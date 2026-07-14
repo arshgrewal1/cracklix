@@ -47,6 +47,10 @@ export interface ExamStoreState {
   persistGuestData: (force?: boolean) => void;
 }
 
+/**
+ * @fileOverview Hardened Mock Test Store v4.8 [Production Hardened].
+ * FIXED: Atomic persistence logic and stabilized hydration nodes.
+ */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
   mockTitle: "",
@@ -69,9 +73,11 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     
     let effectiveResume = resumeData;
-    if (!effectiveResume && !userId) {
+    if (!effectiveResume && !userId && typeof window !== 'undefined') {
        const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
-       if (stored) effectiveResume = JSON.parse(stored);
+       if (stored) {
+          try { effectiveResume = JSON.parse(stored); } catch (e) { console.error("[Sync] Local data corrupted."); }
+       }
     }
 
     const isResuming = effectiveResume && effectiveResume.status !== 'COMPLETED';
@@ -201,6 +207,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   },
 
   persistGuestData: (force = false) => {
+    if (typeof window === 'undefined') return;
     const state = get();
     if (!state.userId && state.mockId) {
        const payload = {

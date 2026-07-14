@@ -10,8 +10,8 @@ import {
 import { storage } from '@/firebase/app';
 
 /**
- * @fileOverview Institutional Storage Governance Node v1.0.
- * Handles specialized file processing, compression, and metadata extraction.
+ * @fileOverview Institutional Storage Governance Node v1.1 [Hardened].
+ * FIXED: Improved image optimization handling and error traceability.
  */
 
 export interface FileMetadata {
@@ -64,14 +64,20 @@ class StorageService {
         ctx.drawImage(img, 0, 0, width, height);
         canvas.toBlob(
           (blob) => {
-            if (blob) resolve(blob);
+            if (blob) {
+               URL.revokeObjectURL(img.src);
+               resolve(blob);
+            }
             else reject(new Error('Compression failure'));
           },
           'image/webp',
-          0.8 // 80% Quality target
+          0.85 // 85% Quality target
         );
       };
-      img.onerror = reject;
+      img.onerror = (err) => {
+         URL.revokeObjectURL(img.src);
+         reject(err);
+      };
     });
   }
 
@@ -86,13 +92,14 @@ class StorageService {
     let uploadData: File | Blob = file;
     let fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 
-    // 1. Logic: Auto-optimize images
+    // 1. Logic: Auto-optimize images (non-SVGs)
     if (file.type.startsWith('image/') && file.type !== 'image/svg+xml') {
       try {
         uploadData = await this.processImage(file);
         fileName = fileName.replace(/\.[^/.]+$/, "") + ".webp";
       } catch (e) {
-        console.warn('[Storage] Optimization failed, using raw node.');
+        console.warn('[Storage] Optimization bypassed, using raw node:', e);
+        uploadData = file;
       }
     }
 
@@ -107,7 +114,10 @@ class StorageService {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           if (onProgress) onProgress(progress);
         },
-        (error) => reject(error),
+        (error) => {
+           console.error("[Storage] Upload failure:", error);
+           reject(error);
+        },
         async () => {
           const url = await getDownloadURL(uploadTask.snapshot.ref);
           resolve({

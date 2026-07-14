@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -37,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v79.0.
- * UPDATED: Normalized typography and casing.
+ * @fileOverview Cracklix Navigation Hub v80.0 [Hardened].
+ * FIXED: Standardized Title Case and refined mobile responsiveness.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -92,11 +91,12 @@ export default function Navbar() {
     }
   };
 
-  const isAdmin =
-    profile?.role === 'ADMIN' ||
-    profile?.role === 'SUPER_ADMIN' ||
-    (user?.email &&
-      SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
+  const isAdmin = React.useMemo(() => {
+    if (!user || !profile) return false;
+    const userEmail = user?.email?.toLowerCase();
+    const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
+    return profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
+  }, [user, profile]);
 
   if (!mounted) {
     return <nav className="w-full border-b border-slate-100 bg-white h-20 lg:h-20" />;
@@ -106,14 +106,14 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
         <nav className="w-full h-20 lg:h-20">
-          <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-2 md:px-4 h-full flex items-center justify-between">
+          <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU | LOGO */}
             <div className="flex items-center gap-0 z-10">
               <button
                 onClick={() => setisSidebarOpen(true)}
                 aria-label="Open menu"
-                className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
+                className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30"
               >
                 <Menu className="w-5 h-5 md:w-6 md:h-6" />
               </button>
@@ -126,13 +126,13 @@ export default function Navbar() {
               />
             </div>
 
-            {/* CENTER BLOCK: NAVIGATION (EXACT CENTER) */}
+            {/* CENTER BLOCK: NAVIGATION */}
             <div className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-6 xl:gap-8 h-full">
               <NavLink href="/" label="Home" active={pathname === '/'} />
               <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
               <NavLink href="/vacancies" label="Vacancies" active={pathname === '/vacancies'} />
               <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
-              <NavLink href="/current-affairs" label="CA Center" active={pathname === '/current-affairs'} />
+              <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
             </div>
 
             {/* RIGHT BLOCK: ELITE ACCESS | SEARCH | PROFILE */}
@@ -172,12 +172,12 @@ export default function Navbar() {
                   >
                     <div className="flex flex-col items-center text-center space-y-6">
                       <div className="flex flex-col items-center gap-4">
-                         <div className="h-14 w-14 rounded-2xl bg-[#EEF4FF] flex items-center justify-center text-[#2563EB] shadow-sm relative">
-                            <User className="h-7 w-7" />
+                         <div className="h-14 w-14 rounded-2xl bg-[#EEF4FF] flex items-center justify-center text-[#2563EB] shadow-sm relative overflow-hidden">
+                            <StudentAvatar profile={profile} className="w-full h-full" iconClassName="h-8 w-8" />
                          </div>
                          <div className="space-y-0.5">
                            <h3 className="text-base font-bold text-[#0F172A] truncate max-w-[240px]">
-                             {profile?.name || "Student"}
+                             {profile?.name || "Aspirant"}
                            </h3>
                            <Link href="/profile" className="text-[11px] font-medium text-[#94A3B8] hover:text-primary">My Profile</Link>
                          </div>
@@ -185,16 +185,16 @@ export default function Navbar() {
                       <div className="h-px w-full bg-slate-100" />
                       <div className="w-full space-y-1 text-left">
                          <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My Progress" />
-                         <ProfileMenuItem href="/pass" icon={Gem} label="Pro Pass" />
-                         <ProfileMenuItem href="/profile" icon={Settings} label="Settings" />
-                         {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Panel" highlight />}
+                         <ProfileMenuItem href="/pass" icon={Gem} label="Elite Pass Hub" />
+                         <ProfileMenuItem href="/profile" icon={Settings} label="Portal Settings" />
+                         {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Console" highlight />}
                       </div>
-                      <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] font-semibold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
+                      <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link href="/login" className="px-5 h-11 rounded-xl bg-primary text-white font-bold text-xs flex items-center justify-center transition-all active:scale-95 shadow-md shrink-0">
+                <Link href="/login" className="px-6 h-11 rounded-xl bg-primary text-white font-bold text-xs flex items-center justify-center transition-all active:scale-95 shadow-md shrink-0">
                   Login
                 </Link>
               )}
@@ -216,7 +216,7 @@ export default function Navbar() {
     return (
       <Link href={href} className={cn(
         "text-[14px] xl:text-[15px] font-semibold transition-all whitespace-nowrap border-b-2 py-1", 
-        active ? "text-primary border-primary" : "text-slate-500 border-transparent hover:text-primary hover:text-primary/20"
+        active ? "text-primary border-primary" : "text-slate-500 border-transparent hover:text-primary hover:border-primary/20"
       )}>
         {label}
       </Link>
@@ -226,7 +226,7 @@ export default function Navbar() {
   function ProfileMenuItem({ href, icon: Icon, label, highlight }: { href: string, icon: any, label: string, highlight?: boolean }) {
     return (
       <Link href={href} className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-xs font-semibold",
+        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-[13px] font-semibold",
         highlight ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
       )}>
          <Icon className={cn("h-4 w-4 shrink-0", highlight ? "text-primary" : "text-slate-400")} />

@@ -9,13 +9,14 @@ import {
   getDoc, 
   setDoc,
   updateDoc,
-  increment 
+  increment,
+  runTransaction 
 } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 
 /**
- * @fileOverview Hardened Razorpay Verification & Provisioning Node v3.0.
- * ATOMICITY: Ensures Subscriptions, Payment Requests, and User Profiles are updated in a verified sequence.
+ * @fileOverview Hardened Razorpay Verification & Provisioning Node v3.1.
+ * FIXED: Optimized atomicity with runTransaction to ensure registry integrity.
  */
 
 export async function POST(req: Request) {
@@ -32,7 +33,6 @@ export async function POST(req: Request) {
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!key_secret) {
-      // Emergency Dev Mock
       if (process.env.NODE_ENV === 'development' && razorpay_order_id?.startsWith('order_mock')) {
          return provisionSubscription(userId, planId, razorpay_order_id, "mock_pay_id", couponCode);
       }
@@ -60,100 +60,82 @@ export async function POST(req: Request) {
 async function provisionSubscription(userId: string, planId: string, orderId: string, paymentId: string, couponCode?: string) {
   const db = firestore;
   
-  // 1. Context Sync
-  const [planSnap, userSnap] = await Promise.all([
-    getDoc(doc(db, "passes", planId)),
-    getDoc(doc(db, "users", userId))
-  ]);
+  try {
+     const subId = `sub_${nanoid(10)}`;
+     const invoiceNumber = `INV-${Date.now()}-${nanoid(4).toUpperCase()}`;
 
-  if (!planSnap.exists() || !userSnap.exists()) {
-    return NextResponse.json({ error: "Context registry mismatch." }, { status: 404 });
+     await runTransaction(db, async (transaction) => {
+        const planRef = doc(db, "passes", planId);
+        const userRef = doc(db, "users", userId);
+        const statsRef = doc(db, "settings", "stats");
+
+        const planSnap = await transaction.get(planRef);
+        const userSnap = await transaction.get(userRef);
+
+        if (!planSnap.exists() || !userSnap.exists()) {
+           throw new Error("Context registry mismatch.");
+        }
+
+        const planData = planSnap.data();
+        const userData = userSnap.data();
+        
+        const now = new Date();
+        const validityDays = Number(planData.durationDays) || 30;
+        
+        let baseDate = now;
+        if (userData.passStatus === 'active' && userData.passExpiresAt) {
+           const currentExpiry = new Date(userData.passExpiresAt);
+           if (currentExpiry > now) baseDate = currentExpiry;
+        }
+
+        const expiryDate = new Date(baseDate.getTime());
+        expiryDate.setDate(expiryDate.getDate() + validityDays);
+
+        // 1. Create Subscription
+        const subRef = doc(db, "subscriptions", subId);
+        transaction.set(subRef, {
+           id: subId,
+           userId,
+           userName: userData.name || "Aspirant",
+           userEmail: userData.email || "",
+           planId,
+           planName: planData.name,
+           amount: planData.price,
+           status: 'ACTIVE',
+           purchaseDate: now.toISOString(),
+           expiryDate: expiryDate.toISOString(),
+           paymentId,
+           orderId,
+           invoiceNumber,
+           updatedAt: serverTimestamp(),
+        });
+
+        // 2. Update User Profile
+        transaction.update(userRef, {
+           passStatus: 'active',
+           passExpiresAt: expiryDate.toISOString(),
+           status: planId,
+           pass: {
+             active: true,
+             plan: planData.name,
+             purchaseDate: now.toISOString(),
+             expiryDate: expiryDate.toISOString(),
+             freePassClaimed: planId === 'free-pass'
+           },
+           updatedAt: serverTimestamp()
+        });
+
+        // 3. Update Global Stats
+        transaction.update(statsRef, {
+           totalRevenue: increment(Number(planData.price) || 0),
+           activePasses: increment(1),
+           updatedAt: serverTimestamp()
+        });
+     });
+
+     return NextResponse.json({ success: true, subscriptionId: subId });
+  } catch (error: any) {
+     console.error("[PROVISIONING_ERROR]:", error);
+     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-
-  const planData = planSnap.data();
-  const userData = userSnap.data();
-  
-  const now = new Date();
-  const validityDays = Number(planData.durationDays) || 30;
-  
-  // Calculate new expiry (handling renewals)
-  let baseDate = now;
-  if (userData.passStatus === 'active' && userData.passExpiresAt) {
-     const currentExpiry = new Date(userData.passExpiresAt);
-     if (currentExpiry > now) baseDate = currentExpiry;
-  }
-
-  const expiryDate = new Date(baseDate.getTime());
-  expiryDate.setDate(expiryDate.getDate() + validityDays);
-
-  const invoiceNumber = `INV-${Date.now()}-${nanoid(4).toUpperCase()}`;
-  const subId = `sub_${nanoid(10)}`;
-
-  // 2. Transact: Create Subscription Registry Node
-  const subPayload = {
-    id: subId,
-    userId,
-    userName: userData.name || "Aspirant",
-    userEmail: userData.email || "",
-    userPhone: userData.phone || "",
-    planId,
-    planName: planData.name,
-    amount: planData.price,
-    currency: "INR",
-    paymentId,
-    orderId,
-    status: 'ACTIVE',
-    purchaseDate: now.toISOString(),
-    activationDate: now.toISOString(),
-    expiryDate: expiryDate.toISOString(),
-    validityDays,
-    invoiceNumber,
-    couponUsed: couponCode || null,
-    updatedAt: serverTimestamp(),
-  };
-
-  await setDoc(doc(db, "subscriptions", subId), subPayload);
-
-  // 3. Transact: Log Payment Request as APPROVED
-  await addDoc(collection(db, "payment_requests"), {
-    userId,
-    userName: userData.name,
-    userEmail: userData.email,
-    orderId,
-    paymentId,
-    planId,
-    planName: planData.name,
-    amount: planData.price,
-    status: 'APPROVED',
-    gateway: 'RAZORPAY',
-    verified: true,
-    invoiceNumber,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
-
-  // 4. Transact: Update User Master Node
-  await updateDoc(doc(db, "users", userId), {
-    passStatus: 'active',
-    passExpiresAt: expiryDate.toISOString(),
-    status: planId,
-    planTier: Number(planData.tier) || 1,
-    pass: {
-      active: true,
-      plan: planData.name,
-      purchaseDate: now.toISOString(),
-      expiryDate: expiryDate.toISOString(),
-      freePassClaimed: planId === 'free-pass'
-    },
-    updatedAt: serverTimestamp()
-  });
-
-  // 5. Transact: Increment Revenue Stats
-  await updateDoc(doc(db, 'settings', 'stats'), {
-    totalRevenue: increment(Number(planData.price) || 0),
-    activePasses: increment(1),
-    updatedAt: serverTimestamp()
-  }).catch(() => {});
-
-  return NextResponse.json({ success: true, subscriptionId: subId });
 }

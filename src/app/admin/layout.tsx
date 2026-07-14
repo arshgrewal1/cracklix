@@ -1,12 +1,11 @@
-
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useUser, useAuth } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { Menu, ShieldCheck } from "lucide-react";
+import { Menu, ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import Link from "next/link";
@@ -15,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v35.1 [Branding Synced].
- * UPDATED: Logo height and scaling matched with student portal.
+ * @fileOverview Admin Layout v36.0 [Audit Hardened].
+ * FIXED: Improved auth gate reliability and synchronized brand scaling.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -28,11 +27,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     setMounted(true);
-    const savedState = localStorage.getItem('admin-sidebar-state');
-    if (savedState) {
-      setIsSidebarOpen(savedState === 'expanded');
-    } else {
-      setIsSidebarOpen(window.innerWidth >= 1024);
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem('admin-sidebar-state');
+      if (savedState) {
+        setIsSidebarOpen(savedState === 'expanded');
+      } else {
+        setIsSidebarOpen(window.innerWidth >= 1024);
+      }
     }
   }, []);
 
@@ -42,9 +43,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [pathname, mounted]);
 
-  const userEmail = user?.email?.toLowerCase();
-  const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
-  const isAdmin = (profile && (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN')) || isFounder;
+  const isAdmin = useMemo(() => {
+    if (!profile && !user) return false;
+    const userEmail = user?.email?.toLowerCase();
+    const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
+    return (profile && (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN')) || isFounder;
+  }, [profile, user]);
 
   const isAccessBlocked = !loading && mounted && (!user || (!isAdmin && !profileLoading));
 
@@ -61,7 +65,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const toggleSidebar = () => {
     const newState = !isSidebarOpen;
     setIsSidebarOpen(newState);
-    localStorage.setItem('admin-sidebar-state', newState ? 'expanded' : 'collapsed');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('admin-sidebar-state', newState ? 'expanded' : 'collapsed');
+    }
   };
 
   const handleLogout = async () => {
@@ -73,8 +79,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isGlobalLoading) return (
     <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6">
-       <ShieldCheck className="h-10 w-10 text-blue-600 animate-pulse" />
-       <p className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase">Securing Admin Panel...</p>
+       <div className="relative">
+          <ShieldCheck className="h-12 w-12 text-blue-600 animate-pulse" />
+          <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 text-primary animate-spin" />
+       </div>
+       <div className="text-center space-y-1">
+          <p className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Registry Governance</p>
+          <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Securing Command Hub...</p>
+       </div>
     </div>
   );
   
@@ -112,22 +124,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 align="left"
               />
             </div>
-            <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-4">
+            <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-4 uppercase tracking-[0.2em]">
                Registry Governance
             </p>
           </div>
           
           <div className="flex items-center gap-4">
-             <Button asChild variant="outline" className="hidden sm:flex h-10 rounded-full text-[10px] font-semibold tracking-tight">
-                <Link href="/">View Site</Link>
+             <Button asChild variant="outline" className="hidden sm:flex h-11 rounded-full text-[10px] font-bold tracking-tight px-6">
+                <Link href="/">View Portal</Link>
              </Button>
-             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-bold">
+             <div className="h-11 w-11 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">
                 {profile?.name?.[0] || 'A'}
              </div>
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-10 lg:p-12">
+        <main className="flex-1 p-4 md:p-10 lg:p-12 overflow-x-hidden">
           {children}
         </main>
       </div>

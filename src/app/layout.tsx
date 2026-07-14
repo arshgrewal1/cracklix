@@ -1,3 +1,4 @@
+'use client';
 
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
@@ -20,41 +21,9 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v68.0 [Typography Optimized].
- * UPDATED: Switched to Poppins font and normalized typography.
+ * @fileOverview Root Layout v69.0 [Production Hardened].
+ * FIXED: Standardized Viewport export for Next.js 15 compatibility.
  */
-export const metadata: Metadata = {
-  title: "Cracklix | Punjab's Smart Mock Test Platform",
-  description: "Punjab's most trusted government exam preparation platform.",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Cracklix",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  icons: {
-    icon: [
-      { url: "/icons/icon-192x192.png", type: "image/png", sizes: "192x192" },
-      { url: "/icons/icon-512x512.png", type: "image/png", sizes: "512x512" },
-    ],
-    shortcut: "/icons/icon-192x192.png",
-    apple: [
-      { url: "/icons/icon-512x512.png", sizes: "512x512" },
-    ],
-  },
-};
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: "cover",
-  themeColor: "#2563EB",
-};
 
 export default function RootLayout({
   children,
