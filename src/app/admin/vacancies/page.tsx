@@ -31,8 +31,8 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/components/admin"
 
 /**
- * @fileOverview Vacancy Hub Dashboard v1.0.
- * Central administrative node for all recruitment listings.
+ * @fileOverview Vacancy Hub Dashboard v1.2.
+ * FIXED: Corrected syntax error in table closing tags.
  */
 
 export default function VacancyDashboard() {
@@ -64,7 +64,8 @@ export default function VacancyDashboard() {
   }, [vacancies, searchTerm])
 
   const handleDelete = async (id: string) => {
-    if (!db || !confirm("Permanently purge this vacancy node from the registry?")) return
+    if (!db) return
+    if (!confirm("Permanently purge this vacancy node from the registry?")) return
     await deleteDoc(doc(db, "vacancies", id))
     toast({ title: "Vacancy Purged" })
   }
@@ -112,50 +113,52 @@ export default function VacancyDashboard() {
             <TableBody>
               {loading ? (
                 <AdminTableSkeleton rows={5} columns={4} />
-              ) : filteredVacancies.length > 0 ? filteredVacancies.map((v) => (
-                <TableRow key={v.id} className="hover:bg-slate-50 border-slate-50 transition-all group">
-                  <TableCell className="px-8 md:px-12 py-6 md:py-8">
-                     <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
-                           <Megaphone className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="min-w-0">
-                           <p className="font-bold text-[#0F172A] text-sm md:text-base leading-tight truncate max-w-[250px]">{v.title}</p>
-                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-2">
-                              <Zap className="h-2.5 w-2.5" /> ID: {v.id.slice(-8)}
-                           </p>
-                        </div>
-                     </div>
-                  </TableCell>
-                  <TableCell>
-                     <div className="space-y-1.5">
-                        <p className="text-[11px] font-bold text-slate-600 line-clamp-1">{v.department}</p>
-                        <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-400 text-[8px] font-black uppercase px-2 py-0.5 tracking-tighter">{v.type}</Badge>
-                     </div>
-                  </TableCell>
-                  <TableCell>
-                     <Badge className={cn(
-                       "border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm",
-                       v.status === 'PUBLISHED' ? "bg-emerald-50 text-emerald-600" :
-                       v.status === 'DRAFT' ? "bg-slate-100 text-slate-400" :
-                       v.status === 'SCHEDULED' ? "bg-blue-50 text-blue-600" :
-                       "bg-rose-50 text-rose-600"
-                     )}>
-                        {v.status}
-                     </Badge>
-                  </TableCell>
-                  <TableCell className="text-right px-8 md:px-12">
-                     <div className="flex justify-end gap-2 md:gap-3 opacity-20 group-hover:opacity-100 transition-all">
-                        <Button variant="ghost" size="icon" className="h-10 w-10 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90" asChild>
-                           <Link href={`/admin/vacancies/add?id=${v.id}`}><Edit className="h-4 w-4" /></Link>
-                        </Button>
-                        <button className="h-10 w-10 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={() => handleDelete(v.id)}>
-                           <Trash2 className="h-4 w-4" />
-                        </button>
-                     </div>
-                  </TableCell>
-                </TableRow>
-              )) : (
+              ) : filteredVacancies.length > 0 ? (
+                filteredVacancies.map((v) => (
+                  <TableRow key={v.id} className="hover:bg-slate-50 border-slate-50 transition-all group">
+                    <TableCell className="px-8 md:px-12 py-6 md:py-8">
+                       <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                             <Megaphone className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="min-w-0">
+                             <p className="font-bold text-[#0F172A] text-sm md:text-base leading-tight truncate max-w-[250px]">{v.title}</p>
+                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-2">
+                                <Zap className="h-2.5 w-2.5" /> ID: {v.id.slice(-8)}
+                             </p>
+                          </div>
+                       </div>
+                    </TableCell>
+                    <TableCell>
+                       <div className="space-y-1.5">
+                          <p className="text-[11px] font-bold text-slate-600 line-clamp-1">{v.department}</p>
+                          <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-400 text-[8px] font-black uppercase px-2 py-0.5 tracking-tighter">{v.type}</Badge>
+                       </div>
+                    </TableCell>
+                    <TableCell>
+                       <Badge className={cn(
+                         "border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm",
+                         v.status === 'PUBLISHED' ? "bg-emerald-50 text-emerald-600" :
+                         v.status === 'DRAFT' ? "bg-slate-100 text-slate-400" :
+                         v.status === 'SCHEDULED' ? "bg-blue-50 text-blue-600" :
+                         "bg-rose-50 text-rose-600"
+                       )}>
+                          {v.status}
+                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-right px-8 md:px-12">
+                       <div className="flex justify-end gap-2 md:gap-3 opacity-20 group-hover:opacity-100 transition-all">
+                          <Button variant="ghost" size="icon" className="h-10 w-10 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90" asChild>
+                             <Link href={`/admin/vacancies/add?id=${v.id}`}><Edit className="h-4 w-4" /></Link>
+                          </Button>
+                          <button className="h-10 w-10 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={() => handleDelete(v.id)}>
+                             <Trash2 className="h-4 w-4" />
+                          </button>
+                       </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
                    <TableCell colSpan={4} className="h-80 md:h-[500px] text-center">
                       <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
@@ -167,7 +170,7 @@ export default function VacancyDashboard() {
               )}
             </TableBody>
           </Table>
-        </div>
+        </CardContent>
       </Card>
     </div>
   )
