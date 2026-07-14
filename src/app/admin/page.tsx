@@ -28,8 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Panel Dashboard v31.0
- * SIMPLIFIED: Replaced "Registry", "Node", and "Governance" with easier words.
+ * Admin Dashboard Center v32.0
+ * SIMPLIFIED: Replaced technical jargon with accessible application terms.
  */
 
 export default function AdminDashboard() {

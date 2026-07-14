@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge"
 import { ShieldCheck, CheckCircle2, XCircle, Zap, CreditCard, Loader2, Activity } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, doc, updateDoc, serverTimestamp, addDoc } from "firebase/firestore"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { approvePaymentRequest } from "@/app/actions/payment"
 import { useToast } from "@/hooks/use-toast"
@@ -16,9 +15,9 @@ import { AdminPageHeader, AdminTableSkeleton } from "@/components/admin"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Administrative Manual UPI Verification Hub v5.0 (High-Fidelity).
- * FIXED: Standardized header spacing and typography using AdminPageHeader.
- * FIXED: Refined table density and iconography for better PWA ergonomics.
+ * @fileOverview Administrative Manual UPI Verification Center v5.2.
+ * UPDATED: Simplified terminology for improved accessibility.
+ * FIXED: Hardened syntax to resolve potential ChunkLoadError.
  */
 
 export default function VerifyPaymentsPage() {
@@ -47,7 +46,7 @@ export default function VerifyPaymentsPage() {
         timestamp: serverTimestamp()
       });
 
-      toast({ title: "Pass Activated", description: "Aspirant upgraded successfully." })
+      toast({ title: "Pass Activated", description: "Student upgraded successfully." })
     } catch (e: any) {
       toast({ variant: "destructive", title: "Approval Failed" })
     } finally {
@@ -81,16 +80,16 @@ export default function VerifyPaymentsPage() {
   return (
     <div className="space-y-10 md:space-y-16 text-[#0F172A] text-left animate-in fade-in duration-700 pb-32 pt-2">
       
-      {/* 1. HEADER HUB - STANDARDIZED SPACING */}
+      {/* 1. HEADER CENTER - SIMPLIFIED LANGUAGE */}
       <AdminPageHeader
         icon={ShieldCheck}
-        label="Manual Ingestion Node"
+        label="Manual Upload Portal"
         title="Manual Verification"
         subtitle="Audit and authorize manual UPI transaction requests for elite pass activation."
       >
         <div className="px-5 py-3 md:px-8 md:py-4 bg-emerald-50 rounded-[1.5rem] border border-emerald-100 flex items-center gap-4 md:gap-8 shadow-sm shrink-0 group">
            <div className="space-y-0.5 text-left">
-              <p className="text-[8px] md:text-[9px] font-black text-emerald-600 uppercase tracking-widest">Pending Nodes</p>
+              <p className="text-[8px] md:text-[9px] font-black text-emerald-600 uppercase tracking-widest">Pending Items</p>
               <p className="text-xl md:text-3xl font-black text-emerald-700 leading-none tabular-nums">
                 {loading ? "..." : (requests?.length || 0)}
               </p>
@@ -99,20 +98,20 @@ export default function VerifyPaymentsPage() {
         </div>
       </AdminPageHeader>
 
-      {/* 2. DATA LEDGER */}
+      {/* 2. DATA LIST */}
       <Card className="border-none shadow-3xl bg-white rounded-2xl md:rounded-[3rem] overflow-hidden border border-slate-50 mx-1">
-        <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
+        <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between border-b border-slate-50">
            <CardTitle className="text-sm md:text-xl font-black text-[#0F172A] uppercase tracking-tight flex items-center gap-3">
               <Activity className="h-5 w-5 text-primary" /> Approval Ledger
            </CardTitle>
-           <Badge variant="outline" className="text-[8px] font-black uppercase text-slate-400">Registry Queue</Badge>
+           <Badge variant="outline" className="text-[8px] font-black uppercase text-slate-400">Database Queue</Badge>
         </CardHeader>
-        <CardContent className="p-0 text-left mt-6">
+        <CardContent className="p-0 text-left">
           <div className="overflow-x-auto">
             <Table className="min-w-[900px]">
               <TableHeader className="bg-slate-50/50">
                 <TableRow className="border-slate-100 h-14 md:h-18">
-                  <TableHead className="px-8 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Aspirant Node</TableHead>
+                  <TableHead className="px-8 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Student Entry</TableHead>
                   <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">UTR / Transaction ID</TableHead>
                   <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Amount</TableHead>
                   <TableHead className="text-right px-8 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Control</TableHead>
@@ -131,7 +130,7 @@ export default function VerifyPaymentsPage() {
                             </div>
                             <div className="min-w-0">
                                <p className="font-bold text-[#0F172A] text-sm md:text-lg leading-tight truncate">{req.userName}</p>
-                               <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 truncate">{req.planName} Hub</p>
+                               <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 truncate">{req.planName} Portal</p>
                             </div>
                          </div>
                       </TableCell>
@@ -151,7 +150,7 @@ export default function VerifyPaymentsPage() {
                               className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[8px] md:text-[10px] tracking-widest h-10 md:h-12 px-6 md:px-10 rounded-full shadow-lg border-none transition-all active:scale-95 gap-2"
                             >
                                {processingId === req.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                               Verify Node
+                               Verify Item
                             </Button>
                             <Button 
                               variant="ghost" 
@@ -183,7 +182,7 @@ export default function VerifyPaymentsPage() {
       
       <div className="flex items-center justify-center gap-4 text-slate-300 py-6">
         <ShieldCheck className="h-4 w-4" />
-        <span className="text-[9px] font-black uppercase tracking-[0.5em]">Institutional Verification Sync Active</span>
+        <span className="text-[9px] font-black uppercase tracking-[0.5em]">System Verification Update Active</span>
       </div>
     </div>
   )
