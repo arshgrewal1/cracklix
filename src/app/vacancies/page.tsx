@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -36,8 +37,8 @@ import { Vacancy } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Punjab Vacancy Registry v1.1.
- * FIXED: Removed server-side orderBy to bypass composite index requirement.
+ * @fileOverview Official Punjab Vacancy Registry v1.2.
+ * FIXED: Replaced Admin Header with Student Hero section.
  */
 
 const CATEGORY_CHIPS = [
@@ -64,7 +65,6 @@ export default function VacanciesPortal() {
 
   const vacancyQuery = useMemo(() => {
     if (!db) return null
-    // Simple query to avoid composite index requirements
     return query(collection(db, "vacancies"), where("status", "==", "PUBLISHED"), limit(100))
   }, [db])
 
@@ -113,7 +113,8 @@ export default function VacanciesPortal() {
       
       <main className="container mx-auto px-4 md:px-8 py-10 md:py-20 max-w-[1440px] space-y-12 md:space-y-24 pb-40">
          
-         <section className="text-left space-y-10 md:space-y-16 max-w-5xl">
+         {/* STUDENT HERO SECTION */}
+         <section className="text-left space-y-10 md:space-y-16 max-w-5xl px-1">
             <div className="space-y-6 md:space-y-10">
                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4">
                   <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary shadow-inner shrink-0">

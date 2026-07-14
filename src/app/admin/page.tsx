@@ -15,7 +15,8 @@ import {
   DollarSign, 
   AlertCircle,
   ChevronRight,
-  Gem
+  Gem,
+  Plus
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
@@ -27,9 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Panel Dashboard v29.0
- * FIXED: Removed quota-heavy auto-sync on mount.
- * FIXED: Integrated error handling for Firestore quota limits.
+ * Admin Panel Dashboard v30.0
+ * FIXED: Added Vacancy ingestion to quick tools.
  */
 
 export default function AdminDashboard() {
@@ -47,10 +47,6 @@ export default function AdminDashboard() {
   const pendingReqQuery = useMemo(() => (db ? query(collection(db, "payment_requests"), where("status", "==", "PENDING"), limit(10)) : null), [db]);
   const { data: pendingNodes } = useCollection<any>(pendingReqQuery);
 
-  /**
-   * Emergency Rebuild: This scans the entire DB. 
-   * Use sparingly as it consumes significant quota.
-   */
   const handleSyncLiveStats = async () => {
      if (!db) return;
      setIsStatsSyncing(true);
@@ -188,6 +184,7 @@ export default function AdminDashboard() {
                      <p className="text-[8px] md:text-[9px] font-black text-slate-500 tracking-widest">Operational Shortcuts</p>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:gap-3">
+                     <AdminQuickLink label="Add Vacancy" href="/admin/vacancies/add" highlight />
                      <AdminQuickLink label="Mock Builder" href="/admin/mocks/builder" />
                      <AdminQuickLink label="Platform Stats" href="/admin/analytics" />
                      <QuickActionCard label="Verify Payments" href="/admin/payments/verify" highlight={hasPending} />
@@ -229,10 +226,10 @@ function AdminQuickLink({ label, href, highlight }: any) {
       <Link href={href} className="group">
          <div className={cn(
            "flex items-center justify-between p-3 md:p-4 bg-white/5 border border-white/5 rounded-xl md:rounded-2xl hover:bg-white/10 transition-all active:scale-[0.98]",
-           highlight && "border-rose-500/30 bg-rose-50/5"
+           highlight && "border-primary/30 bg-primary/5"
          )}>
-            <span className="text-[11px] font-bold ml-1 md:ml-2">{label}</span>
-            <ChevronRight className={cn("h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1", highlight ? "text-rose-50" : "text-primary")} />
+            <span className={cn("text-[11px] font-bold ml-1 md:ml-2", highlight ? "text-primary" : "text-white")}>{label}</span>
+            <ChevronRight className={cn("h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1", highlight ? "text-primary" : "text-white/40")} />
          </div>
       </Link>
    )
@@ -246,7 +243,7 @@ function QuickActionCard({ label, href, highlight }: any) {
            highlight && "border-emerald-500/30 bg-emerald-50/5"
          )}>
             <span className={cn("text-[11px] font-bold ml-1 md:ml-2", highlight ? "text-emerald-400" : "text-white")}>{label}</span>
-            <ChevronRight className={cn("h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1", highlight ? "text-emerald-400" : "text-primary")} />
+            <ChevronRight className={cn("h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1", highlight ? "text-emerald-400" : "text-white/40")} />
          </div>
       </Link>
     )

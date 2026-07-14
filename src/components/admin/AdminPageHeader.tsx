@@ -4,6 +4,7 @@
 import { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
+import Link from "next/link";
 
 interface AdminPageHeaderProps {
   icon: LucideIcon;
@@ -21,7 +22,7 @@ interface AdminPageHeaderProps {
 /**
  * Shared admin page header with consistent layout:
  * icon label, title, subtitle, and an action button.
- * v1.1 [Typography Optimized].
+ * v1.2 [Navigation Optimized].
  */
 export function AdminPageHeader({
   icon: Icon,
@@ -64,7 +65,7 @@ export function AdminPageHeader({
             asChild
             className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-semibold text-[10px] tracking-tight shadow-xl border-none transition-all active:scale-95 gap-3"
           >
-            <a href={actionHref}>{buttonContent}</a>
+            <Link href={actionHref}>{buttonContent}</Link>
           </Button>
         ) : (
           <Button
