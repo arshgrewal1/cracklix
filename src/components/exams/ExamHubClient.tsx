@@ -1,8 +1,9 @@
 
 "use client"
 
-import React, { useMemo, useState, useEffect } from "react"
+import React, { useMemo, useEffect, useState } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
@@ -46,8 +47,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Hub Client v30.1.
- * FIXED: Imported missing Lucide icons (Trophy, List, FileStack, Megaphone).
+ * @fileOverview Premium Exam Hub Client v30.2.
+ * FIXED: Imported missing Link component to resolve ReferenceError in MockList.
  */
 
 export default function ExamHubClient() {
@@ -135,7 +136,7 @@ export default function ExamHubClient() {
        <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-xl"><AlertCircle className="h-8 w-8" /></div>
        <div className="space-y-2">
          <h2 className="text-2xl font-black text-[#0F172A]">Exam Not Found</h2>
-         <p className="text-slate-500 font-medium max-w-sm mx-auto">This preparation vertical is currently under maintenance or has been archived.</p>
+         <p className="text-slate-500 font-medium max-sm:px-4 max-w-sm mx-auto">This preparation vertical is currently under maintenance or has been archived.</p>
        </div>
        <Button onClick={() => router.back()} variant="outline" className="rounded-full h-12 px-10 font-bold">Return Back</Button>
     </div>
