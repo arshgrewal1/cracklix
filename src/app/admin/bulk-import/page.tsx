@@ -53,8 +53,9 @@ const LANGUAGE_MODES = [
 ];
 
 /**
- * @fileOverview Institutional Bulk Ingestion Hub v83.0.
- * FIXED: Standardized typography and refined ingestion staging cards.
+ * @fileOverview Institutional Bulk Ingestion Hub v84.0.
+ * FIXED: Full responsive audit for 320px-430px viewports.
+ * FIXED: Action buttons normalized to grid and form controls made fluid.
  */
 export default function BulkIngestionPage() {
   const router = useRouter()
@@ -154,33 +155,46 @@ export default function BulkIngestionPage() {
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-12">
+    <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-12 overflow-x-hidden">
       <AdminPageHeader
         icon={ClipboardList}
         label="Modular Ingestion Hub"
         title="MCQ Ingestion"
         subtitle="Dedicated extraction for 12 preparation formats."
       >
-        <div className="flex items-center gap-3">
-           <button onClick={() => setStagedQuestions([])} className="h-11 px-6 rounded-xl border border-slate-200 font-bold text-[11px] uppercase bg-white hover:bg-slate-50 transition-all">Reset</button>
-           <Button onClick={handleLocalParse} disabled={isProcessing} className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-11 px-8 font-bold text-[11px] gap-3 shadow-xl">
-            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4 text-primary fill-current" />} Parse
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
+           <button 
+             onClick={() => setStagedQuestions([])} 
+             className="h-[52px] md:h-11 px-6 rounded-xl border border-slate-200 font-bold text-[11px] uppercase bg-white hover:bg-slate-50 transition-all flex items-center justify-center min-w-0"
+           >
+              Reset
+           </button>
+           <Button 
+             onClick={handleLocalParse} 
+             disabled={isProcessing} 
+             className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-[52px] md:h-11 px-8 font-bold text-[11px] gap-3 shadow-xl w-full min-w-0"
+           >
+              {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4 text-primary fill-current" />} Parse
            </Button>
-           <Button onClick={handleFinalCommit} disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} className="bg-primary hover:bg-blue-700 text-white rounded-xl h-11 px-8 font-bold text-[11px] gap-3 shadow-xl">
-            {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />} Commit
+           <Button 
+             onClick={handleFinalCommit} 
+             disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
+             className="bg-primary hover:bg-blue-700 text-white rounded-xl h-[52px] md:h-11 px-8 font-bold text-[11px] gap-3 shadow-xl w-full min-w-0"
+           >
+              {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />} Commit
            </Button>
         </div>
       </AdminPageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-5 space-y-8">
-           <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-8 border border-slate-50">
+        <div className="lg:col-span-5 space-y-8 w-full min-w-0">
+           <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-8 border border-slate-50 w-full overflow-hidden">
               <div className="space-y-6">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                    <div className="space-y-2 w-full">
                         <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase tracking-tight">Question Format</Label>
                         <Select value={metadata.parserFormat} onValueChange={(v: ParserFormat) => setMetadata({...metadata, parserFormat: v})}>
-                        <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold px-4">
+                        <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold px-4 w-full">
                             <SelectValue placeholder="Format" />
                         </SelectTrigger>
                         <SelectContent className="bg-[#0B1528] text-white border-white/10">
@@ -196,10 +210,10 @@ export default function BulkIngestionPage() {
                         </Select>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 w-full">
                         <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase tracking-tight">Language Mode</Label>
                         <Select value={metadata.languageMode} onValueChange={(v) => setMetadata({...metadata, languageMode: v})}>
-                        <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold px-4">
+                        <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold px-4 w-full">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-[#0B1528] text-white border-white/10">
@@ -216,51 +230,58 @@ export default function BulkIngestionPage() {
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2 w-full">
                        <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Board Hub</Label>
                        <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
-                          <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold"><SelectValue placeholder="Board" /></SelectTrigger>
+                          <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold w-full"><SelectValue placeholder="Board" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white">{boards?.map(b => <SelectItem key={b.id} value={b.id} className="cursor-pointer">{b.abbreviation}</SelectItem>)}</SelectContent>
                        </Select>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 w-full">
                        <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Subject Node</Label>
                        <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
-                          <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold"><SelectValue placeholder="Subject" /></SelectTrigger>
+                          <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold w-full"><SelectValue placeholder="Subject" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white">{subjects?.map(s => <SelectItem key={s.id} value={s.id} className="cursor-pointer">{s.name}</SelectItem>)}</SelectContent>
                        </Select>
                     </div>
                  </div>
 
-                 <Textarea 
-                    value={rawText} 
-                    onChange={(e) => setRawText(e.target.value)} 
-                    placeholder="Paste blocks from PDF here..." 
-                    className="min-h-[400px] rounded-2xl bg-slate-50 border-none p-6 font-medium text-sm shadow-inner resize-none focus-visible:ring-primary/20" 
-                 />
+                 <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Raw Data Feed</Label>
+                    <Textarea 
+                       value={rawText} 
+                       onChange={(e) => setRawText(e.target.value)} 
+                       placeholder="Paste blocks from PDF here..." 
+                       className="min-h-[220px] md:min-h-[400px] rounded-2xl bg-slate-50 border-none p-6 font-medium text-sm shadow-inner resize-none focus-visible:ring-primary/20 w-full" 
+                    />
+                 </div>
 
-                 <Button onClick={handleLocalParse} disabled={isProcessing || !rawText.trim()} className="w-full h-16 bg-primary hover:bg-blue-700 text-white rounded-2xl font-bold text-[13px] shadow-2xl gap-3 active:scale-95 transition-all border-none">
+                 <Button 
+                   onClick={handleLocalParse} 
+                   disabled={isProcessing || !rawText.trim()} 
+                   className="w-full h-16 bg-primary hover:bg-blue-700 text-white rounded-2xl font-bold text-[13px] shadow-2xl gap-3 active:scale-95 transition-all border-none"
+                 >
                     {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Zap className="h-6 w-6 text-white fill-current" />} Initialize Ingestion
                  </Button>
               </div>
            </Card>
         </div>
 
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-6 w-full min-w-0">
            <div className="flex items-center justify-between px-2">
               <h3 className="text-xl font-bold text-[#0F172A] flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Staging Hub</h3>
               <Badge className="bg-[#0F172A] text-white border-none font-bold text-[10px] px-4 py-1.5 rounded-lg shadow-sm">{stagedQuestions.length} Nodes</Badge>
            </div>
-           <div className="space-y-6">
+           <div className="space-y-6 w-full">
               {stagedQuestions.map((q, idx) => (
-                 <Card key={q.id} className="border-none shadow-lg rounded-[2.5rem] bg-white overflow-hidden border border-slate-100 relative group">
+                 <Card key={q.id} className="border-none shadow-lg rounded-[2.5rem] bg-white overflow-hidden border border-slate-100 relative group w-full">
                     <div className={cn("absolute top-0 left-0 w-2 h-full transition-colors", q.isValid ? "bg-emerald-500" : "bg-rose-500")} />
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
                        <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] px-4 py-1.5 rounded-lg shadow-sm">Staged Node #{idx + 1}</Badge>
                        <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-8 w-8 text-rose-500 hover:bg-rose-50 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"><Trash2 className="h-4 w-4" /></button>
                     </CardHeader>
-                    <CardContent className="p-6 md:p-10 pt-4">
+                    <CardContent className="p-6 md:p-10 pt-4 w-full overflow-hidden">
                        {q.isValid ? (
                           <QuestionRenderer question={q} language={metadata.languageMode} showSolution={true} className="p-0 shadow-none border-none max-w-none" />
                        ) : (
@@ -275,7 +296,7 @@ export default function BulkIngestionPage() {
                  </Card>
               ))}
               {stagedQuestions.length === 0 && (
-                 <div className="h-[500px] flex flex-col items-center justify-center text-slate-300 opacity-20 bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200">
+                 <div className="h-[500px] flex flex-col items-center justify-center text-slate-300 opacity-20 bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200 w-full">
                     <Database className="h-16 w-16 mb-4" />
                     <p className="font-black uppercase tracking-[0.4em]">Awaiting Extraction</p>
                  </div>
