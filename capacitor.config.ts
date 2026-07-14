@@ -2,8 +2,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 /**
- * @fileOverview Hardened Capacitor Configuration v4.5 [PRODUCTION READY].
- * UPDATED: Optimized splash screen behavior for Android 14/15 gestural navigation.
+ * @fileOverview Hardened Capacitor Configuration v4.6 [PRODUCTION READY].
+ * UPDATED: Set launchShowDuration to 0 to bypass native blue splash in favor of React Splash.
  */
 
 const config: CapacitorConfig = {
@@ -12,14 +12,14 @@ const config: CapacitorConfig = {
   webDir: 'out',
   plugins: {
     SplashScreen: {
-      launchShowDuration: 800,
-      backgroundColor: "#2563EB",
+      launchShowDuration: 0,
+      backgroundColor: "#000000",
       showSpinner: false,
       androidScaleType: "CENTER_CROP",
       splashFullScreen: true,
       splashImmersive: true,
-      fadeShowDuration: 200,
-      fadeHideDuration: 200
+      fadeShowDuration: 0,
+      fadeHideDuration: 0
     },
     Keyboard: {
       resize: 'body',
@@ -27,7 +27,7 @@ const config: CapacitorConfig = {
       resizeOnFullScreen: true
     },
     StatusBar: {
-      backgroundColor: '#2563EB',
+      backgroundColor: '#000000',
       style: 'DARK'
     }
   },

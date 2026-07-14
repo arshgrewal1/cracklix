@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
@@ -7,8 +8,8 @@ import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import SessionGuard from '@/components/auth/SessionGuard';
 
 /**
- * @fileOverview Master Client Boundary Node v2.8.
- * FIXED: Optimized hydration logic to ensure body content is always rendered to avoid compilation hangs.
+ * @fileOverview Master Client Boundary Node v2.9.
+ * UPDATED: Changed hydration loading background to pure black to match Splash Screen.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -20,8 +21,8 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   return (
     <FirebaseProvider app={app} firestore={firestore} auth={auth} storage={storage}>
       {!mounted ? (
-        <div className="min-h-screen bg-white flex items-center justify-center">
-           <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <div className="min-h-screen bg-black flex items-center justify-center">
+           {/* Pure black background matches the Splash Screen during hydration */}
         </div>
       ) : (
         <>
