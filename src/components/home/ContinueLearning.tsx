@@ -27,9 +27,23 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview Institutional Performance Hub v6.1.
- * FIXED: Included daily_quizzes in the valid mock lookup for accurate attempt tracking.
+ * @fileOverview Institutional Performance Hub v6.2.
+ * UPDATED: Integrated dynamic AuthorityLogo for specific test identity.
  */
+
+// Formatting Utilities
+const formatTime = (seconds: number) => {
+  if (!seconds || seconds <= 0 || isNaN(seconds)) return "--";
+  
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.round(seconds % 60);
+  
+  if (h > 0) return `${h}h ${m}m`;
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+};
 
 export default function ContinueLearning() {
   const { user, profile } = useUser();
@@ -137,12 +151,14 @@ export default function ContinueLearning() {
                             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
 
                             <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8">
-                                {/* Left Icon Node */}
+                                {/* Left Icon Node - Now Dynamic Board Logo */}
                                 <div className="relative shrink-0">
                                     <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-                                    <div className="h-16 w-16 md:h-[72px] md:w-[72px] rounded-full bg-primary/10 backdrop-blur-[18px] border border-white/10 flex items-center justify-center shadow-2xl relative transition-transform duration-500 group-hover:scale-105">
-                                        <Zap className="h-7 w-7 md:h-8 md:w-8 text-primary fill-primary" />
-                                    </div>
+                                    <AuthorityLogo 
+                                      boardId={mockMeta?.boardId || "GENERAL"} 
+                                      size="md" 
+                                      className="h-16 w-16 md:h-[72px] md:w-[72px] relative transition-transform duration-500 group-hover:scale-105" 
+                                    />
                                 </div>
 
                                 <div className="flex-1 space-y-4 md:space-y-5 min-w-0">
