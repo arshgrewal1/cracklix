@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { Metadata, Viewport } from "next";
@@ -15,6 +14,7 @@ import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import GlobalStudyTracker from "@/components/analytics/GlobalStudyTracker";
 import AnnouncementBar from "@/components/layout/AnnouncementBar";
+import SplashScreen from "@/components/pwa/SplashScreen";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -23,8 +23,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v70.1 [Production Hardened].
- * FIXED: Added unique keys to global siblings to resolve React "key" prop warnings.
+ * @fileOverview Root Layout v71.0 [Splash Hardened].
+ * UPDATED: Integrated high-fidelity SplashScreen node.
  */
 
 export default function RootLayout({
@@ -48,6 +48,8 @@ export default function RootLayout({
         `}
       >
         <FirebaseClientProvider>
+          <SplashScreen key="app-splash-screen" />
+          
           <div key="main-app-container" className="min-h-screen flex flex-col">
             <AnnouncementBar />
             {children}
