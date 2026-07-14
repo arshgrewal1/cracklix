@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState } from "react"
@@ -6,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Plus, Trash2, Edit, Search, Loader2, GraduationCap, Save, Star, Activity, Users, Zap } from "lucide-material"
+import { Plus, Trash2, Edit, Search, Loader2, GraduationCap, Save, Star, Activity, Users, Zap } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, doc, deleteDoc, setDoc, serverTimestamp, orderBy, updateDoc } from "firebase/firestore"
 import { Label } from "@/components/ui/label"
@@ -18,7 +19,7 @@ import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell
 
 /**
  * @fileOverview Exam Vertical Registry v16.0 (Metrics Sync).
- * UPDATED: Added fields for totalMocks and studentCount for original data sync.
+ * FIXED: Standardized Lucide imports to resolve build blockage.
  */
 
 export default function ExamRegistryPage() {
