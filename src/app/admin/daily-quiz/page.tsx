@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo } from "react"
@@ -19,22 +20,26 @@ import {
   ChevronRight,
   ShieldCheck,
   Activity,
-  Target
+  Target,
+  Trash2,
+  Edit
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, orderBy, limit, where } from "firebase/firestore"
+import { collection, query, orderBy, limit, where, deleteDoc, doc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Daily Challenge Governance Hub v2.0.
- * UPDATED: Integrated real-time analytics and verified builder routing.
+ * @fileOverview Daily Challenge Governance Hub v2.5.
+ * UPDATED: Added direct Edit and Delete actions to the dashboard cards.
  */
 
 export default function DailyQuizDashboard() {
   const db = useFirestore()
+  const { toast } = useToast()
 
   const quizQuery = useMemo(() => (db ? query(collection(db, "daily_quizzes"), orderBy("updatedAt", "desc"), limit(15)) : null), [db])
   const resultsQuery = useMemo(() => (db ? collection(db, "results") : null), [db])
@@ -61,6 +66,17 @@ export default function DailyQuizDashboard() {
     };
   }, [results]);
 
+  const handleDelete = async (id: string) => {
+    if (!db) return
+    if (!confirm("Permanently delete this challenge from the database?")) return
+    try {
+      await deleteDoc(doc(db, "daily_quizzes", id))
+      toast({ title: "Challenge Deleted" })
+    } catch (e) {
+      toast({ variant: "destructive", title: "Delete Failed" })
+    }
+  }
+
   return (
     <div className="space-y-10 md:space-y-16 text-left pb-32 animate-in fade-in duration-700 pt-2 px-1">
       
@@ -71,7 +87,7 @@ export default function DailyQuizDashboard() {
               <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Daily Challenge Registry</span>
            </div>
           <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter antialiased leading-none uppercase">Today's Quiz</h1>
-          <p className="text-slate-500 font-medium text-[11px] md:text-lg">Coordinate high-impact daily mock nodes for the student body.</p>
+          <p className="text-slate-500 font-medium text-[11px] md:text-lg">Coordinate high-impact daily mock tests for the student body.</p>
         </div>
         <Button asChild className="w-full md:w-auto h-12 md:h-16 px-10 bg-[#0F172A] hover:bg-black text-white rounded-full font-black uppercase text-[10px] tracking-widest gap-3 shadow-2xl transition-all active:scale-95 border-none">
            <Link href="/admin/daily-quiz/builder"><Plus className="h-5 w-5" /> Initialize Challenge</Link>
@@ -108,9 +124,14 @@ export default function DailyQuizDashboard() {
                               </div>
                            </div>
                         </div>
-                        <Button asChild variant="outline" className="h-14 md:h-16 px-10 rounded-2xl border-slate-100 text-[#0F172A] font-black uppercase text-[10px] tracking-widest gap-2">
-                           <Link href={`/admin/daily-quiz/builder?id=${activeQuiz.id}`}><Settings className="h-4 w-4" /> Config</Link>
-                        </Button>
+                        <div className="flex flex-col gap-3 shrink-0">
+                          <Button asChild variant="outline" className="h-12 md:h-14 px-8 rounded-2xl border-slate-100 text-[#0F172A] font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-slate-50">
+                             <Link href={`/admin/daily-quiz/builder?id=${activeQuiz.id}`}><Edit className="h-4 w-4" /> Edit</Link>
+                          </Button>
+                          <Button onClick={() => handleDelete(activeQuiz.id)} variant="ghost" className="h-12 md:h-14 px-8 rounded-2xl text-rose-500 hover:bg-rose-50 font-black uppercase text-[10px] tracking-widest gap-2">
+                             <Trash2 className="h-4 w-4" /> Delete
+                          </Button>
+                        </div>
                      </CardContent>
                   </Card>
                ) : (
@@ -124,7 +145,7 @@ export default function DailyQuizDashboard() {
             <section className="space-y-8">
                <div className="flex items-center justify-between border-b border-slate-50 pb-6 px-1">
                   <h3 className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Challenge Archive</h3>
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-400 font-bold">Registry Snapshot</Badge>
+                  <Badge variant="secondary" className="bg-slate-100 text-slate-400 font-bold">Database Snapshot</Badge>
                </div>
                <div className="grid grid-cols-1 gap-4">
                   {quizzes?.filter(q => q.id !== activeQuiz?.id).map((q: any) => (
@@ -142,9 +163,16 @@ export default function DailyQuizDashboard() {
                                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1.5">Modified: {new Date(q.updatedAt?.seconds * 1000).toLocaleDateString()}</p>
                               </div>
                            </div>
-                           <div className="flex items-center gap-3">
+                           <div className="flex items-center gap-2 md:gap-4">
                               <Badge className={cn("border-none font-bold text-[9px] uppercase", q.status === 'PUBLISHED' ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400")}>{q.status}</Badge>
-                              <Button asChild variant="ghost" size="icon" className="h-11 w-11 rounded-xl hover:bg-white"><Link href={`/admin/daily-quiz/builder?id=${q.id}`}><ChevronRight className="h-5 w-5" /></Link></Button>
+                              <div className="flex items-center gap-1 md:gap-2 opacity-20 group-hover:opacity-100 transition-all">
+                                <Button asChild variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white hover:text-primary">
+                                  <Link href={`/admin/daily-quiz/builder?id=${q.id}`}><Edit className="h-4 w-4" /></Link>
+                                </Button>
+                                <Button onClick={() => handleDelete(q.id)} variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-rose-50 hover:text-rose-500">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                            </div>
                         </CardContent>
                      </Card>
