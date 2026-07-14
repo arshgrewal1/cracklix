@@ -6,8 +6,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v61.0.
- * UPDATED: Zero spacing between Toggle and Logo.
+ * Cracklix Admin Sidebar Header v62.0.
+ * UPDATED: Centered logo and increased scale for high-mass brand presence.
  */
 export default function SidebarHeader({
   isOpen,
@@ -19,22 +19,30 @@ export default function SidebarHeader({
   return (
     <div
       className={cn(
-        "h-[90px] md:h-[110px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300",
-        isOpen ? "justify-start gap-0" : "flex-col justify-center py-4 gap-4"
+        "h-[90px] md:h-[110px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300 relative",
+        isOpen ? "justify-center" : "flex-col justify-center py-4 gap-4"
       )}
     >
-      <SidebarToggle
-        isOpen={isOpen}
-        onToggle={onToggle}
-      />
+      <div className={cn(
+        "transition-all duration-300",
+        isOpen ? "absolute left-4" : "relative"
+      )}>
+        <SidebarToggle
+          isOpen={isOpen}
+          onToggle={onToggle}
+        />
+      </div>
 
-      <div className={cn("flex items-center overflow-hidden transition-all", !isOpen && "opacity-0 scale-95")}>
+      <div className={cn(
+        "flex items-center overflow-hidden transition-all", 
+        !isOpen && "opacity-0 scale-95"
+      )}>
         {isOpen ? (
           <Logo
             href="/admin"
             variant="light"
-            align="left"
-            className="transition-all duration-500 h-10 md:h-12 w-auto animate-in fade-in slide-in-from-left-2 -ml-2"
+            align="center"
+            className="transition-all duration-500 h-14 md:h-20 w-auto animate-in fade-in zoom-in-95"
           />
         ) : (
           <Logo

@@ -30,8 +30,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Mobile Sidebar v71.0.
- * UPDATED: Increased Logo size for improved brand visibility.
+ * @fileOverview Mobile Sidebar v72.0.
+ * UPDATED: Centered Logo and increased scale for improved brand prominence.
  */
 export default function MobileSidebar({
   onClose,
@@ -76,18 +76,18 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
-      {/* HEADER */}
-      <div className="h-[80px] md:h-[110px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
+      {/* HEADER: Centered Logo + Absolute Close Button */}
+      <div className="h-[80px] md:h-[110px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-center relative">
          <Logo
            variant="light"
-           align="left"
-           className="flex-shrink-0 -ml-5 md:-ml-8"
-           imgClassName="h-14 md:h-18 w-auto"
+           align="center"
+           className="flex-shrink-0"
+           imgClassName="h-20 md:h-28 w-auto"
            onClick={onClose}
          />
          <button
             onClick={onClose}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all border border-slate-100 ml-4"
+            className="absolute right-6 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all border border-slate-100"
           >
             <X className="h-6 w-6" />
           </button>
