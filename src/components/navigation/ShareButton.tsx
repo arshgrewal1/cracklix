@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -26,9 +27,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Premium Social Share Hub v4.0.
- * Optimized for text-only sharing with high-conversion marketing copy.
- * Removed image generation to ensure instant execution of the share sheet.
+ * @fileOverview Premium Social Share Hub v4.1 [Hardened].
+ * FIXED: Implemented safety check for Clipboard API to prevent DOMException in restricted frames.
  */
 export default function ShareButton({ 
   className = "", 
@@ -87,7 +87,7 @@ Join thousands of Punjab aspirants preparing smarter every day.`;
           title: 'Cracklix | Punjab Exam Prep',
           text: shareMessage,
         });
-        toast({ title: "Shared Successfully" });
+        toast({ title: "Shared successfully" });
       } else {
         // DESKTOP FALLBACK: Show Premium Modal
         setIsShareDialogOpen(true);
@@ -102,20 +102,30 @@ Join thousands of Punjab aspirants preparing smarter every day.`;
   };
 
   const copyToClipboard = async () => {
+    if (!navigator.clipboard) {
+       toast({ variant: "destructive", title: "Security barrier", description: "Clipboard access is restricted by your browser." });
+       return;
+    }
+
     try {
       await navigator.clipboard.writeText(installUrl);
-      toast({ title: "Link Copied!", description: "Invitation link saved to registry." });
+      toast({ title: "Link copied!", description: "Invitation link saved to registry." });
     } catch (e) {
-      toast({ variant: "destructive", title: "Copy Failed" });
+      toast({ variant: "destructive", title: "Copy failed" });
     }
   };
   
   const copyMessageToClipboard = async () => {
+    if (!navigator.clipboard) {
+       toast({ variant: "destructive", title: "Security barrier", description: "Clipboard access is restricted by your browser." });
+       return;
+    }
+
     try {
       await navigator.clipboard.writeText(shareMessage);
-      toast({ title: "Message Copied!", description: "Invitation text saved to registry." });
+      toast({ title: "Message copied!", description: "Invitation text saved to registry." });
     } catch (e) {
-      toast({ variant: "destructive", title: "Copy Failed" });
+      toast({ variant: "destructive", title: "Copy failed" });
     }
   };
 
@@ -161,17 +171,17 @@ Join thousands of Punjab aspirants preparing smarter every day.`;
                    <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button onClick={copyMessageToClipboard} className="w-full h-14 md:h-16 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-6 border border-slate-100 transition-all active:scale-95 group">
-                   <Send className="h-6 w-6 text-slate-400" /> <span className="font-black text-[11px] md:text-sm uppercase tracking-widest truncate flex-1 text-left">Copy Full Message</span>
+                   <Send className="h-6 w-6 text-slate-400" /> <span className="font-black text-[11px] md:text-sm uppercase tracking-widest truncate flex-1 text-left">Copy full message</span>
                 </button>
                 <button onClick={copyToClipboard} className="w-full h-14 md:h-16 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-6 border border-slate-100 transition-all active:scale-95 group">
-                   <Copy className="h-6 w-6 text-slate-400" /> <span className="font-black text-[11px] md:text-sm uppercase tracking-widest truncate flex-1 text-left">Copy Install Link</span>
+                   <Copy className="h-6 w-6 text-slate-400" /> <span className="font-black text-[11px] md:text-sm uppercase tracking-widest truncate flex-1 text-left">Copy install link</span>
                 </button>
              </div>
           </div>
           
           <DialogFooter className="bg-slate-50 p-6 border-t border-slate-100 flex items-center justify-center gap-4 text-slate-300">
              <ShieldCheck className="h-4 w-4" />
-             <p className="text-[9px] font-black uppercase tracking-[0.3em]">Verified Distribution Protocol</p>
+             <p className="text-[9px] font-black uppercase tracking-[0.3em]">Verified distribution protocol</p>
           </DialogFooter>
         </DialogContent>
       </Dialog>

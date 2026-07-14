@@ -2,6 +2,7 @@
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
+import { useRouter, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore } from "@/firebase"
@@ -30,7 +31,8 @@ import {
   Flame,
   FileStack,
   Layers,
-  Settings
+  Settings,
+  Loader2
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -47,13 +49,13 @@ import {
 } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview World-Class Personalized Dashboard v3.1 [Typography Optimized].
+ * @fileOverview World-Class Personalized Dashboard v3.2.
+ * FIXED: Imported missing Loader2 to resolve runtime ReferenceError.
  */
 
 const MODAL_CATEGORIES = [
@@ -106,7 +108,7 @@ export default function MyExamsPage() {
     (mocks || []).forEach(m => {
        const eids = m.examIds || (m.examId ? [m.examId] : []);
        eids.forEach((eid: string) => {
-          if (!map[eid]) map[eid] = { mocks: 0, subject: 0, sectional: 0, pyq: 0, total: 0, daily: 0, notes: 0, attempted: 0 };
+          if (!map[eid]) map[eid] = { mocks: 0, subject: 0, sectional: 0, pyq: 0, total: 0, daily: 0, attempted: 0 };
           if (m.mockType === 'FULL') map[eid].mocks++;
           else if (m.mockType === 'SUBJECT') map[eid].subject++;
           else if (m.mockType === 'SECTIONAL') map[eid].sectional++;
@@ -118,7 +120,7 @@ export default function MyExamsPage() {
     });
     (pyqs || []).forEach(p => {
        if (p.examId) {
-          if (!map[p.examId]) map[p.examId] = { mocks: 0, subject: 0, sectional: 0, pyq: 0, total: 0, daily: 0, notes: 0, attempted: 0 };
+          if (!map[p.examId]) map[p.examId] = { mocks: 0, subject: 0, sectional: 0, pyq: 0, total: 0, daily: 0, attempted: 0 };
           map[p.examId].pyq++;
           map[p.examId].total++;
        }
@@ -165,12 +167,12 @@ export default function MyExamsPage() {
   const handleAddExam = async (examId: string) => {
     if (!db || !user) return;
     if (profile?.pinnedExams?.includes(examId)) {
-      toast({ title: "Already added", variant: "default" });
+      toast({ title: "Already added" });
       return;
     }
     try {
       await updateDoc(doc(db, "users", user.uid), { pinnedExams: arrayUnion(examId), updatedAt: serverTimestamp() });
-      toast({ title: "Exam Added", description: "Dashboard synchronized." });
+      toast({ title: "Exam added", description: "Dashboard synchronized." });
     } catch (e) {
       toast({ variant: "destructive", title: "Error syncing hub" });
     }
@@ -211,7 +213,7 @@ export default function MyExamsPage() {
                  </Badge>
                  <div className="space-y-2">
                     <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-[#60A5FA] antialiased">
-                       My Exams
+                       My exams
                     </h1>
                     <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl leading-tight">
                        Manage your personalized exam preparation with one beautiful dashboard.
@@ -222,7 +224,7 @@ export default function MyExamsPage() {
               <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                 <DialogTrigger asChild>
                   <Button className="group relative overflow-hidden w-full md:w-auto h-[58px] px-10 bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] hover:brightness-110 rounded-full shadow-[0_15px_40px_rgba(37,99,235,0.30)] transition-all duration-300 active:scale-95 border-none font-bold text-sm tracking-tight text-white">
-                    <Plus className="h-5 w-5 mr-2" /> Add New Exam
+                    <Plus className="h-5 w-5 mr-2" /> Add new exam
                     <motion.div 
                         animate={{ x: ['-100%', '300%'] }}
                         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -234,7 +236,7 @@ export default function MyExamsPage() {
                 <DialogContent className="sm:max-w-4xl w-[95vw] max-h-[90vh] bg-white rounded-[2rem] md:rounded-[3rem] border-none shadow-5xl p-0 overflow-hidden flex flex-col">
                    <div className="h-2 w-full bg-primary shrink-0" />
                    <DialogHeader className="p-8 md:p-12 pb-2 shrink-0 text-left">
-                      <DialogTitle className="text-3xl font-bold text-[#0F172A] tracking-tighter">Exam Registry</DialogTitle>
+                      <DialogTitle className="text-3xl font-bold text-[#0F172A] tracking-tighter">Exam registry</DialogTitle>
                       <DialogDescription className="text-slate-400 font-semibold text-[10px] md:text-sm mt-2">Select a recruitment vertical to start your journey.</DialogDescription>
                    </DialogHeader>
 
@@ -297,7 +299,7 @@ export default function MyExamsPage() {
                    </div>
                    
                    <DialogFooter className="p-8 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row justify-center shrink-0">
-                      <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest">Official Registry Authorized</p>
+                      <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest">Official registry authorized</p>
                    </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -320,7 +322,7 @@ export default function MyExamsPage() {
                     </div>
                     <div className="space-y-1 z-10">
                        <p className="text-xl md:text-4xl font-bold text-[#0F172A] tracking-tighter antialiased tabular-nums">{stat.val}</p>
-                       <p className="text-[9px] md:text-[11px] font-semibold text-slate-400">{stat.label}</p>
+                       <p className="text-[9px] md:text-[11px] font-semibold text-slate-400 uppercase tracking-tight">{stat.label}</p>
                     </div>
                  </Card>
               </motion.div>
@@ -336,7 +338,7 @@ export default function MyExamsPage() {
            ) : pinnedExams.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                  {pinnedExams.map((exam: any, idx: number) => {
-                    const s = statsMap[exam.id] || { mocks: 0, pyq: 0, daily: 0, total: 0, attempted: 0, notes: 0 };
+                    const s = statsMap[exam.id] || { mocks: 0, pyq: 0, daily: 0, total: 0, attempted: 0 };
                     const progress = s.total > 0 ? Math.round((s.attempted / s.total) * 100) : 0;
                     const board = boards?.find((b: any) => b.id === exam.boardId || b.abbreviation === exam.boardId);
 
@@ -355,7 +357,7 @@ export default function MyExamsPage() {
                                   disabled={unpinningId === exam.id}
                                   className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-300 hover:text-rose-500 active:scale-90 transition-all shadow-sm"
                                 >
-                                   {unpinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                   {unpinningId === exam.id ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Trash2 className="h-4 w-4" />}
                                 </button>
                              </div>
 
@@ -370,20 +372,20 @@ export default function MyExamsPage() {
                                    <div className="space-y-2">
                                       <div className="flex flex-wrap justify-center md:justify-start items-center gap-3">
                                          <Badge className="bg-primary/5 text-primary border-none text-[9px] font-semibold tracking-tight px-3 py-0.5 rounded shadow-sm">
-                                            {board?.abbreviation || 'PSSSB'} Hub
+                                            {board?.abbreviation || 'Official'} Hub
                                          </Badge>
                                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[9px] font-semibold tracking-tight px-3 py-0.5 rounded shadow-sm">
-                                            Live Patterns
+                                            Live patterns
                                          </Badge>
                                       </div>
-                                      <h3 className="text-xl md:text-[28px] font-bold text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tight antialiased">
+                                      <h3 className="text-xl md:text-[28px] font-bold text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tight antialiased uppercase">
                                          {exam.name}
                                       </h3>
                                    </div>
 
                                    <div className="space-y-3">
-                                      <div className="flex justify-between items-center text-[10px] font-semibold text-slate-400">
-                                         <span>Overall Mastery</span>
+                                      <div className="flex justify-between items-center text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+                                         <span>Overall mastery</span>
                                          <span className="text-primary tabular-nums">{progress}%</span>
                                       </div>
                                       <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner">
@@ -397,10 +399,10 @@ export default function MyExamsPage() {
                                    </div>
 
                                    <div className="grid grid-cols-2 gap-3 pt-4">
-                                      <ExamMiniStat icon={Layers} label="Mock Tests" val={s.mocks} />
-                                      <ExamMiniStat icon={Zap} label="Daily Quiz" val={s.daily} />
-                                      <ExamMiniStat icon={FileStack} label="Old Papers" val={s.pyq} />
-                                      <ExamMiniStat icon={BookOpen} label="Notes Hub" val="Active" />
+                                      <ExamMiniStat icon={Layers} label="Mock tests" val={s.mocks} />
+                                      <ExamMiniStat icon={Zap} label="Daily quiz" val={s.daily} />
+                                      <ExamMiniStat icon={FileStack} label="Old papers" val={s.pyq} />
+                                      <ExamMiniStat icon={BookOpen} label="Notes hub" val="Active" />
                                    </div>
                                 </div>
 
@@ -409,12 +411,12 @@ export default function MyExamsPage() {
                                      onClick={() => router.push(`/exams/view?id=${exam.id}`)}
                                      className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-bold text-xs tracking-tight shadow-xl transition-all active:scale-95 border-none gap-3"
                                    >
-                                      Continue Prep <ChevronRight className="h-4 w-4" />
+                                      Continue prep <ChevronRight className="h-4 w-4" />
                                    </Button>
                                    <Button 
                                      variant="outline"
                                      className="w-full sm:w-14 h-14 p-0 rounded-2xl border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-primary transition-all active:scale-95 shadow-sm"
-                                     title="Manage Nodes"
+                                     title="Manage nodes"
                                    >
                                       <Settings className="h-5 w-5" />
                                    </Button>
@@ -441,7 +443,7 @@ export default function MyExamsPage() {
                  </div>
 
                  <div className="space-y-4 max-w-md">
-                    <h2 className="text-2xl md:text-4xl font-bold text-[#0F172A] tracking-tighter leading-none">No Exams Added Yet</h2>
+                    <h2 className="text-2xl md:text-4xl font-bold text-[#0F172A] tracking-tighter leading-none">No exams added yet</h2>
                     <p className="text-slate-400 font-medium text-sm md:text-lg leading-relaxed">
                        Start by adding your first exam vertical to unlock personalized preparation nodes and rankings.
                     </p>
@@ -451,7 +453,7 @@ export default function MyExamsPage() {
                    onClick={() => setIsAddModalOpen(true)}
                    className="h-16 md:h-20 px-12 md:px-16 bg-gradient-to-r from-primary via-blue-500 to-blue-400 hover:brightness-110 text-white font-bold text-xs tracking-tight rounded-2xl md:rounded-[2.5rem] shadow-4xl border-none transition-all active:scale-95 flex items-center gap-4 group"
                  >
-                    Add First Exam <Plus className="h-5 w-5 md:h-7 md:w-7 group-hover:rotate-90 transition-transform duration-300" />
+                    Add first exam <Plus className="h-5 w-5 md:h-7 md:w-7 group-hover:rotate-90 transition-transform duration-300" />
                  </Button>
               </motion.div>
            )}
@@ -476,7 +478,7 @@ function ExamMiniStat({ icon: Icon, label, val }: any) {
        <Icon className="h-3.5 w-3.5 text-primary opacity-40 group-hover:opacity-100 transition-all" />
        <div className="space-y-0.5">
           <p className="text-[11px] md:text-sm font-bold text-[#0F172A] tabular-nums">{val}</p>
-          <p className="text-[7px] md:text-[8px] font-semibold text-slate-400 truncate">{label}</p>
+          <p className="text-[7px] md:text-[8px] font-semibold text-slate-400 uppercase tracking-widest truncate">{label}</p>
        </div>
     </div>
   )
