@@ -1,26 +1,41 @@
 
 'use client';
 
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useMemo, useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Play, ChevronRight, Star, Smartphone, Landmark } from "lucide-react";
+import { Zap, Play, ChevronRight, Star, Smartphone, Landmark, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview High-Mass Institutional Hero v46.0.
- * UPDATED: Normalized typography and casing.
+ * @fileOverview High-Mass Institutional Hero v47.0.
+ * UPDATED: Integrated Smart PWA Install Flow with dynamic secondary action.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
+  const { toast } = useToast();
+  const { canInstall, installApp, isInstalled } = usePWAInstall();
+  const prevInstalled = useRef(isInstalled);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Registry Sync: Detect successful installation and notify aspirant
+  useEffect(() => {
+    if (mounted && isInstalled && !prevInstalled.current) {
+      toast({
+        title: "Cracklix App installed successfully.",
+        description: "Experience the portal directly from your home screen.",
+      });
+    }
+    prevInstalled.current = isInstalled;
+  }, [isInstalled, mounted, toast]);
 
   if (!mounted) return null;
 
@@ -57,6 +72,7 @@ export default function Hero() {
             transition={{ duration: 0.45, ease: "easeOut" }}
             className="flex flex-col sm:flex-row gap-[18px] w-full max-w-2xl px-5 mx-auto items-center justify-center"
           >
+             {/* Primary Navigation Node */}
              <Button 
                asChild 
                className="relative overflow-hidden w-full h-[58px] bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] hover:brightness-110 rounded-full shadow-[0_12px_35px_rgba(37,99,235,0.30)] hover:shadow-[0_15px_45px_rgba(37,99,235,0.40)] transition-all duration-300 active:scale-[0.98] border-none group cursor-pointer"
@@ -80,19 +96,56 @@ export default function Hero() {
                 </Link>
              </Button>
              
-             <Button 
-                asChild 
-                variant="outline" 
-                className="w-full h-[58px] rounded-full bg-white border-2 border-[#DCE8FF] hover:border-[#60A5FA] hover:bg-[#F8FBFF] text-[#1E3A8A] font-semibold text-[17px] shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300 active:scale-[0.98] hover:-translate-y-[2px] group"
-                aria-label="Browse Selection"
-              >
-                <Link href="/exams" className="flex items-center justify-center w-full px-1">
-                    <div className="w-[42px] h-[42px] rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0 group-hover:bg-[#E0F2FE] transition-colors">
-                        <Landmark className="h-5 w-5 text-[#1E3A8A]" />
-                    </div>
-                    <span className="flex-1 text-center pr-[42px]">Browse Selection</span>
-                </Link>
-              </Button>
+             {/* Secondary Registry Hub: Smart PWA Toggle */}
+             <div className="w-full sm:w-auto sm:flex-1">
+               <AnimatePresence mode="wait">
+                 {(canInstall && !isInstalled) ? (
+                   <motion.div
+                     key="install-node"
+                     initial={{ opacity: 0 }}
+                     animate={{ opacity: 1 }}
+                     exit={{ opacity: 0 }}
+                     transition={{ duration: 0.25 }}
+                   >
+                     <Button 
+                        onClick={installApp}
+                        variant="outline" 
+                        className="w-full h-[58px] rounded-full bg-white/80 backdrop-blur-md border-2 border-primary text-[#1E3A8A] font-bold text-[17px] shadow-xl shadow-blue-600/10 transition-all duration-300 active:scale-95 hover:bg-blue-50 group"
+                        aria-label="Install Cracklix App"
+                      >
+                        <div className="flex items-center justify-center w-full px-1">
+                            <div className="w-[42px] h-[42px] rounded-full bg-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-primary/20">
+                                <Download className="h-5 w-5 text-white" />
+                            </div>
+                            <span className="flex-1 text-center pr-[42px]">📲 Install Cracklix App</span>
+                        </div>
+                      </Button>
+                   </motion.div>
+                 ) : (
+                   <motion.div
+                     key="browse-node"
+                     initial={{ opacity: 0 }}
+                     animate={{ opacity: 1 }}
+                     exit={{ opacity: 0 }}
+                     transition={{ duration: 0.25 }}
+                   >
+                     <Button 
+                        asChild 
+                        variant="outline" 
+                        className="w-full h-[58px] rounded-full bg-white border-2 border-[#DCE8FF] hover:border-[#60A5FA] hover:bg-[#F8FBFF] text-[#1E3A8A] font-semibold text-[17px] shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300 active:scale-[0.98] hover:-translate-y-[2px] group"
+                        aria-label="Browse Selection"
+                      >
+                        <Link href="/exams" className="flex items-center justify-center w-full px-1">
+                            <div className="w-[42px] h-[42px] rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0 group-hover:bg-[#E0F2FE] transition-colors">
+                                <Landmark className="h-5 w-5 text-[#1E3A8A]" />
+                            </div>
+                            <span className="flex-1 text-center pr-[42px]">Browse Selection</span>
+                        </Link>
+                      </Button>
+                   </motion.div>
+                 )}
+               </AnimatePresence>
+             </div>
           </motion.div>
           
           <div className="flex items-center gap-8 pt-4 md:pt-8 opacity-40 grayscale group hover:grayscale-0 transition-all duration-700">
