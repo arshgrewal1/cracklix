@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -47,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Hub Client v30.2.
- * FIXED: Imported missing Link component to resolve ReferenceError in MockList.
+ * @fileOverview Premium Exam Hub Client v30.3.
+ * UPDATED: Redesigned MiniStatCard to match high-fidelity visual reference.
  */
 
 export default function ExamHubClient() {
@@ -206,9 +205,9 @@ export default function ExamHubClient() {
          </motion.div>
       </section>
 
-      {/* 2. STATISTICS ROW */}
-      <section className="px-4 md:px-8 py-4">
-         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+      {/* 2. REDESIGNED STATISTICS ROW */}
+      <section className="px-4 md:px-8 py-6">
+         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             <MiniStatCard label="Available tests" value={`${groupedContent.FULL.length + groupedContent.SUBJECT.length}+`} icon={<Layers className="text-blue-500" />} />
             <MiniStatCard label="MCQ items" value={`${(groupedContent.FULL.length + groupedContent.SUBJECT.length) * 100}+`} icon={<Zap className="text-orange-500" />} />
             <MiniStatCard label="Aspirants" value={`${exam.studentCount || '12K+'}`} icon={<Users className="text-emerald-500" />} />
@@ -271,15 +270,18 @@ function ResourceChip({ icon, label }: any) {
    )
 }
 
-function MiniStatCard({ label, value, icon, color, bg }: any) {
+/**
+ * High-Fidelity Stat Card redesigned to match user reference image.
+ */
+function MiniStatCard({ label, value, icon }: any) {
    return (
-      <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 transition-transform hover:-translate-y-1 duration-300">
-         <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shadow-inner shrink-0", bg)}>
-            {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
+      <div className="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.04)] border border-slate-50 flex items-center gap-6 md:gap-10 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">
+         <div className="h-14 w-14 md:h-20 md:w-20 rounded-full bg-white shadow-[0_10px_25px_rgba(0,0,0,0.06)] flex items-center justify-center shrink-0 border border-slate-50 group-hover:scale-105 transition-transform">
+            {React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6 md:h-9 md:w-9" })}
          </div>
-         <div className="min-w-0">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{label}</p>
-            <p className="text-lg font-black text-[#0F172A] tabular-nums leading-none">{value}</p>
+         <div className="min-w-0 flex-1 space-y-1">
+            <p className="text-[10px] md:text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-2">{label}</p>
+            <p className="text-2xl md:text-5xl font-black text-[#0F172A] tabular-nums leading-none tracking-tighter">{value}</p>
          </div>
       </div>
    )
