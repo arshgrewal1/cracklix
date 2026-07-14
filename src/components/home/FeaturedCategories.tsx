@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,7 +13,8 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Filtered Institutional Categories Hub v40.2 [Typography Optimized].
+ * @fileOverview Filtered Institutional Categories Hub v40.3.
+ * UPDATED: Standardized casing for headings.
  */
 
 const TARGET_IDS = [

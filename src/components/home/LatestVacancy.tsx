@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -15,7 +14,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Vacancy Node v2.2 [Typography Optimized].
+ * @fileOverview Institutional Vacancy Node v2.3.
+ * UPDATED: Removed uppercase from heading.
  */
 export default function LatestVacancy() {
   const db = useFirestore();

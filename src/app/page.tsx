@@ -25,8 +25,8 @@ import { Button } from "@/components/ui/button";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v500.0.
- * UPDATED: Integrated high-fidelity "Daily Challenge" logic with master registry.
+ * @fileOverview Institutional Premium Hub v500.1.
+ * UPDATED: Normalized heading casing to Title Case.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -68,7 +68,7 @@ export default function HomePage() {
                   <div className="space-y-4">
                      <div className="flex items-center justify-center gap-3">
                         <Flame className="h-8 w-8 text-orange-500 fill-current animate-pulse" />
-                        <h2 className="text-2xl md:text-[32px] font-black tracking-tight text-white antialiased uppercase">
+                        <h2 className="text-2xl md:text-[32px] font-black tracking-tight text-white antialiased">
                            {activeQuiz ? "Today's Challenge" : "Challenge Pending"}
                         </h2>
                      </div>

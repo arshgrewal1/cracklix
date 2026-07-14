@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -27,9 +26,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v50.0.
- * UPDATED: Refactored grid to 4-columns to match Categories hub.
- * UPDATED: Optimized card height and simplified iconography.
+ * @fileOverview Institutional Popular Exams Hub v50.1.
+ * UPDATED: Normalized casing for headings.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -113,7 +111,7 @@ export default function PopularExams() {
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
            <div className="space-y-2 text-left">
-              <h2 className="text-[32px] md:text-5xl font-bold tracking-tighter text-[#0F172A] antialiased uppercase">
+              <h2 className="text-[32px] md:text-5xl font-bold tracking-tighter text-[#0F172A] antialiased">
                 Trending Hubs
               </h2>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
@@ -169,7 +167,7 @@ export default function PopularExams() {
                           </div>
 
                           <div className="space-y-4 flex-1 text-left">
-                             <h3 className="text-lg md:text-xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase line-clamp-2">
+                             <h3 className="text-lg md:text-xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
                                 {exam.name}
                              </h3>
                              

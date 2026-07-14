@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -15,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Latest Tests Hub v41.0.
- * UI: Normalized card heights and pushed action buttons to the bottom for layout symmetry.
+ * @fileOverview Premium Latest Tests Hub v41.1.
+ * UPDATED: Normalized casing for headings.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -51,7 +50,7 @@ export default function LatestMocks() {
                 <Zap className="h-5 w-5 md:h-6 md:w-6 fill-current" />
               </div>
               <div className="text-left">
-                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Latest Mock Tests</h2>
+                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Latest Mock Tests</h2>
                  <p className="text-[11px] md:text-sm font-medium text-slate-500">Newly added high-fidelity series with official patterns.</p>
               </div>
            </div>
@@ -77,7 +76,7 @@ export default function LatestMocks() {
                 transition={{ delay: i * 0.05 }}
                 className="flex flex-col h-full"
               >
-                <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white p-8 flex flex-col group h-full relative overflow-hidden text-left flex-1">
+                <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white p-8 flex flex-col group h-full relative overflow-hidden text-left flex-1">
                   
                   <div className="flex justify-between items-start mb-6">
                     <AuthorityLogo boardId={boardId} size="md" className="shadow-xl" />
@@ -91,7 +90,7 @@ export default function LatestMocks() {
                   <div className="flex-1 space-y-4">
                     <div className="space-y-1.5">
                        <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">{mock.difficulty || 'Mixed'} Level</p>
-                       <h3 className="text-xl md:text-2xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2 uppercase">
+                       <h3 className="text-xl md:text-2xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
                            {mock.title}
                        </h3>
                     </div>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,8 +13,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Current Affairs Preview Hub v22.0.
- * UI: Enforced h-full on cards for uniform geometric balance.
+ * @fileOverview Current Affairs Preview Hub v22.1.
+ * UPDATED: Normalized casing for headings.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -39,7 +38,7 @@ export default function CurrentAffairsPreview() {
            <div className="space-y-1">
               <div className="flex items-center gap-3 md:gap-5">
                  <AuthorityLogo boardId="current-affairs" size="md" className="p-0 shadow-none bg-transparent" />
-                 <h2 className="text-[22px] md:text-[clamp(24px,4vw,36px)] font-black tracking-tight text-[#0F172A] uppercase">Current Affairs</h2>
+                 <h2 className="text-[22px] md:text-[clamp(24px,4vw,36px)] font-black tracking-tight text-[#0F172A]">Current Affairs</h2>
               </div>
               <p className="max-w-2xl text-[14px] md:text-[clamp(13px,1.5vw,18px)] font-medium text-slate-500">Stay updated with daily verified news and tests.</p>
            </div>
@@ -68,7 +67,7 @@ export default function CurrentAffairsPreview() {
                        </div>
 
                        <div className="flex-1 flex flex-col justify-start text-center min-w-0">
-                          <h3 className="text-[15px] md:text-xl font-bold leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors mb-2 md:mb-6 uppercase">
+                          <h3 className="text-[15px] md:text-xl font-bold leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors mb-2 md:mb-6">
                              {item.title}
                           </h3>
                           

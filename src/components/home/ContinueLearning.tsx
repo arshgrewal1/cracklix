@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview Institutional Performance Hub v6.2.
- * UPDATED: Integrated dynamic AuthorityLogo for specific test identity.
+ * @fileOverview Institutional Performance Hub v6.3.
+ * UPDATED: Normalized casing for headings.
  */
 
 // Formatting Utilities
@@ -110,13 +110,13 @@ export default function ContinueLearning() {
 
   return (
     <section className="py-8 md:py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 md:space-y-12 text-left">
+      <div className="max-w-7xl auto px-4 sm:px-6 lg:px-8 space-y-8 md:space-y-12 text-left">
         <div className="flex items-center justify-between px-1">
            <div className="flex items-center gap-3">
               <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-50 flex items-center justify-center text-primary shadow-sm shrink-0">
                  <Target className="h-4 w-4 md:h-5 md:w-5" />
               </div>
-              <h2 className="text-xl md:text-4xl font-headline font-black text-[#0F172A] tracking-tight leading-none">My Progress</h2>
+              <h2 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight leading-none">My Progress</h2>
            </div>
            <Button asChild variant="ghost" className="text-primary font-black text-[9px] md:text-xs tracking-widest gap-2">
               <Link href="/my-exams">View All <ChevronRight className="h-4 w-4" /></Link>

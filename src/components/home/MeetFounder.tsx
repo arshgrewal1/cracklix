@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from "react";
@@ -11,8 +10,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Refined Meet Founder Section v7.1.
- * UPDATED: Removed uppercase and repositioned text above image on mobile.
+ * @fileOverview Refined Meet Founder Section v7.2.
+ * UPDATED: Normalized casing for headings.
  */
 export default function MeetFounder() {
   const db = useFirestore();
