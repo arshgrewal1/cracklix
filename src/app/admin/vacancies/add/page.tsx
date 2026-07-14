@@ -2,8 +2,8 @@
 
 import React, { Suspense, useEffect, useState, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useFirestore, useDoc, useStorage } from "@/firebase"
-import { doc, setDoc, serverTimestamp, collection } from "firebase/firestore"
+import { useFirestore, useDoc, useStorage, useCollection } from "@/firebase"
+import { doc, setDoc, serverTimestamp, collection, query, orderBy } from "firebase/firestore"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -28,7 +28,8 @@ import {
   CheckCircle2,
   Trash2,
   AlertCircle,
-  Zap
+  Zap,
+  Edit3
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
@@ -37,9 +38,28 @@ import { Vacancy, ContentStatus } from "@/types"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Modular Vacancy Ingestion Node v1.1.
- * FIXED: Refined fetch logic to prevent infinite loading on new node creation.
+ * @fileOverview Modular Vacancy Ingestion Node v1.2.
+ * UPDATED: Expanded board list and implemented Manual Fill logic.
  */
+
+const BOARD_OPTIONS = [
+  "PSSSB",
+  "PPSC",
+  "Punjab Police",
+  "PSPCL",
+  "PSTCL",
+  "BFUHS",
+  "Education Board (ETT/Master Cadre)",
+  "High Court",
+  "SSC",
+  "RRB",
+  "IBPS",
+  "SBI",
+  "UPSC",
+  "NTA",
+  "National Hub",
+  "Manual Entry"
+];
 
 export default function AddVacancyPage() {
   return (
@@ -60,8 +80,16 @@ function VacancyFormWrapper() {
   const [activeTab, setActiveTab] = useState("basic")
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [customBoard, setCustomBoard] = useState("")
 
   const { data: existingData, loading: fetchLoading } = useDoc<any>(useMemo(() => (db && id ? doc(db, "vacancies", id) : null), [db, id]))
+  
+  const { data: registryBoards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]));
+
+  const combinedBoards = useMemo(() => {
+    const fromDb = registryBoards?.map(b => b.abbreviation) || [];
+    return Array.from(new Set([...BOARD_OPTIONS, ...fromDb]));
+  }, [registryBoards]);
 
   const [formData, setFormData] = useState<Partial<Vacancy>>({
     title: "",
@@ -98,6 +126,10 @@ function VacancyFormWrapper() {
   useEffect(() => {
     if (existingData) {
       setFormData({ ...existingData })
+      if (!BOARD_OPTIONS.includes(existingData.board)) {
+         setFormData(prev => ({ ...prev, board: "Manual Entry" }));
+         setCustomBoard(existingData.board);
+      }
     }
   }, [existingData])
 
@@ -128,6 +160,11 @@ function VacancyFormWrapper() {
        return
     }
 
+    if (formData.board === 'Manual Entry' && !customBoard.trim()) {
+       toast({ variant: "destructive", title: "Audit Blocked", description: "Please enter the board name manually." })
+       return
+    }
+
     setIsSaving(true)
     const finalId = id || `vac-${Date.now()}`
     const docRef = doc(db, "vacancies", finalId)
@@ -135,6 +172,7 @@ function VacancyFormWrapper() {
     const payload = {
       ...formData,
       id: finalId,
+      board: formData.board === 'Manual Entry' ? customBoard.trim() : formData.board,
       status,
       updatedAt: serverTimestamp(),
       createdAt: id ? (existingData?.createdAt || serverTimestamp()) : serverTimestamp(),
@@ -190,11 +228,23 @@ function VacancyFormWrapper() {
                        <FormInput label="Job Title" value={formData.title} onChange={v => setFormData({...formData, title: v})} placeholder="e.g. Punjab Police Constable Recruitment 2025" />
                        <FormInput label="Department" value={formData.department} onChange={v => setFormData({...formData, department: v})} placeholder="e.g. Home Affairs & Justice" />
                     </div>
+                    
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                       <FormSelect label="Recruitment Board" value={formData.board} onChange={v => setFormData({...formData, board: v})} options={["PSSSB", "PPSC", "Punjab Police", "Education Board", "High Court", "National Hub"]} />
+                       <div className="space-y-4">
+                          <FormSelect label="Recruitment Board" value={formData.board} onChange={v => setFormData({...formData, board: v})} options={combinedBoards} />
+                          {formData.board === 'Manual Entry' && (
+                             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+                                <Label className="text-[9px] font-black uppercase text-primary ml-1 flex items-center gap-2">
+                                   <Edit3 className="h-3 w-3" /> Type Board Name
+                                </Label>
+                                <Input value={customBoard} onChange={e => setCustomBoard(e.target.value)} className="h-11 rounded-xl bg-blue-50 border-none font-bold px-5 shadow-sm text-primary" placeholder="e.g. PU Chandigarh" />
+                             </motion.div>
+                          )}
+                       </div>
                        <FormSelect label="Category" value={formData.category} onChange={v => setFormData({...formData, category: v})} options={["Government", "Contract", "Semi-Govt", "Institutional"]} />
                        <FormInput label="Ad Number" value={formData.adNumber} onChange={v => setFormData({...formData, adNumber: v})} placeholder="e.g. 01/2025" />
                     </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                        <FormInput label="Post Name" value={formData.postName} onChange={v => setFormData({...formData, postName: v})} placeholder="e.g. Sub Inspector (District Cadre)" />
                        <FormInput label="Total Posts" value={formData.totalPosts} onChange={v => setFormData({...formData, totalPosts: v})} placeholder="e.g. 1746" />
@@ -340,7 +390,7 @@ function FileUpload({ label, value, onChange, type, icon }: any) {
             "h-32 rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-slate-50",
             value ? "bg-emerald-50/30 border-emerald-200" : "bg-slate-50/30 border-slate-200"
          )}>
-            <input type="file" ref={inputRef} className="hidden" accept={type} onChange={onChange} />
+            <input type="file" min-h-0 ref={inputRef} className="hidden" accept={type} onChange={onChange} />
             {value ? (
                <>
                   {icon}
