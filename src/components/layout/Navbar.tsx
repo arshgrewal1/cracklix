@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v76.0.
- * UPDATED: Doubled Logo size and pulled to extreme left.
+ * @fileOverview Cracklix Navigation Hub v77.0.
+ * UPDATED: Implemented exact centering for navigation links using absolute positioning.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -105,10 +105,10 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
         <nav className="w-full h-20 lg:h-20">
-          <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-2 md:px-4 h-full flex items-center justify-between">
+          <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-2 md:px-4 h-full flex items-center justify-between">
 
-            {/* LEFT BLOCK: MENU | LOGO | NAVIGATION */}
-            <div className="flex items-center gap-0">
+            {/* LEFT BLOCK: MENU | LOGO */}
+            <div className="flex items-center gap-0 z-10">
               <button
                 onClick={() => setisSidebarOpen(true)}
                 aria-label="Open menu"
@@ -123,18 +123,19 @@ export default function Navbar() {
                 imgClassName="h-24 md:h-36 w-auto"
                 align="left"
               />
+            </div>
 
-              <div className="hidden lg:flex items-center gap-4 xl:gap-6 ml-2">
-                <NavLink href="/" label="Home" active={pathname === '/'} />
-                <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
-                <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
-                <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
-                <NavLink href="/install" label="Install App" active={pathname === '/install'} />
-              </div>
+            {/* CENTER BLOCK: NAVIGATION (EXACT CENTER) */}
+            <div className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-6 xl:gap-8 h-full">
+              <NavLink href="/" label="Home" active={pathname === '/'} />
+              <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
+              <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
+              <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
+              <NavLink href="/install" label="Install App" active={pathname === '/install'} />
             </div>
 
             {/* RIGHT BLOCK: ELITE ACCESS | SEARCH | PROFILE */}
-            <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
+            <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10">
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden lg:flex flex-col items-end shrink-0">
                     <span className="text-[9px] font-black text-emerald-600 tracking-tight leading-none uppercase">Elite Access</span>
