@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -13,8 +14,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Filtered Institutional Categories Hub v40.1.
- * UPDATED: Optimized AuthorityLogo integration for maximized circular fill.
+ * @fileOverview Filtered Institutional Categories Hub v40.2 [Typography Optimized].
  */
 
 const TARGET_IDS = [
@@ -33,7 +33,6 @@ export default function FeaturedCategories() {
 
   const categories = useMemo(() => {
     if (!rawCategories) return [];
-    // Show target IDs first, then sort by display order
     return rawCategories.filter(c => TARGET_IDS.includes(c.id)).slice(0, 4);
   }, [rawCategories]);
 
@@ -47,7 +46,7 @@ export default function FeaturedCategories() {
                <Layers className="h-5 w-5 md:h-6 md:w-6" />
              </div>
              <div className="text-left">
-                <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Quick Categories</h2>
+                <h2 className="text-xl md:text-3xl font-bold text-[#0F172A] tracking-tight">Quick Categories</h2>
                 <p className="text-[11px] md:text-sm font-medium text-slate-500">Find tests by your target recruitment vertical.</p>
              </div>
           </div>
@@ -76,8 +75,8 @@ export default function FeaturedCategories() {
                         </div>
                      </div>
 
-                     <div className="flex-1 space-y-4">
-                        <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">
+                     <div className="flex-1 space-y-4 text-left">
+                        <h3 className="text-lg md:text-2xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight">
                            {cat.title}
                         </h3>
                         
@@ -98,7 +97,7 @@ export default function FeaturedCategories() {
 
 function MiniBadge({ icon: Icon, label, color }: any) {
    return (
-      <div className={cn("px-2.5 py-1 rounded-lg flex items-center gap-1.5 font-bold text-[9px] uppercase tracking-tight", color)}>
+      <div className={cn("px-2.5 py-1 rounded-lg flex items-center gap-1.5 font-semibold text-[9px] tracking-tight", color)}>
          <Icon className="h-3 w-3" />
          {label}
       </div>

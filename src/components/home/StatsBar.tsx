@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -45,6 +46,9 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
   return <span>{displayValue.toLocaleString()}{suffix}</span>;
 }
 
+/**
+ * @fileOverview Institutional Stats Bar v1.1 [Typography Optimized].
+ */
 export default function StatsBar() {
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
@@ -144,16 +148,16 @@ export default function StatsBar() {
                     </div>
 
                     <div className="text-center space-y-0.5 z-10 w-full">
-                      <div className="text-lg md:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tighter leading-none antialiased">
+                      <div className="text-lg md:text-2xl lg:text-3xl font-bold text-[#0F172A] tracking-tighter leading-none antialiased">
                         <Counter value={item.val} suffix={item.noSuffix ? "" : "+"} />
                       </div>
-                      <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight truncate px-1">
+                      <p className="text-[10px] md:text-[11px] font-semibold text-slate-400 tracking-tight truncate px-1">
                         {item.label}
                       </p>
                       
                       {item.trend && (
                         <div className="mt-1 flex items-center justify-center gap-1">
-                           <span className="text-[8px] md:text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50 flex items-center gap-1">
+                           <span className="text-[8px] md:text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50 flex items-center gap-1">
                              <TrendingUp className="h-2 w-2" /> {item.trend}
                            </span>
                         </div>

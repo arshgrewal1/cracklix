@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link";
@@ -15,8 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Premium Mobile Bottom Navigation v2.1.
- * FIXED: Optimized for Home Dashboard Module access.
+ * Premium Mobile Bottom Navigation v2.2 [Typography Optimized].
  */
 
 export default function MobileNav() {
@@ -72,7 +72,7 @@ export default function MobileNav() {
 
                 <span
                   className={cn(
-                    "mt-1 text-[9px] font-black tracking-widest uppercase",
+                    "mt-1 text-[9px] font-bold tracking-tight",
                     isActive ? "text-primary" : "text-slate-400"
                   )}
                 >

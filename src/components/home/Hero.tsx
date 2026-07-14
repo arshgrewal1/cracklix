@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -11,8 +12,8 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview High-Mass Institutional Hero v45.0.
- * RESTORED: Reverted secondary button to "Browse Selection" for reliability across all browsers.
+ * @fileOverview High-Mass Institutional Hero v46.0.
+ * UPDATED: Normalized typography and casing.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -34,15 +35,15 @@ export default function Hero() {
              className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-blue-50 border border-blue-100/50 shadow-sm"
           >
             <Star className="h-4 w-4 text-primary fill-primary animate-pulse" />
-            <span className="text-[11px] md:text-xs font-black tracking-widest text-primary uppercase antialiased">
+            <span className="text-[11px] md:text-xs font-semibold text-primary antialiased">
               Punjab's Smartest Platform
             </span>
           </motion.div>
 
           <div className="space-y-6 max-w-4xl">
-            <h1 className="text-[42px] md:text-8xl lg:text-[100px] font-black tracking-tighter text-[#0F172A] leading-[0.95] antialiased">
+            <h1 className="text-[42px] md:text-8xl lg:text-[100px] font-bold tracking-tighter text-[#0F172A] leading-[0.95] antialiased">
               Crack Punjab Exams <br/>
-              <span className="text-primary italic">With Confidence</span>
+              <span className="text-primary italic">with confidence</span>
             </h1>
 
             <p className="text-[16px] md:text-2xl text-slate-500 font-medium leading-relaxed tracking-tight px-4 max-w-2xl mx-auto">
@@ -56,7 +57,6 @@ export default function Hero() {
             transition={{ duration: 0.45, ease: "easeOut" }}
             className="flex flex-col sm:flex-row gap-[18px] w-full max-w-2xl px-5 mx-auto items-center justify-center"
           >
-             {/* PRIMARY: START PREPARATION */}
              <Button 
                asChild 
                className="relative overflow-hidden w-full h-[58px] bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] hover:brightness-110 rounded-full shadow-[0_12px_35px_rgba(37,99,235,0.30)] hover:shadow-[0_15px_45px_rgba(37,99,235,0.40)] transition-all duration-300 active:scale-[0.98] border-none group cursor-pointer"
@@ -73,14 +73,13 @@ export default function Hero() {
                     <div className="w-[42px] h-[42px] rounded-full bg-white/18 backdrop-blur-[12px] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,255,255,0.2)] border border-white/10 group-hover:scale-105 transition-transform duration-300">
                       <Play className="h-5 w-5 fill-white text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
                     </div>
-                    <span className="flex-1 text-center font-bold text-[18px] text-white tracking-[0.3px] pr-[42px]">
+                    <span className="flex-1 text-center font-semibold text-[18px] text-white pr-[42px]">
                       Start Preparation
                     </span>
                   </div>
                 </Link>
              </Button>
              
-             {/* SECONDARY: BROWSE SELECTION */}
              <Button 
                 asChild 
                 variant="outline" 
@@ -97,7 +96,7 @@ export default function Hero() {
           </motion.div>
           
           <div className="flex items-center gap-8 pt-4 md:pt-8 opacity-40 grayscale group hover:grayscale-0 transition-all duration-700">
-             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Official Portal Verified</p>
+             <p className="text-[10px] font-semibold tracking-widest text-slate-400 uppercase">Official Portal Verified</p>
           </div>
         </div>
       </div>

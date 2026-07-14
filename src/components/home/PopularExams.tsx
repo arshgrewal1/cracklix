@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -26,8 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v46.0.
- * FIXED: Wired bookmark (save) button with live Firestore registry sync.
+ * @fileOverview Institutional Popular Exams Hub v47.0 [Typography Optimized].
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -89,19 +89,19 @@ export default function PopularExams() {
 
   return (
     <section className="py-12 md:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-12 text-left">
         
         {/* SECTION HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
            <div className="space-y-2 text-left">
-              <h2 className="text-[32px] md:text-6xl font-black tracking-tighter text-[#0F172A] antialiased">
+              <h2 className="text-[32px] md:text-6xl font-bold tracking-tighter text-[#0F172A] antialiased">
                 Popular Exams
               </h2>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
                 Targeted preparation for Punjab&apos;s most competitive recruitment verticals.
               </p>
            </div>
-           <Link href="/exams" className="text-primary font-black text-xs md:text-sm tracking-widest uppercase hover:underline flex items-center gap-2 group shrink-0">
+           <Link href="/exams" className="text-primary font-bold text-xs md:text-sm tracking-tight hover:underline flex items-center gap-2 group shrink-0">
               Explore Registry <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
            </Link>
         </div>
@@ -128,16 +128,14 @@ export default function PopularExams() {
                  >
                     <Card className="border-none shadow-5xl rounded-[3rem] bg-white p-6 md:p-12 flex flex-col relative overflow-hidden group hover:-translate-y-2 transition-all duration-500 border border-slate-50">
                        
-                       {/* PREMIUM BADGE HUB */}
                        {isPremium && (
                           <div className="absolute top-0 right-12 z-20">
-                             <div className="bg-amber-400 text-amber-950 px-5 py-2.5 rounded-b-2xl font-black text-[9px] uppercase tracking-widest shadow-xl flex items-center gap-2">
+                             <div className="bg-amber-400 text-amber-950 px-5 py-2.5 rounded-b-2xl font-bold text-[9px] tracking-tight shadow-xl flex items-center gap-2">
                                 <Lock className="h-3 w-3 fill-current" /> Premium
                              </div>
                           </div>
                        )}
 
-                       {/* UPPER BLOCK: LOGO & IDENTITY */}
                        <div className="flex items-center gap-6 md:gap-12">
                           <div className="shrink-0 relative group-hover:scale-105 transition-transform duration-500">
                              <AuthorityLogo 
@@ -149,12 +147,11 @@ export default function PopularExams() {
                           </div>
 
                           <div className="flex-1 text-left space-y-4 md:space-y-6 min-w-0">
-                             <h3 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-tight group-hover:text-primary transition-colors">
+                             <h3 className="text-2xl md:text-5xl font-bold text-[#0F172A] tracking-tight group-hover:text-primary transition-colors leading-tight line-clamp-2">
                                 {exam.name}
                              </h3>
                              
-                             {/* STATS STRIP */}
-                             <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[10px] md:text-xs font-bold text-slate-400 tracking-tight">
+                             <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[10px] md:text-xs font-semibold text-slate-400 tracking-tight">
                                 <span className="flex items-center gap-2">
                                    <Zap className="h-4 w-4 text-primary fill-primary" /> 
                                    {exam.activeQuestions || '5000'} Questions
@@ -171,11 +168,10 @@ export default function PopularExams() {
                           </div>
                        </div>
 
-                       {/* LOWER BLOCK: ACTIONS */}
                        <div className="mt-8 md:mt-12 pt-8 md:pt-10 border-t border-slate-50 flex items-center gap-4 md:gap-6">
                           <Button asChild className={cn(
-                             "flex-1 h-14 md:h-20 rounded-full font-black uppercase text-[10px] md:text-xs tracking-[0.2em] shadow-4xl transition-all active:scale-95 border-none gap-3",
-                             locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
+                             "flex-1 h-14 md:h-20 rounded-full font-bold text-[10px] md:text-xs tracking-tight shadow-4xl transition-all active:scale-95 border-none gap-3",
+                             locked ? "bg-amber-50 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                           )}>
                              <Link href={`/exams/view?id=${exam.id}`}>
                                 {locked ? <Lock className="h-4 w-4" /> : null}
@@ -206,10 +202,9 @@ export default function PopularExams() {
            })}
         </div>
 
-        {/* BOTTOM AFFIRMATION */}
         <div className="flex items-center justify-center gap-4 text-slate-300 py-4 opacity-50">
            <ShieldCheck className="h-5 w-5" />
-           <span className="text-[10px] font-black uppercase tracking-[0.4em]">Official Punjab Registry Validated</span>
+           <span className="text-[10px] font-semibold tracking-widest uppercase">Official Punjab Registry Validated</span>
         </div>
 
       </div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,15 +15,13 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Vacancy Node v2.1.
- * FIXED: Removed server-side orderBy to bypass composite index requirement.
+ * @fileOverview Institutional Vacancy Node v2.2 [Typography Optimized].
  */
 export default function LatestVacancy() {
   const db = useFirestore();
 
   const vacanciesQuery = useMemo(() => {
     if (!db) return null;
-    // Simple query to avoid composite index requirements for multiple where + orderBy
     return query(
       collection(db, "vacancies"),
       where("status", "==", "PUBLISHED"),
@@ -51,16 +50,16 @@ export default function LatestVacancy() {
            <div className="space-y-3 text-left">
               <div className="flex items-center gap-2">
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-[10px] md:text-xs font-black text-emerald-600 tracking-[0.3em] uppercase">Registry Live Sync</span>
+                 <span className="text-[10px] md:text-xs font-semibold text-emerald-600 tracking-tight uppercase">Registry Live Sync</span>
               </div>
-              <h2 className="text-3xl md:text-6xl font-black tracking-tighter text-[#0F172A] antialiased">
+              <h2 className="text-3xl md:text-6xl font-bold tracking-tighter text-[#0F172A] antialiased">
                 Latest Vacancies
               </h2>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
                 Official notifications and direct apply nodes for state recruitments.
               </p>
            </div>
-           <Button asChild variant="ghost" className="text-primary font-black text-xs md:text-sm tracking-widest uppercase hover:underline flex items-center gap-2 group shrink-0">
+           <Button asChild variant="ghost" className="text-primary font-bold text-xs md:text-sm tracking-tight hover:underline flex items-center gap-2 group shrink-0">
               <Link href="/vacancies">Open Registry <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
            </Button>
         </div>
@@ -78,20 +77,20 @@ export default function LatestVacancy() {
                        <div className="flex justify-between items-start mb-8 w-full relative z-10">
                           <AuthorityLogo boardId={v.board} size="md" className="h-16 w-16 md:h-24 md:w-24 shadow-2xl border-4 border-white bg-slate-50" />
                           <div className="flex flex-col items-end gap-2">
-                             {v.isBreaking && <Badge className="bg-rose-500 text-white border-none px-3 py-1 font-black text-[9px] uppercase animate-pulse">Breaking</Badge>}
-                             <span className="text-[10px] md:text-[11px] font-black text-slate-300 uppercase tracking-widest tabular-nums">LAST: {new Date(v.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                             {v.isBreaking && <Badge className="bg-rose-500 text-white border-none px-3 py-1 font-semibold text-[9px] uppercase animate-pulse">Breaking</Badge>}
+                             <span className="text-[10px] md:text-[11px] font-semibold text-slate-300 tabular-nums">LAST: {new Date(v.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
                           </div>
                        </div>
 
                        <div className="space-y-4 flex-1 relative z-10">
-                          <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight line-clamp-2 uppercase">{v.title}</h3>
-                          <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">{v.department}</p>
+                          <h3 className="text-xl md:text-3xl font-bold text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight line-clamp-2">{v.title}</h3>
+                          <p className="text-[9px] md:text-[11px] font-semibold text-slate-400 tracking-tight">{v.department}</p>
                           
                           <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-50">
-                             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                             <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-400 tracking-tight">
                                 <Zap className="h-4 w-4 text-primary" /> {v.totalPosts} Posts
                              </div>
-                             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                             <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-400 tracking-tight">
                                 <Target className="h-4 w-4 text-emerald-500" /> {v.education?.split(' ')[0]}
                              </div>
                           </div>
@@ -101,7 +100,7 @@ export default function LatestVacancy() {
                 </motion.div>
               ))
            ) : (
-              <div className="col-span-full py-20 text-center opacity-30 italic font-black uppercase text-xl md:text-3xl tracking-tighter flex flex-col items-center gap-6">
+              <div className="col-span-full py-20 text-center opacity-30 italic font-semibold text-xl md:text-3xl tracking-tighter flex flex-col items-center gap-6">
                  <ShieldCheck className="h-16 w-16 text-slate-200" />
                  Registry Normalized
               </div>

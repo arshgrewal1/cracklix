@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -36,8 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v78.0.
- * UPDATED: Integrated Vacancies node to centered desktop navigation.
+ * @fileOverview Cracklix Navigation Hub v79.0.
+ * UPDATED: Normalized typography and casing.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -138,8 +139,8 @@ export default function Navbar() {
             <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10">
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden lg:flex flex-col items-end shrink-0">
-                    <span className="text-[9px] font-black text-emerald-600 tracking-tight leading-none uppercase">Elite Access</span>
-                    <span className="text-[11px] font-bold text-slate-400 mt-1.5 leading-none tabular-nums">{timeLeft}</span>
+                    <span className="text-[9px] font-bold text-emerald-600 leading-none">Elite Access</span>
+                    <span className="text-[11px] font-medium text-slate-400 mt-1.5 leading-none tabular-nums">{timeLeft}</span>
                  </div>
               )}
 
@@ -178,7 +179,7 @@ export default function Navbar() {
                            <h3 className="text-base font-bold text-[#0F172A] truncate max-w-[240px]">
                              {profile?.name || "Student"}
                            </h3>
-                           <Link href="/profile" className="text-[11px] font-bold text-[#94A3B8] hover:text-primary">My Profile</Link>
+                           <Link href="/profile" className="text-[11px] font-medium text-[#94A3B8] hover:text-primary">My Profile</Link>
                          </div>
                       </div>
                       <div className="h-px w-full bg-slate-100" />
@@ -188,7 +189,7 @@ export default function Navbar() {
                          <ProfileMenuItem href="/profile" icon={Settings} label="Settings" />
                          {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Panel" highlight />}
                       </div>
-                      <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
+                      <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] font-semibold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -214,7 +215,7 @@ export default function Navbar() {
   function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {
     return (
       <Link href={href} className={cn(
-        "text-[14px] xl:text-[15px] font-bold transition-all whitespace-nowrap border-b-2 py-1", 
+        "text-[14px] xl:text-[15px] font-semibold transition-all whitespace-nowrap border-b-2 py-1", 
         active ? "text-primary border-primary" : "text-slate-500 border-transparent hover:text-primary hover:text-primary/20"
       )}>
         {label}
@@ -225,7 +226,7 @@ export default function Navbar() {
   function ProfileMenuItem({ href, icon: Icon, label, highlight }: { href: string, icon: any, label: string, highlight?: boolean }) {
     return (
       <Link href={href} className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-xs font-bold",
+        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-xs font-semibold",
         highlight ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
       )}>
          <Icon className={cn("h-4 w-4 shrink-0", highlight ? "text-primary" : "text-slate-400")} />

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -48,6 +49,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+/**
+ * Admin Sidebar Navigation v3.6 [Typography Optimized].
+ */
 
 const NAV_GROUPS = [
   {
@@ -139,7 +144,7 @@ export default function SidebarNav({
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="space-y-2">
             {isOpen ? (
-              <p className="px-4 text-[10px] font-bold tracking-tight text-slate-400 uppercase">
+              <p className="px-4 text-[10px] font-semibold tracking-tight text-slate-400">
                 {group.label}
               </p>
             ) : (
@@ -176,7 +181,7 @@ export default function SidebarNav({
                     )} />
 
                     <span className={cn(
-                      "truncate text-[13px] font-bold transition-all duration-300",
+                      "truncate text-[13px] font-semibold transition-all duration-300",
                       isOpen ? "max-w-[150px] opacity-100" : "max-w-0 opacity-0"
                     )}>
                       {item.label}
@@ -196,9 +201,9 @@ export default function SidebarNav({
                     <TooltipContent
                       side="right"
                       align="center"
-                      hidden={state !== "collapsed" || isMobile}
-                      {...tooltip}
-                    />
+                    >
+                       {item.label}
+                    </TooltipContent>
                   </Tooltip>
                 );
               })}

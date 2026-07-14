@@ -1,7 +1,7 @@
 
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import MobileNav from "@/components/layout/MobileNav";
 import PWAManager from "@/components/pwa/PWAManager";
@@ -13,14 +13,15 @@ import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import GlobalStudyTracker from "@/components/analytics/GlobalStudyTracker";
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
 });
 
 /**
- * @fileOverview Root Layout v67.0 [PWA OPTIMIZED].
- * UPDATED: Optimized body wrapper to ensure background consistency in PWA mode.
+ * @fileOverview Root Layout v68.0 [Typography Optimized].
+ * UPDATED: Switched to Poppins font and normalized typography.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -66,7 +67,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className="bg-white">
       <body
         className={`
-          ${inter.variable}
+          ${poppins.variable}
           font-body
           antialiased
           bg-white

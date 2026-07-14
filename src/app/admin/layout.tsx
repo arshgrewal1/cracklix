@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from "react";
@@ -14,8 +15,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v34.0.
- * UPDATED: Zero spacing between menu toggle and logo.
+ * @fileOverview Admin Layout v35.0 [Typography Optimized].
+ * UPDATED: Normalized typography and casing.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -73,7 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (isGlobalLoading) return (
     <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6">
        <ShieldCheck className="h-10 w-10 text-blue-600 animate-pulse" />
-       <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500">Securing Admin Panel...</p>
+       <p className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase">Securing Admin Panel...</p>
     </div>
   );
   
@@ -106,16 +107,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="lg:hidden shrink-0">
               <Logo variant="light" className="h-12 md:h-14 w-auto -ml-2" />
             </div>
-            <p className="hidden md:block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">
+            <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-4">
                Registry Governance
             </p>
           </div>
           
           <div className="flex items-center gap-4">
-             <Button asChild variant="outline" className="hidden sm:flex h-10 rounded-full text-[10px] font-black uppercase tracking-widest">
+             <Button asChild variant="outline" className="hidden sm:flex h-10 rounded-full text-[10px] font-semibold tracking-tight">
                 <Link href="/">View Site</Link>
              </Button>
-             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black">
+             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-bold">
                 {profile?.name?.[0] || 'A'}
              </div>
           </div>
