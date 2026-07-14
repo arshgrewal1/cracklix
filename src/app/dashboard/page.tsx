@@ -70,9 +70,12 @@ export default function StudentDashboard() {
     return query(collection(db, "results"), where("userId", "==", user.uid));
   }, [db, user, mounted]);
 
+  const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]);
+  const quizzesQuery = useMemo(() => (db && mounted ? collection(db, "daily_quizzes") : null), [db, mounted]);
+
   const { data: results, loading: resultsLoading } = useCollection<any>(resultsQuery);
-  const { data: validMocks } = useCollection<any>(useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]));
-  const { data: validQuizzes } = useCollection<any>(useMemo(() => (db && mounted ? collection(db, "daily_quizzes") : null), [db, mounted]));
+  const { data: validMocks } = useCollection<any>(mocksQuery);
+  const { data: validQuizzes } = useCollection<any>(quizzesQuery);
 
   const combinedMocks = useMemo(() => {
     return [...(validMocks || []), ...(validQuizzes || [])];
@@ -146,7 +149,7 @@ export default function StudentDashboard() {
           
           <div className="flex-1 text-center md:text-left space-y-4 min-w-0">
             <div className="space-y-1">
-              <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter truncate leading-none antialiased">
+              <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none antialiased">
                 {profile?.name || "Aspirant"}
               </h1>
               <p className="text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-[0.3em]">{profile?.email}</p>

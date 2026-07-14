@@ -66,11 +66,15 @@ export default function ContinueLearning() {
     return collection(db, "exams");
   }, [db, mounted]);
 
+  const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]);
+  const quizQuery = useMemo(() => (db && mounted ? collection(db, "daily_quizzes") : null), [db, mounted]);
+  const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
+
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery);
   const { data: allExams, loading: examsLoading } = useCollection<any>(examsQuery);
-  const { data: validMocks, loading: mocksLoading } = useCollection<any>(useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]));
-  const { data: validQuizzes, loading: quizLoading } = useCollection<any>(useMemo(() => (db && mounted ? collection(db, "daily_quizzes") : null), [db, mounted]));
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
+  const { data: validMocks, loading: mocksLoading } = useCollection<any>(mocksQuery);
+  const { data: validQuizzes, loading: quizLoading } = useCollection<any>(quizQuery);
+  const { data: boards } = useCollection<any>(boardsQuery);
 
   const combinedMocks = useMemo(() => {
     return [...(validMocks || []), ...(validQuizzes || [])];

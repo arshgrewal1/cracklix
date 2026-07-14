@@ -96,11 +96,12 @@ export default function MyExamsPage() {
   const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted])
   const pyqsQuery = useMemo(() => (db && mounted ? collection(db, "pyqs") : null), [db, mounted])
   const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid)) : null), [db, user])
-  
+  const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
+
   const { data: allExams, loading: examsLoading } = useCollection<any>(examsQuery)
   const { data: mocks } = useCollection<any>(mocksQuery)
   const { data: pyqs } = useCollection<any>(pyqsQuery)
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
+  const { data: boards } = useCollection<any>(boardsQuery)
   const { data: results } = useCollection<any>(resultsQuery)
 
   // STATS CALCULATION

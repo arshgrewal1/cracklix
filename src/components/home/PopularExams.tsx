@@ -43,9 +43,12 @@ export default function PopularExams() {
     return query(collection(db, "exams"), where("isTrending", "==", true), limit(8));
   }, [db]);
 
+  const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
+  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db]);
+
   const { data: exams, loading } = useCollection<any>(examsQuery);
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
-  const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
+  const { data: boards } = useCollection<any>(boardsQuery);
+  const { data: mocks } = useCollection<any>(mocksQuery);
 
   const examStats = useMemo(() => {
     const stats: Record<string, { mocks: number, questions: number }> = {};
