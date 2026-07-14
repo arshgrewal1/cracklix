@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -14,7 +15,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Latest Tests Hub v40.0.
+ * @fileOverview Premium Latest Tests Hub v41.0.
+ * UI: Normalized card heights and pushed action buttons to the bottom for layout symmetry.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -44,12 +46,12 @@ export default function LatestMocks() {
       <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
         <div className="flex items-center justify-between px-1">
-           <div className="flex items-center gap-4">
+           <div className="flex items-center gap-4 text-left">
               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner shrink-0">
                 <Zap className="h-5 w-5 md:h-6 md:w-6 fill-current" />
               </div>
               <div className="text-left">
-                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Latest Mock Tests</h2>
+                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Latest Mock Tests</h2>
                  <p className="text-[11px] md:text-sm font-medium text-slate-500">Newly added high-fidelity series with official patterns.</p>
               </div>
            </div>
@@ -73,8 +75,9 @@ export default function LatestMocks() {
                 whileInView={{ opacity: 1, y: 0 }} 
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
+                className="flex flex-col h-full"
               >
-                <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white p-8 flex flex-col group h-full relative overflow-hidden text-left">
+                <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white p-8 flex flex-col group h-full relative overflow-hidden text-left flex-1">
                   
                   <div className="flex justify-between items-start mb-6">
                     <AuthorityLogo boardId={boardId} size="md" className="shadow-xl" />
@@ -88,7 +91,7 @@ export default function LatestMocks() {
                   <div className="flex-1 space-y-4">
                     <div className="space-y-1.5">
                        <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">{mock.difficulty || 'Mixed'} Level</p>
-                       <h3 className="text-xl md:text-2xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
+                       <h3 className="text-xl md:text-2xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2 uppercase">
                            {mock.title}
                        </h3>
                     </div>
@@ -101,14 +104,15 @@ export default function LatestMocks() {
                     </div>
                   </div>
 
-                  <div className="mt-8">
+                  <div className="mt-8 pt-4">
                     <Button asChild className={cn(
                       "w-full h-12 md:h-14 rounded-xl md:rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-2", 
-                      locked ? "bg-amber-500 hover:bg-amber-600" : "bg-[#0F172A] hover:bg-black"
+                      locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                     )}>
                         <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`}>
-                          {locked ? 'Unlock' : 'Continue'}
-                          <ChevronRight className="h-4 w-4" />
+                          {locked ? <Lock className="h-4 w-4" /> : null}
+                          Continue
+                          <ChevronRight className="h-4 w-4 ml-auto" />
                         </Link>
                     </Button>
                   </div>

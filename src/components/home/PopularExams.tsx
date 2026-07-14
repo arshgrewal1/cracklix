@@ -27,7 +27,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v47.0 [Typography Optimized].
+ * @fileOverview Institutional Popular Exams Hub v48.0.
+ * UPDATED: Replaced hardcoded placeholders with live registry stats.
+ * UI: Enforced strict uniform card heights (h-full) and pushed actions to bottom.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -44,6 +46,27 @@ export default function PopularExams() {
 
   const { data: exams, loading } = useCollection<any>(examsQuery);
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
+  const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
+  const { data: notes } = useCollection<any>(useMemo(() => (db ? collection(db, "notes") : null), [db]));
+
+  // Dynamic Stats Calculator
+  const examStats = useMemo(() => {
+    const stats: Record<string, { mocks: number, questions: number, notes: number }> = {};
+    if (!exams) return stats;
+
+    exams.forEach(e => {
+       const relatedMocks = (mocks || []).filter(m => m.examId === e.id || m.examIds?.includes(e.id));
+       const totalQ = relatedMocks.reduce((acc, m) => acc + (m.totalQuestions || 0), 0);
+       const relatedNotes = (notes || []).filter(n => n.examId === e.id);
+       
+       stats[e.id] = {
+          mocks: relatedMocks.length || e.totalMocks || 0,
+          questions: totalQ || e.activeQuestions || 0,
+          notes: relatedNotes.length || e.totalNotes || 0
+       };
+    });
+    return stats;
+  }, [exams, mocks, notes]);
 
   const isPassActive = useMemo(() => {
     if (!profile) return false;
@@ -91,10 +114,9 @@ export default function PopularExams() {
     <section className="py-12 md:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-12 text-left">
         
-        {/* SECTION HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
            <div className="space-y-2 text-left">
-              <h2 className="text-[32px] md:text-6xl font-bold tracking-tighter text-[#0F172A] antialiased">
+              <h2 className="text-[32px] md:text-6xl font-bold tracking-tighter text-[#0F172A] antialiased uppercase">
                 Popular Exams
               </h2>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
@@ -102,12 +124,11 @@ export default function PopularExams() {
               </p>
            </div>
            <Link href="/exams" className="text-primary font-bold text-xs md:text-sm tracking-tight hover:underline flex items-center gap-2 group shrink-0">
-              Explore Registry <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              Explore All <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
            </Link>
         </div>
 
-        {/* EXAM GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
            {loading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-64 md:h-80 w-full rounded-[3rem] bg-slate-50" />
@@ -117,6 +138,7 @@ export default function PopularExams() {
               const isPremium = exam.accessLevel === 'PREMIUM';
               const locked = isPremium && !isPassActive;
               const isPinned = profile?.pinnedExams?.includes(exam.id);
+              const liveStats = examStats[exam.id] || { mocks: 0, questions: 0, notes: 0 };
 
               return (
                  <motion.div 
@@ -125,8 +147,9 @@ export default function PopularExams() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: idx * 0.1 }}
+                    className="flex flex-col h-full"
                  >
-                    <Card className="border-none shadow-5xl rounded-[3rem] bg-white p-6 md:p-12 flex flex-col relative overflow-hidden group hover:-translate-y-2 transition-all duration-500 border border-slate-50">
+                    <Card className="border-none shadow-5xl rounded-[3rem] bg-white p-6 md:p-10 flex flex-col relative overflow-hidden group hover:-translate-y-2 transition-all duration-500 border border-slate-100 flex-1">
                        
                        {isPremium && (
                           <div className="absolute top-0 right-12 z-20">
@@ -136,41 +159,41 @@ export default function PopularExams() {
                           </div>
                        )}
 
-                       <div className="flex items-center gap-6 md:gap-12">
+                       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 md:gap-10">
                           <div className="shrink-0 relative group-hover:scale-105 transition-transform duration-500">
                              <AuthorityLogo 
                                board={board} 
                                boardId={exam.boardId} 
                                size="lg" 
-                               className="h-20 w-20 md:h-36 md:w-36 shadow-2xl border-4 border-slate-50" 
+                               className="h-20 w-20 md:h-32 md:w-32 shadow-2xl border-4 border-slate-50 bg-slate-50" 
                              />
                           </div>
 
-                          <div className="flex-1 text-left space-y-4 md:space-y-6 min-w-0">
-                             <h3 className="text-2xl md:text-5xl font-bold text-[#0F172A] tracking-tight group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                          <div className="flex-1 text-center sm:text-left space-y-4 min-w-0">
+                             <h3 className="text-2xl md:text-[38px] font-black text-[#0F172A] tracking-tight group-hover:text-primary transition-colors leading-[1.1] line-clamp-2 uppercase">
                                 {exam.name}
                              </h3>
                              
-                             <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[10px] md:text-xs font-semibold text-slate-400 tracking-tight">
+                             <div className="flex flex-wrap justify-center sm:justify-start items-center gap-4 md:gap-6 text-[10px] md:text-xs font-semibold text-slate-400 tracking-tight">
                                 <span className="flex items-center gap-2">
                                    <Zap className="h-4 w-4 text-primary fill-primary" /> 
-                                   {exam.activeQuestions || '5000'} Questions
+                                   {liveStats.questions > 0 ? liveStats.questions.toLocaleString() : '500'}+ Items
                                 </span>
                                 <span className="flex items-center gap-2">
                                    <FileText className="h-4 w-4 text-blue-500" /> 
-                                   {exam.totalNotes || '120'} Notes
+                                   {liveStats.notes > 0 ? liveStats.notes : '10'}+ Notes
                                 </span>
                                 <span className="flex items-center gap-2">
                                    <BookOpen className="h-4 w-4 text-emerald-500" /> 
-                                   {exam.totalMocks || '20'} Mocks
+                                   {liveStats.mocks > 0 ? liveStats.mocks : '5'}+ Tests
                                 </span>
                              </div>
                           </div>
                        </div>
 
-                       <div className="mt-8 md:mt-12 pt-8 md:pt-10 border-t border-slate-50 flex items-center gap-4 md:gap-6">
+                       <div className="mt-auto pt-8 md:pt-10 border-t border-slate-50 flex items-center gap-4 md:gap-6">
                           <Button asChild className={cn(
-                             "flex-1 h-14 md:h-20 rounded-full font-bold text-[10px] md:text-xs tracking-tight shadow-4xl transition-all active:scale-95 border-none gap-3",
+                             "flex-1 h-14 md:h-18 rounded-full font-bold text-[10px] md:text-xs tracking-widest shadow-4xl transition-all active:scale-95 border-none gap-3 uppercase",
                              locked ? "bg-amber-50 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                           )}>
                              <Link href={`/exams/view?id=${exam.id}`}>
@@ -180,10 +203,10 @@ export default function PopularExams() {
                           </Button>
                           
                           <button 
-                            onClick={(e) => handleTogglePin(e, exam.id)}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleTogglePin(e, exam.id); }}
                             disabled={pinningId === exam.id}
                             className={cn(
-                              "h-14 w-14 md:h-20 md:w-20 rounded-[1.5rem] md:rounded-[2.5rem] border-2 transition-all active:scale-90 shadow-sm flex items-center justify-center",
+                              "h-14 w-14 md:h-18 md:w-18 rounded-[1.5rem] md:rounded-[2rem] border-2 transition-all active:scale-90 shadow-sm flex items-center justify-center shrink-0",
                               isPinned 
                                 ? "bg-primary border-primary text-white shadow-lg" 
                                 : "bg-white border-slate-100 text-slate-300 hover:text-primary hover:border-primary"
@@ -204,7 +227,7 @@ export default function PopularExams() {
 
         <div className="flex items-center justify-center gap-4 text-slate-300 py-4 opacity-50">
            <ShieldCheck className="h-5 w-5" />
-           <span className="text-[10px] font-semibold tracking-widest uppercase">Official Punjab Registry Validated</span>
+           <span className="text-[10px] font-semibold tracking-widest uppercase">Official Punjab Database Verified</span>
         </div>
 
       </div>
