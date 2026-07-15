@@ -25,7 +25,10 @@ import {
   ArrowRight,
   ChevronDown,
   ChevronUp,
-  BarChart3
+  BarChart3,
+  BrainCircuit,
+  Sparkles,
+  Award
 } from "lucide-react"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs, limit } from "firebase/firestore"
@@ -34,11 +37,12 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
+import { rationalizeMockQuestion } from "@/ai/flows/rationalize-mock-question"
 
 /**
- * @fileOverview Official Result Hub v9.0.
- * REDESIGNED: Premium Clean White UI (Google Material + Apple Style).
- * REDUCED: Scrolling by 60% using focused review navigation.
+ * @fileOverview Official Result Hub v10.0.
+ * UPDATED: Integrated AI Deep Audit for personalized mistake correction.
+ * FIXED: Resolved BarChart3 ReferenceError.
  */
 
 export default function ResultClient() {
@@ -58,6 +62,10 @@ export default function ResultClient() {
   const [guestResult, setGuestResult] = useState<any>(null)
   const [showExplanation, setShowExplanation] = useState(false)
   
+  // AI States
+  const [isAiLoading, setIsAiLoading] = useState(false)
+  const [aiAuditResult, setAiAuditResult] = useState<any>(null)
+
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -150,6 +158,7 @@ export default function ResultClient() {
   useEffect(() => {
     setCurrentReviewIdx(0);
     setShowExplanation(false);
+    setAiAuditResult(null);
   }, [activeReviewFilter]);
 
   const performanceStatus = useMemo(() => {
@@ -166,6 +175,32 @@ export default function ResultClient() {
      const m = Math.floor(seconds / 60);
      const s = seconds % 60;
      return `${m}m ${s}s`;
+  };
+
+  const handleAiAudit = async () => {
+    const currentQ = filteredQuestions[currentReviewIdx];
+    if (!currentQ || isAiLoading) return;
+
+    setIsAiLoading(true);
+    setAiAuditResult(null);
+    try {
+      const userAnsIndex = sessionData.answers?.[currentQ.index];
+      const userAnsLabel = userAnsIndex !== undefined ? ['A','B','C','D'][userAnsIndex] : "Skipped";
+      const userAnsText = userAnsLabel !== "Skipped" ? currentQ[`option${userAnsLabel}English`] : "Not attempted";
+      
+      const res = await rationalizeMockQuestion({
+        questionText: currentQ.englishQuestion,
+        options: [currentQ.optionAEnglish, currentQ.optionBEnglish, currentQ.optionCEnglish, currentQ.optionDEnglish],
+        correctAnswer: currentQ[`option${currentQ.correctAnswer}English`],
+        userAnswer: userAnsText
+      });
+      setAiAuditResult(res);
+      setShowExplanation(true);
+    } catch (e) {
+      toast({ variant: "destructive", title: "AI Registry Offline", description: "The audit node is currently busy." });
+    } finally {
+      setIsAiLoading(false);
+    }
   };
 
   const handleShare = async () => {
@@ -249,7 +284,7 @@ export default function ResultClient() {
                  <SummaryMetric label="Correct" val={sessionData?.correctCount || 0} icon={<CheckCircle2 className="text-emerald-500" />} />
                  <SummaryMetric label="Wrong" val={sessionData?.wrongCount || 0} icon={<XCircle className="text-rose-500" />} />
                  <SummaryMetric label="Skipped" val={questions.length - (sessionData?.attemptedCount || 0)} icon={<AlertCircle className="text-slate-300" />} />
-                 <SummaryMetric label="Attempt Rate" val={`${Math.round(((sessionData?.attemptedCount || 0) / questions.length) * 100)}%`} icon={<BarChart3 className="text-primary" />} />
+                 <SummaryMetric label="Attempt Rate" val={`${Math.round(((sessionData?.attemptedCount || 0) / (questions.length || 1)) * 100)}%`} icon={<BarChart3 className="text-primary" />} />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-6">
@@ -323,41 +358,94 @@ export default function ResultClient() {
                             />
                           </div>
 
-                          <div className="pt-6 border-t border-slate-50 space-y-4">
-                             <Button 
-                                onClick={() => setShowExplanation(!showExplanation)}
-                                variant="ghost" 
-                                className="w-full justify-between h-12 text-[#2563EB] font-bold text-sm bg-blue-50/30 hover:bg-blue-50 px-6 rounded-xl"
-                             >
-                                {showExplanation ? "Hide Explanation" : "Read Full Explanation"}
-                                {showExplanation ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                             </Button>
+                          <div className="pt-6 border-t border-slate-50 flex flex-col gap-4">
+                             <div className="flex gap-3">
+                                <Button 
+                                  onClick={() => setShowExplanation(!showExplanation)}
+                                  variant="ghost" 
+                                  className="flex-1 justify-between h-12 text-slate-600 font-bold text-sm bg-slate-50 hover:bg-slate-100 px-6 rounded-xl"
+                                >
+                                  {showExplanation ? "Hide Logic" : "Read Explanation"}
+                                  {showExplanation ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                </Button>
+
+                                <Button 
+                                  onClick={handleAiAudit}
+                                  disabled={isAiLoading}
+                                  className="h-12 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 text-white rounded-xl shadow-lg gap-2 border-none active:scale-95"
+                                >
+                                  {isAiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <BrainCircuit className="h-4 w-4" />}
+                                  <span className="hidden sm:inline">AI Deep Audit</span>
+                                </Button>
+                             </div>
 
                              {showExplanation && (
                                 <motion.div 
                                    initial={{ height: 0, opacity: 0 }} 
                                    animate={{ height: 'auto', opacity: 1 }}
-                                   className="bg-slate-50 rounded-2xl p-6 md:p-8 space-y-6 animate-in fade-in"
+                                   className="space-y-6"
                                 >
-                                   <div className="space-y-4">
-                                      <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                         <Zap className="h-3 w-3" /> Solution Logic
-                                      </div>
-                                      <div className="prose prose-slate max-w-none text-slate-600 font-medium leading-relaxed space-y-6">
-                                         {filteredQuestions[currentReviewIdx].englishExplanation && (
-                                            <div className="space-y-2">
-                                               <p className="text-[10px] font-black text-[#2563EB] uppercase">English</p>
-                                               <p>{filteredQuestions[currentReviewIdx].englishExplanation}</p>
-                                            </div>
-                                         )}
-                                         {filteredQuestions[currentReviewIdx].punjabiExplanation && (
-                                            <div className="space-y-2 pt-4 border-t border-slate-200">
-                                               <p className="text-[10px] font-black text-[#2563EB] uppercase">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p>
-                                               <p className="text-lg">{filteredQuestions[currentReviewIdx].punjabiExplanation}</p>
-                                            </div>
-                                         )}
+                                   {/* STATIC EXPLANATION */}
+                                   <div className="bg-slate-50 rounded-2xl p-6 md:p-8 space-y-6">
+                                      <div className="space-y-4">
+                                         <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                            <Zap className="h-3 w-3" /> Registry Rationale
+                                         </div>
+                                         <div className="prose prose-slate max-w-none text-slate-600 font-medium leading-relaxed space-y-6">
+                                            {filteredQuestions[currentReviewIdx].englishExplanation && (
+                                               <div className="space-y-2">
+                                                  <p className="text-[10px] font-black text-[#2563EB] uppercase">English</p>
+                                                  <p>{filteredQuestions[currentReviewIdx].englishExplanation}</p>
+                                               </div>
+                                            )}
+                                            {filteredQuestions[currentReviewIdx].punjabiExplanation && (
+                                               <div className="space-y-2 pt-4 border-t border-slate-200">
+                                                  <p className="text-[10px] font-black text-[#2563EB] uppercase">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p>
+                                                  <p className="text-lg">{filteredQuestions[currentReviewIdx].punjabiExplanation}</p>
+                                               </div>
+                                            )}
+                                         </div>
                                       </div>
                                    </div>
+
+                                   {/* AI AUDIT RESULT */}
+                                   <AnimatePresence>
+                                      {aiAuditResult && (
+                                         <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="bg-blue-50/50 border border-blue-100 rounded-2xl p-6 md:p-8 space-y-6 relative overflow-hidden"
+                                         >
+                                            <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12"><BrainCircuit className="h-24 w-24 text-primary" /></div>
+                                            
+                                            <div className="flex items-center gap-3">
+                                               <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg">
+                                                  <Sparkles className="h-4 w-4 fill-white" />
+                                               </div>
+                                               <h4 className="font-black text-blue-900 uppercase tracking-tight">AI Diagnostic Node</h4>
+                                            </div>
+
+                                            <div className="space-y-6 relative z-10">
+                                               <div className="space-y-3">
+                                                  <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Personalized Rationalization</p>
+                                                  <p className="text-sm md:text-lg text-blue-900 font-medium leading-relaxed">{aiAuditResult.rationalization}</p>
+                                               </div>
+
+                                               <div className="pt-4 border-t border-blue-100/50">
+                                                  <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-3">Key Learning Nodes</p>
+                                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                     {aiAuditResult.keyLearningPoints?.map((pt: string, idx: number) => (
+                                                        <div key={idx} className="flex items-start gap-3 bg-white/50 p-3 rounded-xl border border-blue-50">
+                                                           <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                                                           <span className="text-xs md:text-sm text-blue-800 font-bold">{pt}</span>
+                                                        </div>
+                                                     ))}
+                                                  </div>
+                                               </div>
+                                            </div>
+                                         </motion.div>
+                                      )}
+                                   </AnimatePresence>
                                 </motion.div>
                              )}
                           </div>
@@ -379,7 +467,7 @@ export default function ResultClient() {
          <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-4">
             <Button 
                disabled={currentReviewIdx === 0} 
-               onClick={() => { setCurrentReviewIdx(currentReviewIdx - 1); setShowExplanation(false); }}
+               onClick={() => { setCurrentReviewIdx(currentReviewIdx - 1); setShowExplanation(false); setAiAuditResult(null); }}
                variant="ghost" 
                className="h-12 md:h-14 px-4 md:px-8 font-bold text-xs gap-2 rounded-xl"
             >
@@ -395,7 +483,7 @@ export default function ResultClient() {
 
             <Button 
                disabled={currentReviewIdx >= filteredQuestions.length - 1} 
-               onClick={() => { setCurrentReviewIdx(currentReviewIdx + 1); setShowExplanation(false); }}
+               onClick={() => { setCurrentReviewIdx(currentReviewIdx + 1); setShowExplanation(false); setAiAuditResult(null); }}
                className="h-12 md:h-14 px-4 md:px-8 font-bold text-xs gap-2 rounded-xl bg-slate-900 text-white hover:bg-black"
             >
                <span className="hidden sm:inline">Next</span> <ChevronRight className="h-5 w-5" />
