@@ -43,8 +43,9 @@ import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v12.0.
- * REDESIGNED: Premium White Layout inspired by Testbook.
+ * @fileOverview Official Result Hub v12.1.
+ * FIXED: Updated question loading to check both mcqBank and legacy questions collections.
+ * FIXED: Hardened filteredQuestions logic to handle string vs number keys in sessionData.answers.
  */
 
 export default function ResultClient() {
@@ -127,17 +128,33 @@ export default function ResultClient() {
       try {
         let mockSnap = await getDoc(doc(db, "mocks", mockId))
         if (!mockSnap.exists()) mockSnap = await getDoc(doc(db, "daily_quizzes", mockId));
+        
         if (mockSnap.exists()) {
           const mData = mockSnap.data();
           setMockData(mData);
           const questionIds: string[] = mData.questionIds || []
+          
           if (questionIds.length > 0) {
             const fetched: any[] = []
             const chunks = []
             for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
-            const chunkSnaps = await Promise.all(chunks.map((chunk: string[]) => getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk)))))
-            chunkSnaps.forEach(snap => snap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id })))
-            setQuestions(questionIds.map((id: string) => fetched.find((q: any) => q.id === id)).filter(Boolean))
+            
+            for (const chunk of chunks) {
+              const [mcqSnap, legacySnap] = await Promise.all([
+                 getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
+                 getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+              ]);
+
+              mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
+              legacySnap.docs.forEach(d => {
+                 if (!fetched.find(f => f.id === d.id)) {
+                    fetched.push({ ...d.data(), id: d.id });
+                 }
+              });
+            }
+
+            const mappedQuestions = questionIds.map((id: string) => fetched.find((q: any) => q.id === id)).filter(Boolean);
+            setQuestions(mappedQuestions);
           }
         }
       } catch (e) {
@@ -148,14 +165,17 @@ export default function ResultClient() {
   }, [db, mockId]);
 
   const filteredQuestions = useMemo(() => {
-    if (!sessionData) return [];
+    if (!sessionData || !questions.length) return [];
     return questions.map((q: any, i: number) => ({ ...q, index: i })).filter((q: any) => {
-      const ans = sessionData.answers?.[q.index];
-      const isCorrect = ans !== undefined && ['A','B','C','D'][ans] === q.correctAnswer;
+      // Use both numeric and string indices to ensure cross-platform compatibility
+      const ans = sessionData.answers?.[q.index] ?? sessionData.answers?.[String(q.index)];
+      const hasAnswer = ans !== undefined && ans !== null;
+      const isCorrect = hasAnswer && ['A','B','C','D'][ans] === q.correctAnswer;
+      
       if (activeReviewFilter === 'ALL') return true;
       if (activeReviewFilter === 'CORRECT') return isCorrect;
-      if (activeReviewFilter === 'WRONG') return ans !== undefined && !isCorrect;
-      if (activeReviewFilter === 'SKIPPED') return ans === undefined || ans === null;
+      if (activeReviewFilter === 'WRONG') return hasAnswer && !isCorrect;
+      if (activeReviewFilter === 'SKIPPED') return !hasAnswer;
       return true;
     });
   }, [questions, sessionData, activeReviewFilter]);
@@ -189,8 +209,8 @@ export default function ResultClient() {
     setIsAiLoading(true);
     setAiAuditResult(null);
     try {
-      const userAnsIndex = sessionData.answers?.[currentQ.index];
-      const userAnsLabel = userAnsIndex !== undefined ? ['A','B','C','D'][userAnsIndex] : "Skipped";
+      const userAnsIndex = sessionData.answers?.[currentQ.index] ?? sessionData.answers?.[String(currentQ.index)];
+      const userAnsLabel = (userAnsIndex !== undefined && userAnsIndex !== null) ? ['A','B','C','D'][userAnsIndex] : "Skipped";
       const userAnsText = userAnsLabel !== "Skipped" ? currentQ[`option${userAnsLabel}English`] : "Not attempted";
       
       const res = await rationalizeMockQuestion({
@@ -413,7 +433,7 @@ export default function ResultClient() {
                              </div>
                              
                              <ReviewStatusBadge 
-                                userAns={sessionData.answers?.[filteredQuestions[currentReviewIdx].index]} 
+                                userAns={sessionData.answers?.[filteredQuestions[currentReviewIdx].index] ?? sessionData.answers?.[String(filteredQuestions[currentReviewIdx].index)]} 
                                 correctAns={filteredQuestions[currentReviewIdx].correctAnswer} 
                              />
                           </div>
@@ -423,7 +443,7 @@ export default function ResultClient() {
                                question={filteredQuestions[currentReviewIdx]} 
                                language={mockData?.languageMode || 'ENGLISH_PUNJABI'} 
                                showSolution={true}
-                               selectedAnswer={sessionData.answers?.[filteredQuestions[currentReviewIdx].index]}
+                               selectedAnswer={sessionData.answers?.[filteredQuestions[currentReviewIdx].index] ?? sessionData.answers?.[String(filteredQuestions[currentReviewIdx].index)]}
                                className="p-0 shadow-none border-none bg-transparent"
                             />
                           </div>
@@ -614,7 +634,7 @@ function FilterBtn({ active, onClick, label, count, color = "bg-primary" }: any)
 }
 
 function ReviewStatusBadge({ userAns, correctAns }: any) {
-   const isCorrect = userAns !== undefined && ['A','B','C','D'][userAns] === correctAns;
+   const isCorrect = userAns !== undefined && userAns !== null && ['A','B','C','D'][userAns] === correctAns;
    const isSkipped = userAns === undefined || userAns === null;
 
    if (isCorrect) return <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Correct</Badge>;
