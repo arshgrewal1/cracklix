@@ -1,5 +1,3 @@
-'use client';
-
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -23,9 +21,32 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v71.1 [Scroll Hardened].
- * FIXED: Removed fixed overflow-x-hidden from body class to ensure native scroll container detection.
+ * @fileOverview Root Layout v72.0 [Production Hardened].
+ * REFACTORED: Converted to Server Component for Next.js 15 optimization.
+ * UPDATED: Integrated official Metadata and Viewport registry.
  */
+
+export const metadata: Metadata = {
+  title: "Cracklix | Punjab's Smart Mock Test Platform",
+  description: "Punjab's most trusted government exam preparation platform.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Cracklix",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+};
 
 export default function RootLayout({
   children,
