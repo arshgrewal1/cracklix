@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, useRef } from "react"
@@ -44,8 +43,8 @@ import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v11.2.
- * UPDATED: Redesigned Action Hub buttons to match high-fidelity pill geometry and brand colors.
+ * @fileOverview Official Result Hub v12.0.
+ * REDESIGNED: Premium White Layout inspired by Testbook.
  */
 
 export default function ResultClient() {
@@ -136,7 +135,7 @@ export default function ResultClient() {
             const fetched: any[] = []
             const chunks = []
             for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
-            const chunkSnaps = await Promise.all(chunks.map((chunk: string[]) => getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))))
+            const chunkSnaps = await Promise.all(chunks.map((chunk: string[]) => getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk)))))
             chunkSnaps.forEach(snap => snap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id })))
             setQuestions(questionIds.map((id: string) => fetched.find((q: any) => q.id === id)).filter(Boolean))
           }
@@ -239,7 +238,7 @@ export default function ResultClient() {
         await navigator.share({
           files: [file],
           title: 'My Mock Test Result',
-          text: `I scored ${sessionData.accuracy}% on the ${mockData?.title} test!`
+          text: `🏆 I scored ${sessionData.accuracy}% on the ${mockData?.title} test!`
         });
       } else {
         const url = URL.createObjectURL(pdfBlob);
@@ -305,12 +304,12 @@ export default function ResultClient() {
         
         {/* 2. SUMMARY CARD */}
         <section className="animate-in fade-in slide-in-from-top-4 duration-500">
-           <Card className="border-none shadow-[0_8px_40px_rgba(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white p-6 md:p-12 text-center space-y-8 border border-slate-50">
+           <Card className="border-none shadow-[0_8px_40px_rgba(0,0,0,0.04)] rounded-[2rem] overflow-hidden bg-white p-6 md:p-12 text-center space-y-8 border border-slate-50">
               <div className="space-y-2">
-                 <div className="flex items-center justify-center gap-2 text-emerald-500 font-bold text-sm">
-                    <CheckCircle2 className="h-4 w-4" /> 🎉 Mock Test Completed
+                 <div className="flex items-center justify-center gap-2 text-emerald-500 font-bold text-sm uppercase tracking-widest">
+                    <CheckCircle2 className="h-4 w-4" /> Mock Test Completed
                  </div>
-                 <h1 className="text-xl md:text-3xl font-black tracking-tight">{mockData?.title}</h1>
+                 <h1 className="text-xl md:text-4xl font-black tracking-tight">{mockData?.title}</h1>
                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{new Date(sessionData?.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
               </div>
 
@@ -319,16 +318,17 @@ export default function ResultClient() {
                     <circle cx="50%" cy="50%" r="45%" className="stroke-slate-50 fill-none" strokeWidth="12" />
                     <motion.circle 
                        cx="50%" cy="50%" r="45%" 
-                       className="stroke-primary fill-none" 
+                       className="stroke-[#2563EB] fill-none" 
                        strokeWidth="12" 
                        strokeLinecap="round"
-                       initial={{ strokeDasharray: "0 1000" }}
-                       animate={{ strokeDasharray: `${(sessionData?.accuracy || 0) * 2.82} 1000` }}
+                       initial={{ strokeDashoffset: 282.6 }}
+                       animate={{ strokeDashoffset: 282.6 - (282.6 * (sessionData?.accuracy || 0) / 100) }}
                        transition={{ duration: 1.5, ease: "easeOut" }}
+                       style={{ strokeDasharray: 282.6 }}
                     />
                  </svg>
                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-5xl md:text-7xl font-black tracking-tighter">{sessionData?.accuracy || 0}%</span>
+                    <span className="text-5xl md:text-7xl font-black tracking-tighter tabular-nums">{sessionData?.accuracy || 0}%</span>
                     <span className={cn("text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mt-1", performanceStatus.color)}>{performanceStatus.label}</span>
                  </div>
               </div>
@@ -336,15 +336,14 @@ export default function ResultClient() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
                  <SummaryMetric label="Score" val={(sessionData?.score || 0).toFixed(1)} icon={<Zap className="text-blue-500" />} />
                  <SummaryMetric label="Accuracy" val={`${sessionData?.accuracy || 0}%`} icon={<Target className="text-emerald-500" />} />
-                 <SummaryMetric label="Rank" val={user ? `#${merit.rank}` : "---"} icon={<Trophy className="text-amber-500" />} />
-                 <SummaryMetric label="Time Taken" val={formatTime(sessionData?.timeTaken || 0)} icon={<Clock className="text-slate-400" />} />
+                 <SummaryMetric label="Rank" val={user ? `#${merit.rank}` : "Guest"} icon={<Trophy className="text-amber-500" />} />
+                 <SummaryMetric label="Time" val={formatTime(sessionData?.timeTaken || 0)} icon={<Clock className="text-slate-400" />} />
                  <SummaryMetric label="Correct" val={sessionData?.correctCount || 0} icon={<CheckCircle2 className="text-emerald-500" />} />
                  <SummaryMetric label="Wrong" val={sessionData?.wrongCount || 0} icon={<XCircle className="text-rose-500" />} />
                  <SummaryMetric label="Skipped" val={questions.length - (sessionData?.attemptedCount || 0)} icon={<AlertCircle className="text-slate-300" />} />
-                 <SummaryMetric label="Attempt Rate" val={`${Math.round(((sessionData?.attemptedCount || 0) / (questions.length || 1)) * 100)}%`} icon={<BarChart3 className="text-primary" />} />
+                 <SummaryMetric label="Rate" val={`${Math.round(((sessionData?.attemptedCount || 0) / (questions.length || 1)) * 100)}%`} icon={<BarChart3 className="text-primary" />} />
               </div>
 
-              {/* ACTION BUTTONS: REDESIGNED TO PILL SHAPE AS PER REFERENCE */}
               <div className="flex flex-col gap-4 pt-6 max-w-md mx-auto w-full">
                  <Button 
                    onClick={handleSharePdf} 
@@ -369,7 +368,7 @@ export default function ResultClient() {
            </Card>
         </section>
 
-        {/* 3. PERFORMANCE BARS */}
+        {/* 3. PERFORMANCE GRID */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
            <PerformanceBar label="Accuracy" val={sessionData?.accuracy || 0} color="bg-emerald-500" />
            <PerformanceBar label="Speed" val={mockData?.duration > 0 ? Math.min(100, Math.round(((mockData.duration * 60) / (sessionData?.timeTaken || 1)) * 50)) : 0} color="bg-blue-500" />
