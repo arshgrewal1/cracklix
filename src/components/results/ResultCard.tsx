@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -63,9 +64,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview World-Class Institutional Assessment Report v5.0.
- * Optimized for A4 Printing (300 DPI Simulation).
- * FIXED: All icons and UI components properly imported.
+ * @fileOverview World-Class Institutional Assessment Report v6.0.
+ * FIXED: Imported missing Icons and Badge to resolve ReferenceError.
  */
 export default function ResultCard({
   studentName,

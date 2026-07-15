@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState, useMemo, useEffect, useRef } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -43,8 +44,9 @@ import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v13.0.
- * UPDATED: Integrated Multi-Page Report Data Aggregation for Subject/Topic Analysis.
+ * @fileOverview Official Result Hub v14.0.
+ * FIXED: Resolved ReferenceError by correctly scoping answers through sessionData.
+ * FIXED: Hardened loading state to prevent infinite spinner.
  */
 
 export default function ResultClient() {
@@ -119,8 +121,12 @@ export default function ResultClient() {
 
   useEffect(() => {
     async function loadQuestions() {
-      if (!db || !mockId) return;
+      if (!db || !mockId) {
+        setLoadingQuestions(false);
+        return;
+      }
       try {
+        setLoadingQuestions(true);
         let mockSnap = await getDoc(doc(db, "mocks", mockId))
         if (!mockSnap.exists()) mockSnap = await getDoc(doc(db, "daily_quizzes", mockId));
         
@@ -159,7 +165,6 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  // ANALYTICAL AGGREGATION HUB
   const analysis = useMemo(() => {
      if (!sessionData || !questions.length) return { subjects: [], topics: [], difficulty: { easy: 0, medium: 0, hard: 0 } };
      
@@ -213,11 +218,10 @@ export default function ResultClient() {
     });
   }, [questions, sessionData, activeReviewFilter]);
 
-  useEffect(() => {
-    setCurrentReviewIdx(0);
-    setShowExplanation(false);
-    setAiAuditResult(null);
-  }, [activeReviewFilter]);
+  const answeredCount = useMemo(() => {
+    if (!sessionData?.answers) return 0;
+    return Object.values(sessionData.answers).filter(a => a !== null && a !== undefined).length;
+  }, [sessionData]);
 
   const handleSharePdf = async () => {
     if (isGeneratingPdf || !sessionData) return;
@@ -253,11 +257,6 @@ export default function ResultClient() {
       toast({ variant: "destructive", title: "PDF Failure" });
     } finally { setIsGeneratingPdf(false); }
   };
-
-  const answeredCount = useMemo(() => {
-    if (!sessionData?.answers) return 0;
-    return Object.values(sessionData.answers).filter(a => a !== null && a !== undefined).length;
-  }, [sessionData?.answers]);
 
   const formatTime = (seconds: number) => {
      const m = Math.floor(seconds / 60);
