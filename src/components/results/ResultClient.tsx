@@ -44,8 +44,8 @@ import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v11.1.
- * FIXED: Resolved ReferenceError for 'answers' by correctly accessing sessionData.
+ * @fileOverview Official Result Hub v11.2.
+ * UPDATED: Redesigned Action Hub buttons to match high-fidelity pill geometry and brand colors.
  */
 
 export default function ResultClient() {
@@ -216,7 +216,6 @@ export default function ResultClient() {
     toast({ title: "Generating Document", description: "Synthesizing performance certificate..." });
 
     try {
-      // 1. Render ResultCard to Image
       const dataUrl = await toPng(shareCardRef.current, {
         cacheBust: true,
         width: 1080,
@@ -224,7 +223,6 @@ export default function ResultClient() {
         pixelRatio: 1
       });
 
-      // 2. Wrap in PDF
       const pdf = new jsPDF({
         orientation: 'p',
         unit: 'px',
@@ -235,7 +233,6 @@ export default function ResultClient() {
       const pdfBlob = pdf.output('blob');
       const fileName = `Cracklix_Result_${mockData?.title?.replace(/\s+/g, '_')}.pdf`;
 
-      // 3. Share via Web Share API if possible
       const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
       
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -245,7 +242,6 @@ export default function ResultClient() {
           text: `I scored ${sessionData.accuracy}% on the ${mockData?.title} test!`
         });
       } else {
-        // Fallback to direct download
         const url = URL.createObjectURL(pdfBlob);
         const link = document.createElement('a');
         link.href = url;
@@ -348,12 +344,26 @@ export default function ResultClient() {
                  <SummaryMetric label="Attempt Rate" val={`${Math.round(((sessionData?.attemptedCount || 0) / (questions.length || 1)) * 100)}%`} icon={<BarChart3 className="text-primary" />} />
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                 <Button onClick={handleSharePdf} disabled={isGeneratingPdf} className="flex-1 h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-xl gap-2 border-none">
-                    {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} Share PDF Result
+              {/* ACTION BUTTONS: REDESIGNED TO PILL SHAPE AS PER REFERENCE */}
+              <div className="flex flex-col gap-4 pt-6 max-w-md mx-auto w-full">
+                 <Button 
+                   onClick={handleSharePdf} 
+                   disabled={isGeneratingPdf} 
+                   className="w-full h-14 md:h-16 bg-[#2563EB] hover:bg-blue-700 text-white font-[900] uppercase text-[12px] md:text-sm tracking-[0.1em] rounded-full shadow-[0_15px_30px_rgba(37,99,235,0.25)] gap-3 border-none transition-all active:scale-95"
+                 >
+                    {isGeneratingPdf ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileText className="h-5 w-5" />} 
+                    Share PDF Result
                  </Button>
-                 <Button variant="outline" className="flex-1 h-14 rounded-xl border-slate-200 text-slate-600 font-black uppercase text-[10px] tracking-widest" asChild>
-                    <Link href={`/mocks/instructions?id=${mockId}`}><RefreshCw className="h-4 w-4 mr-2" /> Re-attempt</Link>
+                 
+                 <Button 
+                   asChild 
+                   variant="outline" 
+                   className="w-full h-14 md:h-16 rounded-full border-2 border-slate-100 bg-white text-[#475569] font-[900] uppercase text-[12px] md:text-sm tracking-[0.1em] shadow-sm gap-3 transition-all active:scale-95"
+                 >
+                    <Link href={`/mocks/instructions?id=${mockId}`}>
+                       <RefreshCw className="h-5 w-5" /> 
+                       Re-attempt
+                    </Link>
                  </Button>
               </div>
            </Card>
@@ -384,7 +394,7 @@ export default function ResultClient() {
                  <motion.div 
                     key={filteredQuestions[currentReviewIdx]?.id}
                     initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
                  >
