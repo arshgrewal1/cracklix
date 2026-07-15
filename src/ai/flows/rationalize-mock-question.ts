@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview An AI-powered tutor that provides step-by-step explanations for mock exam questions.
@@ -31,6 +30,7 @@ export async function rationalizeMockQuestion(input: RationalizeMockQuestionInpu
 
 const prompt = ai.definePrompt({
   name: 'rationalizeMockQuestionPrompt',
+  model: 'googleai/gemini-1.5-flash',
   input: {schema: RationalizeMockQuestionInputSchema},
   output: {schema: RationalizeMockQuestionOutputSchema},
   prompt: `You are an expert tutor providing rationalizations for competitive exam questions.
