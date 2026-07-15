@@ -5,20 +5,22 @@ import { useMemo, useEffect, useState } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, where, doc, deleteDoc } from "firebase/firestore"
+import { collection, query, where, doc, deleteDoc, getDoc } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
-import { Bookmark, Search, Trash2, ChevronRight, BookOpen, ShieldCheck, Languages, Zap, X, AlertCircle } from "lucide-react"
+import { Bookmark, Search, Trash2, ChevronRight, BookOpen, ShieldCheck, Languages, Zap, X, AlertCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Official Bookmarks Hub (Unified Persistence).
- * FIXED: Removed 'manual' ID fallback to prevent 404 errors.
+ * @fileOverview Official Bookmarks Hub v4.0.
+ * FIXED: Replaced redirection to practice with a direct solution preview modal.
  */
 
 export default function BookmarksPage() {
@@ -28,6 +30,11 @@ export default function BookmarksPage() {
   const { user, loading: authLoading } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
   
+  // Modal State
+  const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
+  const [isViewing, setIsViewing] = useState(false);
+  const [loadingNode, setLoadingNode] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
@@ -44,13 +51,32 @@ export default function BookmarksPage() {
        !term || 
        b.questionText?.toLowerCase().includes(term) || 
        b.subject?.toLowerCase().includes(term)
-    );
+    ).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [rawBookmarks, searchTerm]);
 
   const handleDelete = async (id: string) => {
      if (!db) return;
      await deleteDoc(doc(db, "bookmarks", id));
   }
+
+  const handleViewSolution = async (questionId: string) => {
+    if (!db || !questionId) return;
+    setLoadingNode(true);
+    try {
+      // Audit both collections for the question node
+      let qSnap = await getDoc(doc(db, "mcqBank", questionId));
+      if (!qSnap.exists()) {
+        qSnap = await getDoc(doc(db, "questions", questionId));
+      }
+
+      if (qSnap.exists()) {
+        setSelectedQuestion(qSnap.data());
+        setIsViewing(true);
+      }
+    } finally {
+      setLoadingNode(false);
+    }
+  };
 
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
@@ -124,12 +150,21 @@ export default function BookmarksPage() {
                           <Button variant="outline" className="flex-1 sm:flex-none rounded-xl border-slate-100 text-[10px] font-black uppercase h-10 px-6 gap-2">
                              <Languages className="h-4 w-4" /> Bilingual
                           </Button>
-                          <Button asChild variant="ghost" className="flex-1 sm:flex-none text-primary font-black uppercase text-[10px] gap-2">
-                             <Link href={b.mockId ? `/mocks/instructions?id=${b.mockId}` : "/mocks"}><BookOpen className="h-4 w-4" /> View Solution</Link>
+                          <Button 
+                            onClick={() => handleViewSolution(b.questionId)} 
+                            variant="ghost" 
+                            className="flex-1 sm:flex-none text-primary font-black uppercase text-[10px] gap-2"
+                          >
+                             {loadingNode ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} 
+                             View Solution
                           </Button>
                        </div>
-                       <Button asChild variant="ghost" className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all hidden sm:flex items-center justify-center">
-                          <Link href={b.mockId ? `/mocks/instructions?id=${b.mockId}` : "/mocks"}><ChevronRight className="h-5 w-5" /></Link>
+                       <Button 
+                        onClick={() => handleViewSolution(b.questionId)}
+                        variant="ghost" 
+                        className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all hidden sm:flex items-center justify-center"
+                       >
+                          <ChevronRight className="h-5 w-5" />
                        </Button>
                     </div>
                   </CardContent>
@@ -140,7 +175,7 @@ export default function BookmarksPage() {
                 {searchTerm ? <Search className="h-16 w-16 mb-6 opacity-10" /> : <Bookmark className="h-16 w-16 mb-6 opacity-10" />}
                 <p className="font-black font-headline text-xl text-[#0F172A]">{searchTerm ? 'No matching nodes' : 'Registry empty'}</p>
                 <p className="text-sm font-bold opacity-50 mt-1 uppercase tracking-widest text-center px-6">
-                  {searchTerm ? 'Try a different search keyword.' : 'Save items across the platform to see them here.'}
+                  {searchTerm ? 'Try a different search keyword.' : 'Save items across the platform to study them later.'}
                 </p>
                 {!searchTerm && (
                    <Button asChild className="mt-8 bg-primary rounded-full h-12 px-8">
@@ -153,6 +188,32 @@ export default function BookmarksPage() {
         </div>
       </main>
       <Footer />
+
+      {/* SOLUTION PREVIEW DIALOG */}
+      <Dialog open={isViewing} onOpenChange={setIsViewing}>
+        <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto rounded-[2rem] md:rounded-[3.5rem] bg-white p-0 border-none shadow-5xl text-left flex flex-col">
+          <div className="h-2 w-full bg-primary shrink-0" />
+          <DialogHeader className="px-8 md:px-12 py-6 border-b border-slate-50 shrink-0">
+             <DialogTitle className="text-xl md:text-3xl font-black uppercase text-[#0F172A]">Official Solution</DialogTitle>
+             <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Verified Institutional Rationale</DialogDescription>
+          </DialogHeader>
+          <div className="px-6 md:px-12 py-8 flex-1">
+             {selectedQuestion && (
+                <QuestionRenderer 
+                  question={selectedQuestion} 
+                  language="ENGLISH_PUNJABI" 
+                  showSolution={true} 
+                  className="p-0 shadow-none border-none bg-transparent"
+                />
+             )}
+          </div>
+          <div className="p-6 md:p-8 bg-slate-50 border-t border-slate-100 flex justify-center shrink-0">
+             <Button onClick={() => setIsViewing(false)} className="rounded-full px-10 bg-[#0F172A] hover:bg-black font-black uppercase text-[10px] tracking-widest">
+                Close Preview
+             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

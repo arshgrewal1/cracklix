@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, where } from "firebase/firestore"
+import { collection, query, where, doc, getDoc } from "firebase/firestore"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { 
   Bookmark, 
@@ -20,19 +20,22 @@ import {
   Sparkles,
   ShieldAlert,
   GraduationCap,
-  BookOpen
+  BookOpen,
+  Loader2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
+import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Official Revision & Study Hub.
- * FIXED: Removed 'manual' ID fallback and hardened navigation logic.
+ * @fileOverview Official Revision & Study Hub v5.0.
+ * FIXED: Unified solution preview modal for consistency with Saved page.
  */
 
 export default function RevisionHub() {
@@ -41,6 +44,11 @@ export default function RevisionHub() {
   const pathname = usePathname()
   const { user, loading: authLoading } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
+
+  // Modal State
+  const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
+  const [isViewing, setIsViewing] = useState(false);
+  const [loadingNode, setLoadingNode] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -82,6 +90,24 @@ export default function RevisionHub() {
     if (!bookmarks) return []
     return bookmarks.filter(b => b.questionText?.toLowerCase().includes(searchTerm.toLowerCase()))
   }, [bookmarks, searchTerm])
+
+  const handleViewSolution = async (questionId: string) => {
+    if (!db || !questionId) return;
+    setLoadingNode(true);
+    try {
+      let qSnap = await getDoc(doc(db, "mcqBank", questionId));
+      if (!qSnap.exists()) {
+        qSnap = await getDoc(doc(db, "questions", questionId));
+      }
+
+      if (qSnap.exists()) {
+        setSelectedQuestion(qSnap.data());
+        setIsViewing(true);
+      }
+    } finally {
+      setLoadingNode(false);
+    }
+  };
 
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
@@ -143,7 +169,7 @@ export default function RevisionHub() {
                         <div className="flex items-center justify-between">
                            <div className="flex items-center gap-4">
                               <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase tracking-widest px-3">
-                                 {b.subjectId || 'General Hub'}
+                                 {b.subject || 'General Hub'}
                               </Badge>
                               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Saved {new Date(b.timestamp).toLocaleDateString()}</span>
                            </div>
@@ -161,12 +187,20 @@ export default function RevisionHub() {
                               <Button variant="outline" className="rounded-xl border-slate-100 text-[10px] font-black uppercase h-10 px-6 gap-2">
                                  <Languages className="h-4 w-4" /> Multi-Language
                               </Button>
-                              <Button asChild variant="ghost" className="text-primary font-black uppercase text-[10px] gap-2">
-                                 <Link href={b.mockId ? `/mocks/instructions?id=${b.mockId}` : "/mocks"}><BookOpen className="h-4 w-4" /> View Solution</Link>
+                              <Button 
+                                onClick={() => handleViewSolution(b.questionId)} 
+                                variant="ghost" 
+                                className="text-primary font-black uppercase text-[10px] gap-2"
+                              >
+                                 {loadingNode ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} View Solution
                               </Button>
                            </div>
-                           <Button asChild variant="ghost" className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all shadow-sm flex items-center justify-center">
-                              <Link href={b.mockId ? `/mocks/instructions?id=${b.mockId}` : "/mocks"}><ChevronRight className="h-5 w-5" /></Link>
+                           <Button 
+                            onClick={() => handleViewSolution(b.questionId)} 
+                            variant="ghost" 
+                            className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all shadow-sm flex items-center justify-center"
+                           >
+                              <ChevronRight className="h-5 w-5" />
                            </Button>
                         </div>
                       </CardContent>
@@ -211,6 +245,32 @@ export default function RevisionHub() {
         </div>
       </main>
       <Footer />
+
+      {/* SOLUTION PREVIEW DIALOG */}
+      <Dialog open={isViewing} onOpenChange={setIsViewing}>
+        <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto rounded-[2rem] md:rounded-[3.5rem] bg-white p-0 border-none shadow-5xl text-left flex flex-col">
+          <div className="h-2 w-full bg-[#0F172A] shrink-0" />
+          <DialogHeader className="px-8 md:px-12 py-6 border-b border-slate-50 shrink-0">
+             <DialogTitle className="text-xl md:text-3xl font-black uppercase text-[#0F172A]">Official Solution</DialogTitle>
+             <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Verified Institutional Rationale</DialogDescription>
+          </DialogHeader>
+          <div className="px-6 md:px-12 py-8 flex-1">
+             {selectedQuestion && (
+                <QuestionRenderer 
+                  question={selectedQuestion} 
+                  language="ENGLISH_PUNJABI" 
+                  showSolution={true} 
+                  className="p-0 shadow-none border-none bg-transparent"
+                />
+             )}
+          </div>
+          <div className="p-6 md:p-8 bg-slate-50 border-t border-slate-100 flex justify-center shrink-0">
+             <Button onClick={() => setIsViewing(false)} className="rounded-full px-10 bg-[#0F172A] hover:bg-black font-black uppercase text-[10px] tracking-widest">
+                Close Preview
+             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
