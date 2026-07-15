@@ -22,6 +22,7 @@ import {
   Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface SubPerformance {
   name: string;
@@ -199,7 +200,7 @@ export default function ResultCard({
         className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
-        <div className="absolute top-0 left-0 right-0 h-4 bg-[#1E3A8A]" />
+        <div className="absolute top-0 right-0 h-4 bg-[#1E3A8A]" />
         
         <div className="px-16 pt-16 space-y-12">
            {/* HEADER */}
@@ -208,7 +209,9 @@ export default function ResultCard({
                  <h2 className="text-4xl font-black tracking-tighter text-[#1E3A8A] uppercase">Performance Analysis</h2>
                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Deep-Dive Assessment Report</p>
               </div>
-              <Logo variant="light" className="h-10 w-auto" align="right" />
+              <div className="h-10 relative aspect-[3/1]">
+                 <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-full w-auto" />
+              </div>
            </div>
 
            {/* SECTION 1: AI SUMMARY */}
@@ -335,7 +338,7 @@ function ReportMetric({ label, val, icon, color, bg }: any) {
    return (
       <div className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-md flex flex-col items-center justify-center text-center space-y-4 group hover:border-primary/20 transition-all">
          <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shadow-inner transition-transform group-hover:scale-110", bg, color)}>
-            {React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6" })}
+            {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6" }) : null}
          </div>
          <div className="space-y-1">
             <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[8px]">{label}</p>
@@ -403,9 +406,4 @@ function ImproveNode({ label }: { label: string }) {
          <AlertCircle className="h-4 w-4 text-rose-500" />
          <span className="text-xs font-bold text-rose-900">{label}</span>
       </div>
-   )
-}
-
-function Logo({ variant, className, align }: any) {
-   return <img src="/logo/cracklix-logo-dark.png" alt="Logo" className={cn("h-10", className)} />;
 }
