@@ -44,8 +44,8 @@ import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v11.0.
- * UPDATED: Integrated high-fidelity PDF sharing engine.
+ * @fileOverview Official Result Hub v11.1.
+ * FIXED: Resolved ReferenceError for 'answers' by correctly accessing sessionData.
  */
 
 export default function ResultClient() {
@@ -262,7 +262,10 @@ export default function ResultClient() {
     }
   };
 
-  const answeredCount = useMemo(() => Object.values(answers || {}).filter(a => a !== null && a !== undefined).length, []);
+  const answeredCount = useMemo(() => {
+    if (!sessionData?.answers) return 0;
+    return Object.values(sessionData.answers).filter(a => a !== null && a !== undefined).length;
+  }, [sessionData?.answers]);
 
   if (!mounted || (resultLoading && user) || (loadingQuestions && questions.length === 0)) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
@@ -609,4 +612,3 @@ function ReviewStatusBadge({ userAns, correctAns }: any) {
    if (isSkipped) return <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Skipped</Badge>;
    return <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Wrong</Badge>;
 }
-
