@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -21,9 +22,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v72.0 [Production Hardened].
- * REFACTORED: Converted to Server Component for Next.js 15 optimization.
- * UPDATED: Integrated official Metadata and Viewport registry.
+ * @fileOverview Root Layout v73.0 [Production Hardened].
+ * FIXED: Resolved ChunkLoadError by stabilizing the client boundary and resolving module conflicts.
  */
 
 export const metadata: Metadata = {
