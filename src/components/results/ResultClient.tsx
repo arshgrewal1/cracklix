@@ -340,8 +340,8 @@ export default function ResultClient() {
                  <SummaryMetric label="Time" val={formatTime(sessionData?.timeTaken || 0)} icon={<Clock className="text-slate-400" />} />
                  <SummaryMetric label="Correct" val={sessionData?.correctCount || 0} icon={<CheckCircle2 className="text-emerald-500" />} />
                  <SummaryMetric label="Wrong" val={sessionData?.wrongCount || 0} icon={<XCircle className="text-rose-500" />} />
-                 <SummaryMetric label="Skipped" val={questions.length - (sessionData?.attemptedCount || 0)} icon={<AlertCircle className="text-slate-300" />} />
-                 <SummaryMetric label="Rate" val={`${Math.round(((sessionData?.attemptedCount || 0) / (questions.length || 1)) * 100)}%`} icon={<BarChart3 className="text-primary" />} />
+                 <SummaryMetric label="Skipped" val={Math.max(0, questions.length - answeredCount)} icon={<AlertCircle className="text-slate-300" />} />
+                 <SummaryMetric label="Rate" val={`${Math.round((answeredCount / (questions.length || 1)) * 100)}%`} icon={<BarChart3 className="text-primary" />} />
               </div>
 
               <div className="flex flex-col gap-4 pt-6 max-w-md mx-auto w-full">
@@ -372,7 +372,7 @@ export default function ResultClient() {
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
            <PerformanceBar label="Accuracy" val={sessionData?.accuracy || 0} color="bg-emerald-500" />
            <PerformanceBar label="Speed" val={mockData?.duration > 0 ? Math.min(100, Math.round(((mockData.duration * 60) / (sessionData?.timeTaken || 1)) * 50)) : 0} color="bg-blue-500" />
-           <PerformanceBar label="Completion" val={questions.length > 0 ? Math.round(((sessionData?.attemptedCount || 0) / questions.length) * 100) : 0} color="bg-primary" />
+           <PerformanceBar label="Completion" val={questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0} color="bg-primary" />
            <PerformanceBar label="Percentile" val={merit.percentile} color="bg-amber-500" />
         </section>
 
@@ -382,7 +382,7 @@ export default function ResultClient() {
               <FilterBtn active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL')} label="All" count={questions.length} />
               <FilterBtn active={activeReviewFilter === 'CORRECT'} onClick={() => setActiveReviewFilter('CORRECT')} label="Correct" count={sessionData?.correctCount || 0} color="bg-emerald-500" />
               <FilterBtn active={activeReviewFilter === 'WRONG'} onClick={() => setActiveReviewFilter('WRONG')} label="Wrong" count={sessionData?.wrongCount || 0} color="bg-rose-500" />
-              <FilterBtn active={activeReviewFilter === 'SKIPPED'} onClick={() => setActiveReviewFilter('SKIPPED')} label="Skipped" count={questions.length - (sessionData?.attemptedCount || 0)} color="bg-slate-400" />
+              <FilterBtn active={activeReviewFilter === 'SKIPPED'} onClick={() => setActiveReviewFilter('SKIPPED')} label="Skipped" count={Math.max(0, questions.length - answeredCount)} color="bg-slate-400" />
            </div>
         </section>
 
