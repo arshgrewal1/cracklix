@@ -29,9 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v7.1.
- * FIXED: Replaced items-center with items-stretch on mobile to occupy full width.
- * ADDED: Overflow-x-hidden guards on main attempt node.
+ * @fileOverview Official Mock Attempt Hub v7.2.
+ * FIXED: Balanced horizontal spacing by explicitly resetting motion x-offset and centering container.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -331,11 +330,23 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           onTouchStart={handleTouchStart} 
           onTouchEnd={handleTouchEnd}
         >
-          <SubjectTabs />
-          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-stretch px-4 md:px-12 pt-4 pb-12 w-full max-w-full overflow-x-hidden">
-            <div className="w-full max-w-4xl mx-auto">
+          <div className="w-full bg-white">
+             <div className="max-w-4xl mx-auto">
+                <SubjectTabs />
+             </div>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 md:px-10 pt-4 pb-12 w-full max-w-full overflow-x-hidden">
+            <div className="w-full max-w-4xl">
               {questions.length > 0 && questions[currentIdx] ? (
-                <motion.div key={currentIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25, ease: "easeOut" }} className="w-full">
+                <motion.div 
+                  key={currentIdx} 
+                  initial={{ opacity: 0, x: 20 }} 
+                  animate={{ opacity: 1, x: 0 }} 
+                  exit={{ opacity: 0, x: -20 }} 
+                  transition={{ duration: 0.25, ease: "easeOut" }} 
+                  className="w-full"
+                >
                   <QuestionRenderer 
                     language={language} 
                     question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
