@@ -9,45 +9,39 @@ import { Capacitor } from '@capacitor/core';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 
 /**
- * @fileOverview Institutional PWA Manager v1.5.
- * FIXED: Removed redundant success toast logic to prevent repeated popups.
- * The success toast is now managed exclusively by the appinstalled event in usePWAInstall.
+ * @fileOverview Institutional PWA Manager v1.6.
+ * FIXED: Uses strict hardware-level installation detection.
  */
 export default function PWAManager() {
   const pathname = usePathname();
-  const { canInstall, installApp, isInstalled } = usePWAInstall();
+  const { canInstall, installApp, isInstalled, isReady } = usePWAInstall();
   const [showPrompt, setShowPrompt] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     
-    const checkStatus = () => {
-      if (typeof window === 'undefined') return;
+    if (!isReady || isInstalled || !canInstall) {
+      setShowPrompt(false);
+      return;
+    }
 
-      const isNative = Capacitor.isNativePlatform();
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                          (window.navigator as any).standalone === true;
-
-      const isMobile = window.innerWidth < 1024; 
-      const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
-      
-      let isDismissed = false;
-      try {
-         isDismissed = localStorage.getItem('cracklix_app_prompt_dismissed') === 'true';
-      } catch (e) {}
-      
-      // SHOW LOGIC: Only show mini-prompt if we CAN install but HAVEN'T yet.
-      if (!isNative && !isStandalone && isMobile && !isExcluded && !isDismissed && !isInstalled && canInstall) {
-        setShowPrompt(true);
-      } else {
-        setShowPrompt(false);
-      }
-    };
-
-    const timer = setTimeout(checkStatus, 3000);
-    return () => clearTimeout(timer);
-  }, [pathname, isInstalled, canInstall]);
+    const isNative = Capacitor.isNativePlatform();
+    const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
+    
+    let isDismissed = false;
+    try {
+       isDismissed = localStorage.getItem('cracklix_app_prompt_dismissed') === 'true';
+    } catch (e) {}
+    
+    // Only show if mobile view, not native app, not installed, and not in excluded routes
+    if (!isNative && !isInstalled && !isExcluded && !isDismissed) {
+      const timer = setTimeout(() => setShowPrompt(true), 4000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowPrompt(false);
+    }
+  }, [pathname, isInstalled, canInstall, isReady]);
 
   const handleInstallAction = () => {
     installApp();
@@ -80,7 +74,7 @@ export default function PWAManager() {
                    </div>
                    <div className="text-left">
                       <h4 className="text-sm font-black uppercase tracking-tight">Official App</h4>
-                      <p className="text-[9px] font-black uppercase text-primary tracking-widest">Portal Version 1.0</p>
+                      <p className="text-[9px] font-black uppercase text-primary tracking-widest">Portal Enabled</p>
                    </div>
                 </div>
                 <button 

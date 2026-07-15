@@ -10,7 +10,9 @@ import {
   CheckCircle,
   ChevronRight,
   Sparkles,
-  Loader2
+  Loader2,
+  AlertCircle,
+  Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
@@ -19,17 +21,17 @@ import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { PLATFORM_VERSION } from "@/lib/version";
 
 /**
- * @fileOverview Official Direct App Portal v16.0.
- * UPDATED: Optimized for One-Click One-Tap installation.
+ * @fileOverview Official Direct App Portal v17.0.
+ * FIXED: Accurate state detection and fallback instructions for unsupported browsers.
  */
 
 export default function InstallPwaPage() {
-  const { canInstall, installApp, isInstalled } = usePWAInstall();
+  const { canInstall, installApp, isInstalled, isReady } = usePWAInstall();
   const { version } = PLATFORM_VERSION;
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleOneClickInstall = async () => {
-    if (isInstalled) return;
+    if (isInstalled || !canInstall) return;
     setIsProcessing(true);
     try {
       await installApp();
@@ -70,16 +72,23 @@ export default function InstallPwaPage() {
                     </p>
 
                     <div className="flex flex-col items-center justify-center gap-6 pt-4">
-                       {isInstalled ? (
+                       {!isReady ? (
+                         <div className="h-24 flex items-center justify-center">
+                            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                         </div>
+                       ) : isInstalled ? (
                          <motion.div 
-                           initial={{ scale: 0.9 }}
-                           animate={{ scale: 1 }}
-                           className="flex items-center gap-4 px-10 py-5 bg-emerald-50 border border-emerald-100 rounded-2xl shadow-sm"
+                           initial={{ scale: 0.9, opacity: 0 }}
+                           animate={{ scale: 1, opacity: 1 }}
+                           className="flex items-center gap-4 px-10 py-6 bg-emerald-50 border border-emerald-200 rounded-[2rem] shadow-xl"
                          >
-                           <CheckCircle className="h-6 w-6 text-emerald-500" />
-                           <span className="font-bold text-base md:text-lg text-emerald-600">App Is Installed</span>
+                           <CheckCircle className="h-8 w-8 text-emerald-500" />
+                           <div className="text-left">
+                              <span className="font-black text-lg md:text-xl text-emerald-700 block leading-none">App Is Installed</span>
+                              <span className="text-[10px] font-bold text-emerald-600/60 uppercase tracking-widest mt-1 block">Ready for preparation</span>
+                           </div>
                          </motion.div>
-                       ) : (
+                       ) : canInstall ? (
                          <Button 
                            onClick={handleOneClickInstall}
                            disabled={isProcessing}
@@ -99,14 +108,37 @@ export default function InstallPwaPage() {
                             </div>
                             <ChevronRight className="h-4 w-4 md:h-6 md:w-6 ml-auto opacity-30 group-hover:translate-x-1 transition-transform" />
                          </Button>
-                       )}
-                       
-                       {!canInstall && !isInstalled && (
-                          <div className="p-5 bg-amber-50 rounded-2xl border border-amber-100 flex items-start gap-4 text-left max-w-sm">
-                             <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                             <p className="text-[11px] md:text-xs text-amber-700 font-medium leading-relaxed">
-                                If the install button doesn't trigger, click your browser's <span className="font-black">Menu (⋮)</span> and select <span className="font-black">"Add to Home Screen"</span>.
-                             </p>
+                       ) : (
+                          /* BROWSER SPECIFIC INSTRUCTIONS FOR UNSUPPORTED PROMPT */
+                          <div className="w-full max-w-md space-y-4 animate-in fade-in zoom-in-95 duration-500">
+                             <div className="p-6 md:p-8 bg-white rounded-[2rem] border-2 border-dashed border-slate-200 shadow-inner space-y-6">
+                                <div className="flex items-center gap-3">
+                                   <div className="h-10 w-10 bg-blue-50 rounded-xl flex items-center justify-center text-primary shadow-sm">
+                                      <Info className="h-5 w-5" />
+                                   </div>
+                                   <h4 className="font-black text-sm uppercase tracking-tight">Manual Setup Hub</h4>
+                                </div>
+                                
+                                <div className="space-y-4 text-left">
+                                   <div className="flex items-start gap-4">
+                                      <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black shrink-0">1</div>
+                                      <p className="text-xs md:text-sm text-slate-600 font-medium">Click your browser's <span className="font-black text-[#0F172A]">Menu (⋮)</span> or <span className="font-black text-[#0F172A]">Share</span> button.</p>
+                                   </div>
+                                   <div className="flex items-start gap-4">
+                                      <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black shrink-0">2</div>
+                                      <p className="text-xs md:text-sm text-slate-600 font-medium">Select <span className="font-black text-[#0F172A] uppercase tracking-tighter">"Add to Home Screen"</span> from the options list.</p>
+                                   </div>
+                                   <div className="flex items-start gap-4">
+                                      <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black shrink-0">3</div>
+                                      <p className="text-xs md:text-sm text-slate-600 font-medium">Confirm the install to launch Cracklix as a high-speed app.</p>
+                                   </div>
+                                </div>
+                             </div>
+                             
+                             <div className="flex items-center justify-center gap-2 text-rose-500 bg-rose-50 px-4 py-2 rounded-xl border border-rose-100">
+                                <AlertCircle className="h-4 w-4" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Native prompt blocked by browser</span>
+                             </div>
                           </div>
                        )}
                     </div>
@@ -125,10 +157,4 @@ export default function InstallPwaPage() {
       <Footer />
     </div>
   )
-}
-
-function AlertCircle({ className }: any) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-  );
 }

@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 /**
- * @fileOverview Production-Hardened PWA Installation Hook v5.0.
- * Handles state persistence, event capture, and one-time success notifications.
+ * @fileOverview Production-Hardened PWA Installation Hook v6.0.
+ * FIXED: Strictly detects standalone mode and manages install prompt state.
  */
 export function usePWAInstall() {
   const [isInstalled, setIsInstalled] = useState(false);
@@ -16,19 +16,23 @@ export function usePWAInstall() {
   const checkStatus = useCallback(() => {
     if (typeof window === 'undefined') return;
     
-    // 1. Check native browser standalone mode
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                        (window.navigator as any).standalone === true;
+    // 1. HARDWARE CHECK: Verify if app is actually running in standalone mode
+    // Standard browsers (Android/Chrome/Windows)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    // iOS Safari
+    const isIOSStandalone = (window.navigator as any).standalone === true;
     
-    // 2. Check local persistence
-    const wasInstalled = localStorage.getItem('cracklix_pwa_installed') === 'true';
+    const actuallyInstalled = isStandalone || isIOSStandalone;
     
-    setIsInstalled(isStandalone || wasInstalled);
+    setIsInstalled(actuallyInstalled);
     
-    // 3. Check for stashed install prompt
-    if ((window as any).deferredPrompt) {
+    // 2. CHECK FOR PROMPT: If not installed, see if we have a stashed prompt
+    if (!actuallyInstalled && (window as any).deferredPrompt) {
       setCanInstall(true);
+    } else {
+      setCanInstall(false);
     }
+    
     setIsReady(true);
   }, []);
 
@@ -37,65 +41,47 @@ export function usePWAInstall() {
 
     checkStatus();
 
+    // Listener for the install prompt availability
     const handlePrompt = (e: any) => {
       e.preventDefault();
       // Stash event for one-click trigger
       (window as any).deferredPrompt = e;
       setCanInstall(true);
-      console.log('[PWA_ENGINE] Installation prompt captured and stashed.');
+      console.log('[PWA_ENGINE] Installation prompt captured.');
     };
 
+    // Listener for successful installation
     const handleAppInstalled = () => {
-      // PERSISTENCE PROTOCOL: Mark as installed
-      localStorage.setItem('cracklix_pwa_installed', 'true');
       setIsInstalled(true);
       setCanInstall(false);
       (window as any).deferredPrompt = null;
 
-      // SUCCESS PROTOCOL: Only show toast if NOT shown before for THIS installation session
-      const successShown = sessionStorage.getItem('cracklix_install_success_shown');
-      if (!successShown) {
-        toast({
-          title: "Application Synchronized",
-          description: "Cracklix is now ready on your home screen.",
-        });
-        sessionStorage.setItem('cracklix_install_success_shown', 'true');
-      }
-      console.log('[PWA_ENGINE] Installation successful. Registry updated.');
+      toast({
+        title: "Application Synchronized",
+        description: "Cracklix is now ready on your home screen.",
+      });
+      console.log('[PWA_ENGINE] Installation successful.');
     };
 
     window.addEventListener('beforeinstallprompt', handlePrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
     
-    // HEALER: Poll to catch state changes if listeners are delayed by browser
-    const poll = setInterval(() => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                          (window.navigator as any).standalone === true;
-      
-      if (isStandalone && !isInstalled) {
-        localStorage.setItem('cracklix_pwa_installed', 'true');
-        setIsInstalled(true);
-      }
-
-      if ((window as any).deferredPrompt && !canInstall) {
-        setCanInstall(true);
-      }
-    }, 1000);
+    // Polling backup to catch browser state transitions
+    const poll = setInterval(checkStatus, 2000);
 
     return () => {
        window.removeEventListener('beforeinstallprompt', handlePrompt);
        window.removeEventListener('appinstalled', handleAppInstalled);
        clearInterval(poll);
     };
-  }, [checkStatus, isInstalled, canInstall, toast]);
+  }, [checkStatus, toast]);
 
   const installApp = async () => {
     const prompt = (window as any).deferredPrompt;
     
     if (!prompt) {
-      // Fallback if prompt is missing but we're in browser
-      window.location.href = '/install';
-      return;
+      // If prompt is missing, we can't trigger the native sheet
+      return false;
     }
 
     try {
@@ -106,9 +92,12 @@ export function usePWAInstall() {
       if (outcome === 'accepted') {
         (window as any).deferredPrompt = null;
         setCanInstall(false);
+        return true;
       }
+      return false;
     } catch (err) {
-      console.error('[PWA_ENGINE] Critical install failure:', err);
+      console.error('[PWA_ENGINE] Install failure:', err);
+      return false;
     }
   };
 
