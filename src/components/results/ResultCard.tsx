@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -26,6 +25,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
 interface SubPerformance {
   name: string;
@@ -64,8 +64,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview World-Class Institutional Assessment Report v6.0.
- * FIXED: Imported missing Icons and Badge to resolve ReferenceError.
+ * @fileOverview World-Class Institutional Assessment Report v6.1.
+ * FIXED: Imported missing Card component to resolve ReferenceError.
  */
 export default function ResultCard({
   studentName,
