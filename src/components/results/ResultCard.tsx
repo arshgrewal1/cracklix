@@ -18,7 +18,10 @@ import {
   Check,
   TrendingUp,
   BrainCircuit,
-  Info
+  Info,
+  Layers,
+  Search,
+  ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -60,8 +63,9 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview World-Class Institutional Assessment Report v4.2.
+ * @fileOverview World-Class Institutional Assessment Report v5.0.
  * Optimized for A4 Printing (300 DPI Simulation).
+ * FIXED: All icons and UI components properly imported.
  */
 export default function ResultCard({
   studentName,
@@ -81,7 +85,7 @@ export default function ResultCard({
   difficulty = { easy: 0, medium: 0, hard: 0 },
   timeMetrics = { avg: "0s", fastest: "0s", slowest: "0s" }
 }: ResultCardProps) {
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://cracklix.com/leaderboard/' + resultId)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://cracklix.com/results/view?id=' + resultId)}`;
   
   const getGrade = (acc: number) => {
     if (acc >= 95) return { label: 'S', color: 'text-emerald-600', sub: 'Superb' };
@@ -103,11 +107,9 @@ export default function ResultCard({
         className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
-        {/* TOP ARCHITECTURAL NODE */}
         <div className="absolute top-0 left-0 right-0 h-4 bg-[#1E3A8A]" />
         <div className="absolute top-4 left-0 right-0 h-1 bg-[#2563EB]" />
 
-        {/* 1. HEADER HUB */}
         <div className="px-16 pt-16 flex justify-between items-start">
            <div className="flex items-center gap-6">
               <div className="h-16 w-16 bg-[#1E3A8A] rounded-2xl flex items-center justify-center shadow-lg">
@@ -124,7 +126,6 @@ export default function ResultCard({
            </div>
         </div>
 
-        {/* 2. GRADE HUB */}
         <div className="px-16 mt-16 flex flex-col items-center">
            <div className="relative">
               <div className="h-44 w-44 rounded-full border-[10px] border-slate-50 flex flex-col items-center justify-center bg-white shadow-2xl relative z-10">
@@ -142,7 +143,6 @@ export default function ResultCard({
            </div>
         </div>
 
-        {/* 3. PERFORMANCE MATRIX */}
         <div className="px-16 mt-16 grid grid-cols-3 gap-8">
            <ReportMetric label="State Rank" val={`#${rank}`} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50" />
            <ReportMetric label="Final Score" val={score} icon={<Zap />} color="text-primary" bg="bg-blue-50" />
@@ -152,7 +152,6 @@ export default function ResultCard({
            <ReportMetric label="Attempt Rate" val={`${Math.round(((correct + wrong) / total) * 100)}%`} icon={<BarChart3 />} color="text-purple-500" bg="bg-purple-50" />
         </div>
 
-        {/* 4. DATA LEDGER */}
         <div className="px-16 mt-12">
            <div className="bg-[#F8FAFC] border border-slate-100 rounded-[2.5rem] p-10 flex items-center justify-between shadow-inner">
               <DataNode label="Attempted" val={correct + wrong} color="text-slate-600" />
@@ -165,12 +164,11 @@ export default function ResultCard({
            </div>
         </div>
 
-        {/* 5. VERIFICATION FOOTER */}
-        <div className="mt-auto bg-[#0F172A] p-16 flex items-center justify-between">
+        <div className="mt-auto bg-[#0F172A] p-16 flex items-center justify-between text-white">
            <div className="space-y-4">
               <div className="flex items-center gap-4">
                  <Crown className="h-8 w-8 text-primary fill-primary" />
-                 <p className="text-2xl font-black tracking-tight text-white uppercase">Institutional Registry Hub</p>
+                 <p className="text-2xl font-black tracking-tight uppercase">Institutional Registry Hub</p>
               </div>
               <div className="flex flex-col gap-1">
                  <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Result ID: {resultId}</p>
@@ -188,7 +186,6 @@ export default function ResultCard({
            </div>
         </div>
 
-        {/* PAGE NUMBER */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-black text-slate-500 uppercase tracking-widest opacity-20">Page 1 of 2</div>
       </div>
 
@@ -201,18 +198,16 @@ export default function ResultCard({
         <div className="absolute top-0 right-0 h-4 bg-[#1E3A8A]" />
         
         <div className="px-16 pt-16 space-y-12">
-           {/* HEADER */}
            <div className="flex justify-between items-end border-b-2 border-slate-100 pb-8">
               <div className="space-y-2">
                  <h2 className="text-4xl font-black tracking-tighter text-[#1E3A8A] uppercase">Performance Analysis</h2>
                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Deep-Dive Assessment Report</p>
               </div>
-              <div className="h-10 relative aspect-[3/1]">
+              <div className="h-10 relative">
                  <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-full w-auto" />
               </div>
            </div>
 
-           {/* SECTION 1: AI SUMMARY */}
            <section className="space-y-4">
               <div className="flex items-center gap-3">
                  <BrainCircuit className="h-6 w-6 text-primary" />
@@ -228,14 +223,13 @@ export default function ResultCard({
               </div>
            </section>
 
-           {/* SECTION 2: SUBJECT PERFORMANCE */}
            <section className="space-y-6">
               <div className="flex items-center gap-3">
                  <Layers className="h-6 w-6 text-primary" />
                  <h3 className="text-lg font-black uppercase tracking-widest text-[#0F172A]">Subject-wise breakdown</h3>
               </div>
               <div className="rounded-[2rem] border border-slate-100 overflow-hidden shadow-xl">
-                 <table className="w-full text-left">
+                 <table className="w-full text-left border-collapse">
                     <thead className="bg-[#1E3A8A] text-white">
                        <tr className="h-14">
                           <th className="px-8 font-black uppercase text-[10px] tracking-widest">Subject Hub</th>
@@ -266,7 +260,6 @@ export default function ResultCard({
               </div>
            </section>
 
-           {/* SECTION 3: ANALYTICS GRID */}
            <div className="grid grid-cols-2 gap-10">
               <section className="space-y-6">
                  <div className="flex items-center gap-3">
@@ -286,14 +279,13 @@ export default function ResultCard({
                     <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-400">Time Metrics</h3>
                  </div>
                  <div className="space-y-6 p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
-                    <MetricPill label="Avg Time / Q" val={timeMetrics.avg} />
-                    <MetricPill label="Fastest Ingestion" val={timeMetrics.fastest} />
-                    <MetricPill label="Slowest Logic" val={timeMetrics.slowest} />
+                    <MetricValue label="Avg Time / Q" val={timeMetrics.avg} />
+                    <MetricValue label="Fastest Ingestion" val={timeMetrics.fastest} />
+                    <MetricValue label="Slowest Logic" val={timeMetrics.slowest} />
                  </div>
               </section>
            </div>
 
-           {/* SECTION 4: STRENGTHS & IMPROVEMENTS */}
            <div className="grid grid-cols-2 gap-10">
               <Card className="p-8 rounded-[2.5rem] bg-emerald-50/50 border-emerald-100 shadow-sm space-y-4">
                  <h4 className="text-emerald-700 font-black uppercase text-[10px] tracking-widest flex items-center gap-2">
@@ -318,7 +310,6 @@ export default function ResultCard({
            </div>
         </div>
 
-        {/* FOOTER */}
         <div className="mt-auto border-t border-slate-100 p-16 flex items-center justify-between text-slate-300">
            <div className="flex items-center gap-3">
               <ShieldCheck className="h-6 w-6" />
@@ -380,7 +371,7 @@ function DifficultyBar({ label, val, color }: any) {
    );
 }
 
-function MetricPill({ label, val }: any) {
+function MetricValue({ label, val }: any) {
    return (
       <div className="flex items-center justify-between">
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>
