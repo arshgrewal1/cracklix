@@ -9,7 +9,6 @@ import {
   ShieldCheck, 
   CheckCircle2, 
   Award, 
-  Landmark, 
   Crown, 
   Medal,
   BarChart3,
@@ -61,9 +60,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview World-Class Institutional Assessment Report v4.0.
+ * @fileOverview World-Class Institutional Assessment Report v4.2.
  * Optimized for A4 Printing (300 DPI Simulation).
- * Redesigned into a 2-page deep-dive performance node.
  */
 export default function ResultCard({
   studentName,
@@ -314,7 +312,7 @@ export default function ResultCard({
                  <div className="space-y-2">
                     <ImproveNode label="Speed Optimization" />
                     <ImproveNode label="Time Management" />
-                    <ImproveNode label="Formula Recall" />
+                    <ImproveNode label="Accuracy Consistency" />
                  </div>
               </Card>
            </div>
@@ -345,7 +343,7 @@ function ReportMetric({ label, val, icon, color, bg }: any) {
             <p className={cn("text-3xl font-black tracking-tighter tabular-nums", color)}>{val}</p>
          </div>
       </div>
-   )
+   );
 }
 
 function DataNode({ label, val, color }: any) {
@@ -354,7 +352,7 @@ function DataNode({ label, val, color }: any) {
          <p className="text-slate-400 font-black uppercase tracking-widest text-[9px]">{label}</p>
          <p className={cn("text-2xl font-black tabular-nums", color)}>{val}</p>
       </div>
-   )
+   );
 }
 
 function SummaryPoint({ text }: { text: string }) {
@@ -365,7 +363,7 @@ function SummaryPoint({ text }: { text: string }) {
          </div>
          <p className="text-sm font-bold text-slate-600 leading-relaxed">{text}</p>
       </li>
-   )
+   );
 }
 
 function DifficultyBar({ label, val, color }: any) {
@@ -379,7 +377,7 @@ function DifficultyBar({ label, val, color }: any) {
             <div className={cn("h-full transition-all duration-1000", color)} style={{ width: `${val}%` }} />
          </div>
       </div>
-   )
+   );
 }
 
 function MetricPill({ label, val }: any) {
@@ -388,7 +386,7 @@ function MetricPill({ label, val }: any) {
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>
          <span className="text-sm font-black text-[#0F172A] tabular-nums">{val}</span>
       </div>
-   )
+   );
 }
 
 function StrengthNode({ label }: { label: string }) {
@@ -397,7 +395,7 @@ function StrengthNode({ label }: { label: string }) {
          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
          <span className="text-xs font-bold text-emerald-900">{label}</span>
       </div>
-   )
+   );
 }
 
 function ImproveNode({ label }: { label: string }) {
@@ -406,4 +404,5 @@ function ImproveNode({ label }: { label: string }) {
          <AlertCircle className="h-4 w-4 text-rose-500" />
          <span className="text-xs font-bold text-rose-900">{label}</span>
       </div>
+   );
 }
