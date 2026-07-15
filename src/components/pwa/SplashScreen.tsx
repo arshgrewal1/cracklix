@@ -6,18 +6,20 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Official Premium Splash Screen v1.1.
- * FIXED: Removed touch-none to prevent interaction locking if unmount is delayed.
+ * @fileOverview Official Premium Splash Screen v1.2.
+ * FIXED: Added mounted check to prevent hydration mismatch and server boot delays.
  */
 export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
   const [showContent, setShowContent] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // 1. Initial Handshake delay
     const contentTimer = setTimeout(() => setShowContent(true), 100);
     
-    // 2. Lifecycle termination (2 seconds)
+    // 2. Lifecycle termination (2.2 seconds)
     const exitTimer = setTimeout(() => setIsVisible(false), 2200);
 
     return () => {
@@ -25,6 +27,8 @@ export default function SplashScreen() {
       clearTimeout(exitTimer);
     };
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <AnimatePresence>
