@@ -1,9 +1,10 @@
-
+import React, { Suspense } from "react";
 import ExamHubClient from "@/components/exams/ExamHubClient";
+import { Loader2 } from "lucide-react";
 
 /**
- * @fileOverview Official Exam Hub Entry v2.0.
- * Redesigned for high-fidelity mobile PWA presentation.
+ * @fileOverview Official Exam Hub Entry v2.1.
+ * FIXED: Wrapped in Suspense to satisfy Next.js 15 CSR bailout requirements for useSearchParams.
  */
 
 export const dynamicParams = false;
@@ -21,7 +22,11 @@ export async function generateStaticParams() {
   ];
 }
 
-export default async function ExamIdPage(props: { params: Promise<{ id: string }> }) {
+export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
-  return <ExamHubClient />;
+  return (
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
+      <ExamHubClient />
+    </Suspense>
+  );
 }
