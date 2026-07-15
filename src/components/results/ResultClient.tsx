@@ -24,7 +24,8 @@ import {
   CheckCircle2,
   ArrowRight,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  BarChart3
 } from "lucide-react"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs, limit } from "firebase/firestore"
@@ -462,4 +463,3 @@ function ReviewStatusBadge({ userAns, correctAns }: any) {
    if (isSkipped) return <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Skipped</Badge>;
    return <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Wrong</Badge>;
 }
-
