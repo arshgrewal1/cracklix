@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect, useRef } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -28,7 +28,8 @@ import {
   BarChart3,
   BrainCircuit,
   Sparkles,
-  Award
+  Award,
+  FileText
 } from "lucide-react"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs, limit } from "firebase/firestore"
@@ -38,11 +39,13 @@ import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
 import { rationalizeMockQuestion } from "@/ai/flows/rationalize-mock-question"
+import { toPng } from "html-to-image"
+import { jsPDF } from "jspdf"
+import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v10.0.
- * UPDATED: Integrated AI Deep Audit for personalized mistake correction.
- * FIXED: Resolved BarChart3 ReferenceError.
+ * @fileOverview Official Result Hub v11.0.
+ * UPDATED: Integrated high-fidelity PDF sharing engine.
  */
 
 export default function ResultClient() {
@@ -62,6 +65,10 @@ export default function ResultClient() {
   const [guestResult, setGuestResult] = useState<any>(null)
   const [showExplanation, setShowExplanation] = useState(false)
   
+  // PDF Sharing States
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
+  const shareCardRef = useRef<HTMLDivElement>(null)
+
   // AI States
   const [isAiLoading, setIsAiLoading] = useState(false)
   const [aiAuditResult, setAiAuditResult] = useState<any>(null)
@@ -154,7 +161,6 @@ export default function ResultClient() {
     });
   }, [questions, sessionData, activeReviewFilter]);
 
-  // Reset review index when filter changes
   useEffect(() => {
     setCurrentReviewIdx(0);
     setShowExplanation(false);
@@ -203,28 +209,60 @@ export default function ResultClient() {
     }
   };
 
-  const handleShare = async () => {
-    const accuracy = sessionData?.accuracy || 0;
-    const score = (sessionData?.score || 0).toFixed(1);
-    const rank = user ? merit.rank : 'Guest';
-    const time = formatTime(sessionData?.timeTaken || 0);
+  const handleSharePdf = async () => {
+    if (isGeneratingPdf || !shareCardRef.current || !sessionData) return;
+    
+    setIsGeneratingPdf(true);
+    toast({ title: "Generating Document", description: "Synthesizing performance certificate..." });
 
-    const shareText = `🏆 I scored ${accuracy}% on Cracklix Mock Test!\n\n📊 Score: ${score}\n🎯 Accuracy: ${accuracy}%\n🏅 Rank: #${rank}\n⏱ Time: ${time}\n\nPractice Punjab Government Exam Mock Tests on Cracklix.\n\n📲 Install App\nhttps://cracklix.vercel.app/install\n\n🌐 Website\nhttps://cracklix.com\n\nView my result: ${window.location.href}`;
+    try {
+      // 1. Render ResultCard to Image
+      const dataUrl = await toPng(shareCardRef.current, {
+        cacheBust: true,
+        width: 1080,
+        height: 1350,
+        pixelRatio: 1
+      });
 
-    if (navigator.share) {
-      try {
+      // 2. Wrap in PDF
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'px',
+        format: [1080, 1350]
+      });
+      
+      pdf.addImage(dataUrl, 'PNG', 0, 0, 1080, 1350);
+      const pdfBlob = pdf.output('blob');
+      const fileName = `Cracklix_Result_${mockData?.title?.replace(/\s+/g, '_')}.pdf`;
+
+      // 3. Share via Web Share API if possible
+      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
-          title: 'My Cracklix Result',
-          text: shareText,
+          files: [file],
+          title: 'My Mock Test Result',
+          text: `I scored ${sessionData.accuracy}% on the ${mockData?.title} test!`
         });
-      } catch (err) {
-        console.warn('Share aborted');
+      } else {
+        // Fallback to direct download
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast({ title: "PDF Ready", description: "Document saved to your downloads." });
       }
-    } else {
-      navigator.clipboard.writeText(shareText);
-      toast({ title: "Result Copied", description: "Share text copied to clipboard." });
+    } catch (error) {
+      console.error("[PDF_GEN_ERROR]:", error);
+      toast({ variant: "destructive", title: "Document Error", description: "Failed to generate PDF registry." });
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
+
+  const answeredCount = useMemo(() => Object.values(answers || {}).filter(a => a !== null && a !== undefined).length, []);
 
   if (!mounted || (resultLoading && user) || (loadingQuestions && questions.length === 0)) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
@@ -235,13 +273,33 @@ export default function ResultClient() {
 
   return (
     <div className="min-h-screen bg-white font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
+      {/* HIDDEN OFFSITE RENDER FOR PDF CAPTURE */}
+      <div className="fixed left-[-9999px] top-0 pointer-events-none">
+        <div ref={shareCardRef}>
+           <ResultCard 
+             studentName={profile?.name || "Aspirant"}
+             examTitle={mockData?.title || "Mock Test"}
+             score={(sessionData?.score || 0).toFixed(1)}
+             rank={user ? merit.rank : 'Guest'}
+             accuracy={sessionData?.accuracy || 0}
+             timeTaken={formatTime(sessionData?.timeTaken || 0)}
+             correct={sessionData?.correctCount || 0}
+             wrong={sessionData?.wrongCount || 0}
+             total={questions.length}
+             date={new Date(sessionData?.timestamp).toLocaleDateString('en-GB')}
+           />
+        </div>
+      </div>
+
       {/* 1. STICKY HEADER */}
       <header className="sticky top-0 z-[100] bg-white/80 backdrop-blur-md border-b border-slate-100 h-16 flex items-center px-4 md:px-8 justify-between">
         <div className="flex items-center gap-4">
            <button onClick={() => router.back()} className="p-2 hover:bg-slate-50 rounded-xl transition-all"><ChevronLeft className="h-6 w-6" /></button>
            <Link href="/"><img src="/logo/cracklix-logo-dark.png" alt="Cracklix" className="h-8 md:h-10 w-auto" /></Link>
         </div>
-        <Button onClick={handleShare} variant="ghost" size="icon" className="rounded-xl"><Share2 className="h-5 w-5" /></Button>
+        <Button onClick={handleSharePdf} disabled={isGeneratingPdf} variant="ghost" size="icon" className="rounded-xl">
+           {isGeneratingPdf ? <Loader2 className="h-5 w-5 animate-spin" /> : <Share2 className="h-5 w-5" />}
+        </Button>
       </header>
 
       <main className="flex-1 w-full max-w-[1200px] mx-auto p-4 md:p-8 space-y-6 md:space-y-10">
@@ -288,8 +346,8 @@ export default function ResultClient() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                 <Button onClick={handleShare} className="flex-1 h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-xl gap-2 border-none">
-                    <Share2 className="h-4 w-4" /> Share Result
+                 <Button onClick={handleSharePdf} disabled={isGeneratingPdf} className="flex-1 h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-xl gap-2 border-none">
+                    {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} Share PDF Result
                  </Button>
                  <Button variant="outline" className="flex-1 h-14 rounded-xl border-slate-200 text-slate-600 font-black uppercase text-[10px] tracking-widest" asChild>
                     <Link href={`/mocks/instructions?id=${mockId}`}><RefreshCw className="h-4 w-4 mr-2" /> Re-attempt</Link>
@@ -551,3 +609,4 @@ function ReviewStatusBadge({ userAns, correctAns }: any) {
    if (isSkipped) return <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Skipped</Badge>;
    return <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Wrong</Badge>;
 }
+
