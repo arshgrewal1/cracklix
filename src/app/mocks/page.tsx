@@ -46,7 +46,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 /**
  * @fileOverview Premium Practice Hub v3.0 [PWA Optimized].
- * UPDATED: Redesigned Popular Categories for compact 4-column mobile grid.
+ * UPDATED: Fixed category text overflow with multi-line wrap and responsive typography.
  */
 
 const QUICK_ACTIONS = [
@@ -225,26 +225,26 @@ export default function MockTestsPage() {
                     className="flex flex-col h-full"
                   >
                     <Card className={cn(
-                      "relative aspect-square w-full rounded-[18px] flex flex-col items-center justify-center gap-1.5 transition-all duration-300 border-2 cursor-pointer shadow-sm group",
+                      "relative aspect-square w-full rounded-[18px] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all duration-300 border-2 cursor-pointer shadow-sm group",
                       isActive 
                         ? "border-primary bg-primary/5 ring-4 ring-primary/5" 
                         : "border-slate-100 bg-white hover:border-primary/20"
                     )}>
                       <div className={cn(
-                        "h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center transition-all duration-500 bg-gradient-to-br shadow-md group-hover:rotate-6",
+                        "h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center transition-all duration-500 bg-gradient-to-br shadow-md group-hover:rotate-6 shrink-0",
                         cat.color
                       )}>
                         <cat.icon className="h-4 w-4 md:h-5 md:w-5 text-white" />
                       </div>
 
-                      <div className="text-center px-1">
+                      <div className="text-center px-1 flex flex-col items-center justify-center w-full min-h-[30px] md:min-h-[42px]">
                         <p className={cn(
-                          "text-[9px] md:text-[13px] font-black uppercase tracking-tight leading-tight truncate w-full",
+                          "text-[8px] md:text-[11px] font-black uppercase tracking-tight leading-[1.2] w-full break-words whitespace-normal",
                           isActive ? "text-primary" : "text-[#0F172A]"
                         )}>
                           {cat.label}
                         </p>
-                        <p className="text-[7px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                        <p className="text-[6px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
                           {count} Tests
                         </p>
                       </div>
