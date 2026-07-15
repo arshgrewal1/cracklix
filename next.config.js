@@ -1,3 +1,4 @@
+
 const withPWA = require('next-pwa')({
     dest: 'public',
     register: true,
@@ -20,6 +21,22 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        '@opentelemetry/exporter-jaeger': false,
+        '@opentelemetry/sdk-trace-node': false,
+        '@opentelemetry/sdk-node': false,
+        '@opentelemetry/api': false,
+        '@opentelemetry/sdk-trace-base': false,
+      };
+    }
+    return config;
+  },
 };
 
 module.exports = withPWA(nextConfig);

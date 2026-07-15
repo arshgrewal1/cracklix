@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import AdEntryContent from './AdEntryContent';
 import { useFirestore } from '@/firebase';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
@@ -8,10 +9,18 @@ import { Loader2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 /**
- * @fileOverview Ad Entry Page Node v3.1 (Next.js 15 Hardened).
- * FIXED: Uses useSearchParams hook for reliable query parameter access.
+ * @fileOverview Ad Entry Page Node v3.2 (Next.js 15 Hardened).
+ * FIXED: Wrapped content in Suspense to satisfy Next.js 15 CSR bailout requirements.
  */
 export default function AdEntryPage() {
+  return (
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>}>
+      <AdEntryLoader />
+    </Suspense>
+  );
+}
+
+function AdEntryLoader() {
   const db = useFirestore();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
