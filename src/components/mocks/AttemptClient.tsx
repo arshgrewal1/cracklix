@@ -29,8 +29,9 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v7.0.
- * FIXED: Implemented dual-collection scan (mcqBank + questions) to resolve data mismatch.
+ * @fileOverview Official Mock Attempt Hub v7.1.
+ * FIXED: Replaced items-center with items-stretch on mobile to occupy full width.
+ * ADDED: Overflow-x-hidden guards on main attempt node.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -135,7 +136,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
         
         for (const chunk of chunks) {
-           // DUAL-SCAN PROTOCOL: Check both mcqBank and legacy questions collection
            const [mcqSnap, legacySnap] = await Promise.all([
              getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
              getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
@@ -310,10 +310,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   );
 
   return (
-    <div className="flex flex-col h-screen bg-white font-body select-none overflow-hidden relative touch-pan-y">
+    <div className="flex flex-col h-screen bg-white font-body select-none overflow-x-hidden relative touch-pan-y w-full max-w-full">
       <AntiCheat />
       <ExamHeader onPaletteToggle={() => setIsPaletteOpen(true)} onExitRequest={() => setShowExitModal(true)} />
-      <main className="flex-1 flex flex-col min-h-0 bg-slate-50/50 relative">
+      <main className="flex-1 flex flex-col min-h-0 bg-slate-50/50 relative w-full max-w-full overflow-x-hidden">
         <AnimatePresence>
           {isPaused && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] bg-[#0B1528]/95 backdrop-blur-xl flex items-center justify-center p-6">
@@ -327,13 +327,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         </AnimatePresence>
         
         <div 
-          className="flex-1 flex flex-col min-h-0" 
+          className="flex-1 flex flex-col min-h-0 w-full max-w-full overflow-x-hidden" 
           onTouchStart={handleTouchStart} 
           onTouchEnd={handleTouchEnd}
         >
           <SubjectTabs />
-          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 pt-4 pb-12">
-            <div className="w-full max-w-4xl">
+          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-stretch px-4 md:px-12 pt-4 pb-12 w-full max-w-full overflow-x-hidden">
+            <div className="w-full max-w-4xl mx-auto">
               {questions.length > 0 && questions[currentIdx] ? (
                 <motion.div key={currentIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25, ease: "easeOut" }} className="w-full">
                   <QuestionRenderer 
@@ -343,7 +343,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
                     onSelect={(idx: number) => setAnswer(currentIdx, idx, db)} 
                     onBookmark={handleBookmark}
                     onReport={handleReportIssue}
-                    className="shadow-md border-none p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[3rem]" 
+                    className="shadow-md border-none p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[3rem] w-full" 
                   />
                 </motion.div>
               ) : <div className="py-20 text-center opacity-20"><Zap className="h-10 w-10 mx-auto mb-4" /><p className="font-bold text-slate-300">Syncing...</p></div>}

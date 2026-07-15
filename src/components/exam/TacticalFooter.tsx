@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
 import { useCallback } from 'react';
 
 /**
- * @fileOverview Test Action Bar v41.0.
- * FIXED: Standardized actions to use store logic directly for better reliability.
+ * @fileOverview Test Action Bar v41.1.
+ * FIXED: Reduced horizontal padding and enforced text wrapping for mobile responsiveness.
  */
 export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
   const currentIdx = useExamStore(s => s.currentIdx);
@@ -35,7 +35,7 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
         <Button 
           variant="outline" 
           onClick={handleReviewLater}
-          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm px-1 leading-tight uppercase tracking-wider"
+          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm px-2 leading-tight uppercase tracking-wider whitespace-normal text-center"
         >
           Review Later
         </Button>
@@ -43,7 +43,7 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
         <Button 
           variant="outline" 
           onClick={handleClear}
-          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm px-1 leading-tight uppercase tracking-wider"
+          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm px-2 leading-tight uppercase tracking-wider whitespace-normal text-center"
         >
           Clear
         </Button>
@@ -51,7 +51,7 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
         <Button 
           onClick={onSubmit}
           className={cn(
-            "h-12 md:h-16 text-white rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] shadow-xl border-none active:scale-95 px-1 transition-all leading-tight uppercase tracking-wider",
+            "h-12 md:h-16 text-white rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] shadow-xl border-none active:scale-95 px-2 transition-all leading-tight uppercase tracking-wider whitespace-normal text-center",
             isLastQuestion ? "bg-emerald-600 hover:bg-emerald-700" : "bg-primary hover:bg-blue-700"
           )}
         >

@@ -23,8 +23,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v74.0.
- * UPDATED: Integrated high-fidelity rendering for Matching and Assertion-Reason types.
+ * @fileOverview Institutional Question Renderer v74.1.
+ * FIXED: Optimized padding for mobile viewports to prevent overflow.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -71,30 +71,30 @@ export default function QuestionRenderer({
 
   return (
     <div className={cn(
-      "w-full text-left font-body bg-white text-[#0F172A] flex flex-col select-none max-w-full",
-      showSolution ? "p-0" : "p-4 md:p-10 lg:p-12 rounded-[2rem] md:rounded-[3rem] shadow-sm",
+      "w-full text-left font-body bg-white text-[#0F172A] flex flex-col select-none max-w-full box-border",
+      showSolution ? "p-0" : "p-5 md:p-10 lg:p-12 rounded-[1.5rem] md:rounded-[3rem] shadow-sm",
       className
     )}>
       
       {!showSolution && (
-        <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-5">
-           <div className="flex items-center gap-3">
-              <span className="font-black text-[11px] md:text-sm text-white bg-[#0F172A] px-4 py-1.5 rounded-full shadow-lg shrink-0">Q {q.displayId || '1'}</span>
-              <div className="flex items-center gap-2 text-[#0F172A] font-bold text-[10px] md:xs tabular-nums bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                 <Clock className="h-3.5 w-3.5 text-primary" />
+        <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-5 w-full">
+           <div className="flex items-center gap-2 md:gap-3 shrink-0">
+              <span className="font-black text-[10px] md:text-sm text-white bg-[#0F172A] px-3 md:px-4 py-1.5 rounded-full shadow-lg shrink-0">Q {q.displayId || '1'}</span>
+              <div className="flex items-center gap-1.5 text-[#0F172A] font-bold text-[9px] md:xs tabular-nums bg-slate-50 px-2 md:px-3 py-1.5 rounded-lg border border-slate-100">
+                 <Clock className="h-3 md:h-3.5 w-3 md:w-3.5 text-primary" />
                  <span>{formatTime(timeLeft)}</span>
               </div>
            </div>
-           <div className="flex items-center gap-2">
+           <div className="flex items-center gap-1 md:gap-2">
               <button 
                 onClick={onBookmark}
-                className={cn("p-2 transition-all active:scale-90", isBookmarked ? "text-primary" : "text-slate-300 hover:text-primary")}
+                className={cn("p-1.5 transition-all active:scale-90", isBookmarked ? "text-primary" : "text-slate-300 hover:text-primary")}
               >
                 <Bookmark className={cn("h-5 w-5", isBookmarked && "fill-current")} />
               </button>
               <button 
                 onClick={onReport}
-                className="p-2 text-slate-300 hover:text-rose-500 transition-all active:scale-90"
+                className="p-1.5 text-slate-300 hover:text-rose-500 transition-all active:scale-90"
               >
                 <AlertTriangle className="h-5 w-5" />
               </button>
@@ -103,13 +103,13 @@ export default function QuestionRenderer({
       )}
 
       <div className={cn(
-         "space-y-6 px-1", 
+         "space-y-6 px-0 w-full", 
          showSolution ? "mb-6" : "mb-10",
          q.questionType === 'ASSERTION_REASON' && "p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner relative overflow-hidden"
       )}>
          {/* ASSERTION & REASON INTERLEAVED HUB */}
          {q.questionType === 'ASSERTION_REASON' && (
-            <div className="space-y-6">
+            <div className="space-y-6 w-full">
                <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
                   <Zap className="h-3 w-3" /> Logic Hub
                </div>
@@ -146,17 +146,17 @@ export default function QuestionRenderer({
 
          {/* STRUCTURED MATCHING GRID */}
          {q.questionType === 'MATCH_FOLLOWING' && (q.matchingData?.rows?.length > 0 || q.tableContent?.rows?.length > 0) && (
-            <div className="my-8 overflow-hidden rounded-[2rem] border-2 border-slate-100 bg-white shadow-2xl relative group">
+            <div className="my-8 overflow-x-auto rounded-[1.5rem] border-2 border-slate-100 bg-white shadow-2xl relative group w-full">
                <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
                   <Link2 className="h-3 w-3" /> Relation Hub
                </div>
-               <Table className="w-full border-collapse">
+               <Table className="w-full border-collapse min-w-[280px]">
                   <TableHeader className="bg-slate-900">
                      <TableRow className="border-none h-14 md:h-16">
-                        <TableHead className="px-6 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest border-r border-white/10">
+                        <TableHead className="px-4 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest border-r border-white/10">
                           {q.matchingData?.leftHeader || q.tableContent?.headers?.[0] || "List I"}
                         </TableHead>
-                        <TableHead className="px-6 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest">
+                        <TableHead className="px-4 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest">
                           {q.matchingData?.rightHeader || q.tableContent?.headers?.[1] || "List II"}
                         </TableHead>
                      </TableRow>
@@ -164,10 +164,10 @@ export default function QuestionRenderer({
                   <TableBody>
                      {(q.matchingData?.rows || q.tableContent?.rows || []).map((row: any, ri: number) => (
                         <TableRow key={ri} className="border-b border-slate-50 hover:bg-slate-50 transition-colors last:border-0 h-12 md:h-16">
-                           <TableCell className="px-6 md:px-10 font-bold text-xs md:text-lg text-[#0F172A] border-r border-slate-50">
+                           <TableCell className="px-4 md:px-10 font-bold text-xs md:text-lg text-[#0F172A] border-r border-slate-50">
                               {Array.isArray(row) ? row[0] : row.left}
                            </TableCell>
-                           <TableCell className="px-6 md:px-10 font-bold text-xs md:text-lg text-[#0F172A]">
+                           <TableCell className="px-4 md:px-10 font-bold text-xs md:text-lg text-[#0F172A]">
                               {Array.isArray(row) ? row[1] : row.right}
                            </TableCell>
                         </TableRow>
@@ -179,18 +179,18 @@ export default function QuestionRenderer({
 
          {/* STANDARD INTRO BLOCKS (FOR NON-AR TYPES) */}
          {q.questionType !== 'ASSERTION_REASON' && (
-            <>
+            <div className="w-full space-y-4">
                {showEn && q.englishQuestion && (
-                  <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
+                  <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words w-full", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
                      <MathText text={q.englishQuestion} />
                   </div>
                )}
                {showLocal && q.punjabiQuestion && (
-                  <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4 border-t border-slate-100 pt-4", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
+                  <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4 border-t border-slate-100 pt-4 w-full", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
                      <MathText text={q.punjabiQuestion} />
                   </div>
                )}
-            </>
+            </div>
          )}
       </div>
 
@@ -210,26 +210,26 @@ export default function QuestionRenderer({
                 key={key} 
                 onClick={() => !showSolution && onSelect?.(idx)} 
                 className={cn(
-                  "flex items-center gap-4 md:gap-6 transition-all border w-full",
+                  "flex items-center gap-3 md:gap-6 transition-all border w-full box-border",
                   showSolution 
                     ? `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2rem] ${q.correctAnswer === key ? "bg-emerald-50 border-emerald-500 shadow-sm" : isSelected ? "bg-rose-50 border-rose-500" : "bg-white border-slate-100"}`
                     : `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2.5rem] cursor-pointer group/opt active:scale-[0.98] ${isSelected ? "bg-blue-50/50 border-primary ring-2 ring-primary/5 shadow-xl" : "bg-white border-slate-100 hover:border-slate-300 shadow-sm"}`
                 )}
               >
                 <span className={cn(
-                  "font-black shrink-0 w-8 md:w-12 text-center transition-colors",
+                  "font-black shrink-0 w-6 md:w-12 text-center transition-colors",
                   showSolution ? "text-base md:text-xl" : "text-sm md:text-3xl",
                   isSelected ? "text-primary" : "text-slate-300 group-hover/opt:text-slate-400"
                 )}>{key}</span>
                 
                 <div className="flex flex-col flex-1 min-w-0 space-y-1">
                   {showEn && en && (
-                    <div className={cn("font-bold leading-tight break-words", showSolution ? "text-sm md:text-base" : "text-[15px] md:text-2xl", isSelected ? "text-primary" : "text-[#0F172A]")}>
+                    <div className={cn("font-bold leading-tight break-words w-full", showSolution ? "text-sm md:text-base" : "text-[15px] md:text-2xl", isSelected ? "text-primary" : "text-[#0F172A]")}>
                       <MathText text={en} />
                     </div>
                   )}
                   {showLocal && localText && !hideLocal && (
-                    <div className={cn("font-[800] leading-tight break-words text-[#0F172A]", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
+                    <div className={cn("font-[800] leading-tight break-words text-[#0F172A] w-full", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
                       <MathText text={localText} />
                     </div>
                   )}
@@ -241,7 +241,7 @@ export default function QuestionRenderer({
       )}
 
       {showSolution && (
-        <div className="mt-10 border border-slate-100 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-slate-50/50 shadow-2xl relative">
+        <div className="mt-10 border border-slate-100 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-slate-50/50 shadow-2xl relative w-full">
            <div className="absolute top-0 left-0 w-2 md:w-3 h-full bg-emerald-500" />
            
            <div className="p-8 md:p-14 space-y-10">
@@ -249,21 +249,21 @@ export default function QuestionRenderer({
                  <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-emerald-600 tracking-[0.1em]">
                     <ShieldCheck className="h-5 w-5" /> Verified Answer
                  </div>
-                 <div className="pl-8 space-y-2">
+                 <div className="pl-0 md:pl-8 space-y-2">
                     <p className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight">
                        Option {q.correctAnswer}: {q[`option${q.correctAnswer}English`]}
                     </p>
                  </div>
               </div>
 
-              <div className="h-px w-full bg-slate-200/50 ml-8" />
+              <div className="h-px w-full bg-slate-200/50" />
 
               <div className="space-y-6">
                  <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-slate-400 tracking-[0.1em]">
                     <Info className="h-5 w-5" /> Explanation
                  </div>
                  
-                 <div className="pl-8 space-y-8">
+                 <div className="pl-0 md:pl-8 space-y-8">
                     {q.englishExplanation && (
                        <div className="space-y-2">
                           <p className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest">English Rationale</p>
