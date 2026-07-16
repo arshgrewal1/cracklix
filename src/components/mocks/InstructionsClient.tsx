@@ -5,11 +5,11 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useFirestore, useUser } from "@/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Info, CheckCircle2, Clock, BookOpen, Zap, Lock, AlertCircle, ChevronRight, ArrowLeft, RotateCcw } from "lucide-react";
+import { ShieldCheck, Info, CheckCircle2, Clock, BookOpen, Zap, Lock, AlertCircle, ChevronRight, ArrowLeft, RotateCcw, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
@@ -22,8 +22,8 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v4.3.
- * FIXED: Detects finished tests and offers "View Result" instead of triggering auto-submit loops.
+ * @fileOverview Official Test Rules Hub v4.4.
+ * FIXED: Retake now performs a hard reset (deletes old attempts) to allow fresh starts.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -37,6 +37,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
   const [mock, setMock] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFinished, setIsFinished] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [accessChecked, setAccessChecked] = useState(false);
   const [accessError, setAccessError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
@@ -150,6 +151,30 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
     }
   }, [db, activeId, user, userLoading, profile, router, pathname, searchParams]);
 
+  const handleRetake = async () => {
+    if (!db || isResetting || !activeId) return;
+    
+    setIsResetting(true);
+    try {
+      // 1. Purge Cloud Attempt
+      if (user) {
+        await deleteDoc(doc(db, "attempts", `${user.uid}_${activeId}`));
+      }
+      
+      // 2. Purge Local Storage Attempt
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(`cracklix_guest_attempt_${activeId}`);
+      }
+
+      setIsFinished(false);
+      toast({ title: "Test Reset", description: "You can now start a fresh attempt." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Reset failed", description: "Could not clear previous attempt." });
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   if (isLoading || userLoading) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white space-y-8 p-6">
        <Zap className="h-12 w-12 text-primary animate-pulse" />
@@ -256,11 +281,13 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                    
                    {isFinished && (
                       <Button 
-                        onClick={() => router.push(`/mocks/attempt?id=${activeId}&retake=true`)}
+                        onClick={handleRetake}
+                        disabled={isResetting}
                         variant="outline"
-                        className="h-16 md:h-24 px-10 border-2 border-slate-100 text-[#0F172A] font-black uppercase tracking-[0.1em] text-[11px] md:text-sm rounded-2xl md:rounded-[3rem] shadow-sm hover:bg-slate-50 transition-all active:scale-95"
+                        className="h-16 md:h-24 px-10 border-2 border-slate-100 text-[#0F172A] font-black uppercase tracking-[0.1em] text-[11px] md:text-sm rounded-2xl md:rounded-[3rem] shadow-sm hover:bg-slate-50 transition-all active:scale-95 gap-3"
                       >
-                         <RotateCcw className="mr-2 h-5 w-5" /> Retake
+                         {isResetting ? <Loader2 className="h-5 w-5 animate-spin" /> : <RotateCcw className="h-5 w-5" />} 
+                         Retake
                       </Button>
                    )}
                  </div>

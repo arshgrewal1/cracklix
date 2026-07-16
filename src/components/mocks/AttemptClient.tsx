@@ -29,9 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v7.5 [Sync Stability].
- * FIXED: Enhanced question batching to prevent "Sync failure" during asset loading.
- * FIXED: Added protection against auto-submitting old finished tests.
+ * @fileOverview Official Mock Attempt Hub v7.6.
+ * FIXED: Bypasses resume logic if 'retake=true' and prevents infinite loading on completed sessions.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -50,6 +49,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const lastSegment = pathSegments[pathSegments.length - 2]; 
     return lastSegment !== 'attempt' ? lastSegment : null;
   }, [pathname, searchParams, propMockId]);
+
+  const isRetakeRequested = searchParams.get('retake') === 'true';
 
   const { startSession, stopSession } = useActiveSession('MOCK', mockId || undefined);
 
@@ -159,7 +160,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
         // 4. Attempt State Handshake
         let resumeData = undefined;
-        if (user) {
+        if (user && !isRetakeRequested) {
            const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
            if (attemptSnap.exists()) {
              const aData = attemptSnap.data();
@@ -170,6 +171,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
              }
              resumeData = aData;
            }
+        } else if (isRetakeRequested && user) {
+           // Explicitly purge old attempt if retake signaled via URL
+           await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
         }
 
         initExam(mockId, mData.title || "Elite Series", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
@@ -180,7 +184,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       } finally { setIsInitializing(false); }
     }
     loadExam();
-  }, [db, user, profile, mockId, initExam, router, toast, pathname, startSession]);
+  }, [db, user, profile, mockId, initExam, router, toast, pathname, startSession, isRetakeRequested]);
 
   useEffect(() => {
     if (isInitializing || initError) return;
