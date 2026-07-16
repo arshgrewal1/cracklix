@@ -48,9 +48,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v5.0 [Sync & Auto-Submit Fix].
- * FIXED: Prevented old finished attempts from triggering auto-submission by validating timeLeft.
- * FIXED: Reset store state on new test initialization to clear stale data.
+ * @fileOverview Hardened Test Store v5.2 [Total Isolation].
+ * FIXED: Reliable state reset on initialization to prevent data bleed between tests.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -71,6 +70,18 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   isGuest: false,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
+    // 1. Mandatory Clean Reset of previous state
+    set({
+      mockId: null,
+      questions: [],
+      answers: {},
+      status: {},
+      visited: [0],
+      timeLeft: 0,
+      currentIdx: 0,
+      isPaused: false,
+    });
+
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     
     // Safety: Detect finished attempts (Cloud or Local) to prevent auto-submit loops
