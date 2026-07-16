@@ -9,11 +9,12 @@ import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Info, CheckCircle2, Clock, BookOpen, Zap, Lock, AlertCircle, ChevronRight, ArrowLeft, RotateCcw, Loader2 } from "lucide-react";
+import { ShieldCheck, Info, CheckCircle2, Clock, BookOpen, Zap, Lock, AlertCircle, ChevronRight, ArrowLeft, RotateCcw, Loader2, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
@@ -22,8 +23,9 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v4.4.
+ * @fileOverview Official Test Rules Hub v5.0.
  * FIXED: Retake now performs a hard reset (deletes old attempts) to allow fresh starts.
+ * REDESIGNED: Premium Start Button with animated shine and centered actions.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -156,20 +158,18 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
     
     setIsResetting(true);
     try {
-      // 1. Purge Cloud Attempt
       if (user) {
         await deleteDoc(doc(db, "attempts", `${user.uid}_${activeId}`));
       }
       
-      // 2. Purge Local Storage Attempt
       if (typeof window !== 'undefined') {
         localStorage.removeItem(`cracklix_guest_attempt_${activeId}`);
       }
 
       setIsFinished(false);
-      toast({ title: "Test Reset", description: "You can now start a fresh attempt." });
+      toast({ title: "Test reset successfully" });
     } catch (e) {
-      toast({ variant: "destructive", title: "Reset failed", description: "Could not clear previous attempt." });
+      toast({ variant: "destructive", title: "Reset failed" });
     } finally {
       setIsResetting(false);
     }
@@ -236,7 +236,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                  </button>
                  <Badge className="bg-blue-50 text-primary border-none px-4 py-1.5 rounded-full font-black uppercase text-[8px] md:text-[10px] tracking-widest shadow-sm">Verified Practice</Badge>
               </div>
-              <h1 className="text-2xl md:text-5xl lg:text-6xl font-headline font-black text-[#0F172A] leading-tight tracking-tight">{mock.title}</h1>
+              <h1 className="text-2xl md:text-5xl lg:text-6xl font-headline font-black text-[#0F172A] tracking-tight leading-tight">{mock.title}</h1>
            </div>
 
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -252,7 +252,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                     <Info className="h-7 w-7 text-primary" /> Test guidelines
                  </CardTitle>
               </CardHeader>
-              <CardContent className="p-8 md:p-14 space-y-10 md:space-y-16">
+              <CardContent className="p-8 md:p-14 space-y-12">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
                     <Instruction text="Each question carries equal marks as per official norms." />
                     <Instruction text="Wrong answers incur a negative penalty as listed." />
@@ -262,32 +262,40 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                     <Instruction text="Navigational palette allows direct question jumping." />
                  </div>
 
-                 <div className="flex flex-col sm:flex-row gap-4">
+                 <div className="flex flex-col gap-6 items-center w-full max-w-2xl mx-auto pt-4">
                    {isFinished ? (
-                      <Button 
-                        onClick={() => router.push(`/results/view?id=${activeId}`)}
-                        className="flex-1 h-16 md:h-24 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[11px] md:text-base rounded-2xl md:rounded-[3rem] shadow-5xl group transition-all active:scale-95 border-none"
-                      >
-                         View result <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
-                      </Button>
+                      <>
+                        <Button 
+                          onClick={() => router.push(`/results/view?id=${activeId}`)}
+                          className="w-full h-16 md:h-20 bg-emerald-600 hover:bg-emerald-700 text-white font-[900] uppercase tracking-[0.1em] text-[12px] md:text-sm rounded-[18px] md:rounded-[2rem] shadow-xl group transition-all active:scale-95 border-none flex items-center justify-center gap-2"
+                        >
+                           View test analysis <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                        </Button>
+                        <Button 
+                          onClick={handleRetake}
+                          disabled={isResetting}
+                          variant="outline"
+                          className="w-full h-14 md:h-16 border-2 border-slate-100 text-[#0F172A] font-black uppercase tracking-[0.1em] text-[10px] md:text-xs rounded-xl md:rounded-[1.5rem] shadow-sm hover:bg-slate-50 transition-all active:scale-95 gap-3"
+                        >
+                           {isResetting ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} 
+                           Retake test
+                        </Button>
+                      </>
                    ) : (
                       <Button 
                         onClick={() => router.push(`/mocks/attempt?id=${activeId}`)}
-                        className="flex-1 h-16 md:h-24 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[11px] md:text-base rounded-2xl md:rounded-[3rem] shadow-5xl group transition-all active:scale-95 border-none"
+                        className="relative overflow-hidden w-full h-16 md:h-24 bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] hover:brightness-110 text-white font-[900] uppercase tracking-[0.2em] text-[12px] md:text-xl rounded-[18px] md:rounded-[3rem] shadow-[0_20px_50px_rgba(37,99,235,0.3)] transition-all active:scale-95 border-none group"
                       >
-                         Start test <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
-                      </Button>
-                   )}
-                   
-                   {isFinished && (
-                      <Button 
-                        onClick={handleRetake}
-                        disabled={isResetting}
-                        variant="outline"
-                        className="h-16 md:h-24 px-10 border-2 border-slate-100 text-[#0F172A] font-black uppercase tracking-[0.1em] text-[11px] md:text-sm rounded-2xl md:rounded-[3rem] shadow-sm hover:bg-slate-50 transition-all active:scale-95 gap-3"
-                      >
-                         {isResetting ? <Loader2 className="h-5 w-5 animate-spin" /> : <RotateCcw className="h-5 w-5" />} 
-                         Retake
+                         <div className="flex items-center justify-center gap-4 relative z-10">
+                            <Zap className="h-6 w-6 md:h-8 md:w-8 fill-white text-white" />
+                            <span>Start test</span>
+                            <ChevronRight className="h-6 w-6 md:h-8 md:w-8 transition-transform group-hover:translate-x-2" />
+                         </div>
+                         <motion.div 
+                            animate={{ x: ['-100%', '300%'] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute inset-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] pointer-events-none"
+                         />
                       </Button>
                    )}
                  </div>

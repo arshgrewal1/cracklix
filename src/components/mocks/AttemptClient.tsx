@@ -29,8 +29,9 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v7.6.
+ * @fileOverview Official Mock Attempt Hub v7.7.
  * FIXED: Bypasses resume logic if 'retake=true' and prevents infinite loading on completed sessions.
+ * HARDENED: Stricter userLoading check to prevent premature login redirects.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -38,7 +39,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const db = useFirestore();
-  const { user, profile } = useUser();
+  const { user, profile, loading: userLoading } = useUser();
   const { toast } = useToast();
 
   const mockId = useMemo(() => {
@@ -106,11 +107,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
   useEffect(() => {
     async function loadExam() {
-      if (!db || !mockId) return;
+      if (!db || !mockId || userLoading) return;
       try {
         setIsInitializing(true);
         
-        // 1. Fetch Mock Metadata
         const mockSnap = await getDoc(doc(db, "mocks", mockId));
         const dailySnap = !mockSnap.exists() ? await getDoc(doc(db, "daily_quizzes", mockId)) : null;
         
@@ -120,7 +120,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         const mData = targetSnap.data();
         setMockData(mData);
 
-        // 2. Access Tier Verification
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
         if (tier === 'PREMIUM') {
            if (!user || !profile) { router.replace(`/login?returnUrl=${encodeURIComponent(pathname)}`); return; }
@@ -133,7 +132,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            }
         }
 
-        // 3. Question Asset Ingestion
         const questionIds: string[] = mData.questionIds || [];
         if (questionIds.length === 0) throw new Error("This test has no questions assigned.");
         
@@ -158,22 +156,17 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
         if (sortedQs.length === 0) throw new Error("Failed to load questions. Registry sync failed.");
 
-        // 4. Attempt State Handshake
         let resumeData = undefined;
         if (user && !isRetakeRequested) {
            const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
            if (attemptSnap.exists()) {
              const aData = attemptSnap.data();
-             // If already finished, redirect to results to prevent loops
              if (aData.status === 'COMPLETED') {
                 router.replace(`/results/view?id=${mockId}`);
                 return;
              }
              resumeData = aData;
            }
-        } else if (isRetakeRequested && user) {
-           // Explicitly purge old attempt if retake signaled via URL
-           await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
         }
 
         initExam(mockId, mData.title || "Elite Series", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
@@ -184,7 +177,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       } finally { setIsInitializing(false); }
     }
     loadExam();
-  }, [db, user, profile, mockId, initExam, router, toast, pathname, startSession, isRetakeRequested]);
+  }, [db, user, profile, userLoading, mockId, initExam, router, toast, pathname, startSession, isRetakeRequested]);
 
   useEffect(() => {
     if (isInitializing || initError) return;
