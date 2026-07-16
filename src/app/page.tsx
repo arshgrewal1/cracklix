@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v500.8.
- * SIMPLIFIED: Replaced technical jargon with student-friendly terms.
+ * @fileOverview Institutional Premium Hub v500.9.
+ * UPDATED: Removed uppercase from challenge headings.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -98,7 +98,7 @@ export default function HomePage() {
                       </div>
                     </>
                   ) : (
-                    <div className="py-10 opacity-20"><p className="text-white font-bold uppercase tracking-[0.4em]">Loading latest tests...</p></div>
+                    <div className="py-10 opacity-20"><p className="text-white font-bold tracking-widest">Loading latest tests...</p></div>
                   )}
                </div>
             </motion.div>
@@ -121,7 +121,7 @@ function ChallengeChip({ icon, label }: { icon: React.ReactNode, label: string }
    return (
       <div className="inline-flex items-center gap-2 h-[36px] px-[14px] bg-white/5 backdrop-blur-md border border-white/10 rounded-full hover:bg-white/10 transition-all duration-300 shadow-sm group/chip">
          <span className="shrink-0 text-primary">{icon}</span>
-         <span className="text-[11px] font-bold text-white uppercase tracking-tight">{label}</span>
+         <span className="text-[11px] font-bold text-white tracking-tight">{label}</span>
       </div>
    )
 }

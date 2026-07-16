@@ -72,8 +72,8 @@ import ResultCard from "./ResultCard"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Center v5.2.
- * FIXED: Centered primary actions and simplified all technical language.
+ * @fileOverview Premium Assessment Center v5.3.
+ * UPDATED: Removed uppercase from result titles and labels.
  */
 
 export default function ResultClient() {
@@ -416,7 +416,7 @@ export default function ResultClient() {
                              <Clock className="h-3.5 w-3.5" /> Updated: Just Now
                           </span>
                        </div>
-                       <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-tight text-[#0F172A] uppercase">{mockData?.title}</h1>
+                       <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-tight text-[#0F172A]">{mockData?.title}</h1>
                        <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl mx-auto leading-relaxed">{performanceStatus.desc}</p>
                     </div>
 
@@ -430,7 +430,7 @@ export default function ResultClient() {
                        </Button>
                     </div>
 
-                    <div className="pt-8 border-t border-slate-50 flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
+                    <div className="pt-8 border-t border-slate-50 flex flex-wrap justify-center lg:justify-start items-center gap-8 md:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
                        <Landmark className="h-6 w-6" />
                        <ShieldCheck className="h-6 w-6" />
                        <Star className="h-6 w-6" />
@@ -493,12 +493,12 @@ export default function ResultClient() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 space-y-8 text-left border border-slate-100 overflow-hidden">
-                    <div className="flex items-center gap-4">
+                    <CardHeader className="p-0 flex items-center gap-4 flex-row">
                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner">
                           <BarChart3 className="h-6 w-6" />
                        </div>
-                       <h3 className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Difficulty Matrix</h3>
-                    </div>
+                       <CardTitle className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Difficulty Matrix</CardTitle>
+                    </CardHeader>
                     <div className="space-y-6">
                        <DiffLevel label="Easy Items" val={analysis.difficulty.easy} color="bg-emerald-500" />
                        <DiffLevel label="Medium Items" val={analysis.difficulty.medium} color="bg-blue-500" />

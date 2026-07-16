@@ -8,8 +8,8 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v61.2.
- * FIXED: Standardized alignment for primary and secondary action nodes.
+ * @fileOverview Premium Mobile-First PWA Hero v61.3.
+ * UPDATED: Removed uppercase from action nodes.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);

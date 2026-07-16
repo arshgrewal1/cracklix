@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v51.0.
- * UPDATED: Standardized typography to sentence case.
+ * @fileOverview Institutional Popular Exams Hub v51.1.
+ * UPDATED: Removed uppercase from exam titles.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -163,8 +163,8 @@ export default function PopularExams() {
                              </button>
                           </div>
 
-                          <div className="space-y-4 flex-1 text-left">
-                             <h3 className="text-lg md:text-xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 uppercase">
+                          <div className="space-y-4 flex-1 text-left relative z-10">
+                             <h3 className="text-lg md:text-xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
                                 {exam.name}
                              </h3>
                              
@@ -174,7 +174,7 @@ export default function PopularExams() {
                              </div>
                           </div>
 
-                          <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between group-hover:text-primary">
+                          <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between group-hover:text-primary relative z-10">
                              <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest group-hover:text-primary transition-colors">Start prep</span>
                              <ChevronRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1" />
                           </div>

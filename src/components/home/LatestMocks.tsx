@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Latest Tests Hub v42.0.
- * UPDATED: Standardized typography to sentence case.
+ * @fileOverview Premium Latest Tests Hub v42.1.
+ * UPDATED: Removed uppercase from mock titles.
  */
 export default function LatestMocks() {
   const db = useFirestore()

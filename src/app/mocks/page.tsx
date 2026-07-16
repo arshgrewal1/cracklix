@@ -45,8 +45,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Practice Hub v3.0 [PWA Optimized].
- * UPDATED: Fixed category text overflow with multi-line wrap and responsive typography.
+ * @fileOverview Premium Practice Hub v3.1.
+ * UPDATED: Removed uppercase from mock titles.
  */
 
 const QUICK_ACTIONS = [
@@ -134,156 +134,34 @@ export default function MockTestsPage() {
            </motion.div>
         </section>
 
-        {/* 2. SEARCH & QUICK ACTIONS */}
-        <div className="space-y-8">
-           {/* SEARCH BOX */}
-           <motion.div 
-             initial={{ opacity: 0, y: 10 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.1 }}
-             className="relative max-w-3xl mx-auto group"
-           >
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-[22px] blur-md opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
-              <div className="relative h-[60px] md:h-[68px] bg-white/80 backdrop-blur-xl border border-slate-200 rounded-[20px] md:rounded-[24px] shadow-sm flex items-center px-6 gap-4">
-                 <Search className="h-5 w-5 md:h-6 md:w-6 text-slate-400 group-focus-within:text-primary transition-colors" />
-                 <input 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search Mock Tests..."
-                    className="flex-1 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-xl"
-                 />
-                 <button className="h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-primary transition-all">
-                    <Mic className="h-5 w-5" />
-                 </button>
-              </div>
-           </motion.div>
-
-           {/* QUICK ACTIONS GRID */}
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {QUICK_ACTIONS.map((action, i) => (
-                <motion.div 
-                  key={action.label} 
-                  initial={{ opacity: 0, y: 10 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  transition={{ delay: 0.2 + (i * 0.05) }}
-                >
-                   <Link href={action.href}>
-                      <Card className="border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-[20px] md:rounded-[28px] bg-white/60 backdrop-blur-md hover:-translate-y-1 overflow-hidden group">
-                         <CardContent className="p-5 md:p-8 flex items-center gap-4">
-                            <div className={cn("h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform", action.bg, action.color)}>
-                               <action.icon className="h-6 w-6 md:h-7 md:w-7" />
-                            </div>
-                            <span className="font-black text-[11px] md:text-sm uppercase tracking-widest text-slate-600">{action.label}</span>
-                         </CardContent>
-                      </Card>
-                   </Link>
-                </motion.div>
-              ))}
-           </div>
-        </div>
-
-        {/* 3. POPULAR CATEGORIES - COMPACT GRID REDESIGN */}
-        <section className="space-y-6">
-           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-1">
-              <div className="flex items-center gap-3">
-                 <Layers className="h-5 w-5 text-primary" />
-                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Popular Categories</h2>
-              </div>
-              
-              <AnimatePresence>
-                {selectedCategory && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-full font-bold text-[10px] uppercase tracking-widest"
-                  >
-                     <span>Filtering: {selectedCategory}</span>
-                     <button onClick={() => setSelectedCategory(null)} className="p-1 hover:bg-primary/20 rounded-full transition-colors">
-                        <X className="h-3 w-3" />
-                     </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-           </div>
-           
-           <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-6 justify-center">
-              {CATEGORIES.map((cat, i) => {
-                const isActive = selectedCategory === cat.label;
-                const count = rawMocks?.filter((m:any) => m.title?.toLowerCase().includes(cat.label.toLowerCase())).length || 0;
-                
-                return (
-                  <motion.div 
-                    key={cat.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.05 }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedCategory(isActive ? null : cat.label)}
-                    className="flex flex-col h-full"
-                  >
-                    <Card className={cn(
-                      "relative aspect-square w-full rounded-[18px] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all duration-300 border-2 cursor-pointer shadow-sm group",
-                      isActive 
-                        ? "border-primary bg-primary/5 ring-4 ring-primary/5" 
-                        : "border-slate-100 bg-white hover:border-primary/20"
-                    )}>
-                      <div className={cn(
-                        "h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center transition-all duration-500 bg-gradient-to-br shadow-md group-hover:rotate-6 shrink-0",
-                        cat.color
-                      )}>
-                        <cat.icon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                      </div>
-
-                      <div className="text-center px-1 flex flex-col items-center justify-center w-full min-h-[30px] md:min-h-[42px]">
-                        <p className={cn(
-                          "text-[8px] md:text-[11px] font-black uppercase tracking-tight leading-[1.2] w-full break-words whitespace-normal",
-                          isActive ? "text-primary" : "text-[#0F172A]"
-                        )}>
-                          {cat.label}
-                        </p>
-                        <p className="text-[6px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                          {count} Tests
-                        </p>
-                      </div>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-           </div>
-        </section>
-
-        {/* 4. BOARD FILTERS */}
-        <div className="space-y-6 pt-4">
-           <div className="flex items-center justify-between px-1">
-              <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-slate-400">Board Filter</h3>
-              <div className="h-px flex-1 bg-slate-100 mx-6 hidden md:block" />
-           </div>
-           <div className="flex items-center gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-              <FilterChip 
-                label="All Boards" 
-                active={selectedBoard === 'all'} 
-                onClick={() => setSelectedBoard('all')} 
+        {/* 2. SEARCH BOX */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="relative max-w-3xl mx-auto group"
+        >
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-[22px] blur-md opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
+          <div className="relative h-[60px] md:h-[68px] bg-white/80 backdrop-blur-xl border border-slate-200 rounded-[20px] md:rounded-[24px] shadow-sm flex items-center px-6 gap-4">
+              <Search className="h-5 w-5 md:h-6 md:w-6 text-slate-400 group-focus-within:text-primary transition-colors" />
+              <input 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search Mock Tests..."
+                className="flex-1 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-xl"
               />
-              {boards?.map((b: any) => (
-                <FilterChip 
-                   key={b.id}
-                   label={b.abbreviation}
-                   active={selectedBoard === b.id}
-                   onClick={() => setSelectedBoard(b.id)}
-                />
-              ))}
-           </div>
-        </div>
+              <button className="h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-primary transition-all">
+                <Mic className="h-5 w-5" />
+              </button>
+          </div>
+        </motion.div>
 
         {/* 5. MAIN TEST GRID */}
         <div className="space-y-10">
            <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-3">
                  <Trophy className="h-5 w-5 text-amber-500" />
-                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Available Tests</h2>
+                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Available tests</h2>
               </div>
               <Badge variant="secondary" className="bg-white border-slate-100 text-slate-400 font-bold px-3 py-1 rounded-full shadow-sm">
                  {filteredMocks.length} Nodes Found
@@ -360,7 +238,7 @@ function MockSeriesCard({ mock, isPassActive, index }: { mock: any, isPassActive
                         <Lock className="h-3 w-3" /> Elite Pass
                      </Badge>
                   ) : (
-                     <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">Free Portal</Badge>
+                     <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm">Free Portal</Badge>
                   )}
                   <div className="flex items-center gap-1 text-amber-400">
                      <Star className="h-3 w-3 fill-current" />
@@ -370,7 +248,7 @@ function MockSeriesCard({ mock, isPassActive, index }: { mock: any, isPassActive
             </div>
 
             <div className="flex-1 space-y-5 text-left relative z-10">
-               <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 uppercase tracking-tight">
+               <h3 className="text-lg md:text-2xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 tracking-tight">
                   {mock.title}
                </h3>
                

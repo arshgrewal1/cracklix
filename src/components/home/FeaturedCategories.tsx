@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Filtered Institutional Categories Hub v41.0.
+ * @fileOverview Filtered Institutional Categories Hub v41.1.
  * UPDATED: Standardized typography to sentence case.
  */
 

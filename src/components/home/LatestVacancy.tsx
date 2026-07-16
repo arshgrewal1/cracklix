@@ -14,8 +14,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Vacancy Node v2.5.
- * UPDATED: Standardized typography to sentence case.
+ * @fileOverview Institutional Vacancy Node v2.6.
+ * UPDATED: Removed uppercase from recruitment titles.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
