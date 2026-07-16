@@ -48,8 +48,9 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v5.2 [Total Isolation].
- * FIXED: Reliable state reset on initialization to prevent data bleed between tests.
+ * @fileOverview Hardened Test Store v5.3 [Total Isolation].
+ * FIXED: Reliable state reset on initialization to prevent data bleed.
+ * FIXED: TypeError: Cannot read properties of undefined (reading 'startTime').
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -87,7 +88,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     // Safety: Detect finished attempts (Cloud or Local) to prevent auto-submit loops
     const isAttemptFinished = resumeData?.status === 'COMPLETED' || (resumeData && resumeData.timeLeft <= 0);
     
-    let effectiveResume = isAttemptFinished ? null : resumeData;
+    let effectiveResume = isAttemptFinished ? null : (resumeData || null);
 
     // Check LocalStorage for guests only if Cloud data isn't active
     if (!effectiveResume && !userId && typeof window !== 'undefined') {
@@ -104,9 +105,10 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
        }
     }
 
-    const isResuming = effectiveResume !== null;
+    // FIXED: Use !! to handle undefined vs null safely
+    const isResuming = !!effectiveResume;
     const now = Date.now();
-    const finalStartTime = isResuming ? (effectiveResume.startTime || now) : now;
+    const finalStartTime = (isResuming && effectiveResume) ? (effectiveResume.startTime || now) : now;
     const defaultTime = duration * 60;
 
     set({
@@ -114,7 +116,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       mockTitle: title,
       userId,
       isGuest: !userId,
-      questions,
+      questions: questions || [],
       isPaused: false,
       language: finalLang,
       baseLanguageMode: finalLang,

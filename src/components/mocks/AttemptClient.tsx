@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useUser, useAuth } from "@/firebase";
+import { useUser, useAuth, useFirestore } from "@/firebase";
 import { doc, getDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import ExamHeader from "@/components/exam/ExamHeader";
@@ -29,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v8.0.
- * FIXED: Universal ID extraction and hardened question retrieval to prevent "Sync Failure".
+ * @fileOverview Official Mock Attempt Hub v8.1.
+ * FIXED: Reliable state initialization and hardened question retrieval.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -49,7 +49,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     if (queryId && queryId !== 'manual') return queryId;
     
     const segments = pathname.split('/').filter(Boolean);
-    // Handle format: /mocks/[id]/attempt
     if (segments.length >= 2) {
       const idIdx = segments.indexOf('mocks') + 1;
       if (idIdx > 0 && segments[idIdx] && segments[idIdx] !== 'attempt') {
@@ -120,9 +119,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       setIsInitializing(true);
       setInitError(null);
       
-      console.log(`[ATTEMPT] Initializing sync for Test ID: ${mockId}`);
-
-      // 1. Fetch Mock Metadata
       const mockRef = doc(db, "mocks", mockId);
       const dailyRef = doc(db, "daily_quizzes", mockId);
       
@@ -132,13 +128,12 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }
       
       if (!targetSnap.exists()) {
-         throw new Error("The requested test entry was not found in our database.");
+         throw new Error("Test entry not found.");
       }
       
       const mData = targetSnap.data();
       setMockData(mData);
 
-      // 2. Security & Access Audit
       const tier = (mData.accessLevel || 'FREE').toUpperCase();
       if (tier === 'PREMIUM') {
          if (!user && !userLoading) { 
@@ -153,15 +148,14 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             
             if (!hasActivePass) {
                router.replace('/pass');
-               toast({ title: "Elite Pass Required", description: "This is a premium mock test hub." });
+               toast({ title: "Elite Pass Required" });
                return;
             }
          }
       }
 
-      // 3. Question Retrieval Hub
       const questionIds: string[] = mData.questionIds || [];
-      if (questionIds.length === 0) throw new Error("This test entry has no questions configured.");
+      if (questionIds.length === 0) throw new Error("No questions configured.");
       
       const fetchedQuestions: any[] = [];
       const chunks = [];
@@ -170,7 +164,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }
       
       for (const chunk of chunks) {
-         // Query both main and legacy banks for robustness
          const [mcqSnap, legacySnap] = await Promise.all([
            getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
            getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
@@ -184,9 +177,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          });
       }
 
-      // 4. Integrity Check & Store Initialization
       const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
-      if (sortedQs.length === 0) throw new Error("Could not synchronize question content. Please contact support.");
+      if (sortedQs.length === 0) throw new Error("Question sync failure.");
 
       let resumeData = null;
       if (user && !isRetakeRequested) {
@@ -202,14 +194,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }
 
       initExam(mockId, mData.title || "Cracklix Test", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
-      
-      // 5. Start Study Session
       startSession(); 
       setIsInitializing(false);
       
     } catch (err: any) { 
-      console.error("[ATTEMPT_SYNC_ERROR]:", err);
-      setInitError(err.message || "An unexpected error occurred during test sync."); 
+      setInitError(err.message || "Sync failure."); 
       setIsInitializing(false);
     }
   }, [db, mockId, user, userLoading, profile, router, pathname, initExam, startSession, toast, isRetakeRequested]);
@@ -433,4 +422,3 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     </div>
   );
 }
-
