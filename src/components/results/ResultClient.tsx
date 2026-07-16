@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Card } from "@/components/ui/card"
@@ -30,24 +31,25 @@ import {
   Award,
   FileText,
   RotateCcw,
-  LayoutGrid
+  LayoutGrid,
+  X
 } from "lucide-react"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
-import { collection, query, where, doc, getDoc, documentId, getDocs, limit } from "firebase/firestore"
-import Link from "next/link"
+import { collection, query, where, doc, getDoc, documentId, getDocs, limit, deleteDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
-import { rationalizeMockQuestion } from "@/ai/flows/rationalize-mock-question"
 import { toPng } from "html-to-image"
 import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v14.2.
- * FIXED: Reset currentReviewIdx when filter changes.
- * FIXED: Hardened answer matching logic to handle string keys from Firestore.
+ * @fileOverview Official Result Hub v15.0 [Logic Audit Fixed].
+ * FIXED: Mutually exclusive categorization for Correct, Wrong, and Skipped questions.
+ * FIXED: Counters exactly match the filtered lists.
+ * FIXED: Strict handling of null/undefined/empty answers.
+ * ADDED: Console debugging for registry verification.
  */
 
 export default function ResultClient() {
@@ -68,8 +70,6 @@ export default function ResultClient() {
   const [showExplanation, setShowExplanation] = useState(false)
   
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
-  const [isAiLoading, setIsAiLoading] = useState(false)
-  const [aiAuditResult, setAiAuditResult] = useState<any>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -91,7 +91,13 @@ export default function ResultClient() {
   useEffect(() => {
      if (isGuestMode && mockId) {
         const stored = localStorage.getItem(`cracklix_guest_result_${mockId}`);
-        if (stored) setGuestResult(JSON.parse(stored));
+        if (stored) {
+          try {
+            setGuestResult(JSON.parse(stored));
+          } catch (e) {
+            console.error("Guest result parsing failed");
+          }
+        }
      }
   }, [isGuestMode, mockId]);
 
@@ -166,23 +172,89 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
+  /**
+   * REFACTORED CATEGORIZATION LOGIC
+   * Every question is strictly assigned to one bucket (Correct, Wrong, or Skipped).
+   */
+  const categorizedNodes = useMemo(() => {
+    if (!sessionData || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
+    
+    const all = questions.map((q, i) => ({ ...q, originalIndex: i }));
+    const correct: any[] = [];
+    const wrong: any[] = [];
+    const skipped: any[] = [];
+
+    all.forEach((q) => {
+      // Handles both integer index and string index from Firestore
+      const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)];
+      
+      // Strict rule: null, undefined, or empty string -> Skipped
+      const isAttempted = ans !== null && ans !== undefined && ans !== "";
+      
+      if (!isAttempted) {
+        skipped.push(q);
+      } else {
+        const userSelectedLabel = ['A', 'B', 'C', 'D', 'E'][Number(ans)];
+        if (userSelectedLabel === q.correctAnswer) {
+          correct.push(q);
+        } else {
+          wrong.push(q);
+        }
+      }
+    });
+
+    // Console Debugging as requested
+    const idSet = new Set();
+    const duplicateIds = questions.filter(q => {
+      if (idSet.has(q.id)) return true;
+      idSet.add(q.id);
+      return false;
+    }).map(q => q.id);
+
+    console.log("[RESULT_LOGIC_AUDIT]", {
+      total: all.length,
+      correct: correct.length,
+      wrong: wrong.length,
+      skipped: skipped.length,
+      sum: correct.length + wrong.length + skipped.length,
+      isBalanced: (correct.length + wrong.length + skipped.length) === all.length,
+      duplicateIds
+    });
+
+    return { all, correct, wrong, skipped };
+  }, [questions, sessionData]);
+
+  const filteredQuestions = useMemo(() => {
+    if (activeReviewFilter === 'CORRECT') return categorizedNodes.correct;
+    if (activeReviewFilter === 'WRONG') return categorizedNodes.wrong;
+    if (activeReviewFilter === 'SKIPPED') return categorizedNodes.skipped;
+    return categorizedNodes.all;
+  }, [categorizedNodes, activeReviewFilter]);
+
   const analysis = useMemo(() => {
-     if (!sessionData || !questions.length) return { subjects: [], topics: [], difficulty: { easy: 0, medium: 0, hard: 0 } };
+     if (!sessionData || !questions.length) return { subjects: [], difficulty: { easy: 0, medium: 0, hard: 0 } };
      
      const subMap: Record<string, any> = {};
      const difficultyCount = { easy: 0, medium: 0, hard: 0 };
      const difficultyCorrect = { easy: 0, medium: 0, hard: 0 };
 
-     questions.forEach((q, i) => {
+     categorizedNodes.all.forEach((q) => {
         const sId = q.subjectId || 'General Hub';
-        const ansIdx = sessionData.answers?.[i] ?? sessionData.answers?.[String(i)];
-        const isCorrect = ansIdx !== undefined && ansIdx !== null && ['A','B','C','D'][ansIdx] === q.correctAnswer;
-        const isWrong = ansIdx !== undefined && ansIdx !== null && !isCorrect;
+        const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)];
+        const isAttempted = ans !== null && ans !== undefined && ans !== "";
+        const isCorrect = isAttempted && ['A','B','C','D'][Number(ans)] === q.correctAnswer;
+        const isWrong = isAttempted && !isCorrect;
 
         if (!subMap[sId]) subMap[sId] = { name: sId, total: 0, correct: 0, wrong: 0, score: 0 };
         subMap[sId].total++;
-        if (isCorrect) { subMap[sId].correct++; subMap[sId].score += Number(mockData?.positiveMarks || 1); }
-        if (isWrong) { subMap[sId].wrong++; subMap[sId].score -= Number(mockData?.negativeMarks || 0.25); }
+        if (isCorrect) { 
+          subMap[sId].correct++; 
+          subMap[sId].score += Number(mockData?.positiveMarks || 1); 
+        }
+        if (isWrong) { 
+          subMap[sId].wrong++; 
+          subMap[sId].score -= Number(mockData?.negativeMarks || 0.25); 
+        }
 
         const diffKey = (q.difficulty || 'Medium').toLowerCase() as 'easy' | 'medium' | 'hard';
         if (difficultyCount[diffKey] !== undefined) difficultyCount[diffKey]++;
@@ -202,33 +274,13 @@ export default function ResultClient() {
      };
 
      return { subjects, difficulty };
-  }, [questions, sessionData, mockData]);
-
-  const filteredQuestions = useMemo(() => {
-    if (!sessionData || !questions.length) return [];
-    return questions.map((q: any, i: number) => ({ ...q, index: i })).filter((q: any) => {
-      const ans = sessionData.answers?.[q.index] ?? sessionData.answers?.[String(q.index)];
-      const hasAnswer = ans !== undefined && ans !== null;
-      const isCorrect = hasAnswer && ['A','B','C','D'][ans] === q.correctAnswer;
-      
-      if (activeReviewFilter === 'ALL') return true;
-      if (activeReviewFilter === 'CORRECT') return isCorrect;
-      if (activeReviewFilter === 'WRONG') return hasAnswer && !isCorrect;
-      if (activeReviewFilter === 'SKIPPED') return !hasAnswer;
-      return true;
-    });
-  }, [questions, sessionData, activeReviewFilter]);
+  }, [categorizedNodes, sessionData, mockData]);
 
   // RESET INDEX ON FILTER CHANGE
   useEffect(() => {
     setCurrentReviewIdx(0);
     setShowExplanation(false);
   }, [activeReviewFilter]);
-
-  const answeredCount = useMemo(() => {
-    if (!sessionData?.answers) return 0;
-    return Object.values(sessionData.answers).filter(a => a !== null && a !== undefined).length;
-  }, [sessionData]);
 
   const handleSharePdf = async () => {
     if (isGeneratingPdf || !sessionData) return;
@@ -292,6 +344,8 @@ export default function ResultClient() {
      </div>
   );
 
+  const currentQuestion = filteredQuestions[currentReviewIdx];
+
   return (
     <div className="min-h-screen bg-white font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
       
@@ -304,16 +358,16 @@ export default function ResultClient() {
              rank={user ? merit.rank : 'Guest'}
              accuracy={sessionData?.accuracy || 0}
              timeTaken={formatTime(sessionData?.timeTaken || 0)}
-             correct={sessionData?.correctCount || 0}
-             wrong={sessionData?.wrongCount || 0}
-             total={questions.length}
+             correct={categorizedNodes.correct.length}
+             wrong={categorizedNodes.wrong.length}
+             total={categorizedNodes.all.length}
              date={new Date(sessionData?.timestamp).toLocaleDateString('en-GB')}
              resultId={sessionData?.id || 'manual'}
              percentile={merit.percentile}
              subjects={analysis.subjects}
              difficulty={analysis.difficulty}
              timeMetrics={{
-                avg: `${Math.round((sessionData?.timeTaken || 0) / (answeredCount || 1))}s`,
+                avg: `${Math.round((sessionData?.timeTaken || 0) / (categorizedNodes.correct.length + categorizedNodes.wrong.length || 1))}s`,
                 fastest: "4s",
                 slowest: "84s"
              }}
@@ -424,27 +478,36 @@ export default function ResultClient() {
 
         <section className="sticky top-[64px] z-[90] bg-white/90 backdrop-blur-md py-4 border-b border-slate-50 -mx-4 px-4">
            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-              <FilterBtn active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL')} label="All" count={questions.length} />
-              <FilterBtn active={activeReviewFilter === 'CORRECT'} onClick={() => setActiveReviewFilter('CORRECT')} label="Correct" count={sessionData?.correctCount || 0} color="bg-emerald-500" />
-              <FilterBtn active={activeReviewFilter === 'WRONG'} onClick={() => setActiveReviewFilter('WRONG')} label="Wrong" count={sessionData?.wrongCount || 0} color="bg-rose-500" />
-              <FilterBtn active={activeReviewFilter === 'SKIPPED'} onClick={() => setActiveReviewFilter('SKIPPED')} label="Skipped" count={Math.max(0, questions.length - answeredCount)} color="bg-slate-400" />
+              <FilterBtn active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL')} label="All" count={categorizedNodes.all.length} />
+              <FilterBtn active={activeReviewFilter === 'CORRECT'} onClick={() => setActiveReviewFilter('CORRECT')} label="Correct" count={categorizedNodes.correct.length} color="bg-emerald-500" />
+              <FilterBtn active={activeReviewFilter === 'WRONG'} onClick={() => setActiveReviewFilter('WRONG')} label="Wrong" count={categorizedNodes.wrong.length} color="bg-rose-500" />
+              <FilterBtn active={activeReviewFilter === 'SKIPPED'} onClick={() => setActiveReviewFilter('SKIPPED')} label="Skipped" count={categorizedNodes.skipped.length} color="bg-slate-400" />
            </div>
         </section>
 
         <section className="pb-32">
            <AnimatePresence mode="wait">
               {filteredQuestions.length > 0 ? (
-                 <motion.div key={filteredQuestions[currentReviewIdx]?.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                 <motion.div key={currentQuestion?.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
                     <Card className="border border-slate-100 shadow-sm rounded-2xl overflow-hidden bg-white">
                        <div className="p-6 md:p-10 space-y-6">
                           <div className="flex items-center justify-between">
                              <div className="flex items-center gap-3">
-                                <span className="h-8 w-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-black text-xs">{filteredQuestions[currentReviewIdx].index + 1}</span>
-                                <Badge className="bg-blue-50 text-blue-600 border-none text-[8px] font-black uppercase tracking-widest px-2">{filteredQuestions[currentReviewIdx].difficulty || 'MEDIUM'}</Badge>
+                                <span className="h-8 w-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-black text-xs">{currentQuestion.originalIndex + 1}</span>
+                                <Badge className="bg-blue-50 text-blue-600 border-none text-[8px] font-black uppercase tracking-widest px-2">{currentQuestion.difficulty || 'MEDIUM'}</Badge>
                              </div>
-                             <ReviewStatusBadge userAns={sessionData.answers?.[filteredQuestions[currentReviewIdx].index] ?? sessionData.answers?.[String(filteredQuestions[currentReviewIdx].index)]} correctAns={filteredQuestions[currentReviewIdx].correctAnswer} />
+                             <ReviewStatusBadge 
+                                userAns={sessionData.answers?.[currentQuestion.originalIndex] ?? sessionData.answers?.[String(currentQuestion.originalIndex)]} 
+                                correctAns={currentQuestion.correctAnswer} 
+                             />
                           </div>
-                          <QuestionRenderer question={filteredQuestions[currentReviewIdx]} language={mockData?.languageMode || 'ENGLISH_PUNJABI'} showSolution={true} selectedAnswer={sessionData.answers?.[filteredQuestions[currentReviewIdx].index] ?? sessionData.answers?.[String(filteredQuestions[currentReviewIdx].index)]} className="p-0 shadow-none border-none bg-transparent" />
+                          <QuestionRenderer 
+                            question={currentQuestion} 
+                            language={mockData?.languageMode || 'ENGLISH_PUNJABI'} 
+                            showSolution={true} 
+                            selectedAnswer={sessionData.answers?.[currentQuestion.originalIndex] ?? sessionData.answers?.[String(currentQuestion.originalIndex)]} 
+                            className="p-0 shadow-none border-none bg-transparent" 
+                          />
                           <div className="pt-6 border-t border-slate-50 flex flex-col gap-4">
                              <Button onClick={() => setShowExplanation(!showExplanation)} variant="ghost" className="justify-between h-12 text-slate-600 font-bold text-sm bg-slate-50 hover:bg-slate-100 px-6 rounded-xl">
                                 {showExplanation ? "Hide Rationale" : "View Official Rationale"} {showExplanation ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -473,12 +536,12 @@ export default function ResultClient() {
 
       <div className="fixed bottom-0 left-0 right-0 z-[110] bg-white border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] px-4 py-4 md:py-6">
          <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-4">
-            <Button disabled={currentReviewIdx === 0} onClick={() => { setCurrentReviewIdx(currentReviewIdx - 1); setShowExplanation(false); setAiAuditResult(null); }} variant="ghost" className="h-12 md:h-14 px-4 md:px-8 font-bold text-xs gap-2 rounded-xl"><ChevronLeft className="h-5 w-5" /> Previous</Button>
+            <Button disabled={currentReviewIdx === 0} onClick={() => { setCurrentReviewIdx(currentReviewIdx - 1); setShowExplanation(false); }} variant="ghost" className="h-12 md:h-14 px-4 md:px-8 font-bold text-xs gap-2 rounded-xl"><ChevronLeft className="h-5 w-5" /> Previous</Button>
             <div className="flex flex-col items-center">
                <span className="text-lg md:text-xl font-black tabular-nums">{filteredQuestions.length > 0 ? currentReviewIdx + 1 : 0} / {filteredQuestions.length}</span>
                <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Nodes</span>
             </div>
-            <Button disabled={currentReviewIdx >= filteredQuestions.length - 1} onClick={() => { setCurrentReviewIdx(currentReviewIdx + 1); setShowExplanation(false); setAiAuditResult(null); }} className="h-12 md:h-14 px-4 md:px-8 font-bold text-xs gap-2 rounded-xl bg-slate-900 text-white hover:bg-black">Next <ChevronRight className="h-5 w-5" /></Button>
+            <Button disabled={currentReviewIdx >= filteredQuestions.length - 1} onClick={() => { setCurrentReviewIdx(currentReviewIdx + 1); setShowExplanation(false); }} className="h-12 md:h-14 px-4 md:px-8 font-bold text-xs gap-2 rounded-xl bg-slate-900 text-white hover:bg-black">Next <ChevronRight className="h-5 w-5" /></Button>
          </div>
       </div>
       
@@ -508,8 +571,12 @@ function FilterBtn({ active, onClick, label, count, color = "bg-primary" }: any)
 }
 
 function ReviewStatusBadge({ userAns, correctAns }: any) {
-   const isCorrect = userAns !== undefined && userAns !== null && ['A','B','C','D'][userAns] === correctAns;
+   // Strict rules for status badge logic
+   const isAttempted = userAns !== null && userAns !== undefined && userAns !== "";
+   if (!isAttempted) return <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Skipped</Badge>;
+   
+   const isCorrect = ['A','B','C','D','E'][Number(userAns)] === correctAns;
    if (isCorrect) return <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Correct</Badge>;
-   if (userAns === undefined || userAns === null) return <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Skipped</Badge>;
+   
    return <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Wrong</Badge>;
 }
