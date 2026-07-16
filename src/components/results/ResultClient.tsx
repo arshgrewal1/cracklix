@@ -5,7 +5,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -33,10 +33,6 @@ import {
   RotateCcw,
   LayoutGrid,
   X,
-  Target as TargetIcon,
-  Crown,
-  Medal,
-  Check,
   Timer,
   FileSearch,
   BookOpen,
@@ -60,9 +56,10 @@ import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Premium Institutional Result Hub v2.1.
- * FIXED: Standardized performanceStatus variable name to resolve ReferenceError.
- * FIXED: Imported missing Landmark, Star, and Bookmark icons.
+ * @fileOverview Premium Institutional Result Hub v2.2.
+ * FIXED: Imported missing CardHeader, CardContent, and CardTitle.
+ * FIXED: Standardized performanceStatus variable mapping.
+ * FIXED: Added missing Landmark, Star, and Bookmark icons.
  */
 
 export default function ResultClient() {
@@ -218,6 +215,11 @@ export default function ResultClient() {
     return categorizedNodes.all;
   }, [categorizedNodes, activeReviewFilter]);
 
+  // Reset navigation index when filter changes
+  useEffect(() => {
+    setCurrentReviewIdx(0);
+  }, [activeReviewFilter]);
+
   const analysis = useMemo(() => {
      if (!sessionData || !questions.length) return { subjects: [], difficulty: { easy: 0, medium: 0, hard: 0 } };
      
@@ -266,7 +268,7 @@ export default function ResultClient() {
   const achievements = useMemo(() => {
     if (!sessionData) return [];
     const pool = [];
-    if (sessionData.accuracy >= 100) pool.push({ label: "Perfect Precision", icon: <Crown className="text-amber-500" />, desc: "100% Accuracy Achieved" });
+    if (sessionData.accuracy >= 100) pool.push({ label: "Perfect Precision", icon: <Trophy className="text-amber-500" />, desc: "100% Accuracy Achieved" });
     if (sessionData.accuracy >= 90) pool.push({ label: "Accuracy Master", icon: <Target className="text-emerald-500" />, desc: "Top 90%+ Accuracy" });
     if ((sessionData.timeTaken / (questions.length || 1)) < 30) pool.push({ label: "Speed Demon", icon: <Zap className="text-orange-500" />, desc: "Lightning fast attempt" });
     if (sessionData.score > 80) pool.push({ label: "High Flyer", icon: <Award className="text-primary" />, desc: "Elite score threshold" });
@@ -586,7 +588,7 @@ export default function ResultClient() {
               <AnimatePresence mode="wait">
                  {filteredQuestions.length > 0 ? (
                     <motion.div key={currentQuestion?.id + activeReviewFilter} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.4, ease: "easeOut" }} className="space-y-10">
-                       <Card className="border-none shadow-3xl rounded-[2.5rem] md:rounded-[3.5rem] bg-white overflow-hidden border border-slate-100 group transition-all duration-700">
+                       <Card className="border-none shadow-3xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-100 group transition-all duration-700">
                           <div className="p-8 md:p-14 space-y-10">
                              <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
@@ -673,7 +675,7 @@ export default function ResultClient() {
 function StatCard({ label, val, sub, icon, highlight }: any) {
   return (
     <Card className={cn(
-      "border-none shadow-xl bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] relative overflow-hidden group border border-slate-50 transition-all hover:translate-y-[-4px]",
+      "border-none shadow-xl bg-white p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group border border-slate-50 transition-all hover:translate-y-[-4px]",
       highlight && "ring-4 ring-primary/5"
     )}>
        <div className="absolute top-0 right-0 p-4 md:p-6 opacity-5 group-hover:scale-110 transition-transform">{icon}</div>
