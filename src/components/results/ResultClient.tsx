@@ -6,7 +6,18 @@ import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
-import { collection, query, where, doc, getDoc, documentId, getDocs, limit, serverTimestamp, addDoc } from "firebase/firestore"
+import { 
+  collection, 
+  query, 
+  where, 
+  doc, 
+  getDoc, 
+  documentId, 
+  getDocs, 
+  limit, 
+  serverTimestamp, 
+  addDoc 
+} from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
   Trophy, 
@@ -61,8 +72,8 @@ import ResultCard from "./ResultCard"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Center v5.1.
- * SIMPLIFIED: Replaced technical jargon with student-friendly terms.
+ * @fileOverview Premium Assessment Center v5.2.
+ * FIXED: Centered primary actions and simplified all technical language.
  */
 
 export default function ResultClient() {
@@ -326,7 +337,6 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
       
-      {/* HIDDEN A4 TEMPLATE FOR PDF */}
       <div className="fixed left-[-3000px] top-0 pointer-events-none">
            <ResultCard 
              studentName={profile?.name || "Aspirant"}
@@ -398,21 +408,21 @@ export default function ResultClient() {
                  </div>
 
                  {/* RIGHT: IDENTITY & ACTIONS */}
-                 <div className="flex-1 space-y-8 text-center lg:text-left w-full">
+                 <div className="flex-1 space-y-8 text-center w-full">
                     <div className="space-y-4">
-                       <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                       <div className="flex flex-wrap items-center justify-center gap-3">
                           <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-400 font-black text-[10px] px-3 py-1 uppercase tracking-widest">Official Database</Badge>
                           <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
                              <Clock className="h-3.5 w-3.5" /> Updated: Just Now
                           </span>
                        </div>
                        <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-tight text-[#0F172A] uppercase">{mockData?.title}</h1>
-                       <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl leading-relaxed">{performanceStatus.desc}</p>
+                       <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl mx-auto leading-relaxed">{performanceStatus.desc}</p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                        <Button onClick={handleSharePdf} disabled={isGeneratingPdf} className="w-full sm:w-auto h-14 md:h-18 px-10 md:px-16 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[11px] tracking-widest rounded-2xl shadow-3xl gap-3 border-none transition-all active:scale-95">
-                          {isGeneratingPdf ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileText className="h-5 w-5" />} 
+                          {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-5 w-5" />} 
                           Download Report
                        </Button>
                        <Button onClick={() => router.push(`/mocks/instructions?id=${mockId}`)} variant="outline" className="w-full sm:w-auto h-14 md:h-18 px-10 md:px-14 border-2 border-slate-200 text-[#0F172A] font-black uppercase text-[11px] tracking-widest rounded-2xl bg-white hover:bg-slate-50 gap-3 shadow-sm transition-all active:scale-95">
@@ -420,7 +430,7 @@ export default function ResultClient() {
                        </Button>
                     </div>
 
-                    <div className="pt-8 border-t border-slate-50 flex flex-wrap justify-center lg:justify-start items-center gap-8 md:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
+                    <div className="pt-8 border-t border-slate-50 flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
                        <Landmark className="h-6 w-6" />
                        <ShieldCheck className="h-6 w-6" />
                        <Star className="h-6 w-6" />
@@ -435,12 +445,12 @@ export default function ResultClient() {
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
            <StatCard label="Final Score" val={(sessionData?.score || 0).toFixed(1)} sub="Points" icon={<Zap className="text-blue-500" />} />
            <StatCard label="State Rank" val={user ? `#${merit.rank}` : "---"} sub="Live Ranking" icon={<Trophy className="text-amber-500" />} highlight />
-           <StatCard label="Accuracy" val={`${sessionData?.accuracy || 0}%`} sub="Mastery Index" icon={<Target className="text-emerald-500" />} />
+           <StatCard label="Accuracy" val={`${sessionData?.accuracy || 0}%`} sub="Skill Score" icon={<Target className="text-emerald-500" />} />
            <StatCard label="Percentile" val={`${merit.percentile}%`} sub="Performance" icon={<Award className="text-purple-500" />} />
            <StatCard label="Correct" val={categorizedNodes.correct.length} sub="Verified Answers" icon={<CheckCircle2 className="text-emerald-600" />} />
            <StatCard label="Incorrect" val={categorizedNodes.wrong.length} sub="Mistakes" icon={<XCircle className="text-rose-500" />} />
            <StatCard label="Skipped" val={categorizedNodes.skipped.length} sub="No Attempt" icon={<AlertCircle className="text-slate-400" />} />
-           <StatCard label="Time Taken" val={formatTime(sessionData?.timeTaken || 0)} sub="Duration" icon={<Clock className="text-indigo-500" />} />
+           <StatCard label="Time Spent" val={formatTime(sessionData?.timeTaken || 0)} sub="Duration" icon={<Clock className="text-indigo-500" />} />
         </section>
 
         {/* ANALYTICS & ACHIEVEMENTS HUB */}
@@ -453,7 +463,7 @@ export default function ResultClient() {
                           <CardTitle className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Subject Mastery</CardTitle>
                           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Official category review</p>
                        </div>
-                       <Badge className="bg-primary/10 text-primary border-none font-black text-[9px] uppercase px-4 py-1.5 rounded-full shadow-inner">Real-time Data</Badge>
+                       <Badge className="bg-primary/10 text-primary border-none font-black text-[9px] uppercase px-4 py-1.5 rounded-full shadow-inner">Live Data</Badge>
                     </div>
                  </CardHeader>
                  <CardContent className="p-8 md:p-14 space-y-10">
@@ -487,18 +497,18 @@ export default function ResultClient() {
                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner">
                           <BarChart3 className="h-6 w-6" />
                        </div>
-                       <h3 className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Difficulty Level</h3>
+                       <h3 className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Difficulty Matrix</h3>
                     </div>
                     <div className="space-y-6">
-                       <DiffLevel label="Easy Questions" val={analysis.difficulty.easy} color="bg-emerald-500" />
-                       <DiffLevel label="Medium Questions" val={analysis.difficulty.medium} color="bg-blue-500" />
-                       <DiffLevel label="Hard Questions" val={analysis.difficulty.hard} color="bg-rose-500" />
+                       <DiffLevel label="Easy Items" val={analysis.difficulty.easy} color="bg-emerald-500" />
+                       <DiffLevel label="Medium Items" val={analysis.difficulty.medium} color="bg-blue-500" />
+                       <DiffLevel label="Expert Items" val={analysis.difficulty.hard} color="bg-rose-500" />
                     </div>
                  </Card>
 
                  <Card className="border-none shadow-xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-12 space-y-8 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-44 w-44 text-primary" /></div>
-                    <div className="relative z-10 space-y-8">
+                    <div className="relative z-10 space-y-8 text-left">
                        <div className="space-y-1">
                           <h3 className="text-2xl font-black tracking-tight">Study Tips</h3>
                           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Logic Hub Advice</p>
@@ -515,7 +525,7 @@ export default function ResultClient() {
 
            <div className="lg:col-span-4 space-y-10">
               <section className="space-y-6">
-                 <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Unlocked Badges</h3>
+                 <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400 ml-2 text-left">Unlocked Badges</h3>
                  <div className="grid grid-cols-1 gap-4">
                     {achievements.length > 0 ? achievements.map((a, i) => (
                        <Card key={i} className="border-none shadow-lg rounded-2xl bg-white p-6 flex items-center gap-5 group hover:shadow-xl transition-all hover:-translate-x-1 border border-slate-50">
@@ -540,8 +550,8 @@ export default function ResultClient() {
                     <Medal className="h-10 w-10 fill-current" />
                  </div>
                  <div className="space-y-3">
-                    <h3 className="text-2xl font-black text-[#0F172A] tracking-tight">State Ranking Center</h3>
-                    <p className="text-slate-500 font-medium text-sm">Your score has been updated in the master merit list for all Punjab students.</p>
+                    <h3 className="text-2xl font-black text-[#0F172A] tracking-tight">State Ranking Hub</h3>
+                    <p className="text-slate-500 font-medium text-sm">Your score has been updated in the merit list for all Punjab students.</p>
                  </div>
                  <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner space-y-4">
                     <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -559,13 +569,13 @@ export default function ResultClient() {
 
         {/* QUESTION REVIEW SYSTEM - SCROLL BASED LIST */}
         <section className="space-y-10 pt-16 border-t border-slate-100">
-           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 px-2">
+           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 px-2 text-left">
               <div className="space-y-4">
                  <div className="flex items-center gap-3">
                     <FileSearch className="h-6 w-6 text-primary" />
                     <h2 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter">Detailed Analysis</h2>
                  </div>
-                 <p className="text-slate-500 font-medium text-sm md:text-xl">Check every answer and official explanation in this list.</p>
+                 <p className="text-slate-500 font-medium text-sm md:text-xl">Check every answer and explanation in this list.</p>
               </div>
            </div>
 
@@ -590,7 +600,7 @@ export default function ResultClient() {
                             transition={{ duration: 0.4, delay: idx * 0.05 }}
                           >
                              <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-100 group transition-all duration-700">
-                                <div className="p-8 md:p-14 space-y-10">
+                                <div className="p-8 md:p-14 space-y-10 text-left">
                                    <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-4">
                                          <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-xs md:text-lg shadow-xl">
@@ -630,7 +640,7 @@ export default function ResultClient() {
                  ) : (
                     <div className="py-40 text-center opacity-30 animate-in fade-in duration-500">
                        <FileSearch className="h-20 w-20 mx-auto text-slate-300" />
-                       <p className="text-xl font-black uppercase tracking-[0.4em] mt-8 text-slate-400">No Questions Found</p>
+                       <p className="text-xl font-black uppercase tracking-[0.4em] mt-8 text-slate-400">No Items Found</p>
                     </div>
                  )}
               </AnimatePresence>
@@ -641,15 +651,15 @@ export default function ResultClient() {
         <section className="pt-20">
            <Card className="border-none shadow-5xl rounded-[3rem] bg-[#0B1528] text-white p-10 md:p-24 relative overflow-hidden group border border-white/5">
               <div className="absolute top-0 right-0 p-12 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Star className="h-64 w-64 text-primary fill-primary" /></div>
-              <div className="relative z-10 space-y-12 text-center lg:text-left">
+              <div className="relative z-10 space-y-12 text-center">
                  <div className="space-y-6">
                     <h2 className="text-3xl md:text-7xl font-[900] tracking-tighter leading-none text-white uppercase">Your journey <br/> <span className="text-primary">continues.</span></h2>
-                    <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto lg:mx-0 leading-snug">The review is complete. Now focus on your weak areas to improve your rank in the list.</p>
+                    <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-snug">The review is complete. Now focus on your weak areas to improve your score.</p>
                  </div>
                  
-                 <div className="flex flex-col sm:flex-row items-center gap-6">
+                 <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                     <Button asChild className="w-full sm:w-auto h-16 md:h-20 px-12 md:px-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-sm tracking-widest rounded-2xl md:rounded-3xl shadow-4xl border-none transition-all active:scale-95 group/btn">
-                       <Link href="/mocks" className="flex items-center gap-4">Continue Practice <ChevronRight className="h-5 w-5 group-hover/btn:translate-x-2 transition-transform" /></Link>
+                       <Link href="/mocks" className="flex items-center gap-4">Continue Learning <ChevronRight className="h-5 w-5 group-hover/btn:translate-x-2 transition-transform" /></Link>
                     </Button>
                     <Button asChild variant="outline" className="w-full sm:w-auto h-16 md:h-20 px-12 md:px-16 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-2xl md:rounded-3xl font-black uppercase text-[10px] md:text-sm tracking-widest transition-all active:scale-95 border-none">
                        <Link href="/dashboard">Return Home</Link>
@@ -669,7 +679,7 @@ export default function ResultClient() {
 function StatCard({ label, val, sub, icon, highlight }: any) {
   return (
     <Card className={cn(
-      "border-none shadow-xl bg-white p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group border border-slate-50 transition-all hover:translate-y-[-4px]",
+      "border-none shadow-xl bg-white p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group border border-slate-50 transition-all hover:translate-y-[-4px] text-left",
       highlight && "ring-4 ring-primary/5"
     )}>
        <div className="absolute top-0 right-0 p-4 md:p-6 opacity-5 group-hover:scale-110 transition-transform">{icon}</div>
