@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v500.7.
- * FIXED: Removed 'whitespace-nowrap' from Today's Challenge header to ensure mobile wrapping.
+ * @fileOverview Institutional Premium Hub v500.8.
+ * SIMPLIFIED: Replaced technical jargon with student-friendly terms.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -98,7 +98,7 @@ export default function HomePage() {
                       </div>
                     </>
                   ) : (
-                    <div className="py-10 opacity-20"><p className="text-white font-bold uppercase tracking-[0.4em]">Vault synchronizing...</p></div>
+                    <div className="py-10 opacity-20"><p className="text-white font-bold uppercase tracking-[0.4em]">Loading latest tests...</p></div>
                   )}
                </div>
             </motion.div>

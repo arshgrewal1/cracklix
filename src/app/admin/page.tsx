@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -28,7 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v32.0
+ * Admin Dashboard Center v32.1
  * SIMPLIFIED: Replaced technical jargon with accessible application terms.
  */
 

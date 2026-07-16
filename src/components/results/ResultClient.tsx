@@ -23,8 +23,6 @@ import {
   Share2,
   CheckCircle2,
   ArrowRight,
-  ChevronDown,
-  ChevronUp,
   BarChart3,
   BrainCircuit,
   Sparkles,
@@ -38,14 +36,11 @@ import {
   BookOpen,
   ArrowUpRight,
   Flame,
-  MessageCircle,
-  Heart,
-  Lightbulb,
-  Landmark,
+  Medal,
   Star,
   Bookmark,
   Check,
-  Medal
+  Landmark
 } from "lucide-react"
 import { 
   Card, 
@@ -53,15 +48,9 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card"
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
@@ -72,9 +61,8 @@ import ResultCard from "./ResultCard"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Institutional Result Hub v5.0.
- * FIXED: Replaced pagination with a high-fidelity scrollable list for question review.
- * FIXED: Standardized all imports and resolved performanceStatus reference error.
+ * @fileOverview Premium Assessment Center v5.1.
+ * SIMPLIFIED: Replaced technical jargon with student-friendly terms.
  */
 
 export default function ResultClient() {
@@ -230,12 +218,12 @@ export default function ResultClient() {
 
   const performanceStatus = useMemo(() => {
      const acc = sessionData?.accuracy || 0;
-     if (acc >= 90) return { label: "Outstanding", color: "text-emerald-600", bg: "bg-emerald-50", desc: "Top-tier analytical capability verified." };
-     if (acc >= 75) return { label: "Excellent", color: "text-[#2563EB]", bg: "bg-blue-50", desc: "Institutional grade performance achieved." };
-     if (acc >= 60) return { label: "Very Good", color: "text-blue-500", bg: "bg-blue-50/50", desc: "Consistently above average logic flow." };
-     if (acc >= 50) return { label: "Good", color: "text-amber-600", bg: "bg-amber-50", desc: "Solid foundation, needs pattern practice." };
+     if (acc >= 90) return { label: "Outstanding", color: "text-emerald-600", bg: "bg-emerald-50", desc: "Top-tier skills verified." };
+     if (acc >= 75) return { label: "Excellent", color: "text-[#2563EB]", bg: "bg-blue-50", desc: "Professional grade performance achieved." };
+     if (acc >= 60) return { label: "Very Good", color: "text-blue-500", bg: "bg-blue-50/50", desc: "Consistently above average performance." };
+     if (acc >= 50) return { label: "Good", color: "text-amber-600", bg: "bg-amber-50", desc: "Solid foundation, needs more practice." };
      if (acc >= 40) return { label: "Average", color: "text-orange-600", bg: "bg-orange-50", desc: "Moderate grasp, requires intensive review." };
-     return { label: "Needs Work", color: "text-rose-600", bg: "bg-rose-50", desc: "Focus on subject nodes to improve accuracy." };
+     return { label: "Needs Work", color: "text-rose-600", bg: "bg-rose-50", desc: "Focus on subject basics to improve score." };
   }, [sessionData]);
 
   const analysis = useMemo(() => {
@@ -246,7 +234,7 @@ export default function ResultClient() {
      const difficultyCorrect = { easy: 0, medium: 0, hard: 0 };
 
      categorizedNodes.all.forEach((q) => {
-        const sId = q.subjectId || 'General Hub';
+        const sId = q.subjectId || 'General';
         const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)];
         const isAttempted = ans !== null && ans !== undefined && String(ans) !== "";
         const isCorrect = isAttempted && ['A','B','C','D'][Number(ans)] === q.correctAnswer;
@@ -289,7 +277,7 @@ export default function ResultClient() {
     if (sessionData.accuracy >= 100) pool.push({ label: "Perfect Precision", icon: <Trophy className="text-amber-500" />, desc: "100% Accuracy Achieved" });
     if (sessionData.accuracy >= 90) pool.push({ label: "Accuracy Master", icon: <Target className="text-emerald-500" />, desc: "Top 90%+ Accuracy" });
     if ((sessionData.timeTaken / (questions.length || 1)) < 30) pool.push({ label: "Speed Demon", icon: <Zap className="text-orange-500" />, desc: "Lightning fast attempt" });
-    if (sessionData.score > 80) pool.push({ label: "High Flyer", icon: <Award className="text-primary" />, desc: "Elite score threshold" });
+    if (sessionData.score > 80) pool.push({ label: "High Flyer", icon: <Award className="text-primary" />, desc: "High score achieved" });
     return pool;
   }, [sessionData, questions.length]);
 
@@ -305,7 +293,7 @@ export default function ResultClient() {
   const handleSharePdf = async () => {
     if (isGeneratingPdf || !sessionData) return;
     setIsGeneratingPdf(true);
-    toast({ title: "Generating Report", description: "Synthesizing deep-dive analytics..." });
+    toast({ title: "Generating Report", description: "Creating detailed analysis..." });
 
     try {
       const page1 = document.getElementById('cracklix-result-page-1');
@@ -322,7 +310,7 @@ export default function ResultClient() {
 
       const fileName = `Cracklix_Report_${mockData?.title?.replace(/\s+/g, '_')}.pdf`;
       pdf.save(fileName);
-      toast({ title: "Report Exported", description: "Assessment saved to device." });
+      toast({ title: "Report Exported", description: "Result saved to device." });
     } catch (error) {
       toast({ variant: "destructive", title: "PDF Failure" });
     } finally { setIsGeneratingPdf(false); }
@@ -405,7 +393,7 @@ export default function ResultClient() {
                     </div>
                     <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-[#0F172A] text-white px-5 py-2 rounded-2xl shadow-2xl border border-white/10 whitespace-nowrap">
                        <ShieldCheck className="h-4 w-4 text-primary" />
-                       <span className="text-[10px] font-black uppercase tracking-widest">Assessment Verified</span>
+                       <span className="text-[10px] font-black uppercase tracking-widest">Result Verified</span>
                     </div>
                  </div>
 
@@ -413,9 +401,9 @@ export default function ResultClient() {
                  <div className="flex-1 space-y-8 text-center lg:text-left w-full">
                     <div className="space-y-4">
                        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
-                          <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-400 font-black text-[10px] px-3 py-1 uppercase tracking-widest">Official Registry Node</Badge>
+                          <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-400 font-black text-[10px] px-3 py-1 uppercase tracking-widest">Official Database</Badge>
                           <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
-                             <Clock className="h-3.5 w-3.5" /> Synchronized: Just Now
+                             <Clock className="h-3.5 w-3.5" /> Updated: Just Now
                           </span>
                        </div>
                        <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-tight text-[#0F172A] uppercase">{mockData?.title}</h1>
@@ -445,13 +433,13 @@ export default function ResultClient() {
 
         {/* 2X4 PREMIUM STATS GRID */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-           <StatCard label="Final Score" val={(sessionData?.score || 0).toFixed(1)} sub="Registry Pts" icon={<Zap className="text-blue-500" />} />
+           <StatCard label="Final Score" val={(sessionData?.score || 0).toFixed(1)} sub="Points" icon={<Zap className="text-blue-500" />} />
            <StatCard label="State Rank" val={user ? `#${merit.rank}` : "---"} sub="Live Ranking" icon={<Trophy className="text-amber-500" />} highlight />
            <StatCard label="Accuracy" val={`${sessionData?.accuracy || 0}%`} sub="Mastery Index" icon={<Target className="text-emerald-500" />} />
            <StatCard label="Percentile" val={`${merit.percentile}%`} sub="Performance" icon={<Award className="text-purple-500" />} />
-           <StatCard label="Correct" val={categorizedNodes.correct.length} sub="Verified Nodes" icon={<CheckCircle2 className="text-emerald-600" />} />
-           <StatCard label="Incorrect" val={categorizedNodes.wrong.length} sub="Error Audit" icon={<XCircle className="text-rose-500" />} />
-           <StatCard label="Skipped" val={categorizedNodes.skipped.length} sub="Stagnant Nodes" icon={<AlertCircle className="text-slate-400" />} />
+           <StatCard label="Correct" val={categorizedNodes.correct.length} sub="Verified Answers" icon={<CheckCircle2 className="text-emerald-600" />} />
+           <StatCard label="Incorrect" val={categorizedNodes.wrong.length} sub="Mistakes" icon={<XCircle className="text-rose-500" />} />
+           <StatCard label="Skipped" val={categorizedNodes.skipped.length} sub="No Attempt" icon={<AlertCircle className="text-slate-400" />} />
            <StatCard label="Time Taken" val={formatTime(sessionData?.timeTaken || 0)} sub="Duration" icon={<Clock className="text-indigo-500" />} />
         </section>
 
@@ -463,9 +451,9 @@ export default function ResultClient() {
                     <div className="flex items-center justify-between">
                        <div>
                           <CardTitle className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Subject Mastery</CardTitle>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Institutional category audit</p>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Official category review</p>
                        </div>
-                       <Badge className="bg-primary/10 text-primary border-none font-black text-[9px] uppercase px-4 py-1.5 rounded-full shadow-inner">Real-time Node</Badge>
+                       <Badge className="bg-primary/10 text-primary border-none font-black text-[9px] uppercase px-4 py-1.5 rounded-full shadow-inner">Real-time Data</Badge>
                     </div>
                  </CardHeader>
                  <CardContent className="p-8 md:p-14 space-y-10">
@@ -474,7 +462,7 @@ export default function ResultClient() {
                           <div className="flex justify-between items-end">
                              <div className="space-y-1">
                                 <h4 className="text-sm md:text-xl font-bold text-[#0F172A]">{sub.name}</h4>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{sub.correct} / {sub.total} Verified</p>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{sub.correct} / {sub.total} Correct</p>
                              </div>
                              <div className="text-right">
                                 <span className={cn("text-lg md:text-2xl font-black tabular-nums", sub.accuracy > 70 ? "text-emerald-600" : "text-amber-600")}>{sub.accuracy}%</span>
@@ -499,12 +487,12 @@ export default function ResultClient() {
                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner">
                           <BarChart3 className="h-6 w-6" />
                        </div>
-                       <h3 className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Difficulty Matrix</h3>
+                       <h3 className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Difficulty Level</h3>
                     </div>
                     <div className="space-y-6">
-                       <DiffLevel label="Easy Nodes" val={analysis.difficulty.easy} color="bg-emerald-500" />
-                       <DiffLevel label="Medium Nodes" val={analysis.difficulty.medium} color="bg-blue-500" />
-                       <DiffLevel label="Expert Nodes" val={analysis.difficulty.hard} color="bg-rose-500" />
+                       <DiffLevel label="Easy Questions" val={analysis.difficulty.easy} color="bg-emerald-500" />
+                       <DiffLevel label="Medium Questions" val={analysis.difficulty.medium} color="bg-blue-500" />
+                       <DiffLevel label="Hard Questions" val={analysis.difficulty.hard} color="bg-rose-500" />
                     </div>
                  </Card>
 
@@ -512,13 +500,13 @@ export default function ResultClient() {
                     <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-44 w-44 text-primary" /></div>
                     <div className="relative z-10 space-y-8">
                        <div className="space-y-1">
-                          <h3 className="text-2xl font-black tracking-tight">AI Insights</h3>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Logic Hub Recommendation</p>
+                          <h3 className="text-2xl font-black tracking-tight">Study Tips</h3>
+                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Logic Hub Advice</p>
                        </div>
                        <div className="space-y-5">
-                          <RecommendationNode label="Consistency" text={sessionData?.accuracy > 60 ? "Strong mastery detected in core hubs." : "Review subject fundamentals to increase index."} />
-                          <RecommendationNode label="Speed" text={sessionData?.timeTaken < (questions.length * 60) ? "Optimal processing speed verified." : "Optimize per-question ingestion rate."} />
-                          <RecommendationNode label="Goal" text="Prepare for the next full-length mock to lock rankings." />
+                          <RecommendationNode label="Consistency" text={sessionData?.accuracy > 60 ? "Strong skills detected in core topics." : "Review subject basics to increase score."} />
+                          <RecommendationNode label="Speed" text={sessionData?.timeTaken < (questions.length * 60) ? "Optimal solving speed verified." : "Try to solve questions faster next time."} />
+                          <RecommendationNode label="Goal" text="Prepare for the next full test to lock your rank." />
                        </div>
                     </div>
                  </Card>
@@ -552,12 +540,12 @@ export default function ResultClient() {
                     <Medal className="h-10 w-10 fill-current" />
                  </div>
                  <div className="space-y-3">
-                    <h3 className="text-2xl font-black text-[#0F172A] tracking-tight">State Ranking Hub</h3>
-                    <p className="text-slate-500 font-medium text-sm">Your performance has been synchronized with the master merit registry across Punjab.</p>
+                    <h3 className="text-2xl font-black text-[#0F172A] tracking-tight">State Ranking Center</h3>
+                    <p className="text-slate-500 font-medium text-sm">Your score has been updated in the master merit list for all Punjab students.</p>
                  </div>
                  <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner space-y-4">
                     <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                       <span>Total Competitors</span>
+                       <span>Total Students</span>
                        <span className="text-primary tabular-nums">{merit.total.toLocaleString()}</span>
                     </div>
                     <div className="h-1 w-full bg-white rounded-full overflow-hidden"><div className="h-full bg-primary w-3/4" /></div>
@@ -575,9 +563,9 @@ export default function ResultClient() {
               <div className="space-y-4">
                  <div className="flex items-center gap-3">
                     <FileSearch className="h-6 w-6 text-primary" />
-                    <h2 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter">Detailed Audit</h2>
+                    <h2 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter">Detailed Analysis</h2>
                  </div>
-                 <p className="text-slate-500 font-medium text-sm md:text-xl">Examine every response node and official rationalization in the scroll hub.</p>
+                 <p className="text-slate-500 font-medium text-sm md:text-xl">Check every answer and official explanation in this list.</p>
               </div>
            </div>
 
@@ -631,7 +619,7 @@ export default function ResultClient() {
                                       </div>
                                       <div className="flex items-center gap-3 bg-blue-50/50 px-6 py-2.5 rounded-full border border-blue-100">
                                          <Timer className="h-4 w-4 text-primary" />
-                                         <span className="text-[10px] md:text-[11px] font-black uppercase text-primary tracking-widest tabular-nums">Registry Item Verified</span>
+                                         <span className="text-[10px] md:text-[11px] font-black uppercase text-primary tracking-widest tabular-nums">Official Answer Verified</span>
                                       </div>
                                    </div>
                                 </div>
@@ -642,7 +630,7 @@ export default function ResultClient() {
                  ) : (
                     <div className="py-40 text-center opacity-30 animate-in fade-in duration-500">
                        <FileSearch className="h-20 w-20 mx-auto text-slate-300" />
-                       <p className="text-xl font-black uppercase tracking-[0.4em] mt-8 text-slate-400">Node Cluster Empty</p>
+                       <p className="text-xl font-black uppercase tracking-[0.4em] mt-8 text-slate-400">No Questions Found</p>
                     </div>
                  )}
               </AnimatePresence>
@@ -656,7 +644,7 @@ export default function ResultClient() {
               <div className="relative z-10 space-y-12 text-center lg:text-left">
                  <div className="space-y-6">
                     <h2 className="text-3xl md:text-7xl font-[900] tracking-tighter leading-none text-white uppercase">Your journey <br/> <span className="text-primary">continues.</span></h2>
-                    <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto lg:mx-0 leading-snug">The audit is complete. Now focus on your weak subjects to increase your institutional merit index.</p>
+                    <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto lg:mx-0 leading-snug">The review is complete. Now focus on your weak areas to improve your rank in the list.</p>
                  </div>
                  
                  <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -664,7 +652,7 @@ export default function ResultClient() {
                        <Link href="/mocks" className="flex items-center gap-4">Continue Practice <ChevronRight className="h-5 w-5 group-hover/btn:translate-x-2 transition-transform" /></Link>
                     </Button>
                     <Button asChild variant="outline" className="w-full sm:w-auto h-16 md:h-20 px-12 md:px-16 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-2xl md:rounded-3xl font-black uppercase text-[10px] md:text-sm tracking-widest transition-all active:scale-95 border-none">
-                       <Link href="/dashboard">Return Dashboard</Link>
+                       <Link href="/dashboard">Return Home</Link>
                     </Button>
                  </div>
               </div>
@@ -738,6 +726,5 @@ function ReviewStatus({ userAns, correctAns }: any) {
    const isCorrect = ['A','B','C','D'][Number(userAns)] === correctAns;
    return isCorrect 
      ? <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] px-4 py-1.5 rounded-full shadow-inner uppercase tracking-widest">CORRECT</Badge>
-     : <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] px-4 py-1.5 rounded-full shadow-inner uppercase tracking-widest">INCORRECT</Badge>;
+     : <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] px-4 py-1.5 rounded-full shadow-inner uppercase tracking-widest">WRONG</Badge>;
 }
-
