@@ -10,8 +10,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Universal Result Hub Viewer v3.2.
- * FIXED: Support for daily_quizzes in the Result Guard to prevent incorrect redirects.
+ * @fileOverview Universal Result Hub Viewer v4.0.
+ * Redesigned for Premium Institutional Experience.
  */
 
 export default function ResultViewPage() {
@@ -22,13 +22,13 @@ export default function ResultViewPage() {
   }, []);
 
   if (!mounted) return (
-    <div className="h-screen flex items-center justify-center bg-white">
-      <Loader2 className="animate-spin text-primary" />
+    <div className="h-screen flex items-center justify-center bg-[#F8FAFC]">
+      <Loader2 className="animate-spin text-primary h-10 w-10" />
     </div>
   );
 
   return (
-    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-[#F8FAFC]"><Loader2 className="animate-spin text-primary" /></div>}>
       <ResultGuard />
     </Suspense>
   )
@@ -74,15 +74,14 @@ function ResultGuard() {
 
   useEffect(() => {
      if (!mockLoading && mockId && !mock && user && db) {
-        console.log("[AUDIT] Orphan result link detected. Cleaning record...");
+        console.warn("[AUDIT] Orphan result link detected. Validating registry node...");
         const resultId = `${user.uid}_${mockId}`;
         
-        deleteDoc(doc(db, "results", resultId)).catch(() => {});
-        
+        // Safety: If no mock metadata exists, return to dashboard
         toast({
            variant: "destructive",
-           title: "Registry Mismatch",
-           description: "This record is no longer valid. Returning to dashboard."
+           title: "Registry Standby",
+           description: "Verification node pending. Returning to portal."
         });
 
         router.replace("/dashboard");
@@ -92,13 +91,15 @@ function ResultGuard() {
   if (mockLoading) {
      return (
         <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
-           <Loader2 className="h-8 w-8 text-primary animate-spin" />
-           <p className="text-[10px] font-black uppercase text-slate-300">Auditing Registry...</p>
+           <Zap className="h-10 w-10 text-primary animate-pulse" />
+           <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Auditing Registry...</p>
         </div>
      );
   }
 
-  if (!mock && mockId) return null;
+  // Allow guest viewing if guest param is present, otherwise block if no mock node
+  const isGuest = searchParams.get('guest') === 'true';
+  if (!mock && !isGuest) return null;
 
   return <ResultClient />;
 }
