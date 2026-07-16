@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v500.6.
- * REDESIGNED: Home Hero and Search Hub for premium PWA experience.
+ * @fileOverview Institutional Premium Hub v500.7.
+ * FIXED: Removed 'whitespace-nowrap' from Today's Challenge header to ensure mobile wrapping.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -63,7 +63,7 @@ export default function HomePage() {
                   <div className="space-y-0">
                      <div className="flex items-center justify-center gap-2">
                         <Flame className="h-6 w-6 text-orange-500 fill-current animate-pulse" />
-                        <h2 className="text-[26px] font-[700] tracking-tight text-white antialiased whitespace-nowrap leading-tight">
+                        <h2 className="text-[26px] font-[700] tracking-tight text-white antialiased leading-tight">
                            Today's challenge
                         </h2>
                      </div>

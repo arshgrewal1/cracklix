@@ -46,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Hub Client v30.3.
- * UPDATED: Redesigned MiniStatCard to match high-fidelity visual reference.
+ * @fileOverview Premium Exam Hub Client v30.4.
+ * FIXED: Removed 'truncate' from H1 to prevent clipping of long exam names on mobile.
  */
 
 export default function ExamHubClient() {
@@ -126,13 +126,13 @@ export default function ExamHubClient() {
   if (examLoading || userLoading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.3em]">Synchronizing Center...</p>
+       <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Synchronizing Center...</p>
     </div>
   );
 
   if (!examId || (!exam && !examLoading)) return (
     <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6 bg-white">
-       <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-xl"><AlertCircle className="h-8 w-8" /></div>
+       <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-blue-100"><AlertCircle className="h-8 w-8" /></div>
        <div className="space-y-2">
          <h2 className="text-2xl font-black text-[#0F172A]">Exam Not Found</h2>
          <p className="text-slate-500 font-medium max-sm:px-4 max-w-sm mx-auto">This preparation vertical is currently under maintenance or has been archived.</p>
@@ -142,10 +142,9 @@ export default function ExamHubClient() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full max-w-full">
       <Navbar />
       
-      {/* 1. PREMIUM COMPACT HERO */}
       <section className="px-4 md:px-8 pt-6 pb-2">
          <motion.div 
            initial={{ opacity: 0, y: 15 }}
@@ -158,7 +157,6 @@ export default function ExamHubClient() {
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-[80px]" />
 
             <div className="relative z-10 space-y-8">
-               {/* TOP ROW: Back + Badge + Bookmark */}
                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                      <button onClick={() => router.back()} className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:bg-white/10 active:scale-90 transition-all shrink-0">
@@ -180,11 +178,10 @@ export default function ExamHubClient() {
                   </button>
                </div>
 
-               {/* SECOND ROW: LOGO + IDENTITY */}
                <div className="flex items-center gap-5 md:gap-8">
                   <AuthorityLogo board={activeBoard} category={activeCategory} size="md" className="h-16 w-16 md:h-24 md:w-24 shrink-0 bg-slate-50 border-4 border-white/10 shadow-2xl" />
-                  <div className="min-w-0 space-y-1">
-                     <h1 className="text-xl md:text-5xl font-black text-white leading-tight tracking-tight truncate">
+                  <div className="min-w-0 space-y-1 flex-1">
+                     <h1 className="text-xl md:text-5xl font-black text-white leading-[1.1] tracking-tight break-words">
                         {exam.name}
                      </h1>
                      <div className="flex items-center gap-2">
@@ -194,7 +191,6 @@ export default function ExamHubClient() {
                   </div>
                </div>
 
-               {/* THIRD ROW: RESOURCE CHIPS */}
                <div className="flex flex-wrap gap-2 pt-2">
                   <ResourceChip icon={<Zap className="h-3 w-3" />} label={`${groupedContent.FULL.length + groupedContent.SUBJECT.length} Mocks`} />
                   <ResourceChip icon={<FileText className="h-3 w-3" />} label={`${groupedContent.PYQ.length} Papers`} />
@@ -205,7 +201,6 @@ export default function ExamHubClient() {
          </motion.div>
       </section>
 
-      {/* 2. REDESIGNED STATISTICS ROW */}
       <section className="px-4 md:px-8 py-6">
          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             <MiniStatCard label="Available tests" value={`${groupedContent.FULL.length + groupedContent.SUBJECT.length}+`} icon={<Layers className="text-blue-500" />} />
@@ -215,7 +210,6 @@ export default function ExamHubClient() {
          </div>
       </section>
 
-      {/* 3. STICKY NAVIGATION & MAIN GRID */}
       <main className="container mx-auto px-4 md:px-8 py-4 max-w-7xl pb-40 space-y-10">
          <Tabs defaultValue="FULL" className="space-y-10">
             <div className="sticky top-[80px] z-40 -mx-4 px-4 bg-[#F8FAFC]/80 backdrop-blur-md pb-4 pt-2">
@@ -241,7 +235,6 @@ export default function ExamHubClient() {
             </div>
          </Tabs>
 
-         {/* 4. RECOMMENDED FEED SECTIONS */}
          <section className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 border-t border-slate-100">
             <RelatedContentFeed title="Latest Current Affairs" icon={Zap} href="/current-affairs" color="text-orange-500" bg="bg-orange-50" />
             <RelatedContentFeed title="Official Notifications" icon={Megaphone} href="/notifications" color="text-blue-500" bg="bg-blue-50" />
@@ -270,9 +263,6 @@ function ResourceChip({ icon, label }: any) {
    )
 }
 
-/**
- * High-Fidelity Stat Card redesigned to match user reference image.
- */
 function MiniStatCard({ label, value, icon }: any) {
    return (
       <div className="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.04)] border border-slate-50 flex items-center gap-6 md:gap-10 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">

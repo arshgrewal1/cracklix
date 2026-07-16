@@ -45,8 +45,9 @@ import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v15.1 [Timer Accuracy Audit].
- * FIXED: formatTime now correctly handles Hours, Minutes, and Seconds with robust safety checks.
+ * @fileOverview Official Result Hub v15.2.
+ * FIXED: Combined mocks and daily_quizzes for accurate valid attempt tracking.
+ * ADDED: Enhanced Re-attempt Test button in the primary action hub.
  */
 
 export default function ResultClient() {
@@ -140,7 +141,7 @@ export default function ResultClient() {
           const questionIds: string[] = mData.questionIds || []
           
           if (questionIds.length > 0) {
-            const fetched: any[] = []
+            const fetchedQuestions: any[] = []
             const chunks = []
             for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
             
@@ -152,13 +153,13 @@ export default function ResultClient() {
 
               mcqSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
               legacySnap.docs.forEach(d => {
-                 if (!fetched.find(f => f.id === d.id)) {
-                    fetched.push({ ...d.data(), id: d.id });
+                 if (!fetchedQuestions.find(f => f.id === d.id)) {
+                    fetchedQuestions.push({ ...d.data(), id: d.id });
                  }
               });
             }
 
-            const mappedQuestions = questionIds.map((id: string) => fetched.find((q: any) => q.id === id)).filter(Boolean);
+            const mappedQuestions = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
             setQuestions(mappedQuestions);
           }
         }
@@ -191,6 +192,14 @@ export default function ResultClient() {
           wrong.push(q);
         }
       }
+    });
+
+    console.log("[RESULT_AUDIT]", {
+       total: all.length,
+       correct: correct.length,
+       wrong: wrong.length,
+       skipped: skipped.length,
+       checksum: all.length === (correct.length + wrong.length + skipped.length)
     });
 
     return { all, correct, wrong, skipped };
@@ -293,18 +302,11 @@ export default function ResultClient() {
      router.push(`/mocks/instructions?id=${mockId}`);
   };
 
-  /**
-   * REFACTORED: Institutional-grade Time Formatting
-   */
   const formatTime = (seconds: any) => {
      const totalSecs = Number(seconds);
      if (isNaN(totalSecs) || totalSecs <= 0) return "0m 0s";
      
-     // Detect likely millisecond input error
-     if (totalSecs > 1000000000) {
-        console.warn("[Timer] Extreme value detected, likely raw Date.now() string.");
-        return "N/A";
-     }
+     if (totalSecs > 1000000000) return "N/A";
 
      const hours = Math.floor(totalSecs / 3600);
      const minutes = Math.floor((totalSecs % 3600) / 60);
@@ -416,23 +418,23 @@ export default function ResultClient() {
                    className="w-full h-14 md:h-16 bg-[#2563EB] hover:bg-blue-700 text-white font-[900] uppercase text-[12px] md:text-sm tracking-[0.1em] rounded-full shadow-[0_15px_30px_rgba(37,99,235,0.25)] gap-3 border-none transition-all active:scale-95"
                  >
                     {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-5 w-5" />} 
-                    Share Detailed Report
+                    Share Report
                  </Button>
                  
                  <div className="grid grid-cols-2 gap-3 w-full">
                     <Button 
                       onClick={handleReattempt}
                       variant="outline" 
-                      className="h-12 md:h-14 rounded-full border-2 border-slate-100 text-[#0F172A] font-black uppercase text-[10px] tracking-widest gap-2"
+                      className="h-12 md:h-14 rounded-full border-2 border-slate-200 text-[#0F172A] font-black uppercase text-[9px] tracking-widest gap-2 bg-white"
                     >
-                       <RotateCcw className="h-4 w-4" /> Re-attempt
+                       <RotateCcw className="h-4 w-4 text-primary" /> Re-attempt
                     </Button>
                     <Button 
                       asChild
                       variant="outline" 
-                      className="h-12 md:h-14 rounded-full border-2 border-slate-100 text-[#0F172A] font-black uppercase text-[10px] tracking-widest gap-2"
+                      className="h-12 md:h-14 rounded-full border-2 border-slate-200 text-[#0F172A] font-black uppercase text-[9px] tracking-widest gap-2 bg-white"
                     >
-                       <Link href="/mocks"><LayoutGrid className="h-4 w-4" /> Practice Hub</Link>
+                       <Link href="/mocks"><LayoutGrid className="h-4 w-4 text-primary" /> Practice hub</Link>
                     </Button>
                  </div>
               </div>
@@ -557,7 +559,6 @@ function FilterBtn({ active, onClick, label, count, color = "bg-primary" }: any)
 }
 
 function ReviewStatusBadge({ userAns, correctAns }: any) {
-   // Strict rules for status badge logic
    const isAttempted = userAns !== null && userAns !== undefined && userAns !== "";
    if (!isAttempted) return <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-lg">Skipped</Badge>;
    
