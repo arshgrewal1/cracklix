@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -29,7 +28,9 @@ import {
   BrainCircuit,
   Sparkles,
   Award,
-  FileText
+  FileText,
+  RotateCcw,
+  LayoutGrid
 } from "lucide-react"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs, limit } from "firebase/firestore"
@@ -44,9 +45,8 @@ import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v14.0.
- * FIXED: Resolved ReferenceError by correctly scoping answers through sessionData.
- * FIXED: Hardened loading state to prevent infinite spinner.
+ * @fileOverview Official Result Hub v14.1.
+ * UPDATED: Added high-fidelity Re-attempt Test action node.
  */
 
 export default function ResultClient() {
@@ -258,6 +258,11 @@ export default function ResultClient() {
     } finally { setIsGeneratingPdf(false); }
   };
 
+  const handleReattempt = () => {
+     if (!mockId) return;
+     router.push(`/mocks/instructions?id=${mockId}`);
+  };
+
   const formatTime = (seconds: number) => {
      const m = Math.floor(seconds / 60);
      const s = seconds % 60;
@@ -356,15 +361,32 @@ export default function ResultClient() {
                  <SummaryMetric label="Time" val={formatTime(sessionData?.timeTaken || 0)} icon={<Clock className="text-slate-400" />} />
               </div>
 
-              <div className="flex flex-col gap-4 pt-6 max-w-md mx-auto w-full">
+              <div className="flex flex-col gap-3 pt-6 max-w-md mx-auto w-full">
                  <Button 
                    onClick={handleSharePdf} 
                    disabled={isGeneratingPdf} 
                    className="w-full h-14 md:h-16 bg-[#2563EB] hover:bg-blue-700 text-white font-[900] uppercase text-[12px] md:text-sm tracking-[0.1em] rounded-full shadow-[0_15px_30px_rgba(37,99,235,0.25)] gap-3 border-none transition-all active:scale-95"
                  >
-                    {isGeneratingPdf ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileText className="h-5 w-5" />} 
+                    {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-5 w-5" />} 
                     Share Detailed Report
                  </Button>
+                 
+                 <div className="grid grid-cols-2 gap-3 w-full">
+                    <Button 
+                      onClick={handleReattempt}
+                      variant="outline" 
+                      className="h-12 md:h-14 rounded-full border-2 border-slate-100 text-[#0F172A] font-black uppercase text-[10px] tracking-widest gap-2"
+                    >
+                       <RotateCcw className="h-4 w-4" /> Re-attempt
+                    </Button>
+                    <Button 
+                      asChild
+                      variant="outline" 
+                      className="h-12 md:h-14 rounded-full border-2 border-slate-100 text-[#0F172A] font-black uppercase text-[10px] tracking-widest gap-2"
+                    >
+                       <Link href="/mocks"><LayoutGrid className="h-4 w-4" /> Practice Hub</Link>
+                    </Button>
+                 </div>
               </div>
            </Card>
         </section>

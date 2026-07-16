@@ -42,8 +42,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import Logo from "@/components/brand/Logo"
 
 /**
- * @fileOverview Premium Exam Selection Hub v302.0 [Reference Redesign].
- * UPDATED: Re-engineered Featured Cards to match exactly with the provided image (Blue Title, Navy Pill Button).
+ * @fileOverview Premium Exam Selection Hub v302.1 [Reference Redesign].
+ * FIXED: Title clipping on mobile by using responsive text sizing and better line-heights.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -148,7 +148,7 @@ export default function ExamsEntryPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search exams..."
-                className="flex-1 min-w-0 bg-transparent border-none outline-none font-bold text-[#0F172A] placeholder:text-slate-300 text-sm md:text-xl"
+                className="flex-1 min-w-0 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-xl"
               />
               <div className="flex items-center gap-1 md:gap-2 border-l border-slate-100 pl-2 md:pl-4 shrink-0">
                 {searchTerm && (
@@ -258,7 +258,7 @@ export default function ExamsEntryPage() {
                   {/* BODY: Institutional Identity */}
                   <div className="space-y-6 flex-1 text-left">
                     <div className="space-y-2">
-                      <h3 className="text-2xl md:text-[32px] font-black text-primary leading-[1.1] tracking-tight uppercase group-hover:brightness-90 transition-all">
+                      <h3 className="text-xl sm:text-2xl md:text-[32px] font-black text-primary leading-[1.1] tracking-tight uppercase group-hover:brightness-90 transition-all">
                         {exam.name}
                       </h3>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">
