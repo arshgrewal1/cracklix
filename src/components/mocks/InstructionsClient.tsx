@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo, isValidElement, cloneElement, ReactElement } from "react";
@@ -10,7 +9,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Info, CheckCircle2, Clock, BookOpen, Zap, Lock, AlertCircle, ChevronRight, ArrowLeft } from "lucide-react";
+import { ShieldCheck, Info, CheckCircle2, Clock, BookOpen, Zap, Lock, AlertCircle, ChevronRight, ArrowLeft, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
@@ -23,8 +22,8 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v4.2.
- * FIXED: Enhanced handling for invalid or missing test IDs.
+ * @fileOverview Official Test Rules Hub v4.3.
+ * FIXED: Detects finished tests and offers "View Result" instead of triggering auto-submit loops.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -37,6 +36,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
   
   const [mock, setMock] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFinished, setIsFinished] = useState(false);
   const [accessChecked, setAccessChecked] = useState(false);
   const [accessError, setAccessError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
@@ -78,6 +78,14 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
         const mData = targetSnap.data();
         setMock(mData);
+
+        // Check if already finished
+        if (user) {
+          const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${activeId}`));
+          if (attemptSnap.exists() && attemptSnap.data().status === 'COMPLETED') {
+            setIsFinished(true);
+          }
+        }
 
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
         if (tier === 'FREE') {
@@ -159,12 +167,12 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
               <AlertCircle className="h-10 w-10" />
            </div>
            <div className="space-y-3">
-              <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Test Not Found</h2>
-              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This test node is unavailable or the link has expired. Explore our latest mock series in the hub.</p>
+              <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase tracking-tight">test not found</h2>
+              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This test is unavailable or the link has expired. Explore our latest mock series in the hub.</p>
            </div>
            <div className="pt-4">
               <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none active:scale-95">
-                 <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to Practice Hub</Link>
+                 <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to hub</Link>
               </Button>
            </div>
         </Card>
@@ -178,14 +186,14 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
               <Lock className="h-10 w-10" />
            </div>
            <div className="space-y-3">
-              <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase leading-tight">Access Locked</h2>
+              <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase leading-tight">access locked</h2>
               <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">{accessError}</p>
            </div>
            <div className="pt-4 flex flex-col gap-3">
-              <Button asChild className="h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none">
-                 <Link href="/pass">View Pass Hub</Link>
+              <Button asChild className="h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest shadow-xl border-none">
+                 <Link href="/pass">View pass hub</Link>
               </Button>
-              <Button variant="ghost" onClick={() => router.back()} className="h-12 text-slate-400 font-bold uppercase text-[9px] tracking-widest">Go Back</Button>
+              <Button variant="ghost" onClick={() => router.back()} className="h-12 text-slate-400 font-bold uppercase text-[9px] tracking-widest">Go back</Button>
            </div>
         </Card>
      </div>
@@ -203,7 +211,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                  </button>
                  <Badge className="bg-blue-50 text-primary border-none px-4 py-1.5 rounded-full font-black uppercase text-[8px] md:text-[10px] tracking-widest shadow-sm">Verified Practice</Badge>
               </div>
-              <h1 className="text-2xl md:text-5xl lg:text-6xl font-headline font-black text-[#0F172A] uppercase leading-tight tracking-tight">{mock.title}</h1>
+              <h1 className="text-2xl md:text-5xl lg:text-6xl font-headline font-black text-[#0F172A] leading-tight tracking-tight">{mock.title}</h1>
            </div>
 
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -216,25 +224,46 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
            <Card className="border-none shadow-3xl rounded-[2.5rem] md:rounded-[3.5rem] bg-white overflow-hidden border border-slate-100">
               <CardHeader className="p-8 md:p-12 bg-slate-50/50 border-b border-slate-100">
                  <CardTitle className="text-lg md:text-3xl font-headline font-black text-[#0F172A] flex items-center gap-4">
-                    <Info className="h-7 w-7 text-primary" /> Test Guidelines
+                    <Info className="h-7 w-7 text-primary" /> Test guidelines
                  </CardTitle>
               </CardHeader>
               <CardContent className="p-8 md:p-14 space-y-10 md:space-y-16">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
                     <Instruction text="Each question carries equal marks as per official norms." />
                     <Instruction text="Wrong answers incur a negative penalty as listed." />
-                    <Instruction text="Automated submission node triggers when time ends." />
+                    <Instruction text="Automated submission triggers when time ends." />
                     <Instruction text="CBT interface mimics official recruitment boards." />
                     <Instruction text="Bilingual language support available during attempt." />
                     <Instruction text="Navigational palette allows direct question jumping." />
                  </div>
 
-                 <Button 
-                    onClick={() => router.push(`/mocks/attempt?id=${activeId}`)}
-                    className="w-full h-16 md:h-24 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[11px] md:text-base rounded-2xl md:rounded-[3rem] shadow-5xl group transition-all active:scale-95 border-none"
-                 >
-                    Start Test <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
-                 </Button>
+                 <div className="flex flex-col sm:flex-row gap-4">
+                   {isFinished ? (
+                      <Button 
+                        onClick={() => router.push(`/results/view?id=${activeId}`)}
+                        className="flex-1 h-16 md:h-24 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[11px] md:text-base rounded-2xl md:rounded-[3rem] shadow-5xl group transition-all active:scale-95 border-none"
+                      >
+                         View result <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+                      </Button>
+                   ) : (
+                      <Button 
+                        onClick={() => router.push(`/mocks/attempt?id=${activeId}`)}
+                        className="flex-1 h-16 md:h-24 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[11px] md:text-base rounded-2xl md:rounded-[3rem] shadow-5xl group transition-all active:scale-95 border-none"
+                      >
+                         Start test <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+                      </Button>
+                   )}
+                   
+                   {isFinished && (
+                      <Button 
+                        onClick={() => router.push(`/mocks/attempt?id=${activeId}&retake=true`)}
+                        variant="outline"
+                        className="h-16 md:h-24 px-10 border-2 border-slate-100 text-[#0F172A] font-black uppercase tracking-[0.1em] text-[11px] md:text-sm rounded-2xl md:rounded-[3rem] shadow-sm hover:bg-slate-50 transition-all active:scale-95"
+                      >
+                         <RotateCcw className="mr-2 h-5 w-5" /> Retake
+                      </Button>
+                   )}
+                 </div>
               </CardContent>
            </Card>
         </div>
@@ -247,7 +276,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 function StatPlate({ icon, label, val }: any) {
   return (
     <div className="p-5 md:p-10 bg-white rounded-2xl md:rounded-[3rem] border border-slate-100 shadow-xl text-center space-y-2 md:space-y-5 group hover:border-primary/30 transition-all">
-       <div className="h-10 w-10 md:h-16 md:w-16 bg-slate-50 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto text-primary mb-2 shadow-inner group-hover:scale-110 transition-transform">
+       <div className={cn("h-10 w-10 md:h-16 md:w-16 bg-slate-50 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto text-primary mb-2 shadow-inner group-hover:scale-110 transition-transform")}>
           {isValidElement(icon) && cloneElement(icon as ReactElement<any>, { className: "h-5 w-5 md:h-8 md:w-8" })}
        </div>
        <p className="text-[8px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>

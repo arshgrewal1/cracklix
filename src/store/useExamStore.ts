@@ -48,8 +48,9 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Mock Test Store v4.9 [Timer Fixed].
- * FIXED: startTime is strictly initialized once per session to prevent massive duration bugs.
+ * @fileOverview Hardened Test Store v5.0 [Sync & Auto-Submit Fix].
+ * FIXED: Prevented old finished attempts from triggering auto-submission by validating timeLeft.
+ * FIXED: Reset store state on new test initialization to clear stale data.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -72,24 +73,30 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     
-    // Clear any stale local data before starting a truly fresh exam
-    if (!resumeData && typeof window !== 'undefined') {
-      localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
-    }
+    // Safety: Detect finished attempts (Cloud or Local) to prevent auto-submit loops
+    const isAttemptFinished = resumeData?.status === 'COMPLETED' || (resumeData && resumeData.timeLeft <= 0);
+    
+    let effectiveResume = isAttemptFinished ? null : resumeData;
 
-    let effectiveResume = resumeData;
+    // Check LocalStorage for guests only if Cloud data isn't active
     if (!effectiveResume && !userId && typeof window !== 'undefined') {
        const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
        if (stored) {
-          try { effectiveResume = JSON.parse(stored); } catch (e) { console.error("[Sync] Local data corrupted."); }
+          try { 
+            const parsed = JSON.parse(stored);
+            if (parsed.status !== 'COMPLETED' && parsed.timeLeft > 0) {
+              effectiveResume = parsed;
+            }
+          } catch (e) { 
+            localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
+          }
        }
     }
 
-    const isResuming = effectiveResume && effectiveResume.status !== 'COMPLETED';
-    
-    // Reset or resume the startTime node
+    const isResuming = effectiveResume !== null;
     const now = Date.now();
     const finalStartTime = isResuming ? (effectiveResume.startTime || now) : now;
+    const defaultTime = duration * 60;
 
     set({
       mockId,
@@ -104,11 +111,15 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       status: isResuming ? (effectiveResume.statusMap || {}) : {},
       visited: isResuming ? (effectiveResume.visited || [0]) : [0],
       bookmarks: isResuming ? (effectiveResume.bookmarks || []) : [],
-      timeLeft: isResuming ? (effectiveResume.timeLeft || duration * 60) : (duration * 60),
+      timeLeft: isResuming ? (effectiveResume.timeLeft || defaultTime) : defaultTime,
       currentIdx: isResuming ? (effectiveResume.currentIdx || 0) : 0,
       startTime: finalStartTime,
       violations: isResuming ? (effectiveResume.violations || 0) : 0,
     });
+
+    if (!isResuming && typeof window !== 'undefined') {
+      localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
+    }
   },
 
   tick: () => {
@@ -116,6 +127,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     if (state.questions.length > 0 && state.timeLeft > 0 && !state.isPaused) {
       const nextTime = state.timeLeft - 1;
       set({ timeLeft: nextTime });
+      // Autosave guest data every 30 seconds
       if (nextTime % 30 === 0) state.persistGuestData();
     }
   },
@@ -151,6 +163,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         currentIdx: state.currentIdx,
         violations: state.violations,
         startTime: state.startTime,
+        status: 'IN_PROGRESS',
         updatedAt: serverTimestamp()
       }, { merge: true }).catch(() => {});
     } else {
