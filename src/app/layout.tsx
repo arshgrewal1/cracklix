@@ -21,9 +21,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v73.0 [Production Hardened].
- * FIXED: Resolved ChunkLoadError by stabilizing the client boundary and resolving module conflicts.
- * FIXED: Added data-scroll-behavior="smooth" to prevent Next.js 15 routing warnings.
+ * @fileOverview Root Layout v73.1 [Next.js 15 Compliant].
+ * FIXED: Added data-scroll-behavior="smooth" to prevent smooth-scroll routing warnings.
  */
 
 export const metadata: Metadata = {

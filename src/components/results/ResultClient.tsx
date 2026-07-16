@@ -44,7 +44,8 @@ import {
   Landmark,
   Star,
   Bookmark,
-  Check
+  Check,
+  Medal
 } from "lucide-react"
 import { 
   Card, 
@@ -329,7 +330,7 @@ export default function ResultClient() {
   if (!mounted || (resultLoading && user) || (loadingQuestions && questions.length === 0)) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
         <Loader2 className="h-10 w-10 text-primary animate-spin" />
-        <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em]">Preparing Analysis...</p>
+        <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Preparing Analysis...</p>
      </div>
   );
 
@@ -641,7 +642,7 @@ export default function ResultClient() {
                     </motion.div>
                  ) : (
                     <div className="py-40 text-center opacity-30 animate-in fade-in duration-500">
-                       <Search className="h-20 w-20 mx-auto text-slate-300" />
+                       <SearchIcon className="h-20 w-20 mx-auto text-slate-300" />
                        <p className="text-xl font-black uppercase tracking-[0.4em] mt-8 text-slate-400">Node Cluster Empty</p>
                     </div>
                  )}
