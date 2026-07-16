@@ -42,8 +42,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import Logo from "@/components/brand/Logo"
 
 /**
- * @fileOverview Premium Exam Selection Hub v302.1 [Reference Redesign].
- * FIXED: Title clipping on mobile by using responsive text sizing and better line-heights.
+ * @fileOverview Premium Exam Selection Hub v302.2 [Clipping Fixed].
+ * FIXED: Title clipping on mobile by using break-words and responsive text sizing.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -258,7 +258,7 @@ export default function ExamsEntryPage() {
                   {/* BODY: Institutional Identity */}
                   <div className="space-y-6 flex-1 text-left">
                     <div className="space-y-2">
-                      <h3 className="text-xl sm:text-2xl md:text-[32px] font-black text-primary leading-[1.1] tracking-tight uppercase group-hover:brightness-90 transition-all">
+                      <h3 className="text-lg sm:text-2xl md:text-[32px] font-black text-primary leading-[1.1] tracking-tight uppercase group-hover:brightness-90 transition-all break-words">
                         {exam.name}
                       </h3>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">

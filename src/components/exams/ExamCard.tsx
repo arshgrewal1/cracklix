@@ -11,8 +11,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Exam Card v2.0.
- * UPDATED: Redesigned to match high-fidelity pill button and blue title style.
+ * @fileOverview Official Institutional Exam Card v2.1.
+ * FIXED: Resolved title clipping on mobile by adding break-words and adjusting responsive sizes.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"
@@ -40,7 +40,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
         {/* Content Node */}
         <div className="flex-1 space-y-6 text-left">
           <div className="space-y-2">
-            <h3 className="text-2xl font-black text-primary leading-tight uppercase tracking-tight group-hover:brightness-90 transition-all">
+            <h3 className="text-lg md:text-2xl font-black text-primary leading-tight uppercase tracking-tight group-hover:brightness-90 transition-all break-words">
               {examName}
             </h3>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">
