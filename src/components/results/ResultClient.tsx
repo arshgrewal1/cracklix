@@ -1,7 +1,6 @@
-
 "use client"
 
-import React, { useState, useMemo, useEffect, useRef } from "react"
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -45,7 +44,10 @@ import {
   Flame,
   MessageCircle,
   Heart,
-  Lightbulb
+  Lightbulb,
+  Landmark,
+  Star,
+  Bookmark
 } from "lucide-react"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs, limit, deleteDoc, serverTimestamp, addDoc } from "firebase/firestore"
@@ -60,6 +62,7 @@ import ResultCard from "./ResultCard"
 /**
  * @fileOverview Premium Institutional Result Hub v2.1.
  * FIXED: Standardized performanceStatus variable name to resolve ReferenceError.
+ * FIXED: Imported missing Landmark, Star, and Bookmark icons.
  */
 
 export default function ResultClient() {
