@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -15,11 +14,9 @@ import {
   BarChart3,
   Timer,
   AlertCircle,
-  FileText,
   Check,
   TrendingUp,
   BrainCircuit,
-  Info,
   Layers,
   Search,
   ArrowRight
@@ -64,10 +61,6 @@ interface ResultCardProps {
   timeMetrics?: { avg: string; fastest: string; slowest: string };
 }
 
-/**
- * @fileOverview Institutional A4 Assessment Report Template v2.0.
- * Optimised for 300 DPI multi-page PDF generation.
- */
 export default function ResultCard({
   studentName,
   examTitle,

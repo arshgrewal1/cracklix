@@ -1,13 +1,13 @@
 "use client"
 
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
+import { collection, query, where, doc, getDoc, documentId, getDocs, limit, serverTimestamp, addDoc } from "firebase/firestore"
+import { useToast } from "@/hooks/use-toast"
 import { 
   Trophy, 
   Target, 
@@ -45,9 +45,11 @@ import {
   Star,
   Bookmark
 } from "lucide-react"
-import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
-import { collection, query, where, doc, getDoc, documentId, getDocs, limit, deleteDoc, serverTimestamp, addDoc } from "firebase/firestore"
-import { useToast } from "@/hooks/use-toast"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
@@ -55,12 +57,7 @@ import { toPng } from "html-to-image"
 import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
-/**
- * @fileOverview Premium Institutional Result Hub v2.2.
- * FIXED: Imported missing CardHeader, CardContent, and CardTitle.
- * FIXED: Standardized performanceStatus variable mapping.
- * FIXED: Added missing Landmark, Star, and Bookmark icons.
- */
+const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 export default function ResultClient() {
   const db = useFirestore()
@@ -74,10 +71,9 @@ export default function ResultClient() {
   const [questions, setQuestions] = useState<any[]>([])
   const [mockData, setMockData] = useState<any>(null)
   const [loadingQuestions, setLoadingQuestions] = useState(true)
-  const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED' | 'BOOKMARKS'>('ALL')
+  const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
   const [currentReviewIdx, setCurrentReviewIdx] = useState(0)
   const [guestResult, setGuestResult] = useState<any>(null)
-  const [showExplanation, setShowExplanation] = useState(false)
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
 
   useEffect(() => {
@@ -182,7 +178,7 @@ export default function ResultClient() {
   }, [db, mockId]);
 
   const categorizedNodes = useMemo(() => {
-    if (!sessionData || !questions.length) return { all: [], correct: [], wrong: [], skipped: [], bookmarks: [] };
+    if (!sessionData || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
     
     const all = questions.map((q, i) => ({ ...q, originalIndex: i }));
     const correct: any[] = [];
@@ -191,7 +187,7 @@ export default function ResultClient() {
 
     all.forEach((q) => {
       const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)];
-      const isAttempted = ans !== null && ans !== undefined && ans !== "";
+      const isAttempted = ans !== null && ans !== undefined && String(ans) !== "";
       
       if (!isAttempted) {
         skipped.push(q);
@@ -215,10 +211,19 @@ export default function ResultClient() {
     return categorizedNodes.all;
   }, [categorizedNodes, activeReviewFilter]);
 
-  // Reset navigation index when filter changes
   useEffect(() => {
     setCurrentReviewIdx(0);
   }, [activeReviewFilter]);
+
+  const performanceStatus = useMemo(() => {
+     const acc = sessionData?.accuracy || 0;
+     if (acc >= 90) return { label: "Outstanding", color: "text-emerald-600", bg: "bg-emerald-50", desc: "Top-tier analytical capability verified." };
+     if (acc >= 75) return { label: "Excellent", color: "text-[#2563EB]", bg: "bg-blue-50", desc: "Institutional grade performance achieved." };
+     if (acc >= 60) return { label: "Very Good", color: "text-blue-500", bg: "bg-blue-50/50", desc: "Consistently above average logic flow." };
+     if (acc >= 50) return { label: "Good", color: "text-amber-600", bg: "bg-amber-50", desc: "Solid foundation, needs pattern practice." };
+     if (acc >= 40) return { label: "Average", color: "text-orange-600", bg: "bg-orange-50", desc: "Moderate grasp, requires intensive review." };
+     return { label: "Needs Work", color: "text-rose-600", bg: "bg-rose-50", desc: "Focus on subject nodes to improve accuracy." };
+  }, [sessionData]);
 
   const analysis = useMemo(() => {
      if (!sessionData || !questions.length) return { subjects: [], difficulty: { easy: 0, medium: 0, hard: 0 } };
@@ -230,7 +235,7 @@ export default function ResultClient() {
      categorizedNodes.all.forEach((q) => {
         const sId = q.subjectId || 'General Hub';
         const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)];
-        const isAttempted = ans !== null && ans !== undefined && ans !== "";
+        const isAttempted = ans !== null && ans !== undefined && String(ans) !== "";
         const isCorrect = isAttempted && ['A','B','C','D'][Number(ans)] === q.correctAnswer;
         const isWrong = isAttempted && !isCorrect;
 
@@ -273,17 +278,7 @@ export default function ResultClient() {
     if ((sessionData.timeTaken / (questions.length || 1)) < 30) pool.push({ label: "Speed Demon", icon: <Zap className="text-orange-500" />, desc: "Lightning fast attempt" });
     if (sessionData.score > 80) pool.push({ label: "High Flyer", icon: <Award className="text-primary" />, desc: "Elite score threshold" });
     return pool;
-  }, [sessionData, questions]);
-
-  const performanceStatus = useMemo(() => {
-     const acc = sessionData?.accuracy || 0;
-     if (acc >= 90) return { label: "Outstanding", color: "text-emerald-600", bg: "bg-emerald-50", desc: "Top-tier analytical capability verified." };
-     if (acc >= 75) return { label: "Excellent", color: "text-[#2563EB]", bg: "bg-blue-50", desc: "Institutional grade performance achieved." };
-     if (acc >= 60) return { label: "Very Good", color: "text-blue-500", bg: "bg-blue-50/50", desc: "Consistently above average logic flow." };
-     if (acc >= 50) return { label: "Good", color: "text-amber-600", bg: "bg-amber-50", desc: "Solid foundation, needs pattern practice." };
-     if (acc >= 40) return { label: "Average", color: "text-orange-600", bg: "bg-orange-50", desc: "Moderate grasp, requires intensive review." };
-     return { label: "Needs Work", color: "text-rose-600", bg: "bg-rose-50", desc: "Focus on subject nodes to improve accuracy." };
-  }, [sessionData]);
+  }, [sessionData, questions.length]);
 
   const formatTime = (seconds: any) => {
      const totalSecs = Number(seconds);
@@ -706,7 +701,7 @@ function RecommendationNode({ label, text }: any) {
    return (
       <div className="flex items-start gap-4 group">
          <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 border border-primary/20 shadow-inner">
-            <Check className="h-3 w-3 text-primary stroke-[4px]" />
+            <CheckCircle2 className="h-3 w-3 text-primary stroke-[4px]" />
          </div>
          <div className="space-y-0.5">
             <p className="text-[8px] font-black uppercase text-primary tracking-widest">{label}</p>
@@ -727,7 +722,7 @@ function FilterNode({ active, onClick, label, count, icon, activeColor = "bg-pri
 }
 
 function ReviewStatus({ userAns, correctAns }: any) {
-   const isAttempted = userAns !== null && userAns !== undefined && userAns !== "";
+   const isAttempted = userAns !== null && userAns !== undefined && String(userAns) !== "";
    if (!isAttempted) return <Badge className="bg-slate-50 text-slate-400 border-none font-black text-[9px] px-4 py-1.5 rounded-full shadow-inner uppercase">SKIPPED</Badge>;
    const isCorrect = ['A','B','C','D'][Number(userAns)] === correctAns;
    return isCorrect 
