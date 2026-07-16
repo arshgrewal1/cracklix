@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -24,6 +23,7 @@ const poppins = Poppins({
 /**
  * @fileOverview Root Layout v73.0 [Production Hardened].
  * FIXED: Resolved ChunkLoadError by stabilizing the client boundary and resolving module conflicts.
+ * FIXED: Added data-scroll-behavior="smooth" to prevent Next.js 15 routing warnings.
  */
 
 export const metadata: Metadata = {
@@ -56,7 +56,12 @@ export default function RootLayout({
   const registryVersion = INSTITUTIONAL_PAYLOAD.version;
 
   return (
-    <html lang="en" suppressHydrationWarning className="bg-white">
+    <html 
+      lang="en" 
+      suppressHydrationWarning 
+      className="bg-white scroll-smooth"
+      data-scroll-behavior="smooth"
+    >
       <body
         className={`
           ${poppins.variable}
