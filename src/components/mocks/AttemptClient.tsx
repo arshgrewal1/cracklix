@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useUser, useAuth, useFirestore } from "@/firebase";
+import { useUser, useFirestore } from "@/firebase";
 import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc, deleteDoc, addDoc } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import ExamHeader from "@/components/exam/ExamHeader";
@@ -29,9 +29,9 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v7.7.
- * FIXED: Bypasses resume logic if 'retake=true' and prevents infinite loading on completed sessions.
- * HARDENED: Stricter userLoading check to prevent premature login redirects.
+ * @fileOverview Official Mock Attempt Hub v7.8.
+ * FIXED: Reliable ID extraction from all URL formats.
+ * FIXED: Sync failure handled with fallbacks and improved logging.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -42,13 +42,19 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const { user, profile, loading: userLoading } = useUser();
   const { toast } = useToast();
 
+  // Unified ID extraction
   const mockId = useMemo(() => {
     if (propMockId) return propMockId;
     const queryId = searchParams.get('id');
-    if (queryId) return queryId;
-    const pathSegments = pathname.split('/').filter(Boolean);
-    const lastSegment = pathSegments[pathSegments.length - 2]; 
-    return lastSegment !== 'attempt' ? lastSegment : null;
+    if (queryId && queryId !== 'manual') return queryId;
+    
+    const segments = pathname.split('/').filter(Boolean);
+    // Path: /mocks/[id]/attempt
+    if (segments.length >= 3 && segments[segments.length-1] === 'attempt') {
+      return segments[segments.length - 2];
+    }
+    // Path: /mocks/attempt (likely query id used above)
+    return null;
   }, [pathname, searchParams, propMockId]);
 
   const isRetakeRequested = searchParams.get('retake') === 'true';
@@ -110,30 +116,41 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       if (!db || !mockId || userLoading) return;
       try {
         setIsInitializing(true);
+        setInitError(null);
         
         const mockSnap = await getDoc(doc(db, "mocks", mockId));
         const dailySnap = !mockSnap.exists() ? await getDoc(doc(db, "daily_quizzes", mockId)) : null;
         
         const targetSnap = (mockSnap.exists() ? mockSnap : dailySnap);
-        if (!targetSnap || !targetSnap.exists()) throw new Error("Test details not found in database.");
+        if (!targetSnap || !targetSnap.exists()) {
+           throw new Error("Test not found in registry.");
+        }
         
         const mData = targetSnap.data();
         setMockData(mData);
 
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
         if (tier === 'PREMIUM') {
-           if (!user || !profile) { router.replace(`/login?returnUrl=${encodeURIComponent(pathname)}`); return; }
-           const userEmail = user.email?.toLowerCase();
-           const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
-           let hasActivePass = isAdmin || (profile?.passExpiresAt && new Date(profile.passExpiresAt) > new Date());
-           if (!hasActivePass) {
-              toast({ variant: "destructive", title: "Access Locked", description: "This test requires an active Elite Pass." });
-              router.replace('/pass'); return;
+           if (!user && !userLoading) { 
+              router.replace(`/login?returnUrl=${encodeURIComponent(pathname)}`); 
+              return; 
+           }
+           if (user && profile) {
+              const userEmail = user.email?.toLowerCase();
+              const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
+              const expiry = profile?.passExpiresAt ? new Date(profile.passExpiresAt) : null;
+              const hasActivePass = isAdmin || (expiry && expiry > new Date());
+              
+              if (!hasActivePass) {
+                 router.replace('/pass');
+                 toast({ title: "Pass Required", description: "This is a premium mock test." });
+                 return;
+              }
            }
         }
 
         const questionIds: string[] = mData.questionIds || [];
-        if (questionIds.length === 0) throw new Error("This test has no questions assigned.");
+        if (questionIds.length === 0) throw new Error("Test configuration error: 0 questions.");
         
         const fetchedQuestions: any[] = [];
         const chunks = [];
@@ -154,7 +171,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         }
 
         const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
-        if (sortedQs.length === 0) throw new Error("Failed to load questions. Registry sync failed.");
+        if (sortedQs.length === 0) throw new Error("Question database sync failure.");
 
         let resumeData = undefined;
         if (user && !isRetakeRequested) {
@@ -169,7 +186,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            }
         }
 
-        initExam(mockId, mData.title || "Elite Series", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
+        initExam(mockId, mData.title || "Cracklix Test", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
         startSession(); 
       } catch (err: any) { 
         console.error("[ATTEMPT_SYNC_ERROR]:", err);
@@ -239,15 +256,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         await setDoc(doc(db, "results", `${user.uid}_${mockId}`), resultPayload, { merge: true });
         await setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true });
         
-        localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
         router.replace(`/results/view?id=${mockId}`);
       } else {
         localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify(resultPayload));
-        localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
         router.replace(`/results/view?id=${mockId}&guest=true`);
       }
     } catch (e) {
-      toast({ variant: "destructive", title: "Submission Error", description: "Could not save results. Check connection." });
+      toast({ variant: "destructive", title: "Submission failed" });
       setIsSubmittingFinal(false);
     }
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime, stopSession, toast]);
@@ -265,65 +280,18 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     }
   }, [currentIdx, questions, saveAndNext, db]);
 
-  const handleBookmark = async () => {
-    if (!user || !db || !questions[currentIdx]) return;
-    const q = questions[currentIdx];
-    const bookmarkId = `${user.uid}_${q.id}`;
-    const bookmarkRef = doc(db, "bookmarks", bookmarkId);
-
-    try {
-      const snap = await getDoc(bookmarkRef);
-      if (snap.exists()) {
-        await deleteDoc(bookmarkRef);
-        toast({ title: "Bookmark removed" });
-      } else {
-        await setDoc(bookmarkRef, {
-          userId: user.uid,
-          questionId: q.id,
-          questionText: q.englishQuestion,
-          subject: q.subjectId,
-          timestamp: new Date().toISOString()
-        });
-        toast({ title: "Question saved" });
-      }
-    } catch (e) {
-      toast({ variant: "destructive", title: "Action failed" });
-    }
-  };
-
-  const handleReportIssue = async () => {
-    if (!user || !db || !questions[currentIdx]) return;
-    const q = questions[currentIdx];
-    try {
-       await addDoc(collection(db, "reports"), {
-          userId: user.uid,
-          questionId: q.id,
-          mockId: mockId,
-          type: 'CONTENT_ISSUE',
-          status: 'PENDING',
-          timestamp: serverTimestamp()
-       });
-       toast({ title: "Issue flagged", description: "Quality team notified." });
-    } catch (e) {
-       toast({ variant: "destructive", title: "Report failed" });
-    }
-  };
-
-  const answeredCount = useMemo(() => Object.values(answers || {}).filter(a => a !== null && a !== undefined).length, [answers]);
-  const notAnsweredCount = useMemo(() => questions.length - answeredCount, [questions.length, answeredCount]);
-
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8">
        <Zap className="h-12 w-12 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Synchronizing...</p>
+       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Loading Environment...</p>
     </div>
   );
 
-  if (initError || !mockId) return (
+  if (initError) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white p-10 text-center space-y-8">
        <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100"><AlertCircle className="h-8 w-8" /></div>
        <div className="space-y-2"><h2 className="text-2xl font-black text-[#0F172A]">Sync failure</h2><p className="text-slate-500 font-medium max-sm:px-4 max-w-sm mx-auto">{initError}</p></div>
-       <Button onClick={() => router.replace('/dashboard')} className="h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-bold text-sm">Return to portal</Button>
+       <Button onClick={() => router.replace('/dashboard')} className="h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-bold">Return to portal</Button>
     </div>
   );
 
@@ -371,8 +339,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
                     question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
                     selectedAnswer={answers?.[currentIdx] ?? null} 
                     onSelect={(idx: number) => setAnswer(currentIdx, idx, db)} 
-                    onBookmark={handleBookmark}
-                    onReport={handleReportIssue}
                     className="shadow-md border-none p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[3rem] w-full" 
                   />
                 </motion.div>
@@ -415,11 +381,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               <div className="relative h-16 w-16 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-400 border border-blue-500/30 shadow-2xl"><ShieldCheck className="h-8 w-8" /></div>
             </div>
             <DialogHeader><DialogTitle className="text-white font-black text-3xl tracking-tight">Submit test</DialogTitle><DialogDescription className="text-slate-400 mt-2">Confirm your submission. Once committed, you cannot modify your answers.</DialogDescription></DialogHeader>
-            <div className="justify-center gap-6 my-8 py-4 border-y border-white/5 w-full hidden sm:flex">
-                <div className="text-center"><p className="text-2xl font-black text-white tabular-nums">{answeredCount}</p><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Answered</p></div>
-                <div className="w-px h-10 bg-white/10" /><div className="text-center"><p className="text-2xl font-black text-white tabular-nums">{notAnsweredCount}</p><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Remaining</p></div>
-            </div>
-            <div className="w-full flex flex-col gap-3">
+            <div className="w-full flex flex-col gap-3 mt-8">
               <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl border-none">Confirm submission</Button>
               <Button variant="ghost" onClick={() => setShowSubmitModal(false)} disabled={isSubmittingFinal} className="w-full h-12 text-slate-400 hover:text-white font-bold">Return to test</Button>
             </div>

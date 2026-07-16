@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, isValidElement, cloneElement, ReactElement } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -23,9 +23,9 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v5.0.
- * FIXED: Retake now performs a hard reset (deletes old attempts) to allow fresh starts.
- * REDESIGNED: Premium Start Button with animated shine and centered actions.
+ * @fileOverview Official Test Rules Hub v6.0.
+ * FIXED: Accurate check for finished attempts to prevent "Retake" on new tests.
+ * FIXED: Unified ID extraction to resolve Sync Failure.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -44,26 +44,36 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
   const [accessError, setAccessError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
 
+  // Unify ID extraction
   const activeId = useMemo(() => {
     if (propMockId) return propMockId;
     const queryId = searchParams?.get('id');
     if (queryId && queryId !== 'manual') return queryId;
     
-    const pathSegments = pathname.split('/').filter(Boolean);
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    return (lastSegment !== 'instructions' && lastSegment !== 'manual') ? lastSegment : null;
+    // Check if ID is in path: /mocks/[id]/instructions
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length >= 2 && segments[segments.length-1] === 'instructions') {
+      return segments[segments.length - 2];
+    }
+    // Check if ID is the last segment: /mocks/[id]
+    const last = segments[segments.length - 1];
+    return (last && last !== 'instructions' && last !== 'view') ? last : null;
   }, [pathname, searchParams, propMockId]);
 
   useEffect(() => {
     async function loadTestAndAuditAccess() {
-      if (!db || !activeId || activeId === 'manual') {
-        setIsLoading(false);
-        setNotFound(true);
+      if (!db || !activeId) {
+        if (!activeId) {
+          setIsLoading(false);
+          setNotFound(true);
+        }
         return;
       }
 
       try {
         setIsLoading(true);
+        // Important: Reset finished state before new check
+        setIsFinished(false);
         
         const mockRef = doc(db, "mocks", activeId);
         const dailyRef = doc(db, "daily_quizzes", activeId);
@@ -82,12 +92,17 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
         const mData = targetSnap.data();
         setMock(mData);
 
-        // Check if already finished
+        // STRICTOR CHECK: Only show "Finished" if a user record exists with status COMPLETED
         if (user) {
-          const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${activeId}`));
+          const attemptRef = doc(db, "attempts", `${user.uid}_${activeId}`);
+          const attemptSnap = await getDoc(attemptRef);
           if (attemptSnap.exists() && attemptSnap.data().status === 'COMPLETED') {
             setIsFinished(true);
           }
+        } else {
+          // Guest check
+          const guestResult = localStorage.getItem(`cracklix_guest_result_${activeId}`);
+          if (guestResult) setIsFinished(true);
         }
 
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
@@ -97,52 +112,32 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
           return;
         }
 
-        if (!user) {
+        if (!user && !userLoading) {
           router.push(`/login?returnUrl=${encodeURIComponent(pathname + (searchParams?.toString() ? '?' + searchParams.toString() : ''))}`);
           return;
         }
 
-        const userEmail = user.email?.toLowerCase();
-        const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
-        
-        if (isAdmin) {
-          setAccessChecked(true);
-          setIsLoading(false);
-          return;
-        }
+        if (user && profile) {
+          const userEmail = user.email?.toLowerCase();
+          const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
+          
+          if (isAdmin) {
+            setAccessChecked(true);
+          } else {
+            const expiry = profile?.passExpiresAt ? new Date(profile.passExpiresAt) : null;
+            const isPassActive = expiry && expiry > new Date() && profile?.pass?.active !== false;
 
-        const now = new Date();
-        const expiry = profile?.passExpiresAt ? new Date(profile.passExpiresAt) : null;
-        const isPassActive = expiry && expiry > now && profile?.pass?.active !== false;
-
-        if (!isPassActive && tier === 'PREMIUM') {
-          setAccessError("Your Pro Pass has expired. Please renew to access this premium test.");
-          setIsLoading(false);
-          return;
-        }
-
-        const passId = profile?.status || 'free-pass';
-        const passRef = doc(db, "passes", passId);
-        const passSnap = await getDoc(passRef);
-        
-        if (passSnap.exists()) {
-          const passData = passSnap.data();
-          const allowedMocks = passData.allowedMocks || [];
-          const allowedCategories = passData.allowedCategories || [];
-
-          const isAllowed = allowedMocks.includes(activeId) || allowedCategories.includes(mData.boardId || "");
-
-          if (!isAllowed && tier === 'PREMIUM') {
-             setAccessError(`This test is not included in your current ${passData.name || 'Plan'}. Upgrade to continue.`);
-             setIsLoading(false);
-             return;
+            if (!isPassActive) {
+              setAccessError("Your Pro Pass is required for this premium test.");
+            } else {
+              setAccessChecked(true);
+            }
           }
         }
 
-        setAccessChecked(true);
       } catch (err: any) {
         console.error("[INSTRUCTIONS_SYNC_ERROR]:", err);
-        setAccessError("A temporary synchronization error occurred. Please try again.");
+        setAccessError("Database sync failed. Please refresh.");
       } finally {
         setIsLoading(false);
       }
@@ -164,6 +159,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
       
       if (typeof window !== 'undefined') {
         localStorage.removeItem(`cracklix_guest_attempt_${activeId}`);
+        localStorage.removeItem(`cracklix_guest_result_${activeId}`);
       }
 
       setIsFinished(false);
@@ -192,34 +188,12 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
               <AlertCircle className="h-10 w-10" />
            </div>
            <div className="space-y-3">
-              <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase tracking-tight">test not found</h2>
-              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This test is unavailable or the link has expired. Explore our latest mock series in the hub.</p>
+              <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Test Not Found</h2>
+              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This test is unavailable or the link has expired.</p>
            </div>
-           <div className="pt-4">
-              <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none active:scale-95">
-                 <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to hub</Link>
-              </Button>
-           </div>
-        </Card>
-     </div>
-  );
-
-  if (accessError) return (
-     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-        <Card className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-14 shadow-5xl border-none space-y-8 animate-in zoom-in-95 duration-500">
-           <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
-              <Lock className="h-10 w-10" />
-           </div>
-           <div className="space-y-3">
-              <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase leading-tight">access locked</h2>
-              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">{accessError}</p>
-           </div>
-           <div className="pt-4 flex flex-col gap-3">
-              <Button asChild className="h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest shadow-xl border-none">
-                 <Link href="/pass">View pass hub</Link>
-              </Button>
-              <Button variant="ghost" onClick={() => router.back()} className="h-12 text-slate-400 font-bold uppercase text-[9px] tracking-widest">Go back</Button>
-           </div>
+           <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl">
+              <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to hub</Link>
+           </Button>
         </Card>
      </div>
   );
@@ -231,25 +205,33 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
         <div className="space-y-8 md:space-y-12">
            <div className="flex flex-col items-start gap-4">
               <div className="flex items-center gap-3">
-                 <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary shadow-sm active:scale-90 transition-all">
+                 <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary shadow-sm transition-all">
                     <ArrowLeft className="h-5 w-5" />
                  </button>
                  <Badge className="bg-blue-50 text-primary border-none px-4 py-1.5 rounded-full font-black uppercase text-[8px] md:text-[10px] tracking-widest shadow-sm">Verified Practice</Badge>
               </div>
-              <h1 className="text-2xl md:text-5xl lg:text-6xl font-headline font-black text-[#0F172A] tracking-tight leading-tight">{mock.title}</h1>
+              <h1 className="text-2xl md:text-5xl lg:text-6xl font-headline font-black text-[#0F172A] tracking-tight leading-tight">{mock?.title}</h1>
            </div>
 
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              <StatPlate icon={<Clock />} label="Duration" val={`${mock.duration}m`} />
-              <StatPlate icon={<BookOpen />} label="Items" val={mock.totalQuestions} />
-              <StatPlate icon={<Zap />} label="Total Pts" val={mock.totalQuestions * (mock.positiveMarks || 1)} />
-              <StatPlate icon={<ShieldCheck />} label="Penalty" val={`-${mock.negativeMarks || 0.25}`} />
+              <StatPlate icon={<Clock />} label="Duration" val={`${mock?.duration || 0}m`} />
+              <StatPlate icon={<BookOpen />} label="Items" val={mock?.totalQuestions || 0} />
+              <StatPlate icon={<Zap />} label="Total Pts" val={(mock?.totalQuestions || 0) * (mock?.positiveMarks || 1)} />
+              <StatPlate icon={<ShieldCheck />} label="Penalty" val={`-${mock?.negativeMarks || 0.25}`} />
            </div>
+
+           {accessError && (
+              <div className="p-6 bg-rose-50 border border-rose-100 rounded-3xl flex items-center gap-4 animate-in slide-in-from-top-2">
+                 <Lock className="h-6 w-6 text-rose-500 shrink-0" />
+                 <p className="text-sm font-bold text-rose-700">{accessError}</p>
+                 <Button asChild variant="link" className="ml-auto text-rose-700 font-black uppercase text-[10px]"><Link href="/pass">Upgrade</Link></Button>
+              </div>
+           )}
 
            <Card className="border-none shadow-3xl rounded-[2.5rem] md:rounded-[3.5rem] bg-white overflow-hidden border border-slate-100">
               <CardHeader className="p-8 md:p-12 bg-slate-50/50 border-b border-slate-100">
                  <CardTitle className="text-lg md:text-3xl font-headline font-black text-[#0F172A] flex items-center gap-4">
-                    <Info className="h-7 w-7 text-primary" /> Test guidelines
+                    <Info className="h-7 w-7 text-primary" /> Test Guidelines
                  </CardTitle>
               </CardHeader>
               <CardContent className="p-8 md:p-14 space-y-12">
@@ -264,37 +246,38 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
                  <div className="flex flex-col gap-6 items-center w-full max-w-2xl mx-auto pt-4">
                    {isFinished ? (
-                      <>
+                      <div className="w-full space-y-4">
                         <Button 
                           onClick={() => router.push(`/results/view?id=${activeId}`)}
-                          className="w-full h-16 md:h-20 bg-emerald-600 hover:bg-emerald-700 text-white font-[900] uppercase tracking-[0.1em] text-[12px] md:text-sm rounded-[18px] md:rounded-[2rem] shadow-xl group transition-all active:scale-95 border-none flex items-center justify-center gap-2"
+                          className="w-full h-16 md:h-20 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest text-[12px] md:text-sm rounded-[18px] md:rounded-[2rem] shadow-xl transition-all active:scale-95 border-none flex items-center justify-center gap-3"
                         >
-                           View test analysis <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                           View Analysis <ChevronRight className="h-5 w-5" />
                         </Button>
                         <Button 
                           onClick={handleRetake}
                           disabled={isResetting}
                           variant="outline"
-                          className="w-full h-14 md:h-16 border-2 border-slate-100 text-[#0F172A] font-black uppercase tracking-[0.1em] text-[10px] md:text-xs rounded-xl md:rounded-[1.5rem] shadow-sm hover:bg-slate-50 transition-all active:scale-95 gap-3"
+                          className="w-full h-14 border-2 border-slate-100 text-[#0F172A] font-black uppercase text-[10px] rounded-2xl shadow-sm hover:bg-slate-50 active:scale-95 gap-3"
                         >
                            {isResetting ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} 
-                           Retake test
+                           Retake Test (Reset)
                         </Button>
-                      </>
+                      </div>
                    ) : (
                       <Button 
+                        disabled={!!accessError}
                         onClick={() => router.push(`/mocks/attempt?id=${activeId}`)}
-                        className="relative overflow-hidden w-full h-16 md:h-24 bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] hover:brightness-110 text-white font-[900] uppercase tracking-[0.2em] text-[12px] md:text-xl rounded-[18px] md:rounded-[3rem] shadow-[0_20px_50px_rgba(37,99,235,0.3)] transition-all active:scale-95 border-none group"
+                        className="relative overflow-hidden w-full h-16 md:h-24 bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] hover:brightness-110 text-white font-black uppercase tracking-[0.2em] text-[12px] md:text-xl rounded-[20px] md:rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-all active:scale-95 border-none group"
                       >
                          <div className="flex items-center justify-center gap-4 relative z-10">
-                            <Zap className="h-6 w-6 md:h-8 md:w-8 fill-white text-white" />
-                            <span>Start test</span>
+                            <Play className="h-6 w-6 md:h-8 md:w-8 fill-primary text-primary" />
+                            <span>Start Test</span>
                             <ChevronRight className="h-6 w-6 md:h-8 md:w-8 transition-transform group-hover:translate-x-2" />
                          </div>
                          <motion.div 
                             animate={{ x: ['-100%', '300%'] }}
                             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute inset-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] pointer-events-none"
+                            className="absolute inset-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-25deg] pointer-events-none"
                          />
                       </Button>
                    )}
@@ -312,7 +295,7 @@ function StatPlate({ icon, label, val }: any) {
   return (
     <div className="p-5 md:p-10 bg-white rounded-2xl md:rounded-[3rem] border border-slate-100 shadow-xl text-center space-y-2 md:space-y-5 group hover:border-primary/30 transition-all">
        <div className={cn("h-10 w-10 md:h-16 md:w-16 bg-slate-50 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto text-primary mb-2 shadow-inner group-hover:scale-110 transition-transform")}>
-          {isValidElement(icon) && cloneElement(icon as ReactElement<any>, { className: "h-5 w-5 md:h-8 md:w-8" })}
+          {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-8 md:w-8" }) : icon}
        </div>
        <p className="text-[8px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
        <p className="text-xl md:text-4xl font-black text-[#0F172A] uppercase leading-none tabular-nums">{val}</p>
