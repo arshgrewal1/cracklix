@@ -45,8 +45,9 @@ import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v14.1.
- * UPDATED: Added high-fidelity Re-attempt Test action node.
+ * @fileOverview Official Result Hub v14.2.
+ * FIXED: Reset currentReviewIdx when filter changes.
+ * FIXED: Hardened answer matching logic to handle string keys from Firestore.
  */
 
 export default function ResultClient() {
@@ -217,6 +218,12 @@ export default function ResultClient() {
       return true;
     });
   }, [questions, sessionData, activeReviewFilter]);
+
+  // RESET INDEX ON FILTER CHANGE
+  useEffect(() => {
+    setCurrentReviewIdx(0);
+    setShowExplanation(false);
+  }, [activeReviewFilter]);
 
   const answeredCount = useMemo(() => {
     if (!sessionData?.answers) return 0;
@@ -447,7 +454,17 @@ export default function ResultClient() {
                     </Card>
                  </motion.div>
               ) : (
-                 <div className="py-20 text-center space-y-4 opacity-40"><AlertCircle className="h-12 w-12 mx-auto text-slate-300" /><p className="font-bold text-slate-500 uppercase tracking-widest">No nodes matched filter</p></div>
+                 <div className="py-32 text-center space-y-4 opacity-40 animate-in fade-in duration-500">
+                    <AlertCircle className="h-16 w-16 mx-auto text-slate-200" />
+                    <div className="space-y-1">
+                       <p className="font-bold text-lg tracking-tight text-[#0F172A]">No nodes matched filter</p>
+                       <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">
+                          {activeReviewFilter === 'WRONG' ? 'You have zero incorrect answers in this test.' : 
+                           activeReviewFilter === 'SKIPPED' ? 'You attempted every single question.' : 
+                           'No questions found in this category.'}
+                       </p>
+                    </div>
+                 </div>
               )}
            </AnimatePresence>
         </section>
