@@ -48,7 +48,7 @@ import {
   Lightbulb
 } from "lucide-react"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
-import { collection, query, where, doc, getDoc, documentId, getDocs, limit, deleteDoc, serverTimestamp } from "firebase/firestore"
+import { collection, query, where, doc, getDoc, documentId, getDocs, limit, deleteDoc, serverTimestamp, addDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
@@ -56,11 +56,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import { toPng } from "html-to-image"
 import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
-import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
 
 /**
- * @fileOverview Premium Institutional Result Hub v2.0 (REBUILT).
- * Inspired by Testbook, Oliveboard, and Adda247.
+ * @fileOverview Premium Institutional Result Hub v2.1.
+ * FIXED: Standardized performanceStatus variable name to resolve ReferenceError.
  */
 
 export default function ResultClient() {
@@ -189,7 +188,6 @@ export default function ResultClient() {
     const correct: any[] = [];
     const wrong: any[] = [];
     const skipped: any[] = [];
-    const bookmarks: any[] = [];
 
     all.forEach((q) => {
       const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)];
@@ -198,7 +196,7 @@ export default function ResultClient() {
       if (!isAttempted) {
         skipped.push(q);
       } else {
-        const userSelectedLabel = ['A', 'B', 'C', 'D', 'E'][Number(ans)];
+        const userSelectedLabel = ['A', 'B', 'C', 'D'][Number(ans)];
         if (userSelectedLabel === q.correctAnswer) {
           correct.push(q);
         } else {
@@ -207,7 +205,7 @@ export default function ResultClient() {
       }
     });
 
-    return { all, correct, wrong, skipped, bookmarks };
+    return { all, correct, wrong, skipped };
   }, [questions, sessionData]);
 
   const filteredQuestions = useMemo(() => {
@@ -272,7 +270,7 @@ export default function ResultClient() {
     return pool;
   }, [sessionData, questions]);
 
-  const performanceLabel = useMemo(() => {
+  const performanceStatus = useMemo(() => {
      const acc = sessionData?.accuracy || 0;
      if (acc >= 90) return { label: "Outstanding", color: "text-emerald-600", bg: "bg-emerald-50", desc: "Top-tier analytical capability verified." };
      if (acc >= 75) return { label: "Excellent", color: "text-[#2563EB]", bg: "bg-blue-50", desc: "Institutional grade performance achieved." };
@@ -450,7 +448,7 @@ export default function ResultClient() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
            <div className="lg:col-span-8 space-y-10">
               <Card className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden border border-slate-100">
-                 <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30">
+                 <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30 text-left">
                     <div className="flex items-center justify-between">
                        <div>
                           <CardTitle className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Subject Mastery</CardTitle>
