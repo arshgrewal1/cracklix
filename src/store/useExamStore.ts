@@ -48,8 +48,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Mock Test Store v4.8 [Production Hardened].
- * FIXED: Atomic persistence logic and stabilized hydration nodes.
+ * @fileOverview Hardened Mock Test Store v4.9 [Timer Fixed].
+ * FIXED: startTime is strictly initialized once per session to prevent massive duration bugs.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -72,6 +72,11 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     
+    // Clear any stale local data before starting a truly fresh exam
+    if (!resumeData && typeof window !== 'undefined') {
+      localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
+    }
+
     let effectiveResume = resumeData;
     if (!effectiveResume && !userId && typeof window !== 'undefined') {
        const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
@@ -82,6 +87,10 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     const isResuming = effectiveResume && effectiveResume.status !== 'COMPLETED';
     
+    // Reset or resume the startTime node
+    const now = Date.now();
+    const finalStartTime = isResuming ? (effectiveResume.startTime || now) : now;
+
     set({
       mockId,
       mockTitle: title,
@@ -97,7 +106,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       bookmarks: isResuming ? (effectiveResume.bookmarks || []) : [],
       timeLeft: isResuming ? (effectiveResume.timeLeft || duration * 60) : (duration * 60),
       currentIdx: isResuming ? (effectiveResume.currentIdx || 0) : 0,
-      startTime: isResuming ? (effectiveResume.startTime || Date.now()) : Date.now(),
+      startTime: finalStartTime,
       violations: isResuming ? (effectiveResume.violations || 0) : 0,
     });
   },

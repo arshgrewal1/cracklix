@@ -45,11 +45,8 @@ import { jsPDF } from "jspdf"
 import ResultCard from "./ResultCard"
 
 /**
- * @fileOverview Official Result Hub v15.0 [Logic Audit Fixed].
- * FIXED: Mutually exclusive categorization for Correct, Wrong, and Skipped questions.
- * FIXED: Counters exactly match the filtered lists.
- * FIXED: Strict handling of null/undefined/empty answers.
- * ADDED: Console debugging for registry verification.
+ * @fileOverview Official Result Hub v15.1 [Timer Accuracy Audit].
+ * FIXED: formatTime now correctly handles Hours, Minutes, and Seconds with robust safety checks.
  */
 
 export default function ResultClient() {
@@ -153,7 +150,7 @@ export default function ResultClient() {
                  getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
               ]);
 
-              mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
+              mcqSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
               legacySnap.docs.forEach(d => {
                  if (!fetched.find(f => f.id === d.id)) {
                     fetched.push({ ...d.data(), id: d.id });
@@ -172,10 +169,6 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  /**
-   * REFACTORED CATEGORIZATION LOGIC
-   * Every question is strictly assigned to one bucket (Correct, Wrong, or Skipped).
-   */
   const categorizedNodes = useMemo(() => {
     if (!sessionData || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
     
@@ -185,10 +178,7 @@ export default function ResultClient() {
     const skipped: any[] = [];
 
     all.forEach((q) => {
-      // Handles both integer index and string index from Firestore
       const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)];
-      
-      // Strict rule: null, undefined, or empty string -> Skipped
       const isAttempted = ans !== null && ans !== undefined && ans !== "";
       
       if (!isAttempted) {
@@ -201,24 +191,6 @@ export default function ResultClient() {
           wrong.push(q);
         }
       }
-    });
-
-    // Console Debugging as requested
-    const idSet = new Set();
-    const duplicateIds = questions.filter(q => {
-      if (idSet.has(q.id)) return true;
-      idSet.add(q.id);
-      return false;
-    }).map(q => q.id);
-
-    console.log("[RESULT_LOGIC_AUDIT]", {
-      total: all.length,
-      correct: correct.length,
-      wrong: wrong.length,
-      skipped: skipped.length,
-      sum: correct.length + wrong.length + skipped.length,
-      isBalanced: (correct.length + wrong.length + skipped.length) === all.length,
-      duplicateIds
     });
 
     return { all, correct, wrong, skipped };
@@ -276,7 +248,6 @@ export default function ResultClient() {
      return { subjects, difficulty };
   }, [categorizedNodes, sessionData, mockData]);
 
-  // RESET INDEX ON FILTER CHANGE
   useEffect(() => {
     setCurrentReviewIdx(0);
     setShowExplanation(false);
@@ -322,10 +293,27 @@ export default function ResultClient() {
      router.push(`/mocks/instructions?id=${mockId}`);
   };
 
-  const formatTime = (seconds: number) => {
-     const m = Math.floor(seconds / 60);
-     const s = seconds % 60;
-     return `${m}m ${s}s`;
+  /**
+   * REFACTORED: Institutional-grade Time Formatting
+   */
+  const formatTime = (seconds: any) => {
+     const totalSecs = Number(seconds);
+     if (isNaN(totalSecs) || totalSecs <= 0) return "0m 0s";
+     
+     // Detect likely millisecond input error
+     if (totalSecs > 1000000000) {
+        console.warn("[Timer] Extreme value detected, likely raw Date.now() string.");
+        return "N/A";
+     }
+
+     const hours = Math.floor(totalSecs / 3600);
+     const minutes = Math.floor((totalSecs % 3600) / 60);
+     const remainingSecs = Math.round(totalSecs % 60);
+     
+     if (hours > 0) {
+        return `${hours}h ${minutes}m ${remainingSecs}s`;
+     }
+     return `${minutes}m ${remainingSecs}s`;
   };
 
   const performanceStatus = useMemo(() => {
@@ -349,7 +337,6 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-white font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
       
-      {/* HIDDEN OFFSITE RENDER FOR MULTI-PAGE PDF CAPTURE */}
       <div className="fixed left-[-2000px] top-0 pointer-events-none">
            <ResultCard 
              studentName={profile?.name || "Aspirant"}
@@ -452,7 +439,6 @@ export default function ResultClient() {
            </Card>
         </section>
 
-        {/* ANALYTICS SECTION */}
         <section className="space-y-6">
            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 ml-2">Analytical Breakdown</h3>
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -29,8 +29,7 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v7.2.
- * FIXED: Balanced horizontal spacing by explicitly resetting motion x-offset and centering container.
+ * @fileOverview Official Mock Attempt Hub v7.3 [Timer Audit].
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -191,8 +190,19 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     });
 
     const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
-    const timeTaken = Math.round((Date.now() - startTime) / 1000);
     
+    // Timer Precision Audit
+    const endTime = Date.now();
+    const durationMs = endTime - startTime;
+    const timeTaken = Math.round(durationMs / 1000);
+    
+    console.log("[TIMER_AUDIT]", { 
+      startTime, 
+      endTime, 
+      durationSeconds: timeTaken,
+      isPlausible: timeTaken > 0 && timeTaken < (mockData.duration * 120) 
+    });
+
     await stopSession({
       completedQuestions: attemptedCount,
       correct: correctCount,
@@ -208,7 +218,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       attemptedCount, 
       totalQuestions: questions.length,
       accuracy: attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0,
-      timeTaken, 
+      timeTaken: Math.max(1, timeTaken), 
       answers: answers || {}, 
       timestamp: new Date().toISOString(),
       accessLevel: (mockData.accessLevel || 'FREE').toUpperCase(),
@@ -303,7 +313,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   if (initError || !mockId) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white p-10 text-center space-y-8">
        <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100"><AlertCircle className="h-8 w-8" /></div>
-       <div className="space-y-2"><h2 className="text-2xl font-black text-[#0F172A]">Sync Failure</h2><p className="text-slate-500 font-medium max-w-sm mx-auto">{initError}</p></div>
+       <div className="space-y-2"><h2 className="text-2xl font-black text-[#0F172A]">Sync Failure</h2><p className="text-slate-500 font-medium max-sm:px-4 max-w-sm mx-auto">{initError}</p></div>
        <Button onClick={() => router.replace('/dashboard')} className="h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-bold text-sm">Return to Portal</Button>
     </div>
   );
