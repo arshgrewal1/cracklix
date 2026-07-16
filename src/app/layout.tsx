@@ -21,7 +21,7 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v73.1 [Next.js 15 Compliant].
+ * @fileOverview Root Layout v73.2 [Next.js 15 Compliant].
  * FIXED: Added data-scroll-behavior="smooth" to prevent smooth-scroll routing warnings.
  */
 

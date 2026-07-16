@@ -71,6 +71,12 @@ import ResultCard from "./ResultCard"
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
+/**
+ * @fileOverview Premium Institutional Result Hub v5.0.
+ * FIXED: Replaced pagination with a high-fidelity scrollable list for question review.
+ * FIXED: Standardized all imports and resolved performanceStatus reference error.
+ */
+
 export default function ResultClient() {
   const db = useFirestore()
   const { user, profile } = useUser()
@@ -84,7 +90,6 @@ export default function ResultClient() {
   const [mockData, setMockData] = useState<any>(null)
   const [loadingQuestions, setLoadingQuestions] = useState(true)
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
-  const [currentReviewIdx, setCurrentReviewIdx] = useState(0)
   const [guestResult, setGuestResult] = useState<any>(null)
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
 
@@ -223,10 +228,6 @@ export default function ResultClient() {
     return categorizedNodes.all;
   }, [categorizedNodes, activeReviewFilter]);
 
-  useEffect(() => {
-    setCurrentReviewIdx(0);
-  }, [activeReviewFilter]);
-
   const performanceStatus = useMemo(() => {
      const acc = sessionData?.accuracy || 0;
      if (acc >= 90) return { label: "Outstanding", color: "text-emerald-600", bg: "bg-emerald-50", desc: "Top-tier analytical capability verified." };
@@ -333,8 +334,6 @@ export default function ResultClient() {
         <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Preparing Analysis...</p>
      </div>
   );
-
-  const currentQuestion = filteredQuestions[currentReviewIdx];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
@@ -570,7 +569,7 @@ export default function ResultClient() {
            </div>
         </div>
 
-        {/* QUESTION REVIEW SYSTEM */}
+        {/* QUESTION REVIEW SYSTEM - SCROLL BASED LIST */}
         <section className="space-y-10 pt-16 border-t border-slate-100">
            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 px-2">
               <div className="space-y-4">
@@ -578,7 +577,7 @@ export default function ResultClient() {
                     <FileSearch className="h-6 w-6 text-primary" />
                     <h2 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter">Detailed Audit</h2>
                  </div>
-                 <p className="text-slate-500 font-medium text-sm md:text-xl">Examine every response node and official rationalization.</p>
+                 <p className="text-slate-500 font-medium text-sm md:text-xl">Examine every response node and official rationalization in the scroll hub.</p>
               </div>
            </div>
 
@@ -591,58 +590,58 @@ export default function ResultClient() {
               </div>
            </div>
 
-           <div className="max-w-4xl mx-auto space-y-12">
+           <div className="max-w-4xl mx-auto space-y-8">
               <AnimatePresence mode="wait">
                  {filteredQuestions.length > 0 ? (
-                    <motion.div key={currentQuestion?.id + activeReviewFilter} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.4, ease: "easeOut" }} className="space-y-10">
-                       <Card className="border-none shadow-3xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-100 group transition-all duration-700">
-                          <div className="p-8 md:p-14 space-y-10">
-                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                   <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-xs md:text-lg shadow-xl">
-                                      {currentQuestion.originalIndex + 1}
+                    <div key={activeReviewFilter} className="space-y-8 md:space-y-12">
+                       {filteredQuestions.map((q, idx) => (
+                          <motion.div 
+                            key={q.id} 
+                            initial={{ opacity: 0, y: 20 }} 
+                            animate={{ opacity: 1, y: 0 }} 
+                            transition={{ duration: 0.4, delay: idx * 0.05 }}
+                          >
+                             <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-100 group transition-all duration-700">
+                                <div className="p-8 md:p-14 space-y-10">
+                                   <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-4">
+                                         <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-xs md:text-lg shadow-xl">
+                                            {q.originalIndex + 1}
+                                         </div>
+                                         <Badge variant="outline" className="bg-slate-50 text-slate-400 border-none font-black text-[9px] uppercase px-3 py-1 rounded-lg">{q.difficulty || 'MEDIUM'}</Badge>
+                                      </div>
+                                      <ReviewStatus userAns={sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)]} correctAns={q.correctAnswer} />
                                    </div>
-                                   <Badge variant="outline" className="bg-slate-50 text-slate-400 border-none font-black text-[9px] uppercase px-3 py-1 rounded-lg">{currentQuestion.difficulty || 'MEDIUM'}</Badge>
-                                </div>
-                                <ReviewStatus userAns={sessionData.answers?.[currentQuestion.originalIndex] ?? sessionData.answers?.[String(currentQuestion.originalIndex)]} correctAns={currentQuestion.correctAnswer} />
-                             </div>
 
-                             <div className="space-y-8">
-                                <QuestionRenderer 
-                                  question={currentQuestion} 
-                                  language={mockData?.languageMode || 'ENGLISH_PUNJABI'} 
-                                  showSolution={true} 
-                                  selectedAnswer={sessionData.answers?.[currentQuestion.originalIndex] ?? sessionData.answers?.[String(currentQuestion.originalIndex)]} 
-                                  className="p-0 shadow-none border-none bg-transparent" 
-                                />
-                             </div>
+                                   <div className="space-y-8">
+                                      <QuestionRenderer 
+                                        question={q} 
+                                        language={mockData?.languageMode || 'ENGLISH_PUNJABI'} 
+                                        showSolution={true} 
+                                        selectedAnswer={sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)]} 
+                                        className="p-0 shadow-none border-none bg-transparent" 
+                                      />
+                                   </div>
 
-                             <div className="pt-10 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-6">
-                                <div className="flex items-center gap-4">
-                                   <button className="h-11 w-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90 shadow-inner"><Bookmark className="h-5 w-5" /></button>
-                                   <button className="h-11 w-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90 shadow-inner"><Share2 className="h-5 w-5" /></button>
-                                   <button className="h-11 w-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-rose-500 transition-all active:scale-90 shadow-inner"><AlertCircle className="h-5 w-5" /></button>
+                                   <div className="pt-10 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-6">
+                                      <div className="flex items-center gap-4">
+                                         <button className="h-11 w-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90 shadow-inner"><Bookmark className="h-5 w-5" /></button>
+                                         <button className="h-11 w-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90 shadow-inner"><Share2 className="h-5 w-5" /></button>
+                                         <button className="h-11 w-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-rose-500 transition-all active:scale-90 shadow-inner"><AlertCircle className="h-5 w-5" /></button>
+                                      </div>
+                                      <div className="flex items-center gap-3 bg-blue-50/50 px-6 py-2.5 rounded-full border border-blue-100">
+                                         <Timer className="h-4 w-4 text-primary" />
+                                         <span className="text-[10px] md:text-[11px] font-black uppercase text-primary tracking-widest tabular-nums">Registry Item Verified</span>
+                                      </div>
+                                   </div>
                                 </div>
-                                <div className="flex items-center gap-3 bg-blue-50/50 px-6 py-2.5 rounded-full border border-blue-100">
-                                   <Timer className="h-4 w-4 text-primary" />
-                                   <span className="text-[10px] md:text-[11px] font-black uppercase text-primary tracking-widest tabular-nums">Attempt Time: 42s</span>
-                                </div>
-                             </div>
-                          </div>
-                       </Card>
-
-                       <div className="bg-white border border-slate-200 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-full px-4 md:px-10 h-16 md:h-24 flex items-center justify-between gap-4">
-                          <button disabled={currentReviewIdx === 0} onClick={() => setCurrentReviewIdx(currentReviewIdx - 1)} className="h-10 md:h-16 px-6 md:px-10 rounded-full font-black uppercase text-[10px] md:text-xs tracking-widest text-[#0F172A] hover:bg-slate-50 disabled:opacity-20 transition-all flex items-center gap-3 active:scale-95"><ChevronLeft className="h-4 w-4" /> Previous</button>
-                          <div className="flex flex-col items-center">
-                             <span className="text-lg md:text-3xl font-black tabular-nums tracking-tighter">{currentReviewIdx + 1} / {filteredQuestions.length}</span>
-                             <p className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">Question Registry</p>
-                          </div>
-                          <button disabled={currentReviewIdx >= filteredQuestions.length - 1} onClick={() => setCurrentReviewIdx(currentReviewIdx + 1)} className="h-10 md:h-16 px-6 md:px-10 rounded-full font-black uppercase text-[10px] md:text-xs tracking-widest bg-[#0F172A] text-white hover:bg-black disabled:opacity-20 transition-all flex items-center gap-3 shadow-xl active:scale-95">Next <ChevronRight className="h-4 w-4 text-primary" /></button>
-                       </div>
-                    </motion.div>
+                             </Card>
+                          </motion.div>
+                       ))}
+                    </div>
                  ) : (
                     <div className="py-40 text-center opacity-30 animate-in fade-in duration-500">
-                       <SearchIcon className="h-20 w-20 mx-auto text-slate-300" />
+                       <FileSearch className="h-20 w-20 mx-auto text-slate-300" />
                        <p className="text-xl font-black uppercase tracking-[0.4em] mt-8 text-slate-400">Node Cluster Empty</p>
                     </div>
                  )}
@@ -741,3 +740,4 @@ function ReviewStatus({ userAns, correctAns }: any) {
      ? <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] px-4 py-1.5 rounded-full shadow-inner uppercase tracking-widest">CORRECT</Badge>
      : <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] px-4 py-1.5 rounded-full shadow-inner uppercase tracking-widest">INCORRECT</Badge>;
 }
+
