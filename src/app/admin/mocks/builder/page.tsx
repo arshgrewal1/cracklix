@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -34,7 +35,8 @@ import {
   Activity,
   ArrowUpRight,
   Target,
-  History
+  History,
+  ShieldCheck
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -60,10 +62,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { AdminPageHeader } from "@/components/admin"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
+import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v39.0.
- * UPDATED: Integrated Usage Filter (Used/Unused) and 4-column filter grid.
+ * @fileOverview Enterprise Mock Builder Hub v40.0.
+ * UPDATED: Integrated Publish/Draft header actions and Visibility Toggle.
+ * FIXED: Replaced technical jargon and eliminated layout overlaps.
  */
 
 export default function MockBuilderPage() {
@@ -222,7 +226,7 @@ function MockBuilderContent() {
     toast({ title: `Linked ${toAdd.length} items` });
   }
 
-  const handlePublish = async () => {
+  const handlePublish = async (isDraft: boolean) => {
     if (!db || isPublishing) return
     if (!mockData.title?.trim()) {
       toast({ variant: "destructive", title: "Audit blocked", description: "Series title is mandatory." })
@@ -230,7 +234,7 @@ function MockBuilderContent() {
     }
     const flatQuestionIds = sections.flatMap((s: any) => (s.questions || []).map((q: any) => q.id));
     if (flatQuestionIds.length === 0) {
-       toast({ variant: "destructive", title: "Assembly empty", description: "Add items to the database." });
+       toast({ variant: "destructive", title: "Assembly area empty", description: "Add items to the test series." });
        return;
     }
 
@@ -247,6 +251,8 @@ function MockBuilderContent() {
       questionIds: flatQuestionIds,
       sections: sectionMetadata,
       totalMarks: flatQuestionIds.length * (Number(mockData.positiveMarks) || 1),
+      published: !isDraft,
+      status: isDraft ? 'DRAFT' : 'PUBLISHED',
       updatedAt: serverTimestamp(),
       createdAt: isEditing ? (existingMock?.createdAt || serverTimestamp()) : serverTimestamp(),
     };
@@ -259,7 +265,7 @@ function MockBuilderContent() {
       await addDoc(collection(db, "audit_logs"), {
         user: profile?.name || "Administrator",
         action: isEditing ? "MOCK_UPDATE" : "MOCK_CREATE",
-        details: `Mock series "${payload.title}" synchronized.`,
+        details: `Mock series "${payload.title}" synchronized as ${isDraft ? 'Draft' : 'Live'}.`,
         timestamp: serverTimestamp()
       });
       toast({ title: "Database synced" });
@@ -295,13 +301,16 @@ function MockBuilderContent() {
         label="Assembly area"
         title={isEditing ? "Modify series" : "Mock builder"}
         subtitle="Manage structure and details for the test series."
-        onAction={handlePublish}
-        actionLabel={isPublishing ? "Syncing..." : "Save to database"}
-        actionIcon={isPublishing ? Loader2 : Save}
       >
-        <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm hover:bg-slate-50 transition-all mr-auto md:mr-0 shrink-0">
-          <ChevronLeft className="h-5 w-5" />
-        </button>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
+           <button onClick={() => router.back()} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all border-none cursor-pointer">Discard</button>
+           <Button onClick={() => handlePublish(true)} disabled={isPublishing} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">
+              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save draft
+           </Button>
+           <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] tracking-tight shadow-2xl gap-3 border-none transition-all active:scale-95">
+              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync live
+           </Button>
+        </div>
       </AdminPageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
@@ -441,6 +450,25 @@ function MockBuilderContent() {
                        })}
                     </div>
                  </div>
+
+                 <div className="space-y-6 pt-6 border-t border-slate-100">
+                    <div className="flex items-center gap-4">
+                       <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100">
+                          <CheckCircle2 className="h-5 w-5" />
+                       </div>
+                       <div className="space-y-0.5 text-left">
+                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">Master governance</h4>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Visibility control</p>
+                       </div>
+                    </div>
+                    <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", mockData.published ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-slate-100 opacity-60")}>
+                       <div className="space-y-0.5">
+                          <p className="text-[11px] font-bold uppercase text-[#0F172A] tracking-tight">System activation</p>
+                          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Enable live feed access</p>
+                       </div>
+                       <Switch checked={mockData.published} onCheckedChange={v => setMockData({...mockData, published: v})} />
+                    </div>
+                 </div>
               </div>
            </Card>
         </div>
@@ -571,7 +599,7 @@ function MockBuilderContent() {
                            {/* RIGHT SIDE: TEXT AND BUTTON */}
                            <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full">
                               <h4 className="text-[30px] font-[800] text-[#0F172A] tracking-tighter leading-none mb-[6px] whitespace-nowrap">
-                                 Items Ready
+                                 Items ready
                               </h4>
                               <p className="text-[14px] font-medium text-slate-500 mb-[18px]">
                                  Ready to stage into registry
@@ -581,7 +609,7 @@ function MockBuilderContent() {
                                 disabled={bankSelection.length === 0} 
                                 className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0"
                               >
-                                 Link Staged Assets <ArrowUpRight className="h-4 w-4" />
+                                 Link staged items <ArrowUpRight className="h-4 w-4" />
                               </Button>
                            </div>
                         </div>
@@ -695,7 +723,7 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
       <Card className="border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300 rounded-[18px] p-5 space-y-4 group">
          <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-               {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
+               {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" }) : null}
             </div>
             <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
          </div>
