@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -61,8 +62,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v35.0.
- * FIXED: Resolved layout overlap in diagnostic and selection cards.
+ * @fileOverview Enterprise Mock Builder Hub v36.0.
+ * RESTORED: Duration and Difficulty fields in the settings card.
  * DESIGN: Integrated high-fidelity Linear/Stripe style registry dashboard.
  */
 
@@ -326,6 +327,21 @@ function MockBuilderContent() {
                     <select value={mockData.accessLevel} onChange={e => setMockData((p: any) => ({...p, accessLevel: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
                        <option value="FREE">Free Area</option>
                        <option value="PREMIUM">Elite Area</option>
+                    </select>
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-2 text-left">
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Duration (Min)</Label>
+                    <Input type="number" value={mockData.duration} onChange={e => setMockData((p: any) => ({...p, duration: parseInt(e.target.value) || 0}))} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-black text-center text-xs md:text-base shadow-inner text-[#0F172A]" />
+                 </div>
+                 <div className="space-y-2 text-left">
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Difficulty</Label>
+                    <select value={mockData.difficulty} onChange={e => setMockData((p: any) => ({...p, difficulty: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
+                       <option value="Easy">Easy</option>
+                       <option value="Medium">Medium</option>
+                       <option value="Hard">Hard</option>
                     </select>
                  </div>
               </div>
