@@ -29,7 +29,9 @@ import {
   Save,
   GraduationCap,
   AlertCircle,
-  FileText
+  FileText,
+  Search,
+  ExternalLink
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where, documentId, orderBy, DocumentData, updateDoc, increment, addDoc } from "firebase/firestore"
@@ -39,10 +41,11 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { AdminPageHeader } from "@/components/admin"
+import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v26.2.
- * FIXED: Resolved JSX tag mismatch (Button vs button).
+ * @fileOverview Enterprise Mock Builder Hub v27.0.
+ * FIXED: Rebuilt with MCQ Engine for deterministic question filtering and index recovery.
  */
 
 export default function MockBuilderPage() {
@@ -63,23 +66,24 @@ function MockBuilderContent() {
   const mockId = searchParams?.get("id") ?? ""
   const isEditing = !!mockId
 
+  const [bankLoading, setBankLoading] = useState(false)
+  const [questionBank, setQuestionBank] = useState<any[]>([])
+  const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
+  
   const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]))
   const { data: rawExams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
   const { data: existingMock } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
   
   const [isInitializing, setIsInitializing] = useState(true)
-  const [bankLoading, setBankLoading] = useState(false)
-  const [questionBank, setQuestionBank] = useState<Question[]>([])
   const [isPublishing, setIsPublishing] = useState(false)
   const [activeRightTab, setActiveRightTab] = useState<'BANK' | 'ASSEMBLY'>('BANK')
   
   const [filterBoard, setFilterBoard] = useState("all")
   const [filterExam, setFilterExam] = useState("all")
   const [filterSubject, setSubjectFilter] = useState("all")
-  const [hideUsed, setHideUsed] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
   const [bankSelection, setBankSelection] = useState<string[]>([])
-  const [displayLimit, setDisplayLimit] = useState(100)
   
   const [mockData, setMockData] = useState<any>({
     title: "", 
@@ -98,28 +102,39 @@ function MockBuilderContent() {
   })
 
   const [sections, setSections] = useState<any[]>([
-    { id: 'sec-1', name: 'General Hub', questions: [] as Question[] }
+    { id: 'sec-1', name: 'General Hub', questions: [] as any[] }
   ])
   const [activeSectionId, setActiveSectionId] = useState('sec-1')
 
-  const fetchBank = useCallback(async () => {
-    if (!db) return
-    setBankLoading(true)
+  // PRODUCTION FILTER SYNC
+  const fetchFilteredBank = useCallback(async () => {
+    if (!db) return;
+    setBankLoading(true);
+    setDiagnostic(null);
     try {
-      const q = query(collection(db, "questions"), limit(500))
-      const snap = await getDocs(q)
-      setQuestionBank(snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }) as Question))
+      const result = await mcqEngine.fetch(db, {
+        boardId: filterBoard,
+        examId: filterExam,
+        subjectId: filterSubject,
+        searchTerm: searchTerm,
+        status: 'PUBLISHED'
+      }, 100);
+
+      setQuestionBank(result.data);
+      setDiagnostic(result.diagnostic);
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Registry Standby", description: e.message });
     } finally {
-      setBankLoading(false)
+      setBankLoading(false);
     }
-  }, [db]);
+  }, [db, filterBoard, filterExam, filterSubject, searchTerm, toast]);
 
   useEffect(() => {
-    fetchBank()
-  }, [fetchBank])
+    fetchFilteredBank();
+  }, [fetchFilteredBank]);
 
   useEffect(() => {
-    if (!db || !isEditing || !existingMock || questionBank.length === 0) {
+    if (!db || !isEditing || !existingMock || !rawExams) {
        if (!isEditing) setIsInitializing(false);
        return;
     }
@@ -129,26 +144,38 @@ function MockBuilderContent() {
       assignmentMode: existingMock.assignmentMode || "MULTIPLE",
       boardIds: existingMock.boardIds || (existingMock.boardId ? [existingMock.boardId] : []),
       examIds: existingMock.examIds || (existingMock.examId ? [existingMock.examId] : []),
-      positiveMarks: existingMock.positiveMarks ?? 1,
-      negativeMarks: existingMock.negativeMarks ?? 0.25,
     });
 
-    if (existingMock.questionIds) {
-      let currentIndex = 0;
-      const hydratedSections = (existingMock.sections || [{ name: 'General Hub', count: existingMock.questionIds.length }]).map((s: ExamSection, idx: number) => {
-        const count = Number(s.count) || 0;
-        const sectionQIds: string[] = (existingMock.questionIds as string[]).slice(currentIndex, currentIndex + count);
-        currentIndex += count;
-        return { 
-          id: `sec-${idx + 1}`, 
-          name: s.name, 
-          questions: sectionQIds.map((id: string) => questionBank.find((q: Question) => q.id === id)).filter(Boolean) as Question[]
-        };
-      });
-      setSections(hydratedSections.length > 0 ? hydratedSections : [{ id: 'sec-1', name: 'General Hub', questions: [] }]);
-    }
-    setIsInitializing(false);
-  }, [db, existingMock, questionBank, isEditing]);
+    const hydrateExisting = async () => {
+      if (existingMock.questionIds?.length > 0) {
+        const fetched: any[] = [];
+        const chunks = [];
+        for (let i = 0; i < existingMock.questionIds.length; i += 30) {
+          chunks.push(existingMock.questionIds.slice(i, i + 30));
+        }
+        for (const chunk of chunks) {
+          const qSnap = await getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk)));
+          qSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
+        }
+
+        let currentIndex = 0;
+        const hydratedSections = (existingMock.sections || [{ name: 'General Hub', count: existingMock.questionIds.length }]).map((s: ExamSection, idx: number) => {
+          const count = Number(s.count) || 0;
+          const sectionQIds: string[] = (existingMock.questionIds as string[]).slice(currentIndex, currentIndex + count);
+          currentIndex += count;
+          return { 
+            id: `sec-${idx + 1}`, 
+            name: s.name, 
+            questions: sectionQIds.map((id: string) => fetched.find((q: any) => q.id === id)).filter(Boolean)
+          };
+        });
+        setSections(hydratedSections.length > 0 ? hydratedSections : [{ id: 'sec-1', name: 'General Hub', questions: [] }]);
+      }
+      setIsInitializing(false);
+    };
+
+    hydrateExisting();
+  }, [db, existingMock, isEditing, rawExams]);
 
   const uniqueExams = useMemo(() => {
     if (!rawExams) return [];
@@ -158,19 +185,10 @@ function MockBuilderContent() {
     return rawExams;
   }, [rawExams, mockData.boardIds]);
 
-  const filteredBank = useMemo(() => {
-    const allSelectedIds = sections.flatMap((s: any) => (s.questions || []).map((q: Question) => q.id));
-    return questionBank.filter((q: Question) => {
-      const matchesBoard = filterBoard === "all" || q.boardId === filterBoard;
-      const matchesExam = filterExam === "all" || q.examId === filterExam;
-      const matchesSub = filterSubject === "all" || q.subjectId === filterSubject;
-      const notInThisMock = !allSelectedIds.includes(q.id);
-      const usedGuard = !hideUsed || (q.status !== 'USED');
-      return matchesBoard && matchesExam && matchesSub && notInThisMock && usedGuard;
-    })
-  }, [questionBank, filterBoard, filterExam, filterSubject, hideUsed, sections])
-
-  const visibleBank = useMemo(() => filteredBank.slice(0, displayLimit), [filteredBank, displayLimit]);
+  const displayBank = useMemo(() => {
+    const allSelectedIds = new Set(sections.flatMap((s: any) => (s.questions || []).map((q: any) => q.id)));
+    return questionBank.filter(q => !allSelectedIds.has(q.id));
+  }, [questionBank, sections]);
 
   const toggleBoardId = (id: string) => {
      const current = mockData.boardIds || [];
@@ -194,21 +212,21 @@ function MockBuilderContent() {
   };
 
   const handleLinkQuestions = () => {
-    const toAdd = questionBank.filter((q: Question) => bankSelection.includes(q.id));
+    const toAdd = questionBank.filter((q: any) => bankSelection.includes(q.id));
     setSections((prev: any[]) => prev.map((s: any) => s.id === activeSectionId ? { ...s, questions: [...(s.questions || []), ...toAdd] } : s));
     setBankSelection([]);
-    toast({ title: `Linked ${toAdd.length} questions` });
+    toast({ title: `Linked ${toAdd.length} items` });
   }
 
   const handlePublish = async () => {
     if (!db || isPublishing) return
     if (!mockData.title?.trim()) {
-      toast({ variant: "destructive", title: "Validation Error", description: "Series title is mandatory." })
+      toast({ variant: "destructive", title: "Audit Blocked", description: "Series title is mandatory." })
       return
     }
-    const flatQuestionIds = sections.flatMap((s: any) => (s.questions || []).map((q: Question) => q.id));
+    const flatQuestionIds = sections.flatMap((s: any) => (s.questions || []).map((q: any) => q.id));
     if (flatQuestionIds.length === 0) {
-       toast({ variant: "destructive", title: "Assembly Empty", description: "Please add questions to the hub." });
+       toast({ variant: "destructive", title: "Assembly Empty", description: "Add items to the hub." });
        return;
     }
 
@@ -231,26 +249,15 @@ function MockBuilderContent() {
 
     try {
       await setDoc(mockRef, payload, { merge: true });
-      const batch = writeBatch(db);
-      flatQuestionIds.forEach((id: string) => {
-        batch.update(doc(db, "questions", id), { status: 'USED', updatedAt: serverTimestamp() });
-      });
-      await batch.commit();
-
       if (!isEditing) {
-        await updateDoc(doc(db, 'settings', 'stats'), {
-           totalMocks: increment(1),
-           updatedAt: serverTimestamp()
-        }).catch(() => {});
+        await updateDoc(doc(db, 'settings', 'stats'), { totalMocks: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
       }
-
       await addDoc(collection(db, "audit_logs"), {
         user: profile?.name || "Administrator",
         action: isEditing ? "MOCK_UPDATE" : "MOCK_CREATE",
-        details: isEditing ? `Mock Series "${payload.title}" structural modification committed.` : `New Mock Series "${payload.title}" assembled and deployed with ${payload.totalQuestions} nodes.`,
+        details: `Mock Series "${payload.title}" synchronized.`,
         timestamp: serverTimestamp()
       });
-
       toast({ title: "Registry Synced" });
       router.push("/admin/mocks")
     } catch (e: any) {
@@ -321,17 +328,6 @@ function MockBuilderContent() {
                  </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Duration (Min)</Label>
-                    <Input type="number" value={mockData.duration} onChange={e => setMockData((p: any) => ({...p, duration: parseInt(e.target.value) || 120}))} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-black text-center text-xs md:text-base shadow-inner" />
-                 </div>
-                 <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Attempts</Label>
-                    <Input type="number" value={mockData.attemptLimit} onChange={e => setMockData((p: any) => ({...p, attemptLimit: parseInt(e.target.value) || 0}))} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-black text-center text-xs md:text-base shadow-inner" />
-                 </div>
-              </div>
-
               <div className="space-y-6 pt-6 border-t border-slate-50">
                  <div className="space-y-3">
                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Landmark className="h-3 w-3" /> Board Mapping</Label>
@@ -383,7 +379,7 @@ function MockBuilderContent() {
                             </SelectTrigger>
                             <SelectContent className="bg-[#0B1528] border-white/10 text-white">
                                <SelectItem value="all">All Boards Hub</SelectItem>
-                               {boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} HUB</SelectItem>)}
+                               {boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}
                             </SelectContent>
                          </Select>
                       </div>
@@ -412,10 +408,31 @@ function MockBuilderContent() {
                          </Select>
                       </div>
                    </div>
+
+                   {/* DIAGNOSTIC HUB */}
+                   {diagnostic && (
+                      <div className="relative z-10 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl space-y-4">
+                         <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                               <AlertCircle className="h-5 w-5 text-amber-500" />
+                               <p className="text-xs font-bold text-amber-200">Database Diagnostic</p>
+                            </div>
+                            {diagnostic.indexUrl && (
+                               <Button asChild className="h-9 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-black uppercase border-none">
+                                  <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision Index <ExternalLink className="h-3 w-3 ml-2" /></a>
+                               </Button>
+                            )}
+                         </div>
+                         <p className="text-[11px] text-slate-400 leading-relaxed">{diagnostic.message}</p>
+                      </div>
+                   )}
+
                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 pt-6 border-t border-white/10">
                       <div className="flex-1 text-left">
                          <p className="text-[9px] font-black uppercase text-primary tracking-[0.3em]">Selection Node</p>
-                         <div className="text-2xl md:text-5xl font-black text-white tabular-nums tracking-tighter">{bankSelection.length} <span className="text-sm md:text-xl text-slate-500 font-bold ml-1">Staged</span></div>
+                         <div className="text-2xl md:text-5xl font-black text-white tabular-nums tracking-tighter">
+                            {bankSelection.length} <span className="text-sm md:text-xl text-slate-500 font-bold ml-1">Staged</span>
+                         </div>
                       </div>
                       <Button onClick={handleLinkQuestions} disabled={bankSelection.length === 0} className="w-full md:w-auto h-12 md:h-16 px-10 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full shadow-2xl border-none gap-3 active:scale-95">
                          Link Staged Assets <CheckCircle2 className="h-5 w-5" />
@@ -426,7 +443,7 @@ function MockBuilderContent() {
                 <div className="grid grid-cols-1 gap-3">
                    {bankLoading ? (
                       Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white" />)
-                   ) : filteredBank.slice(0, 100).map((q: Question) => {
+                   ) : displayBank.length > 0 ? displayBank.map((q: any) => {
                       const isSelected = bankSelection.includes(q.id);
                       return (
                         <div key={q.id} onClick={() => setBankSelection((p: string[]) => isSelected ? p.filter(id => id !== q.id) : [...p, q.id])} className={cn("p-5 md:px-8 rounded-2xl md:rounded-[2rem] border-2 transition-all cursor-pointer flex items-center justify-between group", isSelected ? "bg-primary/5 border-primary shadow-lg" : "bg-white border-slate-50 hover:border-slate-100 shadow-sm")}>
@@ -437,21 +454,25 @@ function MockBuilderContent() {
                               <div className="min-w-0 text-left">
                                  <p className="font-bold text-[#0F172A] truncate text-sm md:text-base leading-tight">{q.englishQuestion}</p>
                                  <div className="flex items-center gap-3 mt-1.5">
-                                    <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black uppercase px-2">{subjects?.find(s => s.id === q.subjectId)?.name || 'GK'}</Badge>
+                                    <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black uppercase px-2">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'GK'}</Badge>
                                     <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{q.difficulty}</span>
                                  </div>
                               </div>
                            </div>
                         </div>
                       )
-                   })}
-                   {filteredBank.length === 0 && <div className="py-24 text-center opacity-20 italic uppercase font-black tracking-widest text-lg">Registry Bank Empty</div>}
+                   }) : (
+                      <div className="py-24 text-center opacity-20 italic uppercase font-black tracking-widest text-lg flex flex-col items-center gap-4">
+                         <Database className="h-12 w-12" />
+                         Registry bank empty
+                      </div>
+                   )}
                 </div>
              </div>
            ) : (
              <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between px-2">
-                   <h3 className="text-xl md:text-3xl font-black text-[#0F172A] flex items-center gap-4">
+                   <h3 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase flex items-center gap-4">
                       <Layers className="h-6 w-6 text-primary" /> Series Composition
                    </h3>
                    <Popover>
@@ -491,13 +512,13 @@ function MockBuilderContent() {
                             </div>
                          </div>
                          <div className="p-6 md:p-10 space-y-3">
-                            {sec.questions?.map((q: Question, qIdx: number) => (
+                            {sec.questions?.map((q: any, qIdx: number) => (
                                <div key={q.id} className="flex items-center justify-between p-4 md:px-8 bg-white border border-slate-100 rounded-xl md:rounded-2xl hover:shadow-lg transition-all group">
                                   <div className="flex items-center gap-4 md:gap-8 min-w-0">
                                      <span className="text-xs md:text-lg font-black text-slate-200 tabular-nums">#{qIdx + 1}</span>
                                      <p className="text-sm font-bold text-slate-600 truncate">{q.englishQuestion}</p>
                                   </div>
-                                  <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: Question) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90"><X className="h-4 w-4" /></button>
+                                  <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90"><X className="h-4 w-4" /></button>
                                </div>
                             ))}
                             {(!sec.questions || sec.questions.length === 0) && <div className="py-12 text-center opacity-30 italic font-black uppercase text-[10px]">No assets linked to this section</div>}

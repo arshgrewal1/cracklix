@@ -26,7 +26,8 @@ import {
   Flame,
   Search,
   Settings,
-  AlertCircle
+  AlertCircle,
+  ExternalLink
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -47,14 +48,15 @@ import {
   addDoc 
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { Question } from "@/types"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
+import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Daily Challenge Architect v2.2 (Full Logic).
+ * @fileOverview Daily Challenge Architect v27.0.
+ * FIXED: Integrated MCQ Engine for deterministic filtering and index recovery.
  */
 
 export default function DailyQuizBuilder() {
@@ -75,9 +77,12 @@ function DailyQuizBuilderContent() {
   const quizId = searchParams?.get("id") ?? ""
   const isEditing = !!quizId
 
-  const { data: rawBank, loading: bankLoading } = useCollection<Question>(useMemo(() => (db ? query(collection(db, "mcqBank"), limit(500)) : null), [db]))
+  const [bankLoading, setBankLoading] = useState(false)
+  const [questionBank, setQuestionBank] = useState<any[]>([])
+  const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
+
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
-  const { data: existingQuiz, loading: quizLoading } = useDoc<any>(useMemo(() => (db && quizId ? doc(db, "daily_quizzes", quizId) : null), [db, quizId]))
+  const { data: existingQuiz } = useDoc<any>(useMemo(() => (db && quizId ? doc(db, "daily_quizzes", quizId) : null), [db, quizId]))
   
   const [isInitializing, setIsInitializing] = useState(true)
   const [isPublishing, setIsPublishing] = useState(false)
@@ -103,36 +108,67 @@ function DailyQuizBuilderContent() {
     explanationModeEnabled: true
   })
 
-  const [stagedQuestions, setStagedQuestions] = useState<Question[]>([])
+  const [stagedQuestions, setStagedQuestions] = useState<any[]>([])
+
+  // ENGINE SYNC
+  const fetchFilteredBank = useCallback(async () => {
+    if (!db) return;
+    setBankLoading(true);
+    setDiagnostic(null);
+    try {
+      const result = await mcqEngine.fetch(db, {
+        subjectId: filterSubject,
+        difficulty: filterDifficulty,
+        searchTerm: searchTerm,
+        status: 'PUBLISHED'
+      }, 100);
+
+      setQuestionBank(result.data);
+      setDiagnostic(result.diagnostic);
+    } finally {
+      setBankLoading(false);
+    }
+  }, [db, filterSubject, filterDifficulty, searchTerm]);
 
   useEffect(() => {
-    if (!db || bankLoading) return;
+    fetchFilteredBank();
+  }, [fetchFilteredBank]);
 
-    if (isEditing && existingQuiz) {
-      setQuizData({ ...existingQuiz });
-      if (existingQuiz.questionIds && rawBank) {
-         const hydrated = (existingQuiz.questionIds as string[]).map(id => rawBank.find(q => q.id === id)).filter(Boolean) as Question[];
-         setStagedQuestions(hydrated);
+  useEffect(() => {
+    if (!db || !existingQuiz) {
+       if (!isEditing) setIsInitializing(false);
+       return;
+    }
+
+    setQuizData({ ...existingQuiz });
+    
+    const hydrateExisting = async () => {
+      if (existingQuiz.questionIds?.length > 0) {
+        const fetched: any[] = [];
+        const chunks = [];
+        for (let i = 0; i < existingQuiz.questionIds.length; i += 30) {
+          chunks.push(existingQuiz.questionIds.slice(i, i + 30));
+        }
+        for (const chunk of chunks) {
+          const qSnap = await getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk)));
+          qSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
+        }
+        const hydrated = (existingQuiz.questionIds as string[]).map(id => fetched.find(q => q.id === id)).filter(Boolean);
+        setStagedQuestions(hydrated);
       }
       setIsInitializing(false);
-    } else if (!isEditing) {
-       setIsInitializing(false);
-    }
-  }, [db, existingQuiz, rawBank, isEditing, bankLoading]);
+    };
 
-  const filteredBank = useMemo(() => {
-    if (!rawBank) return [];
+    hydrateExisting();
+  }, [db, existingQuiz, isEditing]);
+
+  const displayBank = useMemo(() => {
     const stagedIds = new Set(stagedQuestions.map(q => q.id));
-    return rawBank.filter(q => {
-      const matchesSearch = !searchTerm || q.englishQuestion?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSubject = filterSubject === 'all' || q.subjectId === filterSubject;
-      const matchesDiff = filterDifficulty === 'all' || q.difficulty === filterDifficulty;
-      return matchesSearch && matchesSubject && matchesDiff && !stagedIds.has(q.id);
-    });
-  }, [rawBank, stagedQuestions, searchTerm, filterSubject, filterDifficulty]);
+    return questionBank.filter(q => !stagedIds.has(q.id));
+  }, [questionBank, stagedQuestions]);
 
   const handleLinkSelected = () => {
-    const toAdd = (rawBank || []).filter(q => bankSelection.includes(q.id));
+    const toAdd = questionBank.filter((q: any) => bankSelection.includes(q.id));
     setStagedQuestions(prev => [...prev, ...toAdd]);
     setBankSelection([]);
     toast({ title: "Assets Linked" });
@@ -145,7 +181,7 @@ function DailyQuizBuilderContent() {
        return;
     }
     if (stagedQuestions.length === 0) {
-       toast({ variant: "destructive", title: "Assembly Empty", description: "Add questions to challenge." });
+       toast({ variant: "destructive", title: "Assembly Empty", description: "Add items to challenge." });
        return;
     }
 
@@ -156,7 +192,6 @@ function DailyQuizBuilderContent() {
     try {
        const batch = writeBatch(db);
 
-       // Rule: Only one quiz can be "isTodayQuiz"
        if (!isDraft && quizData.isTodayQuiz) {
           const prevActiveSnap = await getDocs(query(collection(db, "daily_quizzes"), where("isTodayQuiz", "==", true)));
           prevActiveSnap.docs.forEach(d => {
@@ -185,7 +220,7 @@ function DailyQuizBuilderContent() {
        await addDoc(collection(db, "audit_logs"), {
           user: profile?.name || "Administrator",
           action: isEditing ? "QUIZ_UPDATE" : "QUIZ_CREATE",
-          details: `Daily Challenge "${payload.title}" ${isDraft ? 'saved as draft' : 'published live'}.`,
+          details: `Daily Challenge "${payload.title}" synchronized.`,
           timestamp: serverTimestamp()
        });
 
@@ -209,7 +244,7 @@ function DailyQuizBuilderContent() {
         <div className="flex gap-3">
            <button onClick={() => setStagedQuestions([])} className="h-14 px-8 rounded-2xl border border-slate-200 font-black uppercase text-[10px] bg-white hover:bg-slate-50 transition-all">Reset</button>
            <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest border-slate-200">Save Draft</Button>
-           <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl gap-3 border-none">
+           <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl gap-3 border-none transition-all active:scale-95">
               {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync Live Now
            </Button>
         </div>
@@ -291,6 +326,25 @@ function DailyQuizBuilderContent() {
                            </Select>
                         </div>
                      </div>
+
+                     {/* DIAGNOSTIC HUB */}
+                     {diagnostic && (
+                        <div className="relative z-10 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl space-y-4">
+                           <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                 <AlertCircle className="h-5 w-5 text-amber-500" />
+                                 <p className="text-xs font-bold text-amber-200">Sync Diagnostic</p>
+                              </div>
+                              {diagnostic.indexUrl && (
+                                 <Button asChild className="h-9 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-black uppercase border-none">
+                                    <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision Index <ExternalLink className="h-3 w-3 ml-2" /></a>
+                                 </Button>
+                              )}
+                           </div>
+                           <p className="text-[11px] text-slate-400 leading-relaxed">{diagnostic.message}</p>
+                        </div>
+                     )}
+
                      <div className="relative z-10 flex flex-col md:flex-row items-center gap-10 pt-8 border-t border-white/10">
                         <div className="flex-1">
                            <div className="relative">
@@ -311,7 +365,7 @@ function DailyQuizBuilderContent() {
                   <div className="grid grid-cols-1 gap-3">
                      {bankLoading ? (
                         Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white" />)
-                     ) : filteredBank.length > 0 ? filteredBank.map((q) => {
+                     ) : displayBank.length > 0 ? displayBank.map((q) => {
                         const isSel = bankSelection.includes(q.id);
                         return (
                            <div key={q.id} onClick={() => setBankSelection(prev => isSel ? prev.filter(id => id !== q.id) : [...prev, q.id])} className={cn("p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group", isSel ? "bg-primary/5 border-primary shadow-lg" : "bg-white border-slate-50 hover:border-slate-100 shadow-sm")}>
@@ -321,7 +375,7 @@ function DailyQuizBuilderContent() {
                                  </div>
                                  <div className="min-w-0 text-left">
                                     <p className="font-bold text-[#0F172A] truncate text-sm md:text-base">{q.englishQuestion}</p>
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{q.subjectId} • {q.difficulty}</p>
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'} • {q.difficulty}</p>
                                  </div>
                               </div>
                            </div>
@@ -329,7 +383,7 @@ function DailyQuizBuilderContent() {
                      }) : (
                         <div className="py-20 text-center opacity-30 italic font-black uppercase text-xs flex flex-col items-center gap-4">
                            <AlertCircle className="h-10 w-10 text-slate-300" />
-                           No questions matched in registry.
+                           No items matched in registry.
                         </div>
                      )}
                   </div>
@@ -338,7 +392,7 @@ function DailyQuizBuilderContent() {
                <div className="space-y-8 animate-in fade-in duration-500">
                   <div className="flex items-center justify-between px-2">
                      <h3 className="text-xl font-black text-[#0F172A] uppercase flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Active Composition</h3>
-                     <Badge className="bg-[#0F172A] text-white border-none font-bold px-4 py-1.5 rounded-lg">{stagedQuestions.length} Questions</Badge>
+                     <Badge className="bg-[#0F172A] text-white border-none font-bold px-4 py-1.5 rounded-lg">{stagedQuestions.length} Items</Badge>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
                      {stagedQuestions.map((q, idx) => (
