@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -58,9 +58,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v34.0.
- * FIXED: Resolved layout overlap in diagnostic and selection cards.
- * DESIGN: Integrated high-fidelity Linear/Stripe style registry dashboard.
+ * @fileOverview Daily Challenge Builder v38.0.
+ * FIXED: Visual collision in analytics card.
+ * FIXED: Added missing CardTitle import.
  */
 
 export default function DailyQuizBuilder() {
@@ -261,7 +261,7 @@ function DailyQuizBuilderContent() {
             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50">
                <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Challenge title</Label>
-                  <Input value={quizData.title} onChange={e => setQuizData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-lg shadow-inner" placeholder="e.g. Daily Punjab GK #12" />
+                  <Input value={quizData.title} onChange={e => setFormData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-lg shadow-inner" placeholder="e.g. Daily Punjab GK #12" />
                </div>
 
                <div className="grid grid-cols-2 gap-4">
@@ -356,31 +356,33 @@ function DailyQuizBuilderContent() {
 
                     {diagnostic && (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                        <Card className="border-none shadow-xl bg-amber-50/50 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-amber-100">
-                           <div className="flex items-center gap-6">
-                              <div className="h-14 w-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-inner">
-                                 <Database className="h-7 w-7 animate-pulse" />
-                              </div>
-                              <div className="text-left space-y-1">
-                                 <div className="flex items-center gap-2">
-                                    <CardTitle className="text-lg font-black text-amber-900">System check</CardTitle>
-                                    <Badge className="bg-amber-500 text-white border-none text-[8px] font-black uppercase">Index missing</Badge>
-                                 </div>
-                                 <p className="text-sm font-medium text-amber-700/70">Database index required for fast filtering. Sync may be slow.</p>
-                              </div>
+                        <Card className="border-none shadow-xl bg-amber-50/50 rounded-[2rem] p-6 md:p-8 border border-amber-100">
+                           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                             <div className="flex items-center gap-6 text-left">
+                                <div className="h-14 w-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-inner shrink-0">
+                                   <Database className="h-7 w-7 animate-pulse" />
+                                </div>
+                                <div className="space-y-1">
+                                   <div className="flex items-center gap-2">
+                                      <CardTitle className="text-lg font-black text-amber-900">System check</CardTitle>
+                                      <Badge className="bg-amber-500 text-white border-none text-[8px] font-black uppercase">Index missing</Badge>
+                                   </div>
+                                   <p className="text-sm font-medium text-amber-700/70">Database index required for fast filtering. Sync may be slow.</p>
+                                </div>
+                             </div>
+                             {diagnostic.indexUrl && (
+                                <Button asChild className="w-full md:w-auto h-14 px-8 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-white rounded-xl font-bold uppercase text-[10px] gap-2 border-none shadow-lg shrink-0">
+                                   <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision index <ExternalLink className="h-4 w-4" /></a>
+                                </Button>
+                             )}
                            </div>
-                           {diagnostic.indexUrl && (
-                              <Button asChild className="h-14 px-8 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-white rounded-xl font-bold uppercase text-[10px] gap-2 border-none shadow-lg shrink-0">
-                                 <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision index <ExternalLink className="h-4 w-4" /></a>
-                              </Button>
-                           )}
                         </Card>
                       </motion.div>
                     )}
 
                     <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-12 relative overflow-hidden border border-slate-100 text-left">
                        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><Zap className="h-44 w-44" /></div>
-                       <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 justify-between relative z-10">
+                       <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 justify-between relative z-10">
                           <div className="flex items-center gap-6 md:gap-10 min-w-0 flex-1">
                              <div className="relative shrink-0">
                                 <svg className="h-24 w-24 md:h-32 md:w-32 transform -rotate-90">
@@ -400,7 +402,7 @@ function DailyQuizBuilderContent() {
                                    <span className="text-2xl md:text-5xl font-black tabular-nums tracking-tighter">{bankSelection.length}</span>
                                 </div>
                              </div>
-                             <div className="space-y-1 min-w-0 flex-1">
+                             <div className="space-y-1 min-w-[200px] flex-1">
                                 <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none">Items ready</h4>
                                 <p className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into area</p>
                              </div>
