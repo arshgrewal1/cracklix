@@ -23,9 +23,9 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v6.0.
- * FIXED: Accurate check for finished attempts to prevent "Retake" on new tests.
- * FIXED: Unified ID extraction to resolve Sync Failure.
+ * @fileOverview Official Test Rules Hub v6.1.
+ * REDESIGNED: Start Test button with vibrant primary-to-cyan gradient.
+ * FIXED: Precise retake detection and universal ID extraction.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -44,18 +44,15 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
   const [accessError, setAccessError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
 
-  // Unify ID extraction
   const activeId = useMemo(() => {
     if (propMockId) return propMockId;
-    const queryId = searchParams?.get('id');
+    const queryId = searchParams.get('id');
     if (queryId && queryId !== 'manual') return queryId;
     
-    // Check if ID is in path: /mocks/[id]/instructions
     const segments = pathname.split('/').filter(Boolean);
     if (segments.length >= 2 && segments[segments.length-1] === 'instructions') {
       return segments[segments.length - 2];
     }
-    // Check if ID is the last segment: /mocks/[id]
     const last = segments[segments.length - 1];
     return (last && last !== 'instructions' && last !== 'view') ? last : null;
   }, [pathname, searchParams, propMockId]);
@@ -72,7 +69,6 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
       try {
         setIsLoading(true);
-        // Important: Reset finished state before new check
         setIsFinished(false);
         
         const mockRef = doc(db, "mocks", activeId);
@@ -92,7 +88,6 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
         const mData = targetSnap.data();
         setMock(mData);
 
-        // STRICTOR CHECK: Only show "Finished" if a user record exists with status COMPLETED
         if (user) {
           const attemptRef = doc(db, "attempts", `${user.uid}_${activeId}`);
           const attemptSnap = await getDoc(attemptRef);
@@ -100,7 +95,6 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
             setIsFinished(true);
           }
         } else {
-          // Guest check
           const guestResult = localStorage.getItem(`cracklix_guest_result_${activeId}`);
           if (guestResult) setIsFinished(true);
         }
@@ -251,7 +245,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                           onClick={() => router.push(`/results/view?id=${activeId}`)}
                           className="w-full h-16 md:h-20 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest text-[12px] md:text-sm rounded-[18px] md:rounded-[2rem] shadow-xl transition-all active:scale-95 border-none flex items-center justify-center gap-3"
                         >
-                           View Analysis <ChevronRight className="h-5 w-5" />
+                           View analysis <ChevronRight className="h-5 w-5" />
                         </Button>
                         <Button 
                           onClick={handleRetake}
@@ -260,24 +254,24 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                           className="w-full h-14 border-2 border-slate-100 text-[#0F172A] font-black uppercase text-[10px] rounded-2xl shadow-sm hover:bg-slate-50 active:scale-95 gap-3"
                         >
                            {isResetting ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} 
-                           Retake Test (Reset)
+                           Retake test (Reset)
                         </Button>
                       </div>
                    ) : (
                       <Button 
                         disabled={!!accessError}
                         onClick={() => router.push(`/mocks/attempt?id=${activeId}`)}
-                        className="relative overflow-hidden w-full h-16 md:h-24 bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] hover:brightness-110 text-white font-black uppercase tracking-[0.2em] text-[12px] md:text-xl rounded-[20px] md:rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-all active:scale-95 border-none group"
+                        className="relative overflow-hidden w-full h-16 md:h-24 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase tracking-[0.2em] text-[12px] md:text-xl rounded-[20px] md:rounded-[3rem] shadow-[0_20px_50px_rgba(37,99,235,0.3)] transition-all active:scale-95 border-none group"
                       >
                          <div className="flex items-center justify-center gap-4 relative z-10">
-                            <Play className="h-6 w-6 md:h-8 md:w-8 fill-primary text-primary" />
+                            <Play className="h-6 w-6 md:h-8 md:w-8 fill-white text-white" />
                             <span>Start Test</span>
                             <ChevronRight className="h-6 w-6 md:h-8 md:w-8 transition-transform group-hover:translate-x-2" />
                          </div>
                          <motion.div 
                             animate={{ x: ['-100%', '300%'] }}
                             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute inset-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-25deg] pointer-events-none"
+                            className="absolute inset-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] pointer-events-none"
                          />
                       </Button>
                    )}

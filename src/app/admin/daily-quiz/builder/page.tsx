@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -59,8 +58,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v31.0.
- * FIXED: UI overlap in Selection Analytics Card.
+ * @fileOverview Daily Challenge Builder v32.0.
+ * FIXED: Syntax error in PremiumFilterCard.
+ * FIXED: UI overlap in Selection Analytics Card via responsive stacking.
  */
 
 export default function DailyQuizBuilder() {
@@ -247,10 +247,10 @@ function DailyQuizBuilderContent() {
         title={isEditing ? "Modify challenge" : "New daily quiz"}
         subtitle="Configure the official daily preparation items for the database."
       >
-        <div className="flex gap-3">
-           <button onClick={() => setStagedQuestions([])} className="h-14 px-8 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all">Reset</button>
-           <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-8 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">Save draft</Button>
-           <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] tracking-tight shadow-2xl gap-3 border-none transition-all active:scale-95">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
+           <button onClick={() => setStagedQuestions([])} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all">Reset</button>
+           <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">Save draft</Button>
+           <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] tracking-tight shadow-2xl gap-3 border-none transition-all active:scale-95">
               {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync live
            </Button>
         </div>
@@ -306,7 +306,6 @@ function DailyQuizBuilderContent() {
 
             {activeTab === 'BANK' ? (
                <div className="space-y-10 animate-in zoom-in-95 duration-500 relative">
-                  {/* SUBTLE BACKGROUND PATTERN */}
                   <div className="absolute inset-0 -z-10 opacity-[0.04] pointer-events-none" style={{ backgroundImage: `radial-gradient(#0F172A 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
                   
                   <div className="space-y-6">
@@ -323,7 +322,6 @@ function DailyQuizBuilderContent() {
                        </div>
                     </div>
 
-                    {/* PREMIUM FILTER CARDS */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                        <PremiumFilterCard 
                           icon={<Landmark className="text-blue-500" />}
@@ -348,7 +346,6 @@ function DailyQuizBuilderContent() {
                        />
                     </div>
 
-                    {/* SEARCH BAR */}
                     <div className="relative group w-full">
                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-all duration-500" />
                        <div className="relative flex items-center h-16 bg-white border border-slate-100 rounded-[18px] shadow-sm px-4 md:px-6 gap-2 md:gap-4 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
@@ -357,7 +354,6 @@ function DailyQuizBuilderContent() {
                        </div>
                     </div>
 
-                    {/* DIAGNOSTICS CARD */}
                     {diagnostic && (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                         <Card className="border-none shadow-xl bg-amber-50/50 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-amber-100">
@@ -382,7 +378,6 @@ function DailyQuizBuilderContent() {
                       </motion.div>
                     )}
 
-                    {/* SELECTION ANALYTICS CARD - FIXED OVERLAP */}
                     <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-12 relative overflow-hidden border border-slate-100 text-left">
                        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><Zap className="h-44 w-44" /></div>
                        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 justify-between relative z-10">
@@ -413,7 +408,7 @@ function DailyQuizBuilderContent() {
                           <Button 
                             onClick={handleLinkSelected} 
                             disabled={bankSelection.length === 0} 
-                            className="w-full lg:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
+                            className="w-full lg:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black text-[11px] md:text-xs tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
                           >
                              Link staged items <ArrowUpRight className="h-5 w-5" />
                           </Button>
@@ -502,10 +497,11 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
             onChange={e => onChange(e.target.value)} 
             className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none appearance-none cursor-pointer hover:bg-slate-100 focus:ring-2 focus:ring-primary/10 transition-all text-[#0F172A]"
          >
-            <option value="all">All {label.split(' ')[1]}s</option>
+            <option value="all">All {label.split(' ')[0]}s</option>
             {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
          </select>
       </Card>
+   );
 }
 
 function ConfigSwitch({ label, checked, onChange }: any) {

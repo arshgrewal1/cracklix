@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -62,8 +61,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v32.0.
- * FIXED: Resolved text overlapping in Selection Analytics Card.
+ * @fileOverview Enterprise Mock Builder Hub v33.0.
+ * FIXED: Variable reference isEditing used mockId.
+ * FIXED: UI overlap in Selection Analytics Card via responsive flex stacking.
  */
 
 export default function MockBuilderPage() {
@@ -151,7 +151,7 @@ function MockBuilderContent() {
   }, [fetchFilteredBank]);
 
   useEffect(() => {
-    if (!db || !isEditing || !existingMock || !rawExams) {
+    if (!db || !mockId || !existingMock || !rawExams) {
        if (!isEditing) setIsInitializing(false);
        return;
     }
@@ -167,7 +167,8 @@ function MockBuilderContent() {
       if (existingMock.questionIds?.length > 0) {
         const fetched: any[] = [];
         const chunks = [];
-        for (let i = 0; i < existingMock.questionIds.length; i += 30) {
+        const questionIds = existingMock.questionIds;
+        for (let i = 0; i < questionIds.length; i += 30) {
           chunks.push(questionIds.slice(i, i + 30));
         }
         for (const chunk of chunks) {
@@ -198,7 +199,7 @@ function MockBuilderContent() {
     };
 
     hydrateExisting();
-  }, [db, existingMock, isEditing, rawExams]);
+  }, [db, existingMock, isEditing, rawExams, mockId]);
 
   const uniqueExams = useMemo(() => {
     if (!rawExams) return [];
@@ -287,7 +288,7 @@ function MockBuilderContent() {
   );
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-40 text-left pt-2">
+    <div className="max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-40 text-left pt-2 px-4 md:px-10">
       <AdminPageHeader
         icon={Layers}
         label="Assembly area"
@@ -302,7 +303,7 @@ function MockBuilderContent() {
         </button>
       </AdminPageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 px-1">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
         <div className="lg:col-span-4 space-y-6 md:space-y-8">
            <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-5 md:p-10 space-y-6 md:space-y-8 border border-slate-50">
               <div className="space-y-2 text-left">
@@ -341,7 +342,6 @@ function MockBuilderContent() {
               </div>
 
               <div className="space-y-10 pt-10 border-t border-slate-100">
-                 {/* Premium Board Mapping */}
                  <div className="space-y-6">
                     <div className="flex items-center gap-4">
                        <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-primary shadow-sm border border-blue-100">
@@ -384,7 +384,6 @@ function MockBuilderContent() {
                     </div>
                  </div>
 
-                 {/* Premium Exam Vertical */}
                  <div className="space-y-6">
                     <div className="flex items-center gap-4">
                        <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 shadow-sm border border-purple-100">
@@ -438,7 +437,6 @@ function MockBuilderContent() {
 
            {activeRightTab === 'BANK' ? (
              <div className="space-y-10 animate-in zoom-in-95 duration-500 relative">
-                {/* SUBTLE BACKGROUND PATTERN */}
                 <div className="absolute inset-0 -z-10 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(#0F172A 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
                 
                 <div className="space-y-6">
@@ -455,7 +453,6 @@ function MockBuilderContent() {
                      </div>
                   </div>
 
-                  {/* PREMIUM FILTER CARDS */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                      <PremiumFilterCard 
                         icon={<Landmark className="text-blue-500" />}
@@ -480,7 +477,6 @@ function MockBuilderContent() {
                      />
                   </div>
 
-                  {/* SEARCH BAR - MODERN */}
                   <div className="relative group w-full">
                      <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-all duration-500" />
                      <div className="relative flex items-center h-16 bg-white border border-slate-100 rounded-[18px] shadow-sm px-6 gap-4 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
@@ -489,7 +485,6 @@ function MockBuilderContent() {
                      </div>
                   </div>
 
-                  {/* DIAGNOSTICS CARD - PREMIUM */}
                   {diagnostic && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                        <Card className="border-none shadow-xl bg-amber-50/50 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-amber-100">
@@ -514,7 +509,6 @@ function MockBuilderContent() {
                     </motion.div>
                   )}
 
-                  {/* SELECTION ANALYTICS CARD - FIXED OVERLAP */}
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                      <div className="lg:col-span-12">
                         <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-8 md:p-12 relative overflow-hidden border border-slate-100 text-left">
@@ -547,7 +541,7 @@ function MockBuilderContent() {
                               <Button 
                                 onClick={handleLinkQuestions} 
                                 disabled={bankSelection.length === 0} 
-                                className="w-full lg:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
+                                className="w-full lg:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black text-[11px] md:text-xs tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
                               >
                                  Link staged items <ArrowUpRight className="h-5 w-5" />
                               </Button>
@@ -672,9 +666,9 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
             onChange={e => onChange(e.target.value)} 
             className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none appearance-none cursor-pointer hover:bg-slate-100 focus:ring-2 focus:ring-primary/10 transition-all text-[#0F172A]"
          >
-            <option value="all">All {label.split(' ')[1]}s</option>
+            <option value="all">All {label.split(' ')[0]}s</option>
             {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
          </select>
       </Card>
-   )
+   );
 }
