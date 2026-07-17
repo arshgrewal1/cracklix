@@ -41,8 +41,6 @@ import {
   doc, 
   setDoc, 
   serverTimestamp, 
-  query, 
-  limit, 
   getDocs, 
   writeBatch, 
   where, 
@@ -61,9 +59,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v30.0.
- * FIXED: UI overlap in Selection Analytics Card by adjusting flex properties and paddings.
- * LANGUAGE: Replaced "Registry" and "Node" with "Database" and "Item".
+ * @fileOverview Daily Challenge Builder v31.0.
+ * FIXED: UI overlap in Selection Analytics Card.
  */
 
 export default function DailyQuizBuilder() {
@@ -386,10 +383,10 @@ function DailyQuizBuilderContent() {
                     )}
 
                     {/* SELECTION ANALYTICS CARD - FIXED OVERLAP */}
-                    <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-12 relative overflow-hidden border border-slate-50 text-left">
+                    <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-12 relative overflow-hidden border border-slate-100 text-left">
                        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><Zap className="h-44 w-44" /></div>
-                       <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 justify-between relative z-10">
-                          <div className="flex items-center gap-6 md:gap-10 min-w-0">
+                       <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 justify-between relative z-10">
+                          <div className="flex items-center gap-6 md:gap-10 min-w-0 flex-1">
                              <div className="relative shrink-0">
                                 <svg className="h-24 w-24 md:h-32 md:w-32 transform -rotate-90">
                                    <circle cx="50%" cy="50%" r="44%" className="stroke-slate-100 fill-none" strokeWidth="8" />
@@ -408,7 +405,7 @@ function DailyQuizBuilderContent() {
                                    <span className="text-2xl md:text-5xl font-black tabular-nums tracking-tighter">{bankSelection.length}</span>
                                 </div>
                              </div>
-                             <div className="space-y-1 min-w-0">
+                             <div className="space-y-1 min-w-0 flex-1">
                                 <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none truncate md:whitespace-normal">Items ready</h4>
                                 <p className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into area</p>
                              </div>
@@ -416,7 +413,7 @@ function DailyQuizBuilderContent() {
                           <Button 
                             onClick={handleLinkSelected} 
                             disabled={bankSelection.length === 0} 
-                            className="w-full md:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
+                            className="w-full lg:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
                           >
                              Link staged items <ArrowUpRight className="h-5 w-5" />
                           </Button>
@@ -466,7 +463,7 @@ function DailyQuizBuilderContent() {
                         <Card key={q.id} className="border-none shadow-lg rounded-2xl bg-white group hover:shadow-xl transition-all border border-slate-100 overflow-hidden">
                            <CardContent className="p-6 md:px-10 flex items-center justify-between gap-6">
                               <div className="flex items-center gap-6 min-w-0">
-                                 <span className="text-xl font-black text-slate-200 tabular-nums">#{idx + 1}</span>
+                                 <span className="text-xs md:text-lg font-black text-slate-200 tabular-nums">#{idx + 1}</span>
                                  <div className="min-w-0 text-left">
                                     <p className="font-bold text-[#0F172A] text-sm md:text-lg truncate">{q.englishQuestion}</p>
                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {q.id.slice(-8)}</p>
@@ -509,7 +506,6 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
             {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
          </select>
       </Card>
-   )
 }
 
 function ConfigSwitch({ label, checked, onChange }: any) {

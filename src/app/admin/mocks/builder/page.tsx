@@ -62,8 +62,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v31.0.
- * UPDATED: Premium UI redesign for Board Mapping and Exam Vertical panels.
+ * @fileOverview Enterprise Mock Builder Hub v32.0.
+ * FIXED: Resolved text overlapping in Selection Analytics Card.
  */
 
 export default function MockBuilderPage() {
@@ -168,7 +168,7 @@ function MockBuilderContent() {
         const fetched: any[] = [];
         const chunks = [];
         for (let i = 0; i < existingMock.questionIds.length; i += 30) {
-          chunks.push(existingMock.questionIds.slice(i, i + 30));
+          chunks.push(questionIds.slice(i, i + 30));
         }
         for (const chunk of chunks) {
           const [mcqSnap, legacySnap] = await Promise.all([
@@ -519,8 +519,8 @@ function MockBuilderContent() {
                      <div className="lg:col-span-12">
                         <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-8 md:p-12 relative overflow-hidden border border-slate-100 text-left">
                            <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><Zap className="h-44 w-44" /></div>
-                           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 justify-between relative z-10">
-                              <div className="flex items-center gap-6 md:gap-10 min-w-0">
+                           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 justify-between relative z-10">
+                              <div className="flex items-center gap-6 md:gap-10 min-w-0 flex-1">
                                  <div className="relative shrink-0">
                                     <svg className="h-24 w-24 md:h-32 md:w-32 transform -rotate-90">
                                        <circle cx="50%" cy="50%" r="44%" className="stroke-slate-100 fill-none" strokeWidth="8" />
@@ -539,7 +539,7 @@ function MockBuilderContent() {
                                        <span className="text-2xl md:text-5xl font-black tabular-nums tracking-tighter">{bankSelection.length}</span>
                                     </div>
                                  </div>
-                                 <div className="space-y-1 min-w-0">
+                                 <div className="space-y-1 min-w-0 flex-1">
                                     <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none truncate md:whitespace-normal">Items ready</h4>
                                     <p className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into area</p>
                                  </div>
@@ -547,7 +547,7 @@ function MockBuilderContent() {
                               <Button 
                                 onClick={handleLinkQuestions} 
                                 disabled={bankSelection.length === 0} 
-                                className="w-full md:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
+                                className="w-full lg:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
                               >
                                  Link staged items <ArrowUpRight className="h-5 w-5" />
                               </Button>
@@ -558,6 +558,11 @@ function MockBuilderContent() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 pt-10">
+                   {bankSelection.length > 0 && (
+                     <div className="flex justify-end mb-4">
+                        <Button variant="ghost" onClick={() => setBankSelection([])} className="text-rose-500 hover:bg-rose-50 font-bold text-[10px] uppercase tracking-widest">Clear selection</Button>
+                     </div>
+                   )}
                    {bankLoading ? (
                       Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-2xl bg-white" />)
                    ) : displayBank.length > 0 ? displayBank.map((q: any) => {
