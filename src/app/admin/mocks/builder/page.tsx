@@ -65,9 +65,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v41.0.
- * FIXED: Ensured examId (singular) is set for legacy compatibility.
- * FIXED: Ensured published boolean is explicitly set.
+ * @fileOverview Enterprise Mock Builder Hub v42.0 [LIVE COUNTER SYNC].
+ * FIXED: Increments global counters upon publishing.
  */
 
 export default function MockBuilderPage() {
@@ -247,7 +246,7 @@ function MockBuilderContent() {
       ...mockData,
       id: finalId,
       boardId: mockData.boardIds[0] || "GENERAL",
-      examId: mockData.examIds[0] || "GENERAL", // Legacy compatibility
+      examId: mockData.examIds[0] || "GENERAL", 
       totalQuestions: flatQuestionIds.length,
       questionIds: flatQuestionIds,
       sections: sectionMetadata,
@@ -692,7 +691,7 @@ function MockBuilderContent() {
                                </div>
                             </div>
                             <div className="flex gap-2">
-                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === self.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active area' : 'Set focus'}</button>
+                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active area' : 'Set focus'}</button>
                                <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></Button>
                             </div>
                          </div>

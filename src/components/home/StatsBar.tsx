@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -47,7 +46,8 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 }
 
 /**
- * @fileOverview Institutional Stats Bar v1.1 [Typography Optimized].
+ * @fileOverview Institutional Stats Bar v1.2 [REAL DATA SYNC].
+ * Pulls from settings/stats document for 100% accurate database numbers.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -82,12 +82,9 @@ export default function StatsBar() {
       support: "Live now"
     };
 
-    const mode = settings?.studentCounterMode || 'manual';
-    const threshold = settings?.studentCounterThreshold || 1000;
     const totalUsers = stats?.totalUsers || 0;
-
-    const shouldShowStudents = mode === 'auto' 
-      ? totalUsers >= threshold 
+    const shouldShowStudents = settings?.studentCounterMode === 'auto' 
+      ? totalUsers >= (settings?.studentCounterThreshold || 1000) 
       : s.showStudents;
 
     const pool = [];
@@ -104,17 +101,7 @@ export default function StatsBar() {
     return pool.slice(0, 4);
   }, [stats, settings, mounted]);
 
-  if (!mounted) {
-    return (
-      <section className="bg-white py-8 md:py-12 border-b border-slate-50">
-        <div className="max-w-[1440px] mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-[22px]" />)}
-          </div>
-        </div>
-      </section>
-    );
-  }
+  if (!mounted) return null;
 
   return (
     <section className="bg-white py-8 md:py-12 border-b border-slate-50">
