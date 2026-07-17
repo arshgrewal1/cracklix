@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -61,9 +61,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v34.0.
- * FIXED: Added missing CardTitle import.
- * FIXED: Responsive flex-col lg:flex-row stacking for Analytics card to prevent overlap.
+ * @fileOverview Enterprise Mock Builder Hub v35.0.
+ * FIXED: Resolved layout overlap in diagnostic and selection cards.
+ * DESIGN: Integrated high-fidelity Linear/Stripe style registry dashboard.
  */
 
 export default function MockBuilderPage() {
@@ -501,7 +501,7 @@ function MockBuilderContent() {
                              </div>
                           </div>
                           {diagnostic.indexUrl && (
-                             <Button asChild className="h-14 px-8 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-white rounded-xl font-bold uppercase text-[10px] gap-2 border-none shadow-lg">
+                             <Button asChild className="h-14 px-8 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-white rounded-xl font-bold uppercase text-[10px] gap-2 border-none shadow-lg shrink-0">
                                 <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision index <ExternalLink className="h-4 w-4" /></a>
                              </Button>
                           )}
@@ -509,52 +509,50 @@ function MockBuilderContent() {
                     </motion.div>
                   )}
 
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                     <div className="lg:col-span-12">
-                        <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-8 md:p-12 relative overflow-hidden border border-slate-100 text-left">
-                           <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><Zap className="h-44 w-44" /></div>
-                           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 justify-between relative z-10">
-                              <div className="flex items-center gap-6 md:gap-10 min-w-0 flex-1">
-                                 <div className="relative shrink-0">
-                                    <svg className="h-24 w-24 md:h-32 md:w-32 transform -rotate-90">
-                                       <circle cx="50%" cy="50%" r="44%" className="stroke-slate-100 fill-none" strokeWidth="8" />
-                                       <motion.circle 
-                                          cx="50%" cy="50%" r="44%" 
-                                          className="stroke-primary fill-none" 
-                                          strokeWidth="8" 
-                                          strokeLinecap="round"
-                                          initial={{ strokeDashoffset: 276 }}
-                                          animate={{ strokeDashoffset: 276 - (276 * Math.min(bankSelection.length, 100) / 100) }}
-                                          transition={{ duration: 1.5 }}
-                                          style={{ strokeDasharray: 276 }}
-                                       />
-                                    </svg>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                       <span className="text-2xl md:text-5xl font-black tabular-nums tracking-tighter">{bankSelection.length}</span>
-                                    </div>
-                                 </div>
-                                 <div className="space-y-1 min-w-0 flex-1">
-                                    <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none truncate md:whitespace-normal">Items ready</h4>
-                                    <p className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into area</p>
+                  <div className="grid grid-cols-1 gap-8">
+                     <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-12 relative overflow-hidden border border-slate-100 text-left">
+                        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><Zap className="h-44 w-44" /></div>
+                        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 justify-between relative z-10">
+                           <div className="flex items-center gap-6 md:gap-10 min-w-0 flex-1">
+                              <div className="relative shrink-0">
+                                 <svg className="h-24 w-24 md:h-32 md:w-32 transform -rotate-90">
+                                    <circle cx="50%" cy="50%" r="44%" className="stroke-slate-100 fill-none" strokeWidth="8" />
+                                    <motion.circle 
+                                       cx="50%" cy="50%" r="44%" 
+                                       className="stroke-primary fill-none" 
+                                       strokeWidth="8" 
+                                       strokeLinecap="round"
+                                       initial={{ strokeDashoffset: 276 }}
+                                       animate={{ strokeDashoffset: 276 - (276 * Math.min(bankSelection.length, 100) / 100) }}
+                                       transition={{ duration: 1.5 }}
+                                       style={{ strokeDasharray: 276 }}
+                                    />
+                                 </svg>
+                                 <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-2xl md:text-5xl font-black tabular-nums tracking-tighter">{bankSelection.length}</span>
                                  </div>
                               </div>
-                              <Button 
-                                onClick={handleLinkQuestions} 
-                                disabled={bankSelection.length === 0} 
-                                className="w-full lg:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black text-[11px] md:text-xs tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
-                              >
-                                 Link staged items <ArrowUpRight className="h-5 w-5" />
-                              </Button>
+                              <div className="space-y-1 min-w-0 flex-1">
+                                 <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none">Items ready</h4>
+                                 <p className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into area</p>
+                              </div>
                            </div>
-                        </Card>
-                     </div>
+                           <Button 
+                             onClick={handleLinkQuestions} 
+                             disabled={bankSelection.length === 0} 
+                             className="w-full lg:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black text-[11px] md:text-xs tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
+                           >
+                              Link staged items <ArrowUpRight className="h-5 w-5" />
+                           </Button>
+                        </div>
+                     </Card>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 pt-10">
                    {bankSelection.length > 0 && (
                      <div className="flex justify-end mb-4">
-                        <Button variant="ghost" onClick={() => setBankSelection([])} className="text-rose-500 hover:bg-rose-50 font-bold text-[10px] uppercase tracking-widest">Clear selection</Button>
+                        <button onClick={() => setBankSelection([])} className="text-rose-500 hover:text-rose-600 font-bold text-[10px] uppercase tracking-widest bg-transparent border-none cursor-pointer">Clear selection</button>
                      </div>
                    )}
                    {bankLoading ? (
@@ -571,7 +569,7 @@ function MockBuilderContent() {
                                  <div className="min-w-0 text-left">
                                     <p className="font-bold text-[#0F172A] truncate text-base md:text-lg leading-tight">{q.englishQuestion}</p>
                                     <div className="flex items-center gap-4 mt-2">
-                                       <Badge className="bg-slate-50 text-slate-500 border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-md shadow-inner">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'}</Badge>
+                                       <Badge className="bg-slate-50 text-slate-500 border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-md shadow-sm">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'}</Badge>
                                        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{q.difficulty}</span>
                                     </div>
                                  </div>
@@ -636,7 +634,7 @@ function MockBuilderContent() {
                                      <span className="text-xs md:text-lg font-black text-slate-200 tabular-nums">#{qIdx + 1}</span>
                                      <p className="text-sm font-bold text-slate-600 truncate">{q.englishQuestion}</p>
                                   </div>
-                                  <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90"><X className="h-4 w-4" /></button>
+                                  <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
                                </div>
                             ))}
                             {(!sec.questions || sec.questions.length === 0) && <div className="py-12 text-center opacity-30 italic font-black uppercase text-[10px]">No items linked to this area</div>}

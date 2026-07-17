@@ -58,9 +58,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v33.0.
- * FIXED: Added missing CardTitle import.
- * FIXED: Responsive flex-col lg:flex-row stacking for Analytics card.
+ * @fileOverview Daily Challenge Builder v34.0.
+ * FIXED: Resolved layout overlap in diagnostic and selection cards.
+ * DESIGN: Integrated high-fidelity Linear/Stripe style registry dashboard.
  */
 
 export default function DailyQuizBuilder() {
@@ -248,8 +248,8 @@ function DailyQuizBuilderContent() {
         subtitle="Configure the official daily preparation items for the database."
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
-           <button onClick={() => setStagedQuestions([])} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all">Reset</button>
-           <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">Save draft</button>
+           <button onClick={() => setStagedQuestions([])} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all border-none cursor-pointer">Reset</button>
+           <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">Save draft</Button>
            <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] tracking-tight shadow-2xl gap-3 border-none transition-all active:scale-95">
               {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync live
            </Button>
@@ -300,8 +300,8 @@ function DailyQuizBuilderContent() {
 
          <div className="lg:col-span-8 space-y-10">
             <div className="flex bg-slate-100 p-1.5 rounded-2xl w-fit gap-2">
-               <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Question database</button>
-               <button onClick={() => setActiveTab('ASSEMBLY')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Active area</button>
+               <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Question database</button>
+               <button onClick={() => setActiveTab('ASSEMBLY')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Active area</button>
             </div>
 
             {activeTab === 'BANK' ? (
@@ -370,7 +370,7 @@ function DailyQuizBuilderContent() {
                               </div>
                            </div>
                            {diagnostic.indexUrl && (
-                              <Button asChild className="h-14 px-8 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-white rounded-xl font-bold uppercase text-[10px] gap-2 border-none shadow-lg">
+                              <Button asChild className="h-14 px-8 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-white rounded-xl font-bold uppercase text-[10px] gap-2 border-none shadow-lg shrink-0">
                                  <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision index <ExternalLink className="h-4 w-4" /></a>
                               </Button>
                            )}
@@ -401,7 +401,7 @@ function DailyQuizBuilderContent() {
                                 </div>
                              </div>
                              <div className="space-y-1 min-w-0 flex-1">
-                                <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none truncate md:whitespace-normal">Items ready</h4>
+                                <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none">Items ready</h4>
                                 <p className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into area</p>
                              </div>
                           </div>
@@ -431,7 +431,7 @@ function DailyQuizBuilderContent() {
                                     <div className="min-w-0 text-left">
                                        <p className="font-bold text-[#0F172A] truncate text-base md:text-lg leading-tight">{q.englishQuestion}</p>
                                        <div className="flex items-center gap-4 mt-2">
-                                          <Badge className="bg-slate-50 text-slate-500 border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-md shadow-inner">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'}</Badge>
+                                          <Badge className="bg-slate-50 text-slate-500 border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-md shadow-sm">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'}</Badge>
                                           <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{q.difficulty}</span>
                                        </div>
                                     </div>
@@ -464,7 +464,7 @@ function DailyQuizBuilderContent() {
                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {q.id.slice(-8)}</p>
                                  </div>
                               </div>
-                              <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 rounded-xl hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all flex items-center justify-center active:scale-90"><Trash2 className="h-5 w-5" /></button>
+                              <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 rounded-xl hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all flex items-center justify-center active:scale-90 border-none bg-transparent cursor-pointer"><Trash2 className="h-5 w-5" /></button>
                            </CardContent>
                         </Card>
                      ))}
