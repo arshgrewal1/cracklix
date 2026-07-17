@@ -33,7 +33,8 @@ import {
   BookOpen,
   Filter,
   Activity,
-  ArrowUpRight
+  ArrowUpRight,
+  Target
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -61,9 +62,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v30.0.
- * FIXED: UI overlap in Selection Analytics Card by adjusting flex properties and paddings.
- * LANGUAGE: Replaced "Registry" and "Node" with "Database" and "Item".
+ * @fileOverview Enterprise Mock Builder Hub v31.0.
+ * UPDATED: Premium UI redesign for Board Mapping and Exam Vertical panels.
  */
 
 export default function MockBuilderPage() {
@@ -340,32 +340,90 @@ function MockBuilderContent() {
                  </div>
               </div>
 
-              <div className="space-y-6 pt-6 border-t border-slate-50">
-                 <div className="space-y-3">
-                    <Label className="text-[10px] font-bold text-slate-500 ml-1 flex items-center gap-2 uppercase"><Landmark className="h-3 w-3" /> Board center</Label>
-                    <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar pr-2">
-                       {boards?.map((b: any) => (
-                          <div key={b.id} onClick={() => toggleBoardId(b.id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
-                             <div className={cn("h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 transition-all", mockData.boardIds?.includes(b.id) ? "border-primary bg-primary" : "border-slate-300 bg-white")}>
-                                {mockData.boardIds?.includes(b.id) && <Check className="h-2.5 w-2.5 text-white stroke-[4px]" />}
+              <div className="space-y-10 pt-10 border-t border-slate-100">
+                 {/* Premium Board Mapping */}
+                 <div className="space-y-6">
+                    <div className="flex items-center gap-4">
+                       <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-primary shadow-sm border border-blue-100">
+                          <Landmark className="h-5 w-5" />
+                       </div>
+                       <div className="space-y-0.5 text-left">
+                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">Board mapping</h4>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Authority center</p>
+                       </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2.5 max-h-52 overflow-y-auto custom-scrollbar pr-2">
+                       {boards?.map((b: any) => {
+                          const isSelected = mockData.boardIds?.includes(b.id);
+                          return (
+                             <div 
+                                key={b.id} 
+                                onClick={() => toggleBoardId(b.id)} 
+                                className={cn(
+                                   "flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group active:scale-[0.98]",
+                                   isSelected 
+                                      ? "bg-primary/5 border-primary shadow-[0_10px_20px_-5px_rgba(37,99,235,0.15)]" 
+                                      : "bg-white border-slate-50 hover:border-slate-200"
+                                )}
+                             >
+                                <div className="flex items-center gap-3">
+                                   <div className={cn(
+                                      "h-4 w-4 rounded-md border-2 flex items-center justify-center transition-all",
+                                      isSelected ? "bg-primary border-primary" : "bg-white border-slate-200 group-hover:border-slate-300"
+                                   )}>
+                                      {isSelected && <Check className="h-2.5 w-2.5 text-white stroke-[4px]" />}
+                                   </div>
+                                   <span className={cn("text-[11px] font-bold uppercase transition-colors", isSelected ? "text-primary" : "text-slate-500")}>
+                                      {b.abbreviation} area
+                                   </span>
+                                </div>
+                                {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />}
                              </div>
-                             <span className="text-[10px] font-bold text-[#0F172A] uppercase">{b.abbreviation} area</span>
-                          </div>
-                       ))}
+                          )
+                       })}
                     </div>
                  </div>
 
-                 <div className="space-y-3">
-                    <Label className="text-[10px] font-bold text-slate-500 ml-1 flex items-center gap-2 uppercase"><GraduationCap className="h-3 w-3" /> Exam category</Label>
-                    <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar pr-2">
-                       {uniqueExams.map((e: any) => (
-                          <div key={e.id} onClick={() => toggleExamId(e.id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
-                             <div className={cn("h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 transition-all", mockData.examIds?.includes(e.id) ? "border-primary bg-primary" : "border-slate-300 bg-white")}>
-                                {mockData.examIds?.includes(e.id) && <Check className="h-2.5 w-2.5 text-white stroke-[4px]" />}
+                 {/* Premium Exam Vertical */}
+                 <div className="space-y-6">
+                    <div className="flex items-center gap-4">
+                       <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 shadow-sm border border-purple-100">
+                          <Target className="h-5 w-5" />
+                       </div>
+                       <div className="space-y-0.5 text-left">
+                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">Exam vertical</h4>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Category hub</p>
+                       </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2.5 max-h-52 overflow-y-auto custom-scrollbar pr-2">
+                       {uniqueExams.map((e: any) => {
+                          const isSelected = mockData.examIds?.includes(e.id);
+                          return (
+                             <div 
+                                key={e.id} 
+                                onClick={() => toggleExamId(e.id)} 
+                                className={cn(
+                                   "flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group active:scale-[0.98]",
+                                   isSelected 
+                                      ? "bg-purple-500/5 border-purple-500 shadow-[0_10px_20px_-5px_rgba(168,85,247,0.15)]" 
+                                      : "bg-white border-slate-50 hover:border-slate-200"
+                                )}
+                             >
+                                <div className="flex items-center gap-3 min-w-0">
+                                   <div className={cn(
+                                      "h-4 w-4 rounded-md border-2 flex items-center justify-center shrink-0 transition-all",
+                                      isSelected ? "bg-purple-500 border-purple-500" : "bg-white border-slate-200 group-hover:border-slate-300"
+                                   )}>
+                                      {isSelected && <Check className="h-2.5 w-2.5 text-white stroke-[4px]" />}
+                                   </div>
+                                   <span className={cn("text-[11px] font-bold uppercase transition-colors truncate", isSelected ? "text-purple-600" : "text-slate-500")}>
+                                      {e.name}
+                                   </span>
+                                </div>
+                                {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse" />}
                              </div>
-                             <span className="text-[10px] font-bold text-[#0F172A] uppercase">{e.name}</span>
-                          </div>
-                       ))}
+                          )
+                       })}
                     </div>
                  </div>
               </div>
