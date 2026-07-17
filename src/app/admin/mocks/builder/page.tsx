@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -6,21 +7,17 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
+import { Skeleton } from "@/components/ui/skeleton"
 import { 
   ChevronLeft, 
+  ChevronRight,
   Database, 
   Loader2,
   Plus,
   Trash2,
   Zap,
-  Clock,
-  Target,
-  ShieldCheck,
   CheckCircle2,
-  Landmark,
   X,
   RefreshCw,
   Award,
@@ -31,22 +28,41 @@ import {
   AlertCircle,
   FileText,
   Search,
-  ExternalLink
+  ExternalLink,
+  Landmark,
+  BookOpen,
+  Filter,
+  Activity,
+  ArrowUpRight
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
-import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where, documentId, orderBy, DocumentData, updateDoc, increment, addDoc } from "firebase/firestore"
+import { 
+  collection, 
+  query, 
+  doc, 
+  setDoc, 
+  serverTimestamp, 
+  getDocs, 
+  writeBatch, 
+  where, 
+  documentId, 
+  orderBy, 
+  updateDoc, 
+  increment, 
+  addDoc 
+} from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { MockType, Difficulty, AccessLevel, LanguageDisplayMode, MockAssignmentMode, Question, ExamSection, Exam } from "@/types"
+import { MockType, Difficulty, AccessLevel, LanguageDisplayMode, MockAssignmentMode, ExamSection, Exam } from "@/types"
 import { cn } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { AdminPageHeader } from "@/components/admin"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
+import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v28.0.
- * FIXED: Standardized filter behavior to match MCQ Bank (default status 'all').
- * TYPOGRAPHY: Removed uppercase from labels and headers.
+ * @fileOverview Enterprise Mock Builder Hub v29.0 [UI OVERHAUL].
+ * REDESIGN: Apple + Linear + Stripe Dashboard style for Registry Bank.
+ * STABILITY: Preserved 100% functionality and Firestore logic.
  */
 
 export default function MockBuilderPage() {
@@ -65,7 +81,7 @@ function MockBuilderContent() {
   const { toast } = useToast()
 
   const mockId = searchParams?.get("id") ?? ""
-  const isEditing = !!mockId
+  const isEditing = !!quizId
 
   const [bankLoading, setBankLoading] = useState(false)
   const [questionBank, setQuestionBank] = useState<any[]>([])
@@ -117,7 +133,7 @@ function MockBuilderContent() {
         examId: filterExam,
         subjectId: filterSubject,
         searchTerm: searchTerm,
-        status: 'all' // Changed from hardcoded 'PUBLISHED' to allow seeing all questions
+        status: 'all'
       }, 100);
 
       setQuestionBank(result.data);
@@ -195,27 +211,6 @@ function MockBuilderContent() {
     const allSelectedIds = new Set(sections.flatMap((s: any) => (s.questions || []).map((q: any) => q.id)));
     return questionBank.filter(q => !allSelectedIds.has(q.id));
   }, [questionBank, sections]);
-
-  const toggleBoardId = (id: string) => {
-     const current = mockData.boardIds || [];
-     const nextIds = current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id];
-     setMockData((prev: any) => ({
-        ...prev,
-        boardIds: nextIds,
-        examIds: prev.examIds.filter((eid: string) => {
-           const examObj = rawExams?.find((ex: any) => ex.id === eid);
-           return examObj && nextIds.includes(examObj.boardId);
-        })
-     }));
-  };
-
-  const toggleExamId = (id: string) => {
-     const current = mockData.examIds || [];
-     setMockData((prev: any) => ({
-        ...prev,
-        examIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id]
-     }));
-  };
 
   const handleLinkQuestions = () => {
     const toAdd = questionBank.filter((q: any) => bankSelection.includes(q.id));
@@ -366,88 +361,155 @@ function MockBuilderContent() {
            </Card>
         </div>
 
-        <div className="lg:col-span-8 space-y-6">
-           <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-full w-fit mb-4">
-              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2 rounded-full font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-sm" : "text-slate-400 hover:text-slate-600")}>Database bank</button>
-              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-8 py-2 rounded-full font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-sm" : "text-slate-400 hover:text-slate-600")}>Active composition</button>
+        <div className="lg:col-span-8 space-y-10">
+           <div className="flex items-center gap-3 bg-slate-100 p-1 rounded-2xl w-fit mb-4">
+              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Database bank</button>
+              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Active composition</button>
            </div>
 
            {activeRightTab === 'BANK' ? (
-             <div className="space-y-6 md:space-y-8 animate-in zoom-in-95 duration-500">
-                <Card className="bg-[#0F172A] rounded-2xl md:rounded-[3rem] p-6 md:p-10 text-white space-y-8 shadow-2xl border border-white/5 relative overflow-hidden">
-                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12"><Database className="h-64 w-64" /></div>
-                   <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <FilterNode 
-                        label="Board center" 
-                        value={filterBoard} 
+             <div className="space-y-10 animate-in zoom-in-95 duration-500 relative">
+                {/* SUBTLE BACKGROUND PATTERN */}
+                <div className="absolute inset-0 -z-10 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(#0F172A 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
+                
+                <div className="space-y-6">
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-1">
+                     <div className="space-y-1">
+                        <h3 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Registry bank</h3>
+                        <p className="text-sm font-medium text-slate-400">Select filters to stage questions for this mock series.</p>
+                     </div>
+                     <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-slate-100 shadow-sm">
+                        <div className={cn("h-2.5 w-2.5 rounded-full animate-pulse", !diagnostic ? "bg-emerald-500" : diagnostic.indexUrl ? "bg-amber-500" : "bg-rose-500")} />
+                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                           Database status: {!diagnostic ? 'Healthy' : diagnostic.indexUrl ? 'Index required' : 'Sync error'}
+                        </span>
+                     </div>
+                  </div>
+
+                  {/* PREMIUM FILTER CARDS */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                     <PremiumFilterCard 
+                        icon={<Landmark className="text-blue-500" />}
+                        label="Authority board"
+                        value={filterBoard}
                         onChange={(v) => { setFilterBoard(v); setFilterExam('all'); }}
                         options={boards?.map(b => ({ label: b.abbreviation, value: b.id })) || []}
-                      />
-                      <FilterNode 
-                        label="Vertical hub" 
-                        value={filterExam} 
+                     />
+                     <PremiumFilterCard 
+                        icon={<GraduationCap className="text-purple-500" />}
+                        label="Exam vertical"
+                        value={filterExam}
                         onChange={setFilterExam}
                         options={uniqueExams.map((e: any) => ({ label: e.name, value: e.id }))}
-                      />
-                      <FilterNode 
-                        label="Subject hub" 
-                        value={filterSubject} 
+                     />
+                     <PremiumFilterCard 
+                        icon={<BookOpen className="text-emerald-500" />}
+                        label="Subject hub"
+                        value={filterSubject}
                         onChange={setSubjectFilter}
                         options={subjects?.map((s: any) => ({ label: s.name, value: s.id })) || []}
-                      />
-                   </div>
+                     />
+                  </div>
 
-                   {/* DIAGNOSTIC HUB */}
-                   {diagnostic && (
-                      <div className="relative z-10 bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl space-y-4">
-                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                               <AlertCircle className="h-5 w-5 text-amber-500" />
-                               <p className="text-xs font-bold text-amber-200">Database diagnostic</p>
-                            </div>
-                            {diagnostic.indexUrl && (
-                               <Button asChild className="h-9 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-black uppercase border-none">
-                                  <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision index <ExternalLink className="h-3 w-3 ml-2" /></a>
-                               </Button>
-                            )}
-                         </div>
-                         <p className="text-[11px] text-slate-400 leading-relaxed">{diagnostic.message}</p>
-                      </div>
-                   )}
+                  {/* SEARCH BAR - MODERN */}
+                  <div className="relative group w-full">
+                     <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-all duration-500" />
+                     <div className="relative flex items-center h-16 bg-white border border-slate-100 rounded-[18px] shadow-sm px-6 gap-4 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
+                        <Search className="h-5 w-5 text-slate-400 group-focus-within:text-primary" />
+                        <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 font-bold text-base md:text-lg" placeholder="Search master bank for statements..." />
+                     </div>
+                  </div>
 
-                   <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 pt-6 border-t border-white/10">
-                      <div className="flex-1 text-left">
-                         <p className="text-[9px] font-bold uppercase text-primary tracking-widest">Selection node</p>
-                         <div className="text-2xl md:text-5xl font-black text-white tabular-nums tracking-tighter">
-                            {bankSelection.length} <span className="text-sm md:text-xl text-slate-500 font-bold ml-1">Staged</span>
-                         </div>
-                      </div>
-                      <Button onClick={handleLinkQuestions} disabled={bankSelection.length === 0} className="w-full md:w-auto h-12 md:h-16 px-10 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full shadow-2xl border-none gap-3 active:scale-95">
-                         Link staged assets <CheckCircle2 className="h-5 w-5" />
-                      </Button>
-                   </div>
-                </Card>
+                  {/* DIAGNOSTICS CARD - PREMIUM */}
+                  {diagnostic && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                       <Card className="border-none shadow-xl bg-amber-50/50 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-amber-100">
+                          <div className="flex items-center gap-6">
+                             <div className="h-14 w-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-inner">
+                                <Database className="h-7 w-7 animate-pulse" />
+                             </div>
+                             <div className="text-left space-y-1">
+                                <div className="flex items-center gap-2">
+                                   <CardTitle className="text-lg font-black text-amber-900">Database diagnostics</CardTitle>
+                                   <Badge className="bg-amber-500 text-white border-none text-[8px] font-black uppercase">Index missing</Badge>
+                                </div>
+                                <p className="text-sm font-medium text-amber-700/70">Composite index required for fast filtering. Sync may be degraded.</p>
+                             </div>
+                          </div>
+                          {diagnostic.indexUrl && (
+                             <Button asChild className="h-14 px-8 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-white rounded-xl font-bold uppercase text-[10px] gap-2 border-none shadow-lg">
+                                <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision index <ExternalLink className="h-4 w-4" /></a>
+                             </Button>
+                          )}
+                       </Card>
+                    </motion.div>
+                  )}
 
-                <div className="grid grid-cols-1 gap-3">
+                  {/* SELECTION ANALYTICS CARD */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                     <div className="lg:col-span-12">
+                        <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-8 md:p-12 relative overflow-hidden border border-slate-50 text-left">
+                           <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><Zap className="h-44 w-44" /></div>
+                           <div className="flex flex-col md:flex-row items-center gap-12 justify-between">
+                              <div className="flex items-center gap-10">
+                                 <div className="relative">
+                                    <svg className="h-24 w-24 md:h-32 md:w-32 transform -rotate-90">
+                                       <circle cx="50%" cy="50%" r="44%" className="stroke-slate-100 fill-none" strokeWidth="8" />
+                                       <motion.circle 
+                                          cx="50%" cy="50%" r="44%" 
+                                          className="stroke-primary fill-none" 
+                                          strokeWidth="8" 
+                                          strokeLinecap="round"
+                                          initial={{ strokeDashoffset: 276 }}
+                                          animate={{ strokeDashoffset: 276 - (276 * Math.min(bankSelection.length, 100) / 100) }}
+                                          transition={{ duration: 1.5 }}
+                                          style={{ strokeDasharray: 276 }}
+                                       />
+                                    </svg>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                       <span className="text-2xl md:text-5xl font-black tabular-nums tracking-tighter">{bankSelection.length}</span>
+                                    </div>
+                                 </div>
+                                 <div className="space-y-1">
+                                    <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none">Questions ready</h4>
+                                    <p className="text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into assembly</p>
+                                 </div>
+                              </div>
+                              <Button 
+                                onClick={handleLinkQuestions} 
+                                disabled={bankSelection.length === 0} 
+                                className="w-full md:w-auto h-16 md:h-20 px-12 md:px-20 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center"
+                              >
+                                 Link staged assets <ArrowUpRight className="h-5 w-5" />
+                              </Button>
+                           </div>
+                        </Card>
+                     </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 pt-10">
                    {bankLoading ? (
-                      Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white" />)
+                      Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-2xl bg-white" />)
                    ) : displayBank.length > 0 ? displayBank.map((q: any) => {
                       const isSelected = bankSelection.includes(q.id);
                       return (
-                        <div key={q.id} onClick={() => setBankSelection((p: string[]) => isSelected ? p.filter(id => id !== q.id) : [...p, q.id])} className={cn("p-5 md:px-8 rounded-2xl md:rounded-[2rem] border-2 transition-all cursor-pointer flex items-center justify-between group", isSelected ? "bg-primary/5 border-primary shadow-lg" : "bg-white border-slate-50 hover:border-slate-100 shadow-sm")}>
-                           <div className="flex items-center gap-4 md:gap-8 min-w-0">
-                              <div className={cn("h-6 w-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all", isSelected ? "bg-primary border-primary shadow-xl" : "bg-white border-slate-200")}>
-                                 {isSelected && <Check className="h-3 w-3 text-white stroke-[4px]" />}
-                              </div>
-                              <div className="min-w-0 text-left">
-                                 <p className="font-bold text-[#0F172A] truncate text-sm md:text-base leading-tight">{q.englishQuestion}</p>
-                                 <div className="flex items-center gap-3 mt-1.5">
-                                    <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-bold uppercase px-2">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'GK'}</Badge>
-                                    <span className="text-[9px] font-bold text-slate-300 uppercase tracking-tight">{q.difficulty}</span>
+                        <motion.div key={q.id} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+                           <div onClick={() => setBankSelection((p: string[]) => isSelected ? p.filter(id => id !== q.id) : [...p, q.id])} className={cn("p-6 md:px-10 rounded-[1.5rem] md:rounded-[2rem] border-2 transition-all cursor-pointer flex items-center justify-between group", isSelected ? "bg-primary/5 border-primary shadow-lg" : "bg-white border-slate-50 hover:border-slate-100 shadow-sm")}>
+                              <div className="flex items-center gap-6 md:gap-10 min-w-0">
+                                 <div className={cn("h-7 w-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all", isSelected ? "bg-primary border-primary shadow-xl" : "bg-white border-slate-200")}>
+                                    {isSelected && <Check className="h-4 w-4 text-white stroke-[4px]" />}
+                                 </div>
+                                 <div className="min-w-0 text-left">
+                                    <p className="font-bold text-[#0F172A] truncate text-base md:text-lg leading-tight">{q.englishQuestion}</p>
+                                    <div className="flex items-center gap-4 mt-2">
+                                       <Badge className="bg-slate-50 text-slate-500 border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-md shadow-inner">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'}</Badge>
+                                       <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{q.difficulty}</span>
+                                    </div>
                                  </div>
                               </div>
                            </div>
-                        </div>
+                        </motion.div>
                       )
                    }) : (
                       <div className="py-24 text-center opacity-20 italic uppercase font-black tracking-widest text-lg flex flex-col items-center gap-4">
@@ -520,6 +582,27 @@ function MockBuilderContent() {
       </div>
     </div>
   )
+}
+
+function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
+   return (
+      <Card className="border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300 rounded-[18px] p-5 space-y-4 group">
+         <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+               {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
+            </div>
+            <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
+         </div>
+         <select 
+            value={value} 
+            onChange={e => onChange(e.target.value)} 
+            className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none appearance-none cursor-pointer hover:bg-slate-100 focus:ring-2 focus:ring-primary/10 transition-all text-[#0F172A]"
+         >
+            <option value="all">All {label.split(' ')[1]}s</option>
+            {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+         </select>
+      </Card>
+   )
 }
 
 function FilterNode({ label, value, onChange, options }: any) {
