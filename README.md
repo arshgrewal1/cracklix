@@ -31,17 +31,16 @@ npm run git:sync
 
 ## 🔐 Git Authentication Fix (GitHub Token)
 
-GitHub no longer accepts your account password for terminal operations. You must use a **Personal Access Token (PAT)**.
+GitHub no longer accepts your account password for terminal operations. If your branch is "ahead of origin" but won't push, you must use a **Personal Access Token (PAT)**.
 
 1.  **Generate Token**: Go to [GitHub Settings](https://github.com/settings/tokens) > **Generate new token (classic)**.
 2.  **Select Scopes**: Check the `repo` box.
 3.  **Copy Token**: Copy the generated `ghp_...` string.
-4.  **Use Token**: When the terminal asks for your **Password**, paste the **Token** instead.
-
-Alternatively, update your remote URL to include the token to avoid repeated prompts:
+4.  **Use Token**: Update your remote URL to include the token to avoid repeated prompts:
 ```bash
 git remote set-url origin https://<YOUR_TOKEN>@github.com/arshgrewal1/cracklix.git
 ```
+Replace `<YOUR_TOKEN>` with the token you copied. Now `npm run git:sync` will work instantly.
 
 ## 🛠️ Tech Stack
 - **Framework**: Next.js 15 (App Router)

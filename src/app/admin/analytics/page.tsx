@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -98,7 +99,7 @@ export default function AdminAnalytics() {
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             <AnalyticCard label="Total Students" value={statsLoading ? "..." : stats?.totalUsers} trend="Verified" icon={<Users />} color="blue" />
-            <AnalyticCard label="Active Today" value={statsLoading ? "..." : stats?.activeStudentsToday || 12} trend="+12%" icon={<Target />} color="emerald" />
+            <AnalyticCard label="Active Today" value={statsLoading ? "..." : stats?.activeStudentsToday} trend="+12%" icon={<Target />} color="emerald" />
             <AnalyticCard label="Growth Index" value="24.2%" trend="+4%" icon={<TrendingUp />} color="primary" />
             <AnalyticCard label="Accuracy Avg" value={`${stats?.averageAccuracy || 68}%`} trend="Registry" icon={<ShieldCheck />} color="indigo" />
          </div>
