@@ -33,7 +33,8 @@ import {
   Filter,
   Activity,
   ArrowUpRight,
-  Target
+  Target,
+  History
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -61,8 +62,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v38.5.
- * FIXED: Comprehensive UI overhaul for "Items Ready" card to eliminate all visual overlaps.
+ * @fileOverview Enterprise Mock Builder Hub v39.0.
+ * UPDATED: Integrated Usage Filter (Used/Unused) and 4-column filter grid.
  */
 
 export default function MockBuilderPage() {
@@ -99,6 +100,7 @@ function MockBuilderContent() {
   const [filterBoard, setFilterBoard] = useState("all")
   const [filterExam, setFilterExam] = useState("all")
   const [filterSubject, setSubjectFilter] = useState("all")
+  const [filterStatus, setFilterStatus] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [bankSelection, setBankSelection] = useState<string[]>([])
   
@@ -132,8 +134,8 @@ function MockBuilderContent() {
         boardId: filterBoard,
         examId: filterExam,
         subjectId: filterSubject,
+        status: filterStatus,
         searchTerm: searchTerm,
-        status: 'all'
       }, 100);
 
       setQuestionBank(result.data);
@@ -143,7 +145,7 @@ function MockBuilderContent() {
     } finally {
       setBankLoading(false);
     }
-  }, [db, filterBoard, filterExam, filterSubject, searchTerm, toast]);
+  }, [db, filterBoard, filterExam, filterSubject, filterStatus, searchTerm, toast]);
 
   useEffect(() => {
     fetchFilteredBank();
@@ -418,7 +420,7 @@ function MockBuilderContent() {
                                 className={cn(
                                    "flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group active:scale-[0.98]",
                                    isSelected 
-                                      ? "bg-purple-500/5 border-purple-500 shadow-[0_10px_20px_-5px_rgba(168,85,247,0.15)]" 
+                                      ? "bg-purple-50/5 border-purple-500 shadow-[0_10px_20px_-5px_rgba(168,85,247,0.15)]" 
                                       : "bg-white border-slate-50 hover:border-slate-200"
                                 )}
                              >
@@ -467,7 +469,7 @@ function MockBuilderContent() {
                      </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                      <PremiumFilterCard 
                         icon={<Landmark className="text-blue-500" />}
                         label="Authority board"
@@ -489,6 +491,16 @@ function MockBuilderContent() {
                         onChange={setSubjectFilter}
                         options={subjects?.map((s: any) => ({ label: s.name, value: s.id })) || []}
                      />
+                     <PremiumFilterCard 
+                        icon={<History className="text-orange-500" />}
+                        label="Usage status"
+                        value={filterStatus}
+                        onChange={setFilterStatus}
+                        options={[
+                           { label: 'Unused items', value: 'UNUSED' },
+                           { label: 'Used items', value: 'USED' }
+                        ]}
+                     />
                   </div>
 
                   <div className="relative group w-full">
@@ -507,7 +519,7 @@ function MockBuilderContent() {
                                 <div className="h-14 w-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-inner shrink-0">
                                    <Database className="h-7 w-7 animate-pulse" />
                                 </div>
-                                <div className="space-y-1">
+                                <div className="text-left space-y-1">
                                    <div className="flex items-center gap-2">
                                       <CardTitle className="text-lg font-black text-amber-900">System check</CardTitle>
                                       <Badge className="bg-amber-500 text-white border-none text-[8px] font-black uppercase">Index missing</Badge>

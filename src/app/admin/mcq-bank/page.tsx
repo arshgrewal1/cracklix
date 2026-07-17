@@ -52,8 +52,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Master MCQ Bank Hub v2.1.
- * FIXED: Integrated Smart Index Recovery for zero-crash filtering.
+ * @fileOverview Master MCQ Bank Hub v2.2.
+ * UPDATED: Expanded Status filter to include lifecycle states (USED/UNUSED).
  */
 
 export default function MCQBankPage() {
@@ -178,7 +178,7 @@ export default function MCQBankPage() {
               label="Status" 
               value={filters.status} 
               onChange={v => setFilters({...filters, status: v})}
-              options={['PUBLISHED', 'DRAFT', 'ARCHIVED'].map(s => ({ label: s, value: s }))}
+              options={['PUBLISHED', 'DRAFT', 'ARCHIVED', 'UNUSED', 'USED'].map(s => ({ label: s, value: s }))}
             />
          </div>
          <AdminSearchInput
@@ -244,7 +244,7 @@ export default function MCQBankPage() {
                   </TableCell>
                   <TableCell className="px-6 py-6 text-left">
                      <div className="space-y-1.5">
-                        <code className="text-[10px] font-mono text-primary font-bold">ID: {q.id.slice(-8)}</code>
+                        <code className="text-[10px] font-mono text-primary font-black">ID: {q.id.slice(-8)}</code>
                         <div className="flex gap-2">
                            <Badge variant="outline" className="border-slate-100 text-slate-400 text-[7px] px-1.5 uppercase">{q.subjectId || 'General'}</Badge>
                         </div>

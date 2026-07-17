@@ -31,7 +31,8 @@ import {
   BookOpen,
   ArrowUpRight,
   Landmark,
-  Target
+  Target,
+  History
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -58,8 +59,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v38.5.
- * FIXED: Comprehensive UI overhaul for "Items Ready" card to eliminate all visual overlaps.
+ * @fileOverview Daily Challenge Builder v39.0.
+ * UPDATED: Integrated Usage Filter (Used/Unused) and 4-column filter grid.
  */
 
 export default function DailyQuizBuilder() {
@@ -95,6 +96,7 @@ function DailyQuizBuilderContent() {
   const [filterBoard, setFilterBoard] = useState("all")
   const [filterSubject, setSubjectFilter] = useState("all")
   const [filterDifficulty, setDifficultyFilter] = useState("all")
+  const [filterStatus, setFilterStatus] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [bankSelection, setBankSelection] = useState<string[]>([])
   
@@ -124,8 +126,8 @@ function DailyQuizBuilderContent() {
         boardId: filterBoard,
         subjectId: filterSubject,
         difficulty: filterDifficulty,
+        status: filterStatus,
         searchTerm: searchTerm,
-        status: 'all'
       }, 100);
 
       setQuestionBank(result.data);
@@ -133,7 +135,7 @@ function DailyQuizBuilderContent() {
     } finally {
       setBankLoading(false);
     }
-  }, [db, filterBoard, filterSubject, filterDifficulty, searchTerm]);
+  }, [db, filterBoard, filterSubject, filterDifficulty, filterStatus, searchTerm]);
 
   useEffect(() => {
     fetchFilteredBank();
@@ -321,7 +323,7 @@ function DailyQuizBuilderContent() {
                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                        <PremiumFilterCard 
                           icon={<Landmark className="text-blue-500" />}
                           label="Board center"
@@ -343,6 +345,16 @@ function DailyQuizBuilderContent() {
                           onChange={setDifficultyFilter}
                           options={['Easy', 'Medium', 'Hard'].map(d => ({ label: d, value: d }))}
                        />
+                       <PremiumFilterCard 
+                        icon={<History className="text-orange-500" />}
+                        label="Usage status"
+                        value={filterStatus}
+                        onChange={setFilterStatus}
+                        options={[
+                           { label: 'Unused items', value: 'UNUSED' },
+                           { label: 'Used items', value: 'USED' }
+                        ]}
+                       />
                     </div>
 
                     <div className="relative group w-full">
@@ -361,7 +373,7 @@ function DailyQuizBuilderContent() {
                                 <div className="h-14 w-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-inner shrink-0">
                                    <Database className="h-7 w-7 animate-pulse" />
                                 </div>
-                                <div className="space-y-1">
+                                <div className="text-left space-y-1">
                                    <div className="flex items-center gap-2">
                                       <CardTitle className="text-lg font-black text-amber-900">System check</CardTitle>
                                       <Badge className="bg-amber-500 text-white border-none text-[8px] font-black uppercase">Index missing</Badge>
