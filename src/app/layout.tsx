@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -21,8 +22,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v73.2 [Next.js 15 Compliant].
- * FIXED: Added data-scroll-behavior="smooth" to prevent smooth-scroll routing warnings.
+ * @fileOverview Root Layout v73.3 [PRODUCTION LOCK].
+ * FIXED: Added data-scroll-behavior="smooth" to Satisfy Next.js 15 routing transitions.
  */
 
 export const metadata: Metadata = {

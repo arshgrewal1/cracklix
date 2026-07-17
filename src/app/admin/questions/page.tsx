@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback, Suspense } from "react"
@@ -25,7 +26,10 @@ import {
   AlertCircle,
   Archive,
   GraduationCap,
-  X
+  X,
+  ShieldCheck,
+  Zap,
+  Layers
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -50,11 +54,12 @@ import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
-import { AdminTableSkeleton } from "@/components/admin";
+import { AdminTableSkeleton, AdminPageHeader, AdminSearchInput } from "@/components/admin";
+import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v4.8.
- * FIXED: Added missing GraduationCap import.
+ * @fileOverview Legacy Questions Hub v5.0.
+ * Refactored to share the High-Fidelity MCQ Engine for deterministic results.
  */
 
 export default function QuestionBank() {
@@ -76,98 +81,60 @@ function QuestionBankContent() {
     examId: searchParams.get('examId') || 'all',
     boardId: searchParams.get('boardId') || 'all',
     subjectId: searchParams.get('subjectId') || 'all',
-    chapterId: 'all',
     difficulty: 'all',
     status: 'all'
   })
 
   const [loading, setLoading] = useState(true)
   const [questions, setQuestions] = useState<any[]>([])
-  const [lastDoc, setLastDoc] = useState<DocumentData | null>(null)
+  const [lastDoc, setLastDoc] = useState<any>(null)
   const [hasMore, setHasMore] = useState(true)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [isBulkProcessing, setIsBulkProcessing] = useState(false)
+  const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
 
   const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]);
   const examsQuery = useMemo(() => (db ? query(collection(db, "exams"), orderBy("name", "asc")) : null), [db]);
   const subjectsQuery = useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]);
-  const chaptersQuery = useMemo(() => (db && filters.subjectId !== 'all' ? query(collection(db, "chapters"), where("subjectId", "==", filters.subjectId)) : null), [db, filters.subjectId]);
 
   const { data: boards } = useCollection<any>(boardsQuery);
   const { data: exams } = useCollection<any>(examsQuery);
   const { data: subjects } = useCollection<any>(subjectsQuery);
-  const { data: chapters } = useCollection<any>(chaptersQuery);
 
-  const fetchQuestions = useCallback(async (nextCursor: DocumentData | null = null) => {
+  const fetchQuestions = useCallback(async (isLoadMore = false) => {
     if (!db) return
     setLoading(true)
+    setDiagnostic(null)
     
-    if (!nextCursor) {
-      setQuestions([])
-    }
-
-    const buildQuery = () => {
-      const constraints: any[] = [limit(50)]
-      
-      if (filters.examId !== 'all') constraints.push(where("examId", "==", filters.examId))
-      if (filters.boardId !== 'all') constraints.push(where("boardId", "==", filters.boardId))
-      if (filters.subjectId !== 'all') constraints.push(where("subjectId", "==", filters.subjectId))
-      if (filters.chapterId !== 'all') constraints.push(where("chapterId", "==", filters.chapterId))
-      if (filters.difficulty !== 'all') constraints.push(where("difficulty", "==", filters.difficulty))
-      if (filters.status !== 'all') constraints.push(where("status", "==", filters.status))
-
-      if (nextCursor) {
-        constraints.push(startAfter(nextCursor))
-      }
-      
-      return query(collection(db, "questions"), ...constraints)
-    }
-
     try {
-      const q = buildQuery()
-      const snap = await getDocs(q)
-      let newQs = snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }))
-      
-      // Sort client-side if needed or rely on index, but keeping it stable for the UI
-      newQs.sort((a: any, b: any) => {
-        const tA = a.updatedAt?.seconds || 0;
-        const tB = b.updatedAt?.seconds || 0;
-        return tB - tA;
-      });
+      const result = await mcqEngine.fetch(
+        db, 
+        { ...filters, searchTerm }, 
+        50, 
+        isLoadMore ? lastDoc : undefined
+      )
 
-      if (nextCursor) {
-        setQuestions(prev => [...prev, ...newQs])
-      } else { 
-        setQuestions(newQs)
-        setSelectedIds([]) 
+      if (isLoadMore) {
+        setQuestions(prev => [...prev, ...result.data])
+      } else {
+        setQuestions(result.data)
+        setSelectedIds([])
       }
-      
-      setLastDoc(snap.docs[snap.docs.length - 1] || null)
-      setHasMore(snap.docs.length === 50)
+
+      setLastDoc(result.lastVisible)
+      setHasMore(result.hasMore)
+      setDiagnostic(result.diagnostic)
+
     } catch (e: any) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error("[MCQ_BANK_SYNC_ERROR]", e);
-      }
       toast({ variant: "destructive", title: "Registry Sync Failed", description: e.message })
     } finally { 
       setLoading(false) 
     }
-  }, [db, filters, toast]);
+  }, [db, filters, searchTerm, lastDoc, toast]);
 
   useEffect(() => { 
-    fetchQuestions(null) 
-  }, [filters, fetchQuestions]);
-
-  const filteredQuestions = useMemo(() => {
-    if (!questions) return []
-    if (!searchTerm.trim()) return questions;
-    const term = searchTerm.toLowerCase().trim();
-    return questions.filter((q: any) => {
-        return (q.englishQuestion || "").toLowerCase().includes(term) || 
-               (q.id || "").toLowerCase().includes(term) ||
-               (q.tags || []).some((t: string) => t.toLowerCase().includes(term));
-    })
-  }, [questions, searchTerm])
+    fetchQuestions(false) 
+  }, [filters, searchTerm]);
 
   const handleBulkAction = async (action: string) => {
     if (!db || selectedIds.length === 0) return;
@@ -179,13 +146,12 @@ function QuestionBankContent() {
       if (action === 'DELETE') batch.delete(ref);
       else if (action === 'PUBLISH') batch.update(ref, { status: 'PUBLISHED', updatedAt: serverTimestamp() });
       else if (action === 'ARCHIVE') batch.update(ref, { status: 'ARCHIVED', updatedAt: serverTimestamp() });
-      else if (action === 'LOCK') batch.update(ref, { status: 'LOCKED', updatedAt: serverTimestamp() });
     });
 
     try {
       await batch.commit();
       toast({ title: "Bulk Action Successful", description: `${selectedIds.length} nodes processed.` });
-      fetchQuestions(null);
+      fetchQuestions(false);
     } catch (e) {
       toast({ variant: "destructive", title: "Bulk Sync Failed" });
     } finally {
@@ -200,168 +166,144 @@ function QuestionBankContent() {
      return exams.filter((e: any) => e.boardId === filters.boardId);
   }, [exams, filters.boardId]);
 
-  const availableSubjects = useMemo(() => {
-     if (!subjects) return [];
-     if (filters.boardId === 'all') return subjects;
-     return subjects.filter((s: any) => s.boardId === filters.boardId);
-  }, [subjects, filters.boardId]);
-
   return (
-    <div className="space-y-6 md:space-y-10 text-left pb-32 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-1">
-             <Database className="h-4 w-4 text-primary" />
-             <span className="text-[9px] font-black text-slate-400 tracking-tight">Enterprise Asset Bank</span>
-          </div>
-          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">MCQ Bank</h1>
-          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Master question repository with complete institutional hierarchy.</p>
-        </div>
-        
-        <div className="flex gap-3 w-full md:w-auto">
-           <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white font-black text-[10px] tracking-widest gap-3 shadow-xl border-none">
+    <div className="space-y-6 md:space-y-10 text-left pb-32 animate-in fade-in duration-500 pt-2 px-1">
+      <AdminPageHeader
+        icon={Database}
+        label="Legacy Ingestion Bank"
+        title="Question Registry"
+        subtitle="Manage original collection with enhanced high-fidelity filtering."
+        actionLabel="New Question"
+        actionIcon={Plus}
+        actionHref="/admin/questions/add"
+      >
+        <div className="flex gap-3">
+           <Button asChild className="h-11 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white font-black text-[10px] tracking-widest gap-3 shadow-xl border-none">
               <Link href="/admin/bulk-import"><CloudUpload className="h-4 w-4" /> Bulk OCR</Link>
            </Button>
-           <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white font-black text-[10px] tracking-widest shadow-xl border-none">
-              <Link href="/admin/questions/add"><Plus className="h-5 w-5" /> New Question</Link>
-           </Button>
         </div>
-      </div>
+      </AdminPageHeader>
 
-      <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white mx-1 border border-slate-50 p-4 md:p-8">
-         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="space-y-1.5">
-               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Board</Label>
-               <select 
-                  value={filters.boardId} 
-                  onChange={e => {
-                     setFilters({...filters, boardId: e.target.value, examId: 'all', subjectId: 'all', chapterId: 'all'});
-                  }} 
-                  className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner"
-               >
-                  <option value="all">All Boards</option>
-                  {boards?.map((b: any) => <option key={b.id} value={b.id}>{b.abbreviation}</option>)}
-               </select>
-            </div>
-            <div className="space-y-1.5">
-               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Exam</Label>
-               <select 
-                  value={filters.examId} 
-                  onChange={e => setFilters({...filters, examId: e.target.value})} 
-                  className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner"
-               >
-                  <option value="all">All Exams</option>
-                  {availableExams.map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
-               </select>
-            </div>
-            <div className="space-y-1.5">
-               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Subject</Label>
-               <select value={filters.subjectId} onChange={e => setFilters({...filters, subjectId: e.target.value, chapterId: 'all'})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner">
-                  <option value="all">All Subjects</option>
-                  {availableSubjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
-               </select>
-            </div>
-            <div className="space-y-1.5">
-               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Chapter</Label>
-               <select value={filters.chapterId} onChange={e => setFilters({...filters, chapterId: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner">
-                  <option value="all">All Chapters</option>
-                  {chapters?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
-               </select>
-            </div>
-            <div className="space-y-1.5">
-               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Level</Label>
-               <select value={filters.difficulty} onChange={e => setFilters({...filters, difficulty: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner">
-                  <option value="all">All Levels</option>
-                  <option value="Easy">Easy</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Hard">Hard</option>
-                  <option value="Expert">Expert</option>
-               </select>
-            </div>
-            <div className="space-y-1.5">
-               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Status</Label>
-               <select value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner">
-                  <option value="all">All Status</option>
-                  <option value="PUBLISHED">Published</option>
-                  <option value="DRAFT">Draft</option>
-                  <option value="LOCKED">Locked</option>
-                  <option value="ARCHIVED">Archived</option>
-               </select>
-            </div>
-         </div>
-         <div className="relative mt-6 group">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-primary transition-colors" />
-            <Input 
-               className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold text-sm shadow-inner" 
-               placeholder="Search by statement, ID, or keywords..." 
-               value={searchTerm} 
-               onChange={e => setSearchTerm(e.target.value)} 
+      <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white border border-slate-50 p-6 md:p-8 space-y-6">
+         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <FilterNode 
+              label="Board" 
+              value={filters.boardId} 
+              onChange={v => setFilters({...filters, boardId: v, examId: 'all'})}
+              options={boards?.map(b => ({ label: b.abbreviation, value: b.id })) || []}
+            />
+            <FilterNode 
+              label="Exam" 
+              value={filters.examId} 
+              onChange={v => setFilters({...filters, examId: v})}
+              options={availableExams.map((e: any) => ({ label: e.name, value: e.id }))}
+            />
+            <FilterNode 
+              label="Subject" 
+              value={filters.subjectId} 
+              onChange={v => setFilters({...filters, subjectId: v})}
+              options={subjects?.map(s => ({ label: s.name, value: s.id })) || []}
+            />
+            <FilterNode 
+              label="Level" 
+              value={filters.difficulty} 
+              onChange={v => setFilters({...filters, difficulty: v})}
+              options={['Easy', 'Medium', 'Hard', 'Expert'].map(d => ({ label: d, value: d }))}
+            />
+            <FilterNode 
+              label="Status" 
+              value={filters.status} 
+              onChange={v => setFilters({...filters, status: v})}
+              options={['PUBLISHED', 'DRAFT', 'ARCHIVED'].map(s => ({ label: s, value: s }))}
             />
          </div>
+         <AdminSearchInput
+           value={searchTerm}
+           onChange={setSearchTerm}
+           placeholder="Search statement, ID, or tags..."
+         />
       </Card>
 
-      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
+      {diagnostic && !loading && (
+        <Card className="bg-rose-50 border border-rose-100 p-8 rounded-[2.5rem] space-y-6 shadow-sm">
+           <div className="flex items-center gap-4">
+              <AlertCircle className="h-8 w-8 text-rose-500" />
+              <div className="text-left">
+                 <h4 className="font-black text-rose-600 uppercase tracking-widest text-xs">Registry Standby</h4>
+                 <p className="text-sm font-medium text-rose-400 mt-1">{diagnostic.message}</p>
+              </div>
+           </div>
+           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {Object.entries(diagnostic.filterPass).map(([key, pass]) => (
+                <div key={key} className={cn("p-3 rounded-xl flex items-center justify-between border-2 transition-all", pass ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-white border-rose-100 text-rose-400 opacity-60")}>
+                   <span className="text-[10px] font-black uppercase tracking-tight">{key.replace('Id', '')}</span>
+                   {pass ? <CheckCircle2 className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                </div>
+              ))}
+           </div>
+        </Card>
+      )}
+
+      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[1000px]">
             <TableHeader className="bg-slate-50/50">
               <TableRow className="h-14 border-slate-100">
                 <TableHead className="w-16 px-6 text-center">
                   <Checkbox 
-                    checked={selectedIds.length === filteredQuestions.length && filteredQuestions.length > 0} 
-                    onCheckedChange={(checked) => setSelectedIds(checked ? filteredQuestions.map((q: any) => q.id) : [])} 
+                    checked={selectedIds.length === questions.length && questions.length > 0} 
+                    onCheckedChange={(checked) => setSelectedIds(checked ? questions.map((q: any) => q.id) : [])} 
                   />
                 </TableHead>
-                <TableHead className="px-6 text-[9px] font-black text-slate-400 tracking-tight">Statement & Identity</TableHead>
-                <TableHead className="text-[9px] font-black text-slate-400 tracking-tight">Hierarchy Context</TableHead>
-                <TableHead className="text-[9px] font-black text-slate-400 tracking-tight text-center">Type</TableHead>
-                <TableHead className="text-right px-10 text-[9px] font-black text-slate-400 tracking-tight">Audit</TableHead>
+                <TableHead className="px-6 text-[9px] font-black text-slate-400 tracking-tight uppercase">Identity</TableHead>
+                <TableHead className="text-[9px] font-black text-slate-400 tracking-tight uppercase">Statement</TableHead>
+                <TableHead className="text-[9px] font-black text-slate-400 tracking-tight text-center uppercase">Type</TableHead>
+                <TableHead className="text-right px-10 text-[9px] font-black text-slate-400 tracking-tight uppercase">Audit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading && questions.length === 0 ? (
-                <AdminTableSkeleton rows={5} columns={5} />
-              ) : filteredQuestions.length > 0 ? filteredQuestions.map((q: any) => {
-                 const subject = subjects?.find((s: any) => s.id === q.subjectId);
-                 const chapter = chapters?.find((c: any) => c.id === q.chapterId);
-                 return (
-                  <TableRow key={q.id} className={cn("hover:bg-slate-50 transition-all group border-slate-50", selectedIds.includes(q.id) && "bg-primary/5")}>
-                    <TableCell className="px-6 text-center">
-                      <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={(checked) => setSelectedIds(prev => checked ? [...prev, q.id] : prev.filter(id => id !== q.id))} />
-                    </TableCell>
-                    <TableCell className="px-6 py-6 text-left max-w-md">
-                       <div className="flex items-center gap-2 mb-1.5">
-                          <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black uppercase rounded-sm">{q.id.slice(-8)}</Badge>
-                          <Badge className={cn("border-none text-[8px] font-black px-2 py-0.5 rounded-sm", q.difficulty === 'Expert' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600')}>{q.difficulty}</Badge>
-                       </div>
-                       <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
-                    </TableCell>
-                    <TableCell>
-                       <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-[#0F172A]">{subject?.name || q.subjectId || 'No Subject'}</p>
-                          <p className="text-[9px] text-slate-400 font-medium uppercase tracking-tight">{chapter?.name || q.chapterId || 'No Chapter'}</p>
-                       </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                       <Badge variant="outline" className="border-slate-100 text-slate-400 text-[8px] font-black uppercase px-2">{q.questionType || 'MCQ'}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right px-10">
-                       <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
-                          <Button variant="ghost" size="icon" className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary" asChild>
-                             <Link href={`/admin/questions/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link>
-                          </Button>
-                          <button className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={async () => { if(confirm("Purge asset from registry?")) { await deleteDoc(doc(db!, "questions", q.id)); fetchQuestions(null); } }}>
-                             <Trash2 className="h-4 w-4" />
-                          </button>
-                       </div>
-                    </TableCell>
-                  </TableRow>
-                 )
-              }) : (
+                <AdminTableSkeleton rows={8} columns={5} />
+              ) : questions.length > 0 ? questions.map((q: any) => (
+                <TableRow key={q.id} className={cn("hover:bg-slate-50 transition-all group border-slate-50", selectedIds.includes(q.id) && "bg-primary/5")}>
+                  <TableCell className="px-6 text-center">
+                    <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={(checked) => setSelectedIds(prev => checked ? [...prev, q.id] : prev.filter(id => id !== q.id))} />
+                  </TableCell>
+                  <TableCell className="px-6 py-6 text-left max-w-[140px]">
+                     <div className="space-y-2">
+                        <code className="text-[10px] font-mono text-primary font-black bg-blue-50 px-2 py-0.5 rounded">ID: {q.id.slice(-8)}</code>
+                        <div className="flex flex-wrap gap-1">
+                           <Badge variant="outline" className="text-[7px] border-slate-100 text-slate-300 font-bold uppercase">{q.boardId || 'GOVT'}</Badge>
+                        </div>
+                     </div>
+                  </TableCell>
+                  <TableCell className="max-w-md">
+                     <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
+                     <div className="flex items-center gap-3 mt-2.5">
+                        <Badge className="bg-slate-50 text-slate-400 border-none text-[8px] font-black rounded uppercase tracking-tighter">Level: {q.difficulty}</Badge>
+                        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{subjects?.find((s:any) => s.id === q.subjectId)?.name || q.subjectId}</span>
+                     </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                     <Badge variant="outline" className="border-slate-100 text-slate-400 text-[8px] font-black uppercase px-2 shadow-sm">{q.questionType || 'MCQ'}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right px-10">
+                     <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
+                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white shadow-sm" asChild>
+                           <Link href={`/admin/questions/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link>
+                        </Button>
+                        <button className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={async () => { if(confirm("Purge asset from registry?")) { await deleteDoc(doc(db!, "questions", q.id)); fetchQuestions(false); } }}>
+                           <Trash2 className="h-4 w-4" />
+                        </button>
+                     </div>
+                  </TableCell>
+                </TableRow>
+              )) : !loading && (
                  <TableRow>
                     <TableCell colSpan={5} className="h-80 text-center">
-                       <div className="flex flex-col items-center justify-center opacity-10 space-y-4">
-                          <AlertCircle className="h-16 w-16 text-slate-400" />
-                          <p className="font-black text-2xl uppercase tracking-widest">No Assets Found</p>
+                       <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
+                          <Layers className="h-20 w-20 text-slate-400" />
+                          <p className="font-black text-2xl uppercase tracking-[0.4em]">Registry Empty</p>
                        </div>
                     </TableCell>
                  </TableRow>
@@ -371,36 +313,56 @@ function QuestionBankContent() {
         </CardContent>
       </Card>
       
-      {hasMore && (
-        <div className="flex justify-center mt-6">
-          <Button variant="outline" onClick={() => fetchQuestions(lastDoc)} disabled={loading} className="gap-3 h-11 px-8 rounded-full font-black uppercase text-[10px] tracking-widest border-slate-100">
-            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />} Sync next 50 nodes
+      {hasMore && questions.length > 0 && (
+        <div className="flex justify-center mt-10">
+          <Button variant="outline" onClick={() => fetchQuestions(true)} disabled={loading} className="gap-3 h-14 px-12 rounded-full font-black uppercase text-[10px] tracking-widest border-slate-200 shadow-xl bg-white hover:bg-slate-50">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <RefreshCw className="h-4 w-4 text-primary" />} Load Next Node
           </Button>
         </div>
       )}
 
       {selectedIds.length > 0 && (
          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500 w-[95vw] max-w-3xl">
-            <div className="bg-[#0F172A] text-white px-6 md:px-8 py-4 rounded-[2rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl relative">
-               <div className="flex items-center gap-4">
-                  <div className="h-11 w-11 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black text-sm">{selectedIds.length}</div>
-                  <div className="hidden sm:block">
-                    <p className="text-[11px] font-black uppercase tracking-widest">Assets Selected</p>
-                    <p className="text-[8px] font-bold text-slate-500 uppercase">Registry Normalization Active</p>
+            <div className="bg-[#0F172A] text-white px-8 py-5 rounded-[2.5rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl relative">
+               <div className="flex items-center gap-5">
+                  <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black text-lg shadow-xl">{selectedIds.length}</div>
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-widest leading-none">Assets Staged</p>
+                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Batch Management Protocol</p>
                   </div>
                </div>
                <div className="flex items-center gap-3">
-                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-emerald-600 transition-all font-black text-[9px] uppercase tracking-widest"><CheckCircle2 className="h-4 w-4" /> Publish</button>
-                  <button onClick={() => handleBulkAction('LOCK')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-amber-600 transition-all active:scale-90"><Lock className="h-4 w-4" /></button>
-                  <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90"><Trash2 className="h-4 w-4" /></button>
-                  <div className="w-px h-8 bg-white/10 mx-1" />
-                  <button onClick={() => setSelectedIds([])} className="p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-90 text-slate-400 hover:text-white" title="Clear Selection">
-                     <X className="h-4 w-4" />
+                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-all font-black text-[10px] uppercase shadow-lg"><CheckCircle2 className="h-4 w-4" /> Publish</button>
+                  <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90 shadow-sm"><Trash2 className="h-4 w-4" /></button>
+                  <div className="w-px h-10 bg-white/10 mx-2" />
+                  <button onClick={() => setSelectedIds([])} className="p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-90 text-slate-400 hover:text-white" title="Clear Registry Selection">
+                     <X className="h-5 w-5" />
                   </button>
                </div>
             </div>
          </div>
       )}
+
+      <div className="flex items-center justify-center gap-4 text-slate-300 py-10 opacity-30">
+        <ShieldCheck className="h-5 w-5" />
+        <span className="text-[9px] font-black uppercase tracking-[0.5em]">Institutional Audit Hub Secure</span>
+      </div>
+    </div>
+  )
+}
+
+function FilterNode({ label, value, onChange, options }: any) {
+  return (
+    <div className="space-y-1.5 text-left">
+       <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-widest">{label}</label>
+       <select 
+          value={value} 
+          onChange={e => onChange(e.target.value)} 
+          className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none shadow-inner appearance-none cursor-pointer hover:bg-slate-100 transition-colors"
+       >
+          <option value="all">All {label}s</option>
+          {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+       </select>
     </div>
   )
 }
