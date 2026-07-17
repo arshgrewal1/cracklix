@@ -44,8 +44,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v27.0.
- * FIXED: Rebuilt with MCQ Engine for deterministic question filtering and index recovery.
+ * @fileOverview Enterprise Mock Builder Hub v28.0.
+ * FIXED: Standardized filter behavior to match MCQ Bank (default status 'all').
+ * TYPOGRAPHY: Removed uppercase from labels and headers.
  */
 
 export default function MockBuilderPage() {
@@ -102,11 +103,10 @@ function MockBuilderContent() {
   })
 
   const [sections, setSections] = useState<any[]>([
-    { id: 'sec-1', name: 'General Hub', questions: [] as any[] }
+    { id: 'sec-1', name: 'General hub', questions: [] as any[] }
   ])
   const [activeSectionId, setActiveSectionId] = useState('sec-1')
 
-  // PRODUCTION FILTER SYNC
   const fetchFilteredBank = useCallback(async () => {
     if (!db) return;
     setBankLoading(true);
@@ -117,13 +117,13 @@ function MockBuilderContent() {
         examId: filterExam,
         subjectId: filterSubject,
         searchTerm: searchTerm,
-        status: 'PUBLISHED'
+        status: 'all' // Changed from hardcoded 'PUBLISHED' to allow seeing all questions
       }, 100);
 
       setQuestionBank(result.data);
       setDiagnostic(result.diagnostic);
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Registry Standby", description: e.message });
+      toast({ variant: "destructive", title: "Database standby", description: e.message });
     } finally {
       setBankLoading(false);
     }
@@ -154,12 +154,18 @@ function MockBuilderContent() {
           chunks.push(existingMock.questionIds.slice(i, i + 30));
         }
         for (const chunk of chunks) {
-          const qSnap = await getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk)));
-          qSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
+          const [mcqSnap, legacySnap] = await Promise.all([
+            getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
+            getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+          ]);
+          mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
+          legacySnap.docs.forEach(d => {
+            if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
+          });
         }
 
         let currentIndex = 0;
-        const hydratedSections = (existingMock.sections || [{ name: 'General Hub', count: existingMock.questionIds.length }]).map((s: ExamSection, idx: number) => {
+        const hydratedSections = (existingMock.sections || [{ name: 'General hub', count: existingMock.questionIds.length }]).map((s: ExamSection, idx: number) => {
           const count = Number(s.count) || 0;
           const sectionQIds: string[] = (existingMock.questionIds as string[]).slice(currentIndex, currentIndex + count);
           currentIndex += count;
@@ -169,7 +175,7 @@ function MockBuilderContent() {
             questions: sectionQIds.map((id: string) => fetched.find((q: any) => q.id === id)).filter(Boolean)
           };
         });
-        setSections(hydratedSections.length > 0 ? hydratedSections : [{ id: 'sec-1', name: 'General Hub', questions: [] }]);
+        setSections(hydratedSections.length > 0 ? hydratedSections : [{ id: 'sec-1', name: 'General hub', questions: [] }]);
       }
       setIsInitializing(false);
     };
@@ -221,12 +227,12 @@ function MockBuilderContent() {
   const handlePublish = async () => {
     if (!db || isPublishing) return
     if (!mockData.title?.trim()) {
-      toast({ variant: "destructive", title: "Audit Blocked", description: "Series title is mandatory." })
+      toast({ variant: "destructive", title: "Audit blocked", description: "Series title is mandatory." })
       return
     }
     const flatQuestionIds = sections.flatMap((s: any) => (s.questions || []).map((q: any) => q.id));
     if (flatQuestionIds.length === 0) {
-       toast({ variant: "destructive", title: "Assembly Empty", description: "Add items to the hub." });
+       toast({ variant: "destructive", title: "Assembly empty", description: "Add items to the hub." });
        return;
     }
 
@@ -255,10 +261,10 @@ function MockBuilderContent() {
       await addDoc(collection(db, "audit_logs"), {
         user: profile?.name || "Administrator",
         action: isEditing ? "MOCK_UPDATE" : "MOCK_CREATE",
-        details: `Mock Series "${payload.title}" synchronized.`,
+        details: `Mock series "${payload.title}" synchronized.`,
         timestamp: serverTimestamp()
       });
-      toast({ title: "Registry Synced" });
+      toast({ title: "Database synced" });
       router.push("/admin/mocks")
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sync failed" })
@@ -270,7 +276,7 @@ function MockBuilderContent() {
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300">Synchronizing Hub...</p>
+       <p className="text-[10px] font-black uppercase text-slate-300">Synchronizing hub...</p>
     </div>
   );
 
@@ -278,11 +284,11 @@ function MockBuilderContent() {
     <div className="max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-40 text-left pt-2">
       <AdminPageHeader
         icon={Layers}
-        label="Assembly Hub"
-        title={isEditing ? "Modify Series" : "Mock Architect"}
+        label="Assembly hub"
+        title={isEditing ? "Modify series" : "Mock architect"}
         subtitle="Manage structural components and metadata for the series."
         onAction={handlePublish}
-        actionLabel={isPublishing ? "Syncing..." : "Commit Registry"}
+        actionLabel={isPublishing ? "Syncing..." : "Commit database"}
         actionIcon={isPublishing ? Loader2 : Save}
       >
         <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm hover:bg-slate-50 transition-all mr-auto md:mr-0 shrink-0">
@@ -294,13 +300,13 @@ function MockBuilderContent() {
         <div className="lg:col-span-4 space-y-6 md:space-y-8">
            <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-5 md:p-10 space-y-6 md:space-y-8 border border-slate-50">
               <div className="space-y-2">
-                 <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Series headline</Label>
+                 <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Series headline</Label>
                  <Input value={mockData.title} onChange={e => setMockData((p: any) => ({...p, title: e.target.value}))} className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner text-[#0F172A]" placeholder="e.g. Clerk Mock Series 01" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Mock type</Label>
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Mock type</Label>
                     <select value={mockData.mockType} onChange={e => setMockData((p: any) => ({...p, mockType: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
                        <option value="FULL">Full Length</option>
                        <option value="SUBJECT">Subject-Wise</option>
@@ -309,42 +315,42 @@ function MockBuilderContent() {
                     </select>
                  </div>
                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Access tier</Label>
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Access tier</Label>
                     <select value={mockData.accessLevel} onChange={e => setMockData((p: any) => ({...p, accessLevel: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
-                       <option value="FREE">Free Hub</option>
-                       <option value="PREMIUM">Elite Hub</option>
+                       <option value="FREE">Free hub</option>
+                       <option value="PREMIUM">Elite hub</option>
                     </select>
                  </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Correct Mark</Label>
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Correct mark</Label>
                     <Input type="number" step="0.25" value={mockData.positiveMarks} onChange={e => setMockData((p: any) => ({...p, positiveMarks: parseFloat(e.target.value) || 1}))} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-black text-center text-xs md:text-base text-emerald-600 shadow-inner" />
                  </div>
                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Negative Mark</Label>
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Negative mark</Label>
                     <Input type="number" step="0.25" value={mockData.negativeMarks} onChange={e => setMockData((p: any) => ({...p, negativeMarks: parseFloat(e.target.value) || 0}))} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-black text-center text-xs md:text-base text-rose-500 shadow-inner" />
                  </div>
               </div>
 
               <div className="space-y-6 pt-6 border-t border-slate-50">
                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Landmark className="h-3 w-3" /> Board Mapping</Label>
+                    <Label className="text-[10px] font-bold text-slate-500 ml-1 flex items-center gap-2 uppercase"><Landmark className="h-3 w-3" /> Board mapping</Label>
                     <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                        {boards?.map((b: any) => (
                           <div key={b.id} onClick={() => toggleBoardId(b.id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
                              <div className={cn("h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 transition-all", mockData.boardIds?.includes(b.id) ? "border-primary bg-primary" : "border-slate-300 bg-white")}>
                                 {mockData.boardIds?.includes(b.id) && <Check className="h-2.5 w-2.5 text-white stroke-[4px]" />}
                              </div>
-                             <span className="text-[10px] font-bold text-[#0F172A] uppercase">{b.abbreviation} HUB</span>
+                             <span className="text-[10px] font-bold text-[#0F172A] uppercase">{b.abbreviation} hub</span>
                           </div>
                        ))}
                     </div>
                  </div>
 
                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><GraduationCap className="h-3 w-3" /> Vertical Hub</Label>
+                    <Label className="text-[10px] font-bold text-slate-500 ml-1 flex items-center gap-2 uppercase"><GraduationCap className="h-3 w-3" /> Exam vertical</Label>
                     <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                        {uniqueExams.map((e: any) => (
                           <div key={e.id} onClick={() => toggleExamId(e.id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
@@ -362,8 +368,8 @@ function MockBuilderContent() {
 
         <div className="lg:col-span-8 space-y-6">
            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-full w-fit mb-4">
-              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2 rounded-full font-black uppercase text-[10px] tracking-widest transition-all", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-sm" : "text-slate-400 hover:text-slate-600")}>Registry Bank</button>
-              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-8 py-2 rounded-full font-black uppercase text-[10px] tracking-widest transition-all", activeRightTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-sm" : "text-slate-400 hover:text-slate-600")}>Active Composition</button>
+              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2 rounded-full font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-sm" : "text-slate-400 hover:text-slate-600")}>Database bank</button>
+              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-8 py-2 rounded-full font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-sm" : "text-slate-400 hover:text-slate-600")}>Active composition</button>
            </div>
 
            {activeRightTab === 'BANK' ? (
@@ -371,42 +377,24 @@ function MockBuilderContent() {
                 <Card className="bg-[#0F172A] rounded-2xl md:rounded-[3rem] p-6 md:p-10 text-white space-y-8 shadow-2xl border border-white/5 relative overflow-hidden">
                    <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12"><Database className="h-64 w-64" /></div>
                    <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="space-y-1.5">
-                         <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Board Center</Label>
-                         <Select value={filterBoard} onValueChange={(v) => { setFilterBoard(v); setFilterExam('all'); }}>
-                            <SelectTrigger className="w-full h-11 bg-white/5 border-white/10 rounded-xl px-4 font-bold text-xs text-white">
-                               <SelectValue placeholder="All Boards Hub" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#0B1528] border-white/10 text-white">
-                               <SelectItem value="all">All Boards Hub</SelectItem>
-                               {boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}
-                            </SelectContent>
-                         </Select>
-                      </div>
-                      <div className="space-y-1.5">
-                         <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Vertical hub</Label>
-                         <Select value={filterExam} onValueChange={setFilterExam}>
-                            <SelectTrigger className="w-full h-11 bg-white/5 border-white/10 rounded-xl px-4 font-bold text-xs text-white">
-                               <SelectValue placeholder="All Exams Hub" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#0B1528] border-white/10 text-white">
-                               <SelectItem value="all">All Exams Hub</SelectItem>
-                               {uniqueExams.map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
-                            </SelectContent>
-                         </Select>
-                      </div>
-                      <div className="space-y-1.5">
-                         <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Subject hub</Label>
-                         <Select value={filterSubject} onValueChange={setSubjectFilter}>
-                            <SelectTrigger className="w-full h-11 bg-white/5 border-white/10 rounded-xl px-4 font-bold text-xs text-white">
-                               <SelectValue placeholder="All Subject Nodes" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#0B1528] border-white/10 text-white">
-                               <SelectItem value="all">All Subject Nodes</SelectItem>
-                               {subjects?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                            </SelectContent>
-                         </Select>
-                      </div>
+                      <FilterNode 
+                        label="Board center" 
+                        value={filterBoard} 
+                        onChange={(v) => { setFilterBoard(v); setFilterExam('all'); }}
+                        options={boards?.map(b => ({ label: b.abbreviation, value: b.id })) || []}
+                      />
+                      <FilterNode 
+                        label="Vertical hub" 
+                        value={filterExam} 
+                        onChange={setFilterExam}
+                        options={uniqueExams.map((e: any) => ({ label: e.name, value: e.id }))}
+                      />
+                      <FilterNode 
+                        label="Subject hub" 
+                        value={filterSubject} 
+                        onChange={setSubjectFilter}
+                        options={subjects?.map((s: any) => ({ label: s.name, value: s.id })) || []}
+                      />
                    </div>
 
                    {/* DIAGNOSTIC HUB */}
@@ -415,11 +403,11 @@ function MockBuilderContent() {
                          <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                <AlertCircle className="h-5 w-5 text-amber-500" />
-                               <p className="text-xs font-bold text-amber-200">Database Diagnostic</p>
+                               <p className="text-xs font-bold text-amber-200">Database diagnostic</p>
                             </div>
                             {diagnostic.indexUrl && (
                                <Button asChild className="h-9 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-black uppercase border-none">
-                                  <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision Index <ExternalLink className="h-3 w-3 ml-2" /></a>
+                                  <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision index <ExternalLink className="h-3 w-3 ml-2" /></a>
                                </Button>
                             )}
                          </div>
@@ -429,13 +417,13 @@ function MockBuilderContent() {
 
                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 pt-6 border-t border-white/10">
                       <div className="flex-1 text-left">
-                         <p className="text-[9px] font-black uppercase text-primary tracking-[0.3em]">Selection Node</p>
+                         <p className="text-[9px] font-bold uppercase text-primary tracking-widest">Selection node</p>
                          <div className="text-2xl md:text-5xl font-black text-white tabular-nums tracking-tighter">
                             {bankSelection.length} <span className="text-sm md:text-xl text-slate-500 font-bold ml-1">Staged</span>
                          </div>
                       </div>
                       <Button onClick={handleLinkQuestions} disabled={bankSelection.length === 0} className="w-full md:w-auto h-12 md:h-16 px-10 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full shadow-2xl border-none gap-3 active:scale-95">
-                         Link Staged Assets <CheckCircle2 className="h-5 w-5" />
+                         Link staged assets <CheckCircle2 className="h-5 w-5" />
                       </Button>
                    </div>
                 </Card>
@@ -454,8 +442,8 @@ function MockBuilderContent() {
                               <div className="min-w-0 text-left">
                                  <p className="font-bold text-[#0F172A] truncate text-sm md:text-base leading-tight">{q.englishQuestion}</p>
                                  <div className="flex items-center gap-3 mt-1.5">
-                                    <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black uppercase px-2">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'GK'}</Badge>
-                                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{q.difficulty}</span>
+                                    <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-bold uppercase px-2">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'GK'}</Badge>
+                                    <span className="text-[9px] font-bold text-slate-300 uppercase tracking-tight">{q.difficulty}</span>
                                  </div>
                               </div>
                            </div>
@@ -472,19 +460,19 @@ function MockBuilderContent() {
            ) : (
              <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between px-2">
-                   <h3 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase flex items-center gap-4">
-                      <Layers className="h-6 w-6 text-primary" /> Series Composition
+                   <h3 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase flex items-center gap-4">
+                      <Layers className="h-6 w-6 text-primary" /> Series composition
                    </h3>
                    <Popover>
                       <PopoverTrigger asChild>
                          <Button className="h-10 md:h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] uppercase rounded-xl shadow-xl gap-2">
-                            <Plus className="h-4 w-4" /> Add Section
+                            <Plus className="h-4 w-4" /> Add section
                          </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-[320px] p-6 bg-[#0F172A] text-white rounded-[2rem] border-white/10 shadow-5xl z-[1001]">
                          <div className="space-y-4">
                             <Label className="text-[10px] font-black uppercase text-primary tracking-widest ml-1">Section hub name</Label>
-                            <Input placeholder="e.g. PUNJAB GK" className="h-12 bg-white/5 border-white/10 text-white rounded-full font-bold px-6 shadow-inner" onKeyDown={(e) => {
+                            <Input placeholder="e.g. Punjab GK" className="h-12 bg-white/5 border-white/10 text-white rounded-full font-bold px-6 shadow-inner" onKeyDown={(e) => {
                                if(e.key === 'Enter') {
                                   const val = (e.target as HTMLInputElement).value;
                                   if(val.trim()) { setSections([...sections, { id: `sec-${Date.now()}`, name: val.trim(), questions: [] }]); (e.target as HTMLInputElement).value = ""; }
@@ -503,11 +491,11 @@ function MockBuilderContent() {
                                <div className="h-10 w-10 md:h-12 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-lg shadow-xl">{sIdx + 1}</div>
                                <div className="text-left">
                                   <Input value={sec.name} onChange={e => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, name: e.target.value } : s))} className="h-10 p-0 bg-transparent border-none font-black text-xl md:text-2xl focus-visible:ring-0 text-[#0F172A] uppercase" />
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{(sec.questions?.length || 0)} Assets Linked</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{(sec.questions?.length || 0)} Assets linked</p>
                                </div>
                             </div>
                             <div className="flex gap-2">
-                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active Hub' : 'Set Focus'}</button>
+                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active hub' : 'Set focus'}</button>
                                <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></Button>
                             </div>
                          </div>
@@ -534,10 +522,26 @@ function MockBuilderContent() {
   )
 }
 
+function FilterNode({ label, value, onChange, options }: any) {
+  return (
+    <div className="space-y-1.5 text-left">
+       <label className="text-[9px] font-bold uppercase text-slate-400 ml-1 tracking-tight">{label}</label>
+       <select 
+          value={value} 
+          onChange={e => onChange(e.target.value)} 
+          className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 font-bold text-xs outline-none appearance-none cursor-pointer hover:bg-white/10 transition-colors text-white"
+       >
+          <option value="all" className="bg-[#0F172A]">All {label.replace(' hub', '')}s</option>
+          {options.map((opt: any) => <option key={opt.value} value={opt.value} className="bg-[#0F172A]">{opt.label}</option>)}
+       </select>
+    </div>
+  )
+}
+
 function ConfigSwitch({ label, checked, onChange }: any) {
    return (
       <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", checked ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-transparent opacity-60")}>
-         <span className="text-[11px] font-black uppercase text-[#0F172A] tracking-tight">{label}</span>
+         <span className="text-[11px] font-bold uppercase text-[#0F172A] tracking-tight">{label}</span>
          <Switch checked={checked} onCheckedChange={onChange} />
       </div>
    )

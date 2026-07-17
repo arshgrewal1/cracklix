@@ -17,8 +17,8 @@ import {
 } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional MCQ Filtering Engine v1.1 [RESILIENT].
- * FIXED: Implemented Smart Index Recovery (Failover to client-side sort on index error).
+ * @fileOverview Institutional MCQ Filtering Engine v1.2 [RESILIENT].
+ * FIXED: Optimized failover logic and ensured diagnostics don't overwrite successful fetches.
  */
 
 export type FilterPriority = 'BOARD' | 'VERTICAL' | 'SUBJECT' | 'LANGUAGE' | 'OTHER';
@@ -60,9 +60,6 @@ class MCQEngine {
       .toLowerCase();
   }
 
-  /**
-   * Builds the query constraints based on active filters.
-   */
   private buildConstraints(filters: MCQFilters, includeOrder = true): QueryConstraint[] {
     const constraints: QueryConstraint[] = [];
     if (filters.boardId && filters.boardId !== 'all') constraints.push(where("boardId", "==", filters.boardId));
@@ -79,9 +76,6 @@ class MCQEngine {
     return constraints;
   }
 
-  /**
-   * Main fetch node with automatic index recovery.
-   */
   public async fetch(
     db: Firestore, 
     filters: MCQFilters, 
@@ -101,13 +95,9 @@ class MCQEngine {
       return this.processResults(db, docs, snap, filters, pageSize, startTime);
 
     } catch (error: any) {
-      // 1. Detect Missing Index Error
       const isIndexError = error.code === 'failed-precondition' || error.message?.includes('index');
       
       if (isIndexError) {
-        console.warn("[MCQ_ENGINE] Index missing. Initializing Smart Recovery (Client-Sort Mode)...");
-        
-        // 2. Failover: Execute query without OrderBy
         const fallbackConstraints = this.buildConstraints(filters, false);
         if (cursor) fallbackConstraints.push(startAfter(cursor));
         fallbackConstraints.push(limit(pageSize));
@@ -115,7 +105,6 @@ class MCQEngine {
         const fallbackQ = query(collection(db, this.collectionName), ...fallbackConstraints);
         const fallbackSnap = await getDocs(fallbackQ);
         
-        // 3. Client-side sort
         const docs = fallbackSnap.docs.map(d => ({ ...d.data(), id: d.id }));
         const sortedDocs = [...docs].sort((a: any, b: any) => {
            const tA = a.updatedAt?.seconds || 0;
@@ -125,16 +114,16 @@ class MCQEngine {
 
         const result = await this.processResults(db, sortedDocs, fallbackSnap, filters, pageSize, startTime);
         
-        // 4. Attach Index URL to diagnostics
+        const indexUrl = this.extractIndexUrl(error.message);
         if (result.diagnostic) {
-           result.diagnostic.message = "System using Failover Mode. Some sorting might be limited until indexes are created.";
-           result.diagnostic.indexUrl = this.extractIndexUrl(error.message);
+           result.diagnostic.message = "System using failover mode. Some sorting might be limited.";
+           result.diagnostic.indexUrl = indexUrl;
         } else {
            result.diagnostic = {
-              success: false,
+              success: true,
               filterPass: {},
-              message: "Index Required. Please click the link to optimize.",
-              indexUrl: this.extractIndexUrl(error.message),
+              message: "Index required for optimal performance. Please click to provision.",
+              indexUrl: indexUrl,
               totalDocsInCollection: 0
            };
         }
@@ -154,7 +143,6 @@ class MCQEngine {
   private async processResults(db: Firestore, docs: any[], snap: any, filters: MCQFilters, pageSize: number, startTime: number) {
     let results = docs;
     
-    // Client-side search refinement
     if (filters.searchTerm && filters.searchTerm.trim().length >= 2) {
       const term = this.normalize(filters.searchTerm);
       results = docs.filter(d => 
@@ -169,8 +157,6 @@ class MCQEngine {
     if (results.length === 0) {
       diagnostic = await this.runDiagnostics(db, filters);
     }
-
-    console.log(`[MCQ_ENGINE] Execution: ${Date.now() - startTime}ms. Docs: ${results.length}`);
 
     return {
       data: results,
@@ -188,7 +174,7 @@ class MCQEngine {
     const report: DiagnosticReport = {
       success: false,
       filterPass: {},
-      message: "No documents matched the selected criteria.",
+      message: "No items matched the selected criteria in the database.",
       totalDocsInCollection: totalDocs
     };
 

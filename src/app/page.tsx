@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v500.9.
- * UPDATED: Removed uppercase from challenge headings.
+ * @fileOverview Institutional Premium Hub v501.0.
+ * TYPOGRAPHY: Removed uppercase from primary headings.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -44,7 +44,7 @@ export default function HomePage() {
 
       {user && <ContinueLearning />}
 
-      {/* Today's Challenge - Compact Redesign */}
+      {/* Today's challenge - Sentence Case */}
       <section className="py-6 md:py-16 bg-white">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 

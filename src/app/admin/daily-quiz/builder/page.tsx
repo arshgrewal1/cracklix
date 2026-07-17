@@ -55,8 +55,9 @@ import { Switch } from "@/components/ui/switch"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Daily Challenge Architect v27.0.
- * FIXED: Integrated MCQ Engine for deterministic filtering and index recovery.
+ * @fileOverview Daily Challenge Architect v28.0.
+ * FIXED: Standardized filter behavior and diagnostics to match Question Bank.
+ * TYPOGRAPHY: Removed uppercase from headings.
  */
 
 export default function DailyQuizBuilder() {
@@ -110,7 +111,6 @@ function DailyQuizBuilderContent() {
 
   const [stagedQuestions, setStagedQuestions] = useState<any[]>([])
 
-  // ENGINE SYNC
   const fetchFilteredBank = useCallback(async () => {
     if (!db) return;
     setBankLoading(true);
@@ -120,7 +120,7 @@ function DailyQuizBuilderContent() {
         subjectId: filterSubject,
         difficulty: filterDifficulty,
         searchTerm: searchTerm,
-        status: 'PUBLISHED'
+        status: 'all' // Defaulting to all statuses for builder visibility
       }, 100);
 
       setQuestionBank(result.data);
@@ -171,17 +171,17 @@ function DailyQuizBuilderContent() {
     const toAdd = questionBank.filter((q: any) => bankSelection.includes(q.id));
     setStagedQuestions(prev => [...prev, ...toAdd]);
     setBankSelection([]);
-    toast({ title: "Assets Linked" });
+    toast({ title: "Assets linked" });
   };
 
   const handlePublish = async (isDraft: boolean) => {
     if (!db || isPublishing) return;
     if (!quizData.title.trim()) {
-       toast({ variant: "destructive", title: "Audit Blocked", description: "Title is mandatory." });
+       toast({ variant: "destructive", title: "Audit blocked", description: "Title is mandatory." });
        return;
     }
     if (stagedQuestions.length === 0) {
-       toast({ variant: "destructive", title: "Assembly Empty", description: "Add items to challenge." });
+       toast({ variant: "destructive", title: "Assembly empty", description: "Add items to challenge." });
        return;
     }
 
@@ -220,11 +220,11 @@ function DailyQuizBuilderContent() {
        await addDoc(collection(db, "audit_logs"), {
           user: profile?.name || "Administrator",
           action: isEditing ? "QUIZ_UPDATE" : "QUIZ_CREATE",
-          details: `Daily Challenge "${payload.title}" synchronized.`,
+          details: `Daily challenge "${payload.title}" synchronized.`,
           timestamp: serverTimestamp()
        });
 
-       toast({ title: "Registry Synced" });
+       toast({ title: "Database synced" });
        router.push("/admin/daily-quiz");
     } catch (e) {
        toast({ variant: "destructive", title: "Sync failed" });
@@ -237,15 +237,15 @@ function DailyQuizBuilderContent() {
     <div className="max-w-[1600px] mx-auto space-y-10 pb-40 text-left pt-2 px-4 md:px-10">
       <AdminPageHeader
         icon={Flame}
-        label="Challenge Architect"
-        title={isEditing ? "Modify Challenge" : "New Daily Quiz"}
+        label="Challenge architect"
+        title={isEditing ? "Modify challenge" : "New daily quiz"}
         subtitle="Configure the official daily preparation node for the Punjab registry."
       >
         <div className="flex gap-3">
-           <button onClick={() => setStagedQuestions([])} className="h-14 px-8 rounded-2xl border border-slate-200 font-black uppercase text-[10px] bg-white hover:bg-slate-50 transition-all">Reset</button>
-           <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest border-slate-200">Save Draft</Button>
-           <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl gap-3 border-none transition-all active:scale-95">
-              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync Live Now
+           <button onClick={() => setStagedQuestions([])} className="h-14 px-8 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all">Reset</button>
+           <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-8 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">Save draft</Button>
+           <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] tracking-tight shadow-2xl gap-3 border-none transition-all active:scale-95">
+              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync live
            </Button>
         </div>
       </AdminPageHeader>
@@ -254,24 +254,24 @@ function DailyQuizBuilderContent() {
          <div className="lg:col-span-4 space-y-8">
             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50">
                <div className="space-y-2 text-left">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Challenge Headline</Label>
+                  <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Challenge headline</Label>
                   <Input value={quizData.title} onChange={e => setQuizData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-lg shadow-inner" placeholder="e.g. Daily Punjab GK #12" />
                </div>
 
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2 text-left">
-                     <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Duration (Min)</Label>
+                     <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Duration (Min)</Label>
                      <Input type="number" value={quizData.duration} onChange={e => setQuizData({...quizData, duration: parseInt(e.target.value) || 0})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center shadow-inner" />
                   </div>
                   <div className="space-y-2 text-left">
-                     <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Correct Mark</Label>
+                     <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Correct mark</Label>
                      <Input type="number" value={quizData.positiveMarks} onChange={e => setQuizData({...quizData, positiveMarks: parseFloat(e.target.value) || 1})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center text-emerald-600 shadow-inner" />
                   </div>
                </div>
 
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2 text-left">
-                     <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Difficulty</Label>
+                     <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Difficulty</Label>
                      <select value={quizData.difficulty} onChange={e => setQuizData({...quizData, difficulty: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none">
                         <option value="Easy">Easy</option>
                         <option value="Medium">Medium</option>
@@ -279,23 +279,23 @@ function DailyQuizBuilderContent() {
                      </select>
                   </div>
                   <div className="space-y-2 text-left">
-                     <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Reward XP</Label>
+                     <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Reward XP</Label>
                      <Input type="number" value={quizData.rewardXP} onChange={e => setQuizData({...quizData, rewardXP: parseInt(e.target.value) || 0})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center text-primary shadow-inner" />
                   </div>
                </div>
 
                <div className="space-y-6 pt-6 border-t border-slate-50">
-                  <ConfigSwitch label="Official Challenge" checked={quizData.isTodayQuiz} onChange={v => setQuizData({...quizData, isTodayQuiz: v})} />
-                  <ConfigSwitch label="Review Allowed" checked={quizData.reviewModeEnabled} onChange={v => setQuizData({...quizData, reviewModeEnabled: v})} />
-                  <ConfigSwitch label="Show Explanations" checked={quizData.explanationModeEnabled} onChange={v => setQuizData({...quizData, explanationModeEnabled: v})} />
+                  <ConfigSwitch label="Official challenge" checked={quizData.isTodayQuiz} onChange={v => setQuizData({...quizData, isTodayQuiz: v})} />
+                  <ConfigSwitch label="Review allowed" checked={quizData.reviewModeEnabled} onChange={v => setQuizData({...quizData, reviewModeEnabled: v})} />
+                  <ConfigSwitch label="Show explanations" checked={quizData.explanationModeEnabled} onChange={v => setQuizData({...quizData, explanationModeEnabled: v})} />
                </div>
             </Card>
          </div>
 
          <div className="lg:col-span-8 space-y-6">
             <div className="flex bg-slate-100 p-1.5 rounded-2xl w-fit gap-2">
-               <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all", activeTab === 'BANK' ? "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600")}>MCQ Bank Hub</button>
-               <button onClick={() => setActiveTab('ASSEMBLY')} className={cn("px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all", activeTab === 'ASSEMBLY' ? "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600")}>Assembly Pool</button>
+               <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeTab === 'BANK' ? "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600")}>MCQ bank hub</button>
+               <button onClick={() => setActiveTab('ASSEMBLY')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeTab === 'ASSEMBLY' ? "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600")}>Assembly pool</button>
             </div>
 
             {activeTab === 'BANK' ? (
@@ -303,28 +303,18 @@ function DailyQuizBuilderContent() {
                   <Card className="bg-[#0B1528] rounded-[2.5rem] p-8 md:p-12 text-white space-y-10 shadow-3xl border border-white/5 relative overflow-hidden">
                      <div className="absolute top-0 right-0 p-10 opacity-5 rotate-12"><Database className="h-64 w-64" /></div>
                      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-2 text-left">
-                           <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Subject hub</Label>
-                           <Select value={filterSubject} onValueChange={setSubjectFilter}>
-                              <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12 text-white font-bold text-xs"><SelectValue placeholder="All Subjects" /></SelectTrigger>
-                              <SelectContent className="bg-[#0B1528] border-white/10 text-white">
-                                 <SelectItem value="all">All Subjects Hub</SelectItem>
-                                 {subjects?.map((s:any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                              </SelectContent>
-                           </Select>
-                        </div>
-                        <div className="space-y-2 text-left">
-                           <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Level hub</Label>
-                           <Select value={filterDifficulty} onValueChange={setDifficultyFilter}>
-                              <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12 text-white font-bold text-xs"><SelectValue placeholder="Mixed Levels" /></SelectTrigger>
-                              <SelectContent className="bg-[#0B1528] border-white/10 text-white">
-                                 <SelectItem value="all">Mixed Level Registry</SelectItem>
-                                 <SelectItem value="Easy">Easy</SelectItem>
-                                 <SelectItem value="Medium">Medium</SelectItem>
-                                 <SelectItem value="Hard">Hard</SelectItem>
-                              </SelectContent>
-                           </Select>
-                        </div>
+                        <FilterNode 
+                          label="Subject hub" 
+                          value={filterSubject} 
+                          onChange={setSubjectFilter} 
+                          options={subjects?.map(s => ({ label: s.name, value: s.id })) || []}
+                        />
+                        <FilterNode 
+                          label="Level hub" 
+                          value={filterDifficulty} 
+                          onChange={setDifficultyFilter} 
+                          options={['Easy', 'Medium', 'Hard'].map(d => ({ label: d, value: d }))}
+                        />
                      </div>
 
                      {/* DIAGNOSTIC HUB */}
@@ -333,11 +323,11 @@ function DailyQuizBuilderContent() {
                            <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                  <AlertCircle className="h-5 w-5 text-amber-500" />
-                                 <p className="text-xs font-bold text-amber-200">Sync Diagnostic</p>
+                                 <p className="text-xs font-bold text-amber-200">Database diagnostic</p>
                               </div>
                               {diagnostic.indexUrl && (
                                  <Button asChild className="h-9 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-black uppercase border-none">
-                                    <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision Index <ExternalLink className="h-3 w-3 ml-2" /></a>
+                                    <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision index <ExternalLink className="h-3 w-3 ml-2" /></a>
                                  </Button>
                               )}
                            </div>
@@ -354,10 +344,10 @@ function DailyQuizBuilderContent() {
                         </div>
                         <div className="flex items-center gap-6">
                            <div className="text-right">
-                              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">STAGED</p>
+                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Staged</p>
                               <p className="text-3xl font-black text-primary tabular-nums tracking-tighter">{bankSelection.length}</p>
                            </div>
-                           <Button onClick={handleLinkSelected} disabled={bankSelection.length === 0} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full shadow-2xl border-none font-bold text-xs uppercase tracking-widest gap-2 active:scale-95 transition-all">Link Assets <ChevronRight className="h-4 w-4" /></Button>
+                           <Button onClick={handleLinkSelected} disabled={bankSelection.length === 0} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full shadow-2xl border-none font-bold text-xs uppercase tracking-tight gap-2 active:scale-95 transition-all">Link assets <ChevronRight className="h-4 w-4" /></Button>
                         </div>
                      </div>
                   </Card>
@@ -375,13 +365,13 @@ function DailyQuizBuilderContent() {
                                  </div>
                                  <div className="min-w-0 text-left">
                                     <p className="font-bold text-[#0F172A] truncate text-sm md:text-base">{q.englishQuestion}</p>
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'} • {q.difficulty}</p>
+                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'} • {q.difficulty}</p>
                                  </div>
                               </div>
                            </div>
                         )
                      }) : (
-                        <div className="py-20 text-center opacity-30 italic font-black uppercase text-xs flex flex-col items-center gap-4">
+                        <div className="py-20 text-center opacity-30 italic font-bold uppercase text-xs flex flex-col items-center gap-4">
                            <AlertCircle className="h-10 w-10 text-slate-300" />
                            No items matched in registry.
                         </div>
@@ -391,7 +381,7 @@ function DailyQuizBuilderContent() {
             ) : (
                <div className="space-y-8 animate-in fade-in duration-500">
                   <div className="flex items-center justify-between px-2">
-                     <h3 className="text-xl font-black text-[#0F172A] uppercase flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Active Composition</h3>
+                     <h3 className="text-xl font-bold text-[#0F172A] uppercase flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Active composition</h3>
                      <Badge className="bg-[#0F172A] text-white border-none font-bold px-4 py-1.5 rounded-lg">{stagedQuestions.length} Items</Badge>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
@@ -402,7 +392,7 @@ function DailyQuizBuilderContent() {
                                  <span className="text-xl font-black text-slate-200 tabular-nums">#{idx + 1}</span>
                                  <div className="min-w-0 text-left">
                                     <p className="font-bold text-[#0F172A] text-sm md:text-lg truncate">{q.englishQuestion}</p>
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">ID: {q.id.slice(-8)}</p>
+                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {q.id.slice(-8)}</p>
                                  </div>
                               </div>
                               <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 rounded-xl hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all flex items-center justify-center active:scale-90"><Trash2 className="h-5 w-5" /></button>
@@ -412,7 +402,7 @@ function DailyQuizBuilderContent() {
                      {stagedQuestions.length === 0 && (
                         <div className="h-80 flex flex-col items-center justify-center text-slate-300 opacity-20 border-2 border-dashed border-slate-200 rounded-[3rem] space-y-6">
                            <Layers className="h-16 w-16" />
-                           <p className="font-black text-xl uppercase tracking-widest">Composition Empty</p>
+                           <p className="font-bold text-xl uppercase tracking-widest">Composition empty</p>
                         </div>
                      )}
                   </div>
@@ -424,10 +414,26 @@ function DailyQuizBuilderContent() {
   )
 }
 
+function FilterNode({ label, value, onChange, options }: any) {
+  return (
+    <div className="space-y-1.5 text-left">
+       <label className="text-[9px] font-bold uppercase text-slate-400 ml-1 tracking-tight">{label}</label>
+       <select 
+          value={value} 
+          onChange={e => onChange(e.target.value)} 
+          className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 font-bold text-xs outline-none appearance-none cursor-pointer hover:bg-white/10 transition-colors text-white"
+       >
+          <option value="all" className="bg-[#0F172A]">All {label.replace(' hub', '')}s</option>
+          {options.map((opt: any) => <option key={opt.value} value={opt.value} className="bg-[#0F172A]">{opt.label}</option>)}
+       </select>
+    </div>
+  )
+}
+
 function ConfigSwitch({ label, checked, onChange }: any) {
    return (
-      <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", checked ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-transparent opacity-60")}>
-         <span className="text-[11px] font-black uppercase text-[#0F172A] tracking-tight">{label}</span>
+      <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", checked ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-slate-100 opacity-60")}>
+         <span className="text-[11px] font-bold uppercase text-[#0F172A] tracking-tight">{label}</span>
          <Switch checked={checked} onCheckedChange={onChange} />
       </div>
    )
