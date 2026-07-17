@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback } from "react"
@@ -26,7 +25,8 @@ import {
   UploadCloud,
   Tag,
   X,
-  ShieldCheck
+  ShieldCheck,
+  ExternalLink
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { 
@@ -52,8 +52,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Master MCQ Bank Hub v2.0.
- * Rebuilt using the High-Fidelity MCQ Engine for deterministic filtering.
+ * @fileOverview Master MCQ Bank Hub v2.1.
+ * FIXED: Integrated Smart Index Recovery for zero-crash filtering.
  */
 
 export default function MCQBankPage() {
@@ -85,7 +85,6 @@ export default function MCQBankPage() {
   const fetchQuestions = useCallback(async (isLoadMore = false) => {
     if (!db) return
     setLoading(true)
-    setDiagnostic(null)
     
     try {
       const result = await mcqEngine.fetch(
@@ -106,7 +105,7 @@ export default function MCQBankPage() {
       setDiagnostic(result.diagnostic)
 
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed", description: e.message })
+      toast({ variant: "destructive", title: "Database Standby", description: e.message })
     } finally {
       setLoading(false)
     }
@@ -130,7 +129,7 @@ export default function MCQBankPage() {
 
     try {
       await batch.commit();
-      toast({ title: "Update Complete", description: `${selectedIds.length} items updated.` });
+      toast({ title: "Database Updated", description: `${selectedIds.length} items synced.` });
       fetchQuestions(false);
       setSelectedIds([]);
     } finally { setIsBulkProcessing(false); }
@@ -143,7 +142,7 @@ export default function MCQBankPage() {
         icon={Database}
         label="Central Question Database"
         title="Question Bank"
-        subtitle="Manage practice questions and metadata with deterministic filtering."
+        subtitle="Manage practice items with deterministic filtering and auto-recovery."
         actionLabel="Add Question"
         actionIcon={Plus}
         actionHref="/admin/mcq-bank/add"
@@ -170,7 +169,7 @@ export default function MCQBankPage() {
               options={subjects?.map(s => ({ label: s.name, value: s.id })) || []}
             />
             <FilterSelect 
-              label="Difficulty" 
+              label="Level" 
               value={filters.difficulty} 
               onChange={v => setFilters({...filters, difficulty: v})}
               options={['Easy', 'Medium', 'Hard', 'Expert'].map(d => ({ label: d, value: d }))}
@@ -189,21 +188,32 @@ export default function MCQBankPage() {
          />
       </Card>
 
-      {diagnostic && !loading && (
+      {diagnostic && (
         <Card className="bg-amber-50 border border-amber-100 p-8 rounded-[2rem] space-y-4 animate-in slide-in-from-top-2">
-           <div className="flex items-center gap-3">
-              <AlertCircle className="h-6 w-6 text-amber-600" />
-              <h4 className="font-black uppercase text-xs tracking-widest text-amber-700">Diagnostic Report</h4>
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-center gap-3">
+                 <AlertCircle className="h-6 w-6 text-amber-600" />
+                 <h4 className="font-black uppercase text-xs tracking-widest text-amber-700">Diagnostic Hub</h4>
+              </div>
+              {diagnostic.indexUrl && (
+                <Button asChild className="h-10 px-6 bg-[#0F172A] hover:bg-black text-white rounded-xl font-bold text-[10px] uppercase gap-2 border-none">
+                   <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">
+                      Provision Index <ExternalLink className="h-3 w-3" />
+                   </a>
+                </Button>
+              )}
            </div>
            <p className="text-sm font-medium text-amber-600 leading-relaxed">{diagnostic.message}</p>
-           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {Object.entries(diagnostic.filterPass).map(([key, pass]) => (
-                <div key={key} className={cn("px-3 py-1.5 rounded-lg flex items-center justify-between text-[9px] font-bold uppercase", pass ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700")}>
-                   <span>{key.replace('Id', '')}</span>
-                   {pass ? <CheckCircle2 className="h-3 w-3" /> : <X className="h-3 w-3" />}
-                </div>
-              ))}
-           </div>
+           {!diagnostic.indexUrl && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                 {Object.entries(diagnostic.filterPass).map(([key, pass]) => (
+                   <div key={key} className={cn("px-3 py-1.5 rounded-lg flex items-center justify-between text-[9px] font-bold uppercase", pass ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700")}>
+                      <span>{key.replace('Id', '')}</span>
+                      {pass ? <CheckCircle2 className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                   </div>
+                 ))}
+              </div>
+           )}
         </Card>
       )}
 
@@ -280,7 +290,7 @@ export default function MCQBankPage() {
       {hasMore && questions.length > 0 && (
         <div className="flex justify-center mt-10">
            <Button variant="outline" onClick={() => fetchQuestions(true)} disabled={loading} className="rounded-full px-12 h-14 font-black uppercase text-[10px] tracking-widest border-slate-200 gap-3">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Load More Nodes
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Load More Items
            </Button>
         </div>
       )}
@@ -292,7 +302,7 @@ export default function MCQBankPage() {
                   <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black text-lg">{selectedIds.length}</div>
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-widest leading-none">Items Selected</p>
-                    <p className="text-[8px] font-bold text-slate-500 uppercase mt-1.5 tracking-widest">Registry Sync Active</p>
+                    <p className="text-[8px] font-bold text-slate-500 uppercase mt-1.5 tracking-widest">Database Sync Active</p>
                   </div>
                </div>
                <div className="flex items-center gap-3">
