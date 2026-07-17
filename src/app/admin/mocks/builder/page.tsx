@@ -47,6 +47,7 @@ import {
   where, 
   documentId, 
   orderBy, 
+  DocumentData, 
   updateDoc, 
   increment, 
   addDoc 
@@ -60,9 +61,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v29.0 [UI OVERHAUL].
+ * @fileOverview Enterprise Mock Builder Hub v29.1 [UI OVERHAUL + BUG FIX].
+ * FIXED: ReferenceError: quizId is not defined. Changed to mockId.
  * REDESIGN: Apple + Linear + Stripe Dashboard style for Registry Bank.
- * STABILITY: Preserved 100% functionality and Firestore logic.
  */
 
 export default function MockBuilderPage() {
@@ -81,7 +82,7 @@ function MockBuilderContent() {
   const { toast } = useToast()
 
   const mockId = searchParams?.get("id") ?? ""
-  const isEditing = !!quizId
+  const isEditing = !!mockId
 
   const [bankLoading, setBankLoading] = useState(false)
   const [questionBank, setQuestionBank] = useState<any[]>([])
@@ -268,6 +269,16 @@ function MockBuilderContent() {
     }
   }
 
+  const toggleBoardId = (id: string) => {
+     const current = mockData.boardIds || [];
+     setMockData({ ...mockData, boardIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id] });
+  };
+
+  const toggleExamId = (id: string) => {
+     const current = mockData.examIds || [];
+     setMockData({ ...mockData, examIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id] });
+  };
+
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
@@ -294,13 +305,13 @@ function MockBuilderContent() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 px-1">
         <div className="lg:col-span-4 space-y-6 md:space-y-8">
            <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-5 md:p-10 space-y-6 md:space-y-8 border border-slate-50">
-              <div className="space-y-2">
+              <div className="space-y-2 text-left">
                  <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Series headline</Label>
                  <Input value={mockData.title} onChange={e => setMockData((p: any) => ({...p, title: e.target.value}))} className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner text-[#0F172A]" placeholder="e.g. Clerk Mock Series 01" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2">
+                 <div className="space-y-2 text-left">
                     <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Mock type</Label>
                     <select value={mockData.mockType} onChange={e => setMockData((p: any) => ({...p, mockType: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
                        <option value="FULL">Full Length</option>
@@ -309,7 +320,7 @@ function MockBuilderContent() {
                        <option value="PYQ">Official PYQ</option>
                     </select>
                  </div>
-                 <div className="space-y-2">
+                 <div className="space-y-2 text-left">
                     <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Access tier</Label>
                     <select value={mockData.accessLevel} onChange={e => setMockData((p: any) => ({...p, accessLevel: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
                        <option value="FREE">Free hub</option>
@@ -319,11 +330,11 @@ function MockBuilderContent() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2">
+                 <div className="space-y-2 text-left">
                     <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Correct mark</Label>
                     <Input type="number" step="0.25" value={mockData.positiveMarks} onChange={e => setMockData((p: any) => ({...p, positiveMarks: parseFloat(e.target.value) || 1}))} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-black text-center text-xs md:text-base text-emerald-600 shadow-inner" />
                  </div>
-                 <div className="space-y-2">
+                 <div className="space-y-2 text-left">
                     <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Negative mark</Label>
                     <Input type="number" step="0.25" value={mockData.negativeMarks} onChange={e => setMockData((p: any) => ({...p, negativeMarks: parseFloat(e.target.value) || 0}))} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-black text-center text-xs md:text-base text-rose-500 shadow-inner" />
                  </div>
@@ -603,22 +614,6 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
          </select>
       </Card>
    )
-}
-
-function FilterNode({ label, value, onChange, options }: any) {
-  return (
-    <div className="space-y-1.5 text-left">
-       <label className="text-[9px] font-bold uppercase text-slate-400 ml-1 tracking-tight">{label}</label>
-       <select 
-          value={value} 
-          onChange={e => onChange(e.target.value)} 
-          className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 font-bold text-xs outline-none appearance-none cursor-pointer hover:bg-white/10 transition-colors text-white"
-       >
-          <option value="all" className="bg-[#0F172A]">All {label.replace(' hub', '')}s</option>
-          {options.map((opt: any) => <option key={opt.value} value={opt.value} className="bg-[#0F172A]">{opt.label}</option>)}
-       </select>
-    </div>
-  )
 }
 
 function ConfigSwitch({ label, checked, onChange }: any) {
