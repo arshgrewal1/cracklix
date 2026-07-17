@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -58,9 +58,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v32.0.
- * FIXED: Syntax error in PremiumFilterCard.
- * FIXED: UI overlap in Selection Analytics Card via responsive stacking.
+ * @fileOverview Daily Challenge Builder v33.0.
+ * FIXED: Added missing CardTitle import.
+ * FIXED: Responsive flex-col lg:flex-row stacking for Analytics card.
  */
 
 export default function DailyQuizBuilder() {
@@ -249,7 +249,7 @@ function DailyQuizBuilderContent() {
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
            <button onClick={() => setStagedQuestions([])} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all">Reset</button>
-           <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">Save draft</Button>
+           <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">Save draft</button>
            <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] tracking-tight shadow-2xl gap-3 border-none transition-all active:scale-95">
               {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync live
            </Button>

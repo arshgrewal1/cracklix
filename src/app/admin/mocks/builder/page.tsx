@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -61,9 +61,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v33.0.
- * FIXED: Variable reference isEditing used mockId.
- * FIXED: UI overlap in Selection Analytics Card via responsive flex stacking.
+ * @fileOverview Enterprise Mock Builder Hub v34.0.
+ * FIXED: Added missing CardTitle import.
+ * FIXED: Responsive flex-col lg:flex-row stacking for Analytics card to prevent overlap.
  */
 
 export default function MockBuilderPage() {
