@@ -37,6 +37,7 @@ import {
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
   collection, 
+  query, 
   doc, 
   setDoc, 
   serverTimestamp, 
@@ -60,9 +61,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Architect v29.0 [UI OVERHAUL].
- * REDESIGN: Apple + Linear + Stripe Dashboard style for Registry Bank.
- * STABILITY: Preserved 100% functionality and Firestore logic.
+ * @fileOverview Daily Challenge Builder v30.0.
+ * FIXED: UI overlap in Selection Analytics Card by adjusting flex properties and paddings.
+ * LANGUAGE: Replaced "Registry" and "Node" with "Database" and "Item".
  */
 
 export default function DailyQuizBuilder() {
@@ -189,7 +190,7 @@ function DailyQuizBuilderContent() {
        return;
     }
     if (stagedQuestions.length === 0) {
-       toast({ variant: "destructive", title: "Assembly empty", description: "Add items to challenge." });
+       toast({ variant: "destructive", title: "Assembly area empty", description: "Add items to challenge." });
        return;
     }
 
@@ -245,9 +246,9 @@ function DailyQuizBuilderContent() {
     <div className="max-w-[1600px] mx-auto space-y-10 pb-40 text-left pt-2 px-4 md:px-10">
       <AdminPageHeader
         icon={Flame}
-        label="Challenge architect"
+        label="Challenge builder"
         title={isEditing ? "Modify challenge" : "New daily quiz"}
-        subtitle="Configure the official daily preparation node for the Punjab registry."
+        subtitle="Configure the official daily preparation items for the database."
       >
         <div className="flex gap-3">
            <button onClick={() => setStagedQuestions([])} className="h-14 px-8 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all">Reset</button>
@@ -262,7 +263,7 @@ function DailyQuizBuilderContent() {
          <div className="lg:col-span-4 space-y-8">
             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50">
                <div className="space-y-2 text-left">
-                  <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Challenge headline</Label>
+                  <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Challenge title</Label>
                   <Input value={quizData.title} onChange={e => setQuizData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-lg shadow-inner" placeholder="e.g. Daily Punjab GK #12" />
                </div>
 
@@ -272,7 +273,7 @@ function DailyQuizBuilderContent() {
                      <Input type="number" value={quizData.duration} onChange={e => setQuizData({...quizData, duration: parseInt(e.target.value) || 0})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center shadow-inner" />
                   </div>
                   <div className="space-y-2 text-left">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Correct mark</Label>
+                     <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Points per item</Label>
                      <Input type="number" value={quizData.positiveMarks} onChange={e => setQuizData({...quizData, positiveMarks: parseFloat(e.target.value) || 1})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center text-emerald-600 shadow-inner" />
                   </div>
                </div>
@@ -302,8 +303,8 @@ function DailyQuizBuilderContent() {
 
          <div className="lg:col-span-8 space-y-10">
             <div className="flex bg-slate-100 p-1.5 rounded-2xl w-fit gap-2">
-               <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>MCQ bank hub</button>
-               <button onClick={() => setActiveTab('ASSEMBLY')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Assembly pool</button>
+               <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Question database</button>
+               <button onClick={() => setActiveTab('ASSEMBLY')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Active area</button>
             </div>
 
             {activeTab === 'BANK' ? (
@@ -313,14 +314,14 @@ function DailyQuizBuilderContent() {
                   
                   <div className="space-y-6">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-1">
-                       <div className="space-y-1">
-                          <h3 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Registry bank</h3>
-                          <p className="text-sm font-medium text-slate-400">Select filters to stage questions for this challenge.</p>
+                       <div className="space-y-1 text-left">
+                          <h3 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Question database</h3>
+                          <p className="text-sm font-medium text-slate-400">Select filters to stage items for this challenge.</p>
                        </div>
                        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-slate-100 shadow-sm">
                           <div className={cn("h-2.5 w-2.5 rounded-full animate-pulse", !diagnostic ? "bg-emerald-500" : "bg-amber-500")} />
                           <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                             Database status: {!diagnostic ? 'Healthy' : 'Index required'}
+                             System status: {!diagnostic ? 'Healthy' : 'Update required'}
                           </span>
                        </div>
                     </div>
@@ -336,14 +337,14 @@ function DailyQuizBuilderContent() {
                        />
                        <PremiumFilterCard 
                           icon={<BookOpen className="text-emerald-500" />}
-                          label="Subject hub"
+                          label="Subject center"
                           value={filterSubject}
                           onChange={setSubjectFilter}
                           options={subjects?.map(s => ({ label: s.name, value: s.id })) || []}
                        />
                        <PremiumFilterCard 
                           icon={<Target className="text-purple-500" />}
-                          label="Difficulty hub"
+                          label="Difficulty center"
                           value={filterDifficulty}
                           onChange={setDifficultyFilter}
                           options={['Easy', 'Medium', 'Hard'].map(d => ({ label: d, value: d }))}
@@ -353,9 +354,9 @@ function DailyQuizBuilderContent() {
                     {/* SEARCH BAR */}
                     <div className="relative group w-full">
                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-all duration-500" />
-                       <div className="relative flex items-center h-16 bg-white border border-slate-100 rounded-[18px] shadow-sm px-6 gap-4 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
+                       <div className="relative flex items-center h-16 bg-white border border-slate-100 rounded-[18px] shadow-sm px-4 md:px-6 gap-2 md:gap-4 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
                           <Search className="h-5 w-5 text-slate-400 group-focus-within:text-primary" />
-                          <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 font-bold text-base md:text-lg" placeholder="Search master bank..." />
+                          <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 font-bold text-base md:text-lg" placeholder="Search database for items..." />
                        </div>
                     </div>
 
@@ -369,10 +370,10 @@ function DailyQuizBuilderContent() {
                               </div>
                               <div className="text-left space-y-1">
                                  <div className="flex items-center gap-2">
-                                    <CardTitle className="text-lg font-black text-amber-900">Database diagnostics</CardTitle>
+                                    <CardTitle className="text-lg font-black text-amber-900">System check</CardTitle>
                                     <Badge className="bg-amber-500 text-white border-none text-[8px] font-black uppercase">Index missing</Badge>
                                  </div>
-                                 <p className="text-sm font-medium text-amber-700/70">Composite index required for fast filtering.</p>
+                                 <p className="text-sm font-medium text-amber-700/70">Database index required for fast filtering. Sync may be slow.</p>
                               </div>
                            </div>
                            {diagnostic.indexUrl && (
@@ -384,12 +385,12 @@ function DailyQuizBuilderContent() {
                       </motion.div>
                     )}
 
-                    {/* SELECTION ANALYTICS CARD */}
-                    <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-8 md:p-12 relative overflow-hidden border border-slate-50 text-left">
+                    {/* SELECTION ANALYTICS CARD - FIXED OVERLAP */}
+                    <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-12 relative overflow-hidden border border-slate-50 text-left">
                        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><Zap className="h-44 w-44" /></div>
-                       <div className="flex flex-col md:flex-row items-center gap-12 justify-between">
-                          <div className="flex items-center gap-10">
-                             <div className="relative">
+                       <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 justify-between relative z-10">
+                          <div className="flex items-center gap-6 md:gap-10 min-w-0">
+                             <div className="relative shrink-0">
                                 <svg className="h-24 w-24 md:h-32 md:w-32 transform -rotate-90">
                                    <circle cx="50%" cy="50%" r="44%" className="stroke-slate-100 fill-none" strokeWidth="8" />
                                    <motion.circle 
@@ -407,13 +408,17 @@ function DailyQuizBuilderContent() {
                                    <span className="text-2xl md:text-5xl font-black tabular-nums tracking-tighter">{bankSelection.length}</span>
                                 </div>
                              </div>
-                             <div className="space-y-1">
-                                <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none">Questions ready</h4>
-                                <p className="text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage</p>
+                             <div className="space-y-1 min-w-0">
+                                <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none truncate md:whitespace-normal">Items ready</h4>
+                                <p className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into area</p>
                              </div>
                           </div>
-                          <Button onClick={handleLinkSelected} disabled={bankSelection.length === 0} className="w-full md:w-auto h-16 md:h-20 px-12 md:px-20 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center">
-                             Link staged assets <ArrowUpRight className="h-5 w-5" />
+                          <Button 
+                            onClick={handleLinkSelected} 
+                            disabled={bankSelection.length === 0} 
+                            className="w-full md:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
+                          >
+                             Link staged items <ArrowUpRight className="h-5 w-5" />
                           </Button>
                        </div>
                     </Card>
@@ -445,7 +450,7 @@ function DailyQuizBuilderContent() {
                      }) : (
                         <div className="py-24 text-center opacity-30 italic font-black uppercase text-xl flex flex-col items-center gap-4">
                            <AlertCircle className="h-12 w-12 text-slate-300" />
-                           No items found
+                           Database bank empty
                         </div>
                      )}
                   </div>
@@ -453,12 +458,12 @@ function DailyQuizBuilderContent() {
             ) : (
                <div className="space-y-8 animate-in fade-in duration-500">
                   <div className="flex items-center justify-between px-2">
-                     <h3 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Active composition</h3>
+                     <h3 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Active area composition</h3>
                      <Badge className="bg-[#0F172A] text-white border-none font-bold px-4 py-1.5 rounded-lg">{stagedQuestions.length} Items</Badge>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
                      {stagedQuestions.map((q, idx) => (
-                        <Card key={q.id} className="border-none shadow-lg rounded-2xl bg-white group hover:shadow-xl transition-all border border-slate-50 overflow-hidden">
+                        <Card key={q.id} className="border-none shadow-lg rounded-2xl bg-white group hover:shadow-xl transition-all border border-slate-100 overflow-hidden">
                            <CardContent className="p-6 md:px-10 flex items-center justify-between gap-6">
                               <div className="flex items-center gap-6 min-w-0">
                                  <span className="text-xl font-black text-slate-200 tabular-nums">#{idx + 1}</span>
@@ -474,7 +479,7 @@ function DailyQuizBuilderContent() {
                      {stagedQuestions.length === 0 && (
                         <div className="h-80 flex flex-col items-center justify-center text-slate-300 opacity-20 border-2 border-dashed border-slate-200 rounded-[3rem] space-y-6">
                            <Layers className="h-16 w-16" />
-                           <p className="font-bold text-xl uppercase tracking-widest">Composition empty</p>
+                           <p className="font-bold text-xl uppercase tracking-widest">Composition area empty</p>
                         </div>
                      )}
                   </div>

@@ -61,9 +61,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v29.1 [UI OVERHAUL + BUG FIX].
- * FIXED: ReferenceError: quizId is not defined. Changed to mockId.
- * REDESIGN: Apple + Linear + Stripe Dashboard style for Registry Bank.
+ * @fileOverview Enterprise Mock Builder Hub v30.0.
+ * FIXED: UI overlap in Selection Analytics Card by adjusting flex properties and paddings.
+ * LANGUAGE: Replaced "Registry" and "Node" with "Database" and "Item".
  */
 
 export default function MockBuilderPage() {
@@ -120,7 +120,7 @@ function MockBuilderContent() {
   })
 
   const [sections, setSections] = useState<any[]>([
-    { id: 'sec-1', name: 'General hub', questions: [] as any[] }
+    { id: 'sec-1', name: 'General area', questions: [] as any[] }
   ])
   const [activeSectionId, setActiveSectionId] = useState('sec-1')
 
@@ -182,7 +182,7 @@ function MockBuilderContent() {
         }
 
         let currentIndex = 0;
-        const hydratedSections = (existingMock.sections || [{ name: 'General hub', count: existingMock.questionIds.length }]).map((s: ExamSection, idx: number) => {
+        const hydratedSections = (existingMock.sections || [{ name: 'General area', count: existingMock.questionIds.length }]).map((s: ExamSection, idx: number) => {
           const count = Number(s.count) || 0;
           const sectionQIds: string[] = (existingMock.questionIds as string[]).slice(currentIndex, currentIndex + count);
           currentIndex += count;
@@ -192,7 +192,7 @@ function MockBuilderContent() {
             questions: sectionQIds.map((id: string) => fetched.find((q: any) => q.id === id)).filter(Boolean)
           };
         });
-        setSections(hydratedSections.length > 0 ? hydratedSections : [{ id: 'sec-1', name: 'General hub', questions: [] }]);
+        setSections(hydratedSections.length > 0 ? hydratedSections : [{ id: 'sec-1', name: 'General area', questions: [] }]);
       }
       setIsInitializing(false);
     };
@@ -228,7 +228,7 @@ function MockBuilderContent() {
     }
     const flatQuestionIds = sections.flatMap((s: any) => (s.questions || []).map((q: any) => q.id));
     if (flatQuestionIds.length === 0) {
-       toast({ variant: "destructive", title: "Assembly empty", description: "Add items to the hub." });
+       toast({ variant: "destructive", title: "Assembly empty", description: "Add items to the database." });
        return;
     }
 
@@ -282,7 +282,7 @@ function MockBuilderContent() {
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300">Synchronizing hub...</p>
+       <p className="text-[10px] font-black uppercase text-slate-300">Loading database...</p>
     </div>
   );
 
@@ -290,11 +290,11 @@ function MockBuilderContent() {
     <div className="max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-40 text-left pt-2">
       <AdminPageHeader
         icon={Layers}
-        label="Assembly hub"
-        title={isEditing ? "Modify series" : "Mock architect"}
-        subtitle="Manage structural components and metadata for the series."
+        label="Assembly area"
+        title={isEditing ? "Modify series" : "Mock builder"}
+        subtitle="Manage structure and details for the test series."
         onAction={handlePublish}
-        actionLabel={isPublishing ? "Syncing..." : "Commit database"}
+        actionLabel={isPublishing ? "Syncing..." : "Save to database"}
         actionIcon={isPublishing ? Loader2 : Save}
       >
         <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm hover:bg-slate-50 transition-all mr-auto md:mr-0 shrink-0">
@@ -306,57 +306,57 @@ function MockBuilderContent() {
         <div className="lg:col-span-4 space-y-6 md:space-y-8">
            <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-5 md:p-10 space-y-6 md:space-y-8 border border-slate-50">
               <div className="space-y-2 text-left">
-                 <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Series headline</Label>
+                 <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Series title</Label>
                  <Input value={mockData.title} onChange={e => setMockData((p: any) => ({...p, title: e.target.value}))} className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner text-[#0F172A]" placeholder="e.g. Clerk Mock Series 01" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2 text-left">
-                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Mock type</Label>
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Test type</Label>
                     <select value={mockData.mockType} onChange={e => setMockData((p: any) => ({...p, mockType: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
                        <option value="FULL">Full Length</option>
                        <option value="SUBJECT">Subject-Wise</option>
                        <option value="SECTIONAL">Sectional</option>
-                       <option value="PYQ">Official PYQ</option>
+                       <option value="PYQ">Official Paper</option>
                     </select>
                  </div>
                  <div className="space-y-2 text-left">
-                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Access tier</Label>
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Access level</Label>
                     <select value={mockData.accessLevel} onChange={e => setMockData((p: any) => ({...p, accessLevel: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
-                       <option value="FREE">Free hub</option>
-                       <option value="PREMIUM">Elite hub</option>
+                       <option value="FREE">Free Area</option>
+                       <option value="PREMIUM">Elite Area</option>
                     </select>
                  </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2 text-left">
-                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Correct mark</Label>
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Points per item</Label>
                     <Input type="number" step="0.25" value={mockData.positiveMarks} onChange={e => setMockData((p: any) => ({...p, positiveMarks: parseFloat(e.target.value) || 1}))} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-black text-center text-xs md:text-base text-emerald-600 shadow-inner" />
                  </div>
                  <div className="space-y-2 text-left">
-                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Negative mark</Label>
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Negative penalty</Label>
                     <Input type="number" step="0.25" value={mockData.negativeMarks} onChange={e => setMockData((p: any) => ({...p, negativeMarks: parseFloat(e.target.value) || 0}))} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-black text-center text-xs md:text-base text-rose-500 shadow-inner" />
                  </div>
               </div>
 
               <div className="space-y-6 pt-6 border-t border-slate-50">
                  <div className="space-y-3">
-                    <Label className="text-[10px] font-bold text-slate-500 ml-1 flex items-center gap-2 uppercase"><Landmark className="h-3 w-3" /> Board mapping</Label>
+                    <Label className="text-[10px] font-bold text-slate-500 ml-1 flex items-center gap-2 uppercase"><Landmark className="h-3 w-3" /> Board center</Label>
                     <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                        {boards?.map((b: any) => (
                           <div key={b.id} onClick={() => toggleBoardId(b.id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
                              <div className={cn("h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 transition-all", mockData.boardIds?.includes(b.id) ? "border-primary bg-primary" : "border-slate-300 bg-white")}>
                                 {mockData.boardIds?.includes(b.id) && <Check className="h-2.5 w-2.5 text-white stroke-[4px]" />}
                              </div>
-                             <span className="text-[10px] font-bold text-[#0F172A] uppercase">{b.abbreviation} hub</span>
+                             <span className="text-[10px] font-bold text-[#0F172A] uppercase">{b.abbreviation} area</span>
                           </div>
                        ))}
                     </div>
                  </div>
 
                  <div className="space-y-3">
-                    <Label className="text-[10px] font-bold text-slate-500 ml-1 flex items-center gap-2 uppercase"><GraduationCap className="h-3 w-3" /> Exam vertical</Label>
+                    <Label className="text-[10px] font-bold text-slate-500 ml-1 flex items-center gap-2 uppercase"><GraduationCap className="h-3 w-3" /> Exam category</Label>
                     <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                        {uniqueExams.map((e: any) => (
                           <div key={e.id} onClick={() => toggleExamId(e.id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
@@ -374,8 +374,8 @@ function MockBuilderContent() {
 
         <div className="lg:col-span-8 space-y-10">
            <div className="flex items-center gap-3 bg-slate-100 p-1 rounded-2xl w-fit mb-4">
-              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Database bank</button>
-              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Active composition</button>
+              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Question database</button>
+              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Active area</button>
            </div>
 
            {activeRightTab === 'BANK' ? (
@@ -386,13 +386,13 @@ function MockBuilderContent() {
                 <div className="space-y-6">
                   <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-1">
                      <div className="space-y-1">
-                        <h3 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Registry bank</h3>
-                        <p className="text-sm font-medium text-slate-400">Select filters to stage questions for this mock series.</p>
+                        <h3 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Question database</h3>
+                        <p className="text-sm font-medium text-slate-400">Select filters to stage items for this test.</p>
                      </div>
                      <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-slate-100 shadow-sm">
                         <div className={cn("h-2.5 w-2.5 rounded-full animate-pulse", !diagnostic ? "bg-emerald-500" : diagnostic.indexUrl ? "bg-amber-500" : "bg-rose-500")} />
                         <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                           Database status: {!diagnostic ? 'Healthy' : diagnostic.indexUrl ? 'Index required' : 'Sync error'}
+                           System status: {!diagnostic ? 'Healthy' : diagnostic.indexUrl ? 'Update required' : 'Sync error'}
                         </span>
                      </div>
                   </div>
@@ -408,14 +408,14 @@ function MockBuilderContent() {
                      />
                      <PremiumFilterCard 
                         icon={<GraduationCap className="text-purple-500" />}
-                        label="Exam vertical"
+                        label="Exam category"
                         value={filterExam}
                         onChange={setFilterExam}
                         options={uniqueExams.map((e: any) => ({ label: e.name, value: e.id }))}
                      />
                      <PremiumFilterCard 
                         icon={<BookOpen className="text-emerald-500" />}
-                        label="Subject hub"
+                        label="Subject center"
                         value={filterSubject}
                         onChange={setSubjectFilter}
                         options={subjects?.map((s: any) => ({ label: s.name, value: s.id })) || []}
@@ -427,7 +427,7 @@ function MockBuilderContent() {
                      <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-all duration-500" />
                      <div className="relative flex items-center h-16 bg-white border border-slate-100 rounded-[18px] shadow-sm px-6 gap-4 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
                         <Search className="h-5 w-5 text-slate-400 group-focus-within:text-primary" />
-                        <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 font-bold text-base md:text-lg" placeholder="Search master bank for statements..." />
+                        <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-xl" placeholder="Search database bank for statements..." />
                      </div>
                   </div>
 
@@ -441,10 +441,10 @@ function MockBuilderContent() {
                              </div>
                              <div className="text-left space-y-1">
                                 <div className="flex items-center gap-2">
-                                   <CardTitle className="text-lg font-black text-amber-900">Database diagnostics</CardTitle>
+                                   <CardTitle className="text-lg font-black text-amber-900">System check</CardTitle>
                                    <Badge className="bg-amber-500 text-white border-none text-[8px] font-black uppercase">Index missing</Badge>
                                 </div>
-                                <p className="text-sm font-medium text-amber-700/70">Composite index required for fast filtering. Sync may be degraded.</p>
+                                <p className="text-sm font-medium text-amber-700/70">Database index required for fast filtering. Sync may be slow.</p>
                              </div>
                           </div>
                           {diagnostic.indexUrl && (
@@ -456,14 +456,14 @@ function MockBuilderContent() {
                     </motion.div>
                   )}
 
-                  {/* SELECTION ANALYTICS CARD */}
+                  {/* SELECTION ANALYTICS CARD - FIXED OVERLAP */}
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                      <div className="lg:col-span-12">
-                        <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-8 md:p-12 relative overflow-hidden border border-slate-50 text-left">
+                        <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-8 md:p-12 relative overflow-hidden border border-slate-100 text-left">
                            <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><Zap className="h-44 w-44" /></div>
-                           <div className="flex flex-col md:flex-row items-center gap-12 justify-between">
-                              <div className="flex items-center gap-10">
-                                 <div className="relative">
+                           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 justify-between relative z-10">
+                              <div className="flex items-center gap-6 md:gap-10 min-w-0">
+                                 <div className="relative shrink-0">
                                     <svg className="h-24 w-24 md:h-32 md:w-32 transform -rotate-90">
                                        <circle cx="50%" cy="50%" r="44%" className="stroke-slate-100 fill-none" strokeWidth="8" />
                                        <motion.circle 
@@ -481,17 +481,17 @@ function MockBuilderContent() {
                                        <span className="text-2xl md:text-5xl font-black tabular-nums tracking-tighter">{bankSelection.length}</span>
                                     </div>
                                  </div>
-                                 <div className="space-y-1">
-                                    <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none">Questions ready</h4>
-                                    <p className="text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into assembly</p>
+                                 <div className="space-y-1 min-w-0">
+                                    <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none truncate md:whitespace-normal">Items ready</h4>
+                                    <p className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into area</p>
                                  </div>
                               </div>
                               <Button 
                                 onClick={handleLinkQuestions} 
                                 disabled={bankSelection.length === 0} 
-                                className="w-full md:w-auto h-16 md:h-20 px-12 md:px-20 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center"
+                                className="w-full md:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black uppercase text-[11px] tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
                               >
-                                 Link staged assets <ArrowUpRight className="h-5 w-5" />
+                                 Link staged items <ArrowUpRight className="h-5 w-5" />
                               </Button>
                            </div>
                         </Card>
@@ -525,7 +525,7 @@ function MockBuilderContent() {
                    }) : (
                       <div className="py-24 text-center opacity-20 italic uppercase font-black tracking-widest text-lg flex flex-col items-center gap-4">
                          <Database className="h-12 w-12" />
-                         Registry bank empty
+                         Database bank empty
                       </div>
                    )}
                 </div>
@@ -534,7 +534,7 @@ function MockBuilderContent() {
              <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between px-2">
                    <h3 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase flex items-center gap-4">
-                      <Layers className="h-6 w-6 text-primary" /> Series composition
+                      <Layers className="h-6 w-6 text-primary" /> Active area composition
                    </h3>
                    <Popover>
                       <PopoverTrigger asChild>
@@ -558,17 +558,17 @@ function MockBuilderContent() {
                 
                 <div className="grid grid-cols-1 gap-6">
                    {sections.map((sec: any, sIdx: number) => (
-                      <Card key={sec.id} className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-50">
+                      <Card key={sec.id} className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-100">
                          <div className="flex items-center justify-between p-6 md:p-10 bg-slate-50/50 border-b border-slate-50">
                             <div className="flex items-center gap-4">
                                <div className="h-10 w-10 md:h-12 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-lg shadow-xl">{sIdx + 1}</div>
                                <div className="text-left">
                                   <Input value={sec.name} onChange={e => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, name: e.target.value } : s))} className="h-10 p-0 bg-transparent border-none font-black text-xl md:text-2xl focus-visible:ring-0 text-[#0F172A] uppercase" />
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{(sec.questions?.length || 0)} Assets linked</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{(sec.questions?.length || 0)} Items linked</p>
                                </div>
                             </div>
                             <div className="flex gap-2">
-                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active hub' : 'Set focus'}</button>
+                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active area' : 'Set focus'}</button>
                                <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></Button>
                             </div>
                          </div>
@@ -582,7 +582,7 @@ function MockBuilderContent() {
                                   <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90"><X className="h-4 w-4" /></button>
                                </div>
                             ))}
-                            {(!sec.questions || sec.questions.length === 0) && <div className="py-12 text-center opacity-30 italic font-black uppercase text-[10px]">No assets linked to this section</div>}
+                            {(!sec.questions || sec.questions.length === 0) && <div className="py-12 text-center opacity-30 italic font-black uppercase text-[10px]">No items linked to this area</div>}
                          </div>
                       </Card>
                    ))}
@@ -613,14 +613,5 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
             {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
          </select>
       </Card>
-   )
-}
-
-function ConfigSwitch({ label, checked, onChange }: any) {
-   return (
-      <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", checked ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-transparent opacity-60")}>
-         <span className="text-[11px] font-bold uppercase text-[#0F172A] tracking-tight">{label}</span>
-         <Switch checked={checked} onCheckedChange={onChange} />
-      </div>
    )
 }
