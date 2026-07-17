@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -36,7 +35,8 @@ import {
   ArrowUpRight,
   Target,
   History,
-  ShieldCheck
+  ShieldCheck,
+  Timer
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -65,9 +65,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v40.0.
- * UPDATED: Integrated Publish/Draft header actions and Visibility Toggle.
- * FIXED: Replaced technical jargon and eliminated layout overlaps.
+ * @fileOverview Enterprise Mock Builder Hub v41.0.
+ * FIXED: Ensured examId (singular) is set for legacy compatibility.
+ * FIXED: Ensured published boolean is explicitly set.
  */
 
 export default function MockBuilderPage() {
@@ -247,6 +247,7 @@ function MockBuilderContent() {
       ...mockData,
       id: finalId,
       boardId: mockData.boardIds[0] || "GENERAL",
+      examId: mockData.examIds[0] || "GENERAL", // Legacy compatibility
       totalQuestions: flatQuestionIds.length,
       questionIds: flatQuestionIds,
       sections: sectionMetadata,
@@ -572,7 +573,7 @@ function MockBuilderContent() {
                           <Zap className="h-44 w-44" />
                         </div>
                         
-                        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+                        <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6">
                            {/* LEFT SIDE: CIRCULAR INDICATOR */}
                            <div className="relative shrink-0 flex flex-col items-center justify-center w-[88px] h-[88px]">
                               <svg className="absolute inset-0 h-full w-full transform -rotate-90">
@@ -597,7 +598,7 @@ function MockBuilderContent() {
                            </div>
 
                            {/* RIGHT SIDE: TEXT AND BUTTON */}
-                           <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full">
+                           <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left w-full min-w-0">
                               <h4 className="text-[30px] font-[800] text-[#0F172A] tracking-tighter leading-none mb-[6px] whitespace-nowrap">
                                  Items ready
                               </h4>
@@ -607,7 +608,7 @@ function MockBuilderContent() {
                               <Button 
                                 onClick={handleLinkQuestions} 
                                 disabled={bankSelection.length === 0} 
-                                className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0"
+                                className="w-full lg:w-auto h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
                               >
                                  Link staged items <ArrowUpRight className="h-4 w-4" />
                               </Button>
@@ -691,7 +692,7 @@ function MockBuilderContent() {
                                </div>
                             </div>
                             <div className="flex gap-2">
-                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active area' : 'Set focus'}</button>
+                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === self.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active area' : 'Set focus'}</button>
                                <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></Button>
                             </div>
                          </div>

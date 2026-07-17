@@ -46,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Hub Client v30.4.
- * FIXED: Removed 'truncate' from H1 to prevent clipping of long exam names on mobile.
+ * @fileOverview Premium Exam Hub Client v31.0.
+ * FIXED: Integrated daily_quizzes into the content pool for accurate test display.
  */
 
 export default function ExamHubClient() {
@@ -70,10 +70,12 @@ export default function ExamHubClient() {
   const { data: exam, loading: examLoading } = useDoc<any>(examRef);
   
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]);
+  const quizzesQuery = useMemo(() => (db ? query(collection(db, "daily_quizzes"), where("published", "==", true)) : null), [db]);
   const pyqsQuery = useMemo(() => (db && examId ? query(collection(db, "pyqs"), where("examId", "==", examId)) : null), [db, examId]);
   const notesQuery = useMemo(() => (db && examId ? query(collection(db, "notes"), where("examId", "==", examId)) : null), [db, examId]);
 
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
+  const { data: rawQuizzes, loading: quizzesLoading } = useCollection<any>(quizzesQuery)
   const { data: rawPyqs, loading: pyqsLoading } = useCollection<any>(pyqsQuery)
   const { data: rawNotes, loading: notesLoading } = useCollection<any>(notesQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
@@ -109,16 +111,20 @@ export default function ExamHubClient() {
 
   const groupedContent = useMemo(() => {
     if (!examId) return { FULL: [], SUBJECT: [], SECTIONAL: [], CA: [], PYQ: [], NOTES: [] };
-    const mocks = (rawMocks || []).filter(m => m.examId === examId || (m.examIds && m.examIds.includes(examId)));
+    
+    // Combine standard mocks and daily quizzes
+    const allMocks = [...(rawMocks || []), ...(rawQuizzes || [])];
+    const mocks = allMocks.filter(m => m.examId === examId || (m.examIds && m.examIds.includes(examId)));
+    
     return {
       FULL: mocks.filter(m => m.mockType === 'FULL'),
       SUBJECT: mocks.filter(m => m.mockType === 'SUBJECT'),
       SECTIONAL: mocks.filter(m => m.mockType === 'SECTIONAL'),
-      CA: mocks.filter(m => m.mockType === 'CA_QUIZ'),
+      CA: mocks.filter(m => m.mockType === 'CA_QUIZ' || m.mockType === 'DAILY_CHALLENGE'),
       PYQ: (rawPyqs || []),
       NOTES: (rawNotes || [])
     }
-  }, [rawMocks, rawPyqs, rawNotes, examId]);
+  }, [rawMocks, rawQuizzes, rawPyqs, rawNotes, examId]);
 
   const activeBoard = boards?.find((b: any) => b.id === exam?.boardId);
   const activeCategory = categories?.find((c: any) => c.id === exam?.categoryId);
@@ -226,10 +232,10 @@ export default function ExamHubClient() {
             </div>
 
             <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
-               <TabsContent value="FULL"><MockList data={groupedContent.FULL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="FULL" /></TabsContent>
-               <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="SUBJECT" /></TabsContent>
-               <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="SECTIONAL" /></TabsContent>
-               <TabsContent value="CA"><MockList data={groupedContent.CA} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="CA" /></TabsContent>
+               <TabsContent value="FULL"><MockList data={groupedContent.FULL} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="FULL" /></TabsContent>
+               <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="SUBJECT" /></TabsContent>
+               <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="SECTIONAL" /></TabsContent>
+               <TabsContent value="CA"><MockList data={groupedContent.CA} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="CA" /></TabsContent>
                <TabsContent value="PYQ"><MockList data={groupedContent.PYQ} isPassActive={isPassActive} loading={pyqsLoading} boards={boards} type="PYQ" /></TabsContent>
                <TabsContent value="NOTES"><MockList data={groupedContent.NOTES} isPassActive={isPassActive} loading={notesLoading} boards={boards} type="NOTES" /></TabsContent>
             </div>
@@ -294,7 +300,7 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
                  <Zap className="h-10 w-10 md:h-14 md:w-14" />
               </div>
            </div>
-           <div className="space-y-3 max-w-sm px-6">
+           <div className="space-y-3 max-sm:px-6">
               <h3 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">No mock tests available</h3>
               <p className="text-slate-400 font-medium text-sm md:text-lg leading-snug">Mock tests will appear here once verified and published by the audit team.</p>
            </div>

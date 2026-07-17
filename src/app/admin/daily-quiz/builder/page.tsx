@@ -32,7 +32,8 @@ import {
   ArrowUpRight,
   Landmark,
   Target,
-  History
+  History,
+  Timer
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -59,8 +60,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v39.0.
- * UPDATED: Integrated Usage Filter (Used/Unused) and 4-column filter grid.
+ * @fileOverview Daily Challenge Builder v40.0.
+ * FIXED: Ensured published boolean is explicitly set for student side sync.
  */
 
 export default function DailyQuizBuilder() {
@@ -211,6 +212,7 @@ function DailyQuizBuilderContent() {
        const payload = {
           ...quizData,
           id: finalId,
+          published: !isDraft,
           status: isDraft ? 'DRAFT' : 'PUBLISHED',
           totalQuestions: stagedQuestions.length,
           questionIds: stagedQuestions.map(q => q.id),
@@ -397,7 +399,7 @@ function DailyQuizBuilderContent() {
                           <Zap className="h-44 w-44" />
                         </div>
                         
-                        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+                        <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6">
                            {/* LEFT SIDE: CIRCULAR INDICATOR */}
                            <div className="relative shrink-0 flex flex-col items-center justify-center w-[88px] h-[88px]">
                               <svg className="absolute inset-0 h-full w-full transform -rotate-90">
@@ -422,9 +424,9 @@ function DailyQuizBuilderContent() {
                            </div>
 
                            {/* RIGHT SIDE: TEXT AND BUTTON */}
-                           <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full">
+                           <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left w-full min-w-0">
                               <h4 className="text-[30px] font-[800] text-[#0F172A] tracking-tighter leading-none mb-[6px] whitespace-nowrap">
-                                 Items Ready
+                                 Items ready
                               </h4>
                               <p className="text-[14px] font-medium text-slate-500 mb-[18px]">
                                  Ready to stage into registry
@@ -432,9 +434,9 @@ function DailyQuizBuilderContent() {
                               <Button 
                                 onClick={handleLinkSelected} 
                                 disabled={bankSelection.length === 0} 
-                                className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0"
+                                className="w-full lg:w-auto h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
                               >
-                                 Link Staged Assets <ArrowUpRight className="h-4 w-4" />
+                                 Link staged items <ArrowUpRight className="h-4 w-4" />
                               </Button>
                            </div>
                         </div>
@@ -489,7 +491,7 @@ function DailyQuizBuilderContent() {
                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {q.id.slice(-8)}</p>
                                  </div>
                               </div>
-                              <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 rounded-xl hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all flex items-center justify-center active:scale-90 border-none bg-transparent cursor-pointer"><Trash2 className="h-5 w-5" /></button>
+                              <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 rounded-xl hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all flex items-center justify-center active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
                            </CardContent>
                         </Card>
                      ))}
@@ -513,7 +515,7 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
       <Card className="border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300 rounded-[18px] p-5 space-y-4 group">
          <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-               {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
+               {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" }) : null}
             </div>
             <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
          </div>

@@ -37,12 +37,12 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v82.0.
- * UPDATED: Removed Return to Admin from Desktop as per user request.
+ * @fileOverview Cracklix Navigation Hub v83.0.
+ * FIXED: Standardized Sidebar state and ensured Sheet component is correctly handled.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
-  const [isSidebarOpen, setisSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
 
   const { user, profile, loading } = useUser();
@@ -92,13 +92,6 @@ export default function Navbar() {
     }
   };
 
-  const isAdmin = React.useMemo(() => {
-    if (!user || !profile) return false;
-    const userEmail = user?.email?.toLowerCase();
-    const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
-    return profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
-  }, [user, profile]);
-
   if (!mounted) {
     return <nav className="w-full border-b border-slate-100 bg-white h-20 lg:h-20" />;
   }
@@ -112,7 +105,7 @@ export default function Navbar() {
             {/* LEFT BLOCK: MENU | LOGO */}
             <div className="flex items-center gap-0 z-10">
               <button
-                onClick={() => setisSidebarOpen(true)}
+                onClick={() => setIsSidebarOpen(true)}
                 aria-label="Open menu"
                 className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30"
               >
@@ -203,10 +196,10 @@ export default function Navbar() {
         </nav>
       </header>
 
-      <Sheet open={isSidebarOpen} onOpenChange={setisSidebarOpen}>
+      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-[300px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
           <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Menu</SheetDescription></SheetHeader>
-          <MobileSidebar onClose={() => setisSidebarOpen(false)} />
+          <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
     </>
