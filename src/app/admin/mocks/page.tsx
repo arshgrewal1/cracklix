@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState } from "react"
@@ -20,7 +21,9 @@ import {
   Landmark,
   Settings,
   Layers,
-  Activity
+  Activity,
+  CheckCircle2,
+  XCircle
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore } from "@/firebase"
@@ -33,9 +36,8 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/components/admin"
 
 /**
- * @fileOverview Institutional Mock Management Hub v20.1 (High-Fidelity).
- * FIXED: Resolved syntax error in TableBody ternary logic.
- * FIXED: Balanced header spacing and refined filter row density.
+ * @fileOverview Institutional Mock Management Hub v20.2.
+ * UPDATED: Added direct Publish/Draft toggle to the registry table.
  */
 
 export default function MockManagement() {
@@ -75,6 +77,27 @@ export default function MockManagement() {
         updatedAt: serverTimestamp() 
       }, { merge: true })
       toast({ title: "Registry Synced", description: `Series tier shifted to ${nextTier}.` })
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Sync Failed" })
+    } finally {
+      setTogglingId(null)
+    }
+  }
+
+  const togglePublish = async (mockId: string, currentStatus: boolean) => {
+    if (!db || togglingId) return
+    const nextStatus = !currentStatus
+    setTogglingId(mockId)
+    
+    try {
+      await setDoc(doc(db, "mocks", mockId), { 
+        published: nextStatus, 
+        updatedAt: serverTimestamp() 
+      }, { merge: true })
+      toast({ 
+        title: "Registry Synced", 
+        description: `Series status updated to ${nextStatus ? 'Live' : 'Draft'}.` 
+      })
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sync Failed" })
     } finally {
@@ -161,13 +184,14 @@ export default function MockManagement() {
                 <TableRow className="h-14 border-slate-100">
                   <TableHead className="px-6 md:px-10 text-[9px] md:text-[10px] font-black tracking-widest text-slate-400 uppercase">Series Identity</TableHead>
                   <TableHead className="text-[9px] md:text-[10px] font-black tracking-widest text-slate-400 uppercase">Type & Hub</TableHead>
+                  <TableHead className="text-[9px] md:text-[10px] font-black tracking-widest text-slate-400 text-center uppercase">Status</TableHead>
                   <TableHead className="text-[9px] md:text-[10px] font-black tracking-widest text-slate-400 text-center uppercase">Tier</TableHead>
                   <TableHead className="text-right px-6 md:px-10 text-[9px] md:text-[10px] font-black tracking-widest text-slate-400 uppercase">Audit</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {mocksLoading ? (
-                  <AdminTableSkeleton rows={5} columns={4} />
+                  <AdminTableSkeleton rows={5} columns={5} />
                 ) : mocks.length > 0 ? (
                   mocks.map((mock: any) => {
                     const tier = (mock.accessLevel || 'FREE').trim().toUpperCase();
@@ -190,6 +214,21 @@ export default function MockManagement() {
                               <Badge variant="outline" className="border-slate-100 text-slate-400 text-[8px] font-black px-2 py-0.5 rounded tracking-widest">{boardAbbr} Hub</Badge>
                               <p className="text-[9px] font-bold text-primary uppercase tracking-tight">{formatMockType(mock.mockType)}</p>
                            </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                           <button 
+                              onClick={() => togglePublish(mock.id, !!mock.published)}
+                              disabled={isSyncing}
+                              className={cn(
+                                "inline-flex items-center gap-2 focus:outline-none transition-all active:scale-95 bg-white border border-slate-100 px-3 py-1 rounded-full shadow-sm",
+                                mock.published ? "text-emerald-600" : "text-slate-400"
+                              )}
+                           >
+                              {isSyncing ? <Loader2 className="h-3 w-3 animate-spin text-primary" /> : mock.published ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                              <span className="text-[9px] font-black uppercase tracking-widest">
+                                 {mock.published ? 'Live' : 'Draft'}
+                              </span>
+                           </button>
                         </TableCell>
                         <TableCell className="text-center">
                            <button 
@@ -221,7 +260,7 @@ export default function MockManagement() {
                   })
                 ) : (
                   <TableRow>
-                     <TableCell colSpan={4} className="h-60 md:h-80 text-center">
+                     <TableCell colSpan={5} className="h-60 md:h-80 text-center">
                         <div className="flex flex-col items-center justify-center opacity-10 space-y-4">
                            <Zap className="h-16 w-16 md:h-24 md:w-24 text-slate-400" />
                            <p className="font-black text-sm md:text-2xl uppercase tracking-widest">No active archives</p>
