@@ -58,9 +58,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v38.0.
- * FIXED: Visual collision in analytics card.
- * FIXED: Added missing CardTitle import.
+ * @fileOverview Daily Challenge Builder v38.5.
+ * FIXED: Comprehensive UI overhaul for "Items Ready" card to eliminate all visual overlaps.
  */
 
 export default function DailyQuizBuilder() {
@@ -261,7 +260,7 @@ function DailyQuizBuilderContent() {
             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50">
                <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Challenge title</Label>
-                  <Input value={quizData.title} onChange={e => setFormData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-lg shadow-inner" placeholder="e.g. Daily Punjab GK #12" />
+                  <Input value={quizData.title} onChange={e => setQuizData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-lg shadow-inner" placeholder="e.g. Daily Punjab GK #12" />
                </div>
 
                <div className="grid grid-cols-2 gap-4">
@@ -380,42 +379,54 @@ function DailyQuizBuilderContent() {
                       </motion.div>
                     )}
 
-                    <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-12 relative overflow-hidden border border-slate-100 text-left">
-                       <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none"><Zap className="h-44 w-44" /></div>
-                       <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 justify-between relative z-10">
-                          <div className="flex items-center gap-6 md:gap-10 min-w-0 flex-1">
-                             <div className="relative shrink-0">
-                                <svg className="h-24 w-24 md:h-32 md:w-32 transform -rotate-90">
-                                   <circle cx="50%" cy="50%" r="44%" className="stroke-slate-100 fill-none" strokeWidth="8" />
-                                   <motion.circle 
-                                      cx="50%" cy="50%" r="44%" 
-                                      className="stroke-primary fill-none" 
-                                      strokeWidth="8" 
-                                      strokeLinecap="round"
-                                      initial={{ strokeDashoffset: 276 }}
-                                      animate={{ strokeDashoffset: 276 - (276 * Math.min(bankSelection.length, 100) / 100) }}
-                                      transition={{ duration: 1.5 }}
-                                      style={{ strokeDasharray: 276 }}
-                                   />
-                                </svg>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                   <span className="text-2xl md:text-5xl font-black tabular-nums tracking-tighter">{bankSelection.length}</span>
-                                </div>
-                             </div>
-                             <div className="space-y-1 min-w-[200px] flex-1">
-                                <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight leading-none">Items ready</h4>
-                                <p className="text-[10px] md:text-sm font-medium text-slate-400 uppercase tracking-widest">Ready to stage into area</p>
-                             </div>
-                          </div>
-                          <Button 
-                            onClick={handleLinkSelected} 
-                            disabled={bankSelection.length === 0} 
-                            className="w-full lg:w-auto h-16 md:h-20 px-8 md:px-14 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black text-[11px] md:text-xs tracking-widest rounded-[20px] md:rounded-[24px] shadow-4xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center shrink-0"
-                          >
-                             Link staged items <ArrowUpRight className="h-5 w-5" />
-                          </Button>
-                       </div>
-                    </Card>
+                    <Card className="border-none shadow-2xl rounded-[24px] bg-white p-6 relative overflow-hidden border border-slate-100 text-left">
+                        {/* 3% Opacity Watermark */}
+                        <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none -z-0">
+                          <Zap className="h-44 w-44" />
+                        </div>
+                        
+                        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+                           {/* LEFT SIDE: CIRCULAR INDICATOR */}
+                           <div className="relative shrink-0 flex flex-col items-center justify-center w-[88px] h-[88px]">
+                              <svg className="absolute inset-0 h-full w-full transform -rotate-90">
+                                 <circle cx="50%" cy="50%" r="40%" className="stroke-slate-100 fill-none" strokeWidth="8" />
+                                 <motion.circle 
+                                    cx="50%" cy="50%" r="40%" 
+                                    className="stroke-primary fill-none" 
+                                    strokeWidth="8" 
+                                    strokeLinecap="round"
+                                    initial={{ strokeDashoffset: 238 }}
+                                    animate={{ strokeDashoffset: 238 - (238 * Math.min(bankSelection.length, 100) / 100) }}
+                                    transition={{ duration: 1.5 }}
+                                    style={{ strokeDasharray: 238 }}
+                                 />
+                              </svg>
+                              <div className="relative z-10 flex flex-col items-center justify-center text-center">
+                                 <span className="text-2xl font-[800] tabular-nums tracking-tighter text-[#0F172A] leading-none">
+                                    {bankSelection.length}
+                                 </span>
+                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">Selected</span>
+                              </div>
+                           </div>
+
+                           {/* RIGHT SIDE: TEXT AND BUTTON */}
+                           <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left w-full">
+                              <h4 className="text-[30px] font-[800] text-[#0F172A] tracking-tighter leading-none mb-[6px] whitespace-nowrap">
+                                 Items Ready
+                              </h4>
+                              <p className="text-[14px] font-medium text-slate-500 mb-[18px]">
+                                 Ready to stage into registry
+                              </p>
+                              <Button 
+                                onClick={handleLinkSelected} 
+                                disabled={bankSelection.length === 0} 
+                                className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0"
+                              >
+                                 Link Staged Assets <ArrowUpRight className="h-4 w-4" />
+                              </Button>
+                           </div>
+                        </div>
+                     </Card>
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 pt-10">
