@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -38,7 +37,8 @@ import {
   Target,
   History,
   ShieldCheck,
-  Timer
+  Timer,
+  BookMarked
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -67,10 +67,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v45.0.
- * FIXED: bankLoading state initialization (useState hook correctly used).
- * FIXED: ArrowRight ReferenceError resolved.
- * FIXED: Items Ready summary card UI hardened with zero overlap logic.
+ * @fileOverview Enterprise Mock Builder Hub v46.0 [Hierarchy Sync].
+ * FIXED: Integrated Subject -> Series hierarchy into the test configuration.
  */
 
 export default function MockBuilderPage() {
@@ -98,6 +96,7 @@ function MockBuilderContent() {
   const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]))
   const { data: rawExams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
+  const { data: allSeries } = useCollection<any>(useMemo(() => (db ? collection(db, "test_series") : null), [db]))
   const { data: existingMock } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
   
   const [isInitializing, setIsInitializing] = useState(true)
@@ -116,6 +115,8 @@ function MockBuilderContent() {
     assignmentMode: "MULTIPLE" as MockAssignmentMode,
     boardIds: [] as string[],
     examIds: [] as string[],
+    learningSubjectId: "",
+    seriesId: "",
     mockType: "FULL" as MockType, 
     duration: 120, 
     difficulty: "Medium" as Difficulty, 
@@ -217,6 +218,11 @@ function MockBuilderContent() {
     return rawExams;
   }, [rawExams, mockData.boardIds]);
 
+  const filteredSeries = useMemo(() => {
+     if (!allSeries || !mockData.learningSubjectId) return [];
+     return allSeries.filter((s: any) => s.subjectId === mockData.learningSubjectId);
+  }, [allSeries, mockData.learningSubjectId]);
+
   const displayBank = useMemo(() => {
     const allSelectedIds = new Set(sections.flatMap((s: any) => (s.questions || []).map((q: any) => q.id)));
     return questionBank.filter(q => !allSelectedIds.has(q.id));
@@ -307,7 +313,7 @@ function MockBuilderContent() {
         subtitle="Manage structure and details for the test series."
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
-           <button onClick={() => router.back()} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all border-none cursor-pointer">Discard</button>
+           <button onClick={() => router.back()} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all border-none cursor-pointer text-slate-400">Discard</button>
            <Button onClick={() => handlePublish(true)} disabled={isPublishing} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">
               {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save draft
            </Button>
@@ -343,6 +349,34 @@ function MockBuilderContent() {
                     </select>
                  </div>
               </div>
+
+              {mockData.mockType === 'SUBJECT' && (
+                 <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><BookMarked className="h-3 w-3" /> Subject Hub</Label>
+                       <select 
+                         value={mockData.learningSubjectId || ""} 
+                         onChange={e => setMockData({...mockData, learningSubjectId: e.target.value, seriesId: ""})}
+                         className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
+                       >
+                          <option value="">Select Hub</option>
+                          {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                       </select>
+                    </div>
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Series Node</Label>
+                       <select 
+                         value={mockData.seriesId || ""} 
+                         onChange={e => setMockData({...mockData, seriesId: e.target.value})}
+                         className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
+                         disabled={!mockData.learningSubjectId}
+                       >
+                          <option value="">Uncategorized</option>
+                          {filteredSeries.map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
+                       </select>
+                    </div>
+                 </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2 text-left">

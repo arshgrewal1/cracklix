@@ -39,7 +39,9 @@ import {
   Flame,
   BarChart3,
   Megaphone,
-  Plus
+  Plus,
+  BookMarked,
+  Layers
 } from "lucide-react";
 
 import {
@@ -50,7 +52,7 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * Admin Sidebar Navigation v3.8 [Student View Integrated].
+ * Admin Sidebar Navigation v3.9 [Learning Hub Integrated].
  */
 
 const NAV_GROUPS = [
@@ -70,6 +72,13 @@ const NAV_GROUPS = [
     items: [
       { label: "Vacancy Hub", href: "/admin/vacancies", icon: Megaphone },
       { label: "Add Vacancy", href: "/admin/vacancies/add", icon: Plus },
+    ],
+  },
+  {
+    label: "Learning Hub",
+    items: [
+      { label: "Subject CMS", href: "/admin/learning/subjects", icon: BookMarked },
+      { label: "Series CMS", href: "/admin/learning/series", icon: Layers },
     ],
   },
   {

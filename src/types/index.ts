@@ -182,11 +182,26 @@ export interface Subject {
   name: string;
   description?: string;
   icon?: string;
+  imageUrl?: string;
   color?: string;
   displayOrder: number;
   isActive: boolean;
   categoryId?: string;
   boardId?: string;
+  updatedAt?: any;
+  createdAt?: any;
+}
+
+export interface TestSeries {
+  id: string;
+  subjectId: string;
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+  difficulty: Difficulty;
+  displayOrder: number;
+  isActive: boolean;
+  testCount?: number;
   updatedAt?: any;
   createdAt?: any;
 }
@@ -405,6 +420,8 @@ export interface MockTest {
   boardId: string;
   boardIds: string[];
   examIds: string[];
+  learningSubjectId?: string;
+  seriesId?: string;
   mockType: MockType;
   accessLevel: AccessLevel;
   duration: number;
