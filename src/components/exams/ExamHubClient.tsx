@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -47,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Hub Client v33.0.
- * FIXED: Subject-level distribution logic - properly group all categorized tests.
+ * @fileOverview Premium Exam Hub Client v34.0.
+ * UPDATED: Real stats integration and mobile-optimized single-row stats bar.
  */
 
 export default function ExamHubClient() {
@@ -69,6 +68,9 @@ export default function ExamHubClient() {
 
   const examRef = useMemo(() => (db && examId ? doc(db, "exams", examId) : null), [db, examId]);
   const { data: exam, loading: examLoading } = useDoc<any>(examRef);
+
+  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
+  const { data: platformStats } = useDoc<any>(statsRef);
   
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]);
   const quizzesQuery = useMemo(() => (db ? query(collection(db, "daily_quizzes"), where("published", "==", true)) : null), [db]);
@@ -159,6 +161,8 @@ export default function ExamHubClient() {
     </div>
   );
 
+  const availableTestsCount = groupedContent.FULL.length + groupedContent.SUBJECT.length + groupedContent.SECTIONAL.length;
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full max-w-full">
       <Navbar />
@@ -210,7 +214,7 @@ export default function ExamHubClient() {
                </div>
 
                <div className="flex flex-wrap gap-2 pt-2">
-                  <ResourceChip icon={<Zap className="h-3 w-3" />} label={`${groupedContent.FULL.length + groupedContent.SUBJECT.length} Mocks`} />
+                  <ResourceChip icon={<Zap className="h-3 w-3" />} label={`${availableTestsCount} Mocks`} />
                   <ResourceChip icon={<FileText className="h-3 w-3" />} label={`${groupedContent.PYQ.length} Papers`} />
                   <ResourceChip icon={<BookOpen className="h-3 w-3" />} label="Notes" />
                   <ResourceChip icon={<ShieldCheck className="h-3 w-3" />} label="Verified" />
@@ -220,11 +224,11 @@ export default function ExamHubClient() {
       </section>
 
       <section className="px-4 md:px-8 py-6">
-         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-            <MiniStatCard label="Available tests" value={`${groupedContent.FULL.length + groupedContent.SUBJECT.length}+`} icon={<Layers className="text-blue-500" />} />
-            <MiniStatCard label="MCQ items" value={`${(groupedContent.FULL.length + groupedContent.SUBJECT.length) * 100}+`} icon={<Zap className="text-orange-500" />} />
-            <MiniStatCard label="Aspirants" value={`${exam.studentCount || '12K+'}`} icon={<Users className="text-emerald-500" />} />
-            <MiniStatCard label="Success rate" value="84%" icon={<BarChart3 className="text-purple-500" />} />
+         <div className="max-w-7xl mx-auto grid grid-cols-4 gap-2 md:gap-8">
+            <MiniStatCard label="Available Tests" value={`${availableTestsCount}+`} icon={<Layers className="text-blue-500" />} />
+            <MiniStatCard label="MCQ Items" value={`${availableTestsCount * 100}+`} icon={<Zap className="text-orange-500" />} />
+            <MiniStatCard label="Aspirants" value={`${platformStats?.totalUsers || '10K'}+`} icon={<Users className="text-emerald-500" />} />
+            <MiniStatCard label="Success Rate" value="84%" icon={<BarChart3 className="text-purple-500" />} />
          </div>
       </section>
 
@@ -311,13 +315,13 @@ function ResourceChip({ icon, label }: any) {
 
 function MiniStatCard({ label, value, icon }: any) {
    return (
-      <div className="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.04)] border border-slate-50 flex items-center gap-6 md:gap-10 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">
-         <div className="h-14 w-14 md:h-20 md:w-20 rounded-full bg-white shadow-[0_10px_25px_rgba(0,0,0,0.06)] flex items-center justify-center shrink-0 border border-slate-50 group-hover:scale-105 transition-transform">
-            {React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6 md:h-9 md:w-9" })}
+      <div className="bg-white p-2 md:p-10 rounded-2xl md:rounded-[2.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.04)] border border-slate-50 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-10 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">
+         <div className="h-8 w-8 md:h-20 md:w-20 rounded-xl md:rounded-full bg-white shadow-sm md:shadow-[0_10px_25px_rgba(0,0,0,0.06)] flex items-center justify-center shrink-0 border border-slate-50 group-hover:scale-105 transition-transform">
+            {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-4 w-4 md:h-9 md:w-9" }) : null}
          </div>
-         <div className="min-w-0 flex-1 space-y-1">
-            <p className="text-[10px] md:text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-2">{label}</p>
-            <p className="text-2xl md:text-5xl font-black text-[#0F172A] tabular-nums leading-none tracking-tighter">{value}</p>
+         <div className="min-w-0 flex-1 space-y-0.5 md:space-y-1 text-center md:text-left">
+            <p className="text-[6px] md:text-[12px] font-black text-slate-400 uppercase tracking-tighter md:tracking-[0.2em] leading-none">{label}</p>
+            <p className="text-xs md:text-5xl font-black text-[#0F172A] tabular-nums leading-none tracking-tighter">{value}</p>
          </div>
       </div>
    )
