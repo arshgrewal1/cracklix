@@ -16,10 +16,11 @@ import { useFirestoreCrud } from "@/hooks/useFirestoreCrud"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import FileUpload from "@/components/admin/FileUpload"
+import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Level 2 CMS: Series Registry Hub v2.1 [Dropdown Fix].
+ * @fileOverview Level 2 CMS: Series Registry Hub v2.2 [Badge Fix].
  */
 
 export default function SeriesCMS() {
@@ -62,8 +63,8 @@ export default function SeriesCMS() {
   const filteredSeries = useMemo(() => {
      if (!rawSeries) return [];
      return rawSeries.filter(s => {
-        const matchesSearch = s.title.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesSubject = subjectFilter === 'all' || s.subjectId === subjectFilter;
+        const matchesSearch = (s.title || "").toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSubject = subjectFilter === "all" || s.subjectId === subjectFilter;
         return matchesSearch && matchesSubject;
      });
   }, [rawSeries, searchTerm, subjectFilter]);

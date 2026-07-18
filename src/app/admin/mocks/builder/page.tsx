@@ -69,7 +69,7 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v50.2 [Dropdown Visibility Fix].
+ * @fileOverview Enterprise Mock Builder Hub v51.0 [Stability Hardened].
  */
 
 export default function MockBuilderPage() {
@@ -90,7 +90,7 @@ function MockBuilderContent() {
   const mockId = searchParams?.get("id") ?? ""
   const isEditing = !!mockId
 
-  const [bankLoading, setBankLoading] = useState(false)
+  const [bankLoading, setBankLoading] = useState(false);
   const [questionBank, setQuestionBank] = useState<any[]>([])
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
   
