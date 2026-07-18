@@ -47,9 +47,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Master Mock Governance Center v3.2.
- * FIXED: Added missing AnimatePresence import.
- * IMPLEMENTED: Bulk Move, Duplication, and Hierarchy Filtering.
+ * @fileOverview Master Mock Test Manager v3.3 [Linguistic Update].
+ * SIMPLIFIED: Replaced "Node" and "Hierarchy" with "Test" and "Folder".
  */
 
 export default function MockManagement() {
@@ -108,7 +107,7 @@ export default function MockManagement() {
            createdAt: serverTimestamp(),
            updatedAt: serverTimestamp()
         })
-        toast({ title: "Series Duplicated", description: "Cloned node saved as Draft." })
+        toast({ title: "Test copied", description: "Cloned entry saved as Draft." })
      } finally { setIsProcessing(false) }
   }
 
@@ -127,26 +126,26 @@ export default function MockManagement() {
 
      try {
         await batch.commit()
-        toast({ title: "Bulk Move Successful", description: `${selectedIds.length} tests re-mapped.` })
+        toast({ title: "Update successful", description: `${selectedIds.length} tests moved.` })
         setIsBulkMoveOpen(false)
         setSelectedIds([])
      } finally { setIsProcessing(false) }
   }
 
   const handleDelete = async (id: string) => {
-    if (!db || !confirm("Permanently purge this test node?")) return
+    if (!db || !confirm("Permanently delete this test?")) return
     await deleteDoc(doc(db, "mocks", id))
-    toast({ title: "Node Purged" })
+    toast({ title: "Test deleted" })
   }
 
   return (
     <div className="space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2">
       <AdminPageHeader
         icon={Layers}
-        label="Hierarchical Test Governance"
-        title="Mock Manager"
-        subtitle="Manage the Subject -> Series -> Test preparation tree."
-        actionLabel="Build New Test"
+        label="Test Management Hub"
+        title="Mock tests"
+        subtitle="Manage the Subject -> Series -> Test structure."
+        actionLabel="Create new test"
         actionIcon={Plus}
         actionHref="/admin/mocks/builder"
       />
@@ -163,12 +162,12 @@ export default function MockManagement() {
             <div className="space-y-1.5">
                <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Filter Series</Label>
                <select value={serFilter} onChange={e => setSerFilter(e.target.value)} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]" disabled={subFilter === 'all'}>
-                  <option value="all">All Series Hubs</option>
+                  <option value="all">All Series</option>
                   {allSeries?.filter((s: any) => s.subjectId === subFilter).map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
                </select>
             </div>
             <div className="space-y-1.5">
-               <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Search Registry</Label>
+               <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Search List</Label>
                <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="h-12 bg-slate-50 border-none rounded-xl font-bold" placeholder="Search by title..." />
             </div>
          </div>
@@ -185,10 +184,10 @@ export default function MockManagement() {
                     onCheckedChange={(c) => setSelectedIds(c ? filteredMocks.map(m => m.id) : [])} 
                   />
                 </TableHead>
-                <TableHead className="px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Test Node</TableHead>
-                <TableHead className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Hierarchy Hub</TableHead>
+                <TableHead className="px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Test Title</TableHead>
+                <TableHead className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Category Folder</TableHead>
                 <TableHead className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Status</TableHead>
-                <TableHead className="text-right px-10 text-[9px] font-black text-slate-400 uppercase tracking-widest">Audit</TableHead>
+                <TableHead className="text-right px-10 text-[9px] font-black text-slate-400 uppercase tracking-widest">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -216,7 +215,7 @@ export default function MockManagement() {
                        <div className="flex flex-col gap-1 text-left">
                           <div className="flex items-center gap-2">
                              <Landmark className="h-3 w-3 text-primary" />
-                             <span className="text-[10px] font-bold text-[#0F172A] uppercase">{sub?.name || 'Uncategorized'}</span>
+                             <span className="text-[10px] font-bold text-[#0F172A] uppercase">{sub?.name || 'Unassigned'}</span>
                           </div>
                           <div className="flex items-center gap-2">
                              <Layers className="h-3 w-3 text-slate-300" />
@@ -245,7 +244,7 @@ export default function MockManagement() {
                     <TableCell colSpan={5} className="h-96 text-center">
                        <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
                           <Layers className="h-20 w-20 text-slate-400" />
-                          <p className="font-black text-2xl uppercase tracking-[0.4em]">Vault Empty</p>
+                          <p className="font-black text-2xl uppercase tracking-[0.4em]">Empty list</p>
                        </div>
                     </TableCell>
                  </TableRow>
@@ -265,11 +264,11 @@ export default function MockManagement() {
                <div className="bg-[#0F172A] text-white p-5 rounded-[2.5rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl">
                   <div className="flex items-center gap-4 ml-2">
                      <div className="h-10 w-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black">{selectedIds.length}</div>
-                     <p className="text-[11px] font-black uppercase tracking-widest">Tests selected</p>
+                     <p className="text-[11px] font-black uppercase tracking-widest">Selected tests</p>
                   </div>
                   <div className="flex items-center gap-2">
-                     <Button onClick={() => setIsBulkMoveOpen(true)} className="h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-[10px] uppercase gap-2 border border-white/5"><MoveHorizontal className="h-4 w-4" /> Move Hub</Button>
-                     <Button onClick={async () => { if(confirm("Bulk purge selected nodes?")) { setIsProcessing(true); const b = writeBatch(db!); selectedIds.forEach(id => b.delete(doc(db!, "mocks", id))); await b.commit(); setSelectedIds([]); setIsProcessing(false); toast({ title: "Bulk Purge Complete" }); } }} className="h-11 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-[10px] uppercase gap-2 border-none shadow-lg"><Trash2 className="h-4 w-4" /> Purge</Button>
+                     <Button onClick={() => setIsBulkMoveOpen(true)} className="h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-[10px] uppercase gap-2 border border-white/5"><MoveHorizontal className="h-4 w-4" /> Move hub</Button>
+                     <Button onClick={async () => { if(confirm("Bulk delete selected tests?")) { setIsProcessing(true); const b = writeBatch(db!); selectedIds.forEach(id => b.delete(doc(db!, "mocks", id))); await b.commit(); setSelectedIds([]); setIsProcessing(false); toast({ title: "Batch deleted" }); } }} className="h-11 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-[10px] uppercase gap-2 border-none shadow-lg"><Trash2 className="h-4 w-4" /> Delete</Button>
                      <button onClick={() => setSelectedIds([])} className="p-3 text-slate-500 hover:text-white"><X className="h-5 w-5" /></button>
                   </div>
                </div>
@@ -281,19 +280,19 @@ export default function MockManagement() {
       <Dialog open={isBulkMoveOpen} onOpenChange={setIsBulkMoveOpen}>
          <DialogContent className="sm:max-w-md rounded-[3rem] bg-white border-none shadow-5xl p-10 text-left">
             <DialogHeader className="space-y-2">
-               <DialogTitle className="text-2xl font-black uppercase text-[#0F172A]">Hierarchy Transfer</DialogTitle>
-               <DialogDescription className="text-slate-400 font-medium">Re-map {selectedIds.length} nodes to a different preparation hub.</DialogDescription>
+               <DialogTitle className="text-2xl font-black uppercase text-[#0F172A]">Move tests</DialogTitle>
+               <DialogDescription className="text-slate-400 font-medium">Re-map {selectedIds.length} items to a different subject or series.</DialogDescription>
             </DialogHeader>
             <div className="py-8 space-y-6">
                <div className="space-y-1.5">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Subject</Label>
                   <select value={moveTarget.subjectId} onChange={e => setMoveTarget({...moveTarget, subjectId: e.target.value, seriesId: ""})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner text-[#0F172A]">
-                     <option value="">Select Target Hub</option>
+                     <option value="">Select target</option>
                      {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                </div>
                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Series (Level 2)</Label>
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Series</Label>
                   <select value={moveTarget.seriesId} onChange={e => setMoveTarget({...moveTarget, seriesId: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner text-[#0F172A]" disabled={!moveTarget.subjectId}>
                      <option value="">Uncategorized</option>
                      {filteredSeriesOptions.map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
@@ -302,7 +301,7 @@ export default function MockManagement() {
             </div>
             <DialogFooter>
                <Button onClick={handleBulkMove} disabled={isProcessing || !moveTarget.subjectId} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl">
-                  {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />} Authorize Transfer
+                  {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />} Confirm move
                </Button>
             </DialogFooter>
          </DialogContent>

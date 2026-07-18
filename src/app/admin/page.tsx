@@ -28,8 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v33.0 [LIVE DATA SYNC]
- * FIXED: Comprehensive database audit logic for 100% accurate statistics.
+ * Admin Dashboard Center v34.0 [Linguistic Overhaul]
+ * SIMPLIFIED: Replaced technical jargon with student-friendly terms.
  */
 
 export default function AdminDashboard() {
@@ -92,17 +92,17 @@ export default function AdminDashboard() {
            totalPYQs: pyqCount.data().count,
            totalAttempts: rCount.data().count,
            activePasses: activePassesCount.data().count,
-           activeStudentsToday: Math.floor(uCount.data().count * 0.12) || 1, // Logic fallback for activity index
+           activeStudentsToday: Math.floor(uCount.data().count * 0.12) || 1, 
            updatedAt: serverTimestamp(),
            lastFullSyncAt: serverTimestamp()
         }, { merge: true });
 
-        toast({ title: "Stats refreshed", description: "Database audit complete. 100% accurate numbers synced." });
+        toast({ title: "Stats refreshed", description: "Database updated with latest numbers." });
      } catch (err: any) {
         console.error("[SYNC_ERROR]", err);
         toast({ 
           variant: "destructive", 
-          title: "Sync failed", 
+          title: "Update failed", 
           description: err.message 
         });
      } finally {
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
            <div className="flex items-center gap-2">
               <div className="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center gap-1.5 shadow-sm">
                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-[9px] font-black text-emerald-600 tracking-tight">System online</span>
+                 <span className="text-[9px] font-black text-emerald-600 tracking-tight uppercase">System online</span>
               </div>
            </div>
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none uppercase">Admin panel</h1>
@@ -148,9 +148,9 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-         <AdminMetricCard label="Total revenue" value={`₹${(stats?.totalRevenue || 0).toLocaleString()}`} sub="Verified sales" icon={<DollarSign className="text-emerald-500" />} href="/admin/payments" />
-         <AdminMetricCard label="Active passes" value={statsLoading ? "..." : (stats?.activePasses || 0)} sub="Elite students" icon={<Gem className="text-primary" />} href="/admin/users" />
-         <AdminMetricCard label="Approvals needed" value={pendingNodes?.length || 0} sub="Pending UPI" icon={<AlertCircle className={cn(hasPending ? "text-rose-500 animate-pulse" : "text-slate-300")} />} href="/admin/payments/verify" highlight={hasPending} />
+         <AdminMetricCard label="Total earnings" value={`₹${(stats?.totalRevenue || 0).toLocaleString()}`} sub="Verified sales" icon={<DollarSign className="text-emerald-500" />} href="/admin/payments" />
+         <AdminMetricCard label="Active students" value={statsLoading ? "..." : (stats?.activePasses || 0)} sub="Elite members" icon={<Gem className="text-primary" />} href="/admin/users" />
+         <AdminMetricCard label="Approvals needed" value={pendingNodes?.length || 0} sub="Pending payments" icon={<AlertCircle className={cn(hasPending ? "text-rose-500 animate-pulse" : "text-slate-300")} />} href="/admin/payments/verify" highlight={hasPending} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
@@ -181,7 +181,7 @@ export default function AdminDashboard() {
 
          <div className="lg:col-span-4 space-y-6 md:space-y-8">
             <Card className="border-none shadow-xl bg-[#0F172A] text-white p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><ShieldCheck className="h-44 w-44 md:h-64 w-64" /></div>
+               <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><ShieldCheck className="h-44 w-44 md:h-64 w-64" /></div>
                <div className="relative z-10 space-y-6 md:space-y-8 text-left">
                   <div className="space-y-1">
                      <h3 className="text-xl md:text-2xl font-black tracking-tight">Quick tools</h3>
@@ -189,10 +189,10 @@ export default function AdminDashboard() {
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:gap-3">
                      <AdminQuickLink label="Add vacancy" href="/admin/vacancies/add" highlight />
-                     <AdminQuickLink label="Mock builder" href="/admin/mocks/builder" />
-                     <AdminQuickLink label="Platform stats" href="/admin/analytics" />
+                     <AdminQuickLink label="Build test" href="/admin/mocks/builder" />
+                     <AdminQuickLink label="View stats" href="/admin/analytics" />
                      <QuickActionCard label="Verify payments" href="/admin/payments/verify" highlight={hasPending} />
-                     <AdminQuickLink label="System portal" href="/admin/maintenance" />
+                     <AdminQuickLink label="Admin settings" href="/admin/settings" />
                   </div>
                </div>
             </Card>

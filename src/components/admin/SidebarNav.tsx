@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -52,7 +53,8 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * Admin Sidebar Navigation v3.9 [Learning Hub Integrated].
+ * Admin Sidebar Navigation v4.0 [Linguistic Overhaul].
+ * SIMPLIFIED: Replaced Registry/Hub/Vertical with Easy Platform Words.
  */
 
 const NAV_GROUPS = [
@@ -60,11 +62,11 @@ const NAV_GROUPS = [
     label: "Main",
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-      { label: "Student View", href: "/", icon: GraduationCap },
+      { label: "Student Portal", href: "/", icon: GraduationCap },
       { label: "Question Bank", href: "/admin/mcq-bank", icon: Database },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Bulk Upload", href: "/admin/bulk-import", icon: UploadCloud },
-      { label: "Audit Review", href: "/admin/qa", icon: Activity },
+      { label: "Review Center", href: "/admin/qa", icon: Activity },
     ],
   },
   {
@@ -77,50 +79,50 @@ const NAV_GROUPS = [
   {
     label: "Learning Hub",
     items: [
-      { label: "Subject CMS", href: "/admin/learning/subjects", icon: BookMarked },
-      { label: "Series CMS", href: "/admin/learning/series", icon: Layers },
+      { label: "Subject Hub", href: "/admin/learning/subjects", icon: BookMarked },
+      { label: "Series Hub", href: "/admin/learning/series", icon: Layers },
     ],
   },
   {
     label: "Today's Challenge",
     items: [
-      { label: "Quiz Manager", href: "/admin/daily-quiz", icon: Flame },
+      { label: "Quiz List", href: "/admin/daily-quiz", icon: Flame },
       { label: "Leaderboard", href: "/admin/daily-quiz/leaderboard", icon: Trophy },
       { label: "Quiz Results", href: "/admin/daily-quiz/results", icon: BarChart3 },
     ],
   },
   {
-    label: "Tests & Structure",
+    label: "Tests & Folders",
     items: [
-      { label: "Mock Builder", href: "/admin/mocks/builder", icon: PenSquare },
-      { label: "Mock Manager", href: "/admin/mocks", icon: ClipboardList },
+      { label: "Build Test", href: "/admin/mocks/builder", icon: PenSquare },
+      { label: "Manage Tests", href: "/admin/mocks", icon: ClipboardList },
       { label: "Exam Center", href: "/admin/exam-registry", icon: GraduationCap },
-      { label: "Selection Boards", href: "/admin/exams", icon: Building2 },
+      { label: "Boards", href: "/admin/exams", icon: Building2 },
       { label: "Subjects", href: "/admin/subjects", icon: BookOpen },
       { label: "Chapters", href: "/admin/chapters", icon: NotebookTabs },
       { label: "Topics", href: "/admin/topics", icon: Library },
-      { label: "Categories", href: "/admin/categories", icon: FolderTree },
+      { label: "Folders", href: "/admin/categories", icon: FolderTree },
     ],
   },
   {
     label: "Payments",
     items: [
-      { label: "Revenue Portal", href: "/admin/revenue", icon: DollarSign },
+      { label: "Revenue", href: "/admin/revenue", icon: DollarSign },
       { label: "Active Passes", href: "/admin/subscriptions", icon: CreditCard },
       { label: "Verify Payments", href: "/admin/payments/verify", icon: ShieldCheck },
-      { label: "Pass Manager", href: "/admin/passes", icon: Gem },
-      { label: "Discount Codes", href: "/admin/coupons", icon: Tag },
+      { label: "Pass Plans", href: "/admin/passes", icon: Gem },
+      { label: "Coupons", href: "/admin/coupons", icon: Tag },
     ],
   },
   {
-    label: "Content Library",
+    label: "Library",
     items: [
-      { label: "CA Manager", href: "/admin/current-affairs", icon: Newspaper },
+      { label: "Current Affairs", href: "/admin/current-affairs", icon: Newspaper },
       { label: "Study Notes", href: "/admin/notes", icon: NotebookPen },
       { label: "Old Papers", href: "/admin/pyqs", icon: Archive },
-      { label: "Exam Calendar", href: "/admin/calendar", icon: Calendar },
-      { label: "Success Stories", href: "/admin/success-stories", icon: Trophy },
-      { label: "Help Center", href: "/admin/help-center", icon: HelpCircle },
+      { label: "Exam Dates", href: "/admin/calendar", icon: Calendar },
+      { label: "Toppers", href: "/admin/success-stories", icon: Trophy },
+      { label: "Help Articles", href: "/admin/help-center", icon: HelpCircle },
     ],
   },
   {
@@ -129,8 +131,8 @@ const NAV_GROUPS = [
       { label: "Students", href: "/admin/users", icon: Users },
       { label: "Active Logins", href: "/admin/devices", icon: Smartphone },
       { label: "Support Desk", href: "/admin/support", icon: MessageCircle },
-      { label: "Audit Logs", href: "/admin/audit-logs", icon: History },
-      { label: "System Health", href: "/admin/health", icon: HeartPulse },
+      { label: "Admin Logs", href: "/admin/audit-logs", icon: History },
+      { label: "Health", href: "/admin/health", icon: HeartPulse },
       { label: "Settings", href: "/admin/settings", icon: Settings },
     ],
   },

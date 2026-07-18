@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v38.1 [Navigation Hardened].
- * SIMPLIFIED: Replaced technical jargon with accessible application terms.
+ * @fileOverview Admin Layout v39.0 [Linguistic Overhaul].
+ * SIMPLIFIED: Replaced technical labels with easy mock platform words.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -85,8 +85,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 text-primary animate-spin" />
        </div>
        <div className="text-center space-y-1">
-          <p className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Admin Center</p>
-          <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Opening Portal...</p>
+          <p className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Admin Hub</p>
+          <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Opening Panel...</p>
        </div>
     </div>
   );
@@ -127,13 +127,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               />
             </div>
             <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-4 uppercase tracking-[0.2em]">
-               Admin Center
+               Admin Hub
             </p>
           </div>
           
           <div className="flex items-center gap-4">
              <Button asChild variant="outline" className="hidden sm:flex h-11 rounded-full text-[10px] font-bold tracking-tight px-6 gap-2">
-                <Link href="/">Check Student Side <ExternalLink className="h-3 w-3 opacity-40" /></Link>
+                <Link href="/">Student View <ExternalLink className="h-3 w-3 opacity-40" /></Link>
              </Button>
              <div className="h-11 w-11 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">
                 {profile?.name?.[0] || 'A'}
