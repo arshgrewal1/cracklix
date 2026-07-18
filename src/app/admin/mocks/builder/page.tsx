@@ -69,9 +69,7 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v50.1.
- * FIXED: bankLoading state initialization and ArrowRight import.
- * FIXED: Board-level distribution logic (Exams are now optional).
+ * @fileOverview Enterprise Mock Builder Hub v50.2 [Dropdown Visibility Fix].
  */
 
 export default function MockBuilderPage() {
@@ -98,7 +96,7 @@ function MockBuilderContent() {
   
   const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]))
   const { data: rawExams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
-  const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
+  const { data: rawSubjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
   const { data: allSeries } = useCollection<any>(useMemo(() => (db ? collection(db, "test_series") : null), [db]))
   const { data: existingMock } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
   
@@ -135,6 +133,11 @@ function MockBuilderContent() {
     { id: 'sec-1', name: 'General area', questions: [] as any[] }
   ])
   const [activeSectionId, setActiveSectionId] = useState('sec-1')
+
+  const subjects = useMemo(() => {
+     if (!rawSubjects) return [];
+     return [...rawSubjects].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }, [rawSubjects]);
 
   const fetchFilteredBank = useCallback(async () => {
     if (!db) return;
@@ -345,7 +348,7 @@ function MockBuilderContent() {
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2 text-left">
                     <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Test type</Label>
-                    <select value={mockData.mockType} onChange={e => setMockData((p: any) => ({...p, mockType: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
+                    <select value={mockData.mockType} onChange={e => setMockData((p: any) => ({...p, mockType: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner text-[#0F172A]">
                        <option value="FULL">Full Length</option>
                        <option value="SUBJECT">Subject-Wise</option>
                        <option value="SECTIONAL">Sectional</option>
@@ -354,7 +357,7 @@ function MockBuilderContent() {
                  </div>
                  <div className="space-y-2 text-left">
                     <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Access level</Label>
-                    <select value={mockData.accessLevel} onChange={e => setMockData((p: any) => ({...p, accessLevel: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
+                    <select value={mockData.accessLevel} onChange={e => setMockData((p: any) => ({...p, accessLevel: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner text-[#0F172A]">
                        <option value="FREE">Free Area</option>
                        <option value="PREMIUM">Elite Area</option>
                     </select>
@@ -384,7 +387,7 @@ function MockBuilderContent() {
                             <select 
                               value={mockData.learningSubjectId || ""} 
                               onChange={e => setMockData({...mockData, learningSubjectId: e.target.value, seriesId: ""})}
-                              className="w-full h-11 bg-blue-50 border-none rounded-xl px-4 font-bold text-[11px] outline-none shadow-sm"
+                              className="w-full h-11 bg-blue-50 border-none rounded-xl px-4 font-bold text-[11px] outline-none shadow-sm text-[#0F172A]"
                             >
                                 <option value="">Select Hub</option>
                                 {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -395,7 +398,7 @@ function MockBuilderContent() {
                             <select 
                               value={mockData.seriesId || ""} 
                               onChange={e => setMockData({...mockData, seriesId: e.target.value})}
-                              className="w-full h-11 bg-blue-50 border-none rounded-xl px-4 font-bold text-[11px] outline-none shadow-sm"
+                              className="w-full h-11 bg-blue-50 border-none rounded-xl px-4 font-bold text-[11px] outline-none shadow-sm text-[#0F172A]"
                               disabled={!mockData.learningSubjectId}
                             >
                                 <option value="">Uncategorized</option>
@@ -414,7 +417,7 @@ function MockBuilderContent() {
                  </div>
                  <div className="space-y-2 text-left">
                     <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Difficulty</Label>
-                    <select value={mockData.difficulty} onChange={e => setMockData((p: any) => ({...p, difficulty: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner">
+                    <select value={mockData.difficulty} onChange={e => setMockData((p: any) => ({...p, difficulty: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner text-[#0F172A]">
                        <option value="Easy">Easy</option>
                        <option value="Medium">Medium</option>
                        <option value="Hard">Hard</option>

@@ -19,7 +19,7 @@ import FileUpload from "@/components/admin/FileUpload"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Level 2 CMS: Series Registry Hub v2.0 [Hardened].
+ * @fileOverview Level 2 CMS: Series Registry Hub v2.1 [Dropdown Fix].
  */
 
 export default function SeriesCMS() {
@@ -30,11 +30,16 @@ export default function SeriesCMS() {
   const [subjectFilter, setSubjectFilter] = useState("all")
   const [editingSeries, setEditingSeries] = useState<any>(null)
 
-  const subjectQuery = useMemo(() => (db ? query(collection(db, "subjects"), orderBy("displayOrder", "asc")) : null), [db]);
+  // Fetch all subjects without strict DB ordering to prevent hidden nodes
+  const { data: rawSubjects } = useCollection<Subject>(useMemo(() => (db ? collection(db, "subjects") : null), [db]));
   const seriesQuery = useMemo(() => (db ? query(collection(db, "test_series"), orderBy("displayOrder", "asc")) : null), [db]);
 
-  const { data: subjects } = useCollection<Subject>(subjectQuery as any);
   const { data: rawSeries, loading } = useCollection<TestSeries>(seriesQuery as any);
+
+  const subjects = useMemo(() => {
+     if (!rawSubjects) return [];
+     return [...rawSubjects].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }, [rawSubjects]);
 
   const { isSaving, saveDocument, deleteDocument } = useFirestoreCrud({
     db,
@@ -83,7 +88,7 @@ export default function SeriesCMS() {
             <select 
                value={subjectFilter} 
                onChange={e => setSubjectFilter(e.target.value)}
-               className="h-14 md:h-16 bg-slate-50 border-none rounded-2xl px-6 font-bold text-sm outline-none shadow-inner cursor-pointer"
+               className="h-14 md:h-16 bg-slate-50 border-none rounded-2xl px-6 font-bold text-sm outline-none shadow-inner cursor-pointer text-[#0F172A]"
             >
                <option value="all">All Subjects Hub</option>
                {subjects?.map(s => <option key={s.id} value={s.id}>{s.name} Hub</option>)}
@@ -162,7 +167,7 @@ export default function SeriesCMS() {
                <select 
                   value={editingSeries?.subjectId || ""} 
                   onChange={e => setEditingSeries({...editingSeries, subjectId: e.target.value})}
-                  className="w-full h-14 bg-slate-50 border-none rounded-xl px-6 font-bold text-sm outline-none shadow-inner appearance-none cursor-pointer"
+                  className="w-full h-14 bg-slate-50 border-none rounded-xl px-6 font-bold text-sm outline-none shadow-inner appearance-none cursor-pointer text-[#0F172A]"
                >
                   <option value="" disabled>Select Subject</option>
                   {subjects?.map(s => <option key={s.id} value={s.id}>{s.name} Hub</option>)}
@@ -172,14 +177,14 @@ export default function SeriesCMS() {
             <div className="grid grid-cols-2 gap-6">
                <div className="space-y-1.5 text-left">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Title</Label>
-                  <Input value={editingSeries?.title || ""} onChange={e => setEditingSeries({...editingSeries, title: e.target.value})} className="h-14 rounded-xl border-none bg-slate-50 font-black text-base px-6 shadow-inner" placeholder="e.g. Number System Series" />
+                  <Input value={editingSeries?.title || ""} onChange={e => setEditingSeries({...editingSeries, title: e.target.value})} className="h-14 rounded-xl border-none bg-slate-50 font-black text-base px-6 shadow-inner text-[#0F172A]" placeholder="e.g. Number System Series" />
                </div>
                <div className="space-y-1.5 text-left">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Difficulty Matrix</Label>
                   <select 
                      value={editingSeries?.difficulty || "Medium"} 
                      onChange={e => setEditingSeries({...editingSeries, difficulty: e.target.value})}
-                     className="w-full h-14 bg-slate-50 border-none rounded-xl px-6 font-bold text-sm outline-none shadow-inner"
+                     className="w-full h-14 bg-slate-50 border-none rounded-xl px-6 font-bold text-sm outline-none shadow-inner text-[#0F172A]"
                   >
                      {["Easy", "Medium", "Hard", "Expert"].map(d => <option key={d} value={d}>{d} Level</option>)}
                   </select>
@@ -188,7 +193,7 @@ export default function SeriesCMS() {
 
             <div className="space-y-1.5 text-left">
                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Abstract</Label>
-               <Textarea value={editingSeries?.description || ""} onChange={e => setEditingSeries({...editingSeries, description: e.target.value})} className="min-h-[100px] rounded-2xl border-none bg-slate-50 p-5 font-medium leading-relaxed shadow-inner" placeholder="Topics covered in this series..." />
+               <Textarea value={editingSeries?.description || ""} onChange={e => setEditingSeries({...editingSeries, description: e.target.value})} className="min-h-[100px] rounded-2xl border-none bg-slate-50 p-5 font-medium leading-relaxed shadow-inner text-[#0F172A]" placeholder="Topics covered in this series..." />
             </div>
 
             <FileUpload 
@@ -201,7 +206,7 @@ export default function SeriesCMS() {
             <div className="grid grid-cols-2 gap-6">
                <div className="space-y-1.5 text-left">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Display Sequence</Label>
-                  <Input type="number" value={editingSeries?.displayOrder || ""} onChange={e => setEditingSeries({...editingSeries, displayOrder: e.target.value})} className="h-12 md:h-14 rounded-xl border-none bg-slate-50 font-black text-center shadow-inner" />
+                  <Input type="number" value={editingSeries?.displayOrder || ""} onChange={e => setEditingSeries({...editingSeries, displayOrder: e.target.value})} className="h-12 md:h-14 rounded-xl border-none bg-slate-50 font-black text-center shadow-inner text-[#0F172A]" />
                </div>
                <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
                   <div className="space-y-0.5">
