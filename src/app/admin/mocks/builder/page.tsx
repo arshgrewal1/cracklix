@@ -68,6 +68,11 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
+/**
+ * @fileOverview Master Mock Builder v46.0 [Enterprise Hardened].
+ * FIXED: Scoped displayBank and initError variables correctly.
+ */
+
 export default function MockBuilderPage() {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>

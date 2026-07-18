@@ -41,7 +41,8 @@ import {
   BookMarked,
   Layers,
   History,
-  Archive
+  Archive,
+  FileStack
 } from "lucide-react";
 
 import {
@@ -113,7 +114,7 @@ const NAV_GROUPS = [
     items: [
       { label: "Current Affairs", href: "/admin/current-affairs", icon: Newspaper },
       { label: "Study Notes", href: "/admin/notes", icon: NotebookPen },
-      { label: "Old Papers", href: "/admin/pyqs", icon: Archive },
+      { label: "Old Papers", href: "/admin/pyqs", icon: FileStack },
       { label: "Exam Dates", href: "/admin/calendar", icon: Calendar },
       { label: "Toppers", href: "/admin/success-stories", icon: Trophy },
       { label: "Help Articles", href: "/admin/help-center", icon: HelpCircle },

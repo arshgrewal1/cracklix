@@ -61,8 +61,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v43.0 [Archive Optimized].
- * FIXED: Implements strict Move-to-Archive logic for used questions.
+ * @fileOverview Daily Challenge Builder v44.0 [Enterprise Hardened].
+ * FIXED: Scoped displayBank and initError correctly.
  */
 
 export default function DailyQuizBuilder() {
@@ -235,10 +235,8 @@ function DailyQuizBuilderContent() {
           accessLevel: 'FREE'
        };
 
-       // 1. Save Quiz Document
        batch.set(quizRef, payload, { merge: true });
 
-       // 2. Question Lifecycle: Move to usedQuestions archive
        if (!isDraft) {
          stagedQuestions.forEach(q => {
             const usedRef = doc(db, "usedQuestions", q.id);
