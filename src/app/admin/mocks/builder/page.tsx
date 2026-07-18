@@ -33,6 +33,7 @@ import {
   Filter,
   Activity,
   ArrowUpRight,
+  ArrowRight,
   Target,
   History,
   ShieldCheck,
@@ -42,12 +43,12 @@ import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
   collection, 
   query, 
+  where, 
   doc, 
   setDoc, 
   serverTimestamp, 
   getDocs, 
   writeBatch, 
-  where, 
   documentId, 
   orderBy, 
   DocumentData, 
@@ -65,9 +66,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v43.0 [UI HARDENED].
- * FIXED: Items Ready card overlap resolved with fluid two-column layout.
- * FIXED: Explicitly set published boolean and synchronized global counters.
+ * @fileOverview Enterprise Mock Builder Hub v43.1 [Audit Fixed].
+ * FIXED: Resolved ArrowRight ReferenceError.
  */
 
 export default function MockBuilderPage() {
@@ -88,7 +88,7 @@ function MockBuilderContent() {
   const mockId = searchParams?.get("id") ?? ""
   const isEditing = !!mockId
 
-  const [bankLoading, setBankLoading] = useState(false)
+  const [bankLoading, setBankLoading] = false
   const [questionBank, setQuestionBank] = useState<any[]>([])
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
   
