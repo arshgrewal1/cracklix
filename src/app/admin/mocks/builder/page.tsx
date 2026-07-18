@@ -69,9 +69,9 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v49.0 [Production Hardened].
- * UPDATED: Hierarchy support expanded to Full, Subject, and Sectional.
- * FIXED: Runtime iterator and reference errors resolved.
+ * @fileOverview Enterprise Mock Builder Hub v50.0.
+ * FIXED: bankLoading state initialization and ArrowRight import.
+ * UPDATED: Board-level distribution logic (Exams are now optional).
  */
 
 export default function MockBuilderPage() {
@@ -250,7 +250,6 @@ function MockBuilderContent() {
        return;
     }
 
-    // STRICTURE: Ensure Subject mapping if Hierarchy-aware type is selected
     const hierarchyTypes = ['FULL', 'SUBJECT', 'SECTIONAL'];
     if (hierarchyTypes.includes(mockData.mockType) && !mockData.learningSubjectId) {
       toast({ variant: "destructive", title: "Hierarchy failure", description: "Assign to a Subject Hub first." });
@@ -362,7 +361,6 @@ function MockBuilderContent() {
                  </div>
               </div>
 
-              {/* HIERARCHY HUB: Available for Full, Subject, and Sectional */}
               <AnimatePresence>
                 {showHierarchy && (
                   <motion.div 
@@ -484,7 +482,7 @@ function MockBuilderContent() {
                           <Target className="h-5 w-5" />
                        </div>
                        <div className="space-y-0.5 text-left">
-                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">Exam vertical</h4>
+                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">Target Specific Exams (Optional)</h4>
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Category hub</p>
                        </div>
                     </div>

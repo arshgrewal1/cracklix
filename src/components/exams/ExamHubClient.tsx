@@ -46,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Hub Client v31.0.
- * FIXED: Integrated daily_quizzes into the content pool for accurate test display.
+ * @fileOverview Premium Exam Hub Client v32.0.
+ * FIXED: Board-level distribution logic - show all tests assigned to board if no specific exam targeting.
  */
 
 export default function ExamHubClient() {
@@ -110,11 +110,22 @@ export default function ExamHubClient() {
   }, [user, profile]);
 
   const groupedContent = useMemo(() => {
-    if (!examId) return { FULL: [], SUBJECT: [], SECTIONAL: [], CA: [], PYQ: [], NOTES: [] };
+    if (!examId || !exam) return { FULL: [], SUBJECT: [], SECTIONAL: [], CA: [], PYQ: [], NOTES: [] };
     
     // Combine standard mocks and daily quizzes
     const allMocks = [...(rawMocks || []), ...(rawQuizzes || [])];
-    const mocks = allMocks.filter(m => m.examId === examId || (m.examIds && m.examIds.includes(examId)));
+    
+    // Board-Level Distibution Filter
+    const mocks = allMocks.filter(m => {
+       // A. Direct target match
+       const isDirectMatch = m.examId === examId || (m.examIds && m.examIds.includes(examId));
+       
+       // B. Broad Board Match: belongs to this board AND no specific exams are targetted
+       const boardMatch = m.boardId === exam.boardId || (m.boardIds && m.boardIds.includes(exam.boardId));
+       const isGenericBoardTest = boardMatch && (!m.examIds || m.examIds.length === 0 || (m.examIds.length === 1 && m.examIds[0] === 'GENERAL'));
+       
+       return isDirectMatch || isGenericBoardTest;
+    });
     
     return {
       FULL: mocks.filter(m => m.mockType === 'FULL'),
@@ -124,7 +135,7 @@ export default function ExamHubClient() {
       PYQ: (rawPyqs || []),
       NOTES: (rawNotes || [])
     }
-  }, [rawMocks, rawQuizzes, rawPyqs, rawNotes, examId]);
+  }, [rawMocks, rawQuizzes, rawPyqs, rawNotes, examId, exam]);
 
   const activeBoard = boards?.find((b: any) => b.id === exam?.boardId);
   const activeCategory = categories?.find((c: any) => c.id === exam?.categoryId);
@@ -192,7 +203,7 @@ export default function ExamHubClient() {
                      </h1>
                      <div className="flex items-center gap-2">
                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <p className="text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-widest">Verified Official Preparation</p>
+                        <p className="text-[10px] md:sm font-bold text-slate-400 uppercase tracking-widest">Verified Official Preparation</p>
                      </div>
                   </div>
                </div>

@@ -30,6 +30,7 @@ import {
   ExternalLink,
   BookOpen,
   ArrowUpRight,
+  ArrowRight,
   Landmark,
   Target,
   History,
@@ -39,12 +40,12 @@ import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
   collection, 
   query, 
+  where, 
   doc, 
   setDoc, 
   serverTimestamp, 
   getDocs, 
   writeBatch, 
-  where, 
   documentId, 
   orderBy, 
   DocumentData, 
@@ -60,8 +61,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v41.0 [UI HARDENED].
- * FIXED: Items Ready card overlap resolved with fluid two-column layout.
+ * @fileOverview Daily Challenge Builder v41.1.
+ * FIXED: bankLoading state initialization and ArrowRight import.
  */
 
 export default function DailyQuizBuilder() {
@@ -228,7 +229,7 @@ function DailyQuizBuilderContent() {
 
        await addDoc(collection(db, "audit_logs"), {
           user: profile?.name || "Administrator",
-          action: isEditing ? "QUIZ_UPDATE" : "QUIZ_CREATE",
+          action: "QUIZ_UPDATE" : "QUIZ_CREATE",
           details: `Daily challenge "${payload.title}" synchronized.`,
           timestamp: serverTimestamp()
        });
@@ -436,7 +437,7 @@ function DailyQuizBuilderContent() {
                                 disabled={bankSelection.length === 0} 
                                 className="w-full lg:w-auto h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
                               >
-                                 Link staged items <ArrowUpRight className="h-4 w-4" />
+                                 Link staged items <ArrowRight className="h-4 w-4" />
                               </Button>
                            </div>
                         </div>
