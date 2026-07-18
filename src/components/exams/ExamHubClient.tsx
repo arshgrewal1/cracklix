@@ -80,6 +80,7 @@ export default function ExamHubClient() {
   const { data: rawNotes, loading: notesLoading } = useCollection<any>(notesQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: categories } = useCollection<any>(useMemo(() => (db ? collection(db, "categories") : null), [db]))
+  const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
 
   const [isPinning, setIsPinning] = useState(false);
 
@@ -110,7 +111,7 @@ export default function ExamHubClient() {
   }, [user, profile]);
 
   const groupedContent = useMemo(() => {
-    if (!examId || !exam) return { FULL: [], SUBJECT: [], SECTIONAL: [], CA: [], PYQ: [], NOTES: [] };
+    if (!examId || !exam) return { FULL: [], SUBJECT: [], SECTIONAL: [], CA: [], PYQ: [], NOTES: [], SUBJECTS_WITH_CONTENT: [] };
     
     // Combine standard mocks and daily quizzes
     const allMocks = [...(rawMocks || []), ...(rawQuizzes || [])];
@@ -126,16 +127,21 @@ export default function ExamHubClient() {
        
        return isDirectMatch || isGenericBoardTest;
     });
+
+    const subjectWiseTests = mocks.filter(m => m.mockType === 'SUBJECT');
+    const subjectIdsWithTests = new Set(subjectWiseTests.map(m => m.learningSubjectId).filter(Boolean));
+    const subjectsWithContent = (subjects || []).filter(s => subjectIdsWithTests.has(s.id));
     
     return {
       FULL: mocks.filter(m => m.mockType === 'FULL'),
-      SUBJECT: mocks.filter(m => m.mockType === 'SUBJECT'),
+      SUBJECT: subjectWiseTests,
       SECTIONAL: mocks.filter(m => m.mockType === 'SECTIONAL'),
       CA: mocks.filter(m => m.mockType === 'CA_QUIZ' || m.mockType === 'DAILY_CHALLENGE'),
       PYQ: (rawPyqs || []),
-      NOTES: (rawNotes || [])
+      NOTES: (rawNotes || []),
+      SUBJECTS_WITH_CONTENT: subjectsWithContent
     }
-  }, [rawMocks, rawQuizzes, rawPyqs, rawNotes, examId, exam]);
+  }, [rawMocks, rawQuizzes, rawPyqs, rawNotes, examId, exam, subjects]);
 
   const activeBoard = boards?.find((b: any) => b.id === exam?.boardId);
   const activeCategory = categories?.find((c: any) => c.id === exam?.categoryId);
@@ -244,7 +250,32 @@ export default function ExamHubClient() {
 
             <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
                <TabsContent value="FULL"><MockList data={groupedContent.FULL} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="FULL" /></TabsContent>
-               <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="SUBJECT" /></TabsContent>
+               <TabsContent value="SUBJECT">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+                     {groupedContent.SUBJECTS_WITH_CONTENT.map((sub: any) => (
+                        <Link key={sub.id} href={`/subjects/${sub.id}?examId=${examId}`}>
+                           <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-8 md:p-10 text-left">
+                              <div className="flex justify-between items-start mb-8">
+                                 <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                    <BookOpen className="h-8 w-8" />
+                                 </div>
+                                 <Badge className="bg-slate-50 text-slate-400 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest">Subject Hub</Badge>
+                              </div>
+                              <div className="space-y-4 flex-1">
+                                 <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase">{sub.name}</h3>
+                                 <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Zap className="h-3.5 w-3.5 text-primary" /> Multi-Series Registry Active
+                                 </p>
+                              </div>
+                              <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between text-primary font-black text-[10px] uppercase tracking-[0.2em]">
+                                 <span>Open Hierarchy</span>
+                                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                              </div>
+                           </Card>
+                        </Link>
+                     ))}
+                  </div>
+               </TabsContent>
                <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="SECTIONAL" /></TabsContent>
                <TabsContent value="CA"><MockList data={groupedContent.CA} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="CA" /></TabsContent>
                <TabsContent value="PYQ"><MockList data={groupedContent.PYQ} isPassActive={isPassActive} loading={pyqsLoading} boards={boards} type="PYQ" /></TabsContent>

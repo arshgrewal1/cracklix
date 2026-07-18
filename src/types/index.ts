@@ -35,6 +35,12 @@ export interface MatchingData {
   rows: MatchingRow[];
 }
 
+export interface MatchingData {
+  leftHeader: string;
+  rightHeader: string;
+  rows: MatchingRow[];
+}
+
 export interface Advertisement {
   id: string;
   title: string;

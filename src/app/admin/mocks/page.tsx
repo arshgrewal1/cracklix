@@ -143,7 +143,7 @@ export default function MockManagement() {
         icon={Layers}
         label="Hierarchical Test Governance"
         title="Mock Manager"
-        subtitle="Manage the Subject → Series → Test preparation tree."
+        subtitle="Manage the Subject -> Series -> Test preparation tree."
         actionLabel="Build New Test"
         actionIcon={Plus}
         actionHref="/admin/mocks/builder"
