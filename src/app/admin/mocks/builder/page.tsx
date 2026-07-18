@@ -69,9 +69,9 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v50.0.
+ * @fileOverview Enterprise Mock Builder Hub v50.1.
  * FIXED: bankLoading state initialization and ArrowRight import.
- * UPDATED: Board-level distribution logic (Exams are now optional).
+ * FIXED: Board-level distribution logic (Exams are now optional).
  */
 
 export default function MockBuilderPage() {

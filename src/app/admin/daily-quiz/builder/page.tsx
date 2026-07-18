@@ -61,8 +61,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v41.1.
- * FIXED: bankLoading state initialization and ArrowRight import.
+ * @fileOverview Daily Challenge Builder v41.2.
+ * FIXED: Syntax error in audit_logs action field.
  */
 
 export default function DailyQuizBuilder() {
@@ -229,7 +229,7 @@ function DailyQuizBuilderContent() {
 
        await addDoc(collection(db, "audit_logs"), {
           user: profile?.name || "Administrator",
-          action: "QUIZ_UPDATE" : "QUIZ_CREATE",
+          action: isEditing ? "QUIZ_UPDATE" : "QUIZ_CREATE",
           details: `Daily challenge "${payload.title}" synchronized.`,
           timestamp: serverTimestamp()
        });
