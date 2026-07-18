@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -42,7 +41,8 @@ import {
   Megaphone,
   Plus,
   BookMarked,
-  Layers
+  Layers,
+  History as UsedIcon
 } from "lucide-react";
 
 import {
@@ -53,8 +53,7 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * Admin Sidebar Navigation v4.0 [Linguistic Overhaul].
- * SIMPLIFIED: Replaced Registry/Hub/Vertical with Easy Platform Words.
+ * Admin Sidebar Navigation v4.1 [Archive Integrated].
  */
 
 const NAV_GROUPS = [
@@ -64,6 +63,7 @@ const NAV_GROUPS = [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { label: "Student Portal", href: "/", icon: GraduationCap },
       { label: "Question Bank", href: "/admin/mcq-bank", icon: Database },
+      { label: "Used Questions", href: "/admin/used-questions", icon: UsedIcon },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Bulk Upload", href: "/admin/bulk-import", icon: UploadCloud },
       { label: "Review Center", href: "/admin/qa", icon: Activity },

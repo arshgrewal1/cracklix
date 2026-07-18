@@ -69,8 +69,8 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v52.0.
- * REDESIGN: High-contrast staging card with improved text visibility and zero-overlap layout.
+ * @fileOverview Enterprise Mock Builder Hub v53.0 [Archive Optimized].
+ * FIXED: Implements strict Move-to-Archive logic for used questions.
  */
 
 export default function MockBuilderPage() {
@@ -94,6 +94,7 @@ function MockBuilderContent() {
   const [bankLoading, setBankLoading] = useState(false);
   const [questionBank, setQuestionBank] = useState<any[]>([])
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
+  const [initError, setInitError] = useState<string | null>(null);
   
   const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]))
   const { data: rawExams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
@@ -188,12 +189,12 @@ function MockBuilderContent() {
           chunks.push(questionIds.slice(i, i + 30));
         }
         for (const chunk of chunks) {
-          const [mcqSnap, legacySnap] = await Promise.all([
+          const [mcqSnap, usedSnap] = await Promise.all([
             getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-            getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+            getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
           ]);
           mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
-          legacySnap.docs.forEach(d => {
+          usedSnap.docs.forEach(d => {
             if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
           });
         }
@@ -214,7 +215,10 @@ function MockBuilderContent() {
       setIsInitializing(false);
     };
 
-    hydrateExisting();
+    hydrateExisting().catch(err => {
+      setInitError("Failed to hydrate existing mock data.");
+      setIsInitializing(false);
+    });
   }, [db, existingMock, isEditing, rawExams, mockId]);
 
   const uniqueExams = useMemo(() => {
@@ -248,8 +252,8 @@ function MockBuilderContent() {
       toast({ variant: "destructive", title: "Audit blocked", description: "Series title is mandatory." })
       return
     }
-    const flatQuestionIds = sections.flatMap((s: any) => (s.questions || []).map((q: any) => q.id));
-    if (flatQuestionIds.length === 0) {
+    const flatQuestions = sections.flatMap((s: any) => (s.questions || []));
+    if (flatQuestions.length === 0) {
        toast({ variant: "destructive", title: "Assembly area empty", description: "Add items to the test series." });
        return;
     }
@@ -270,10 +274,10 @@ function MockBuilderContent() {
       id: finalId,
       boardId: mockData.boardIds[0] || "GENERAL",
       examId: mockData.examIds[0] || "GENERAL", 
-      totalQuestions: flatQuestionIds.length,
-      questionIds: flatQuestionIds,
+      totalQuestions: flatQuestions.length,
+      questionIds: flatQuestions.map(q => q.id),
       sections: sectionMetadata,
-      totalMarks: flatQuestionIds.length * (Number(mockData.positiveMarks) || 1),
+      totalMarks: flatQuestions.length * (Number(mockData.positiveMarks) || 1),
       published: !isDraft,
       status: isDraft ? 'DRAFT' : 'PUBLISHED',
       updatedAt: serverTimestamp(),
@@ -281,16 +285,45 @@ function MockBuilderContent() {
     };
 
     try {
-      await setDoc(mockRef, payload, { merge: true });
+      const batch = writeBatch(db);
+      
+      // 1. Save Mock Document
+      batch.set(mockRef, payload, { merge: true });
+
+      // 2. Question Lifecycle: Move to usedQuestions archive
+      if (!isDraft) {
+        flatQuestions.forEach(q => {
+          const usedRef = doc(db, "usedQuestions", q.id);
+          const bankRef = doc(db, "mcqBank", q.id);
+          const legacyRef = doc(db, "questions", q.id);
+
+          batch.set(usedRef, {
+            ...q,
+            originalQuestionId: q.id,
+            usedAt: serverTimestamp(),
+            usedBy: "Mock Builder",
+            mockId: finalId,
+            mockName: payload.title
+          });
+          
+          batch.delete(bankRef);
+          batch.delete(legacyRef);
+        });
+      }
+
+      await batch.commit();
+
       if (!isEditing) {
         await updateDoc(doc(db, 'settings', 'stats'), { totalMocks: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
       }
+
       await addDoc(collection(db, "audit_logs"), {
         user: profile?.name || "Administrator",
         action: isEditing ? "MOCK_UPDATE" : "MOCK_CREATE",
-        details: `Mock series "${payload.title}" synchronized as ${isDraft ? 'Draft' : 'Live'}.`,
+        details: `Mock series "${payload.title}" synchronized. Questions moved to archive.`,
         timestamp: serverTimestamp()
       });
+
       toast({ title: "Database synced" });
       router.push("/admin/mocks")
     } catch (e: any) {
@@ -314,6 +347,24 @@ function MockBuilderContent() {
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
        <p className="text-[10px] font-black uppercase text-slate-300">Loading database...</p>
+    </div>
+  );
+
+  if (initError) return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-white p-10 text-center space-y-10">
+       <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
+          <AlertCircle className="h-10 w-10" />
+       </div>
+       <div className="space-y-4 max-w-sm mx-auto">
+          <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Sync failure</h2>
+          <p className="text-slate-500 font-medium leading-relaxed">{initError}</p>
+       </div>
+       <div className="flex flex-col gap-4 w-full max-w-xs">
+          <Button onClick={() => window.location.reload()} className="h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl font-bold gap-2">
+             <RefreshCw className="h-4 w-4" /> Retry synchronization
+          </Button>
+          <Button onClick={() => router.replace('/admin/mocks')} variant="ghost" className="h-12 text-slate-400 font-bold uppercase text-[10px]">Return to list</Button>
+       </div>
     </div>
   );
 
@@ -377,9 +428,6 @@ function MockBuilderContent() {
                         <Label className="text-[10px] font-black uppercase text-primary flex items-center gap-2">
                            <Layers className="h-3 w-3" /> Hierarchy Registry
                         </Label>
-                        <Button asChild variant="ghost" className="h-6 px-2 text-[8px] font-bold text-slate-400 hover:text-primary uppercase tracking-widest">
-                           <Link href="/admin/learning/series">Manage Hubs <ArrowUpRight className="h-2 w-2 ml-1" /></Link>
-                        </Button>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -458,7 +506,7 @@ function MockBuilderContent() {
                                 className={cn(
                                    "flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group active:scale-[0.98]",
                                    isSelected 
-                                      ? "bg-primary/5 border-primary shadow-[0_10px_20px_-5px_rgba(37,99,235,0.15)]" 
+                                      ? "bg-primary/5 border-primary shadow-sm" 
                                       : "bg-white border-slate-50 hover:border-slate-200"
                                 )}
                              >
@@ -473,49 +521,6 @@ function MockBuilderContent() {
                                       {b.abbreviation} area
                                    </span>
                                 </div>
-                                {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />}
-                             </div>
-                          )
-                       })}
-                    </div>
-                 </div>
-
-                 <div className="space-y-6">
-                    <div className="flex items-center gap-4">
-                       <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 shadow-sm border border-purple-100">
-                          <Target className="h-5 w-5" />
-                       </div>
-                       <div className="space-y-0.5 text-left">
-                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">Target Specific Exams (Optional)</h4>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Category hub</p>
-                       </div>
-                    </div>
-                    <div className="grid grid-cols-1 gap-2.5 max-h-52 overflow-y-auto custom-scrollbar pr-2">
-                       {uniqueExams.map((e: any) => {
-                          const isSelected = mockData.examIds?.includes(e.id);
-                          return (
-                             <div 
-                                key={e.id} 
-                                onClick={() => toggleExamId(e.id)} 
-                                className={cn(
-                                   "flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group active:scale-[0.98]",
-                                   isSelected 
-                                      ? "bg-purple-50/5 border-purple-500 shadow-[0_10px_20px_-5px_rgba(168,85,247,0.15)]" 
-                                      : "bg-white border-slate-50 hover:border-slate-200"
-                                )}
-                             >
-                                <div className="flex items-center gap-3 min-w-0">
-                                   <div className={cn(
-                                      "h-4 w-4 rounded-md border-2 flex items-center justify-center shrink-0 transition-all",
-                                      isSelected ? "bg-purple-500 border-purple-500" : "bg-white border-slate-200 group-hover:border-slate-300"
-                                   )}>
-                                      {isSelected && <Check className="h-2.5 w-2.5 text-white stroke-[4px]" />}
-                                   </div>
-                                   <span className={cn("text-[11px] font-bold uppercase transition-colors truncate", isSelected ? "text-purple-600" : "text-slate-500")}>
-                                      {e.name}
-                                   </span>
-                                </div>
-                                {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse" />}
                              </div>
                           )
                        })}
@@ -560,12 +565,6 @@ function MockBuilderContent() {
                         <h3 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Question database</h3>
                         <p className="text-sm font-medium text-slate-400">Select filters to stage items for this test.</p>
                      </div>
-                     <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-slate-100 shadow-sm">
-                        <div className={cn("h-2.5 w-2.5 rounded-full animate-pulse", !diagnostic ? "bg-emerald-500" : diagnostic.indexUrl ? "bg-amber-500" : "bg-rose-500")} />
-                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                           System status: {!diagnostic ? 'Healthy' : diagnostic.indexUrl ? 'Update required' : 'Sync error'}
-                        </span>
-                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -590,16 +589,6 @@ function MockBuilderContent() {
                         onChange={setSubjectFilter}
                         options={subjects?.map((s: any) => ({ label: s.name, value: s.id })) || []}
                      />
-                     <PremiumFilterCard 
-                        icon={<History className="text-orange-500" />}
-                        label="Usage status"
-                        value={filterStatus}
-                        onChange={setFilterStatus}
-                        options={[
-                           { label: 'Unused items', value: 'UNUSED' },
-                           { label: 'Used items', value: 'USED' }
-                        ]}
-                     />
                   </div>
 
                   <div className="relative group w-full">
@@ -610,36 +599,9 @@ function MockBuilderContent() {
                      </div>
                   </div>
 
-                  {diagnostic && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                       <Card className="border-none shadow-xl bg-amber-50/50 rounded-[2rem] p-6 md:p-8 border border-amber-100">
-                          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                             <div className="flex items-center gap-6 text-left">
-                                <div className="h-14 w-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 shadow-inner shrink-0">
-                                   <Database className="h-7 w-7 animate-pulse" />
-                                </div>
-                                <div className="text-left space-y-1">
-                                   <div className="flex items-center gap-2">
-                                      <CardTitle className="text-lg font-black text-amber-900">System check</CardTitle>
-                                      <Badge className="bg-amber-500 text-white border-none text-[8px] font-black uppercase">Index missing</Badge>
-                                   </div>
-                                   <p className="text-sm font-medium text-amber-700/70">Database index required for fast filtering. Sync may be slow.</p>
-                                </div>
-                             </div>
-                             {diagnostic.indexUrl && (
-                                <Button asChild className="w-full md:w-auto h-14 px-8 bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-white rounded-xl font-bold uppercase text-[10px] gap-2 border-none shadow-lg shrink-0">
-                                   <a href={diagnostic.indexUrl} target="_blank" rel="noopener noreferrer">Provision index <ExternalLink className="h-4 w-4" /></a>
-                                </Button>
-                             )}
-                          </div>
-                       </Card>
-                    </motion.div>
-                  )}
-
                   <div className="grid grid-cols-1">
                      <Card className="border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.06)] rounded-[32px] bg-white p-6 md:p-8 relative overflow-hidden text-left">
                         <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                           {/* Circle Indicator */}
                            <div className="relative shrink-0 flex items-center justify-center w-24 h-24">
                               <svg className="absolute inset-0 h-full w-full transform -rotate-90">
                                  <circle cx="50%" cy="50%" r="42%" className="stroke-slate-100 fill-none" strokeWidth="6" />
@@ -662,7 +624,6 @@ function MockBuilderContent() {
                               </div>
                            </div>
 
-                           {/* Content Hub */}
                            <div className="flex-1 space-y-4 text-center md:text-left w-full min-w-0">
                               <div className="space-y-1">
                                  <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Assets Staged</h4>
@@ -682,11 +643,6 @@ function MockBuilderContent() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 pt-10">
-                   {bankSelection.length > 0 && (
-                     <div className="flex justify-end mb-4">
-                        <button onClick={() => setBankSelection([])} className="text-rose-500 hover:text-rose-600 font-bold text-[10px] uppercase tracking-widest bg-transparent border-none cursor-pointer">Clear selection</button>
-                     </div>
-                   )}
                    {bankLoading ? (
                       Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-2xl bg-white" />)
                    ) : displayBank.length > 0 ? displayBank.map((q: any) => {
@@ -801,16 +757,4 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
          </select>
       </Card>
    );
-}
-
-function ConfigSwitch({ label, checked, onChange }: any) {
-   return (
-      <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", checked ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-slate-100 opacity-60")}>
-         <div className="space-y-0.5">
-            <p className="text-[11px] font-bold uppercase text-[#0F172A] tracking-tight">{label}</p>
-            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Global Status</p>
-         </div>
-         <Switch checked={checked} onCheckedChange={onChange} />
-      </div>
-   )
 }
