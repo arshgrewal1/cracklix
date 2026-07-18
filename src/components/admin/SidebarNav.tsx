@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { cn } from "@/lib/utils";
 import {
@@ -50,10 +50,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-/**
- * Admin Sidebar Navigation v4.2 [Import Fix].
- */
 
 const NAV_GROUPS = [
   {
@@ -142,11 +138,16 @@ interface SidebarNavProps {
   pathname: string;
 }
 
-export default function SidebarNav({
-  isOpen,
-  pathname,
-}: SidebarNavProps) {
+export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const allNavItems = React.useMemo(() => NAV_GROUPS.flatMap(g => g.items), []);
+
+  if (!mounted) return <div className="flex-1" />;
 
   return (
     <TooltipProvider delayDuration={0}>

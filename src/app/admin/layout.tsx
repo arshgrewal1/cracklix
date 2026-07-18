@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v39.1 [Hydration Hardened].
- * FIXED: Standardized mounting handshake to resolve ChunkLoadError in development.
+ * @fileOverview Admin Layout v39.2 [Hydration Hardened].
+ * FIXED: Standardized mounting handshake to resolve ChunkLoadError and Tooltip issues.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -77,6 +77,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   const isGlobalLoading = !mounted || loading || (user && !profile && profileLoading);
+
+  if (!mounted) return null;
 
   if (isGlobalLoading) return (
     <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6">
