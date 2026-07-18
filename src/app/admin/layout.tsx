@@ -10,12 +10,14 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v39.2 [Hydration Hardened].
- * FIXED: Standardized mounting handshake to resolve ChunkLoadError and Tooltip issues.
+ * @fileOverview Admin Layout v40.0 [Enterprise Hardened].
+ * FIXED: Moved TooltipProvider to root to resolve "reading 'call'" SSR crash.
+ * FIXED: Implemented strict mounting handshake to prevent ChunkLoadError.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -78,7 +80,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const isGlobalLoading = !mounted || loading || (user && !profile && profileLoading);
 
-  if (!mounted) return null;
+  // PREVENT SSR CRASH: Do not render interactive shell until mounted
+  if (!mounted) return (
+    <div className="h-screen w-full bg-white flex items-center justify-center">
+       <Loader2 className="h-10 w-10 text-primary animate-spin" />
+    </div>
+  );
 
   if (isGlobalLoading) return (
     <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6">
@@ -96,57 +103,59 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!user || !isAdmin) return null;
 
   return (
-    <div className="min-h-screen w-full bg-white font-body flex overflow-hidden">
-      
-      <AdminSidebar 
-        isOpen={isSidebarOpen} 
-        onToggle={toggleSidebar} 
-        onCloseMobile={() => setIsSidebarOpen(false)}
-        profile={profile}
-        handleLogout={handleLogout}
-        pathname={pathname}
-      />
+    <TooltipProvider delayDuration={0}>
+      <div className="min-h-screen w-full bg-white font-body flex overflow-hidden">
+        
+        <AdminSidebar 
+          isOpen={isSidebarOpen} 
+          onToggle={toggleSidebar} 
+          onCloseMobile={() => setIsSidebarOpen(false)}
+          profile={profile}
+          handleLogout={handleLogout}
+          pathname={pathname}
+        />
 
-      <div className={cn(
-        "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
-        isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
-      )}>
-        <header className="h-[80px] md:h-[110px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
-          <div className="flex items-center gap-0">
-            <button 
-              onClick={toggleSidebar}
-              className="lg:hidden bg-white border border-slate-200 h-10 w-10 rounded-xl flex items-center justify-center shrink-0 active:scale-95 mr-0"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div className="lg:hidden shrink-0">
-              <Logo 
-                variant="light" 
-                href="/admin"
-                className="flex-shrink-0 -ml-3 md:-ml-6" 
-                imgClassName="h-24 md:h-36 w-auto"
-                align="left"
-              />
+        <div className={cn(
+          "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
+          isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
+        )}>
+          <header className="h-[80px] md:h-[110px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
+            <div className="flex items-center gap-0">
+              <button 
+                onClick={toggleSidebar}
+                className="lg:hidden bg-white border border-slate-200 h-10 w-10 rounded-xl flex items-center justify-center shrink-0 active:scale-95 mr-0"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div className="lg:hidden shrink-0">
+                <Logo 
+                  variant="light" 
+                  href="/admin"
+                  className="flex-shrink-0 -ml-3 md:-ml-6" 
+                  imgClassName="h-24 md:h-36 w-auto"
+                  align="left"
+                />
+              </div>
+              <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-4 uppercase tracking-[0.2em]">
+                 Admin Hub
+              </p>
             </div>
-            <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-4 uppercase tracking-[0.2em]">
-               Admin Hub
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-             <Button asChild variant="outline" className="hidden sm:flex h-11 rounded-full text-[10px] font-bold tracking-tight px-6 gap-2">
-                <Link href="/">Student View <ExternalLink className="h-3 w-3 opacity-40" /></Link>
-             </Button>
-             <div className="h-11 w-11 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">
-                {profile?.name?.[0] || 'A'}
-             </div>
-          </div>
-        </header>
+            
+            <div className="flex items-center gap-4">
+               <Button asChild variant="outline" className="hidden sm:flex h-11 rounded-full text-[10px] font-bold tracking-tight px-6 gap-2">
+                  <Link href="/">Student View <ExternalLink className="h-3 w-3 opacity-40" /></Link>
+               </Button>
+               <div className="h-11 w-11 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">
+                  {profile?.name?.[0] || 'A'}
+               </div>
+            </div>
+          </header>
 
-        <main className="flex-1 p-4 md:p-10 lg:p-12 overflow-x-hidden">
-          {children}
-        </main>
+          <main className="flex-1 p-4 md:p-10 lg:p-12 overflow-x-hidden">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

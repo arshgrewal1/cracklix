@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -7,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
   Database, 
-  Users, 
   ShieldCheck, 
   Zap, 
   Loader2, 
@@ -16,7 +14,6 @@ import {
   AlertCircle,
   ChevronRight,
   Gem,
-  Plus
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
@@ -24,27 +21,32 @@ import { collection, query, orderBy, limit, doc, where, getDocs, setDoc, serverT
 import { seedInitialData } from "@/services/seed-data"
 import { useToast } from "@/hooks/use-toast"
 import StudentAvatar from "@/components/brand/StudentAvatar"
-import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v34.0 [Linguistic Overhaul]
- * SIMPLIFIED: Replaced technical jargon with student-friendly terms.
+ * Admin Dashboard Center v35.0 [SSR Hardened].
+ * FIXED: Implemented strict mounted guard to prevent ChunkLoadError and hydration mismatch.
  */
 
 export default function AdminDashboard() {
   const db = useFirestore()
   const { toast } = useToast()
+  
+  const [mounted, setMounted] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const [isStatsSyncing, setIsStatsSyncing] = useState(false)
 
-  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const statsRef = useMemo(() => (db && mounted ? doc(db, "settings", "stats") : null), [db, mounted]);
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
-  const recentUsersQuery = useMemo(() => (db ? query(collection(db, "users"), orderBy("createdAt", "desc"), limit(5)) : null), [db]);
+  const recentUsersQuery = useMemo(() => (db && mounted ? query(collection(db, "users"), orderBy("createdAt", "desc"), limit(5)) : null), [db, mounted]);
   const { data: recentUsers } = useCollection<any>(recentUsersQuery);
 
-  const pendingReqQuery = useMemo(() => (db ? query(collection(db, "payment_requests"), where("status", "==", "PENDING"), limit(10)) : null), [db]);
+  const pendingReqQuery = useMemo(() => (db && mounted ? query(collection(db, "payment_requests"), where("status", "==", "PENDING"), limit(10)) : null), [db, mounted]);
   const { data: pendingNodes } = useCollection<any>(pendingReqQuery);
 
   const handleSyncLiveStats = async () => {
@@ -99,7 +101,6 @@ export default function AdminDashboard() {
 
         toast({ title: "Stats refreshed", description: "Database updated with latest numbers." });
      } catch (err: any) {
-        console.error("[SYNC_ERROR]", err);
         toast({ 
           variant: "destructive", 
           title: "Update failed", 
@@ -121,6 +122,12 @@ export default function AdminDashboard() {
       setIsSyncing(false)
     }
   }
+
+  if (!mounted) return (
+     <div className="h-screen w-full flex items-center justify-center">
+        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+     </div>
+  );
 
   const hasPending = (pendingNodes?.length || 0) > 0;
 

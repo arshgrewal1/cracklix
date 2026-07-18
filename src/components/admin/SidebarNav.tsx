@@ -15,7 +15,6 @@ import {
   Activity,
   PenSquare,
   ClipboardList,
-  Archive,
   Users,
   DollarSign,
   Smartphone,
@@ -47,7 +46,6 @@ import {
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -138,6 +136,11 @@ interface SidebarNavProps {
   pathname: string;
 }
 
+/**
+ * Admin Sidebar Navigation v4.0.
+ * FIXED: Removed redundant TooltipProvider to resolve module resolution crash.
+ * FIXED: Applied mounted guard for SSR safety.
+ */
 export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -150,78 +153,76 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
   if (!mounted) return <div className="flex-1" />;
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <nav className="flex-1 overflow-y-auto px-3 py-6 no-scrollbar space-y-8">
-        {NAV_GROUPS.map((group) => (
-          <div key={group.label} className="space-y-2">
-            {isOpen ? (
-              <p className="px-4 text-[10px] font-semibold tracking-tight text-slate-400">
-                {group.label}
-              </p>
-            ) : (
-              <div className="h-px bg-slate-50 mx-2" />
-            )}
+    <nav className="flex-1 overflow-y-auto px-3 py-6 no-scrollbar space-y-8">
+      {NAV_GROUPS.map((group) => (
+        <div key={group.label} className="space-y-2">
+          {isOpen ? (
+            <p className="px-4 text-[10px] font-semibold tracking-tight text-slate-400 uppercase">
+              {group.label}
+            </p>
+          ) : (
+            <div className="h-px bg-slate-50 mx-2" />
+          )}
 
-            <div className="space-y-0.5">
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const isExact = pathname === item.href;
-                const isMatch = item.href !== "/admin" && pathname.startsWith(item.href);
-                const hasBetterMatch = allNavItems.some(other => 
-                  other.href !== item.href && 
-                  other.href.length > item.href.length && 
-                  pathname.startsWith(other.href)
-                );
+          <div className="space-y-0.5">
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const isExact = pathname === item.href;
+              const isMatch = item.href !== "/admin" && pathname.startsWith(item.href);
+              const hasBetterMatch = allNavItems.some(other => 
+                other.href !== item.href && 
+                other.href.length > item.href.length && 
+                pathname.startsWith(other.href)
+              );
 
-                const isActive = isExact || (isMatch && !hasBetterMatch);
+              const isActive = isExact || (isMatch && !hasBetterMatch);
 
-                const navItem = (
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "group flex h-10 items-center rounded-xl transition-all duration-300 active:scale-[0.98]",
-                      isOpen ? "gap-4 px-4" : "justify-center",
-                      isActive
-                        ? "bg-primary text-white shadow-lg shadow-primary/20"
-                        : "text-slate-500 hover:bg-slate-50 hover:text-primary"
-                    )}
+              const navItem = (
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "group flex h-10 items-center rounded-xl transition-all duration-300 active:scale-[0.98]",
+                    isOpen ? "gap-4 px-4" : "justify-center",
+                    isActive
+                      ? "bg-primary text-white shadow-lg shadow-primary/20"
+                      : "text-slate-500 hover:bg-slate-50 hover:text-primary"
+                  )}
+                >
+                  <Icon className={cn(
+                    "h-4 w-4 shrink-0",
+                    isActive ? "text-white" : "group-hover:scale-110"
+                  )} />
+
+                  <span className={cn(
+                    "truncate text-[13px] font-semibold transition-all duration-300",
+                    isOpen ? "max-w-[150px] opacity-100" : "max-w-0 opacity-0"
+                  )}>
+                    {item.label}
+                  </span>
+
+                  {isOpen && isActive && (
+                    <ChevronRight className="ml-auto h-3 w-3 text-white/50" />
+                  )}
+                </Link>
+              );
+
+              if (isOpen) return <div key={item.href}>{navItem}</div>;
+
+              return (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger asChild>{navItem}</TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    align="center"
                   >
-                    <Icon className={cn(
-                      "h-4 w-4 shrink-0",
-                      isActive ? "text-white" : "group-hover:scale-110"
-                    )} />
-
-                    <span className={cn(
-                      "truncate text-[13px] font-semibold transition-all duration-300",
-                      isOpen ? "max-w-[150px] opacity-100" : "max-w-0 opacity-0"
-                    )}>
-                      {item.label}
-                    </span>
-
-                    {isOpen && isActive && (
-                      <ChevronRight className="ml-auto h-3 w-3 text-white/50" />
-                    )}
-                  </Link>
-                );
-
-                if (isOpen) return <div key={item.href}>{navItem}</div>;
-
-                return (
-                  <Tooltip key={item.href}>
-                    <TooltipTrigger asChild>{navItem}</TooltipTrigger>
-                    <TooltipContent
-                      side="right"
-                      align="center"
-                    >
-                       {item.label}
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
-            </div>
+                     {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
           </div>
-        ))}
-      </nav>
-    </TooltipProvider>
+        </div>
+      ))}
+    </nav>
   );
 }
