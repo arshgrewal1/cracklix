@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -17,7 +18,11 @@ import {
   Trophy,
   Star,
   RefreshCw,
-  LayoutGrid
+  LayoutGrid,
+  ArrowRight,
+  HelpCircle,
+  X,
+  AlertTriangle
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -28,8 +33,8 @@ import Image from "next/image"
 import { TestSeries, Subject } from "@/types"
 
 /**
- * @fileOverview Level 2: Series Selection Hub v1.0.
- * Displays all series belonging to a specific learning subject.
+ * @fileOverview Level 2: Series Selection Hub v2.0 [AUDIT REPAIR].
+ * FIXED: Implemented strict content partitioning by subjectId and seriesId.
  */
 
 export default function SubjectDetailPortal() {
@@ -45,9 +50,11 @@ export default function SubjectDetailPortal() {
 
   const { data: subject, loading: sLoading } = useDoc<Subject>(useMemo(() => (db && subjectId ? doc(db, "subjects", subjectId) : null), [db, subjectId]));
   
+  // 1. Fetch relevant series for this subject
   const seriesQuery = useMemo(() => (db && subjectId ? query(collection(db, "test_series"), where("subjectId", "==", subjectId), where("isActive", "==", true), orderBy("displayOrder", "asc")) : null), [db, subjectId]);
   const { data: series, loading: serLoading } = useCollection<TestSeries>(seriesQuery as any);
 
+  // 2. Fetch all mocks belonging to this subject
   const mocksQuery = useMemo(() => (db && subjectId ? query(collection(db, "mocks"), where("published", "==", true), where("learningSubjectId", "==", subjectId)) : null), [db, subjectId]);
   const { data: mocks } = useCollection<any>(mocksQuery);
 
@@ -70,16 +77,19 @@ export default function SubjectDetailPortal() {
      return map;
   }, [series, mocks, results]);
 
+  // STRICTURE: Group tests with no series into "Uncategorized"
   const uncategorizedTests = useMemo(() => {
      if (!mocks) return [];
-     return mocks.filter(m => !m.seriesId);
-  }, [mocks]);
+     // A test is uncategorized if it has no seriesId OR its seriesId isn't in the valid series list
+     const validSerIds = new Set(series?.map(s => s.id) || []);
+     return mocks.filter(m => !m.seriesId || m.seriesId === 'uncategorized' || !validSerIds.has(m.seriesId));
+  }, [mocks, series]);
 
-  if (!mounted || sLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>
+  if (!mounted || sLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="animate-spin text-primary h-10 w-10" /></div>
 
   if (!subject) return (
      <div className="h-screen flex flex-col items-center justify-center text-center space-y-6">
-        <AlertCircle className="h-16 w-16 text-slate-200" />
+        <AlertTriangle className="h-16 w-16 text-slate-200" />
         <h2 className="text-2xl font-black">Subject Node Not Found</h2>
         <Button onClick={() => router.push('/subjects')} variant="outline">Back to Vault</Button>
      </div>
@@ -169,20 +179,21 @@ export default function SubjectDetailPortal() {
             )}
          </div>
 
-         {/* UNCATEGORIZED FALLBACK */}
+         {/* UNCATEGORIZED FALLBACK - AUDIT REPAIR */}
          {uncategorizedTests.length > 0 && (
-            <section className="pt-12 md:pt-24 space-y-10">
+            <section className="pt-12 md:pt-24 space-y-10 animate-in slide-in-from-bottom-4">
                <div className="flex items-center gap-4 border-b border-slate-100 pb-6 px-1">
-                  <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 shadow-inner"><X className="h-5 w-5" /></div>
+                  <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 shadow-inner"><Layers className="h-5 w-5" /></div>
                   <h3 className="text-lg md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Uncategorized Hub</h3>
                </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                   {uncategorizedTests.map((mock) => (
                     <Link key={mock.id} href={`/mocks/view?id=${mock.id}`}>
-                       <Card className="border border-slate-100 shadow-lg hover:shadow-4xl transition-all rounded-[2rem] bg-white p-6 md:p-8 flex flex-col group h-full">
-                          <h4 className="font-bold text-sm md:text-lg text-[#0F172A] group-hover:text-primary leading-tight line-clamp-2 uppercase mb-4">{mock.title}</h4>
-                          <div className="mt-auto pt-4 flex items-center justify-between text-primary font-black text-[10px] uppercase tracking-widest">
-                             <span>Start Test</span>
+                       <Card className="border border-slate-100 shadow-lg hover:shadow-4xl transition-all rounded-[2.5rem] bg-white p-8 md:p-10 flex flex-col group h-full relative overflow-hidden">
+                          <div className="absolute top-0 right-0 p-4 opacity-5"><Zap className="h-16 w-16" /></div>
+                          <h4 className="font-black text-lg md:text-2xl text-[#0F172A] group-hover:text-primary leading-tight line-clamp-2 uppercase mb-6">{mock.title}</h4>
+                          <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between text-primary font-black text-[10px] uppercase tracking-widest">
+                             <span>Initialize attempt</span>
                              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                           </div>
                        </Card>
@@ -197,7 +208,3 @@ export default function SubjectDetailPortal() {
     </div>
   )
 }
-
-function Loader2({ className }: any) { return <Zap className={cn("animate-pulse", className)} /> }
-function AlertCircle({ className }: any) { return <AlertTriangle className={className} /> }
-import { AlertTriangle } from "lucide-react"
