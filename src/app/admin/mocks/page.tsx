@@ -1,10 +1,10 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { 
   Plus, 
@@ -45,7 +45,8 @@ import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/compone
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Master Mock Governance Center v3.0 [AUDIT REPAIR].
+ * @fileOverview Master Mock Governance Center v3.1 [Audit Fixed].
+ * FIXED: Added missing Label import.
  * IMPLEMENTED: Bulk Move, Duplication, and Hierarchy Filtering.
  */
 
@@ -152,14 +153,14 @@ export default function MockManagement() {
          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
                <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Filter Subject</Label>
-               <select value={subFilter} onChange={e => { setSubFilter(e.target.value); setSerFilter('all'); }} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none">
+               <select value={subFilter} onChange={e => { setSubFilter(e.target.value); setSerFilter('all'); }} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]">
                   <option value="all">All Subjects</option>
                   {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                </select>
             </div>
             <div className="space-y-1.5">
                <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Filter Series</Label>
-               <select value={serFilter} onChange={e => setSerFilter(e.target.value)} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none" disabled={subFilter === 'all'}>
+               <select value={serFilter} onChange={e => setSerFilter(e.target.value)} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]" disabled={subFilter === 'all'}>
                   <option value="all">All Series Hubs</option>
                   {allSeries?.filter((s: any) => s.subjectId === subFilter).map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
                </select>
@@ -284,14 +285,14 @@ export default function MockManagement() {
             <div className="py-8 space-y-6">
                <div className="space-y-1.5">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Subject</Label>
-                  <select value={moveTarget.subjectId} onChange={e => setMoveTarget({...moveTarget, subjectId: e.target.value, seriesId: ""})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner">
+                  <select value={moveTarget.subjectId} onChange={e => setMoveTarget({...moveTarget, subjectId: e.target.value, seriesId: ""})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner text-[#0F172A]">
                      <option value="">Select Target Hub</option>
                      {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                </div>
                <div className="space-y-1.5">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Series (Level 2)</Label>
-                  <select value={moveTarget.seriesId} onChange={e => setMoveTarget({...moveTarget, seriesId: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner" disabled={!moveTarget.subjectId}>
+                  <select value={moveTarget.seriesId} onChange={e => setMoveTarget({...moveTarget, seriesId: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner text-[#0F172A]" disabled={!moveTarget.subjectId}>
                      <option value="">Uncategorized</option>
                      {filteredSeriesOptions.map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
                   </select>
