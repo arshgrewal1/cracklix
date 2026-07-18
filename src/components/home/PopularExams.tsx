@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v51.1.
- * UPDATED: Removed uppercase from exam titles.
+ * @fileOverview Institutional Popular Exams Hub v51.2.
+ * FIXED: Standardized routing to /exams/view?id={id} to prevent 404s in static export.
  */
 export default function PopularExams() {
   const db = useFirestore();

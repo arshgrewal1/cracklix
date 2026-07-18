@@ -8,7 +8,8 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Fidelity Trending Badges v8.0.
+ * @fileOverview High-Fidelity Trending Badges v8.1.
+ * FIXED: Standardized routing to /exams/view?id={id} to prevent 404s.
  */
 export default function TrendingExams() {
   const db = useFirestore();
@@ -41,7 +42,7 @@ export default function TrendingExams() {
                {loading ? (
                   Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-10 w-32 bg-white animate-pulse rounded-xl border border-slate-100" />)
                ) : exams?.map((exam: any) => (
-                  <Link key={exam.id} href={`/exams/${exam.id}`}>
+                  <Link key={exam.id} href={`/exams/view?id=${exam.id}`}>
                      <Badge className="bg-white border-slate-200 text-[#0F172A] hover:border-primary hover:text-primary transition-all px-4 py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-sm cursor-pointer active:scale-95 gap-2">
                         <Sparkles className="h-3 w-3 text-primary" /> {exam.name}
                      </Badge>

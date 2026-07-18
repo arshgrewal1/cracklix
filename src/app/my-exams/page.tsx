@@ -55,8 +55,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview World-Class Personalized Dashboard v3.4.
- * FIXED: Missing key prop in Skeleton loading state.
+ * @fileOverview World-Class Personalized Dashboard v3.5.
+ * FIXED: Standardized routing to /exams/view?id={id} for build stability.
  */
 
 const MODAL_CATEGORIES = [
@@ -283,17 +283,16 @@ export default function MyExamsPage() {
                                         <p className="text-[9px] font-semibold text-slate-400 mt-1">{e.boardId} Hub</p>
                                      </div>
                                   </div>
-                                  <Button 
+                                  <button 
                                     onClick={() => handleAddExam(e.id)} 
                                     disabled={isAdded}
-                                    variant="ghost" 
                                     className={cn(
-                                      "h-10 w-10 rounded-xl p-0 transition-all active:scale-90",
-                                      isAdded ? "text-emerald-500 bg-emerald-50" : "text-slate-300 hover:text-primary hover:bg-primary/5"
+                                      "h-10 w-10 rounded-xl p-0 transition-all active:scale-90 flex items-center justify-center border-none cursor-pointer",
+                                      isAdded ? "text-emerald-500 bg-emerald-50" : "text-slate-300 hover:text-primary hover:bg-primary/5 bg-transparent"
                                     )}
                                   >
                                      {isAdded ? <CheckCircle2 className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-                                  </Button>
+                                  </button>
                                </div>
                             )
                          })}
@@ -357,7 +356,7 @@ export default function MyExamsPage() {
                                 <button 
                                   onClick={() => handleUnpin(exam.id)}
                                   disabled={unpinningId === exam.id}
-                                  className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-300 hover:text-rose-500 active:scale-90 transition-all shadow-sm"
+                                  className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-300 hover:text-rose-500 active:scale-90 transition-all shadow-sm cursor-pointer"
                                 >
                                    {unpinningId === exam.id ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Trash2 className="h-4 w-4" />}
                                 </button>
