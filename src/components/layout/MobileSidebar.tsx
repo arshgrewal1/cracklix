@@ -33,7 +33,8 @@ import { Badge } from "@/components/ui/badge";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Mobile Sidebar v73.0 [Admin Access Integrated].
+ * @fileOverview Mobile Sidebar v74.0 [Optimization Fixed].
+ * FIXED: Standardized interactive elements to ensure high-speed touch responsiveness.
  */
 export default function MobileSidebar({
   onClose,
@@ -96,7 +97,7 @@ export default function MobileSidebar({
          />
          <button
             onClick={onClose}
-            className="absolute right-6 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all border border-slate-100"
+            className="absolute right-6 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all border border-slate-100 cursor-pointer z-20"
           >
             <X className="h-6 w-6" />
           </button>
@@ -110,7 +111,7 @@ export default function MobileSidebar({
           <Link
             href="/profile"
             onClick={onClose}
-            className="block active:scale-[0.98] transition-all"
+            className="block active:scale-[0.98] transition-all cursor-pointer"
           >
             <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm hover:border-primary/20 transition-all">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50">
@@ -150,7 +151,7 @@ export default function MobileSidebar({
               <Link
                 href="/admin"
                 onClick={onClose}
-                className="flex h-12 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] bg-[#0F172A] text-white shadow-lg mb-2"
+                className="flex h-12 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] bg-[#0F172A] text-white shadow-lg mb-2 cursor-pointer"
               >
                 <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
                 <span className="font-bold text-[14px] tracking-tight">Admin Console</span>
@@ -166,7 +167,7 @@ export default function MobileSidebar({
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    "flex h-12 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98]",
+                    "flex h-12 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] cursor-pointer",
                     isActive
                       ? "bg-blue-50 text-primary shadow-sm"
                       : "text-slate-600 hover:bg-slate-50"
@@ -211,7 +212,7 @@ export default function MobileSidebar({
         <Button
           variant="ghost"
           onClick={handleLogout}
-          className="w-full h-14 justify-start text-red-500 text-sm font-black rounded-2xl hover:bg-red-50 transition-all active:scale-95"
+          className="w-full h-14 justify-start text-red-500 text-sm font-black rounded-2xl hover:bg-red-50 transition-all active:scale-95 cursor-pointer"
         >
           <LogOut className="h-5 w-5 mr-4" />
           Sign Out

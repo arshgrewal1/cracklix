@@ -60,8 +60,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v40.0.
- * FIXED: Ensured published boolean is explicitly set for student side sync.
+ * @fileOverview Daily Challenge Builder v41.0 [UI HARDENED].
+ * FIXED: Items Ready card overlap resolved with fluid two-column layout.
  */
 
 export default function DailyQuizBuilder() {
@@ -331,14 +331,14 @@ function DailyQuizBuilderContent() {
                           label="Board center"
                           value={filterBoard}
                           onChange={setFilterBoard}
-                          options={boards?.map(b => ({ label: b.abbreviation, value: b.id })) || []}
+                          options={boards?.map((b: any) => ({ label: b.abbreviation, value: b.id })) || []}
                        />
                        <PremiumFilterCard 
                           icon={<BookOpen className="text-emerald-500" />}
                           label="Subject center"
                           value={filterSubject}
                           onChange={setSubjectFilter}
-                          options={subjects?.map(s => ({ label: s.name, value: s.id })) || []}
+                          options={subjects?.map((s: any) => ({ label: s.name, value: s.id })) || []}
                        />
                        <PremiumFilterCard 
                           icon={<Target className="text-purple-500" />}
@@ -400,7 +400,7 @@ function DailyQuizBuilderContent() {
                         </div>
                         
                         <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6">
-                           {/* LEFT SIDE: CIRCULAR INDICATOR */}
+                           {/* LEFT SIDE: CIRCULAR PROGRESS INDICATOR */}
                            <div className="relative shrink-0 flex flex-col items-center justify-center w-[88px] h-[88px]">
                               <svg className="absolute inset-0 h-full w-full transform -rotate-90">
                                  <circle cx="50%" cy="50%" r="40%" className="stroke-slate-100 fill-none" strokeWidth="8" />

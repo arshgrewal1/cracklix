@@ -27,6 +27,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
@@ -37,8 +38,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v83.0.
- * FIXED: Standardized Sidebar state and ensured Sheet component is correctly handled.
+ * @fileOverview Cracklix Navigation Hub v84.0.
+ * FIXED: Removed negative margins on Logo that blocked the menu button hit area.
+ * FIXED: Integrated SheetTrigger for high-responsiveness on mobile devices.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -103,19 +105,29 @@ export default function Navbar() {
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU | LOGO */}
-            <div className="flex items-center gap-0 z-10">
-              <button
-                onClick={() => setIsSidebarOpen(true)}
-                aria-label="Open menu"
-                className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30"
-              >
-                <Menu className="w-5 h-5 md:w-6 md:h-6" />
-              </button>
+            <div className="flex items-center gap-3 z-10">
+              <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+                <SheetTrigger asChild>
+                  <button
+                    aria-label="Open menu"
+                    className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 cursor-pointer"
+                  >
+                    <Menu className="w-5 h-5 md:w-6 md:h-6" />
+                  </button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
+                  <SheetHeader className="sr-only">
+                    <SheetTitle>Menu</SheetTitle>
+                    <SheetDescription>Navigation Menu</SheetDescription>
+                  </SheetHeader>
+                  <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
+                </SheetContent>
+              </Sheet>
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-3 md:-ml-6"
-                imgClassName="h-24 md:h-36 w-auto"
+                className="flex-shrink-0"
+                imgClassName="h-20 md:h-28 w-auto"
                 align="left"
               />
             </div>
@@ -195,13 +207,6 @@ export default function Navbar() {
           </div>
         </nav>
       </header>
-
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent side="left" className="w-[300px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
-          <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Menu</SheetDescription></SheetHeader>
-          <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
-        </SheetContent>
-      </Sheet>
     </>
   );
 

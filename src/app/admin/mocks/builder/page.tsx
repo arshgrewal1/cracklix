@@ -65,8 +65,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v42.0 [LIVE COUNTER SYNC].
- * FIXED: Increments global counters upon publishing.
+ * @fileOverview Enterprise Mock Builder Hub v43.0 [UI HARDENED].
+ * FIXED: Items Ready card overlap resolved with fluid two-column layout.
+ * FIXED: Explicitly set published boolean and synchronized global counters.
  */
 
 export default function MockBuilderPage() {
@@ -475,8 +476,8 @@ function MockBuilderContent() {
 
         <div className="lg:col-span-8 space-y-10">
            <div className="flex items-center gap-3 bg-slate-100 p-1 rounded-2xl w-fit mb-4">
-              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Question database</button>
-              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all", activeRightTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Active area</button>
+              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Question database</button>
+              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeRightTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Active area</button>
            </div>
 
            {activeRightTab === 'BANK' ? (
@@ -502,8 +503,8 @@ function MockBuilderContent() {
                         icon={<Landmark className="text-blue-500" />}
                         label="Authority board"
                         value={filterBoard}
-                        onChange={(v) => { setFilterBoard(v); setFilterExam('all'); }}
-                        options={boards?.map(b => ({ label: b.abbreviation, value: b.id })) || []}
+                        onChange={(v: string) => { setFilterBoard(v); setFilterExam('all'); }}
+                        options={boards?.map((b: any) => ({ label: b.abbreviation, value: b.id })) || []}
                      />
                      <PremiumFilterCard 
                         icon={<GraduationCap className="text-purple-500" />}
@@ -609,7 +610,7 @@ function MockBuilderContent() {
                                 disabled={bankSelection.length === 0} 
                                 className="w-full lg:w-auto h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
                               >
-                                 Link staged items <ArrowUpRight className="h-4 w-4" />
+                                 Link staged items <ArrowRight className="h-4 w-4" />
                               </Button>
                            </div>
                         </div>
