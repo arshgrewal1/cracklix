@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -31,8 +30,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Level 2: Series Selection Hub v2.4 [FIXED: Firebase Index Failover].
- * Logic: Performs filtering and sorting client-side to bypass compound index requirements.
+ * @fileOverview Level 2: Series Selection Hub v2.5.
+ * UPDATED: Replaced technical empty state with "No test" / "Free coming soon".
  */
 
 export default function SubjectDetailPortal() {
@@ -48,11 +47,9 @@ export default function SubjectDetailPortal() {
 
   const { data: subject, loading: sLoading } = useDoc<Subject>(useMemo(() => (db && subjectId ? doc(db, "subjects", subjectId) : null), [db, subjectId]));
   
-  // Simplified query: Fetch all series for this subject
   const seriesQuery = useMemo(() => (db && subjectId ? query(collection(db, "test_series"), where("subjectId", "==", subjectId)) : null), [db, subjectId]);
   const { data: rawSeries, loading: serLoading } = useCollection<TestSeries>(seriesQuery as any);
 
-  // Simplified query: Fetch all published mocks for this subject
   const mocksQuery = useMemo(() => (db && subjectId ? query(collection(db, "mocks"), where("learningSubjectId", "==", subjectId)) : null), [db, subjectId]);
   const { data: rawMocks } = useCollection<any>(mocksQuery);
 
@@ -64,7 +61,6 @@ export default function SubjectDetailPortal() {
     return rawMocks.filter(m => m.published === true);
   }, [rawMocks]);
 
-  // Process series: Filter active nodes and sort by displayOrder client-side
   const series = useMemo(() => {
      if (!rawSeries) return [];
      return rawSeries
@@ -161,7 +157,7 @@ export default function SubjectDetailPortal() {
 
                              <div className="space-y-4 flex-1">
                                 <h3 className="text-xl md:text-2xl font-[800] text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight uppercase line-clamp-2">{item.title}</h3>
-                                <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <p className="text-[10px] md:xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                    <Layers className="h-3.5 w-3.5" /> {stats.total} Tests Linked
                                 </p>
                              </div>
@@ -183,7 +179,8 @@ export default function SubjectDetailPortal() {
             ) : (
                <div className="col-span-full py-40 text-center space-y-6 opacity-30">
                   <LayoutGrid className="h-20 w-20 mx-auto text-slate-300" />
-                  <p className="font-black text-2xl uppercase tracking-[0.4em]">Hub Registry Empty</p>
+                  <p className="font-black text-2xl uppercase tracking-widest">No test</p>
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Free coming soon</p>
                </div>
             )}
          </div>

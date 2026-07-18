@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState } from "react"
@@ -27,8 +26,8 @@ import Image from "next/image"
 import { Subject } from "@/types"
 
 /**
- * @fileOverview Level 1: Subject Selection Hub v1.1 [FIXED: Index Failover].
- * Logic: Performs filtering and sorting client-side to bypass composite index requirements.
+ * @fileOverview Level 1: Subject Selection Hub v1.2.
+ * UPDATED: Replaced technical empty state with "No test" / "Free coming soon".
  */
 
 export default function SubjectsPage() {
@@ -106,7 +105,7 @@ export default function SubjectsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
            {sLoading ? (
-              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-400px] w-full rounded-[3rem] bg-white border border-slate-100" />)
+              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[400px] w-full rounded-[3rem] bg-white border border-slate-100" />)
            ) : filteredSubjects.length > 0 ? filteredSubjects.map((subject, idx) => {
               const stats = statsMap[subject.id] || { seriesCount: 0, testCount: 0 };
               return (
@@ -164,7 +163,8 @@ export default function SubjectsPage() {
            }) : (
               <div className="col-span-full py-40 text-center space-y-6 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 opacity-30">
                  <Layers className="h-20 w-20 mx-auto text-slate-300" />
-                 <p className="font-black text-2xl uppercase tracking-[0.4em]">Vault Standby</p>
+                 <p className="font-black text-2xl uppercase tracking-widest">No test</p>
+                 <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Free coming soon</p>
               </div>
            )}
         </div>

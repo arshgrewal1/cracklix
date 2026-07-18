@@ -46,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Hub Client v34.0.
- * UPDATED: Real stats integration and mobile-optimized single-row stats bar.
+ * @fileOverview Premium Exam Hub Client v35.0.
+ * UPDATED: Replaced technical empty state messages with "No test" / "Free coming soon".
  */
 
 export default function ExamHubClient() {
@@ -108,9 +108,7 @@ export default function ExamHubClient() {
 
   const isPassActive = useMemo(() => {
      if (!user || !profile) return false;
-     const userEmail = user.email?.toLowerCase();
-     const isFounder = userEmail && ['arshdeepgrewal1122@gmail.com'].includes(userEmail);
-     if (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN' || isFounder) return true;
+     if (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN') return true;
      return profile?.passStatus === 'active';
   }, [user, profile]);
 
@@ -155,9 +153,9 @@ export default function ExamHubClient() {
        <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-blue-100"><AlertCircle className="h-8 w-8" /></div>
        <div className="space-y-2">
          <h2 className="text-2xl font-black text-[#0F172A]">Exam Not Found</h2>
-         <p className="text-slate-500 font-medium max-sm:px-4 max-w-sm mx-auto">This preparation vertical is currently under maintenance or has been archived.</p>
+         <p className="text-slate-500 font-medium max-sm:px-4 max-w-sm mx-auto">This vertical is currently being prepared for the database.</p>
        </div>
-       <Button onClick={() => router.back()} variant="outline" className="rounded-full h-12 px-10 font-bold">Return Back</Button>
+       <Button onClick={() => router.push('/exams')} variant="outline" className="rounded-full h-12 px-10 font-bold">Return Back</Button>
     </div>
   );
 
@@ -227,7 +225,7 @@ export default function ExamHubClient() {
          <div className="max-w-7xl mx-auto grid grid-cols-4 gap-2 md:gap-8">
             <MiniStatCard label="Available Tests" value={`${availableTestsCount}+`} icon={<Layers className="text-blue-500" />} />
             <MiniStatCard label="MCQ Items" value={`${availableTestsCount * 100}+`} icon={<Zap className="text-orange-500" />} />
-            <MiniStatCard label="Aspirants" value={`${platformStats?.totalUsers || '10K'}+`} icon={<Users className="text-emerald-500" />} />
+            <MiniStatCard label="Aspirants" value={`${(platformStats?.totalUsers / 1000).toFixed(1) || '10'}K+`} icon={<Users className="text-emerald-500" />} />
             <MiniStatCard label="Success Rate" value="84%" icon={<BarChart3 className="text-purple-500" />} />
          </div>
       </section>
@@ -250,33 +248,35 @@ export default function ExamHubClient() {
             <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
                <TabsContent value="FULL"><MockList data={groupedContent.FULL} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="FULL" /></TabsContent>
                <TabsContent value="SUBJECT">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-                     {groupedContent.SUBJECTS_WITH_CONTENT.map((sub: any) => {
-                        const seriesCount = (allSeries || []).filter((s: any) => s.subjectId === sub.id).length;
-                        return (
-                           <Link key={sub.id} href={`/subjects/${sub.id}?examId=${examId}`}>
-                              <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-8 md:p-10 text-left">
-                                 <div className="flex justify-between items-start mb-8">
-                                    <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                       <BookOpen className="h-8 w-8" />
-                                    </div>
-                                    <Badge className="bg-slate-50 text-slate-400 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest">Subject Hub</Badge>
-                                 </div>
-                                 <div className="space-y-4 flex-1">
-                                    <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase">{sub.name}</h3>
-                                    <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                       <Zap className="h-3.5 w-3.5 text-primary" /> {seriesCount} Series Registry Active
-                                    </p>
-                                 </div>
-                                 <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between text-primary font-black text-[10px] uppercase tracking-[0.2em]">
-                                    <span>Open Hierarchy</span>
-                                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                 </div>
-                              </Card>
-                           </Link>
-                        )
-                     })}
-                  </div>
+                  {groupedContent.SUBJECTS_WITH_CONTENT.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+                      {groupedContent.SUBJECTS_WITH_CONTENT.map((sub: any) => {
+                          const seriesCount = (allSeries || []).filter((s: any) => s.subjectId === sub.id).length;
+                          return (
+                            <Link key={sub.id} href={`/subjects/${sub.id}?examId=${examId}`}>
+                                <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-8 md:p-10 text-left">
+                                  <div className="flex justify-between items-start mb-8">
+                                      <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                        <BookOpen className="h-8 w-8" />
+                                      </div>
+                                      <Badge className="bg-slate-50 text-slate-400 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest">Subject Hub</Badge>
+                                  </div>
+                                  <div className="space-y-4 flex-1">
+                                      <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase">{sub.name}</h3>
+                                      <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                        <Zap className="h-3.5 w-3.5 text-primary" /> {seriesCount} Series Active
+                                      </p>
+                                  </div>
+                                  <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between text-primary font-black text-[10px] uppercase tracking-[0.2em]">
+                                      <span>Open Hierarchy</span>
+                                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                  </div>
+                                </Card>
+                            </Link>
+                          )
+                      })}
+                    </div>
+                  ) : <MockList data={[]} loading={false} />}
                </TabsContent>
                <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="SECTIONAL" /></TabsContent>
                <TabsContent value="CA"><MockList data={groupedContent.CA} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="CA" /></TabsContent>
@@ -345,15 +345,12 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
               </div>
            </div>
            <div className="space-y-3 max-sm:px-6">
-              <h3 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">No tests available</h3>
-              <p className="text-slate-400 font-medium text-sm md:text-lg leading-snug">Verification node in standby. Check other hubs.</p>
+              <h3 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight uppercase">No test</h3>
+              <p className="text-slate-400 font-medium text-sm md:text-lg leading-snug">Free coming soon.</p>
            </div>
            <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center px-8">
               <Button asChild className="w-full sm:w-auto h-14 px-10 bg-[#0F172A] text-white rounded-full font-bold shadow-xl border-none">
-                 <Link href="/exams">Browse Other Exams</Link>
-              </Button>
-              <Button asChild variant="ghost" className="w-full sm:w-auto h-14 px-10 text-slate-400 font-bold">
-                 <Link href="/">Return Home</Link>
+                 <Link href="/exams">Browse other exams</Link>
               </Button>
            </div>
         </div>
@@ -385,7 +382,7 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
                                  <Lock className="h-3 w-3" /> Premium
                               </Badge>
                            ) : (
-                              <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm">Free Access</Badge>
+                              <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm">Free access</Badge>
                            )}
                            <div className="flex items-center gap-1 text-amber-400">
                               <Star className="h-3 w-3 fill-current" />
@@ -396,7 +393,7 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
 
                      <div className="flex-1 space-y-4 text-left">
                         <div className="space-y-1.5">
-                           <Badge variant="outline" className="bg-slate-50 text-slate-400 border-none text-[8px] font-black uppercase tracking-widest px-2">{mock.difficulty || 'Medium'}</Badge>
+                           <Badge variant="outline" className="bg-slate-50 text-slate-400 border-none font-black text-[8px] font-black uppercase tracking-widest px-2">{mock.difficulty || 'Medium'}</Badge>
                            <h3 className="text-lg md:text-2xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 uppercase tracking-tight">
                               {mock.title}
                            </h3>
@@ -404,13 +401,13 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
 
                         {!isNote && !isPaper && (
                            <div className="flex flex-wrap items-center gap-4 text-[10px] md:text-[11px] font-bold text-slate-400 pt-4 border-t border-slate-50">
-                              <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary/40" /> {mock.totalQuestions} Items</span>
-                              <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary/40" /> {mock.duration}m Time</span>
+                              <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary/40" /> {mock.totalQuestions} items</span>
+                              <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary/40" /> {mock.duration}m time</span>
                            </div>
                         )}
                         {isPaper && (
                            <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold text-slate-400 pt-4 border-t border-slate-50">
-                              <Calendar className="h-4 w-4 text-primary/40" /> Official {mock.year} Paper
+                              <Calendar className="h-4 w-4 text-primary/40" /> Official {mock.year} paper
                            </div>
                         )}
                      </div>
@@ -429,7 +426,7 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
                            locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                         )}>
                            {locked ? <Lock className="h-4 w-4" /> : isNote || isPaper ? <Download className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current text-primary" />} 
-                           {locked ? 'Unlock Hub' : isNote || isPaper ? 'Download PDF' : 'Continue'}
+                           {locked ? 'Unlock hub' : isNote || isPaper ? 'Download pdf' : 'Continue'}
                            <ChevronRight className="h-4 w-4 ml-auto opacity-30" />
                         </Button>
                      </div>
