@@ -4,9 +4,9 @@ import React, { useMemo, useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, where, doc, orderBy } from "firebase/firestore"
-import { Card, CardContent } from "@/components/ui/card"
+import { useDoc, useCollection, useFirestore } from "@/firebase"
+import { collection, query, where, doc } from "firebase/firestore"
+import { Card } from "@/components/ui/card"
 import { 
   Zap, 
   ChevronRight, 
@@ -15,18 +15,14 @@ import {
   Layers, 
   ArrowLeft,
   Trophy,
-  Star,
-  RefreshCw,
   LayoutGrid,
   ArrowRight,
-  HelpCircle,
-  X,
   AlertTriangle
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 import { TestSeries, Subject } from "@/types"
@@ -34,7 +30,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Level 2: Series Selection Hub v2.2 [FIXED: cn defined].
+ * @fileOverview Level 2: Series Selection Hub v2.3 [FIXED: Firebase Index Failover].
+ * Logic: Performs filtering and sorting client-side to bypass compound index requirements.
  */
 
 export default function SubjectDetailPortal() {
@@ -50,14 +47,23 @@ export default function SubjectDetailPortal() {
 
   const { data: subject, loading: sLoading } = useDoc<Subject>(useMemo(() => (db && subjectId ? doc(db, "subjects", subjectId) : null), [db, subjectId]));
   
-  const seriesQuery = useMemo(() => (db && subjectId ? query(collection(db, "test_series"), where("subjectId", "==", subjectId), where("isActive", "==", true), orderBy("displayOrder", "asc")) : null), [db, subjectId]);
-  const { data: series, loading: serLoading } = useCollection<TestSeries>(seriesQuery as any);
+  // Simplified query to avoid index requirement
+  const seriesQuery = useMemo(() => (db && subjectId ? query(collection(db, "test_series"), where("subjectId", "==", subjectId)) : null), [db, subjectId]);
+  const { data: rawSeries, loading: serLoading } = useCollection<TestSeries>(seriesQuery as any);
 
   const mocksQuery = useMemo(() => (db && subjectId ? query(collection(db, "mocks"), where("published", "==", true), where("learningSubjectId", "==", subjectId)) : null), [db, subjectId]);
   const { data: mocks } = useCollection<any>(mocksQuery);
 
   const resultsQuery = useMemo(() => (db ? collection(db, "results") : null), [db]);
   const { data: results } = useCollection<any>(resultsQuery);
+
+  // Process series: Filter active nodes and sort by displayOrder client-side
+  const series = useMemo(() => {
+     if (!rawSeries) return [];
+     return rawSeries
+        .filter(s => s.isActive !== false)
+        .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }, [rawSeries]);
 
   const seriesStats = useMemo(() => {
      const map: Record<string, { total: number, attempted: number, progress: number }> = {};
@@ -175,7 +181,7 @@ export default function SubjectDetailPortal() {
             )}
          </div>
 
-         {/* UNCATEGORIZED FALLBACK - AUDIT REPAIR */}
+         {/* UNCATEGORIZED FALLBACK */}
          {uncategorizedTests.length > 0 && (
             <section className="pt-12 md:pt-24 space-y-10 animate-in slide-in-from-bottom-4">
                <div className="flex items-center gap-4 border-b border-slate-100 pb-6 px-1">

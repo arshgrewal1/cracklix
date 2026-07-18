@@ -61,8 +61,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v41.2.
- * FIXED: Syntax error in audit_logs action field.
+ * @fileOverview Daily Challenge Builder v41.3.
+ * FIXED: Repaired syntax error in audit log action (isEditing check).
  */
 
 export default function DailyQuizBuilder() {
@@ -241,7 +241,12 @@ function DailyQuizBuilderContent() {
     } finally { setIsPublishing(false); }
   };
 
-  if (isInitializing) return <div className="h-screen flex items-center justify-center bg-white"><Zap className="animate-pulse text-primary h-10 w-10" /></div>
+  if (isInitializing) return (
+     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8">
+        <Zap className="h-12 w-12 text-primary animate-pulse" />
+        <p className="text-[10px] font-black uppercase text-slate-300">Synchronizing Hub...</p>
+     </div>
+  );
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-10 pb-40 text-left pt-2 px-4 md:px-10">

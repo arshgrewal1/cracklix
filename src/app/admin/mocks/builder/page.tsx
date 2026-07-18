@@ -69,7 +69,8 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v51.0 [Stability Hardened].
+ * @fileOverview Enterprise Mock Builder Hub v51.2 [Board-Wide Distribution Enabled].
+ * Logic: Assigning to a Board without specific Exams automatically broadcasts to all Hub exams.
  */
 
 export default function MockBuilderPage() {
