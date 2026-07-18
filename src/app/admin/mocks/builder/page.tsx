@@ -67,8 +67,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v47.0 [Hierarchy UI Fixed].
- * FIXED: Explicitly added Subject and Series selectors to the configuration panel.
+ * @fileOverview Enterprise Mock Builder Hub v48.0 [Contextual UI].
+ * FIXED: Subject/Series selectors are now only visible for SUBJECT-WISE tests.
+ * FIXED: Maintained professional Sentence Case and zero-overlap layout.
  */
 
 export default function MockBuilderPage() {
@@ -247,6 +248,12 @@ function MockBuilderContent() {
        return;
     }
 
+    // STRICTURE: Ensure Subject mapping if Subject-Wise is selected
+    if (mockData.mockType === 'SUBJECT' && !mockData.learningSubjectId) {
+      toast({ variant: "destructive", title: "Hierarchy failure", description: "Select a Subject Hub for Subject-Wise tests." });
+      return;
+    }
+
     setIsPublishing(true)
     const finalId = mockId || `mock-${Date.now()}`
     const mockRef = doc(db, "mocks", finalId)
@@ -350,31 +357,41 @@ function MockBuilderContent() {
                  </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
-                <div className="space-y-2 text-left">
-                    <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><BookMarked className="h-3 w-3" /> Subject Hub</Label>
-                    <select 
-                      value={mockData.learningSubjectId || ""} 
-                      onChange={e => setMockData({...mockData, learningSubjectId: e.target.value, seriesId: ""})}
-                      className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
-                    >
-                        <option value="">Select Hub</option>
-                        {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                    </select>
-                </div>
-                <div className="space-y-2 text-left">
-                    <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Series Node</Label>
-                    <select 
-                      value={mockData.seriesId || ""} 
-                      onChange={e => setMockData({...mockData, seriesId: e.target.value})}
-                      className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
-                      disabled={!mockData.learningSubjectId}
-                    >
-                        <option value="">Uncategorized</option>
-                        {filteredSeries.map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
-                    </select>
-                </div>
-              </div>
+              {/* HIERARCHY HUB: Only visible for Subject-Wise tests */}
+              <AnimatePresence>
+                {mockData.mockType === 'SUBJECT' && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="grid grid-cols-2 gap-4 overflow-hidden"
+                  >
+                    <div className="space-y-2 text-left">
+                        <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><BookMarked className="h-3 w-3" /> Subject Hub</Label>
+                        <select 
+                          value={mockData.learningSubjectId || ""} 
+                          onChange={e => setMockData({...mockData, learningSubjectId: e.target.value, seriesId: ""})}
+                          className="w-full h-11 md:h-12 bg-blue-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
+                        >
+                            <option value="">Select Hub</option>
+                            {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        </select>
+                    </div>
+                    <div className="space-y-2 text-left">
+                        <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Series Node</Label>
+                        <select 
+                          value={mockData.seriesId || ""} 
+                          onChange={e => setMockData({...mockData, seriesId: e.target.value})}
+                          className="w-full h-11 md:h-12 bg-blue-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
+                          disabled={!mockData.learningSubjectId}
+                        >
+                            <option value="">Uncategorized</option>
+                            {filteredSeries.map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
+                        </select>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2 text-left">
@@ -620,7 +637,7 @@ function MockBuilderContent() {
                                     strokeLinecap="round"
                                     initial={{ strokeDashoffset: 238 }}
                                     animate={{ strokeDashoffset: 238 - (238 * Math.min(bankSelection.length, 100) / 100) }}
-                                    transition={{ duration: 1.5 }}
+                                    transition={{ duration: 1.5, ease: "easeOut" }}
                                     style={{ strokeDasharray: 238 }}
                                  />
                               </svg>
