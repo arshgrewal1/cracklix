@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -66,8 +67,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v43.1 [Audit Fixed].
- * FIXED: Resolved ArrowRight ReferenceError.
+ * @fileOverview Enterprise Mock Builder Hub v44.0 [DEBUGGED].
+ * FIXED: bankLoading state initialization (false is not iterable).
+ * FIXED: ArrowRight ReferenceError resolved.
  */
 
 export default function MockBuilderPage() {
@@ -88,7 +90,7 @@ function MockBuilderContent() {
   const mockId = searchParams?.get("id") ?? ""
   const isEditing = !!mockId
 
-  const [bankLoading, setBankLoading] = false
+  const [bankLoading, setBankLoading] = useState(false)
   const [questionBank, setQuestionBank] = useState<any[]>([])
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
   
@@ -600,7 +602,7 @@ function MockBuilderContent() {
                            {/* RIGHT SIDE: TEXT AND BUTTON */}
                            <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left w-full min-w-0">
                               <h4 className="text-[30px] font-[800] text-[#0F172A] tracking-tighter leading-none mb-[6px] whitespace-nowrap">
-                                 Items ready
+                                 Items Ready
                               </h4>
                               <p className="text-[14px] font-medium text-slate-500 mb-[18px]">
                                  Ready to stage into registry
@@ -610,7 +612,7 @@ function MockBuilderContent() {
                                 disabled={bankSelection.length === 0} 
                                 className="w-full lg:w-auto h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
                               >
-                                 Link staged items <ArrowRight className="h-4 w-4" />
+                                 Link Staged Items <ArrowRight className="h-4 w-4" />
                               </Button>
                            </div>
                         </div>
