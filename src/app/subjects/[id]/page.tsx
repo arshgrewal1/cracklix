@@ -17,7 +17,9 @@ import {
   Trophy,
   LayoutGrid,
   ArrowRight,
-  AlertTriangle
+  AlertTriangle,
+  BookOpen,
+  Star
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -30,8 +32,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Level 2: Series Selection Hub v2.5.
- * UPDATED: Replaced technical empty state with "No test" / "Free coming soon".
+ * @fileOverview Level 2: Series Selection Hub v3.0.
+ * REDESIGNED: High-visibility header and board-logo integration.
  */
 
 export default function SubjectDetailPortal() {
@@ -69,19 +71,19 @@ export default function SubjectDetailPortal() {
   }, [rawSeries]);
 
   const seriesStats = useMemo(() => {
-     const map: Record<string, { total: number, attempted: number, progress: number }> = {};
-     if (!series) return map;
+    const map: Record<string, { total: number, attempted: number, progress: number }> = {};
+    if (!series) return map;
 
-     series.forEach(ser => {
-        const testsInSer = (mocks || []).filter(m => m.seriesId === ser.id);
-        const attempted = testsInSer.filter(m => (results || []).some((r: any) => r.mockId === m.id)).length;
-        map[ser.id] = {
-           total: testsInSer.length,
-           attempted,
-           progress: testsInSer.length > 0 ? Math.round((attempted / testsInSer.length) * 100) : 0
-        };
-     });
-     return map;
+    series.forEach(ser => {
+      const testsInSer = (mocks || []).filter(m => m.seriesId === ser.id);
+      const attempted = testsInSer.filter(m => (results || []).some((r: any) => r.mockId === m.id)).length;
+      map[ser.id] = {
+        total: testsInSer.length,
+        attempted,
+        progress: testsInSer.length > 0 ? Math.round((attempted / testsInSer.length) * 100) : 0
+      };
+    });
+    return map;
   }, [series, mocks, results]);
 
   const uncategorizedTests = useMemo(() => {
@@ -104,23 +106,75 @@ export default function SubjectDetailPortal() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
       
-      <section className="bg-[#0B1528] text-white pt-10 pb-16 md:pt-20 md:pb-32 relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/10 blur-[120px] rounded-full" />
+      {/* REDESIGNED HIGH-VISIBILITY HEADER */}
+      <section className="bg-[#020817] text-white pt-10 pb-16 md:pt-20 md:pb-28 relative overflow-hidden">
+         {/* Background Dynamic Nodes */}
+         <div className="absolute top-0 right-0 w-2/3 h-full bg-[#2563EB]/10 blur-[140px] rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+         <div className="absolute bottom-0 left-0 w-1/2 h-2/3 bg-[#3B82F6]/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(#ffffff 1px, transparent 1px)`, backgroundSize: '32px 32px' }} />
+
          <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
-            <button onClick={() => router.push('/subjects')} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"><ArrowLeft className="h-5 w-5" /></button>
-            <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
+            <button 
+              onClick={() => router.push('/subjects')} 
+              className="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95 shadow-2xl"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            
+            <div className="flex flex-col md:flex-row items-center gap-10 md:gap-20">
                <div className="relative shrink-0">
-                  <div className="h-32 w-32 md:h-64 md:w-64 rounded-[2.5rem] md:rounded-[4rem] border-[8px] border-white/5 overflow-hidden bg-[#0F172A] shadow-5xl">
-                     {subject.imageUrl ? <Image src={subject.imageUrl} alt={subject.name} fill className="object-cover opacity-80" /> : <Layers className="h-24 w-24 m-auto text-white/5" />}
+                  <div className="relative h-40 w-40 md:h-64 md:w-64 rounded-[3rem] md:rounded-[4.5rem] border-[6px] border-white/5 overflow-hidden bg-[#0F172A] shadow-[0_40px_80px_rgba(0,0,0,0.5)] group">
+                     {subject.imageUrl ? (
+                        <Image 
+                          src={subject.imageUrl} 
+                          alt={subject.name} 
+                          fill 
+                          className="object-cover opacity-90 transition-transform duration-1000 group-hover:scale-110" 
+                        />
+                     ) : (
+                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
+                           <BookOpen className="h-20 w-20 text-white/10" />
+                        </div>
+                     )}
+                     <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent opacity-60" />
                   </div>
-                  <div className="absolute -bottom-4 -right-4 h-14 w-14 md:h-20 md:w-20 bg-primary rounded-3xl flex items-center justify-center text-white shadow-2xl border-[6px] border-[#0B1528]"><Zap className="h-8 w-8 md:h-10 md:w-10 fill-current" /></div>
+                  
+                  {/* Status Floating Badge */}
+                  <motion.div 
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute -bottom-4 -right-4 h-16 w-16 md:h-24 md:w-24 bg-[#2563EB] rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center text-white shadow-[0_20px_40px_rgba(37,99,235,0.4)] border-[6px] md:border-[10px] border-[#020817] z-20"
+                  >
+                    <Zap className="h-8 w-8 md:h-12 md:w-12 fill-current" />
+                  </motion.div>
                </div>
-               <div className="text-center md:text-left space-y-6 flex-1">
+
+               <div className="text-center md:text-left space-y-6 flex-1 min-w-0">
                   <div className="space-y-4">
-                     <Badge className="bg-primary/20 text-[#60A5FA] border-none px-4 py-1.5 rounded-full font-black text-[10px] tracking-widest uppercase">Learning Hub Active</Badge>
-                     <h1 className="text-4xl md:text-8xl font-[900] tracking-tighter leading-none antialiased uppercase">{subject.name}</h1>
+                     <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 shadow-lg backdrop-blur-xl">
+                        <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                        <span className="text-[10px] md:text-xs font-black tracking-widest text-blue-400 uppercase antialiased">
+                          Learning Hub Active
+                        </span>
+                     </div>
+                     <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-[900] tracking-tighter text-white leading-[1.0] antialiased uppercase drop-shadow-2xl">
+                        {subject.name}
+                     </h1>
                   </div>
-                  <p className="text-slate-400 text-sm md:text-xl font-medium max-w-2xl leading-relaxed">{subject.description || "Master core concepts through specialized preparation nodes."}</p>
+                  <p className="text-slate-300 text-sm md:text-2xl font-medium max-w-3xl leading-relaxed tracking-tight antialiased">
+                    {subject.description || "Master core concepts through specialized preparation nodes and verified mock tests."}
+                  </p>
+                  
+                  <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-2">
+                     <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+                        <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Verified Pattern</span>
+                     </div>
+                     <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+                        <Target className="h-4 w-4 text-primary" />
+                        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Bilingual Support</span>
+                     </div>
+                  </div>
                </div>
             </div>
          </div>
@@ -129,8 +183,10 @@ export default function SubjectDetailPortal() {
       <main className="container mx-auto px-4 md:px-12 py-12 md:py-24 max-w-7xl space-y-16">
          <div className="flex items-center justify-between border-b border-slate-100 pb-8 px-1">
             <div className="flex items-center gap-4">
-               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner"><Target className="h-6 w-6" /></div>
-               <h2 className="text-xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tight">Practice Series</h2>
+               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                  <Target className="h-6 w-6" />
+               </div>
+               <h2 className="text-xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tight">Practice series</h2>
             </div>
             <Badge variant="outline" className="bg-white text-slate-400 border-slate-100 font-bold px-4 py-1.5 rounded-full shadow-sm">{series?.length || 0} Specialized Hubs</Badge>
          </div>
@@ -144,7 +200,7 @@ export default function SubjectDetailPortal() {
                   return (
                     <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
                        <Link href={`/subjects/${subjectId}/series/${item.id}`}>
-                          <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-8 md:p-10 text-left h-full group">
+                          <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-8 md:p-10 text-left h-full">
                              <div className="flex justify-between items-start mb-8">
                                 <div className="h-16 w-16 md:h-20 md:w-20 shrink-0">
                                    <AuthorityLogo boardId={item.boardId} size="md" className="bg-slate-50" />
@@ -164,8 +220,8 @@ export default function SubjectDetailPortal() {
 
                              <div className="mt-8 pt-8 border-t border-slate-50 space-y-4">
                                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                                   <span className="text-slate-400">Mastery Index</span>
-                                   <span className="text-primary">{stats.progress}%</span>
+                                   <span className="text-slate-400">Mastery index</span>
+                                   <span className="text-primary tabular-nums">{stats.progress}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
                                    <motion.div initial={{ width: 0 }} whileInView={{ width: `${stats.progress}%` }} transition={{ duration: 1 }} className="h-full bg-primary shadow-lg" />
@@ -177,10 +233,19 @@ export default function SubjectDetailPortal() {
                   )
                })
             ) : (
-               <div className="col-span-full py-40 text-center space-y-6 opacity-30">
-                  <LayoutGrid className="h-20 w-20 mx-auto text-slate-300" />
-                  <p className="font-black text-2xl uppercase tracking-widest">No test</p>
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Free coming soon</p>
+               <div className="col-span-full py-40 text-center space-y-8 animate-in zoom-in-95 duration-700">
+                  <div className="relative">
+                     <div className="h-20 w-20 md:h-32 md:w-32 bg-slate-50 rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-slate-100 mx-auto flex items-center justify-center text-slate-200">
+                        <LayoutGrid className="h-10 w-10 md:h-16 md:w-16" />
+                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="font-black text-2xl md:text-4xl uppercase tracking-widest text-[#0F172A]">No test</p>
+                    <p className="text-sm md:text-lg font-bold text-slate-400 uppercase tracking-[0.2em]">Free coming soon</p>
+                  </div>
+                  <Button asChild variant="outline" className="rounded-full h-12 px-10 border-slate-200 font-bold uppercase text-[10px] tracking-widest">
+                     <Link href="/exams">Explore other exams</Link>
+                  </Button>
                </div>
             )}
          </div>
@@ -189,8 +254,10 @@ export default function SubjectDetailPortal() {
          {uncategorizedTests.length > 0 && (
             <section className="pt-12 md:pt-24 space-y-10 animate-in slide-in-from-bottom-4">
                <div className="flex items-center gap-4 border-b border-slate-100 pb-6 px-1">
-                  <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 shadow-inner"><Layers className="h-5 w-5" /></div>
-                  <h3 className="text-lg md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Uncategorized Hub</h3>
+                  <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 shadow-inner shrink-0">
+                     <Layers className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Uncategorized hub</h3>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                   {uncategorizedTests.map((mock) => (
