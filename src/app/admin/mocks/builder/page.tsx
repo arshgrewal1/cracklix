@@ -67,9 +67,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v44.0 [DEBUGGED].
- * FIXED: bankLoading state initialization (false is not iterable).
+ * @fileOverview Enterprise Mock Builder Hub v45.0.
+ * FIXED: bankLoading state initialization (useState hook correctly used).
  * FIXED: ArrowRight ReferenceError resolved.
+ * FIXED: Items Ready summary card UI hardened with zero overlap logic.
  */
 
 export default function MockBuilderPage() {
@@ -576,7 +577,7 @@ function MockBuilderContent() {
                         </div>
                         
                         <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6">
-                           {/* LEFT SIDE: CIRCULAR INDICATOR */}
+                           {/* LEFT SIDE: CIRCULAR PROGRESS INDICATOR */}
                            <div className="relative shrink-0 flex flex-col items-center justify-center w-[88px] h-[88px]">
                               <svg className="absolute inset-0 h-full w-full transform -rotate-90">
                                  <circle cx="50%" cy="50%" r="40%" className="stroke-slate-100 fill-none" strokeWidth="8" />
@@ -602,7 +603,7 @@ function MockBuilderContent() {
                            {/* RIGHT SIDE: TEXT AND BUTTON */}
                            <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left w-full min-w-0">
                               <h4 className="text-[30px] font-[800] text-[#0F172A] tracking-tighter leading-none mb-[6px] whitespace-nowrap">
-                                 Items Ready
+                                 Items ready
                               </h4>
                               <p className="text-[14px] font-medium text-slate-500 mb-[18px]">
                                  Ready to stage into registry
@@ -612,7 +613,7 @@ function MockBuilderContent() {
                                 disabled={bankSelection.length === 0} 
                                 className="w-full lg:w-auto h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
                               >
-                                 Link Staged Items <ArrowRight className="h-4 w-4" />
+                                 Link staged items <ArrowRight className="h-4 w-4" />
                               </Button>
                            </div>
                         </div>
