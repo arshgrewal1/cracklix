@@ -19,7 +19,8 @@ import {
   ArrowRight,
   AlertTriangle,
   BookOpen,
-  Star
+  Star,
+  Clock
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -32,8 +33,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Level 2: Series Selection Hub v3.0.
- * REDESIGNED: High-visibility header and board-logo integration.
+ * @fileOverview Level 2: Series Selection Hub v3.1.
+ * UPDATED: Premium "No test" empty state.
  */
 
 export default function SubjectDetailPortal() {
@@ -106,17 +107,14 @@ export default function SubjectDetailPortal() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
       
-      {/* REDESIGNED HIGH-VISIBILITY HEADER */}
       <section className="bg-[#020817] text-white pt-10 pb-16 md:pt-20 md:pb-28 relative overflow-hidden">
-         {/* Background Dynamic Nodes */}
          <div className="absolute top-0 right-0 w-2/3 h-full bg-[#2563EB]/10 blur-[140px] rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none" />
          <div className="absolute bottom-0 left-0 w-1/2 h-2/3 bg-[#3B82F6]/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
-         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(#ffffff 1px, transparent 1px)`, backgroundSize: '32px 32px' }} />
 
          <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
             <button 
               onClick={() => router.push('/subjects')} 
-              className="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95 shadow-2xl"
+              className="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all shadow-2xl"
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
@@ -125,12 +123,7 @@ export default function SubjectDetailPortal() {
                <div className="relative shrink-0">
                   <div className="relative h-40 w-40 md:h-64 md:w-64 rounded-[3rem] md:rounded-[4.5rem] border-[6px] border-white/5 overflow-hidden bg-[#0F172A] shadow-[0_40px_80px_rgba(0,0,0,0.5)] group">
                      {subject.imageUrl ? (
-                        <Image 
-                          src={subject.imageUrl} 
-                          alt={subject.name} 
-                          fill 
-                          className="object-cover opacity-90 transition-transform duration-1000 group-hover:scale-110" 
-                        />
+                        <Image src={subject.imageUrl} alt={subject.name} fill className="object-cover opacity-90 transition-transform duration-1000 group-hover:scale-110" />
                      ) : (
                         <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
                            <BookOpen className="h-20 w-20 text-white/10" />
@@ -138,13 +131,7 @@ export default function SubjectDetailPortal() {
                      )}
                      <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent opacity-60" />
                   </div>
-                  
-                  {/* Status Floating Badge */}
-                  <motion.div 
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="absolute -bottom-4 -right-4 h-16 w-16 md:h-24 md:w-24 bg-[#2563EB] rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center text-white shadow-[0_20px_40px_rgba(37,99,235,0.4)] border-[6px] md:border-[10px] border-[#020817] z-20"
-                  >
+                  <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }} className="absolute -bottom-4 -right-4 h-16 w-16 md:h-24 md:w-24 bg-[#2563EB] rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center text-white shadow-[0_20px_40px_rgba(37,99,235,0.4)] border-[6px] md:border-[10px] border-[#020817] z-20">
                     <Zap className="h-8 w-8 md:h-12 md:w-12 fill-current" />
                   </motion.div>
                </div>
@@ -153,104 +140,71 @@ export default function SubjectDetailPortal() {
                   <div className="space-y-4">
                      <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 shadow-lg backdrop-blur-xl">
                         <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                        <span className="text-[10px] md:text-xs font-black tracking-widest text-blue-400 uppercase antialiased">
-                          Learning Hub Active
-                        </span>
+                        <span className="text-[10px] md:text-xs font-black tracking-widest text-blue-400 uppercase">Learning Hub Active</span>
                      </div>
-                     <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-[900] tracking-tighter text-white leading-[1.0] antialiased uppercase drop-shadow-2xl">
-                        {subject.name}
-                     </h1>
+                     <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-[900] tracking-tighter text-white leading-[1.0] uppercase drop-shadow-2xl">{subject.name}</h1>
                   </div>
-                  <p className="text-slate-300 text-sm md:text-2xl font-medium max-w-3xl leading-relaxed tracking-tight antialiased">
-                    {subject.description || "Master core concepts through specialized preparation nodes and verified mock tests."}
-                  </p>
-                  
-                  <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-2">
-                     <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                        <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Verified Pattern</span>
-                     </div>
-                     <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                        <Target className="h-4 w-4 text-primary" />
-                        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Bilingual Support</span>
-                     </div>
-                  </div>
+                  <p className="text-slate-300 text-sm md:text-2xl font-medium max-w-3xl leading-relaxed tracking-tight">{subject.description || "Master core concepts through verified mock tests."}</p>
                </div>
             </div>
          </div>
       </section>
 
       <main className="container mx-auto px-4 md:px-12 py-12 md:py-24 max-w-7xl space-y-16">
-         <div className="flex items-center justify-between border-b border-slate-100 pb-8 px-1">
-            <div className="flex items-center gap-4">
-               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                  <Target className="h-6 w-6" />
-               </div>
-               <h2 className="text-xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tight">Practice series</h2>
-            </div>
-            <Badge variant="outline" className="bg-white text-slate-400 border-slate-100 font-bold px-4 py-1.5 rounded-full shadow-sm">{series?.length || 0} Specialized Hubs</Badge>
-         </div>
-
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-            {serLoading ? (
-               Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3rem] bg-white border border-slate-50" />)
-            ) : series && series.length > 0 ? (
-               series.map((item, idx) => {
-                  const stats = seriesStats[item.id] || { total: 0, attempted: 0, progress: 0 };
-                  return (
-                    <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
-                       <Link href={`/subjects/${subjectId}/series/${item.id}`}>
-                          <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-8 md:p-10 text-left h-full">
-                             <div className="flex justify-between items-start mb-8">
-                                <div className="h-16 w-16 md:h-20 md:w-20 shrink-0">
-                                   <AuthorityLogo boardId={item.boardId} size="md" className="bg-slate-50" />
-                                </div>
-                                <Badge className={cn(
-                                   "border-none text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm",
-                                   item.difficulty === 'Easy' ? "bg-emerald-50 text-emerald-600" : item.difficulty === 'Medium' ? "bg-blue-50 text-blue-600" : "bg-rose-50 text-rose-600"
-                                )}>{item.difficulty}</Badge>
-                             </div>
-
-                             <div className="space-y-4 flex-1">
-                                <h3 className="text-xl md:text-2xl font-[800] text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight uppercase line-clamp-2">{item.title}</h3>
-                                <p className="text-[10px] md:xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                   <Layers className="h-3.5 w-3.5" /> {stats.total} Tests Linked
-                                </p>
-                             </div>
-
-                             <div className="mt-8 pt-8 border-t border-slate-50 space-y-4">
-                                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                                   <span className="text-slate-400">Mastery index</span>
-                                   <span className="text-primary tabular-nums">{stats.progress}%</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                                   <motion.div initial={{ width: 0 }} whileInView={{ width: `${stats.progress}%` }} transition={{ duration: 1 }} className="h-full bg-primary shadow-lg" />
-                                </div>
-                             </div>
-                          </Card>
-                       </Link>
-                    </motion.div>
-                  )
-               })
-            ) : (
-               <div className="col-span-full py-40 text-center space-y-8 animate-in zoom-in-95 duration-700">
-                  <div className="relative">
-                     <div className="h-20 w-20 md:h-32 md:w-32 bg-slate-50 rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-slate-100 mx-auto flex items-center justify-center text-slate-200">
-                        <LayoutGrid className="h-10 w-10 md:h-16 md:w-16" />
+         {series.length > 0 || uncategorizedTests.length > 0 ? (
+            <>
+               <div className="flex items-center justify-between border-b border-slate-100 pb-8 px-1">
+                  <div className="flex items-center gap-4">
+                     <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                        <Target className="h-6 w-6" />
                      </div>
+                     <h2 className="text-xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tight">Practice series</h2>
                   </div>
-                  <div className="space-y-2">
-                    <p className="font-black text-2xl md:text-4xl uppercase tracking-widest text-[#0F172A]">No test</p>
-                    <p className="text-sm md:text-lg font-bold text-slate-400 uppercase tracking-[0.2em]">Free coming soon</p>
-                  </div>
-                  <Button asChild variant="outline" className="rounded-full h-12 px-10 border-slate-200 font-bold uppercase text-[10px] tracking-widest">
-                     <Link href="/exams">Explore other exams</Link>
-                  </Button>
+                  <Badge variant="outline" className="bg-white text-slate-400 border-slate-100 font-bold px-4 py-1.5 rounded-full shadow-sm">{series?.length || 0} Specialized Hubs</Badge>
                </div>
-            )}
-         </div>
 
-         {/* UNCATEGORIZED FALLBACK */}
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+                  {serLoading ? (
+                     Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3rem] bg-white border border-slate-50" />)
+                  ) : series.map((item, idx) => {
+                        const stats = seriesStats[item.id] || { total: 0, attempted: 0, progress: 0 };
+                        return (
+                        <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
+                           <Link href={`/subjects/${subjectId}/series/${item.id}`}>
+                                <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-8 md:p-10 text-left h-full">
+                                   <div className="flex justify-between items-start mb-8">
+                                      <div className="h-16 w-16 md:h-20 md:w-20 shrink-0">
+                                         <AuthorityLogo boardId={item.boardId} size="md" className="bg-slate-50" />
+                                      </div>
+                                      <Badge className={cn(
+                                         "border-none text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm",
+                                         item.difficulty === 'Easy' ? "bg-emerald-50 text-emerald-600" : item.difficulty === 'Medium' ? "bg-blue-50 text-blue-600" : "bg-rose-50 text-rose-600"
+                                      )}>{item.difficulty}</Badge>
+                                   </div>
+                                   <div className="space-y-4 flex-1">
+                                      <h3 className="text-xl md:text-2xl font-[800] text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight uppercase line-clamp-2">{item.title}</h3>
+                                      <p className="text-[10px] md:xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><Layers className="h-3.5 w-3.5" /> {stats.total} Tests Linked</p>
+                                   </div>
+                                   <div className="mt-8 pt-8 border-t border-slate-50 space-y-4">
+                                      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                         <span className="text-slate-400">Mastery index</span>
+                                         <span className="text-primary tabular-nums">{stats.progress}%</span>
+                                      </div>
+                                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                                         <motion.div initial={{ width: 0 }} whileInView={{ width: `${stats.progress}%` }} transition={{ duration: 1 }} className="h-full bg-primary shadow-lg" />
+                                      </div>
+                                   </div>
+                                </Card>
+                           </Link>
+                        </motion.div>
+                        )
+                  })}
+               </div>
+            </>
+         ) : (
+            <EmptyState title="No test" sub="Free coming soon" />
+         )}
+
          {uncategorizedTests.length > 0 && (
             <section className="pt-12 md:pt-24 space-y-10 animate-in slide-in-from-bottom-4">
                <div className="flex items-center gap-4 border-b border-slate-100 pb-6 px-1">
@@ -276,8 +230,32 @@ export default function SubjectDetailPortal() {
             </section>
          )}
       </main>
-
       <Footer />
     </div>
   )
+}
+
+function EmptyState({ title, sub }: { title: string, sub: string }) {
+  return (
+    <div className="py-24 md:py-40 flex flex-col items-center justify-center text-center space-y-10 bg-white rounded-[3rem] border border-slate-100 shadow-2xl mx-1 animate-in zoom-in-95 duration-700 relative overflow-hidden w-full max-w-4xl mx-auto">
+       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+       <div className="relative">
+          <div className="h-32 w-32 md:h-44 md:w-44 bg-slate-50 rounded-[3rem] md:rounded-[4rem] flex items-center justify-center text-slate-200 border-2 border-dashed border-slate-200 relative z-10">
+             <Zap className="h-12 w-12 md:h-20 md:w-20" />
+          </div>
+          <div className="absolute -bottom-2 -right-2 h-12 w-12 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-slate-100 z-20">
+             <Clock className="h-6 w-6 text-primary animate-pulse" />
+          </div>
+       </div>
+       <div className="space-y-4 max-w-sm px-6 relative z-10">
+          <h3 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tight uppercase leading-none">{title}</h3>
+          <p className="text-slate-400 font-bold text-sm md:text-xl uppercase tracking-widest leading-snug">{sub}</p>
+       </div>
+       <div className="relative z-10">
+          <Button asChild className="h-14 px-10 bg-[#0F172A] text-white rounded-full font-bold shadow-xl border-none">
+             <Link href="/exams">Explore other selection</Link>
+          </Button>
+       </div>
+    </div>
+  );
 }

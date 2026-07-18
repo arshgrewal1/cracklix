@@ -36,7 +36,8 @@ import {
   Trophy,
   List,
   FileStack,
-  Megaphone
+  Megaphone,
+  X
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -46,8 +47,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Hub Client v35.0.
- * UPDATED: Replaced technical empty state messages with "No test" / "Free coming soon".
+ * @fileOverview Premium Exam Hub Client v36.0.
+ * FIXED: High-density mobile stats row and premium "No test" empty states.
  */
 
 export default function ExamHubClient() {
@@ -149,13 +150,12 @@ export default function ExamHubClient() {
   );
 
   if (!examId || (!exam && !examLoading)) return (
-    <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6 bg-white">
-       <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-blue-100"><AlertCircle className="h-8 w-8" /></div>
-       <div className="space-y-2">
-         <h2 className="text-2xl font-black text-[#0F172A]">Exam Not Found</h2>
-         <p className="text-slate-500 font-medium max-sm:px-4 max-w-sm mx-auto">This vertical is currently being prepared for the database.</p>
-       </div>
-       <Button onClick={() => router.push('/exams')} variant="outline" className="rounded-full h-12 px-10 font-bold">Return Back</Button>
+    <div className="h-screen flex flex-col items-center justify-center bg-white p-4">
+      <EmptyState 
+        title="No test" 
+        sub="Free coming soon" 
+        desc="This recruitment vertical is being synchronized with the master database." 
+      />
     </div>
   );
 
@@ -223,10 +223,10 @@ export default function ExamHubClient() {
 
       <section className="px-4 md:px-8 py-6">
          <div className="max-w-7xl mx-auto grid grid-cols-4 gap-2 md:gap-8">
-            <MiniStatCard label="Available Tests" value={`${availableTestsCount}+`} icon={<Layers className="text-blue-500" />} />
-            <MiniStatCard label="MCQ Items" value={`${availableTestsCount * 100}+`} icon={<Zap className="text-orange-500" />} />
-            <MiniStatCard label="Aspirants" value={`${(platformStats?.totalUsers / 1000).toFixed(1) || '10'}K+`} icon={<Users className="text-emerald-500" />} />
-            <MiniStatCard label="Success Rate" value="84%" icon={<BarChart3 className="text-purple-500" />} />
+            <MiniStatCard label="Total tests" value={`${availableTestsCount}+`} icon={<Layers className="text-blue-500" />} />
+            <MiniStatCard label="MCQ items" value={`${availableTestsCount * 100}+`} icon={<Zap className="text-orange-500" />} />
+            <MiniStatCard label="Aspirants" value={platformStats?.totalUsers ? (platformStats.totalUsers / 1000).toFixed(1) + "K+" : "10K+"} icon={<Users className="text-emerald-500" />} />
+            <MiniStatCard label="Success" value="84%" icon={<BarChart3 className="text-purple-500" />} />
          </div>
       </section>
 
@@ -315,13 +315,13 @@ function ResourceChip({ icon, label }: any) {
 
 function MiniStatCard({ label, value, icon }: any) {
    return (
-      <div className="bg-white p-2 md:p-10 rounded-2xl md:rounded-[2.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.04)] border border-slate-50 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-10 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">
-         <div className="h-8 w-8 md:h-20 md:w-20 rounded-xl md:rounded-full bg-white shadow-sm md:shadow-[0_10px_25px_rgba(0,0,0,0.06)] flex items-center justify-center shrink-0 border border-slate-50 group-hover:scale-105 transition-transform">
-            {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-4 w-4 md:h-9 md:w-9" }) : null}
+      <div className="bg-white p-2 md:p-10 rounded-2xl md:rounded-[2.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.04)] border border-slate-50 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-10 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group">
+         <div className="h-6 w-6 md:h-20 md:w-20 rounded-lg md:rounded-full bg-white shadow-sm md:shadow-[0_10px_25px_rgba(0,0,0,0.06)] flex items-center justify-center shrink-0 border border-slate-50 group-hover:scale-105 transition-transform">
+            {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-3 w-3 md:h-9 md:w-9" }) : null}
          </div>
-         <div className="min-w-0 flex-1 space-y-0.5 md:space-y-1 text-center md:text-left">
+         <div className="min-w-0 flex-1 space-y-0.5 text-center md:text-left">
             <p className="text-[6px] md:text-[12px] font-black text-slate-400 uppercase tracking-tighter md:tracking-[0.2em] leading-none">{label}</p>
-            <p className="text-xs md:text-5xl font-black text-[#0F172A] tabular-nums leading-none tracking-tighter">{value}</p>
+            <p className="text-[10px] md:text-5xl font-black text-[#0F172A] tabular-nums leading-none tracking-tighter">{value}</p>
          </div>
       </div>
    )
@@ -336,25 +336,7 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
    );
    
    if (data.length === 0) {
-     return (
-        <div className="py-24 md:py-32 flex flex-col items-center justify-center text-center space-y-8 bg-white rounded-[3rem] border border-slate-100 shadow-xl mx-1 animate-in zoom-in-95 duration-500">
-           <div className="relative">
-              <div className="absolute -inset-6 bg-primary/5 blur-3xl rounded-full" />
-              <div className="relative h-20 w-20 md:h-28 md:w-28 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 border-2 border-dashed border-slate-200">
-                 <Zap className="h-10 w-10 md:h-14 md:w-14" />
-              </div>
-           </div>
-           <div className="space-y-3 max-sm:px-6">
-              <h3 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight uppercase">No test</h3>
-              <p className="text-slate-400 font-medium text-sm md:text-lg leading-snug">Free coming soon.</p>
-           </div>
-           <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center px-8">
-              <Button asChild className="w-full sm:w-auto h-14 px-10 bg-[#0F172A] text-white rounded-full font-bold shadow-xl border-none">
-                 <Link href="/exams">Browse other exams</Link>
-              </Button>
-           </div>
-        </div>
-     );
+     return <EmptyState title="No test" sub="Free coming soon" />;
    }
 
    return (
@@ -457,4 +439,34 @@ function RelatedContentFeed({ title, icon: Icon, href, color, bg }: any) {
          </div>
       </Link>
    )
+}
+
+function EmptyState({ title, sub, desc }: { title: string, sub: string, desc?: string }) {
+  const router = useRouter();
+  return (
+    <div className="py-24 md:py-40 flex flex-col items-center justify-center text-center space-y-10 bg-white rounded-[3rem] border border-slate-100 shadow-2xl mx-1 animate-in zoom-in-95 duration-700 relative overflow-hidden w-full max-w-4xl mx-auto">
+       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+       
+       <div className="relative">
+          <div className="h-32 w-32 md:h-44 md:w-44 bg-slate-50 rounded-[3rem] md:rounded-[4rem] flex items-center justify-center text-slate-200 border-2 border-dashed border-slate-200 relative z-10">
+             <Zap className="h-12 w-12 md:h-20 md:w-20" />
+          </div>
+          <div className="absolute -bottom-2 -right-2 h-12 w-12 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-slate-100 z-20">
+             <Clock className="h-6 w-6 text-primary animate-pulse" />
+          </div>
+       </div>
+
+       <div className="space-y-4 max-w-sm px-6 relative z-10">
+          <h3 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tight uppercase leading-none">{title}</h3>
+          <p className="text-slate-400 font-bold text-sm md:text-xl uppercase tracking-widest leading-snug">{sub}</p>
+          {desc && <p className="text-slate-400 text-xs md:text-sm font-medium mt-2">{desc}</p>}
+       </div>
+
+       <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 w-full justify-center px-8">
+          <Button onClick={() => router.push('/exams')} className="w-full sm:w-auto h-14 px-10 bg-[#0F172A] hover:bg-black text-white rounded-full font-bold shadow-xl border-none">
+             Browse other exams
+          </Button>
+       </div>
+    </div>
+  );
 }
