@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -46,8 +47,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Hub Client v32.0.
- * FIXED: Board-level distribution logic - show all tests assigned to board if no specific exam targeting.
+ * @fileOverview Premium Exam Hub Client v33.0.
+ * FIXED: Subject-level distribution logic - properly group all categorized tests.
  */
 
 export default function ExamHubClient() {
@@ -81,6 +82,7 @@ export default function ExamHubClient() {
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: categories } = useCollection<any>(useMemo(() => (db ? collection(db, "categories") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
+  const { data: allSeries } = useCollection<any>(useMemo(() => (db ? collection(db, "test_series") : null), [db]))
 
   const [isPinning, setIsPinning] = useState(false);
 
@@ -113,28 +115,21 @@ export default function ExamHubClient() {
   const groupedContent = useMemo(() => {
     if (!examId || !exam) return { FULL: [], SUBJECT: [], SECTIONAL: [], CA: [], PYQ: [], NOTES: [], SUBJECTS_WITH_CONTENT: [] };
     
-    // Combine standard mocks and daily quizzes
     const allMocks = [...(rawMocks || []), ...(rawQuizzes || [])];
     
-    // Board-Level Distibution Filter
     const mocks = allMocks.filter(m => {
-       // A. Direct target match
        const isDirectMatch = m.examId === examId || (m.examIds && m.examIds.includes(examId));
-       
-       // B. Broad Board Match: belongs to this board AND no specific exams are targetted
        const boardMatch = m.boardId === exam.boardId || (m.boardIds && m.boardIds.includes(exam.boardId));
        const isGenericBoardTest = boardMatch && (!m.examIds || m.examIds.length === 0 || (m.examIds.length === 1 && m.examIds[0] === 'GENERAL'));
-       
        return isDirectMatch || isGenericBoardTest;
     });
 
-    const subjectWiseTests = mocks.filter(m => m.mockType === 'SUBJECT');
-    const subjectIdsWithTests = new Set(subjectWiseTests.map(m => m.learningSubjectId).filter(Boolean));
+    const subjectIdsWithTests = new Set(mocks.map(m => m.learningSubjectId).filter(Boolean));
     const subjectsWithContent = (subjects || []).filter(s => subjectIdsWithTests.has(s.id));
     
     return {
       FULL: mocks.filter(m => m.mockType === 'FULL'),
-      SUBJECT: subjectWiseTests,
+      SUBJECT: mocks.filter(m => m.mockType === 'SUBJECT'),
       SECTIONAL: mocks.filter(m => m.mockType === 'SECTIONAL'),
       CA: mocks.filter(m => m.mockType === 'CA_QUIZ' || m.mockType === 'DAILY_CHALLENGE'),
       PYQ: (rawPyqs || []),
@@ -252,28 +247,31 @@ export default function ExamHubClient() {
                <TabsContent value="FULL"><MockList data={groupedContent.FULL} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="FULL" /></TabsContent>
                <TabsContent value="SUBJECT">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-                     {groupedContent.SUBJECTS_WITH_CONTENT.map((sub: any) => (
-                        <Link key={sub.id} href={`/subjects/${sub.id}?examId=${examId}`}>
-                           <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-8 md:p-10 text-left">
-                              <div className="flex justify-between items-start mb-8">
-                                 <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                    <BookOpen className="h-8 w-8" />
+                     {groupedContent.SUBJECTS_WITH_CONTENT.map((sub: any) => {
+                        const seriesCount = (allSeries || []).filter((s: any) => s.subjectId === sub.id).length;
+                        return (
+                           <Link key={sub.id} href={`/subjects/${sub.id}?examId=${examId}`}>
+                              <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-8 md:p-10 text-left">
+                                 <div className="flex justify-between items-start mb-8">
+                                    <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                       <BookOpen className="h-8 w-8" />
+                                    </div>
+                                    <Badge className="bg-slate-50 text-slate-400 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest">Subject Hub</Badge>
                                  </div>
-                                 <Badge className="bg-slate-50 text-slate-400 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest">Subject Hub</Badge>
-                              </div>
-                              <div className="space-y-4 flex-1">
-                                 <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase">{sub.name}</h3>
-                                 <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <Zap className="h-3.5 w-3.5 text-primary" /> Multi-Series Registry Active
-                                 </p>
-                              </div>
-                              <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between text-primary font-black text-[10px] uppercase tracking-[0.2em]">
-                                 <span>Open Hierarchy</span>
-                                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                              </div>
-                           </Card>
-                        </Link>
-                     ))}
+                                 <div className="space-y-4 flex-1">
+                                    <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase">{sub.name}</h3>
+                                    <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                       <Zap className="h-3.5 w-3.5 text-primary" /> {seriesCount} Series Registry Active
+                                    </p>
+                                 </div>
+                                 <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between text-primary font-black text-[10px] uppercase tracking-[0.2em]">
+                                    <span>Open Hierarchy</span>
+                                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                 </div>
+                              </Card>
+                           </Link>
+                        )
+                     })}
                   </div>
                </TabsContent>
                <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} isPassActive={isPassActive} loading={mocksLoading || quizzesLoading} boards={boards} type="SECTIONAL" /></TabsContent>
@@ -343,8 +341,8 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
               </div>
            </div>
            <div className="space-y-3 max-sm:px-6">
-              <h3 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">No mock tests available</h3>
-              <p className="text-slate-400 font-medium text-sm md:text-lg leading-snug">Mock tests will appear here once verified and published by the audit team.</p>
+              <h3 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">No tests available</h3>
+              <p className="text-slate-400 font-medium text-sm md:text-lg leading-snug">Verification node in standby. Check other hubs.</p>
            </div>
            <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center px-8">
               <Button asChild className="w-full sm:w-auto h-14 px-10 bg-[#0F172A] text-white rounded-full font-bold shadow-xl border-none">

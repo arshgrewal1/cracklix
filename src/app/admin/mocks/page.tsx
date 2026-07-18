@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -43,10 +44,11 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/components/admin"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
+import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Master Mock Governance Center v3.1 [Audit Fixed].
- * FIXED: Added missing Label import.
+ * @fileOverview Master Mock Governance Center v3.2.
+ * FIXED: Added missing AnimatePresence import.
  * IMPLEMENTED: Bulk Move, Duplication, and Hierarchy Filtering.
  */
 
@@ -66,7 +68,7 @@ export default function MockManagement() {
   const [moveTarget, setMoveTarget] = useState({ subjectId: "", seriesId: "" })
 
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), orderBy("createdAt", "desc")) : null), [db])
-  const subjectsQuery = useMemo(() => (db ? query(collection(db, "subjects"), orderBy("displayOrder", "asc")) : null), [db])
+  const subjectsQuery = useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db])
   const seriesQuery = useMemo(() => (db ? query(collection(db, "test_series"), orderBy("displayOrder", "asc")) : null), [db])
 
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
