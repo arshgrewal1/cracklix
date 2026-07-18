@@ -16,9 +16,10 @@ import { useFirestoreCrud } from "@/hooks/useFirestoreCrud"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import FileUpload from "@/components/admin/FileUpload"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Level 1 CMS: Subject Registry Hub v1.0.
+ * @fileOverview Level 1 CMS: Subject Registry Hub v2.0 [Hardened].
  */
 
 export default function SubjectCMS() {
@@ -34,12 +35,12 @@ export default function SubjectCMS() {
   const { isSaving, saveDocument, deleteDocument } = useFirestoreCrud({
     db,
     collectionName: "subjects",
-    toastMessages: { saveSuccess: "Subject Node Synced" }
+    toastMessages: { saveSuccess: "Subject node synced" }
   });
 
   const handleSave = async () => {
      if (!editingSubject?.name) {
-        toast({ variant: "destructive", title: "Audit Blocked", description: "Name is mandatory." });
+        toast({ variant: "destructive", title: "Audit blocked", description: "Name is mandatory." });
         return;
      }
      const id = editingSubject.id || editingSubject.name.toLowerCase().replace(/\s+/g, '-');
@@ -66,7 +67,7 @@ export default function SubjectCMS() {
         onAction={() => setEditingSubject({ name: "", description: "", imageUrl: "", isActive: true, displayOrder: (subjects?.length || 0) + 1 })}
       />
 
-      <AdminSearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search subjects..." />
+      <AdminSearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search subjects title..." />
 
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
@@ -82,7 +83,7 @@ export default function SubjectCMS() {
             <TableBody>
               {loading ? (
                 <AdminTableSkeleton rows={5} columns={4} />
-              ) : filteredSubjects.map((s) => (
+              ) : filteredSubjects.length > 0 ? filteredSubjects.map((s) => (
                 <TableRow key={s.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                   <TableCell className="px-8 md:px-12 py-6 md:py-10">
                      <div className="flex items-center gap-6">
@@ -103,12 +104,16 @@ export default function SubjectCMS() {
                   </TableCell>
                   <TableCell className="text-right px-8 md:px-12">
                      <div className="flex justify-end gap-2 md:gap-4 opacity-20 group-hover:opacity-100 transition-all">
-                        <button onClick={() => setEditingSubject(s)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90"><Edit className="h-5 w-5" /></button>
-                        <button onClick={() => deleteDocument(s.id, "Purge subject node?")} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90"><Trash2 className="h-5 w-5" /></button>
+                        <button onClick={() => setEditingSubject(s)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-5 w-5" /></button>
+                        <button onClick={() => deleteDocument(s.id, "Purge subject node?")} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                      </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              )) : (
+                 <TableRow>
+                    <TableCell colSpan={4} className="h-60 text-center opacity-30 italic font-black uppercase text-sm">No subjects registered</TableCell>
+                 </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

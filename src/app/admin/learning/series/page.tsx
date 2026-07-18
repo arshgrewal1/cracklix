@@ -16,9 +16,10 @@ import { useFirestoreCrud } from "@/hooks/useFirestoreCrud"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import FileUpload from "@/components/admin/FileUpload"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Level 2 CMS: Series Registry Hub v1.0.
+ * @fileOverview Level 2 CMS: Series Registry Hub v2.0 [Hardened].
  */
 
 export default function SeriesCMS() {
@@ -38,12 +39,12 @@ export default function SeriesCMS() {
   const { isSaving, saveDocument, deleteDocument } = useFirestoreCrud({
     db,
     collectionName: "test_series",
-    toastMessages: { saveSuccess: "Series Hub Synced" }
+    toastMessages: { saveSuccess: "Series hub synced" }
   });
 
   const handleSave = async () => {
      if (!editingSeries?.title || !editingSeries?.subjectId) {
-        toast({ variant: "destructive", title: "Audit Blocked", description: "Title and Subject are mandatory." });
+        toast({ variant: "destructive", title: "Audit blocked", description: "Title and Subject are mandatory." });
         return;
      }
      const id = editingSeries.id || `series-${Date.now()}`;
@@ -74,19 +75,21 @@ export default function SeriesCMS() {
         onAction={() => setEditingSeries({ title: "", subjectId: subjectFilter !== 'all' ? subjectFilter : "", description: "", thumbnailUrl: "", difficulty: "Medium", isActive: true, displayOrder: (rawSeries?.length || 0) + 1 })}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 px-1">
-         <div className="md:col-span-3">
-            <AdminSearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search series..." />
+      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white mx-1 border border-slate-50 p-6 md:p-10">
+         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="md:col-span-3">
+               <AdminSearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search series title..." />
+            </div>
+            <select 
+               value={subjectFilter} 
+               onChange={e => setSubjectFilter(e.target.value)}
+               className="h-14 md:h-16 bg-slate-50 border-none rounded-2xl px-6 font-bold text-sm outline-none shadow-inner cursor-pointer"
+            >
+               <option value="all">All Subjects Hub</option>
+               {subjects?.map(s => <option key={s.id} value={s.id}>{s.name} Hub</option>)}
+            </select>
          </div>
-         <select 
-            value={subjectFilter} 
-            onChange={e => setSubjectFilter(e.target.value)}
-            className="h-14 md:h-16 bg-white border border-slate-100 rounded-2xl px-6 font-bold text-sm outline-none shadow-sm cursor-pointer"
-         >
-            <option value="all">All Subjects Hub</option>
-            {subjects?.map(s => <option key={s.id} value={s.id}>{s.name} Hub</option>)}
-         </select>
-      </div>
+      </Card>
 
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
@@ -102,7 +105,7 @@ export default function SeriesCMS() {
             <TableBody>
               {loading ? (
                 <AdminTableSkeleton rows={5} columns={4} />
-              ) : filteredSeries.map((s) => (
+              ) : filteredSeries.length > 0 ? filteredSeries.map((s) => (
                 <TableRow key={s.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                   <TableCell className="px-8 md:px-12 py-6 md:py-10">
                      <div className="flex items-center gap-6">
@@ -111,13 +114,13 @@ export default function SeriesCMS() {
                         </div>
                         <div className="min-w-0">
                            <p className="font-black text-[#0F172A] text-lg leading-none uppercase">{s.title}</p>
-                           <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">ORDER: {s.displayOrder}</p>
+                           <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">Order: {s.displayOrder}</p>
                         </div>
                      </div>
                   </TableCell>
                   <TableCell>
                      <Badge variant="outline" className="bg-primary/5 text-primary border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest shadow-sm">
-                        {subjects?.find(sub => sub.id === s.subjectId)?.name || 'Orphan Node'}
+                        {subjects?.find(sub => sub.id === s.subjectId)?.name || 'Orphan node'}
                      </Badge>
                   </TableCell>
                   <TableCell className="text-center">
@@ -128,12 +131,16 @@ export default function SeriesCMS() {
                   </TableCell>
                   <TableCell className="text-right px-8 md:px-12">
                      <div className="flex justify-end gap-2 md:gap-4 opacity-20 group-hover:opacity-100 transition-all">
-                        <button onClick={() => setEditingSeries(s)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90"><Edit className="h-5 w-5" /></button>
-                        <button onClick={() => deleteDocument(s.id, "Purge series node?")} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90"><Trash2 className="h-5 w-5" /></button>
+                        <button onClick={() => setEditingSeries(s)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-5 w-5" /></button>
+                        <button onClick={() => deleteDocument(s.id, "Purge series node?")} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                      </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              )) : (
+                 <TableRow>
+                    <TableCell colSpan={4} className="h-60 text-center opacity-30 italic font-black uppercase text-sm">No series registered</TableCell>
+                 </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -199,7 +206,7 @@ export default function SeriesCMS() {
                <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
                   <div className="space-y-0.5">
                      <p className="text-[11px] font-black text-[#0F172A] uppercase">Active Hub</p>
-                     <p className="text-[8px] font-bold text-slate-400 uppercase">Live in selection</p>
+                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Live in selection</p>
                   </div>
                   <Switch checked={editingSeries?.isActive || false} onCheckedChange={v => setEditingSeries({...editingSeries, isActive: v})} />
                </div>

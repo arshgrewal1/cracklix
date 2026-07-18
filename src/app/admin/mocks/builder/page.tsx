@@ -38,7 +38,8 @@ import {
   History,
   ShieldCheck,
   Timer,
-  BookMarked
+  BookMarked,
+  Settings
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -65,11 +66,12 @@ import { AdminPageHeader } from "@/components/admin"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
+import Link from "next/link"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v48.0 [Contextual UI].
- * FIXED: Subject/Series selectors are now only visible for SUBJECT-WISE tests.
- * FIXED: Maintained professional Sentence Case and zero-overlap layout.
+ * @fileOverview Enterprise Mock Builder Hub v49.0 [Production Hardened].
+ * UPDATED: Hierarchy support expanded to Full, Subject, and Sectional.
+ * FIXED: Runtime iterator and reference errors resolved.
  */
 
 export default function MockBuilderPage() {
@@ -161,7 +163,7 @@ function MockBuilderContent() {
   }, [fetchFilteredBank]);
 
   useEffect(() => {
-    if (!db || !mockId || !existingMock || !rawExams) {
+    if (!db || !existingMock || !rawExams) {
        if (!isEditing) setIsInitializing(false);
        return;
     }
@@ -248,9 +250,10 @@ function MockBuilderContent() {
        return;
     }
 
-    // STRICTURE: Ensure Subject mapping if Subject-Wise is selected
-    if (mockData.mockType === 'SUBJECT' && !mockData.learningSubjectId) {
-      toast({ variant: "destructive", title: "Hierarchy failure", description: "Select a Subject Hub for Subject-Wise tests." });
+    // STRICTURE: Ensure Subject mapping if Hierarchy-aware type is selected
+    const hierarchyTypes = ['FULL', 'SUBJECT', 'SECTIONAL'];
+    if (hierarchyTypes.includes(mockData.mockType) && !mockData.learningSubjectId) {
+      toast({ variant: "destructive", title: "Hierarchy failure", description: "Assign to a Subject Hub first." });
       return;
     }
 
@@ -311,6 +314,8 @@ function MockBuilderContent() {
     </div>
   );
 
+  const showHierarchy = ['FULL', 'SUBJECT', 'SECTIONAL'].includes(mockData.mockType);
+
   return (
     <div className="max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-40 text-left pt-2 px-4 md:px-10">
       <AdminPageHeader
@@ -357,37 +362,48 @@ function MockBuilderContent() {
                  </div>
               </div>
 
-              {/* HIERARCHY HUB: Only visible for Subject-Wise tests */}
+              {/* HIERARCHY HUB: Available for Full, Subject, and Sectional */}
               <AnimatePresence>
-                {mockData.mockType === 'SUBJECT' && (
+                {showHierarchy && (
                   <motion.div 
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="grid grid-cols-2 gap-4 overflow-hidden"
+                    className="space-y-6 overflow-hidden pt-4 border-t border-slate-50"
                   >
-                    <div className="space-y-2 text-left">
-                        <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><BookMarked className="h-3 w-3" /> Subject Hub</Label>
-                        <select 
-                          value={mockData.learningSubjectId || ""} 
-                          onChange={e => setMockData({...mockData, learningSubjectId: e.target.value, seriesId: ""})}
-                          className="w-full h-11 md:h-12 bg-blue-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
-                        >
-                            <option value="">Select Hub</option>
-                            {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                        </select>
+                    <div className="flex items-center justify-between px-1">
+                        <Label className="text-[10px] font-black uppercase text-primary flex items-center gap-2">
+                           <Layers className="h-3 w-3" /> Hierarchy Registry
+                        </Label>
+                        <Button asChild variant="ghost" className="h-6 px-2 text-[8px] font-bold text-slate-400 hover:text-primary uppercase tracking-widest">
+                           <Link href="/admin/learning/series">Manage Hubs <ArrowUpRight className="h-2 w-2 ml-1" /></Link>
+                        </Button>
                     </div>
-                    <div className="space-y-2 text-left">
-                        <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Series Node</Label>
-                        <select 
-                          value={mockData.seriesId || ""} 
-                          onChange={e => setMockData({...mockData, seriesId: e.target.value})}
-                          className="w-full h-11 md:h-12 bg-blue-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
-                          disabled={!mockData.learningSubjectId}
-                        >
-                            <option value="">Uncategorized</option>
-                            {filteredSeries.map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
-                        </select>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2 text-left">
+                            <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Subject Hub</Label>
+                            <select 
+                              value={mockData.learningSubjectId || ""} 
+                              onChange={e => setMockData({...mockData, learningSubjectId: e.target.value, seriesId: ""})}
+                              className="w-full h-11 bg-blue-50 border-none rounded-xl px-4 font-bold text-[11px] outline-none shadow-sm"
+                            >
+                                <option value="">Select Hub</option>
+                                {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="space-y-2 text-left">
+                            <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Series Node</Label>
+                            <select 
+                              value={mockData.seriesId || ""} 
+                              onChange={e => setMockData({...mockData, seriesId: e.target.value})}
+                              className="w-full h-11 bg-blue-50 border-none rounded-xl px-4 font-bold text-[11px] outline-none shadow-sm"
+                              disabled={!mockData.learningSubjectId}
+                            >
+                                <option value="">Uncategorized</option>
+                                {filteredSeries.map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
+                            </select>
+                        </div>
                     </div>
                   </motion.div>
                 )}
@@ -790,4 +806,16 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
          </select>
       </Card>
    );
+}
+
+function ConfigSwitch({ label, checked, onChange }: any) {
+   return (
+      <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", checked ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-slate-100 opacity-60")}>
+         <div className="space-y-0.5">
+            <p className="text-[11px] font-bold uppercase text-[#0F172A] tracking-tight">{label}</p>
+            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Global Status</p>
+         </div>
+         <Switch checked={checked} onCheckedChange={onChange} />
+      </div>
+   )
 }
