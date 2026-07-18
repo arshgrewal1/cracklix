@@ -40,7 +40,8 @@ import {
   Plus,
   BookMarked,
   Layers,
-  History
+  History,
+  Archive
 } from "lucide-react";
 
 import {
@@ -136,11 +137,6 @@ interface SidebarNavProps {
   pathname: string;
 }
 
-/**
- * Admin Sidebar Navigation v4.0.
- * FIXED: Removed redundant TooltipProvider to resolve module resolution crash.
- * FIXED: Applied mounted guard for SSR safety.
- */
 export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
   const [mounted, setMounted] = useState(false);
 

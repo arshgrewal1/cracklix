@@ -68,11 +68,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
-/**
- * @fileOverview Enterprise Mock Builder Hub v53.1 [Production Hardened].
- * FIXED: ReferenceError for displayBank and initError resolved with proper state scoping.
- */
-
 export default function MockBuilderPage() {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
@@ -384,7 +379,7 @@ function MockBuilderContent() {
         <div className="lg:col-span-4 space-y-6 md:space-y-8">
            <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-5 md:p-10 space-y-6 md:space-y-8 border border-slate-50">
               <div className="space-y-2 text-left">
-                 <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Series title</Label>
+                 <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Series title</Label>
                  <Input value={mockData.title} onChange={e => setMockData((p: any) => ({...p, title: e.target.value}))} className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner text-[#0F172A]" placeholder="e.g. Clerk Mock Series 01" />
               </div>
 
@@ -640,7 +635,7 @@ function MockBuilderContent() {
                       const isSelected = bankSelection.includes(q.id);
                       return (
                         <motion.div key={q.id} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-                           <div onClick={() => setBankSelection((p: string[]) => isSelected ? p.filter(id => id !== q.id) : [...p, q.id])} className={cn("p-6 md:px-10 rounded-[1.5rem] md:rounded-[2rem] border-2 transition-all cursor-pointer flex items-center justify-between group", isSelected ? "bg-primary/5 border-primary shadow-lg" : "bg-white border-slate-50 hover:border-slate-100 shadow-sm")}>
+                           <div onClick={() => setBankSelection((p: string[]) => isSelected ? p.filter(id => id !== q.id) : [...p, q.id])} className={cn("p-6 md:px-10 rounded-[1.5rem] md:rounded-[2rem] border-2 transition-all duration-300 cursor-pointer flex items-center justify-between group", isSelected ? "bg-primary/5 border-primary shadow-lg" : "bg-white border-slate-50 hover:border-slate-100 shadow-sm")}>
                               <div className="flex items-center gap-6 md:gap-10 min-w-0">
                                  <div className={cn("h-7 w-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all", isSelected ? "bg-primary border-primary shadow-xl" : "bg-white border-slate-200")}>
                                     {isSelected && <Check className="h-4 w-4 text-white stroke-[4px]" />}
