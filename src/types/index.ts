@@ -195,6 +195,7 @@ export interface Subject {
 export interface TestSeries {
   id: string;
   subjectId: string;
+  boardId?: string;
   title: string;
   description?: string;
   thumbnailUrl?: string;

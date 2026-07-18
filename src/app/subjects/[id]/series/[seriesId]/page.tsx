@@ -23,7 +23,8 @@ import {
   Clock,
   BookOpen,
   BarChart3,
-  Timer
+  Timer,
+  Loader2
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,10 +34,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 import { TestSeries, Subject, MockTest } from "@/types"
 import { cn } from "@/lib/utils"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Level 3: Test Registry Hub v1.0.
- * Displays all tests inside a specific learning series.
+ * @fileOverview Level 3: Test Registry Hub v1.1 [Board Branding].
+ * Displays all tests inside a specific learning series with official branding.
  */
 
 export default function SeriesDetailPortal() {
@@ -87,9 +89,8 @@ export default function SeriesDetailPortal() {
             <button onClick={() => router.push(`/subjects/${subjectId}`)} className="h-10 w-10 rounded-xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90"><ArrowLeft className="h-5 w-5" /></button>
             
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-14">
-               <div className="h-32 w-32 md:h-52 md:w-52 rounded-[2rem] md:rounded-[3.5rem] bg-[#0F172A] overflow-hidden relative shadow-5xl shrink-0 group">
-                  {series.thumbnailUrl ? <Image src={series.thumbnailUrl} alt={series.title} fill className="object-cover group-hover:scale-110 transition-transform duration-1000 opacity-80" /> : <Zap className="h-16 w-16 m-auto text-white/5" />}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+               <div className="shrink-0 group">
+                  <AuthorityLogo boardId={series.boardId} size="lg" className="h-28 w-28 md:h-52 md:w-52 rounded-[2rem] md:rounded-[3.5rem] shadow-5xl group-hover:scale-105 transition-transform duration-700 bg-slate-50" />
                </div>
                
                <div className="flex-1 text-center md:text-left space-y-6">
@@ -119,7 +120,7 @@ export default function SeriesDetailPortal() {
 
          <div className="grid grid-cols-1 gap-4 md:gap-6">
             {mocksLoading ? (
-               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-[2rem] bg-white border border-slate-50" />)
+               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-[2rem] bg-white border border-slate-100" />)
             ) : mocks && mocks.length > 0 ? (
                mocks.map((mock, idx) => {
                   const isPremium = mock.accessLevel?.toUpperCase() === 'PREMIUM';
@@ -198,5 +199,3 @@ function StatNode({ icon: Icon, label, color = "text-slate-400" }: any) {
     </div>
   )
 }
-
-function Loader2({ className }: any) { return <Zap className={cn("animate-pulse", className)} /> }

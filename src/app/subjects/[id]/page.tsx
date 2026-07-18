@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -31,10 +30,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 import { TestSeries, Subject } from "@/types"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Level 2: Series Selection Hub v2.0 [AUDIT REPAIR].
- * FIXED: Implemented strict content partitioning by subjectId and seriesId.
+ * @fileOverview Level 2: Series Selection Hub v2.1 [Board Branding].
  */
 
 export default function SubjectDetailPortal() {
@@ -50,11 +49,9 @@ export default function SubjectDetailPortal() {
 
   const { data: subject, loading: sLoading } = useDoc<Subject>(useMemo(() => (db && subjectId ? doc(db, "subjects", subjectId) : null), [db, subjectId]));
   
-  // 1. Fetch relevant series for this subject
   const seriesQuery = useMemo(() => (db && subjectId ? query(collection(db, "test_series"), where("subjectId", "==", subjectId), where("isActive", "==", true), orderBy("displayOrder", "asc")) : null), [db, subjectId]);
   const { data: series, loading: serLoading } = useCollection<TestSeries>(seriesQuery as any);
 
-  // 2. Fetch all mocks belonging to this subject
   const mocksQuery = useMemo(() => (db && subjectId ? query(collection(db, "mocks"), where("published", "==", true), where("learningSubjectId", "==", subjectId)) : null), [db, subjectId]);
   const { data: mocks } = useCollection<any>(mocksQuery);
 
@@ -77,10 +74,8 @@ export default function SubjectDetailPortal() {
      return map;
   }, [series, mocks, results]);
 
-  // STRICTURE: Group tests with no series into "Uncategorized"
   const uncategorizedTests = useMemo(() => {
      if (!mocks) return [];
-     // A test is uncategorized if it has no seriesId OR its seriesId isn't in the valid series list
      const validSerIds = new Set(series?.map(s => s.id) || []);
      return mocks.filter(m => !m.seriesId || m.seriesId === 'uncategorized' || !validSerIds.has(m.seriesId));
   }, [mocks, series]);
@@ -141,8 +136,8 @@ export default function SubjectDetailPortal() {
                        <Link href={`/subjects/${subjectId}/series/${item.id}`}>
                           <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-8 md:p-10 text-left h-full group">
                              <div className="flex justify-between items-start mb-8">
-                                <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl md:rounded-[2rem] bg-slate-50 overflow-hidden relative shadow-inner">
-                                   {item.thumbnailUrl ? <Image src={item.thumbnailUrl} alt={item.title} fill className="object-cover" /> : <div className="h-full w-full flex items-center justify-center text-slate-200"><Star className="h-10 w-10" /></div>}
+                                <div className="h-16 w-16 md:h-20 md:w-20 shrink-0">
+                                   <AuthorityLogo boardId={item.boardId} size="md" className="bg-slate-50" />
                                 </div>
                                 <Badge className={cn(
                                    "border-none text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm",

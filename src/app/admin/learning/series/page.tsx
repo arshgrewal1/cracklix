@@ -10,17 +10,18 @@ import { Plus, Trash2, Edit, Save, Layers, Search, Loader2, Image as ImageIcon, 
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, orderBy, where } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { TestSeries, Subject } from "@/types"
+import { TestSeries, Subject, Board } from "@/types"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
 import { useFirestoreCrud } from "@/hooks/useFirestoreCrud"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import FileUpload from "@/components/admin/FileUpload"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Level 2 CMS: Series Registry Hub v2.2 [Badge Fix].
+ * @fileOverview Level 2 CMS: Series Registry Hub v3.0 [Board Branding Fix].
+ * UPDATED: Replaced custom image upload with official Board Logo selection for better standardization.
  */
 
 export default function SeriesCMS() {
@@ -33,8 +34,9 @@ export default function SeriesCMS() {
 
   // Fetch all subjects without strict DB ordering to prevent hidden nodes
   const { data: rawSubjects } = useCollection<Subject>(useMemo(() => (db ? collection(db, "subjects") : null), [db]));
+  const { data: boards } = useCollection<Board>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
+  
   const seriesQuery = useMemo(() => (db ? query(collection(db, "test_series"), orderBy("displayOrder", "asc")) : null), [db]);
-
   const { data: rawSeries, loading } = useCollection<TestSeries>(seriesQuery as any);
 
   const subjects = useMemo(() => {
@@ -78,7 +80,7 @@ export default function SeriesCMS() {
         subtitle="Organize subjects into specialized preparation hubs (Level 2)."
         actionLabel="Initialize Series"
         actionIcon={Plus}
-        onAction={() => setEditingSeries({ title: "", subjectId: subjectFilter !== 'all' ? subjectFilter : "", description: "", thumbnailUrl: "", difficulty: "Medium", isActive: true, displayOrder: (rawSeries?.length || 0) + 1 })}
+        onAction={() => setEditingSeries({ title: "", subjectId: subjectFilter !== 'all' ? subjectFilter : "", boardId: "psssb", description: "", difficulty: "Medium", isActive: true, displayOrder: (rawSeries?.length || 0) + 1 })}
       />
 
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white mx-1 border border-slate-50 p-6 md:p-10">
@@ -115,8 +117,8 @@ export default function SeriesCMS() {
                 <TableRow key={s.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                   <TableCell className="px-8 md:px-12 py-6 md:py-10">
                      <div className="flex items-center gap-6">
-                        <div className="h-14 w-14 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 shadow-inner">
-                           {s.thumbnailUrl ? <img src={s.thumbnailUrl} className="h-full w-full object-cover" /> : <div className="h-full w-full flex items-center justify-center text-slate-200"><ImageIcon className="h-6 w-6" /></div>}
+                        <div className="shrink-0">
+                           <AuthorityLogo boardId={s.boardId} size="sm" className="bg-slate-50" />
                         </div>
                         <div className="min-w-0">
                            <p className="font-black text-[#0F172A] text-lg leading-none uppercase">{s.title}</p>
@@ -163,16 +165,29 @@ export default function SeriesCMS() {
         saveLabel="Sync Node"
       >
          <div className="space-y-8">
-            <div className="space-y-2 text-left">
-               <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Parent Subject Hub</Label>
-               <select 
-                  value={editingSeries?.subjectId || ""} 
-                  onChange={e => setEditingSeries({...editingSeries, subjectId: e.target.value})}
-                  className="w-full h-14 bg-slate-50 border-none rounded-xl px-6 font-bold text-sm outline-none shadow-inner appearance-none cursor-pointer text-[#0F172A]"
-               >
-                  <option value="" disabled>Select Subject</option>
-                  {subjects?.map(s => <option key={s.id} value={s.id}>{s.name} Hub</option>)}
-               </select>
+            <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Parent Subject Hub</Label>
+                  <select 
+                      value={editingSeries?.subjectId || ""} 
+                      onChange={e => setEditingSeries({...editingSeries, subjectId: e.target.value})}
+                      className="w-full h-14 bg-slate-50 border-none rounded-xl px-6 font-bold text-sm outline-none shadow-inner appearance-none cursor-pointer text-[#0F172A]"
+                  >
+                      <option value="" disabled>Select Subject</option>
+                      {subjects?.map(s => <option key={s.id} value={s.id}>{s.name} Hub</option>)}
+                  </select>
+                </div>
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Branding (Board Logo)</Label>
+                  <select 
+                      value={editingSeries?.boardId || ""} 
+                      onChange={e => setEditingSeries({...editingSeries, boardId: e.target.value})}
+                      className="w-full h-14 bg-slate-50 border-none rounded-xl px-6 font-bold text-sm outline-none shadow-inner appearance-none cursor-pointer text-[#0F172A]"
+                  >
+                      <option value="" disabled>Select Authority</option>
+                      {boards?.map(b => <option key={b.id} value={b.id}>{b.abbreviation} Hub</option>)}
+                  </select>
+                </div>
             </div>
 
             <div className="grid grid-cols-2 gap-6">
@@ -196,13 +211,6 @@ export default function SeriesCMS() {
                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Abstract</Label>
                <Textarea value={editingSeries?.description || ""} onChange={e => setEditingSeries({...editingSeries, description: e.target.value})} className="min-h-[100px] rounded-2xl border-none bg-slate-50 p-5 font-medium leading-relaxed shadow-inner text-[#0F172A]" placeholder="Topics covered in this series..." />
             </div>
-
-            <FileUpload 
-               label="Series Thumbnail Node" 
-               folder="logos" 
-               value={editingSeries?.thumbnailUrl} 
-               onChange={(meta) => setEditingSeries({...editingSeries, thumbnailUrl: meta?.url})} 
-            />
 
             <div className="grid grid-cols-2 gap-6">
                <div className="space-y-1.5 text-left">
