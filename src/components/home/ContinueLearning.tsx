@@ -28,21 +28,21 @@ import { motion } from "framer-motion";
 
 /**
  * @fileOverview Institutional Performance Hub v6.3.
- * UPDATED: Normalized casing for headings.
+ * FIXED: Applied duration sanity checks to exclude corrupted test results.
  */
 
 // Formatting Utilities
 const formatTime = (seconds: number) => {
-  if (!seconds || seconds <= 0 || isNaN(seconds)) return "--";
+  if (!seconds || seconds <= 0 || isNaN(seconds)) return "0m";
   
-  if (seconds < 60) return `${Math.round(seconds)}s`;
-  
+  // Sanity check: Exclude corrupted data over 24h
+  if (seconds > 86400) return "---";
+
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.round(seconds % 60);
   
   if (h > 0) return `${h}h ${m}m`;
-  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  return `${m}m`;
 };
 
 export default function ContinueLearning() {
@@ -85,7 +85,11 @@ export default function ContinueLearning() {
     const validMockIds = new Set(combinedMocks.map(m => m.id));
     
     return [...rawResults]
-      .filter(r => validMockIds.has(r.mockId))
+      .filter(r => {
+         const t = Number(r.timeTaken);
+         // Filter out bad data (> 12 hours)
+         return validMockIds.has(r.mockId) && (!isNaN(t) && t < 43200);
+      })
       .sort((a, b) => {
         const timeA = new Date(a.timestamp || 0).getTime();
         const timeB = new Date(b.timestamp || 0).getTime();

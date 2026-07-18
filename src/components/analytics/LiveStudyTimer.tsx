@@ -7,15 +7,20 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Fidelity Study Timer v3.0.
- * Consumes data from the production Study Analytics Engine for absolute precision.
+ * @fileOverview High-Fidelity Study Timer v3.1.
+ * FIXED: Hardened duration formatter to prevent unrealistic time values.
  */
 
 const formatFullDuration = (seconds: number) => {
   if (isNaN(seconds) || seconds < 0) return "00h 00m 00s";
+  
+  // Sanity check: if seconds are > 24 hours, it's bad data
+  if (seconds > 86400) return "00h 00m 00s";
+
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
+  const s = Math.floor(seconds % 60);
+  
   return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
 }
 
@@ -27,10 +32,11 @@ export default function LiveStudyTimer() {
     // Local tick to provide instant feedback between Firestore syncs
     useEffect(() => {
        if (loading) return;
-       setLiveSeconds(stats.today);
+       // Only set if data is reasonable
+       setLiveSeconds(stats.today > 86400 ? 0 : stats.today);
 
        const interval = setInterval(() => {
-          setLiveSeconds(prev => prev + 1);
+          setLiveSeconds(prev => (prev < 86400 ? prev + 1 : 0));
        }, 1000);
 
        return () => clearInterval(interval);

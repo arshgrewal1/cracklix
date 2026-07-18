@@ -48,9 +48,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v5.3 [Total Isolation].
- * FIXED: Reliable state reset on initialization to prevent data bleed.
- * FIXED: TypeError: Cannot read properties of undefined (reading 'startTime').
+ * @fileOverview Hardened Test Store v5.4 [Total Isolation].
+ * FIXED: Hardened startTime logic to prevent multi-year duration bugs from corrupted timestamps.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -71,7 +70,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   isGuest: false,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
-    // 1. Mandatory Clean Reset of previous state
+    // 1. Mandatory Clean Reset
     set({
       mockId: null,
       questions: [],
@@ -85,12 +84,9 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     
-    // Safety: Detect finished attempts (Cloud or Local) to prevent auto-submit loops
     const isAttemptFinished = resumeData?.status === 'COMPLETED' || (resumeData && resumeData.timeLeft <= 0);
-    
     let effectiveResume = isAttemptFinished ? null : (resumeData || null);
 
-    // Check LocalStorage for guests only if Cloud data isn't active
     if (!effectiveResume && !userId && typeof window !== 'undefined') {
        const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
        if (stored) {
@@ -105,10 +101,13 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
        }
     }
 
-    // FIXED: Use !! to handle undefined vs null safely
     const isResuming = !!effectiveResume;
     const now = Date.now();
-    const finalStartTime = (isResuming && effectiveResume) ? (effectiveResume.startTime || now) : now;
+    
+    // Safety check: ensure startTime is a real recent timestamp, not 0 or corrupted
+    const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
+    const finalStartTime = (rawStartTime > 1000000000000) ? rawStartTime : now;
+
     const defaultTime = duration * 60;
 
     set({
@@ -140,7 +139,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     if (state.questions.length > 0 && state.timeLeft > 0 && !state.isPaused) {
       const nextTime = state.timeLeft - 1;
       set({ timeLeft: nextTime });
-      // Autosave guest data every 30 seconds
       if (nextTime % 30 === 0) state.persistGuestData();
     }
   },

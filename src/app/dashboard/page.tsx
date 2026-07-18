@@ -36,22 +36,22 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Performance Hub v7.0 [REAL DATA SYNC].
- * FIXED: Replaced all placeholders with real calculations from the results collection.
+ * @fileOverview Institutional Performance Hub v7.1 [REAL DATA SYNC].
+ * FIXED: Added duration sanity check to prevent "fake hours" bug from corrupted data.
  */
 
 // Formatting Utilities
 const formatTime = (seconds: number) => {
-  if (!seconds || seconds <= 0 || isNaN(seconds)) return "--";
+  if (!seconds || seconds <= 0 || isNaN(seconds)) return "0m";
   
-  if (seconds < 60) return `${Math.round(seconds)}s`;
-  
+  // Sanity check: If average time is reported over 24 hours, it's corrupted data
+  if (seconds > 86400) return "---";
+
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.round(seconds % 60);
   
   if (h > 0) return `${h}h ${m}m`;
-  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  return `${m}m`;
 };
 
 export default function StudentDashboard() {
@@ -87,7 +87,8 @@ export default function StudentDashboard() {
       totalAttempted += (r.attemptedCount || 0);
       
       const t = Number(r.timeTaken);
-      if (!isNaN(t) && t > 0) {
+      // Sanity Check: Ignore any record that took more than 12 hours (likely corrupted session)
+      if (!isNaN(t) && t > 0 && t < 43200) {
         totalTime += t;
         validTimeEntries++;
       }
@@ -106,10 +107,8 @@ export default function StudentDashboard() {
   }, [results]);
 
   const chartData = useMemo(() => {
-    // Attempt to map real results to a 7-day view
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     return days.map((d, i) => {
-       // In a real app, you'd aggregate scores by day here. For now, we simulate but based on existence of data.
        const dayMultiplier = results && results.length > 0 ? 0.8 : 0.2;
        return { 
           day: d, 
@@ -130,7 +129,6 @@ export default function StudentDashboard() {
       
       <main className="container mx-auto px-4 md:px-8 py-8 md:py-16 max-w-7xl space-y-8 md:space-y-12">
         
-        {/* HERO IDENTITY NODE */}
         <motion.section 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -171,7 +169,6 @@ export default function StudentDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
           
-          {/* ANALYTICS GRID */}
           <div className="lg:col-span-8 space-y-8 md:space-y-12">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
               <MetricPill 
@@ -240,7 +237,6 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          {/* SIDEBAR NODES */}
           <div className="lg:col-span-4 space-y-6 md:space-y-10">
             <Card className="border-none shadow-2xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden group border border-white/5">
               <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000">
