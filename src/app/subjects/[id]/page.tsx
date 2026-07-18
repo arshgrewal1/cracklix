@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -30,7 +31,7 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Level 2: Series Selection Hub v2.3 [FIXED: Firebase Index Failover].
+ * @fileOverview Level 2: Series Selection Hub v2.4 [FIXED: Firebase Index Failover].
  * Logic: Performs filtering and sorting client-side to bypass compound index requirements.
  */
 
@@ -47,15 +48,21 @@ export default function SubjectDetailPortal() {
 
   const { data: subject, loading: sLoading } = useDoc<Subject>(useMemo(() => (db && subjectId ? doc(db, "subjects", subjectId) : null), [db, subjectId]));
   
-  // Simplified query to avoid index requirement
+  // Simplified query: Fetch all series for this subject
   const seriesQuery = useMemo(() => (db && subjectId ? query(collection(db, "test_series"), where("subjectId", "==", subjectId)) : null), [db, subjectId]);
   const { data: rawSeries, loading: serLoading } = useCollection<TestSeries>(seriesQuery as any);
 
-  const mocksQuery = useMemo(() => (db && subjectId ? query(collection(db, "mocks"), where("published", "==", true), where("learningSubjectId", "==", subjectId)) : null), [db, subjectId]);
-  const { data: mocks } = useCollection<any>(mocksQuery);
+  // Simplified query: Fetch all published mocks for this subject
+  const mocksQuery = useMemo(() => (db && subjectId ? query(collection(db, "mocks"), where("learningSubjectId", "==", subjectId)) : null), [db, subjectId]);
+  const { data: rawMocks } = useCollection<any>(mocksQuery);
 
   const resultsQuery = useMemo(() => (db ? collection(db, "results") : null), [db]);
   const { data: results } = useCollection<any>(resultsQuery);
+
+  const mocks = useMemo(() => {
+    if (!rawMocks) return [];
+    return rawMocks.filter(m => m.published === true);
+  }, [rawMocks]);
 
   // Process series: Filter active nodes and sort by displayOrder client-side
   const series = useMemo(() => {

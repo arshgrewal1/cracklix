@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState } from "react"
@@ -26,8 +27,8 @@ import Image from "next/image"
 import { Subject } from "@/types"
 
 /**
- * @fileOverview Level 1: Subject Selection Hub v1.0.
- * Displays beautiful cards for each learning subject.
+ * @fileOverview Level 1: Subject Selection Hub v1.1 [FIXED: Index Failover].
+ * Logic: Performs filtering and sorting client-side to bypass composite index requirements.
  */
 
 export default function SubjectsPage() {
@@ -35,13 +36,21 @@ export default function SubjectsPage() {
   const { user } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
 
-  const subjectsQuery = useMemo(() => (db ? query(collection(db, "subjects"), where("isActive", "==", true), orderBy("displayOrder", "asc")) : null), [db]);
-  const { data: subjects, loading: sLoading } = useCollection<Subject>(subjectsQuery as any);
+  // Fetch all subjects to avoid complex index requirement
+  const subjectsQuery = useMemo(() => (db ? collection(db, "subjects") : null), [db]);
+  const { data: rawSubjects, loading: sLoading } = useCollection<Subject>(subjectsQuery as any);
+
+  const subjects = useMemo(() => {
+    if (!rawSubjects) return [];
+    return rawSubjects
+      .filter(s => s.isActive === true)
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }, [rawSubjects]);
 
   const seriesQuery = useMemo(() => (db ? collection(db, "test_series") : null), [db]);
   const { data: allSeries } = useCollection<any>(seriesQuery);
 
-  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true), where("mockType", "==", "SUBJECT")) : null), [db]);
+  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]);
   const { data: allMocks } = useCollection<any>(mocksQuery);
 
   const statsMap = useMemo(() => {
@@ -97,7 +106,7 @@ export default function SubjectsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
            {sLoading ? (
-              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[400px] w-full rounded-[3rem] bg-white border border-slate-100" />)
+              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-400px] w-full rounded-[3rem] bg-white border border-slate-100" />)
            ) : filteredSubjects.length > 0 ? filteredSubjects.map((subject, idx) => {
               const stats = statsMap[subject.id] || { seriesCount: 0, testCount: 0 };
               return (
