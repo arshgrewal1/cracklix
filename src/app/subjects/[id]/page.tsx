@@ -31,9 +31,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 import { TestSeries, Subject } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Level 2: Series Selection Hub v2.1 [Board Branding].
+ * @fileOverview Level 2: Series Selection Hub v2.2 [FIXED: cn defined].
  */
 
 export default function SubjectDetailPortal() {

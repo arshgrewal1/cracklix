@@ -4,7 +4,7 @@ import { useMemo, useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useCollection, useFirestore, useUser } from "@/firebase"
+import { useCollection, useFirestore, useUser, useDoc } from "@/firebase"
 import { collection, query, orderBy, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { 
   Landmark, 
@@ -42,8 +42,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import Logo from "@/components/brand/Logo"
 
 /**
- * @fileOverview Premium Exam Selection Hub v302.2 [Clipping Fixed].
- * FIXED: Title clipping on mobile by using break-words and responsive text sizing.
+ * @fileOverview Premium Exam Selection Hub v302.3 [Real Metrics Sync].
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -76,6 +75,9 @@ export default function ExamsEntryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [pinningId, setPinningId] = useState<string | null>(null);
 
+  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
+  const { data: platformStats } = useDoc<any>(statsRef);
+
   const { data: rawCategories, loading: catLoading } = useCollection<any>(useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]));
   const { data: exams, loading: examsLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
 
@@ -99,6 +101,8 @@ export default function ExamsEntryPage() {
   }, [exams, searchTerm]);
 
   if (authLoading || !user) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+
+  const realAspirantCount = platformStats?.totalUsers ? (platformStats.totalUsers / 1000).toFixed(1) + "K+" : "10K+";
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full max-w-full">
@@ -277,7 +281,7 @@ export default function ExamsEntryPage() {
                        <div className="flex items-center gap-2.5">
                           <Users className="h-5 w-5 text-primary" />
                           <span className="text-[11px] md:text-sm font-bold text-slate-400 uppercase tracking-tight">
-                             {exam.studentCount || "12K+"} Students
+                             {exam.studentCount || realAspirantCount} Students
                           </span>
                        </div>
                     </div>
@@ -371,7 +375,7 @@ export default function ExamsEntryPage() {
                     Ready to Crack <br/> <span className="text-primary italic">Your Dream Exam?</span>
                  </h2>
                  <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-relaxed">
-                    Start practicing with Punjab&apos;s most trusted mock test platform. Join 100K+ successful students.
+                    Start practicing with Punjab&apos;s most trusted mock test platform. Join {realAspirantCount} successful students.
                  </p>
               </div>
 
