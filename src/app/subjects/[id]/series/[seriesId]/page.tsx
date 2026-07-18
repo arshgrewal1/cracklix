@@ -24,7 +24,8 @@ import {
   BookOpen,
   BarChart3,
   Timer,
-  Loader2
+  Loader2,
+  ArrowRight
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -37,8 +38,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Level 3: Test Registry Hub v1.1 [Board Branding].
- * Displays all tests inside a specific learning series with official branding.
+ * @fileOverview Level 3: Test Registry Hub v1.2 [Import Fix].
+ * FIXED: Added missing ArrowRight icon import to resolve runtime crash.
  */
 
 export default function SeriesDetailPortal() {
@@ -131,7 +132,7 @@ export default function SeriesDetailPortal() {
                   return (
                     <motion.div key={mock.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }}>
                        <Card className={cn(
-                         "border border-slate-100 shadow-lg hover:shadow-2xl transition-all duration-500 rounded-[2rem] md:rounded-[2.5rem] bg-white group relative overflow-hidden",
+                         "border border-slate-100 shadow-lg hover:shadow-4xl transition-all duration-500 rounded-[2rem] md:rounded-[2.5rem] bg-white group relative overflow-hidden",
                          isCompleted && "bg-emerald-50/20"
                        )}>
                           <div className="p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-10">
@@ -180,7 +181,8 @@ export default function SeriesDetailPortal() {
             ) : (
                <div className="py-32 text-center border-2 border-dashed border-slate-100 rounded-[3rem] opacity-30 flex flex-col items-center gap-6">
                   <BookOpen className="h-16 w-16 text-slate-300" />
-                  <p className="font-black text-xl md:text-2xl uppercase tracking-[0.4em]">Vault Sync Standby</p>
+                  <p className="font-black text-xl md:text-2xl uppercase tracking-[0.4em]">No test</p>
+                  <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Free coming soon</p>
                </div>
             )}
          </div>
