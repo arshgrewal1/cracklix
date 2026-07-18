@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from "react";
@@ -15,14 +14,15 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v39.0 [Linguistic Overhaul].
- * SIMPLIFIED: Replaced technical labels with easy mock platform words.
+ * @fileOverview Admin Layout v39.1 [Hydration Hardened].
+ * FIXED: Standardized mounting handshake to resolve ChunkLoadError in development.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
   const authInstance = useAuth();
   const router = useRouter();
   const pathname = usePathname() ?? '';
+  
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -51,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (profile && (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN')) || isFounder;
   }, [profile, user]);
 
-  const isAccessBlocked = !loading && mounted && (!user || (!isAdmin && !profileLoading));
+  const isAccessBlocked = mounted && !loading && (!user || (!isAdmin && !profileLoading));
 
   useEffect(() => {
     if (isAccessBlocked) {

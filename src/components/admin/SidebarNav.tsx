@@ -20,7 +20,6 @@ import {
   DollarSign,
   Smartphone,
   Gem,
-  History,
   HeartPulse,
   Settings,
   NotebookPen,
@@ -42,7 +41,7 @@ import {
   Plus,
   BookMarked,
   Layers,
-  History as UsedIcon
+  History
 } from "lucide-react";
 
 import {
@@ -53,7 +52,7 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * Admin Sidebar Navigation v4.1 [Archive Integrated].
+ * Admin Sidebar Navigation v4.2 [Import Fix].
  */
 
 const NAV_GROUPS = [
@@ -63,7 +62,7 @@ const NAV_GROUPS = [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { label: "Student Portal", href: "/", icon: GraduationCap },
       { label: "Question Bank", href: "/admin/mcq-bank", icon: Database },
-      { label: "Used Questions", href: "/admin/used-questions", icon: UsedIcon },
+      { label: "Used Questions", href: "/admin/used-questions", icon: History },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Bulk Upload", href: "/admin/bulk-import", icon: UploadCloud },
       { label: "Review Center", href: "/admin/qa", icon: Activity },
