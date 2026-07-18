@@ -67,8 +67,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v46.0 [Hierarchy Sync].
- * FIXED: Integrated Subject -> Series hierarchy into the test configuration.
+ * @fileOverview Enterprise Mock Builder Hub v47.0 [Hierarchy UI Fixed].
+ * FIXED: Explicitly added Subject and Series selectors to the configuration panel.
  */
 
 export default function MockBuilderPage() {
@@ -350,33 +350,31 @@ function MockBuilderContent() {
                  </div>
               </div>
 
-              {mockData.mockType === 'SUBJECT' && (
-                 <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
-                    <div className="space-y-2 text-left">
-                       <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><BookMarked className="h-3 w-3" /> Subject Hub</Label>
-                       <select 
-                         value={mockData.learningSubjectId || ""} 
-                         onChange={e => setMockData({...mockData, learningSubjectId: e.target.value, seriesId: ""})}
-                         className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
-                       >
-                          <option value="">Select Hub</option>
-                          {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                       </select>
-                    </div>
-                    <div className="space-y-2 text-left">
-                       <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Series Node</Label>
-                       <select 
-                         value={mockData.seriesId || ""} 
-                         onChange={e => setMockData({...mockData, seriesId: e.target.value})}
-                         className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
-                         disabled={!mockData.learningSubjectId}
-                       >
-                          <option value="">Uncategorized</option>
-                          {filteredSeries.map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
-                       </select>
-                    </div>
-                 </div>
-              )}
+              <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
+                <div className="space-y-2 text-left">
+                    <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><BookMarked className="h-3 w-3" /> Subject Hub</Label>
+                    <select 
+                      value={mockData.learningSubjectId || ""} 
+                      onChange={e => setMockData({...mockData, learningSubjectId: e.target.value, seriesId: ""})}
+                      className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
+                    >
+                        <option value="">Select Hub</option>
+                        {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                </div>
+                <div className="space-y-2 text-left">
+                    <Label className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Series Node</Label>
+                    <select 
+                      value={mockData.seriesId || ""} 
+                      onChange={e => setMockData({...mockData, seriesId: e.target.value})}
+                      className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none"
+                      disabled={!mockData.learningSubjectId}
+                    >
+                        <option value="">Uncategorized</option>
+                        {filteredSeries.map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
+                    </select>
+                </div>
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2 text-left">
