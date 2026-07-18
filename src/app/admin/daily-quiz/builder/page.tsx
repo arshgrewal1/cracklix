@@ -61,8 +61,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v41.3.
- * FIXED: Repaired syntax error in audit log action (isEditing check).
+ * @fileOverview Daily Challenge Builder v42.0.
+ * REDESIGN: High-contrast staging card with improved text visibility and zero-overlap layout.
  */
 
 export default function DailyQuizBuilder() {
@@ -129,7 +129,7 @@ function DailyQuizBuilderContent() {
         subjectId: filterSubject,
         difficulty: filterDifficulty,
         status: filterStatus,
-        searchTerm: searchTerm,
+        customSearch: searchTerm,
       }, 100);
 
       setQuestionBank(result.data);
@@ -320,8 +320,8 @@ function DailyQuizBuilderContent() {
                   <div className="space-y-6">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-1">
                        <div className="space-y-1 text-left">
-                          <h3 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Question database</h3>
-                          <p className="text-sm font-medium text-slate-400">Select filters to stage items for this challenge.</p>
+                        <h3 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Question database</h3>
+                        <p className="text-sm font-medium text-slate-400">Select filters to stage items for this challenge.</p>
                        </div>
                        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-slate-100 shadow-sm">
                           <div className={cn("h-2.5 w-2.5 rounded-full animate-pulse", !diagnostic ? "bg-emerald-500" : "bg-amber-500")} />
@@ -369,7 +369,7 @@ function DailyQuizBuilderContent() {
                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-all duration-500" />
                        <div className="relative flex items-center h-16 bg-white border border-slate-100 rounded-[18px] shadow-sm px-4 md:px-6 gap-2 md:gap-4 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
                           <Search className="h-5 w-5 text-slate-400 group-focus-within:text-primary" />
-                          <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 font-bold text-base md:text-lg" placeholder="Search database for items..." />
+                          <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 font-bold text-base md:text-lg text-[#0F172A]" placeholder="Search database for items..." />
                        </div>
                     </div>
 
@@ -399,48 +399,41 @@ function DailyQuizBuilderContent() {
                       </motion.div>
                     )}
 
-                    <Card className="border-none shadow-2xl rounded-[24px] bg-white p-6 relative overflow-hidden border border-slate-100 text-left">
-                        {/* 3% Opacity Watermark */}
-                        <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none -z-0">
-                          <Zap className="h-44 w-44" />
-                        </div>
-                        
-                        <div className="relative z-10 flex flex-col lg:flex-row items-center gap-6">
-                           {/* LEFT SIDE: CIRCULAR PROGRESS INDICATOR */}
-                           <div className="relative shrink-0 flex flex-col items-center justify-center w-[88px] h-[88px]">
+                    <Card className="border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.06)] rounded-[32px] bg-white p-6 md:p-8 relative overflow-hidden text-left">
+                        <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                           {/* Circle Indicator */}
+                           <div className="relative shrink-0 flex items-center justify-center w-24 h-24">
                               <svg className="absolute inset-0 h-full w-full transform -rotate-90">
-                                 <circle cx="50%" cy="50%" r="40%" className="stroke-slate-100 fill-none" strokeWidth="8" />
+                                 <circle cx="50%" cy="50%" r="42%" className="stroke-slate-100 fill-none" strokeWidth="6" />
                                  <motion.circle 
-                                    cx="50%" cy="50%" r="40%" 
-                                    className="stroke-primary fill-none" 
-                                    strokeWidth="8" 
+                                    cx="50%" cy="50%" r="42%" 
+                                    className="stroke-[#2563EB] fill-none" 
+                                    strokeWidth="6" 
                                     strokeLinecap="round"
                                     initial={{ strokeDashoffset: 238 }}
                                     animate={{ strokeDashoffset: 238 - (238 * Math.min(bankSelection.length, 100) / 100) }}
-                                    transition={{ duration: 1.5 }}
+                                    transition={{ duration: 1.5, ease: "easeOut" }}
                                     style={{ strokeDasharray: 238 }}
                                  />
                               </svg>
-                              <div className="relative z-10 flex flex-col items-center justify-center text-center">
-                                 <span className="text-2xl font-[800] tabular-nums tracking-tighter text-[#0F172A] leading-none">
+                              <div className="flex flex-col items-center justify-center text-center">
+                                 <span className="text-2xl font-black text-[#0F172A] tabular-nums leading-none">
                                     {bankSelection.length}
                                  </span>
-                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">Selected</span>
+                                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Ready</span>
                               </div>
                            </div>
 
-                           {/* RIGHT SIDE: TEXT AND BUTTON */}
-                           <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left w-full min-w-0">
-                              <h4 className="text-[30px] font-[800] text-[#0F172A] tracking-tighter leading-none mb-[6px] whitespace-nowrap">
-                                 Items ready
-                              </h4>
-                              <p className="text-[14px] font-medium text-slate-500 mb-[18px]">
-                                 Ready to stage into registry
-                              </p>
+                           {/* Content Hub */}
+                           <div className="flex-1 space-y-4 text-center md:text-left w-full min-w-0">
+                              <div className="space-y-1">
+                                 <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Assets Staged</h4>
+                                 <p className="text-sm font-medium text-slate-500">Node selection verified and ready for registry integration.</p>
+                              </div>
                               <Button 
                                 onClick={handleLinkSelected} 
                                 disabled={bankSelection.length === 0} 
-                                className="w-full lg:w-auto h-[52px] bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-bold text-sm tracking-tight rounded-[16px] shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
+                                className="w-full md:w-auto h-[52px] bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
                               >
                                  Link staged items <ArrowRight className="h-4 w-4" />
                               </Button>
@@ -484,13 +477,13 @@ function DailyQuizBuilderContent() {
                <div className="space-y-8 animate-in fade-in duration-500">
                   <div className="flex items-center justify-between px-2">
                      <h3 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Active area composition</h3>
-                     <Badge className="bg-[#0F172A] text-white border-none font-bold px-4 py-1.5 rounded-lg">{stagedQuestions.length} Items</Badge>
+                     <Badge className="bg-[#0F172A] text-white border-none font-bold text-[10px] px-4 py-1.5 rounded-lg shadow-sm">{stagedQuestions.length} Nodes</Badge>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
                      {stagedQuestions.map((q, idx) => (
                         <Card key={q.id} className="border-none shadow-lg rounded-2xl bg-white group hover:shadow-xl transition-all border border-slate-100 overflow-hidden">
                            <CardContent className="p-6 md:px-10 flex items-center justify-between gap-6">
-                              <div className="flex items-center gap-6 min-w-0">
+                              <div className="flex items-center gap-4 md:gap-8 min-w-0">
                                  <span className="text-xs md:text-lg font-black text-slate-200 tabular-nums">#{idx + 1}</span>
                                  <div className="min-w-0 text-left">
                                     <p className="font-bold text-[#0F172A] text-sm md:text-lg truncate">{q.englishQuestion}</p>
