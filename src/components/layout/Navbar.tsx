@@ -39,7 +39,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
  * @fileOverview Cracklix Navigation Hub v89.0.
- * UPDATED: Increased logo size for better visibility.
+ * UPDATED: Increased logo size for better visibility and adjusted positioning.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -125,7 +125,7 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-2 md:ml-4"
+                className="flex-shrink-0 -ml-4 md:ml-1"
                 imgClassName="h-28 md:h-48 w-auto"
                 align="left"
               />
