@@ -6,8 +6,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v67.0.
- * UPDATED: Reduced desktop logo height and repositioned it to the right of toggle.
+ * Cracklix Admin Sidebar Header v68.0.
+ * UPDATED: Repositioned toggle and logo into a standard flex row for exact side-by-side alignment.
  */
 export default function SidebarHeader({
   isOpen,
@@ -19,14 +19,11 @@ export default function SidebarHeader({
   return (
     <div
       className={cn(
-        "h-[100px] md:h-[130px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300 relative",
-        isOpen ? "justify-center" : "flex-col justify-center py-4 gap-4"
+        "h-[100px] md:h-[130px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300",
+        isOpen ? "justify-start gap-3" : "flex-col justify-center py-4 gap-4"
       )}
     >
-      <div className={cn(
-        "transition-all duration-300",
-        isOpen ? "absolute left-4" : "relative"
-      )}>
+      <div className="shrink-0">
         <SidebarToggle
           isOpen={isOpen}
           onToggle={onToggle}
@@ -35,22 +32,15 @@ export default function SidebarHeader({
 
       <div className={cn(
         "flex items-center overflow-hidden transition-all", 
-        !isOpen && "opacity-0 scale-95"
+        !isOpen && "opacity-0 scale-95 pointer-events-none absolute"
       )}>
-        {isOpen ? (
+        {isOpen && (
           <Logo
             href="/admin"
             variant="light"
-            align="center"
-            className="transition-all duration-500 animate-in fade-in zoom-in-95 ml-8"
-            imgClassName="h-24 md:h-28 w-auto"
-          />
-        ) : (
-          <Logo
-            href="/admin"
-            variant="icon"
-            align="center"
-            imgClassName="h-10 md:h-12 w-auto"
+            align="left"
+            className="transition-all duration-500 animate-in fade-in zoom-in-95"
+            imgClassName="h-20 md:h-24 w-auto"
           />
         )}
       </div>

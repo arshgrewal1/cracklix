@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v91.0.
- * UPDATED: Repositioned logo to sit immediately right of the menu trigger with gap-2.
+ * @fileOverview Cracklix Navigation Hub v92.0.
+ * UPDATED: Logo and Menu trigger anchored left with tight gap-2 for exact side-by-side alignment.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
