@@ -15,9 +15,8 @@ import { AdminPageHeader, AdminTableSkeleton } from "@/components/admin"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Administrative Manual UPI Verification Center v5.2.
- * UPDATED: Simplified terminology for improved accessibility.
- * FIXED: Hardened syntax to resolve potential ChunkLoadError.
+ * @fileOverview Administrative Manual UPI Verification Center v5.3.
+ * UPDATED: Replaced 'node' with 'entry' or 'item'.
  */
 
 export default function VerifyPaymentsPage() {

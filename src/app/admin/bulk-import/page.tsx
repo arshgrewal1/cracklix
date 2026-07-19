@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -53,9 +54,8 @@ const LANGUAGE_MODES = [
 ];
 
 /**
- * @fileOverview Institutional Bulk Ingestion Hub v84.0.
- * FIXED: Full responsive audit for 320px-430px viewports.
- * FIXED: Action buttons normalized to grid and form controls made fluid.
+ * @fileOverview Institutional Bulk Ingestion Hub v84.1.
+ * UPDATED: Replaced 'node' with 'item'.
  */
 export default function BulkIngestionPage() {
   const router = useRouter()
@@ -87,7 +87,7 @@ export default function BulkIngestionPage() {
     }
 
     if (typeof parseBulkQuestions !== "function") {
-       toast({ variant: "destructive", title: "Node Failure", description: "Parser modules not initialized." });
+       toast({ variant: "destructive", title: "System Failure", description: "Parser modules not initialized." });
        return;
     }
 
@@ -116,7 +116,7 @@ export default function BulkIngestionPage() {
       });
       
       setStagedQuestions(validated);
-      toast({ title: "Extraction Complete", description: `${validated.length} nodes staged.` });
+      toast({ title: "Extraction Complete", description: `${validated.length} items staged.` });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Parsing Error", description: e.message });
     } finally {
@@ -145,7 +145,7 @@ export default function BulkIngestionPage() {
 
       await batch.commit();
       await updateDoc(doc(db, 'settings', 'stats'), { totalQuestions: increment(valids.length), updatedAt: serverTimestamp() }).catch(() => {});
-      toast({ title: "Registry Updated", description: "All valid nodes committed to bank." });
+      toast({ title: "Registry Updated", description: "All valid items committed to bank." });
       router.push("/admin/mcq-bank");
     } catch (e) {
       toast({ variant: "destructive", title: "Commit Failed" });
@@ -175,7 +175,7 @@ export default function BulkIngestionPage() {
              className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-[52px] md:h-11 px-8 font-bold text-[11px] gap-3 shadow-xl w-full min-w-0"
            >
               {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4 text-primary fill-current" />} Parse
-           </Button>
+           </button>
            <Button 
              onClick={handleFinalCommit} 
              disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
@@ -239,7 +239,7 @@ export default function BulkIngestionPage() {
                        </Select>
                     </div>
                     <div className="space-y-2 w-full">
-                       <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Subject Node</Label>
+                       <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Subject Entry</Label>
                        <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
                           <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold w-full"><SelectValue placeholder="Subject" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white">{subjects?.map(s => <SelectItem key={s.id} value={s.id} className="cursor-pointer">{s.name}</SelectItem>)}</SelectContent>
@@ -271,14 +271,14 @@ export default function BulkIngestionPage() {
         <div className="lg:col-span-7 space-y-6 w-full min-w-0">
            <div className="flex items-center justify-between px-2">
               <h3 className="text-xl font-bold text-[#0F172A] flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Staging Hub</h3>
-              <Badge className="bg-[#0F172A] text-white border-none font-bold text-[10px] px-4 py-1.5 rounded-lg shadow-sm">{stagedQuestions.length} Nodes</Badge>
+              <Badge className="bg-[#0F172A] text-white border-none font-bold text-[10px] px-4 py-1.5 rounded-lg shadow-sm">{stagedQuestions.length} Items</Badge>
            </div>
            <div className="space-y-6 w-full">
               {stagedQuestions.map((q, idx) => (
                  <Card key={q.id} className="border-none shadow-lg rounded-[2.5rem] bg-white overflow-hidden border border-slate-100 relative group w-full">
                     <div className={cn("absolute top-0 left-0 w-2 h-full transition-colors", q.isValid ? "bg-emerald-500" : "bg-rose-500")} />
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
-                       <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] px-4 py-1.5 rounded-lg shadow-sm">Staged Node #{idx + 1}</Badge>
+                       <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] px-4 py-1 rounded-lg shadow-sm">Staged Item #{idx + 1}</Badge>
                        <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-8 w-8 text-rose-500 hover:bg-rose-50 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"><Trash2 className="h-4 w-4" /></button>
                     </CardHeader>
                     <CardContent className="p-6 md:p-10 pt-4 w-full overflow-hidden">

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react"
@@ -18,8 +19,8 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
 
 /**
- * @fileOverview Recruitment Registry Hub CMS v12.0 (High-Fidelity Update).
- * FIXED: Balanced header spacing and refined dialog architecture.
+ * @fileOverview Recruitment Registry Hub CMS v12.1.
+ * UPDATED: Replaced 'node' with 'entry'.
  */
 
 export default function CalendarManagement() {
@@ -36,7 +37,7 @@ export default function CalendarManagement() {
   const handleSave = async () => {
     if (!db || !editingEvent) return
     if (!editingEvent.post || !editingEvent.date) {
-       toast({ variant: "destructive", title: "Audit Blocked", description: "Post Name and Date are mandatory nodes." })
+       toast({ variant: "destructive", title: "Audit Blocked", description: "Post Name and Date are mandatory." })
        return
     }
 
@@ -49,7 +50,7 @@ export default function CalendarManagement() {
         updatedAt: serverTimestamp(),
         createdAt: editingEvent.createdAt || serverTimestamp()
       }, { merge: true })
-      toast({ title: "Registry Synced", description: "Calendar node successfully updated." })
+      toast({ title: "Registry Synced", description: "Calendar entry successfully updated." })
       setEditingEvent(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sync Failed" })
@@ -59,7 +60,7 @@ export default function CalendarManagement() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!db || !confirm("Permanently purge this calendar node?")) return
+    if (!db || !confirm("Permanently purge this calendar entry?")) return
     await deleteDoc(doc(db, "exam_calendar", id))
     toast({ title: "Removed from Registry" })
   }
@@ -81,7 +82,7 @@ export default function CalendarManagement() {
         label="Recruitment Registry Hub"
         title="Exam Calendar"
         subtitle="Manage upcoming recruitment dates and official notifications."
-        actionLabel="Add Calendar Node"
+        actionLabel="Add Calendar Entry"
         actionIcon={Plus}
         onAction={() => setEditingEvent({ board: "PSSSB", post: "", date: "", status: "Upcoming", type: "Exam", color: "bg-primary", published: true })}
       />
@@ -129,7 +130,7 @@ export default function CalendarManagement() {
                   <TableCell className="text-right px-8 md:px-12">
                      <div className="flex justify-end gap-2 md:gap-4 opacity-20 group-hover:opacity-100 transition-all">
                         <button onClick={() => setEditingEvent(e)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-5 w-5" /></button>
-                        <button onClick={() => handleDelete(e.id)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
+                        <button onClick={() => handleDelete(e.id)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                      </div>
                   </TableCell>
                 </TableRow>
@@ -152,12 +153,12 @@ export default function CalendarManagement() {
       <AdminDialogShell
         open={!!editingEvent}
         onOpenChange={(o) => !o && setEditingEvent(null)}
-        title="Calendar Node Architect"
+        title="Calendar Architect"
         description="Add or edit official recruitment dates in the registry."
         isSaving={isSaving}
         onSave={handleSave}
         onDiscard={() => setEditingEvent(null)}
-        saveLabel="Commit Node"
+        saveLabel="Commit Entry"
       >
         <div className="grid grid-cols-2 gap-4 md:gap-8">
            <div className="space-y-1.5 text-left">
@@ -189,7 +190,7 @@ export default function CalendarManagement() {
            </div>
         </div>
         <div className="space-y-1.5 text-left">
-           <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2">Theme Color Node <Badge variant="outline" className="text-[7px] font-black">CSS</Badge></Label>
+           <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2">Theme Color node <Badge variant="outline" className="text-[7px] font-black">CSS</Badge></Label>
            <Input value={editingEvent?.color || "bg-primary"} onChange={e => setEditingEvent({...editingEvent, color: e.target.value})} className="h-12 md:h-16 rounded-xl md:rounded-2xl border-none bg-slate-50 font-mono text-xs text-primary px-6 shadow-inner" />
         </div>
       </AdminDialogShell>

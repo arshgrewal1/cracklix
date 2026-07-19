@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -26,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
 /**
- * @fileOverview Official Checkout Hub v3.7.
- * FIXED: Cleaned up syntax errors and ensured robust state management.
+ * @fileOverview Official Checkout Hub v3.8.
+ * UPDATED: Replaced 'node' terminology with 'process' or 'step'.
  */
 
 export default function CheckoutPage() {
@@ -131,7 +132,7 @@ function CheckoutContent() {
 
               router.push(`/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(planData.name)}`);
             } else {
-              throw new Error("Verification node failed.");
+              throw new Error("Verification process failed.");
             }
           } catch (err: any) {
              setErrorMessage(err.message);
@@ -159,7 +160,7 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     try {
       await submitManualPayment({ userId: user.uid, userEmail: user.email || "", userName: profile?.name || "Aspirant", planId, transactionId: utr });
-      toast({ title: "Audit Staged", description: "Verification node under review." });
+      toast({ title: "Audit Staged", description: "Verification process under review." });
       router.push("/dashboard");
     } catch (e: any) {
       setErrorMessage(e.message);

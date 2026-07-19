@@ -22,8 +22,8 @@ const PLACEMENTS: AdPlacementType[] = [
 ];
 
 /**
- * @fileOverview Ad Entry Page Content v4.0.
- * FIXED: Removed problematic module-level getFirestore calls.
+ * @fileOverview Ad Entry Page Content v4.1.
+ * UPDATED: Replaced 'node' terminology with 'entry'.
  */
 
 export default function AdEntryContent({ serverExistingAd, serverExams, serverAdId }: any) {
@@ -82,7 +82,7 @@ export default function AdEntryContent({ serverExistingAd, serverExams, serverAd
 
     try {
       await setDoc(adRef, payload, { merge: true })
-      toast({ title: "Campaign Deployed", description: "Monetization node successfully synced." })
+      toast({ title: "Campaign Deployed", description: "Monetization entry successfully synced." })
       router.push("/admin/ads")
     } catch (e: unknown) {
       toast({ variant: "destructive", title: "Sync Failed", description: (e as Error).message })
@@ -103,9 +103,9 @@ export default function AdEntryContent({ serverExistingAd, serverExams, serverAd
     <div className="max-w-5xl mx-auto space-y-12 pb-24 text-left">
       <div className="flex items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 border border-slate-200" onClick={() => router.back()}><ChevronLeft className="h-6 w-6" /></Button>
+          <button className="rounded-2xl h-12 w-12 border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-all" onClick={() => router.back()}><ChevronLeft className="h-6 w-6" /></button>
           <div className="text-left">
-            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase">{isEditing ? "Modify Campaign" : "New Campaign Node"}</h1>
+            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase">{isEditing ? "Modify Campaign" : "New Campaign Entry"}</h1>
             <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Strategic Monetization Protocol</p>
           </div>
         </div>
@@ -202,7 +202,7 @@ export default function AdEntryContent({ serverExistingAd, serverExams, serverAd
                        <SelectContent className="bg-[#0B1528] border-white/10 text-white">
                           <SelectItem value="ACTIVE" className="cursor-pointer">System Online</SelectItem>
                           <SelectItem value="PAUSED" className="cursor-pointer">System Paused</SelectItem>
-                          <SelectItem value="SCHEDULED" className="cursor-pointer">Scheduled Node</SelectItem>
+                          <SelectItem value="SCHEDULED" className="cursor-pointer">Scheduled Item</SelectItem>
                        </SelectContent>
                     </Select>
                  </div>

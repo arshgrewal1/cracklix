@@ -21,8 +21,8 @@ const categoryConverter: FirestoreDataConverter<Category> = {
 };
 
 /**
- * @fileOverview Institutional Folder Registry v18.0.
- * FIXED: Spatial rebalancing for header and table to resolve cramped layout.
+ * @fileOverview Institutional Folder Registry v18.1.
+ * UPDATED: Replaced 'node' with 'item' or 'entry'.
  */
 export default function CategoryManagement() {
   const db = useFirestore()
@@ -118,8 +118,8 @@ export default function CategoryManagement() {
                   </TableCell>
                   <TableCell className="text-right px-8 md:px-12">
                      <div className="flex justify-end gap-2 md:gap-4 opacity-20 group-hover:opacity-100 transition-all">
-                        <button onClick={() => setEditingCat(cat)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90"><Edit className="h-5 w-5" /></button>
-                        <button onClick={async () => { if(confirm("Purge folder node?") && db) await deleteDoc(doc(db, "categories", cat.id)) }} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90"><Trash2 className="h-5 w-5" /></button>
+                        <button onClick={() => setEditingCat(cat)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-5 w-5" /></button>
+                        <button onClick={async () => { if(confirm("Purge folder item?") && db) await deleteDoc(doc(db, "categories", cat.id)) }} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                      </div>
                   </TableCell>
                 </TableRow>
@@ -133,7 +133,7 @@ export default function CategoryManagement() {
         open={!!editingCat}
         onOpenChange={() => setEditingCat(null)}
         title="Category Architect"
-        description="Configure official folder node metadata."
+        description="Configure official folder metadata."
         isSaving={isSaving}
         onSave={handleSave}
         onDiscard={() => setEditingCat(null)}
@@ -161,7 +161,7 @@ export default function CategoryManagement() {
           <Input value={editingCat?.title || ""} onChange={e => setEditingCat({ ...editingCat, title: e.target.value } as Category)} className="h-14 md:h-18 rounded-xl md:rounded-2xl border-none bg-slate-50 font-black text-sm md:text-xl px-6 shadow-inner" placeholder="e.g. Punjab Government Exams" />
         </div>
         <div className="space-y-1.5 text-left">
-          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Logo URL (PNG/SVG Node)</Label>
+          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Logo URL (PNG/SVG)</Label>
           <Input value={editingCat?.iconUrl || ""} onChange={e => setEditingCat({ ...editingCat, iconUrl: e.target.value } as Category)} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-mono text-[10px] text-primary px-5 shadow-inner" placeholder="https://..." />
         </div>
       </AdminDialogShell>

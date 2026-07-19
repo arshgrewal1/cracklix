@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { Suspense, useEffect, useState, useMemo } from "react"
@@ -30,12 +31,12 @@ import { Vacancy, ContentStatus } from "@/types"
 import FileUpload from "@/components/admin/FileUpload"
 
 /**
- * @fileOverview Modular Vacancy Ingestion Node v2.1.
- * FIXED: Added missing Zap import.
+ * @fileOverview Modular Vacancy Ingestion Hub v2.2.
+ * UPDATED: Replaced 'node' with 'entry' or 'item'.
  */
 
 const BOARD_OPTIONS = [
-  "PSSSB", "PPSC", "Punjab Police", "PSPCL", "PSTCL", "BFUHS",
+  "PSSSB", "PPSC", "Punjab Police", "Punjab State Power Corporation", "Punjab State Transmission Corp", "Baba Farid Univ. Health Sciences",
   "Education Board (ETT/Master Cadre)", "High Court", "SSC", "RRB", "IBPS",
   "SBI", "UPSC", "NTA", "National Hub", "Manual Entry"
 ];
@@ -106,7 +107,7 @@ function VacancyFormWrapper() {
   const handleSave = async (status: ContentStatus = formData.status || "DRAFT") => {
     if (!db || isSaving) return
     if (!formData.title || !formData.department || !formData.lastDate) {
-       toast({ variant: "destructive", title: "Audit Blocked", description: "Job Title, Department, and Last Date are mandatory nodes." })
+       toast({ variant: "destructive", title: "Audit Blocked", description: "Job Title, Department, and Last Date are mandatory." })
        return
     }
 
@@ -144,7 +145,7 @@ function VacancyFormWrapper() {
         <div className="flex items-center gap-6">
            <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-2xl border bg-white h-12 w-12 shadow-sm shrink-0"><ChevronLeft className="h-6 w-6" /></Button>
            <div className="text-left">
-              <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">{id ? 'Modify Vacancy' : 'New Ingestion Node'}</h1>
+              <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">{id ? 'Modify Vacancy' : 'New Ingestion Entry'}</h1>
               <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Institutional Recruitment Portal</p>
            </div>
         </div>
@@ -204,7 +205,7 @@ function VacancyFormWrapper() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                        <FormInput label="Age Limit" value={formData.ageLimit} onChange={(v: string) => setFormData({...formData, ageLimit: v})} placeholder="18 - 28 Years" />
                        <FormInput label="Experience" value={formData.experience} onChange={(v: string) => setFormData({...formData, experience: v})} placeholder="No experience required" />
-                       <FormInput label="Salary Node" value={formData.salary} onChange={(v: string) => setFormData({...formData, salary: v})} placeholder="Pay Level 3 (₹19,900 - ₹63,200)" />
+                       <FormInput label="Salary Entry" value={formData.salary} onChange={(v: string) => setFormData({...formData, salary: v})} placeholder="Pay Level 3 (₹19,900 - ₹63,200)" />
                     </div>
                  </TabsContent>
 
@@ -218,7 +219,7 @@ function VacancyFormWrapper() {
                        <FormInput label="Admit Card Date" type="date" value={formData.admitCardDate} onChange={(v: string) => setFormData({...formData, admitCardDate: v})} />
                        <FormInput label="Result Date" type="date" value={formData.resultDate} onChange={(v: string) => setFormData({...formData, resultDate: v})} />
                     </div>
-                    <FormTextarea label="Application Fee Node" value={formData.applicationFee} onChange={(v: string) => setFormData({...formData, applicationFee: v})} placeholder="GEN: ₹1000, SC/ST: ₹250..." />
+                    <FormTextarea label="Application Fee Entry" value={formData.applicationFee} onChange={(v: string) => setFormData({...formData, applicationFee: v})} placeholder="GEN: ₹1000, SC/ST: ₹250..." />
                  </TabsContent>
 
                  <TabsContent value="media" className="space-y-10 animate-in fade-in duration-300">
@@ -245,7 +246,7 @@ function VacancyFormWrapper() {
                        value={formData.notificationPdfUrl} 
                        onChange={(meta) => setFormData({...formData, notificationPdfUrl: meta?.url})} 
                     />
-                    <FormInput label="Direct Apply Node (URL)" value={formData.applyLink} onChange={(v: string) => setFormData({...formData, applyLink: v})} placeholder="https://..." />
+                    <FormInput label="Direct Apply Entry (URL)" value={formData.applyLink} onChange={(v: string) => setFormData({...formData, applyLink: v})} placeholder="https://..." />
                  </TabsContent>
 
                  <TabsContent value="seo" className="space-y-10 animate-in fade-in duration-300">

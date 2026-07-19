@@ -21,8 +21,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Manual Question Ingestion Node v19.2.
- * UPDATED: Integrated live auditing for question bank modifications.
+ * @fileOverview Manual Question Ingestion Node v19.3.
+ * UPDATED: Replaced 'node' with 'item' or 'entry'.
  */
 
 export default function QuestionEntryPage() {
@@ -110,7 +110,7 @@ function QuestionEntryContent() {
       updatedAt: serverTimestamp(),
       createdAt: isEditing ? (existingData?.createdAt || serverTimestamp()) : serverTimestamp(),
       isStandalone: true,
-      author: existingData?.author || profile?.name || "Registry Node",
+      author: existingData?.author || profile?.name || "Registry node",
       usedCount: existingData?.usedCount || 0
     };
 
@@ -130,7 +130,7 @@ function QuestionEntryContent() {
       await addDoc(collection(db, "audit_logs"), {
         user: profile?.name || "Administrator",
         action: isEditing ? "QUESTION_UPDATE" : "QUESTION_CREATE",
-        details: isEditing ? `Question Node ${finalId} modified.` : `New Question Node ${finalId} ingested manually.`,
+        details: isEditing ? `Question entry ${finalId} modified.` : `New question entry ${finalId} ingested manually.`,
         timestamp: serverTimestamp()
       });
 
@@ -151,7 +151,7 @@ function QuestionEntryContent() {
             <ChevronLeft className="h-6 w-6" />
           </button>
           <div className="text-left">
-            <h1 className="text-3xl font-black font-headline text-[#0F172A] uppercase tracking-tight">{isEditing ? "Modify Question" : "New Question Node"}</h1>
+            <h1 className="text-3xl font-black font-headline text-[#0F172A] uppercase">{isEditing ? "Modify Question" : "New Question Entry"}</h1>
             <p className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-1">Manual Content Ingestion</p>
           </div>
         </div>

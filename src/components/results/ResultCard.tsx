@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -62,8 +63,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview World-Class Institutional Result Card v2.2.
- * FIXED: Reduced vertical margins to prevent content clipping on the 1414px canvas.
+ * @fileOverview World-Class Institutional Result Card v2.3.
+ * UPDATED: Replaced 'node' with 'point' or 'hub'.
  */
 export default function ResultCard({
   studentName,
@@ -152,13 +153,13 @@ export default function ResultCard({
 
         <div className="px-20 mt-12">
            <div className="bg-[#F8FAFC] border border-slate-100 rounded-[3rem] p-10 flex items-center justify-between shadow-inner">
-              <DataNode label="Attempted" val={correct + wrong} color="text-slate-600" />
+              <DataPoint label="Attempted" val={correct + wrong} color="text-slate-600" />
               <div className="w-px h-12 bg-slate-200" />
-              <DataNode label="Correct" val={correct} color="text-emerald-600" />
+              <DataPoint label="Correct" val={correct} color="text-emerald-600" />
               <div className="w-px h-12 bg-slate-200" />
-              <DataNode label="Incorrect" val={wrong} color="text-rose-600" />
+              <DataPoint label="Incorrect" val={wrong} color="text-rose-600" />
               <div className="w-px h-12 bg-slate-200" />
-              <DataNode label="Skipped" val={total - (correct + wrong)} color="text-slate-400" />
+              <DataPoint label="Skipped" val={total - (correct + wrong)} color="text-slate-400" />
            </div>
         </div>
 
@@ -170,7 +171,7 @@ export default function ResultCard({
               </div>
               <div className="flex flex-col gap-2">
                  <p className="text-slate-500 text-sm font-bold uppercase tracking-widest">Registry ID: {resultId}</p>
-                 <p className="text-slate-500 text-sm font-bold uppercase tracking-widest">Verification Node: WWW.CRACKLIX.COM</p>
+                 <p className="text-slate-500 text-sm font-bold uppercase tracking-widest">Verification Entry: WWW.CRACKLIX.COM</p>
               </div>
            </div>
            <div className="flex items-center gap-12">
@@ -214,7 +215,7 @@ export default function ResultCard({
               <div className="bg-[#F8FAFC] p-10 rounded-[3rem] border border-slate-100 relative overflow-hidden">
                  <div className="absolute top-0 right-0 p-10 opacity-[0.03]"><Zap className="h-32 w-32" /></div>
                  <ul className="space-y-6 relative z-10">
-                    <Point text={Number(accuracy) > 80 ? "Superior conceptual clarity across all official exam patterns." : "Foundational knowledge verified; requires targeted practice nodes."} />
+                    <Point text={Number(accuracy) > 80 ? "Superior conceptual clarity across all official exam patterns." : "Foundational knowledge verified; requires targeted practice sessions."} />
                     <Point text={Number(timeTaken.split('m')[0]) > 60 ? "Ingestion speed requires optimization for competitive thresholds." : "Temporal efficiency matches institutional state-topper benchmarks."} />
                     <Point text={correct > total * 0.7 ? "High mastery index detected in primary subject hubs." : "Focus on high-weightage topics to increase overall ranking index."} />
                  </ul>
@@ -265,9 +266,9 @@ export default function ResultCard({
                     <h3 className="text-xl font-black uppercase tracking-widest text-slate-400">Difficulty Distribution</h3>
                  </div>
                  <div className="space-y-6 p-10 bg-slate-50 rounded-[3rem] border border-slate-100">
-                    <Diff label="Easy Nodes" val={difficulty.easy} color="bg-emerald-500" />
-                    <Diff label="Medium Nodes" val={difficulty.medium} color="bg-blue-500" />
-                    <Diff label="Expert Nodes" val={difficulty.hard} color="bg-rose-500" />
+                    <Diff label="Easy Items" val={difficulty.easy} color="bg-emerald-500" />
+                    <Diff label="Medium Items" val={difficulty.medium} color="bg-blue-500" />
+                    <Diff label="Expert Items" val={difficulty.hard} color="bg-rose-500" />
                  </div>
               </section>
 
@@ -279,7 +280,7 @@ export default function ResultCard({
                  <div className="space-y-6 p-10 bg-slate-50 rounded-[3rem] border border-slate-100">
                     <MetricValue label="Avg Ingestion / Q" val={timeMetrics.avg} />
                     <MetricValue label="Fastest Decision" val={timeMetrics.fastest} />
-                    <MetricValue label="Slowest Logic Node" val={timeMetrics.slowest} />
+                    <MetricValue label="Slowest Logic Item" val={timeMetrics.slowest} />
                  </div>
               </section>
            </div>
@@ -312,7 +313,7 @@ function Metric({ label, val, icon, color, bg }: any) {
    );
 }
 
-function DataNode({ label, val, color }: any) {
+function DataPoint({ label, val, color }: any) {
    return (
       <div className="text-center space-y-1">
          <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">{label}</p>

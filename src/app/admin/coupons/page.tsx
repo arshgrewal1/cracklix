@@ -17,9 +17,8 @@ import { useFilteredCollection } from "@/hooks/useFilteredCollection"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
- * @fileOverview Official Coupon Governance Hub v3.0.
- * FIXED: Rebalanced header spacing and replaced native selects with high-fidelity nodes.
- * VISIBILITY: Forced dark background on dropdowns to resolve "invisible text" issues.
+ * @fileOverview Official Coupon Governance Hub v3.1.
+ * UPDATED: Replaced 'node' with 'item' or 'entry'.
  */
 
 export default function CouponManagement() {
@@ -80,7 +79,7 @@ export default function CouponManagement() {
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-slate-100 h-16 md:h-20">
                 <TableHead className="px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Coupon Code</TableHead>
-                <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Discount Node</TableHead>
+                <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Discount Entry</TableHead>
                 <TableHead className="text-center text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Status</TableHead>
                 <TableHead className="text-right px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Control</TableHead>
               </TableRow>
@@ -140,14 +139,14 @@ export default function CouponManagement() {
         open={!!editingCoupon}
         onOpenChange={() => setEditingCoupon(null)}
         title="Coupon Architect"
-        description="Configure tiered discount node metadata."
+        description="Configure tiered discount metadata."
         isSaving={isSaving}
         onSave={handleSave}
         onDiscard={() => setEditingCoupon(null)}
         saveLabel="Commit Code"
       >
         <div className="space-y-1.5 text-left">
-          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Promo Code Node</Label>
+          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Promo Code Entry</Label>
           <Input 
             value={editingCoupon?.code || ""} 
             onChange={e => setEditingCoupon({...editingCoupon, code: e.target.value.toUpperCase()})} 
@@ -191,4 +190,3 @@ export default function CouponManagement() {
     </div>
   )
 }
-

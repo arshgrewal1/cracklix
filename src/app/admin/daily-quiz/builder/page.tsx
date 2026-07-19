@@ -63,8 +63,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v45.0 [Move & Delete].
- * FIXED: Atomic logic to move questions to usedQuestions and purge from bank upon publication.
+ * @fileOverview Daily Challenge Builder v45.1 [Clean Terminology].
+ * UPDATED: Replaced 'node' with 'entry' or 'item'.
  */
 
 export default function DailyQuizBuilder() {
@@ -439,7 +439,7 @@ function DailyQuizBuilderContent() {
                            <div className="flex-1 space-y-4 text-center md:text-left w-full min-w-0">
                               <div className="space-y-1">
                                  <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Assets Staged</h4>
-                                 <p className="text-sm font-medium text-slate-500">Node selection verified and ready for registry integration.</p>
+                                 <p className="text-sm font-medium text-slate-500">Item selection verified and ready for registry integration.</p>
                               </div>
                               <Button 
                                 onClick={handleLinkSelected} 
@@ -518,34 +518,4 @@ function DailyQuizBuilderContent() {
       </div>
     </div>
   )
-}
-
-function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
-   return (
-      <Card className="border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300 rounded-[18px] p-5 space-y-4 group">
-         <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-               {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" }) : null}
-            </div>
-            <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
-         </div>
-         <select 
-            value={value} 
-            onChange={e => onChange(e.target.value)} 
-            className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none appearance-none cursor-pointer hover:bg-slate-100 focus:ring-2 focus:ring-primary/10 transition-all text-[#0F172A]"
-         >
-            <option value="all">All {label}s</option>
-            {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-         </select>
-      </Card>
-   );
-}
-
-function ConfigSwitch({ label, checked, onChange }: any) {
-   return (
-      <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", checked ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-slate-100 opacity-60")}>
-         <span className="text-[11px] font-bold uppercase text-[#0F172A] tracking-tight">{label}</span>
-         <Switch checked={checked} onCheckedChange={onChange} />
-      </div>
-   )
 }
