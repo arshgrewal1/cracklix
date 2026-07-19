@@ -71,8 +71,8 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v48.0 [Granular Targeting].
- * ADDED: Specific Exam Vertical targeting below Board selection for precise test placement.
+ * @fileOverview Master Mock Builder v50.0 [Intelligent Targeting].
+ * FIXED: Board selection now auto-selects all child exams for board-wide targeting.
  */
 
 export default function MockBuilderPage() {
@@ -111,7 +111,7 @@ function MockBuilderContent() {
   const [filterBoard, setFilterBoard] = useState("all")
   const [filterExam, setFilterExam] = useState("all")
   const [filterSubject, setSubjectFilter] = useState("all")
-  const [filterStatus, setFilterStatus] = useState("all")
+  const [filterStatus, setFilterStatus] = useState("UNUSED")
   const [searchTerm, setSearchTerm] = useState("")
   const [bankSelection, setBankSelection] = useState<string[]>([])
   
@@ -285,7 +285,6 @@ function MockBuilderContent() {
       
       batch.set(mockRef, payload, { merge: true });
 
-      // MOVE TO USED QUESTIONS AND DELETE FROM BANK
       if (!isDraft) {
         flatQuestions.forEach(q => {
           const usedRef = doc(db, "usedQuestions", q.id);
@@ -329,8 +328,33 @@ function MockBuilderContent() {
   }
 
   const toggleBoardId = (id: string) => {
-     const current = mockData.boardIds || [];
-     setMockData({ ...mockData, boardIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id] });
+     const currentBoards = mockData.boardIds || [];
+     const isSelecting = !currentBoards.includes(id);
+     
+     const nextBoards = isSelecting 
+        ? [...currentBoards, id] 
+        : currentBoards.filter((x: string) => x !== id);
+
+     // Auto-manage Exam IDs for "Board-wide" logic
+     let nextExams = [...(mockData.examIds || [])];
+     const childExams = rawExams.filter((e: any) => e.boardId === id);
+     const childIds = childExams.map((e: any) => e.id);
+
+     if (isSelecting) {
+        // Automatically add all child exams to target list
+        childIds.forEach(cid => {
+           if (!nextExams.includes(cid)) nextExams.push(cid);
+        });
+     } else {
+        // Automatically remove all child exams from target list
+        nextExams = nextExams.filter(eid => !childIds.includes(eid));
+     }
+
+     setMockData({ 
+        ...mockData, 
+        boardIds: nextBoards,
+        examIds: nextExams
+     });
   };
 
   const toggleExamId = (id: string) => {

@@ -54,8 +54,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Master MCQ Bank Hub v3.0 [Duplicate Detection].
- * ADDED: Duplicate counter and specialized filtering logic.
+ * @fileOverview Master MCQ Bank Hub v3.1 [Duplicate Detection + Counters].
+ * ADDED: Enhanced duplicate counter and direct access to sanitization.
  */
 
 export default function MCQBankPage() {
@@ -279,11 +279,11 @@ export default function MCQBankPage() {
                   <TableCell className="px-6 text-center">
                     <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={(checked) => setSelectedIds(prev => checked ? [...prev, q.id] : prev.filter(id => id !== q.id))} />
                   </TableCell>
-                  <TableCell className="px-6 py-6 text-left">
+                  <TableCell className="px-6 py-6 text-left max-w-[140px]">
                      <div className="space-y-1.5">
                         <code className="text-[10px] font-mono text-primary font-black">ID: {q.id.slice(-8)}</code>
                         <div className="flex gap-2">
-                           <Badge variant="outline" className="border-slate-100 text-slate-400 text-[7px] px-1.5 uppercase">{q.subjectId || 'General'}</Badge>
+                           <Badge variant="outline" className="border-slate-100 text-slate-300 font-bold uppercase">{q.boardId || 'GOVT'}</Badge>
                         </div>
                         {duplicateAnalysis.ids.has(q.id) && (
                           <Badge className="bg-rose-500 text-white border-none text-[7px] font-black uppercase px-2 py-0.5 animate-pulse">Duplicate</Badge>
