@@ -38,9 +38,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v104.0.
+ * @fileOverview Cracklix Navigation Hub v105.0.
  * UPDATED: Logo positioned exactly to the right of the menu trigger with 0 gap and 0 space.
- * FIXED: Ensured syntax correctness in ProfileMenuItem.
+ * FIXED: Syntax error in ProfileMenuItem.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -230,6 +230,6 @@ export default function Navbar() {
          <Icon className={cn("h-4 w-4 shrink-0", highlight ? "text-primary" : "text-slate-400")} />
          <span className="truncate">{label}</span>
       </Link>
-    )
+    );
   }
 }
