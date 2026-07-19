@@ -43,7 +43,8 @@ import {
   BookMarked,
   Newspaper,
   ArrowUpRight,
-  ArrowRight
+  ArrowRight,
+  CheckCircle2
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -136,7 +137,7 @@ export default function MockTestsPage() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden">
       <Navbar />
       
-      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-20 pb-[env(safe-area-inset-bottom,60px)]">
+      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-20 pb-[env(safe-area-inset-bottom,60px)]">
         
         {/* 1. PREMIUM DASHBOARD HEADER */}
         <section className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 px-1">
