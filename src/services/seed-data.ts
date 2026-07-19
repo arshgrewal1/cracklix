@@ -1,8 +1,8 @@
 import { Firestore, doc, serverTimestamp, writeBatch, collection, getDocs } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Institutional Registry Blueprint v84.0.
- * UPDATED: Added sample questions for all major subjects (Math, Reasoning, CA, GK, History, ICT).
+ * @fileOverview Official Institutional Registry Blueprint v84.1.
+ * UPDATED: Fixed 'current-affairs' abbreviation to avoid 'Hub Hub' double-labeling.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -25,7 +25,7 @@ export async function seedInitialData(db: Firestore) {
     { id: "psssb", abbreviation: "PSSSB", name: "Punjab Subordinate Services Selection Board", categoryId: "punjab-government-exams", displayOrder: 2 },
     { id: "punjab-police", abbreviation: "Punjab Police", name: "Punjab Police Recruitment", categoryId: "punjab-government-exams", displayOrder: 3 },
     { id: "teaching-hub", abbreviation: "Teaching", name: "Education Recruitment Board", categoryId: "punjab-teaching-exams", displayOrder: 1 },
-    { id: "current-affairs", abbreviation: "CA Hub", name: "Daily Current Affairs Node", categoryId: "punjab-government-exams", displayOrder: 10 }
+    { id: "current-affairs", abbreviation: "Current Affairs", name: "Daily Current Affairs Hub", categoryId: "punjab-government-exams", displayOrder: 10 }
   ];
 
   // 3. CANONICAL EXAMS

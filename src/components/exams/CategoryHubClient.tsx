@@ -21,8 +21,8 @@ interface CategoryHubClientProps {
 }
 
 /**
- * @fileOverview Premium Category Hub Portal v5.5.
- * UPDATED: Removed all uppercase styling for better PWA sizing.
+ * @fileOverview Premium Category Hub Portal v5.6.
+ * UPDATED: Filtered out Current Affairs from recruitment boards list as it is not a board.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -47,6 +47,12 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
      return [...rawExams].sort((a: any, b: any) => (a.displayOrder || 0) - (b.displayOrder || 0));
   }, [rawExams]);
 
+  const recruitmentBoards = useMemo(() => {
+     if (!boards) return [];
+     // Exclude Current Affairs from boards list as it's a content hub, not a recruitment organization
+     return boards.filter((b: any) => b.id !== 'current-affairs');
+  }, [boards]);
+
   if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
@@ -68,7 +74,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
             <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-14">
                <AuthorityLogo category={category} size="lg" className="h-24 w-24 md:h-36 md:w-36 rounded-[2rem] md:rounded-[3rem] bg-slate-50 border-[6px] border-slate-100 shadow-5xl group-hover:scale-105 transition-transform shrink-0" />
                <div className="space-y-4 text-center lg:text-left flex-1 min-w-0">
-                  <h1 className="text-2xl sm:text-4xl md:text-6xl font-[800] text-[#0F172A] leading-[1.1] tracking-tight antialiased">
+                  <h1 className="text-2xl sm:text-4xl md:text-6xl font-[800] text-[#0F172A] leading-1.1 tracking-tight antialiased">
                      {category?.title || "Exam selection"}
                   </h1>
                   <p className="text-sm md:text-xl text-slate-500 font-medium leading-relaxed max-w-3xl">
@@ -82,14 +88,14 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-20 max-w-7xl flex-1 space-y-16">
          
          {/* BOARDS GRID */}
-         {boards && boards.length > 0 && (
+         {recruitmentBoards && recruitmentBoards.length > 0 && (
             <section className="space-y-10 text-left">
                <div className="flex items-center gap-3 px-2">
                   <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner"><Landmark className="h-5 w-5" /></div>
                   <h2 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A]">Recruitment boards</h2>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-                  {boards.map((board) => (
+                  {recruitmentBoards.map((board) => (
                      <Link key={board.id} href={`/exams/hub/${board.id}`}>
                         <Card className="border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-8 md:p-12 text-left h-full relative">
                            <div className="flex justify-between items-start mb-10">
@@ -103,10 +109,10 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                               <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest">{board.name}</p>
                            </div>
                            <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between">
-                              <span className="text-[9px] font-black text-slate-400 tracking-[0.2em]">Open hub registry</span>
+                              <span className="text-[9px] font-black text-slate-400 tracking-0.2em">Open hub registry</span>
                               <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[8px] px-2 py-0.5 rounded shadow-sm">12+ Exams</Badge>
                            </div>
-                           <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none group-hover:scale-125 transition-transform duration-1000"><ShieldCheck className="h-40 w-40" /></div>
+                           <div className="absolute top-0 right-0 p-8 opacity-0.02 pointer-events-none group-hover:scale-125 transition-transform duration-1000"><ShieldCheck className="h-40 w-40" /></div>
                         </Card>
                      </Link>
                   ))}
@@ -145,8 +151,8 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
             </section>
          )}
 
-         {!boardsLoading && !examsLoading && boards?.length === 0 && activeExams.length === 0 && (
-            <div className="py-40 text-center opacity-30 italic font-black uppercase tracking-[0.5em] flex flex-col items-center gap-10">
+         {!boardsLoading && !examsLoading && recruitmentBoards?.length === 0 && activeExams.length === 0 && (
+            <div className="py-40 text-center opacity-30 italic font-black uppercase tracking-0.5em flex flex-col items-center gap-10">
                <Layers className="h-20 w-20 text-slate-200" />
                <p className="text-xl md:text-3xl">Registry standby</p>
             </div>
