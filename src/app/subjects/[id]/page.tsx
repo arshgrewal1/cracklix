@@ -43,8 +43,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Subject Selection Hub v4.0.
- * Redesigned to match Testbook/Adda247 standards.
+ * @fileOverview Premium Subject Selection Hub v4.1.
+ * UPDATED: Replaced fake 1.2M attempts with real personal attempt counts.
  */
 
 const QUICK_ACTIONS = [
@@ -111,7 +111,6 @@ export default function SubjectDetailPortal() {
         if (['Easy', 'Medium', 'Hard'].includes(activeFilter)) {
            base = base.filter(s => s.difficulty === activeFilter);
         }
-        // Logic for Completed/In-Progress can be added if backend tracks per-series progress
      }
 
      return base;
@@ -140,18 +139,21 @@ export default function SubjectDetailPortal() {
      const totalSeries = series.length;
      const totalTests = mocks.length;
      const totalQuestions = mocks.reduce((acc, m) => acc + (m.totalQuestions || 0), 0);
-     const totalAttempts = "1.2M"; // Static premium label or replace with real global logic
+     
+     // FIXED: Calculate real personal attempts for this subject
+     const subjectMockIds = new Set(mocks.map(m => m.id));
+     const totalAttempts = results?.filter(r => subjectMockIds.has(r.mockId)).length || 0;
 
      return { totalSeries, totalTests, totalQuestions, totalAttempts };
-  }, [series, mocks]);
+  }, [series, mocks, results]);
 
   if (!mounted || sLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="animate-spin text-primary h-10 w-10" /></div>
 
   if (!subject) return (
-     <div className="h-screen flex flex-col items-center justify-center text-center space-y-6">
-        <AlertTriangle className="h-16 w-16 text-slate-200" />
-        <h2 className="text-2xl font-black">Subject Hub Not Found</h2>
-        <Button onClick={() => router.push('/subjects')} variant="outline">Back to Vault</Button>
+     <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
+        <AlertCircle className="h-16 w-16 text-slate-200" />
+        <h2 className="text-2xl font-black text-[#0F172A]">Subject hub not found</h2>
+        <Button onClick={() => router.push('/subjects')} variant="outline">Back to vault</Button>
      </div>
   )
 
@@ -159,11 +161,10 @@ export default function SubjectDetailPortal() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10">
       <Navbar />
       
-      {/* 1. COMPACT PREMIUM HERO */}
       <section className="bg-white border-b border-slate-100 pt-6 pb-8 md:pt-12 md:pb-14 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
-         <div className="container mx-auto px-4 md:px-8 max-w-7xl relative z-10 space-y-8">
+         <div className="container mx-auto px-4 md:px-8 max-get-7xl relative z-10 space-y-8">
             <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
                <div className="relative shrink-0">
                   <div className="h-16 w-16 md:h-24 md:w-24 rounded-2xl md:rounded-[2rem] bg-primary/10 flex items-center justify-center text-primary shadow-inner group-hover:scale-110 transition-transform duration-500 overflow-hidden relative">
@@ -184,13 +185,12 @@ export default function SubjectDetailPortal() {
                   <StatsChip label="Series" val={totalSubjectStats.totalSeries} />
                   <StatsChip label="Tests" val={totalSubjectStats.totalTests} />
                   <StatsChip label="Items" val={totalSubjectStats.totalQuestions} />
-                  <StatsChip label="Attempts" val={totalSubjectStats.totalAttempts} highlight />
+                  <StatsChip label="My Solved" val={totalSubjectStats.totalAttempts} highlight />
                </div>
             </div>
          </div>
       </section>
 
-      {/* 2. QUICK ACTIONS BAR */}
       <section className="bg-white border-b border-slate-50 py-4 overflow-x-auto no-scrollbar">
          <div className="container mx-auto px-4 md:px-8 max-w-7xl">
             <div className="flex items-center gap-3 md:gap-6 min-w-max">
@@ -208,7 +208,6 @@ export default function SubjectDetailPortal() {
          </div>
       </section>
 
-      {/* 3. STICKY INTELLIGENCE HUB (SEARCH + FILTERS) */}
       <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/80 backdrop-blur-xl border-b border-slate-100 py-4 shadow-sm">
          <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col md:flex-row items-center gap-4 md:gap-8">
             <div className="relative group w-full md:max-w-md">
@@ -217,7 +216,7 @@ export default function SubjectDetailPortal() {
                  value={searchTerm}
                  onChange={e => setSearchTerm(e.target.value)}
                  className="h-11 md:h-12 pl-12 rounded-xl bg-white border-slate-200 shadow-sm font-bold text-sm" 
-                 placeholder="Search series or test nodes..." 
+                 placeholder="Search series or test items..." 
                />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-1 md:pb-0">
@@ -238,8 +237,6 @@ export default function SubjectDetailPortal() {
       </div>
 
       <main className="container mx-auto px-4 md:px-8 py-10 md:py-16 max-w-7xl space-y-12 md:space-y-20">
-         
-         {/* 4. SERIES GRID */}
          <section id="series" className="space-y-8 md:space-y-12">
             <div className="flex items-center justify-between px-1">
                <div className="space-y-1">
@@ -247,7 +244,7 @@ export default function SubjectDetailPortal() {
                   <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Targeted practice modules</p>
                </div>
                <Button variant="ghost" className="text-primary font-black uppercase text-[10px] tracking-widest">
-                  View All Hubs
+                  View all hubs
                </Button>
             </div>
 
@@ -293,7 +290,7 @@ export default function SubjectDetailPortal() {
                                  <div className="mt-8 pt-8 border-t border-slate-50 space-y-6">
                                     <div className="space-y-3">
                                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                                          <span className="text-slate-400">Mastery Index</span>
+                                          <span className="text-slate-400">Mastery index</span>
                                           <span className="text-primary tabular-nums">{stats.progress}%</span>
                                        </div>
                                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
@@ -302,7 +299,7 @@ export default function SubjectDetailPortal() {
                                     </div>
                                     
                                     <Button className="w-full h-12 md:h-14 bg-[#0F172A] group-hover:bg-primary text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl transition-all border-none">
-                                       Continue Prep <ArrowRight className="ml-3 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                       Continue prep <ArrowRight className="ml-3 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                     </Button>
                                  </div>
                               </Card>
@@ -312,13 +309,12 @@ export default function SubjectDetailPortal() {
                   })}
                </div>
             ) : (
-               <EmptyState title="No Series Available" sub="This hub is being populated by our audit team. Please check back later." />
+               <EmptyState title="No series available" sub="This hub is being populated by our audit team. Please check back later." />
             )}
          </section>
       </main>
 
       <Footer />
-      {/* Spacer for bottom nav safety */}
       <div className="h-20 md:h-0" />
     </div>
   )
@@ -368,7 +364,7 @@ function EmptyState({ title, sub }: { title: string, sub: string }) {
        </div>
        <div className="relative z-10 pt-4">
           <Button asChild className="h-14 px-10 bg-[#0F172A] text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none active:scale-95 transition-all">
-             <Link href="/exams">Return to Exam Vault</Link>
+             <Link href="/exams">Return to exam vault</Link>
           </Button>
        </div>
     </div>

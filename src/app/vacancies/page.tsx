@@ -4,7 +4,7 @@
 import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useCollection, useFirestore, useUser } from "@/firebase"
+import { useCollection, useFirestore, useUser, useDoc } from "@/firebase"
 import { collection, query, where, limit, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { 
   Megaphone, 
@@ -22,7 +22,8 @@ import {
   TrendingUp,
   Landmark,
   ArrowRight,
-  Target
+  Target,
+  Users
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -37,8 +38,8 @@ import { Vacancy } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Punjab Vacancy Registry v1.3.
- * FIXED: Removed misplaced AdminHeader and restored high-fidelity student layout.
+ * @fileOverview Official Punjab Vacancy Registry v1.4.
+ * UPDATED: Replaced fake 12.4K aspirants with real user data from settings/stats.
  */
 
 const CATEGORY_CHIPS = [
@@ -62,6 +63,9 @@ export default function VacanciesPortal() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
+  const { data: stats } = useDoc<any>(statsRef);
 
   const vacancyQuery = useMemo(() => {
     if (!db) return null
@@ -87,7 +91,7 @@ export default function VacanciesPortal() {
 
   const handleToggleBookmark = async (e: React.MouseEvent, id: string) => {
     e.preventDefault(); e.stopPropagation();
-    if (!user) { toast({ title: "Login Required", description: "Identity sync needed to save nodes." }); return; }
+    if (!user) { toast({ title: "Login required", description: "Identity sync needed to save items." }); return; }
     
     const isSaved = profile?.savedVacancies?.includes(id)
     const userRef = doc(db!, "users", user.uid)
@@ -95,10 +99,10 @@ export default function VacanciesPortal() {
     try {
       if (isSaved) {
         await updateDoc(userRef, { savedVacancies: arrayRemove(id), updatedAt: serverTimestamp() })
-        toast({ title: "Removed from Registry" })
+        toast({ title: "Removed from registry" })
       } else {
         await updateDoc(userRef, { savedVacancies: arrayUnion(id), updatedAt: serverTimestamp() })
-        toast({ title: "Node Synchronized", description: "Added to your personal vault." })
+        toast({ title: "Item synchronized", description: "Added to your personal vault." })
       }
     } catch (e) {
       toast({ variant: "destructive", title: "Sync failed" })
@@ -119,13 +123,13 @@ export default function VacanciesPortal() {
                   <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary shadow-inner shrink-0">
                     <Megaphone className="h-5 w-5 md:h-6 md:w-6" />
                   </div>
-                  <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[10px] md:text-xs tracking-widest uppercase">Official Recruitment Hub</Badge>
+                  <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[10px] md:text-xs tracking-widest uppercase">Official recruitment hub</Badge>
                </motion.div>
                <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased">
-                  Latest <br/> <span className="text-primary italic">Vacancies.</span>
+                  Latest <br/> <span className="text-primary italic">vacancies.</span>
                </h1>
                <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl leading-tight tracking-tight">
-                  Discover verified Punjab Government job notifications, official PDFs, and direct apply nodes in real-time.
+                  Discover verified Punjab Government job notifications, official PDFs, and direct apply portals in real-time.
                </p>
             </div>
 
@@ -178,7 +182,7 @@ export default function VacanciesPortal() {
                                        <div className="flex items-center gap-6">
                                           <AuthorityLogo boardId={v.board} size="md" className="h-16 w-16 md:h-20 md:w-20 shadow-2xl bg-slate-50 border-4 border-white" />
                                           <div className="space-y-1.5">
-                                             <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[10px] font-black uppercase tracking-widest px-3 py-0.5 rounded-lg">{v.department} Hub</Badge>
+                                             <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[10px] font-black uppercase tracking-widest px-3 py-0.5 rounded-lg">{v.department} hub</Badge>
                                              <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight uppercase">{v.title}</h3>
                                           </div>
                                        </div>
@@ -190,13 +194,13 @@ export default function VacanciesPortal() {
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-slate-50">
                                        <SummaryNode icon={Zap} label="Posts" val={v.totalPosts} />
                                        <SummaryNode icon={GraduationCap} label="Eligibility" val={v.education?.split(',')[0]} />
-                                       <SummaryNode icon={DollarSign} label="Salary Hub" val={v.salary?.split(' ')[0]} />
+                                       <SummaryNode icon={DollarSign} label="Salary" val={v.salary?.split(' ')[0]} />
                                        <SummaryNode icon={Clock} label="Last Date" val={new Date(v.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} color="text-rose-500" />
                                     </div>
 
                                     <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
                                        <Button className="w-full sm:w-auto h-14 md:h-16 px-10 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-2xl shadow-xl gap-3 border-none active:scale-95 transition-all">
-                                          Deep Audit Details <ChevronRight className="h-5 w-5" />
+                                          Deep audit details <ChevronRight className="h-5 w-5" />
                                        </Button>
                                        {v.notificationPdfUrl && (
                                           <Button variant="ghost" className="w-full sm:w-auto h-14 text-primary font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-primary/5 transition-all" asChild onClick={e => e.stopPropagation()}>
@@ -213,7 +217,7 @@ export default function VacanciesPortal() {
                ) : (
                   <div className="py-40 text-center opacity-30 italic font-black uppercase text-xl md:text-3xl tracking-tighter flex flex-col items-center gap-8">
                      <AlertCircle className="h-16 w-16 md:h-24 md:w-24 text-slate-300" />
-                     Registry Standby
+                     Registry standby
                   </div>
                )}
             </div>
@@ -224,16 +228,16 @@ export default function VacanciesPortal() {
                   <div className="relative z-10 space-y-10 text-left">
                      <div className="space-y-2">
                         <h3 className="text-3xl font-black tracking-tight leading-none uppercase">Analytics</h3>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Network Demand Index</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Network demand index</p>
                      </div>
                      <div className="space-y-10">
                         <MetricNode label="Active Vacancies" val={loading ? "..." : rawVacancies?.length} icon={<Megaphone className="text-primary" />} />
-                        <MetricNode label="Daily Aspirants" val="12.4K" icon={<Target className="text-emerald-500" />} />
+                        <MetricNode label="Total Aspirants" val={stats?.totalUsers?.toLocaleString() || "..."} icon={<Users className="text-emerald-500" />} />
                         <MetricNode label="Verified Boards" val="12" icon={<ShieldCheck className="text-blue-500" />} />
                      </div>
                      <div className="pt-10 border-t border-white/5">
                         <Button asChild variant="ghost" className="w-full text-slate-400 hover:text-white group font-black uppercase text-[10px] tracking-widest gap-2">
-                           <Link href="/leaderboard">Full Merit Index <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-all" /></Link>
+                           <Link href="/leaderboard">Full merit index <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-all" /></Link>
                         </Button>
                      </div>
                   </div>
@@ -242,7 +246,7 @@ export default function VacanciesPortal() {
                <div className="p-10 bg-white rounded-[3rem] border border-slate-100 shadow-xl space-y-8 text-left group hover:translate-y-[-6px] transition-all duration-500">
                   <div className="flex items-center gap-4">
                      <ShieldCheck className="h-8 w-8 text-emerald-500" />
-                     <h4 className="text-[11px] font-black uppercase tracking-widest text-[#0F172A]">Security Protocol</h4>
+                     <h4 className="text-[11px] font-black uppercase tracking-widest text-[#0F172A]">Security protocol</h4>
                   </div>
                   <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">All recruitment notifications are verified against official gazettes before being synchronized with the master registry. Instant push alerts for Last Date reminders are active for Elite Pass holders.</p>
                </div>

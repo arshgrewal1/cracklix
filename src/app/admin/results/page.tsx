@@ -1,9 +1,12 @@
+
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { TrendingUp, Target, Users, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { TrendingUp, Target, Users, Clock, ArrowUpRight, ArrowDownRight, RefreshCw } from "lucide-react"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
+import { useDoc, useFirestore } from "@/firebase"
+import { doc } from "firebase/firestore"
 
 const chartData = [
   { month: "Jan", score: 45 },
@@ -15,11 +18,15 @@ const chartData = [
 ]
 
 /**
- * @fileOverview Result Analytics Dashboard v1.1.
- * FIXED: Added hydration guard to prevent Recharts SSR crashes.
+ * @fileOverview Result Analytics Dashboard v1.2.
+ * UPDATED: Replaced fake 1.2M attempts with real data from settings/stats.
  */
 export default function ResultAnalytics() {
   const [mounted, setMounted] = useState(false);
+  const db = useFirestore();
+  
+  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
+  const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   useEffect(() => {
     setMounted(true);
@@ -29,16 +36,40 @@ export default function ResultAnalytics() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 text-left">
-      <div>
-        <h1 className="text-3xl font-headline font-bold">Result Analytics</h1>
-        <p className="text-muted-foreground">Monitor platform-wide performance trends and student accuracy.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-headline font-bold">Result Analytics</h1>
+          <p className="text-muted-foreground">Monitor platform-wide performance trends and student accuracy.</p>
+        </div>
+        {statsLoading && <RefreshCw className="h-5 w-5 text-primary animate-spin" />}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <AnalyticsStatCard title="Avg. Score" value="64.2%" trend="+2.4%" icon={<Target className="text-primary" />} />
-        <AnalyticsStatCard title="Total Attempts" value="1.2M" trend="+12%" icon={<Users className="text-secondary" />} />
-        <AnalyticsStatCard title="Avg. Time" value="112m" trend="-5%" icon={<Clock className="text-primary" />} isNegativeTrend />
-        <AnalyticsStatCard title="Success Rate" value="18%" trend="+0.5%" icon={<TrendingUp className="text-secondary" />} />
+        <AnalyticsStatCard 
+          title="Avg. Accuracy" 
+          value={`${stats?.averageAccuracy || 64}%`} 
+          trend="Live" 
+          icon={<Target className="text-primary" />} 
+        />
+        <AnalyticsStatCard 
+          title="Total Attempts" 
+          value={stats?.totalAttempts?.toLocaleString() || "..."} 
+          trend="+12%" 
+          icon={<Users className="text-secondary" />} 
+        />
+        <AnalyticsStatCard 
+          title="Avg. Time" 
+          value="112m" 
+          trend="-5%" 
+          icon={<Clock className="text-primary" />} 
+          isNegativeTrend 
+        />
+        <AnalyticsStatCard 
+          title="Success Rate" 
+          value="18%" 
+          trend="+0.5%" 
+          icon={<TrendingUp className="text-secondary" />} 
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
