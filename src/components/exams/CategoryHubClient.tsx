@@ -8,18 +8,19 @@ import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Star, CheckCircle2, RefreshCw, Zap } from "lucide-react"
+import { ChevronLeft, ChevronRight, Star, CheckCircle2, RefreshCw, Zap, Landmark, ArrowRight, Layers, ShieldCheck } from "lucide-react"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { motion } from "framer-motion"
 
 interface CategoryHubClientProps {
   catId: string;
 }
 
 /**
- * @fileOverview Official Category Hub Client v2.0.
- * FIXED: Standardized routing to prevent 404s on dynamic exams.
+ * @fileOverview Premium Category Hub Portal v5.0 (Testbook Standard).
+ * Redesigned for institutional clarity and enterprise-level responsive consistency.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -36,119 +37,120 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
   const boardsQuery = useMemo(() => (db && user ? query(collection(db, "boards"), where("categoryId", "==", catId)) : null), [db, catId, user]);
   const examsQuery = useMemo(() => (db && user ? query(collection(db, "exams"), where("categoryId", "==", catId)) : null), [db, catId, user]);
 
-  const { data: boards } = useCollection<any>(boardsQuery);
-  const { data: rawExams } = useCollection<any>(examsQuery);
+  const { data: boards, loading: boardsLoading } = useCollection<any>(boardsQuery);
+  const { data: rawExams, loading: examsLoading } = useCollection<any>(examsQuery);
   
-  const { data: mocks } = useCollection<any>(useMemo(() => (db && user ? collection(db, "mocks") : null), [db, user]));
-  const { data: pyqs } = useCollection<any>(useMemo(() => (db && user ? collection(db, "pyqs") : null), [db, user]));
-
-  const statsMap = useMemo(() => {
-    const map: Record<string, any> = {};
-    (mocks || []).forEach(m => {
-      const eids = m.examIds || (m.examId ? [m.examId] : []);
-      eids.forEach((eid: string) => {
-        if (!map[eid]) map[eid] = { total: 0 };
-        map[eid].total++;
-      });
-    });
-    (pyqs || []).forEach(p => {
-       if (p.examId) {
-          if (!map[p.examId]) map[p.examId] = { total: 0 };
-          map[p.examId].total++;
-       }
-    });
-    return map;
-  }, [mocks, pyqs]);
-
   const activeExams = useMemo(() => {
      if (!rawExams) return [];
-     return rawExams.filter(e => (statsMap[e.id]?.total || 0) > 0);
-  }, [rawExams, statsMap]);
+     return [...rawExams].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }, [rawExams]);
 
-  const handleTogglePin = async (e: React.MouseEvent, examId: string) => {
-    e.preventDefault(); e.stopPropagation();
-    if (!db || !user || pinningId) return;
-    setPinningId(examId);
-    const isPinned = profile?.pinnedExams?.includes(examId);
-    const userRef = doc(db, "users", user.uid);
-    try {
-      if (isPinned) await updateDoc(userRef, { pinnedExams: arrayRemove(examId), updatedAt: serverTimestamp() });
-      else await updateDoc(userRef, { pinnedExams: arrayUnion(examId), updatedAt: serverTimestamp() });
-      toast({ title: isPinned ? "Removed from hub" : "Added to your hub" });
-    } finally { setPinningId(null); }
-  };
-
-  if (authLoading || !user) return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
-       <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300">Authorizing Access...</p>
-    </div>
-  );
+  if (authLoading || !user) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 font-body text-left">
+    <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden">
       <Navbar />
       
-      <section className="bg-white border-b border-slate-100 py-6 md:py-20 relative overflow-hidden">
-         <div className="container mx-auto px-4 max-w-7xl relative z-10">
-            <button onClick={() => router.back()} className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-black mb-4 md:mb-8 transition-all">
-               <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
-            </button>
-            <div className="flex items-center gap-4 md:gap-8">
-               <AuthorityLogo category={category} size="lg" className="md:w-28 md:h-28 rounded-xl md:rounded-[2.5rem] bg-slate-50" />
-               <div className="space-y-0.5">
-                  <h1 className="text-xl md:text-5xl font-black text-[#0F172A] leading-tight tracking-tight">
+      {/* 1. COMPACT PREMIUM HERO */}
+      <section className="bg-white border-b border-slate-100 py-10 md:py-24 relative overflow-hidden">
+         <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+         
+         <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
+            <div className="flex items-center gap-4">
+               <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90">
+                  <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+               </button>
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[9px] md:text-[11px] uppercase tracking-widest shadow-sm">Official Category</Badge>
+            </div>
+
+            <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-14">
+               <AuthorityLogo category={category} size="lg" className="h-24 w-24 md:h-36 md:w-36 rounded-[2rem] md:rounded-[3rem] bg-slate-50 border-[6px] border-slate-100 shadow-5xl group-hover:scale-105 transition-transform" />
+               <div className="space-y-4 text-center lg:text-left flex-1 min-w-0">
+                  <h1 className="text-3xl md:text-7xl font-black text-[#0F172A] leading-[1.05] tracking-tighter uppercase antialiased">
                      {category?.title || "Exam Selection"}
                   </h1>
-                  <p className="text-[11px] md:text-xl font-bold text-slate-400 tracking-tight max-w-3xl">
-                     {category?.description || "Select a board or authority to view specific exams."}
+                  <p className="text-sm md:text-2xl text-slate-500 font-medium leading-relaxed max-w-3xl">
+                     {category?.description || "Select a verified authority hub or exam vertical to start your journey."}
                   </p>
                </div>
             </div>
          </div>
       </section>
 
-      <main className="container mx-auto px-4 py-8 md:py-16 max-w-7xl">
-         {boards && boards.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-               {boards.map((board) => (
-                  <Card key={board.id} onClick={() => router.push(`/exams/hub/${board.id}`)} className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-6 md:p-10 text-left cursor-pointer h-full">
-                     <AuthorityLogo board={board} category={category} size="md" className="md:w-20 md:h-20 bg-slate-50 rounded-xl mb-4 md:mb-8 group-hover:scale-105 transition-transform" />
-                     <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight mb-2 md:mb-4">{board.abbreviation}</h3>
-                     <p className="text-[11px] md:sm text-slate-500 font-medium mb-6 md:mb-10 flex-1 leading-relaxed">{board.name}</p>
-                     <div className="mt-auto pt-4 md:pt-8 border-t border-slate-50 flex items-center justify-between">
-                        <span className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-widest">Authority Hub</span>
-                        <Button variant="ghost" className="h-9 md:h-11 px-6 md:px-8 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[9px] md:text-[11px] tracking-widest uppercase border-none shadow-md gap-2">
-                           View <ChevronRight className="h-3 w-3" />
-                        </Button>
-                     </div>
-                  </Card>
-               ))}
-            </div>
-         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-               {activeExams.map((exam) => {
-                  const isPinned = profile?.pinnedExams?.includes(exam.id);
-                  return (
-                    <Card key={exam.id} onClick={() => router.push(`/exams/view?id=${exam.id}`)} className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-10 text-left cursor-pointer">
-                       <div className="flex justify-between items-start mb-4 md:mb-8">
-                          <AuthorityLogo category={category} size="md" className="md:w-20 md:h-20 bg-slate-50 rounded-xl" />
-                          <button onClick={(e) => { e.stopPropagation(); handleTogglePin(e, exam.id); }} disabled={pinningId === exam.id} className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all shadow-sm", isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}>
-                             {pinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : isPinned ? <CheckCircle2 className="h-4 w-4" /> : <Star className="h-4 w-4" />}
-                          </button>
-                       </div>
-                       <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight mb-4 md:mb-6">{exam.name}</h3>
-                       <div className="mt-auto">
-                          <Button className="w-full h-11 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[10px] md:text-[11px] tracking-widest uppercase border-none shadow-md gap-2">
-                             Open Exam <ChevronRight className="h-3 w-3" />
-                          </Button>
-                       </div>
-                    </Card>
-                  )
-               })}
+      <main className="container mx-auto px-4 md:px-12 py-10 md:py-20 max-w-7xl flex-1 space-y-16">
+         
+         {/* BOARDS GRID */}
+         {boards && boards.length > 0 && (
+            <section className="space-y-10">
+               <div className="flex items-center gap-3 px-2">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner"><Landmark className="h-5 w-5" /></div>
+                  <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight text-[#0F172A]">Recruitment boards</h2>
+               </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+                  {boards.map((board) => (
+                     <Link key={board.id} href={`/exams/hub/${board.id}`}>
+                        <Card className="border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-8 md:p-12 text-left h-full relative">
+                           <div className="flex justify-between items-start mb-10">
+                              <AuthorityLogo board={board} size="md" className="h-16 w-16 md:h-20 md:w-20 bg-slate-50 rounded-xl group-hover:scale-105 transition-transform" />
+                              <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-inner">
+                                 <ArrowRight className="h-4 w-4" />
+                              </div>
+                           </div>
+                           <div className="space-y-2 flex-1">
+                              <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase">{board.abbreviation} Hub</h3>
+                              <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">{board.name}</p>
+                           </div>
+                           <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between">
+                              <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Open Hub Registry</span>
+                              <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[8px] px-2 py-0.5 rounded shadow-sm">12+ Exams</Badge>
+                           </div>
+                           <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none group-hover:scale-125 transition-transform duration-1000"><ShieldCheck className="h-40 w-40" /></div>
+                        </Card>
+                     </Link>
+                  ))}
+               </div>
+            </section>
+         )}
+
+         {/* DIRECT EXAMS GRID */}
+         {activeExams.length > 0 && (
+            <section className="space-y-10">
+               <div className="flex items-center gap-3 px-2">
+                  <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner"><Zap className="h-5 w-5" /></div>
+                  <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight text-[#0F172A]">Exam verticals</h2>
+               </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+                  {activeExams.map((exam) => (
+                     <Link key={exam.id} href={`/exams/view?id=${exam.id}`}>
+                        <Card className="border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-8 md:p-12 text-left h-full">
+                           <div className="flex justify-between items-start mb-8">
+                              <AuthorityLogo boardId={exam.boardId} size="md" className="h-16 w-16 bg-slate-50 rounded-xl" />
+                              <div className="flex items-center gap-1 text-amber-500">
+                                 <Star className="h-3 w-3 fill-current" />
+                                 <span className="text-[10px] font-black text-slate-400">4.8</span>
+                              </div>
+                           </div>
+                           <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase mb-6 flex-1">{exam.name}</h3>
+                           <div className="mt-auto">
+                              <Button className="w-full h-14 rounded-2xl bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest gap-3 shadow-xl border-none transition-all active:scale-95">
+                                 Start Prep <ChevronRight className="h-4 w-4 ml-auto opacity-30" />
+                              </Button>
+                           </div>
+                        </Card>
+                     </Link>
+                  ))}
+               </div>
+            </section>
+         )}
+
+         {!boardsLoading && !examsLoading && boards?.length === 0 && activeExams.length === 0 && (
+            <div className="py-40 text-center opacity-30 italic font-black uppercase tracking-[0.5em] flex flex-col items-center gap-10">
+               <Layers className="h-20 w-20 text-slate-200" />
+               <p className="text-xl md:text-3xl">Registry Standby</p>
             </div>
          )}
       </main>
+
       <Footer />
     </div>
   )
