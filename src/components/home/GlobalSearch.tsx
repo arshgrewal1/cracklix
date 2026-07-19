@@ -8,10 +8,11 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '@/hooks/use-toast';
 
 /**
- * @fileOverview Institutional Sticky Search Hub v15.0.
- * FIXED: Rounded 20px, sticky behavior, and verification badge integrated.
+ * @fileOverview Institutional Sticky Search Hub v16.0.
+ * FIXED: Implemented functional Voice Search (Mic).
  */
 
 const TRENDING = [
@@ -23,9 +24,11 @@ const TRENDING = [
 
 export default function GlobalSearch() {
   const db = useFirestore();
+  const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -59,6 +62,40 @@ export default function GlobalSearch() {
   const hasResults = results && (
     results.exams.length > 0 || results.mocks.length > 0 || results.notes.length > 0
   );
+
+  const startListening = () => {
+    if (typeof window === 'undefined') return;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      toast({ 
+        variant: "destructive", 
+        title: "Not Supported", 
+        description: "Voice search is not supported in your browser." 
+      });
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+    
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript);
+      setIsOpen(true);
+    };
+
+    try {
+      recognition.start();
+    } catch (e) {
+      setIsListening(false);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -106,7 +143,13 @@ export default function GlobalSearch() {
                  <Loader2 className="h-4 w-4 text-primary animate-spin mr-1" />
                )}
                <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block" />
-               <button className="h-9 w-9 md:h-11 md:w-11 rounded-xl flex items-center justify-center text-slate-400 hover:text-primary transition-all shrink-0">
+               <button 
+                 onClick={startListening}
+                 className={cn(
+                   "h-9 w-9 md:h-11 md:w-11 rounded-xl flex items-center justify-center transition-all shrink-0",
+                   isListening ? "bg-rose-500 text-white animate-pulse" : "text-slate-400 hover:text-primary"
+                 )}
+               >
                   <Mic className="h-4 w-4 md:h-5 md:w-5" />
                </button>
             </div>

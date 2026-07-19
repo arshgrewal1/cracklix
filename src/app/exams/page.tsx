@@ -31,10 +31,11 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
+import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Exam Selection Hub v4.0.
- * Redesigned for enterprise quality matching Testbook/Adda247 standards.
+ * @fileOverview Premium Exam Selection Hub v5.0.
+ * FIXED: Implemented functional Voice Search.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -57,7 +58,9 @@ const POPULAR_CHIPS = [
 export default function ExamsEntryPage() {
   const db = useFirestore();
   const { user, loading: authLoading } = useUser();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [isListening, setIsListening] = useState(false);
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: platformStats } = useDoc<any>(statsRef);
@@ -83,6 +86,26 @@ export default function ExamsEntryPage() {
       e.boardId?.toLowerCase().includes(term)
     ).slice(0, 8);
   }, [exams, searchTerm]);
+
+  const startListening = () => {
+    if (typeof window === 'undefined') return;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      toast({ variant: "destructive", title: "Not Supported", description: "Voice search is not supported." });
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognition.onresult = (event: any) => {
+      setSearchTerm(event.results[0][0].transcript);
+    };
+    recognition.start();
+  };
 
   if (authLoading || !user) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
@@ -131,7 +154,13 @@ export default function ExamsEntryPage() {
                       <X className="h-4 w-4 text-slate-400" />
                     </button>
                   )}
-                  <button className="h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center text-slate-400 hover:text-primary transition-all">
+                  <button 
+                    onClick={startListening}
+                    className={cn(
+                      "h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center transition-all",
+                      isListening ? "bg-rose-500 text-white animate-pulse" : "text-slate-400 hover:text-primary"
+                    )}
+                  >
                     <Mic className="h-5 w-5" />
                   </button>
                 </div>
@@ -256,7 +285,7 @@ export default function ExamsEntryPage() {
                           <div className="flex justify-between items-start mb-10">
                              <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-2xl border-4 border-white bg-slate-50" />
                              <div className="flex flex-col items-end gap-2">
-                                <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg">LIVE PATTERNS</Badge>
+                                <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-sm">LIVE PATTERNS</Badge>
                                 <div className="flex items-center gap-1 text-amber-500">
                                    <Star className="h-3 w-3 fill-current" />
                                    <span className="text-[10px] font-black text-slate-400">4.9</span>

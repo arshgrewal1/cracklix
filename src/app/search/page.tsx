@@ -1,16 +1,16 @@
-
 "use client"
 
 import * as React from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap, LucideIcon } from "lucide-react"
+import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap, LucideIcon, Mic, X } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 interface SearchResultNode {
   title: string;
@@ -20,8 +20,8 @@ interface SearchResultNode {
 }
 
 /**
- * @fileOverview Search Results Hub v1.1.
- * UPDATED: Simplified result type labels.
+ * @fileOverview Search Results Hub v1.2.
+ * FIXED: Implemented functional Voice Search (Mic).
  */
 
 export default function SearchPage() {
@@ -38,7 +38,11 @@ function SearchContent() {
   const router = useRouter()
   const pathname = usePathname()
   const { user, loading: authLoading } = useUser()
+  const { toast } = useToast();
+  
   const [queryStr, setQuery] = React.useState("")
+  const [debouncedQuery, setDebouncedQuery] = React.useState("")
+  const [isListening, setIsListening] = React.useState(false)
 
   React.useEffect(() => {
     if (!authLoading && !user) {
@@ -51,6 +55,11 @@ function SearchContent() {
     if (q) setQuery(q)
   }, [searchParams])
 
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(queryStr), 300);
+    return () => clearTimeout(timer);
+  }, [queryStr]);
+
   const mocksQuery = React.useMemo(() => (db ? collection(db, "mocks") : null), [db])
   const examsQuery = React.useMemo(() => (db ? collection(db, "exams") : null), [db])
   const notesQuery = React.useMemo(() => (db ? collection(db, "notes") : null), [db])
@@ -62,8 +71,8 @@ function SearchContent() {
   const isLoading = mLoading || eLoading || nLoading
 
   const searchResults = React.useMemo<SearchResultNode[]>(() => {
-    if (queryStr.trim().length < 2) return []
-    const term = queryStr.toLowerCase().trim()
+    if (debouncedQuery.trim().length < 2) return []
+    const term = debouncedQuery.toLowerCase().trim()
     
     const examMatches = (exams || []).filter((e: any) => 
       e.name?.toLowerCase().includes(term) || 
@@ -96,7 +105,27 @@ function SearchContent() {
     }))
 
     return [...examMatches, ...mockMatches, ...notesMatches]
-  }, [queryStr, exams, mocks, notes])
+  }, [debouncedQuery, exams, mocks, notes])
+
+  const startListening = () => {
+    if (typeof window === 'undefined') return;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      toast({ variant: "destructive", title: "Not Supported", description: "Voice search is not supported." });
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognition.onresult = (event: any) => {
+      setQuery(event.results[0][0].transcript);
+    };
+    recognition.start();
+  };
 
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
@@ -122,12 +151,33 @@ function SearchContent() {
                       className="w-full h-12 md:h-14 pl-12 md:pl-16 pr-14 text-sm md:text-2xl rounded-2xl md:rounded-[2.5rem] border-none shadow-2xl bg-white focus:ring-4 focus:ring-primary/5 text-slate-900"
                       placeholder="Search exams or tests..." 
                     />
-                    {isLoading && <Loader2 className="absolute right-6 top-1/2 -translate-y-1/2 h-6 w-6 text-primary animate-spin" />}
+                    
+                    <div className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                       {queryStr && (
+                         <button 
+                           onClick={() => setQuery('')}
+                           className="p-1.5 hover:bg-slate-100 rounded-full"
+                         >
+                           <X className="h-4 w-4 text-slate-400" />
+                         </button>
+                       )}
+                       {isLoading && <Loader2 className="h-5 w-5 text-primary animate-spin" />}
+                       <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block" />
+                       <button 
+                         onClick={startListening}
+                         className={cn(
+                           "h-9 w-9 md:h-11 md:w-11 rounded-xl flex items-center justify-center transition-all",
+                           isListening ? "bg-rose-500 text-white animate-pulse" : "text-slate-400 hover:text-primary"
+                         )}
+                       >
+                         <Mic className="h-4 w-4 md:h-5 md:w-5" />
+                       </button>
+                    </div>
                  </div>
               </div>
            </div>
 
-           {queryStr.length >= 2 && (
+           {debouncedQuery.length >= 2 && (
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.map((res, i) => {
