@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v51.3.
- * UPDATED: Removed fake student count and uppercase styling.
+ * @fileOverview Institutional Popular Exams Hub v51.4.
+ * UPDATED: Integrated verified mock counts and synchronized branding.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -44,7 +44,7 @@ export default function PopularExams() {
   }, [db]);
 
   const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
-  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db]);
+  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]);
 
   const { data: exams, loading } = useCollection<any>(examsQuery);
   const { data: boards } = useCollection<any>(boardsQuery);
@@ -55,7 +55,7 @@ export default function PopularExams() {
     if (!exams) return stats;
 
     exams.forEach(e => {
-       const relatedMocks = (mocks || []).filter(m => m.examId === e.id || m.examIds?.includes(e.id));
+       const relatedMocks = (mocks || []).filter((m: any) => m.examId === e.id || m.examIds?.includes(e.id));
        const totalQ = relatedMocks.reduce((acc, m) => acc + (m.totalQuestions || 0), 0);
        
        stats[e.id] = {
@@ -125,7 +125,7 @@ export default function PopularExams() {
               Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-64 w-full rounded-[2.5rem] bg-slate-50" />
               ))
-           ) : exams?.map((exam, idx) => {
+           ) : exams?.map((exam: any, idx: number) => {
               const board = boards?.find((b: any) => b.id === exam.boardId || b.abbreviation === exam.boardId);
               const isPinned = profile?.pinnedExams?.includes(exam.id);
               const stats = examStats[exam.id] || { mocks: 0, questions: 0 };
@@ -169,7 +169,7 @@ export default function PopularExams() {
                              </h3>
                              
                              <div className="flex flex-wrap items-center gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-primary" /> {stats.mocks}+ Tests</span>
+                                <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-primary" /> {stats.mocks} Mocks</span>
                                 <span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Verified</span>
                              </div>
                           </div>

@@ -12,12 +12,13 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Institutional Exam Vertical Card v4.0.
+ * @fileOverview Premium Institutional Exam Vertical Card v4.1.
  * Redesigned for production standard comparable to Testbook/Oliveboard.
+ * UPDATED: Integrated real data counts.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"
-  const totalMocksCount = exam.totalMocks ?? "40+"
+  const totalMocksCount = exam.totalMocks || 0
 
   return (
     <motion.div whileHover={{ y: -6 }} whileTap={{ scale: 0.98 }}>

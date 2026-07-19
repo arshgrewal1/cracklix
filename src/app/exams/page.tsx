@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser, useDoc } from "@/firebase"
-import { collection, query, orderBy, doc } from "firebase/firestore"
+import { collection, query, orderBy, doc, where } from "firebase/firestore"
 import { 
   Landmark, 
   ChevronRight, 
@@ -34,8 +34,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Exam Selection Hub v5.2.
- * FIXED: Removed mandatory user check to allow public browsing.
+ * @fileOverview Premium Exam Selection Hub v5.3.
+ * UPDATED: Integrated real-time mock counts from registry.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -67,21 +67,31 @@ export default function ExamsEntryPage() {
 
   const { data: rawCategories, loading: catLoading } = useCollection<any>(useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]));
   const { data: exams, loading: examsLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
+  const { data: allMocks } = useCollection<any>(useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]));
+
+  const examStats = useMemo(() => {
+    const stats: Record<string, number> = {};
+    if (!exams || !allMocks) return stats;
+    exams.forEach(e => {
+       stats[e.id] = allMocks.filter((m: any) => m.examId === e.id || m.examIds?.includes(e.id)).length;
+    });
+    return stats;
+  }, [exams, allMocks]);
 
   const categories = useMemo(() => {
     if (!rawCategories) return [];
-    return rawCategories.filter(c => AUTHORIZED_CATEGORY_IDS.includes(c.id));
+    return rawCategories.filter((c: any) => AUTHORIZED_CATEGORY_IDS.includes(c.id));
   }, [rawCategories]);
 
   const featuredExams = useMemo(() => {
     if (!exams) return [];
-    return exams.filter(e => e.isTrending).slice(0, 4);
+    return exams.filter((e: any) => e.isTrending).slice(0, 4);
   }, [exams]);
 
   const filteredExams = useMemo(() => {
     if (!searchTerm.trim() || !exams) return [];
     const term = searchTerm.toLowerCase().trim();
-    return exams.filter(e => 
+    return exams.filter((e: any) => 
       e.name?.toLowerCase().includes(term) || 
       e.boardId?.toLowerCase().includes(term)
     ).slice(0, 8);
@@ -176,7 +186,7 @@ export default function ExamsEntryPage() {
                     className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[24px] shadow-5xl border border-slate-100 z-50 overflow-hidden"
                   >
                     <div className="divide-y divide-slate-50">
-                      {filteredExams.map((e) => (
+                      {filteredExams.map((e: any) => (
                         <Link key={e.id} href={`/exams/view?id=${e.id}`} className="flex items-center justify-between p-4 md:p-6 hover:bg-slate-50 transition-all group">
                           <div className="flex items-center gap-4 min-w-0">
                             <AuthorityLogo boardId={e.boardId} size="sm" className="h-12 w-12 shrink-0" />
@@ -225,7 +235,7 @@ export default function ExamsEntryPage() {
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10 w-full">
               {catLoading ? (
                  Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-[24px]" />)
-              ) : categories.map((cat, i) => (
+              ) : categories.map((cat: any, i: number) => (
                  <motion.div 
                     key={cat.id}
                     whileHover={{ scale: 1.02 }}
@@ -272,7 +282,7 @@ export default function ExamsEntryPage() {
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10">
               {examsLoading ? (
                  Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[32px]" />)
-              ) : featuredExams.map((exam, i) => (
+              ) : featuredExams.map((exam: any, i: number) => (
                  <motion.div 
                     key={exam.id}
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -296,7 +306,7 @@ export default function ExamsEntryPage() {
                              <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-[1.1] tracking-tight group-hover:text-primary transition-colors">{exam.name}</h3>
                              <div className="flex items-center gap-6 pt-4">
                                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px]">
-                                   <Zap className="h-4 w-4 text-primary" /> {exam.totalMocks || '40+'} Mocks
+                                   <Zap className="h-4 w-4 text-primary" /> {examStats[exam.id] || 0} Mocks
                                 </div>
                                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px]">
                                    <Users className="h-4 w-4 text-primary" /> Active
