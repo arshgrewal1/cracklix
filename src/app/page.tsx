@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v501.4.
- * FIXED: Purged "node" terminology and normalized casing for PWA sizing.
+ * @fileOverview Institutional Premium Hub v501.5.
+ * UPDATED: Refined heading text for professional Title Case.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -63,7 +63,7 @@ export default function HomePage() {
                      <div className="flex items-center justify-center gap-2">
                         <Flame className="h-6 w-6 text-orange-500 fill-current animate-pulse" />
                         <h2 className="text-[26px] md:text-4xl font-bold tracking-tight text-white antialiased leading-tight">
-                           Today's challenge
+                           Today's Challenge
                         </h2>
                      </div>
                      <p className="text-[16px] text-slate-300 font-medium mt-[6px] max-w-lg mx-auto">
@@ -84,7 +84,7 @@ export default function HomePage() {
                             <button className="relative overflow-hidden w-full h-[52px] bg-gradient-to-r from-blue-600 to-blue-400 hover:brightness-110 text-white font-bold text-base tracking-tight rounded-[18px] shadow-[0_12px_24px_rgba(37,99,235,0.3)] transition-all duration-300 active:scale-95 border-none group/btn cursor-pointer">
                                <div className="flex items-center justify-center gap-2 relative z-10">
                                   <Zap className="h-4 w-4 fill-white text-white" />
-                                  <span>Start challenge</span>
+                                  <span>Start Challenge</span>
                                   <ChevronRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                                </div>
                                <motion.div 

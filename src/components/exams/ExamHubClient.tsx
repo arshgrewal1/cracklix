@@ -46,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v6.8.
- * UPDATED: Removed uppercase styling.
+ * @fileOverview Premium Exam Detail Hub v6.9.
+ * UPDATED: Refined heading text for professional Title Case.
  */
 
 export default function ExamHubClient() {
@@ -171,15 +171,15 @@ export default function ExamHubClient() {
                   </div>
                   <div className="space-y-4 text-center md:text-left flex-1 min-w-0">
                     <h1 className="text-2xl sm:text-4xl md:text-5xl font-[800] tracking-tight leading-[1.1] text-[#0F172A] antialiased break-words">
-                       {exam.name} <br className="hidden md:block" /> <span className="text-primary italic">Preparation hub.</span>
+                       {exam.name} <br className="hidden md:block" /> <span className="text-primary italic">Preparation Hub</span>
                     </h1>
                     <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl line-clamp-2">
                        {exam.description || "Master the official Punjab recruitment pattern with verified practice series."}
                     </p>
                     <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 pt-2">
-                       <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-tight">Verified test hub</Badge>
+                       <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-tight">Verified Test Hub</Badge>
                        <span className="text-[11px] md:text-sm font-medium text-slate-400 flex items-center gap-2">
-                          <Users className="h-4 w-4 text-primary" /> {platformStats?.totalUsers?.toLocaleString() || "..."}+ Aspirants active
+                          <Users className="h-4 w-4 text-primary" /> {platformStats?.totalUsers?.toLocaleString() || "..."}+ Aspirants Active
                        </span>
                     </div>
                   </div>
@@ -197,20 +197,20 @@ export default function ExamHubClient() {
                       )}
                     >
                        {isPinning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4", isPinned && "fill-current")} />}
-                       {isPinned ? "Pinned to my exams" : "Add to dashboard"}
+                       {isPinned ? "Pinned to My Exams" : "Add to Dashboard"}
                     </Button>
                   )}
                   <Button asChild className="h-14 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white rounded-2xl font-bold text-sm tracking-tight gap-3 shadow-2xl border-none active:scale-95 transition-all">
-                     <Link href="/pass"><Gem className="h-5 w-5 text-white" /> Unlock elite pass</Link>
+                     <Link href="/pass"><Gem className="h-5 w-5 text-white" /> Unlock Elite Pass</Link>
                   </Button>
                </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10 border-t border-slate-100">
-               <HeroStat icon={Zap} label="Tests available" val={stats.totalTests} />
-               <HeroStat icon={FileStack} label="Old papers" val={groupedContent.PYQ.length} />
-               <HeroStat icon={Target} label="My progress" val={user ? `${stats.attempted}` : 'Login'} />
-               <HeroStat icon={Trophy} label="Rank status" val="Active" />
+               <HeroStat icon={Zap} label="Tests Available" val={stats.totalTests} />
+               <HeroStat icon={FileStack} label="Old Papers" val={groupedContent.PYQ.length} />
+               <HeroStat icon={Target} label="My Progress" val={user ? `${stats.attempted}` : 'Login'} />
+               <HeroStat icon={Trophy} label="Rank Status" val="Active" />
             </div>
          </div>
       </section>
@@ -220,12 +220,12 @@ export default function ExamHubClient() {
             <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
                <div className="bg-white border border-slate-200 shadow-sm rounded-[20px] p-1 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">
                   <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-between gap-1 overflow-x-auto no-scrollbar snap-x">
-                     <HubTab value="MOCK" label="Mock series" icon={Zap} />
-                     <HubTab value="SUBJECT" label="Subject tests" icon={BookOpen} />
-                     <HubTab value="SECTIONAL" label="Sectional tests" icon={Layers} />
-                     <HubTab value="PYQ" label="Old papers" icon={FileStack} />
-                     <HubTab value="NOTES" label="Study notes" icon={FileText} />
-                     <HubTab value="CA" label="Current affairs" icon={Newspaper} />
+                     <HubTab value="MOCK" label="Mock Series" icon={Zap} />
+                     <HubTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
+                     <HubTab value="SECTIONAL" label="Sectional Tests" icon={Layers} />
+                     <HubTab value="PYQ" label="Old Papers" icon={FileStack} />
+                     <HubTab value="NOTES" label="Study Notes" icon={FileText} />
+                     <HubTab value="CA" label="Current Affairs" icon={Newspaper} />
                   </TabsList>
                </div>
             </div>
@@ -242,16 +242,16 @@ export default function ExamHubClient() {
                                   <div className="h-16 w-16 md:h-20 md:w-20 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                                     <BookOpen className="h-8 w-8" />
                                   </div>
-                                  <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-bold text-[9px] tracking-widest">Subject hub</Badge>
+                                  <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-bold text-[9px] tracking-widest">Subject Hub</Badge>
                               </div>
                               <div className="space-y-4 flex-1">
                                   <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight tracking-tight">{sub.name}</h3>
                                   <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest flex items-center gap-2">
-                                    <Zap className="h-3.5 w-3.5 text-primary" /> Multi-series active
+                                    <Zap className="h-3.5 w-3.5 text-primary" /> Multi-series Active
                                   </p>
                               </div>
                               <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between text-primary font-bold text-[10px] tracking-tight">
-                                  <span>View tests</span>
+                                  <span>View Tests</span>
                                   <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                               </div>
                             </Card>
@@ -305,7 +305,7 @@ function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
    if (!data || data.length === 0) return (
       <div className="py-40 text-center opacity-20 flex flex-col items-center gap-6">
          <Zap className="h-20 w-20 text-slate-300" />
-         <p className="font-bold text-2xl md:text-4xl tracking-tight text-slate-400">Hub standby</p>
+         <p className="font-bold text-2xl md:text-4xl tracking-tight text-slate-400">Hub Standby</p>
       </div>
    );
 
@@ -324,7 +324,7 @@ function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
                   </div>
                   <div className="space-y-4 flex-1 text-left">
                      <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold text-primary tracking-tight">{item.difficulty || 'Standard'} pattern</p>
+                        <p className="text-[10px] font-bold text-primary tracking-tight">{item.difficulty || 'Standard'} Pattern</p>
                         <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight line-clamp-2">{item.title}</h3>
                      </div>
                      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
@@ -336,7 +336,7 @@ function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
                      <Button asChild className="w-full h-14 md:h-16 rounded-2xl font-bold text-[10px] md:text-[11px] tracking-tight shadow-xl border-none active:scale-95 gap-3 bg-[#0F172A] hover:bg-black text-white">
                         <Link href={isNote || isPYQ ? (item.pdfUrl || '#') : `/mocks/instructions?id=${item.id}`}>
                            {isNote || isPYQ ? <Download className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
-                           {isNote || isPYQ ? "Download PDF" : "Start preparation"}
+                           {isNote || isPYQ ? "Download PDF" : "Start Preparation"}
                            <ChevronRight className="h-4 w-4 ml-auto opacity-40" />
                         </Link>
                      </Button>
