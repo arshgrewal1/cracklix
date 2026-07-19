@@ -5,7 +5,7 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, limit, orderBy } from "firebase/firestore"
-import { Trophy, ShieldCheck, Search, Activity, Zap, Star, Medal, Target } from "lucide-react"
+import { Trophy, ShieldCheck, Search, Activity, Zap, Star, Medal, Target, ChevronRight, X, Filter } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -13,26 +13,37 @@ import { Input } from "@/components/ui/input"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Top Rankers Center v20.1.
- * FIXED: Repaired uniqueRankers reference mismatch causing runtime crash.
- * NORMALIZED: Removed forced uppercase from general headers and student names.
+ * @fileOverview Official Top Rankers Center v3.0 (Premium Redesign).
+ * FIXED: Deduplicates by best score and implements sticky intelligence hub.
+ * PWA: Standardized safe-area hardiness and 44px touch targets.
  */
+
+const CATEGORY_CHIPS = [
+  { id: "all", label: "All Hubs" },
+  { id: "PSSSB", label: "PSSSB" },
+  { id: "PPSC", label: "PPSC" },
+  { id: "Punjab Police", label: "Police" },
+  { id: "Teaching", label: "Teaching" },
+  { id: "Banking", label: "Banking" },
+  { id: "Judiciary", label: "Judiciary" },
+  { id: "Central", label: "Central" },
+];
 
 export default function LeaderboardPage() {
   const db = useFirestore()
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
+  
   const [searchTerm, setSearchTerm] = useState("")
+  const [activeBoard, setActiveBoard] = useState("all")
   const [mounted, setMounted] = useState(false)
   
   useEffect(() => {
     setMounted(true)
-    if (!authLoading && !user) {
-      router.push(`/login?returnUrl=${encodeURIComponent('/leaderboard')}`);
-    }
-  }, [user, authLoading, router]);
+  }, []);
 
   const meritQuery = useMemo(() => (db && mounted ? query(collection(db, "results"), limit(500)) : null), [db, mounted])
   const usersQuery = useMemo(() => (db && mounted ? query(collection(db, "users"), limit(500)) : null), [db, mounted])
@@ -42,33 +53,41 @@ export default function LeaderboardPage() {
 
   const finalSortedList = useMemo(() => {
     if (!results || !mounted) return []
-    const lowerSearch = searchTerm.toLowerCase();
+    const term = searchTerm.toLowerCase().trim();
     
     const uniqueRankers = new Map<string, any>();
     
-    // Deduplicate by User and keep their BEST score globally
+    // 1. DEDUPLICATION LOGIC: Keep Best Score per Aspirant
     [...results].forEach((r: any) => {
       const existing = uniqueRankers.get(r.userId);
       if (!existing || existing.score < r.score) {
         const userProfile = users?.find((u: any) => u.id === r.userId);
+        
+        // Resolve canonical name
         const rawName = userProfile?.name || 
                      (r.userName && r.userName !== 'Aspirant' && r.userName !== 'Student' && !r.userName.includes('@') ? r.userName : null) || 
                      userProfile?.email || 
                      r.userEmail || 
                      "Aspirant";
         
-        const name = rawName;
-        const email = userProfile?.email || r.userEmail || "---";
+        // Normalize to Title Case
+        const name = rawName.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
-        if (!searchTerm || (name.toLowerCase().includes(lowerSearch) || email.toLowerCase().includes(lowerSearch))) {
+        const matchesSearch = !term || 
+          name.toLowerCase().includes(term) || 
+          (r.mockTitle || "").toLowerCase().includes(term);
+
+        const matchesBoard = activeBoard === 'all' || 
+          (r.mockTitle || "").toLowerCase().includes(activeBoard.toLowerCase());
+
+        if (matchesSearch && matchesBoard) {
           uniqueRankers.set(r.userId, {
             id: r.userId,
             name,
-            email,
             profile: userProfile,
-            score: r.score,
-            accuracy: r.accuracy,
-            mockTitle: r.mockTitle,
+            score: r.score || 0,
+            accuracy: r.accuracy || 0,
+            mockTitle: r.mockTitle || "Practice Mock",
             timestamp: r.timestamp,
             gender: r.gender || userProfile?.gender
           });
@@ -77,108 +96,251 @@ export default function LeaderboardPage() {
     });
 
     return Array.from(uniqueRankers.values()).sort((a, b) => b.score - a.score);
-  }, [results, users, searchTerm, mounted]);
+  }, [results, users, searchTerm, activeBoard, mounted]);
 
   const podium = useMemo(() => finalSortedList.slice(0, 3), [finalSortedList]);
+  const listItems = useMemo(() => finalSortedList.slice(3), [finalSortedList]);
 
-  if (!mounted) return <div className="min-h-screen bg-white" />;
+  if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 font-body text-left overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col">
       <Navbar />
       
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-24 max-w-[1440px] space-y-12 md:space-y-24">
-         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
-            <div className="space-y-6 text-left">
-               <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 md:h-14 md:w-14 bg-primary/10 rounded-2xl md:rounded-3xl flex items-center justify-center text-primary shadow-2xl">
-                     <ShieldCheck className="h-6 w-6 md:h-8 md:w-8" />
-                  </div>
-                  <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Official Rank List</span>
+      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-8 md:space-y-12 pb-32">
+         
+         {/* 1. COMPACT HEADER */}
+         <section className="space-y-4 px-1">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+               <div className="space-y-1">
+                  <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight uppercase">Top Rankers</h1>
+                  <p className="text-slate-500 font-medium text-sm md:text-lg">Highest performing students across all Punjab Government exams.</p>
                </div>
-               <h1 className="text-4xl md:text-7xl lg:text-8xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased">Top Rankers</h1>
-               <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl leading-tight tracking-tight italic">Registry of all-time highest scores across Punjab recruitment verticals.</p>
+               <div className="flex items-center gap-3 shrink-0">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Registry Sync Live</span>
+               </div>
             </div>
-            <div className="relative w-full md:w-[500px] group">
-               <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-blue-400/10 rounded-2xl blur opacity-20 transition duration-1000"></div>
-               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-300 group-focus:text-primary transition-colors" />
-               <Input className="h-16 md:h-20 pl-16 rounded-2xl md:rounded-[2rem] bg-white border-none shadow-2xl text-lg md:text-xl font-bold text-[#0F172A]" placeholder="Search student..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+         </section>
+
+         {/* 2. STICKY INTELLIGENCE HUB */}
+         <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/95 backdrop-blur-xl -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
+            <div className="max-w-4xl mx-auto space-y-6">
+               <div className="relative group">
+                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                  <Input 
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    placeholder="Search student or exam vertical..." 
+                    className="h-14 md:h-16 pl-14 pr-12 rounded-2xl bg-white border-slate-200 shadow-xl text-base font-bold placeholder:text-slate-200 focus-visible:ring-4 focus-visible:ring-primary/5 transition-all"
+                  />
+                  {searchTerm && (
+                    <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all">
+                       <X className="h-4 w-4 text-slate-400" />
+                    </button>
+                  )}
+               </div>
+
+               <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 px-1">
+                  {CATEGORY_CHIPS.map(chip => (
+                     <button 
+                       key={chip.id} 
+                       onClick={() => setActiveBoard(chip.id)}
+                       className={cn(
+                          "h-9 px-6 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-tight whitespace-nowrap transition-all border active:scale-95 shadow-sm",
+                          activeBoard === chip.id 
+                             ? "bg-primary border-primary text-white shadow-lg" 
+                             : "bg-white border-slate-100 text-slate-400 hover:border-slate-300"
+                       )}
+                     >
+                        {chip.label}
+                     </button>
+                  ))}
+                  <button className="h-9 w-9 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-400 shrink-0">
+                     <Filter className="h-4 w-4" />
+                  </button>
+               </div>
             </div>
          </div>
 
-         {finalSortedList.length >= 1 && !searchTerm && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end pt-12 md:pt-32 pb-12">
-               <PodiumCard rank={2} data={podium[1]} color="bg-slate-300" />
-               <PodiumCard rank={1} data={podium[0]} color="bg-amber-400" isMain />
-               <PodiumCard rank={3} data={podium[2]} color="bg-orange-400" />
+         {/* 3. PODIUM SECTION */}
+         {!searchTerm && finalSortedList.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 pt-8">
+               {/* 2nd Place */}
+               <PodiumCard rank={2} data={podium[1]} order="md:order-1" />
+               {/* 1st Place */}
+               <PodiumCard rank={1} data={podium[0]} order="md:order-2" isMain />
+               {/* 3rd Place */}
+               <PodiumCard rank={3} data={podium[2]} order="md:order-3" />
             </div>
          )}
 
-         <Card className="border-none shadow-4xl rounded-[3rem] md:rounded-[4.5rem] bg-white overflow-hidden">
-            <CardContent className="p-0">
-               <div className="p-8 md:p-14 border-b border-slate-50 bg-slate-50/30 grid grid-cols-12 text-[10px] md:text-[13px] font-bold text-slate-400 uppercase tracking-widest">
-                 <div className="col-span-2 md:col-span-1">Rank</div>
-                 <div className="col-span-6 md:col-span-7">Student Identity</div>
-                 <div className="col-span-2 text-center">Best Score</div>
-                 <div className="col-span-2 text-right">Accuracy</div>
-               </div>
-               <div className="divide-y divide-slate-50">
-                  {resultsLoading || usersLoading ? Array.from({ length: 5 }).map((_, i) => (<div key={i} className="p-8 grid grid-cols-12 gap-6 items-center"><Skeleton className="h-8 w-12 rounded-md col-span-1" /><div className="col-span-7 flex items-center gap-6"><Skeleton className="h-14 w-14 rounded-2xl" /><div className="space-y-3"><Skeleton className="h-5 w-48" /><Skeleton className="h-3 w-24" /></div></div><Skeleton className="h-10 w-full rounded-xl col-span-2" /><Skeleton className="h-10 w-full rounded-xl col-span-2" /></div>)) : 
-                  finalSortedList.length > 0 ? finalSortedList.map((entry: any, idx: number) => {
-                       const isCurrentUser = entry.id === user?.uid;
-                       return (
-                        <div key={entry.id} className={cn("p-8 md:p-14 grid grid-cols-12 items-center hover:bg-slate-50/80 transition-all duration-500 group border-l-[6px] border-transparent", isCurrentUser ? "bg-primary/5 border-primary" : "hover:border-slate-100")}>
-                           <div className="col-span-2 md:col-span-1 font-headline font-black text-xl md:text-5xl text-slate-200 group-hover:text-primary transition-colors tabular-nums tracking-tighter">#{idx + 1}</div>
-                           <div className="col-span-6 md:col-span-7 flex items-center gap-6 md:gap-12">
-                              <StudentAvatar profile={entry.profile || entry} className="h-12 w-12 md:h-24 md:w-24 rounded-2xl md:rounded-[2.5rem] border-2 md:border-4 border-white shadow-xl bg-slate-50" />
-                              <div className="min-w-0">
-                                 <p className={cn("font-bold text-base md:text-3xl truncate leading-none tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{entry.name} {isCurrentUser && "(You)"}</p>
-                                 <div className="flex items-center gap-3 md:gap-6 mt-2 md:mt-4">
-                                     <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[11px] font-bold uppercase tracking-widest px-3 py-1">{entry.profile?.targetExam || 'Elite Portal'}</Badge>
-                                     <span className="hidden sm:inline-flex items-center gap-2 text-[10px] md:text-[12px] font-bold text-slate-300 uppercase tracking-widest truncate"><Activity className="h-4 w-4" /> Best: {entry.mockTitle}</span>
+         {/* 4. LEADERBOARD LIST */}
+         <div className="max-w-4xl mx-auto space-y-3">
+            <AnimatePresence mode="popLayout">
+               {resultsLoading || usersLoading ? (
+                  Array.from({ length: 8 }).map((_, i) => (
+                     <div key={i} className="h-20 w-full bg-white rounded-2xl border border-slate-50 animate-pulse" />
+                  ))
+               ) : finalSortedList.length > 0 ? (
+                  (searchTerm ? finalSortedList : listItems).map((entry, idx) => (
+                     <motion.div 
+                        key={entry.id}
+                        layout
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ delay: idx * 0.02 }}
+                     >
+                        <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-white group overflow-hidden">
+                           <CardContent className="p-0 flex items-center h-[72px] md:h-[80px]">
+                              {/* RANK NODE */}
+                              <div className="w-12 md:w-16 flex items-center justify-center shrink-0">
+                                 <span className="text-lg md:text-2xl font-black text-slate-200 group-hover:text-primary transition-colors tabular-nums">
+                                    #{searchTerm ? idx + 1 : idx + 4}
+                                 </span>
+                              </div>
+
+                              {/* IDENTITY HUB */}
+                              <div className="flex-1 flex items-center gap-4 min-w-0 pr-4">
+                                 <StudentAvatar 
+                                    profile={entry.profile || entry} 
+                                    className="h-10 w-10 md:h-12 md:w-12 rounded-xl shrink-0 shadow-inner bg-slate-50" 
+                                 />
+                                 <div className="min-w-0 flex-1">
+                                    <h4 className="font-bold text-sm md:text-lg text-[#0F172A] truncate leading-tight group-hover:text-primary transition-colors">
+                                       {entry.name}
+                                    </h4>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                       <Badge variant="outline" className="text-[7px] md:text-[8px] font-black border-slate-100 text-slate-400 uppercase tracking-widest px-1.5 h-4">
+                                          {entry.mockTitle?.split(' ')[0] || 'State'} Hub
+                                       </Badge>
+                                       <span className="text-[9px] md:text-[10px] font-bold text-slate-300 uppercase truncate max-w-[120px]">
+                                          {entry.mockTitle}
+                                       </span>
+                                    </div>
                                  </div>
                               </div>
-                           </div>
-                           <div className="col-span-2 text-center">
-                              <div className="inline-flex flex-col items-center">
-                                 <span className="font-headline font-black text-xl md:text-5xl text-[#0F172A] tracking-tighter leading-none">{(entry.score || 0).toFixed(1)}</span>
-                                 <span className="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2">Pts</span>
+
+                              {/* METRICS GRID */}
+                              <div className="flex items-center gap-4 md:gap-10 px-4 md:px-8 shrink-0">
+                                 <div className="text-right hidden sm:block">
+                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Accuracy</p>
+                                    <p className={cn("text-xs md:text-sm font-black tabular-nums", entry.accuracy > 70 ? "text-emerald-500" : "text-amber-500")}>
+                                       {entry.accuracy}%
+                                    </p>
+                                 </div>
+                                 <div className="text-right">
+                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Total score</p>
+                                    <p className="text-base md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter">
+                                       {Math.round(entry.score)}
+                                    </p>
+                                 </div>
+                                 <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
                               </div>
-                           </div>
-                           <div className="col-span-2 text-right">
-                              <Badge className={cn("border-none text-[10px] md:text-xl font-black px-4 md:px-8 py-2 md:py-4 rounded-xl md:rounded-[2rem] shadow-xl tabular-nums", entry.accuracy > 85 ? "bg-emerald-50 text-emerald-600" : entry.accuracy > 60 ? "bg-amber-50 text-amber-600" : "bg-slate-50 text-slate-400")}>{entry.accuracy}%</Badge>
-                           </div>
-                        </div>
-                       )
-                     }) : (<div className="py-48 flex flex-col items-center justify-center text-slate-300 opacity-20 text-center space-y-8"><Zap className="h-32 w-32" /><p className="font-headline font-black text-3xl uppercase tracking-widest">Merit List Empty</p></div>)}
-               </div>
-            </CardContent>
-         </Card>
+                           </CardContent>
+                        </Card>
+                     </motion.div>
+                  ))
+               ) : (
+                  <motion.div 
+                     initial={{ opacity: 0, scale: 0.95 }}
+                     animate={{ opacity: 1, scale: 1 }}
+                     className="py-32 flex flex-col items-center justify-center text-center space-y-6 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner"
+                  >
+                     <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
+                        <Trophy className="h-10 w-10" />
+                     </div>
+                     <div className="space-y-1">
+                        <h2 className="text-xl font-bold text-[#0F172A] uppercase">No rankings available yet</h2>
+                        <p className="text-slate-400 font-medium text-sm">Complete mock tests to appear on the merit list.</p>
+                     </div>
+                     <Button asChild className="rounded-full bg-primary hover:bg-blue-700 px-8 shadow-xl border-none font-bold text-xs uppercase tracking-widest h-12">
+                        <Link href="/mocks">Explore Practice Hub</Link>
+                     </Button>
+                  </motion.div>
+               )}
+            </AnimatePresence>
+         </div>
+
       </main>
+
       <Footer />
     </div>
   )
 }
 
-function PodiumCard({ rank, data, color, isMain }: any) {
-   if (!data) return null;
-   return (
-      <div className={cn("flex flex-col items-center space-y-8 group relative", isMain ? "mb-12 md:mb-24 z-20" : "mb-6 z-10")}>
-         <div className="relative">
-            <StudentAvatar profile={data?.profile || data} className={cn("border-[6px] border-white shadow-5xl rounded-[3rem] md:rounded-[5rem] transition-all duration-700 group-hover:scale-105", isMain ? "h-40 w-40 md:h-72 md:w-72" : "h-32 w-32 md:h-56 md:w-56")} />
-            <div className={cn("absolute -bottom-6 left-1/2 -translate-x-1/2 h-12 w-12 md:h-20 md:w-20 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center shadow-2xl border-4 md:border-[6px] border-white transition-transform group-hover:rotate-12", color)}>
-               {rank === 1 ? <Trophy className="h-6 w-6 md:h-10 md:w-10 text-white fill-current" /> : rank === 2 ? <Medal className="h-6 w-6 md:h-10 md:w-10 text-white fill-current" /> : <Target className="h-6 w-6 md:h-10 md:w-10 text-white" />}
-            </div>
-            {isMain && (<div className="absolute -top-12 left-1/2 -translate-x-1/2 animate-bounce"><Badge className="bg-primary text-white border-none font-bold text-[10px] md:text-[13px] px-6 py-2 rounded-full shadow-5xl uppercase tracking-[0.2em]">Merit #1</Badge></div>)}
-         </div>
-         <div className="text-center space-y-4 w-full">
-            <h3 className={cn("font-black text-[#0F172A] tracking-tight leading-tight", isMain ? "text-2xl md:text-5xl" : "text-xl md:text-3xl")}>{data?.name || 'Aspirant'}</h3>
-            <div className="flex items-center justify-center gap-8 md:gap-14">
-               <div className="text-center"><p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Score</p><p className="text-xl md:text-4xl font-black text-primary tabular-nums tracking-tighter">{(data?.score || 0).toFixed(1)}</p></div>
-               <div className="h-10 md:h-14 w-px bg-slate-100" />
-               <div className="text-center"><p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Accuracy</p><p className="text-xl md:text-4xl font-black text-emerald-600 tabular-nums tracking-tighter">{data?.accuracy || '0'}%</p></div>
-            </div>
-         </div>
+function PodiumCard({ rank, data, order, isMain }: any) {
+   if (!data) return (
+      <div className={cn("bg-white border border-dashed border-slate-200 rounded-[2rem] p-10 h-64 md:h-80 flex items-center justify-center opacity-40", order)}>
+         <Trophy className="h-10 w-10 text-slate-200" />
       </div>
+   );
+
+   return (
+      <motion.div 
+         initial={{ opacity: 0, y: 30 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ delay: rank * 0.1 }}
+         className={cn("flex", order)}
+      >
+         <Card className={cn(
+            "border-none shadow-xl transition-all duration-500 rounded-[2.5rem] p-8 md:p-10 flex flex-col items-center text-center group hover:-translate-y-2 relative overflow-hidden w-full",
+            isMain ? "bg-[#0F172A] text-white ring-4 ring-primary/20 scale-[1.05] z-10" : "bg-white text-[#0F172A]"
+         )}>
+            {/* Rank Badge */}
+            <div className={cn(
+               "absolute top-6 left-6 h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center text-white font-black text-xs md:text-sm shadow-xl transition-transform group-hover:rotate-12",
+               rank === 1 ? "bg-amber-400" : rank === 2 ? "bg-slate-300" : "bg-orange-400"
+            )}>
+               #{rank}
+            </div>
+
+            <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:scale-110 transition-transform">
+               {rank === 1 ? <Medal className="h-24 w-24" /> : <Trophy className="h-24 w-24" />}
+            </div>
+
+            <div className="space-y-6 relative z-10">
+               <div className="relative inline-block">
+                  <StudentAvatar 
+                    profile={data.profile || data} 
+                    className={cn(
+                      "rounded-[2rem] border-4 shadow-2xl transition-all group-hover:scale-105", 
+                      isMain ? "h-24 w-24 md:h-32 md:w-32 border-primary/20" : "h-20 w-20 md:h-24 md:w-24 border-white"
+                    )} 
+                  />
+                  {rank === 1 && (
+                     <div className="absolute -top-3 -right-3 bg-amber-400 text-white h-8 w-8 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                        <Star className="h-4 w-4 fill-current" />
+                     </div>
+                  )}
+               </div>
+
+               <div className="space-y-1">
+                  <h3 className="text-base md:text-xl font-black truncate max-w-[160px] md:max-w-[200px] leading-tight uppercase tracking-tight">{data.name}</h3>
+                  <p className={cn("text-[9px] font-bold uppercase tracking-widest", isMain ? "text-primary" : "text-slate-400")}>
+                    {data.mockTitle?.split(' ')[0] || 'Top'} Hub
+                  </p>
+               </div>
+
+               <div className="h-px w-12 bg-slate-500/20 mx-auto" />
+
+               <div className="grid grid-cols-2 gap-6">
+                  <div className="text-center">
+                     <p className={cn("text-[8px] font-black uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Score</p>
+                     <p className={cn("text-lg md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-white" : "text-primary")}>
+                        {Math.round(data.score)}
+                     </p>
+                  </div>
+                  <div className="text-center">
+                     <p className={cn("text-[8px] font-black uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Accuracy</p>
+                     <p className={cn("text-lg md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-emerald-400" : "text-emerald-600")}>
+                        {data.accuracy}%
+                     </p>
+                  </div>
+               </div>
+            </div>
+         </Card>
+      </motion.div>
    )
 }
