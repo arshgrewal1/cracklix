@@ -47,6 +47,7 @@ import {
   CheckCircle2
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import Link from "next/link"
@@ -56,8 +57,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Practice Hub v6.2.
- * UPDATED: Normalized casing for text labels and headings.
+ * @fileOverview Premium Practice Hub v6.3.
+ * UPDATED: Optimized categories to include Computer and History.
  */
 
 const QUICK_ACTIONS = [
@@ -75,6 +76,8 @@ const CATEGORIES = [
   { id: "math", label: "Math", icon: Calculator, color: "from-cyan-400 to-blue-600" },
   { id: "punjabi", label: "Punjabi", icon: GraduationCap, color: "from-rose-400 to-pink-600" },
   { id: "english", label: "English", icon: Languages, color: "from-emerald-400 to-teal-600" },
+  { id: "history", label: "History", icon: History, color: "from-orange-400 to-red-600" },
+  { id: "computer", label: "Computer", icon: Cpu, color: "from-slate-400 to-slate-600" },
 ];
 
 const FILTER_CHIPS = [
@@ -165,7 +168,7 @@ export default function MockTestsPage() {
               <div className="w-px h-10 bg-slate-100" />
               <div className="flex flex-col gap-1 text-left">
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Avg score</p>
-                 <p className="text-2xl md:text-4xl font-black text-emerald-500 tabular-nums tracking-tighter">{stats.avgScore}%</p>
+                 <p className="text-2xl md:text-4xl font-black text-emerald-50 tabular-nums tracking-tighter">{stats.avgScore}%</p>
               </div>
            </Card>
         </section>
@@ -231,7 +234,7 @@ export default function MockTestsPage() {
                     <div className="col-span-full py-40 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100 space-y-8 opacity-40">
                        <Zap className="h-20 w-20 mx-auto text-slate-200" />
                        <p className="text-xl font-bold text-slate-400 tracking-tight">No tests found in this filter</p>
-                       <button onClick={() => { setActiveFilter('all'); setSearchTerm(''); }} className="h-11 px-8 rounded-full border border-slate-200 font-bold text-[10px] bg-white hover:bg-slate-50 transition-all">Clear Filter</button>
+                       <button onClick={() => { setActiveFilter('all'); setSearchTerm(''); }} className="h-11 px-8 rounded-full border border-slate-200 font-bold text-[10px] bg-white hover:bg-slate-50 transition-all">Clear filter</button>
                     </div>
                  )}
               </div>
@@ -372,9 +375,9 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
                   <div className="flex flex-col items-end gap-2">
                      <div className="flex items-center gap-2">
                         {isPremium ? (
-                           <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-lg font-bold text-[9px] tracking-tight">Elite Pass</Badge>
+                           <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-lg font-bold text-[9px] tracking-tight">Elite pass</Badge>
                         ) : (
-                           <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-lg font-bold text-[9px] tracking-tight">Free Test</Badge>
+                           <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-lg font-bold text-[9px] tracking-tight">Free test</Badge>
                         )}
                         <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90 cursor-pointer shadow-inner">
                            <Bookmark className="h-4 w-4" />

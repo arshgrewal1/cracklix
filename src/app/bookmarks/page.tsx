@@ -6,7 +6,7 @@ import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, doc, deleteDoc, getDoc } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
-import { Bookmark, Search, Trash2, ChevronRight, BookOpen, ShieldCheck, Languages, Zap, X, AlertCircle, Loader2, Target } from "lucide-react"
+import { Bookmark, Search, Trash2, ChevronRight, BookOpen, ShieldCheck, Languages, Zap, X, AlertCircle, Loader2, Target, BrainCircuit, Calculator, Cpu, Landmark, History as HistoryIcon, Newspaper } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,19 +19,20 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Bookmarks Hub v5.2.
- * FIXED: Imported missing Target icon from lucide-react.
- * LINGUISTIC: Removed remaining 'node' references in UI text.
+ * @fileOverview Official Bookmarks Hub v6.0.
+ * UPDATED: Integrated specific filters for Math, CA, Reasoning, GK, History, and Computer.
+ * DESIGN: Removed all uppercase from filter labels.
  */
 
 const FILTER_CHIPS = [
   { id: "all", label: "All items" },
-  { id: "Questions", label: "Questions" },
-  { id: "Notes", label: "Study notes" },
-  { id: "CA", label: "Current affairs" },
-  { id: "History", label: "History" },
-  { id: "Punjab GK", label: "Punjab GK" },
-  { id: "Math", label: "Mathematics" },
+  { id: "Math", label: "Mathematics", icon: Calculator },
+  { id: "Reasoning", label: "Reasoning", icon: BrainCircuit },
+  { id: "CA", label: "Current affairs", icon: Newspaper },
+  { id: "GK", label: "General knowledge", icon: Landmark },
+  { id: "History", label: "History", icon: HistoryIcon },
+  { id: "Computer", label: "Computer", icon: Cpu },
+  { id: "Notes", label: "Study notes", icon: BookOpen },
 ];
 
 export default function BookmarksPage() {
@@ -43,10 +44,9 @@ export default function BookmarksPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [activeFilter, setActiveFilter] = useState("all")
   
-  // Modal State for Quick Revision
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
   const [isViewing, setIsViewing] = useState(false);
-  const [loadingNode, setLoadingNode] = useState(false);
+  const [loadingItem, setLoadingItem] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -65,9 +65,13 @@ export default function BookmarksPage() {
           b.questionText?.toLowerCase().includes(term) || 
           b.subject?.toLowerCase().includes(term);
        
+       const sub = (b.subject || "").toLowerCase();
+       const type = (b.type || "").toLowerCase();
+
        const matchesFilter = activeFilter === 'all' || 
-          b.subject?.toLowerCase() === activeFilter.toLowerCase() ||
-          b.type?.toLowerCase() === activeFilter.toLowerCase();
+          sub.includes(activeFilter.toLowerCase()) ||
+          type.includes(activeFilter.toLowerCase()) ||
+          (activeFilter === 'CA' && (sub.includes('current') || type.includes('ca')));
 
        return matchesSearch && matchesFilter;
     }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -84,9 +88,8 @@ export default function BookmarksPage() {
 
   const handleViewSolution = async (questionId: string) => {
     if (!db || !questionId) return;
-    setLoadingNode(true);
+    setLoadingItem(true);
     try {
-      // Audit both collections for the question item
       let qSnap = await getDoc(doc(db, "mcqBank", questionId));
       if (!qSnap.exists()) {
         qSnap = await getDoc(doc(db, "questions", questionId));
@@ -96,18 +99,17 @@ export default function BookmarksPage() {
         setSelectedQuestion(qSnap.data());
         setIsViewing(true);
       } else {
-        // Handle case where original item was purged
-        alert("Original question has been archived from the bank.");
+        alert("Original item has been archived from the bank.");
       }
     } finally {
-      setLoadingNode(false);
+      setLoadingItem(false);
     }
   };
 
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-bold text-slate-300 tracking-tight">Syncing identity...</p>
+       <p className="text-[10px] font-bold text-slate-300">Syncing identity...</p>
     </div>
   );
 
@@ -117,7 +119,6 @@ export default function BookmarksPage() {
       
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-10 md:space-y-16 pb-32">
         
-        {/* 1. COMPACT HEADER */}
         <section className="space-y-4 px-1">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -126,7 +127,7 @@ export default function BookmarksPage() {
           >
             <div className="flex items-center gap-3">
                <Bookmark className="h-5 w-5 text-primary" />
-               <span className="text-[10px] font-bold text-slate-400 tracking-tight">Personal registry</span>
+               <span className="text-[10px] font-bold text-slate-400">Personal registry</span>
             </div>
             <h1 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none antialiased">
               Saved <span className="text-primary italic">items.</span>
@@ -137,7 +138,6 @@ export default function BookmarksPage() {
           </motion.div>
         </section>
 
-        {/* 2. STICKY SEARCH & FILTERS */}
         <div className="sticky top-[80px] z-[45] bg-white/90 backdrop-blur-xl -mx-4 px-4 py-4 md:py-6 border-b border-slate-50">
            <div className="max-w-4xl mx-auto space-y-6">
               <div className="relative group">
@@ -163,12 +163,13 @@ export default function BookmarksPage() {
                       key={chip.id} 
                       onClick={() => setActiveFilter(chip.id)}
                       className={cn(
-                         "h-9 px-6 rounded-full font-bold text-[9px] md:text-[10px] tracking-tight transition-all border active:scale-95 shadow-sm whitespace-nowrap",
+                         "h-9 px-6 rounded-full font-bold text-[10px] md:text-[11px] tracking-tight transition-all border active:scale-95 shadow-sm whitespace-nowrap flex items-center gap-2",
                          activeFilter === chip.id 
                             ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" 
                             : "bg-white border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600"
                       )}
                     >
+                       {chip.icon && <chip.icon className="h-3 w-3" />}
                        {chip.label}
                     </button>
                  ))}
@@ -176,7 +177,6 @@ export default function BookmarksPage() {
            </div>
         </div>
 
-        {/* 3. BOOKMARK FEED */}
         <div className="max-w-4xl mx-auto space-y-6">
           <AnimatePresence mode="popLayout">
             {loading ? (
@@ -210,7 +210,7 @@ export default function BookmarksPage() {
                          </div>
                          <button 
                            onClick={() => handleDelete(b.id)}
-                           className="h-10 w-10 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 active:scale-90 transition-all flex items-center justify-center opacity-40 group-hover:opacity-100"
+                           className="h-10 w-10 rounded-xl text-slate-300 hover:text-rose-50 hover:bg-rose-50 active:scale-90 transition-all flex items-center justify-center opacity-40 group-hover:opacity-100"
                          >
                             <Trash2 className="h-5 w-5" />
                          </button>
@@ -235,7 +235,7 @@ export default function BookmarksPage() {
                               variant="outline" 
                               className="flex-1 sm:flex-none h-11 px-8 rounded-xl border-2 border-slate-100 font-bold text-[10px] hover:bg-primary/5 hover:text-primary transition-all active:scale-95 gap-2"
                             >
-                               {loadingNode ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} 
+                               {loadingItem ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} 
                                View rationale
                             </Button>
                          </div>
@@ -262,8 +262,8 @@ export default function BookmarksPage() {
                    </div>
                 </div>
                 <div className="space-y-4 max-w-sm px-6">
-                   <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter">No saved content</h2>
-                   <p className="text-slate-400 font-bold text-sm md:text-base tracking-tight leading-relaxed">Bookmark important questions and notes for quick institutional revision.</p>
+                   <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter">No saved items</h2>
+                   <p className="text-slate-400 font-bold text-sm md:text-base tracking-tight leading-relaxed">Bookmark important questions and notes for quick revision.</p>
                 </div>
                 <Button asChild className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] tracking-widest rounded-2xl shadow-xl border-none transition-all active:scale-95">
                    <Link href="/mocks">Explore practice hub</Link>
@@ -276,13 +276,12 @@ export default function BookmarksPage() {
 
       <Footer />
 
-      {/* SOLUTION PREVIEW DIALOG */}
       <Dialog open={isViewing} onOpenChange={setIsViewing}>
         <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto rounded-[2.5rem] md:rounded-[3.5rem] bg-white p-0 border-none shadow-5xl text-left flex flex-col">
           <div className="h-2 w-full bg-primary shrink-0" />
           <DialogHeader className="px-8 md:px-12 py-8 border-b border-slate-50 shrink-0">
              <DialogTitle className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter">Official solution</DialogTitle>
-             <DialogDescription className="text-[10px] font-bold text-slate-400 tracking-widest mt-2">Verified institutional rationale</DialogDescription>
+             <DialogDescription className="text-[10px] font-bold text-slate-400 mt-2">Verified institutional rationale</DialogDescription>
           </DialogHeader>
           <div className="px-6 md:px-12 py-10 flex-1">
              {selectedQuestion && (
