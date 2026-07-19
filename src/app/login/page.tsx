@@ -244,8 +244,8 @@ function LoginContent() {
     <div className="min-h-[100dvh] bg-white flex flex-col lg:flex-row text-[#0F172A] font-body selection:bg-primary/20 overflow-x-hidden">
       <div className="hidden lg:flex flex-[1.1] bg-[#020B2D] text-white px-12 xl:px-20 py-0 flex-col justify-center relative overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
-        <div className="relative z-10 space-y-12 xl:space-y-20 max-w-[650px]">
-          <Logo variant="dark" align="left" className="my-0" />
+        <div className="relative z-10 space-y-12 xl:space-y-16 max-w-[650px]">
+          <Logo variant="dark" align="left" className="my-0" imgClassName="h-32 md:h-52" />
           <div className="space-y-8">
             <h1 className="text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.05]">
               Punjab's Smart <br/> 
@@ -269,13 +269,18 @@ function LoginContent() {
       <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-12 lg:px-20 py-0 relative bg-slate-50 lg:bg-white overflow-y-auto">
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[480px] py-12">
           <Card className="border-none shadow-5xl lg:shadow-none bg-white rounded-[32px] p-6 md:p-12 space-y-6 md:space-y-10">
-            <div className="space-y-2 text-center lg:text-left">
-               <h2 className="text-2xl md:text-4xl font-black tracking-tight text-[#0F172A]">
-                 {mode === 'login' ? 'Welcome Back' : 'Create Account'}
-               </h2>
-               <p className="text-slate-400 font-bold text-[10px] md:text-[11px] uppercase tracking-widest">
-                 {mode === 'login' ? 'Access your portal' : 'Join the preparation portal'}
-               </p>
+            <div className="space-y-4 text-center lg:text-left">
+               <div className="flex justify-center lg:justify-start -ml-4 md:-ml-8">
+                  <Logo variant="light" align="left" imgClassName="h-28 md:h-36" />
+               </div>
+               <div className="space-y-1">
+                  <h2 className="text-2xl md:text-3xl font-black tracking-tight text-[#0F172A]">
+                    {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+                  </h2>
+                  <p className="text-slate-400 font-bold text-[10px] md:text-[11px] uppercase tracking-widest">
+                    {mode === 'login' ? 'Access your portal' : 'Join the preparation portal'}
+                  </p>
+               </div>
             </div>
 
             <form onSubmit={handleEmailAuth} className="space-y-6">

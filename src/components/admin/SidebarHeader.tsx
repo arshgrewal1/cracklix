@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -7,8 +6,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v62.1.
- * UPDATED: Logo height and scaling matched with student portal for consistency.
+ * Cracklix Admin Sidebar Header v63.0.
+ * UPDATED: Increased logo size for better visibility while maintaining sidebar alignment.
  */
 export default function SidebarHeader({
   isOpen,
@@ -20,7 +19,7 @@ export default function SidebarHeader({
   return (
     <div
       className={cn(
-        "h-[90px] md:h-[110px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300 relative",
+        "h-[100px] md:h-[130px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300 relative",
         isOpen ? "justify-center" : "flex-col justify-center py-4 gap-4"
       )}
     >
@@ -43,15 +42,15 @@ export default function SidebarHeader({
             href="/admin"
             variant="light"
             align="center"
-            className="transition-all duration-500 animate-in fade-in zoom-in-95"
-            imgClassName="h-24 md:h-36 w-auto"
+            className="transition-all duration-500 animate-in fade-in zoom-in-95 -ml-4"
+            imgClassName="h-28 md:h-44 w-auto"
           />
         ) : (
           <Logo
             href="/admin"
             variant="icon"
             align="center"
-            imgClassName="h-10 md:h-12 w-auto"
+            imgClassName="h-12 md:h-14 w-auto"
           />
         )}
       </div>

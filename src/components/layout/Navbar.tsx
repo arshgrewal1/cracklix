@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v85.0.
- * FIXED: Positioned Logo exactly next to sidebar button with zero gap.
+ * @fileOverview Cracklix Navigation Hub v86.0.
+ * UPDATED: Increased logo size for better visibility while maintaining exact alignment.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -100,7 +100,7 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
-        <nav className="w-full h-20 lg:h-20">
+        <nav className="w-full h-20 lg:h-24 transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU | LOGO (SYNCED WITH ADMIN STYLE) */}
@@ -125,8 +125,8 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-3 md:-ml-6"
-                imgClassName="h-20 md:h-28 w-auto"
+                className="flex-shrink-0 -ml-3 md:-ml-8"
+                imgClassName="h-32 md:h-48 w-auto"
                 align="left"
               />
             </div>

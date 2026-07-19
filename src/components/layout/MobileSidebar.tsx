@@ -33,8 +33,8 @@ import { Badge } from "@/components/ui/badge";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Mobile Sidebar v74.0 [Optimization Fixed].
- * FIXED: Standardized interactive elements to ensure high-speed touch responsiveness.
+ * @fileOverview Mobile Sidebar v75.0.
+ * UPDATED: Increased logo size for better visibility in the drawer.
  */
 export default function MobileSidebar({
   onClose,
@@ -87,12 +87,12 @@ export default function MobileSidebar({
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
       {/* HEADER: Centered Logo + Absolute Close Button */}
-      <div className="h-[80px] md:h-[110px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-center relative">
+      <div className="h-[100px] md:h-[130px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-center relative">
          <Logo
            variant="light"
            align="center"
            className="flex-shrink-0"
-           imgClassName="h-20 md:h-28 w-auto"
+           imgClassName="h-28 md:h-40 w-auto"
            onClick={onClose}
          />
          <button
