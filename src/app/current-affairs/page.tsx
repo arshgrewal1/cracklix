@@ -31,6 +31,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -40,8 +41,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Current Affairs Hub v5.6.
- * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
+ * @fileOverview Premium Current Affairs Hub v5.7.
+ * FIXED: Missing Skeleton import causing build failure.
+ * UPDATED: Removed all uppercase styling from headings and labels.
  */
 
 const CATEGORIES = [
@@ -52,7 +54,7 @@ const QUICK_ACTIONS = [
   { label: "Daily quiz", icon: Zap, href: "/mocks", color: "text-orange-500", bg: "bg-orange-50" },
   { label: "PDF notes", icon: FileText, href: "/notes", color: "text-blue-500", bg: "bg-blue-50" },
   { label: "Old papers", icon: History, href: "/pyqs", color: "text-purple-500", bg: "bg-purple-50" },
-  { label: "Bookmarks", icon: Bookmark, href: "/bookmarks", color: "text-rose-500", bg: "bg-rose-50" },
+  { label: "Bookmarks", icon: Bookmark, color: "text-rose-500", bg: "bg-rose-50", href: "/bookmarks" },
 ];
 
 export default function CurrentAffairsCenter() {
@@ -130,7 +132,7 @@ export default function CurrentAffairsCenter() {
         <section className="space-y-6 px-1 text-center md:text-left">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1.5">
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-[#0F172A] tracking-tight">Current Affairs</h1>
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-[#0F172A] tracking-tight">Current affairs</h1>
               <p className="text-slate-500 font-medium text-sm md:text-lg max-w-xl leading-snug">
                 Verified exam news, daily current affairs and bilingual preparation items.
               </p>
