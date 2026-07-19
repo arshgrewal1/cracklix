@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -336,7 +335,7 @@ export default function ResultClient() {
     try {
       const page1 = document.getElementById('cracklix-result-page-1');
       const page2 = document.getElementById('cracklix-result-page-2');
-      if (!page1 || !page2) throw new Error("Registry nodes unavailable");
+      if (!page1 || !page2) throw new Error("Registry elements unavailable");
 
       const img1 = await toPng(page1, { width: 1000, height: 1414, pixelRatio: 2 });
       const img2 = await toPng(page2, { width: 1000, height: 1414, pixelRatio: 2 });
@@ -632,7 +631,7 @@ export default function ResultClient() {
            <div className="inline-flex flex-col items-center gap-6">
               <p className="text-slate-400 font-medium max-w-sm">Analyze every attempt decision and check detailed bilingual rationales below.</p>
               <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center animate-bounce text-slate-300">
-                 <ArrowUp className="h-5 w-5 rotate-180" />
+                 <ArrowDownRight className="h-5 w-5 rotate-45" />
               </div>
            </div>
         </section>
@@ -774,4 +773,3 @@ function ReviewPill({ userAns, correctAns }: any) {
      ? <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">Correct</Badge>
      : <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">Incorrect</Badge>;
 }
-

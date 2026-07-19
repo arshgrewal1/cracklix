@@ -36,7 +36,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Performance Hub v7.3.
+ * @fileOverview Institutional performance hub v7.3.
  * FIXED: Removed "node" terminology and ensured time taken uses accurate durations.
  */
 
@@ -255,7 +255,7 @@ export default function StudentDashboard() {
               </div>
             </Card>
 
-            <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-100 shadow-xl space-y-6 text-left">
+            <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-100 shadow-xl space-y-6 text-left group hover:translate-y-[-4px] transition-all duration-500">
               <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em]">Certificates</h4>
               <div className="h-40 flex flex-col items-center justify-center text-center opacity-30 italic">
                 <Award className="h-10 w-10 mb-4" />

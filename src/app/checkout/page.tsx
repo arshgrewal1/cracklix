@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -32,14 +31,6 @@ import Image from "next/image";
  */
 
 export default function CheckoutPage() {
-  return (
-    <React.Suspense fallback={<div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}>
-      <CheckoutContent />
-    </React.Suspense>
-  );
-}
-
-function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
