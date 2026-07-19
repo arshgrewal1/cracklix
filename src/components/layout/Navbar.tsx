@@ -38,9 +38,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v96.1.
- * FIXED: Syntax error in ProfileMenuItem className attribute.
- * UPDATED: Increased logo size to h-24 md:h-44 for bold prominence.
+ * @fileOverview Cracklix Navigation Hub v97.0.
+ * FIXED: Malformed className syntax in ProfileMenuItem.
+ * UPDATED: Logo positioned exactly to the right of the menu trigger.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -105,12 +105,12 @@ export default function Navbar() {
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU TRIGGER + LOGO (SIDE-BY-SIDE) */}
-            <div className="flex items-center gap-2 z-10 shrink-0">
+            <div className="flex items-center gap-3 z-10 shrink-0">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
                   <button
                     aria-label="Open menu"
-                    className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 cursor-pointer"
+                    className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 cursor-pointer"
                   >
                     <Menu className="w-5 h-5 md:w-6 md:h-6" />
                   </button>
@@ -152,17 +152,17 @@ export default function Navbar() {
 
               <Link
                 href="/search"
-                className="w-10 h-10 md:h-11 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm shrink-0"
+                className="w-10 h-10 md:h-12 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm shrink-0"
               >
                 <Search className="w-5 h-5" />
               </Link>
 
               {loading ? (
-                <Skeleton className="w-10 h-10 md:h-11 rounded-xl bg-slate-100 shrink-0" />
+                <Skeleton className="w-10 h-10 md:h-12 rounded-xl bg-slate-100 shrink-0" />
               ) : user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="w-10 h-10 md:h-11 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all shadow-sm shrink-0">
+                    <button className="w-10 h-10 md:h-12 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all shadow-sm shrink-0">
                       <StudentAvatar
                         profile={profile}
                         className="w-full h-full border-none"
