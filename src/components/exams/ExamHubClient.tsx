@@ -6,7 +6,7 @@ import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
-import { doc, collection, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
+import { doc, collection, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp, getDoc, getDocs, documentId } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -46,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v6.5.
- * FIXED: Added missing Timer icon import.
+ * @fileOverview Premium Exam Detail Hub v6.6.
+ * FIXED: Added missing Timer icon import to resolve ReferenceError.
  * FIXED: Removed overlapping watermark icons and simplified text labels.
  */
 
@@ -210,7 +210,7 @@ export default function ExamHubClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10 border-t border-slate-100">
                <HeroStat icon={Zap} label="Tests available" val={stats.totalTests} />
                <HeroStat icon={FileStack} label="Old papers" val={groupedContent.PYQ.length} />
-               <HeroStat icon={Target} label="My progress" val={user ? `${stats.avgAccuracy}%` : 'Login'} />
+               <HeroStat icon={Target} label="My progress" val={user ? `${stats.attempted}` : 'Login'} />
                <HeroStat icon={Trophy} label="Rank status" val="Active" />
             </div>
          </div>
