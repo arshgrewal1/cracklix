@@ -78,9 +78,8 @@ import ResultCard from "./ResultCard"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Center v6.2.
- * FIXED: Added missing Layers icon import to resolve ReferenceError.
- * UPDATED: Normalized terminology (node -> item).
+ * @fileOverview Premium Assessment Center v6.3.
+ * FIXED: Optimized time taken logic and ensured completion stats sync correctly.
  */
 
 export default function ResultClient() {
@@ -323,34 +322,12 @@ export default function ResultClient() {
   const formatTimeTaken = (seconds: any) => {
      const totalSecs = Number(seconds);
      if (isNaN(totalSecs) || totalSecs <= 0) return "0s";
-     const m = Math.floor(totalSecs / 60);
+     const h = Math.floor(totalSecs / 3600);
+     const m = Math.floor((totalSecs % 3600) / 60);
      const s = Math.round(totalSecs % 60);
+     
+     if (h > 0) return `${h}h ${m}m ${s}s`;
      return m > 0 ? `${m}m ${s}s` : `${s}s`;
-  };
-
-  const handleSharePdf = async () => {
-    if (isGeneratingPdf || !sessionData) return;
-    setIsGeneratingPdf(true);
-    toast({ title: "Generating report", description: "Analyzing data points..." });
-
-    try {
-      const page1 = document.getElementById('cracklix-result-page-1');
-      const page2 = document.getElementById('cracklix-result-page-2');
-      if (!page1 || !page2) throw new Error("Registry elements unavailable");
-
-      const img1 = await toPng(page1, { width: 1000, height: 1414, pixelRatio: 2 });
-      const img2 = await toPng(page2, { width: 1000, height: 1414, pixelRatio: 2 });
-
-      const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: [1000, 1414] });
-      pdf.addImage(img1, 'PNG', 0, 0, 1000, 1414);
-      pdf.addPage([1000, 1414], 'p');
-      pdf.addImage(img2, 'PNG', 0, 0, 1000, 1414);
-
-      pdf.save(`Cracklix_Result_${mockData?.title?.replace(/\s+/g, '_')}.pdf`);
-      toast({ title: "Report exported" });
-    } catch (error) {
-      toast({ variant: "destructive", title: "PDF failure" });
-    } finally { setIsGeneratingPdf(false); }
   };
 
   if (!mounted || (resultLoading && user) || (loadingQuestions && questions.length === 0)) return (
@@ -359,6 +336,10 @@ export default function ResultClient() {
         <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Preparing Analysis...</p>
      </div>
   );
+
+  const completionPercent = questions.length > 0 
+    ? Math.round(((categorizedNodes.correct.length + categorizedNodes.wrong.length) / questions.length) * 100) 
+    : 0;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
@@ -394,7 +375,7 @@ export default function ResultClient() {
         
         {/* 1. HERO SUMMARY SECTION */}
         <section className="animate-in fade-in slide-in-from-top-4 duration-700">
-           <Card className="border-none shadow-sm rounded-[24px] bg-white overflow-hidden relative border border-slate-100">
+           <Card className="border-none shadow-sm rounded-[24px] bg-white overflow-hidden border border-slate-100">
               <div className="p-6 md:p-12 flex flex-col lg:flex-row items-center gap-8 md:gap-16">
                  
                  {/* Premium Score Widget */}
@@ -461,7 +442,7 @@ export default function ResultClient() {
               <StatCard label="Accuracy" val={`${sessionData?.accuracy || 0}%`} icon={<Target className="text-emerald-500" />} />
               <StatCard label="Percentile" val={`${merit.percentile}%`} icon={<Award className="text-purple-500" />} />
               <StatCard label="Time taken" val={formatTimeTaken(sessionData?.timeTaken || 0)} icon={<Timer className="text-blue-500" />} />
-              <StatCard label="Completion" val={`${Math.round(((categorizedNodes.correct.length + categorizedNodes.wrong.length) / (questions.length || 1)) * 100)}%`} icon={<ShieldCheck className="text-emerald-600" />} />
+              <StatCard label="Completion" val={`${completionPercent}%`} icon={<ShieldCheck className="text-emerald-600" />} />
            </div>
         </section>
 

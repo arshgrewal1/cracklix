@@ -18,6 +18,7 @@ export interface ExamStoreState {
   visited: number[];
   bookmarks: number[];
   timeLeft: number;
+  elapsedSeconds: number; // Precision counter
   currentIdx: number;
   isPaused: boolean;
   startTime: number;
@@ -48,8 +49,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v5.4 [Total Isolation].
- * FIXED: Hardened startTime logic to prevent multi-year duration bugs from corrupted timestamps.
+ * @fileOverview Hardened Test Store v5.5 [Active Timer Fix].
+ * UPDATED: Tracking active elapsed time directly to resolve "36m taken for 20m test" accuracy issues.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -61,6 +62,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   visited: [0],
   bookmarks: [],
   timeLeft: 0,
+  elapsedSeconds: 0,
   currentIdx: 0,
   isPaused: false,
   startTime: 0,
@@ -78,6 +80,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       status: {},
       visited: [0],
       timeLeft: 0,
+      elapsedSeconds: 0,
       currentIdx: 0,
       isPaused: false,
     });
@@ -104,7 +107,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const isResuming = !!effectiveResume;
     const now = Date.now();
     
-    // Safety check: ensure startTime is a real recent timestamp, not 0 or corrupted
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
     const finalStartTime = (rawStartTime > 1000000000000) ? rawStartTime : now;
 
@@ -124,6 +126,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       visited: isResuming ? (effectiveResume.visited || [0]) : [0],
       bookmarks: isResuming ? (effectiveResume.bookmarks || []) : [],
       timeLeft: isResuming ? (effectiveResume.timeLeft || defaultTime) : defaultTime,
+      elapsedSeconds: isResuming ? (effectiveResume.elapsedSeconds || 0) : 0,
       currentIdx: isResuming ? (effectiveResume.currentIdx || 0) : 0,
       startTime: finalStartTime,
       violations: isResuming ? (effectiveResume.violations || 0) : 0,
@@ -138,7 +141,11 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const state = get();
     if (state.questions.length > 0 && state.timeLeft > 0 && !state.isPaused) {
       const nextTime = state.timeLeft - 1;
-      set({ timeLeft: nextTime });
+      const nextElapsed = state.elapsedSeconds + 1;
+      set({ 
+        timeLeft: nextTime,
+        elapsedSeconds: nextElapsed
+      });
       if (nextTime % 30 === 0) state.persistGuestData();
     }
   },
@@ -171,6 +178,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         visited: state.visited,
         bookmarks: state.bookmarks,
         timeLeft: state.timeLeft,
+        elapsedSeconds: state.elapsedSeconds,
         currentIdx: state.currentIdx,
         violations: state.violations,
         startTime: state.startTime,
@@ -195,6 +203,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       updateDoc(attemptRef, { 
          answers: newAnswers, 
          statusMap: newStatus, 
+         elapsedSeconds: state.elapsedSeconds,
          updatedAt: serverTimestamp() 
       }).catch(() => {});
     } else {
@@ -211,7 +220,11 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     if (db && state.userId && state.mockId) {
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      updateDoc(attemptRef, { statusMap: newStatus, updatedAt: serverTimestamp() }).catch(() => {});
+      updateDoc(attemptRef, { 
+        statusMap: newStatus, 
+        elapsedSeconds: state.elapsedSeconds,
+        updatedAt: serverTimestamp() 
+      }).catch(() => {});
     } else {
       state.persistGuestData(true);
     }
@@ -249,6 +262,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
           visited: state.visited,
           bookmarks: state.bookmarks,
           timeLeft: state.timeLeft,
+          elapsedSeconds: state.elapsedSeconds,
           currentIdx: state.currentIdx,
           startTime: state.startTime,
           violations: state.violations,

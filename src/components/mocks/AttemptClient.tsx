@@ -29,9 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v8.2.
- * FIXED: Accurate "Time Taken" logic - now calculates (Total Duration - Time Left)
- * to ensure wall-clock drift or pauses don't result in impossible durations.
+ * @fileOverview Official Mock Attempt Hub v8.3.
+ * FIXED: Precise time tracking using elapsedSeconds from store.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -42,7 +41,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const { user, profile, loading: userLoading } = useUser();
   const { toast } = useToast();
 
-  // Unified ID extraction with fallback logic
   const mockId = useMemo(() => {
     if (propMockId) return propMockId;
     
@@ -86,6 +84,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     startTime,
     language,
     timeLeft,
+    elapsedSeconds,
     setCurrentIdx,
     saveAndNext
   } = useExamStore();
@@ -171,7 +170,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          ]);
 
          mcqSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
-         legacySnap.docs.forEach(d => {
+         legacySnap.forEach(d => {
             if (!fetchedQuestions.find(f => f.id === d.id)) {
                fetchedQuestions.push({ ...d.data(), id: d.id });
             }
@@ -235,12 +234,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
     const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
     
-    // Accurate timeTaken calculation: (Total Duration) - (Remaining Time)
-    // This correctly ignores wall-clock drift, page exits, or periods when the test was paused.
-    const totalDurationSeconds = (Number(mockData.duration) || 0) * 60;
-    const timeTaken = totalDurationSeconds > 0 
-      ? Math.max(1, totalDurationSeconds - timeLeft)
-      : Math.round((Date.now() - startTime) / 1000);
+    // Using the store's high-fidelity active elapsedSeconds for accurate reporting
+    const timeTaken = Math.max(1, elapsedSeconds);
     
     await stopSession({
       completedQuestions: attemptedCount,
@@ -257,7 +252,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       attemptedCount, 
       totalQuestions: questions.length,
       accuracy: attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0,
-      timeTaken: Math.max(1, timeTaken), 
+      timeTaken, 
       answers: answers || {}, 
       timestamp: new Date().toISOString(),
       accessLevel: (mockData.accessLevel || 'FREE').toUpperCase(),
@@ -283,7 +278,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       toast({ variant: "destructive", title: "Submission failed" });
       setIsSubmittingFinal(false);
     }
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime, timeLeft, stopSession, toast]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, toast]);
 
   useEffect(() => {
      if (!isInitializing && !initError && timeLeft === 0 && !isSubmittingFinal && questions.length > 0) {
