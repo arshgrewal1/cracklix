@@ -20,8 +20,8 @@ interface BoardHubClientProps {
 }
 
 /**
- * @fileOverview Premium Board Hub Portal v5.0 (Enterprise Quality).
- * Redesigned for high-speed recruitment vertical discovery with tactile premium cards.
+ * @fileOverview Premium Board Hub Portal v5.1.
+ * FIXED: Removed mandatory user session check to allow guest access.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
@@ -73,7 +73,7 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
     } finally { setPinningId(null); }
   };
 
-  if (authLoading || !user) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+  if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden">
@@ -114,7 +114,7 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-24 max-w-7xl flex-1">
          {examsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-               {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3rem] bg-white" />)}
+               {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3rem] bg-white" />) }
             </div>
          ) : exams && exams.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
@@ -133,9 +133,11 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
                           <Card className="border border-[#E5E7EB] shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3.5rem] bg-white group overflow-hidden h-full flex flex-col p-8 md:p-12 text-left relative">
                              <div className="flex justify-between items-start mb-10 w-full relative z-10">
                                 <AuthorityLogo boardId={hubId} size="md" className="h-16 w-16 md:h-24 md:w-24 bg-slate-50 rounded-2xl group-hover:scale-105 transition-transform shadow-2xl border-4 border-white" />
-                                <button onClick={(e) => handleTogglePin(e, exam.id)} disabled={pinningId === exam.id} className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all active:scale-90 shadow-sm", isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}>
-                                   {pinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : isPinned ? <CheckCircle2 className="h-4 w-4" /> : <Star className="h-4 w-4" />}
-                                </button>
+                                {user && (
+                                  <button onClick={(e) => handleTogglePin(e, exam.id)} disabled={pinningId === exam.id} className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all active:scale-90 shadow-sm", isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}>
+                                     {pinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : isPinned ? <CheckCircle2 className="h-4 w-4" /> : <Star className="h-4 w-4" />}
+                                  </button>
+                                )}
                              </div>
                              
                              <div className="space-y-6 flex-1 text-left relative z-10">
@@ -152,7 +154,7 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
                                    Enter Registry Hub <ChevronRight className="h-4 w-4 ml-auto opacity-30" />
                                 </Button>
                              </div>
-                             <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none group-hover:scale-125 transition-transform duration-1000"><Landmark className="h-48 w-48" /></div>
+                             <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none group-hover:scale-125 transition-transform duration-1000"><Landmark className="h-48 w-48" /></div>
                           </Card>
                        </Link>
                     </motion.div>

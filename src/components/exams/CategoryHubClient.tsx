@@ -19,8 +19,8 @@ interface CategoryHubClientProps {
 }
 
 /**
- * @fileOverview Premium Category Hub Portal v5.0 (Testbook Standard).
- * Redesigned for institutional clarity and enterprise-level responsive consistency.
+ * @fileOverview Premium Category Hub Portal v5.1.
+ * FIXED: Removed mandatory user session check to allow guest browsing.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -34,8 +34,8 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
   const { data: categories } = useCollection<any>(useMemo(() => (db ? collection(db, "categories") : null), [db]));
   const category = categories?.find(c => c.id === catId);
 
-  const boardsQuery = useMemo(() => (db && user ? query(collection(db, "boards"), where("categoryId", "==", catId)) : null), [db, catId, user]);
-  const examsQuery = useMemo(() => (db && user ? query(collection(db, "exams"), where("categoryId", "==", catId)) : null), [db, catId, user]);
+  const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), where("categoryId", "==", catId)) : null), [db, catId]);
+  const examsQuery = useMemo(() => (db ? query(collection(db, "exams"), where("categoryId", "==", catId)) : null), [db, catId]);
 
   const { data: boards, loading: boardsLoading } = useCollection<any>(boardsQuery);
   const { data: rawExams, loading: examsLoading } = useCollection<any>(examsQuery);
@@ -45,7 +45,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
      return [...rawExams].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
   }, [rawExams]);
 
-  if (authLoading || !user) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+  if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden">
@@ -60,7 +60,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90">
                   <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
                </button>
-               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[9px] md:text-[11px] uppercase tracking-widest shadow-sm">Official Category</Badge>
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[9px] md:text-[11px] tracking-widest shadow-sm">Official Category</Badge>
             </div>
 
             <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-14">

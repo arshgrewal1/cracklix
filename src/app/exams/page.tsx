@@ -34,8 +34,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Exam Selection Hub v5.1.
- * UPDATED: Normalized casing for headings and labels.
+ * @fileOverview Premium Exam Selection Hub v5.2.
+ * FIXED: Removed mandatory user check to allow public browsing.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -107,7 +107,7 @@ export default function ExamsEntryPage() {
     recognition.start();
   };
 
-  if (authLoading || !user) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+  if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full">
@@ -288,7 +288,7 @@ export default function ExamsEntryPage() {
                                 <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold px-2.5 py-1 rounded-lg shadow-sm">Live patterns</Badge>
                                 <div className="flex items-center gap-1 text-amber-500">
                                    <Star className="h-3 w-3 fill-current" />
-                                   <span className="text-[10px] font-bold text-slate-400">4.9</span>
+                                   <span className="text-[10px] font-black text-slate-400">4.9</span>
                                 </div>
                              </div>
                           </div>
@@ -320,7 +320,7 @@ export default function ExamsEntryPage() {
            <div className="container mx-auto px-8 md:px-20 space-y-16">
               <div className="space-y-4 max-w-3xl mx-auto">
                  <h2 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">The cracklix standard</h2>
-                 <p className="text-slate-400 font-bold text-[11px] md:text-sm uppercase tracking-widest">Verified Institutional Learning Nodes</p>
+                 <p className="text-slate-400 font-bold text-[11px] md:text-sm uppercase tracking-widest">Verified Institutional Learning Items</p>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-16">
                  <ValueNode icon={ShieldCheck} title="Verified patterns" desc="Updated 24x7 as per official gazettes." />

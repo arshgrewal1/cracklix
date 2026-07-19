@@ -45,8 +45,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v5.0 (Testbook Quality).
- * Completely redesigned for high-fidelity information density and tactical preparation flow.
+ * @fileOverview Premium Exam Detail Hub v5.1.
+ * FIXED: Removed mandatory user check to allow public browsing of exam verticals.
  */
 
 export default function ExamHubClient() {
@@ -146,7 +146,7 @@ export default function ExamHubClient() {
   if (!exam) return <div className="p-20 text-center uppercase font-black text-slate-300">Exam Vertical Not Registered</div>
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10">
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden">
       <Navbar />
       
       {/* 1. PREMIUM TESTBOOK-STYLE HERO */}
@@ -177,7 +177,7 @@ export default function ExamHubClient() {
                        {exam.description || "Master the official Punjab recruitment pattern with verified practice series."}
                     </p>
                     <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 pt-2">
-                       <Badge className="bg-primary/20 text-primary border border-primary/20 px-4 py-1.5 rounded-full font-black text-[9px] uppercase tracking-widest">Live Content Node</Badge>
+                       <Badge className="bg-primary/20 text-primary border border-primary/20 px-4 py-1.5 rounded-full font-black text-[9px] uppercase tracking-widest">Live Content Registry</Badge>
                        <span className="text-[11px] md:text-xs font-bold text-slate-500 flex items-center gap-2 uppercase tracking-widest">
                           <Users className="h-3.5 w-3.5" /> 12.4K+ Aspirants Active
                        </span>
@@ -186,18 +186,20 @@ export default function ExamHubClient() {
                </div>
 
                <div className="flex flex-col gap-4 w-full md:w-auto shrink-0">
-                  <Button 
-                    onClick={togglePin} 
-                    disabled={isPinning}
-                    variant="outline" 
-                    className={cn(
-                      "h-14 md:h-16 px-10 rounded-2xl border-white/10 font-black uppercase text-[10px] tracking-widest gap-3 transition-all",
-                      isPinned ? "bg-primary border-primary text-white" : "bg-white/5 text-white hover:bg-white/10"
-                    )}
-                  >
-                     {isPinning ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4", isPinned && "fill-current")} />}
-                     {isPinned ? "In My Exams" : "Add to Dashboard"}
-                  </Button>
+                  {user && (
+                    <Button 
+                      onClick={togglePin} 
+                      disabled={isPinning}
+                      variant="outline" 
+                      className={cn(
+                        "h-14 md:h-16 px-10 rounded-2xl border-white/10 font-black uppercase text-[10px] tracking-widest gap-3 transition-all",
+                        isPinned ? "bg-primary border-primary text-white" : "bg-white/5 text-white hover:bg-white/10"
+                      )}
+                    >
+                       {isPinning ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4", isPinned && "fill-current")} />}
+                       {isPinned ? "In My Exams" : "Add to Dashboard"}
+                    </Button>
+                  )}
                   <Button asChild className="h-14 md:h-16 px-10 bg-white text-[#0F172A] hover:bg-slate-50 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-2xl border-none">
                      <Link href="/pass"><Gem className="h-5 w-5 text-primary" /> Unlock Elite Hub</Link>
                   </Button>
@@ -208,7 +210,7 @@ export default function ExamHubClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10 border-t border-white/5">
                <HeroStat icon={Zap} label="Mock Tests" val={stats.totalTests} />
                <HeroStat icon={FileStack} label="Old Papers" val={groupedContent.PYQ.length} />
-               <HeroStat icon={Target} label="My Progress" val={`${stats.avgAccuracy}%`} />
+               <HeroStat icon={Target} label="My Progress" val={user ? `${stats.avgAccuracy}%` : 'Login'} />
                <HeroStat icon={Trophy} label="Ranking" val="Verified" />
             </div>
          </div>
@@ -257,7 +259,7 @@ export default function ExamHubClient() {
                         </Link>
                       ))}
                     </div>
-                  ) : <div className="py-20 text-center opacity-30 font-black uppercase">No Subject Nodes Available</div>}
+                  ) : <div className="py-20 text-center opacity-30 font-black uppercase">No Subject Items Available</div>}
                </TabsContent>
                <TabsContent value="PYQ"><TestGrid data={groupedContent.PYQ} isPYQ loading={false} /></TabsContent>
                <TabsContent value="NOTES"><TestGrid data={groupedContent.NOTES} isNote loading={false} /></TabsContent>
