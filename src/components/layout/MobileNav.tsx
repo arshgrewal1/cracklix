@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -16,7 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Premium Mobile Bottom Navigation v2.2 [Typography Optimized].
+ * Premium Mobile Bottom Navigation v2.3.
  */
 
 export default function MobileNav() {

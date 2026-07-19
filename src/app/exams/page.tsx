@@ -34,8 +34,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Exam Selection Hub v5.0.
- * FIXED: Implemented functional Voice Search.
+ * @fileOverview Premium Exam Selection Hub v5.1.
+ * UPDATED: Normalized casing for headings and labels.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -107,7 +107,7 @@ export default function ExamsEntryPage() {
     recognition.start();
   };
 
-  if (authLoading || !user) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+  if (authLoading || !user) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full">
@@ -124,13 +124,13 @@ export default function ExamsEntryPage() {
           >
             <div className="space-y-6 max-w-4xl">
               <div className="flex items-center justify-center md:justify-start gap-3">
-                 <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[10px] md:text-xs tracking-widest flex items-center gap-2 uppercase">
+                 <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs tracking-tight flex items-center gap-2">
                    <Landmark className="h-3.5 w-3.5" /> Exam Registry
                  </Badge>
               </div>
               <h1 className="text-[32px] sm:text-6xl lg:text-[72px] font-black tracking-tighter leading-[1.05] text-[#0F172A] antialiased">
-                Find Your <br className="hidden md:block"/>
-                <span className="text-primary">Recruitment Portal.</span>
+                Find your <br className="hidden md:block"/>
+                <span className="text-primary">Recruitment portal.</span>
               </h1>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl leading-relaxed tracking-tight">
                 Select your target board or exam vertical to begin practicing with Punjab's most accurate mock tests.
@@ -182,7 +182,7 @@ export default function ExamsEntryPage() {
                             <AuthorityLogo boardId={e.boardId} size="sm" className="h-12 w-12 shrink-0" />
                             <div className="min-w-0">
                               <span className="font-bold text-[#0F172A] text-sm md:text-lg block truncate">{e.name}</span>
-                              <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{e.boardId} Hub</span>
+                              <span className="text-[10px] font-bold text-slate-400">{e.boardId} Hub</span>
                             </div>
                           </div>
                           <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all" />
@@ -199,7 +199,7 @@ export default function ExamsEntryPage() {
                   <button 
                     key={chip.label}
                     onClick={() => setSearchTerm(chip.label)}
-                    className="h-10 px-6 rounded-full bg-white border border-slate-200 text-[#0F172A] font-bold text-xs uppercase tracking-tight shadow-sm hover:border-primary/40 hover:text-primary transition-all whitespace-nowrap active:scale-95 flex items-center gap-2"
+                    className="h-10 px-6 rounded-full bg-white border border-slate-200 text-[#0F172A] font-bold text-xs tracking-tight shadow-sm hover:border-primary/40 hover:text-primary transition-all whitespace-nowrap active:scale-95 flex items-center gap-2"
                   >
                     <span>{chip.icon}</span> {chip.label}
                   </button>
@@ -216,8 +216,8 @@ export default function ExamsEntryPage() {
                     <Landmark className="h-6 w-6" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight uppercase">Official boards</h2>
-                    <p className="text-[10px] md:text-sm font-black text-slate-400 uppercase tracking-widest mt-1">Verified Authority Hubs</p>
+                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Official boards</h2>
+                    <p className="text-[10px] md:text-sm font-bold text-slate-400 mt-1">Verified Authority Hubs</p>
                  </div>
               </div>
            </div>
@@ -232,15 +232,15 @@ export default function ExamsEntryPage() {
                     whileTap={{ scale: 0.98 }}
                  >
                     <Link href={`/exams/category/${cat.id}`}>
-                       <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[28px] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-8 relative">
+                       <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[28px] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-8 relative text-left">
                           <div className="flex items-center gap-5 relative z-10">
                              <div className="h-14 w-14 md:h-16 md:w-16 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner shrink-0 group-hover:scale-105 transition-transform">
                                 <AuthorityLogo category={cat} size="sm" className="p-0 shadow-none border-none bg-transparent" />
                              </div>
-                             <div className="min-w-0 text-left flex-1">
-                                <h3 className="text-sm md:text-lg font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors uppercase truncate">{cat.title}</h3>
+                             <div className="min-w-0 flex-1">
+                                <h3 className="text-sm md:text-lg font-bold text-[#0F172A] leading-tight group-hover:text-primary transition-colors truncate">{cat.title}</h3>
                                 <div className="mt-1 flex items-center justify-between">
-                                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">12+ Exams</span>
+                                   <span className="text-[9px] font-bold text-slate-400">12+ Exams</span>
                                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-all" />
                                 </div>
                              </div>
@@ -263,8 +263,8 @@ export default function ExamsEntryPage() {
                     <Star className="h-6 w-6 fill-current" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight uppercase">Trending hubs</h2>
-                    <p className="text-[10px] md:text-sm font-black text-slate-400 uppercase tracking-widest mt-1">Highest Aspirant Velocity</p>
+                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Trending hubs</h2>
+                    <p className="text-[10px] md:text-sm font-bold text-slate-400 mt-1">Highest Aspirant Velocity</p>
                  </div>
               </div>
            </div>
@@ -285,26 +285,26 @@ export default function ExamsEntryPage() {
                           <div className="flex justify-between items-start mb-10">
                              <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-2xl border-4 border-white bg-slate-50" />
                              <div className="flex flex-col items-end gap-2">
-                                <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-sm">LIVE PATTERNS</Badge>
+                                <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold px-2.5 py-1 rounded-lg shadow-sm">Live patterns</Badge>
                                 <div className="flex items-center gap-1 text-amber-500">
                                    <Star className="h-3 w-3 fill-current" />
-                                   <span className="text-[10px] font-black text-slate-400">4.9</span>
+                                   <span className="text-[10px] font-bold text-slate-400">4.9</span>
                                 </div>
                              </div>
                           </div>
                           <div className="space-y-4 flex-1">
-                             <h3 className="text-xl md:text-2xl font-black text-[#0F172A] leading-[1.1] tracking-tight uppercase break-words group-hover:text-primary transition-colors">{exam.name}</h3>
+                             <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-[1.1] tracking-tight group-hover:text-primary transition-colors">{exam.name}</h3>
                              <div className="flex items-center gap-6 pt-4">
-                                <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px] uppercase tracking-tight">
+                                <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px]">
                                    <Zap className="h-4 w-4 text-primary" /> {exam.totalMocks || '40+'} Mocks
                                 </div>
-                                <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px] uppercase tracking-tight">
+                                <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px]">
                                    <Users className="h-4 w-4 text-primary" /> Active
                                 </div>
                              </div>
                           </div>
                           <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between group-hover:text-primary transition-all">
-                             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Start Practice</span>
+                             <span className="text-[10px] font-bold">Start practice</span>
                              <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                           </div>
                        </Card>
@@ -315,35 +315,35 @@ export default function ExamsEntryPage() {
         </section>
 
         {/* 4. WHY CRACKLIX SECTION */}
-        <section className="py-12 md:py-24 bg-white rounded-[40px] md:rounded-[80px] shadow-sm border border-slate-100 overflow-hidden relative">
+        <section className="py-12 md:py-24 bg-white rounded-[40px] md:rounded-[80px] shadow-sm border border-slate-100 overflow-hidden relative text-center">
            <div className="absolute top-0 right-0 p-16 opacity-[0.02] pointer-events-none"><ShieldCheck className="h-96 w-96" /></div>
-           <div className="container mx-auto px-8 md:px-20 text-center space-y-16">
+           <div className="container mx-auto px-8 md:px-20 space-y-16">
               <div className="space-y-4 max-w-3xl mx-auto">
-                 <h2 className="text-3xl md:text-6xl font-[900] text-[#0F172A] tracking-tighter uppercase leading-none">The cracklix standard</h2>
-                 <p className="text-slate-400 font-bold text-[11px] md:text-sm uppercase tracking-[0.3em]">Verified Institutional Learning Nodes</p>
+                 <h2 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">The cracklix standard</h2>
+                 <p className="text-slate-400 font-bold text-[11px] md:text-sm uppercase tracking-widest">Verified Institutional Learning Nodes</p>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-16">
-                 <ValueNode icon={ShieldCheck} title="Verified Patterns" desc="Updated 24x7 as per official gazettes." />
-                 <ValueNode icon={Zap} title="Instant Solutions" desc="Bilingual rationale for every MCQ node." />
-                 <ValueNode icon={GraduationCap} title="Merit Ranking" desc="See your All Punjab Rank in real-time." />
-                 <ValueNode icon={Users} title="Student Community" desc="Join 100K+ aspirants preparing smarter." />
+                 <ValueNode icon={ShieldCheck} title="Verified patterns" desc="Updated 24x7 as per official gazettes." />
+                 <ValueNode icon={Zap} title="Instant solutions" desc="Bilingual rationale for every MCQ node." />
+                 <ValueNode icon={GraduationCap} title="Merit ranking" desc="See your All Punjab Rank in real-time." />
+                 <ValueNode icon={Users} title="Student community" desc="Join 100K+ aspirants preparing smarter." />
               </div>
            </div>
         </section>
 
         {/* 5. CTA HUB */}
-        <section className="px-1">
+        <section className="px-1 text-center">
            <motion.div 
              initial={{ opacity: 0, scale: 0.98 }}
              whileInView={{ opacity: 1, scale: 1 }}
              viewport={{ once: true }}
-             className="bg-gradient-to-br from-[#0B1528] to-[#1E3A8A] rounded-[30px] md:rounded-[60px] p-10 md:p-32 text-center space-y-10 md:space-y-16 text-white relative overflow-hidden shadow-5xl border border-white/5"
+             className="bg-gradient-to-br from-[#0B1528] to-[#1E3A8A] rounded-[30px] md:rounded-[60px] p-10 md:p-32 space-y-10 md:space-y-16 text-white relative overflow-hidden shadow-5xl border border-white/5"
            >
               <div className="absolute top-0 right-0 p-16 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000">
                  <Sparkles className="h-64 w-64 text-primary" />
               </div>
               <div className="relative z-10 space-y-6">
-                 <h2 className="text-3xl md:text-8xl font-[900] text-white tracking-tighter leading-[0.9] uppercase antialiased">
+                 <h2 className="text-3xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] antialiased">
                    Ready to crack <br className="hidden md:block" /> your dream job?
                  </h2>
                  <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-relaxed">
@@ -351,7 +351,7 @@ export default function ExamsEntryPage() {
                  </p>
               </div>
               <div className="relative z-10 pt-4 flex justify-center">
-                 <Button asChild className="h-16 md:h-24 px-12 md:px-24 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-sm tracking-[0.3em] rounded-2xl md:rounded-[3rem] shadow-4xl border-none transition-all active:scale-95 group">
+                 <Button asChild className="h-16 md:h-24 px-12 md:px-24 bg-primary hover:bg-blue-700 text-white font-bold text-[10px] md:text-sm tracking-tight rounded-2xl md:rounded-[3rem] shadow-4xl border-none transition-all active:scale-95 group">
                     <Link href="/mocks" className="flex items-center justify-center gap-4">
                        Start practicing <ArrowRight className="h-5 w-5 md:h-8 md:w-8 group-hover:translate-x-2 transition-transform" />
                     </Link>
@@ -373,8 +373,8 @@ function ValueNode({ icon: Icon, title, desc }: any) {
             <Icon className="h-8 w-8 md:h-12 md:w-12" />
          </div>
          <div className="space-y-2">
-            <h4 className="font-black text-sm md:text-xl text-[#0F172A] uppercase leading-tight">{title}</h4>
-            <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-tight leading-snug">{desc}</p>
+            <h4 className="font-bold text-sm md:text-xl text-[#0F172A] leading-tight">{title}</h4>
+            <p className="text-[10px] md:text-xs font-medium text-slate-400 leading-snug">{desc}</p>
          </div>
       </div>
    )

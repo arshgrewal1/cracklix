@@ -56,13 +56,13 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Practice Hub v6.1.
- * UPDATED: Removed fake attempts count and eliminated forced uppercase styling.
+ * @fileOverview Premium Practice Hub v6.2.
+ * UPDATED: Normalized casing for text labels and headings.
  */
 
 const QUICK_ACTIONS = [
   { label: "Bookmarks", icon: Bookmark, color: "text-rose-500", bg: "bg-rose-50", href: "/bookmarks" },
-  { label: "Wrong Qs", icon: X, color: "text-rose-600", bg: "bg-rose-100", href: "/revision" },
+  { label: "Wrong questions", icon: X, color: "text-rose-600", bg: "bg-rose-100", href: "/revision" },
   { label: "Analytics", icon: BarChart3, color: "text-primary", bg: "bg-blue-50", href: "/dashboard" },
   { label: "History", icon: History, color: "text-slate-500", bg: "bg-slate-100", href: "/dashboard" },
   { label: "Rankings", icon: Trophy, color: "text-amber-600", bg: "bg-amber-50", href: "/leaderboard" },
@@ -78,11 +78,11 @@ const CATEGORIES = [
 ];
 
 const FILTER_CHIPS = [
-  { label: "All Hubs", id: "all" },
-  { label: "Not Attempted", id: "NOT_ATTEMPTED" },
+  { label: "All hubs", id: "all" },
+  { label: "Not attempted", id: "NOT_ATTEMPTED" },
   { label: "Completed", id: "COMPLETED" },
-  { label: "Free Tests", id: "FREE" },
-  { label: "Premium Hub", id: "PREMIUM" },
+  { label: "Free tests", id: "FREE" },
+  { label: "Premium hub", id: "PREMIUM" },
   { label: "Popular", id: "POPULAR" },
 ];
 
@@ -146,7 +146,7 @@ export default function MockTestsPage() {
                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                     <Zap className="h-6 w-6 fill-current" />
                  </div>
-                 <h1 className="text-3xl md:text-[44px] font-black tracking-tighter text-[#0F172A] leading-none">Practice Hub</h1>
+                 <h1 className="text-3xl md:text-[44px] font-black tracking-tighter text-[#0F172A] leading-none">Practice hub</h1>
               </div>
               <p className="text-[#64748B] font-medium text-sm md:text-lg">Real-time mock tests based on latest commission patterns.</p>
            </div>
@@ -154,17 +154,17 @@ export default function MockTestsPage() {
            <Card className="bg-white border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[24px] p-5 md:p-8 flex items-center gap-10 md:gap-16 shrink-0 relative overflow-hidden border">
               <div className="absolute top-0 right-0 p-4 opacity-[0.02]"><Activity className="h-24 w-24" /></div>
               <div className="flex flex-col gap-1 text-left">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Available</p>
+                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Available</p>
                  <p className="text-2xl md:text-4xl font-black text-[#0F172A] tabular-nums tracking-tighter">{stats.available}</p>
               </div>
               <div className="w-px h-10 bg-slate-100" />
               <div className="flex flex-col gap-1 text-left">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">My Solved</p>
+                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">My solved</p>
                  <p className="text-2xl md:text-4xl font-black text-primary tabular-nums tracking-tighter">{stats.attempted}</p>
               </div>
               <div className="w-px h-10 bg-slate-100" />
               <div className="flex flex-col gap-1 text-left">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Avg Score</p>
+                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Avg score</p>
                  <p className="text-2xl md:text-4xl font-black text-emerald-500 tabular-nums tracking-tighter">{stats.avgScore}%</p>
               </div>
            </Card>
@@ -194,7 +194,7 @@ export default function MockTestsPage() {
                       key={chip.id} 
                       onClick={() => setActiveFilter(chip.id)}
                       className={cn(
-                         "h-10 px-6 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all border active:scale-95 shadow-sm whitespace-nowrap",
+                         "h-10 px-6 rounded-full font-bold text-[10px] md:text-xs tracking-tight transition-all border active:scale-95 shadow-sm whitespace-nowrap",
                          activeFilter === chip.id 
                             ? "bg-[#0F172A] border-[#0F172A] text-white shadow-xl" 
                             : "bg-white border-slate-100 text-slate-400 hover:border-primary/40 hover:text-primary"
@@ -212,8 +212,8 @@ export default function MockTestsPage() {
            <div className="lg:col-span-8 space-y-12">
               <div className="flex items-center justify-between px-2">
                  <div className="text-left space-y-1">
-                    <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tighter uppercase">Available tests</h2>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Showing {filteredMocks.length} specialized series</p>
+                    <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tighter">Available tests</h2>
+                    <p className="text-[10px] font-bold text-slate-400 tracking-tight">Showing {filteredMocks.length} specialized series</p>
                  </div>
                  <Badge className="bg-primary/10 text-primary border-none font-bold text-[10px] px-3 py-1 rounded-lg">Live hub</Badge>
               </div>
@@ -230,8 +230,8 @@ export default function MockTestsPage() {
                  ) : (
                     <div className="col-span-full py-40 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100 space-y-8 opacity-40">
                        <Zap className="h-20 w-20 mx-auto text-slate-200" />
-                       <p className="text-xl font-black text-slate-400 uppercase tracking-widest">No tests found in this filter</p>
-                       <button onClick={() => { setActiveFilter('all'); setSearchTerm(''); }} className="h-11 px-8 rounded-full border border-slate-200 uppercase font-bold text-[10px] bg-white hover:bg-slate-50 transition-all">Clear Filter</button>
+                       <p className="text-xl font-bold text-slate-400 tracking-tight">No tests found in this filter</p>
+                       <button onClick={() => { setActiveFilter('all'); setSearchTerm(''); }} className="h-11 px-8 rounded-full border border-slate-200 font-bold text-[10px] bg-white hover:bg-slate-50 transition-all">Clear Filter</button>
                     </div>
                  )}
               </div>
@@ -240,7 +240,7 @@ export default function MockTestsPage() {
               <section className="space-y-8 pt-10">
                  <div className="flex items-center gap-3 px-2">
                     <BookMarked className="h-6 w-6 text-primary" />
-                    <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tighter uppercase">Subject collections</h2>
+                    <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tighter">Subject collections</h2>
                  </div>
                  <div className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar pb-8 -mx-4 px-4 md:mx-0 md:px-0 w-full">
                     {CATEGORIES.map((cat, i) => (
@@ -251,8 +251,8 @@ export default function MockTestsPage() {
                                    <cat.icon className="h-8 w-8 md:h-10 md:w-10" />
                                 </div>
                                 <div className="space-y-2 relative z-10">
-                                   <h4 className="font-bold text-sm md:text-xl text-[#0F172A] uppercase leading-tight">{cat.label}</h4>
-                                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">12+ Test Hubs</p>
+                                   <h4 className="font-bold text-sm md:text-xl text-[#0F172A] leading-tight">{cat.label}</h4>
+                                   <p className="text-[10px] font-bold text-slate-400">12+ Test Hubs</p>
                                 </div>
                                 <div className="pt-4 mt-auto">
                                    <Button variant="ghost" className="h-10 w-10 rounded-full bg-slate-50 text-slate-300 group-hover:bg-primary group-hover:text-white transition-all p-0">
@@ -276,7 +276,7 @@ export default function MockTestsPage() {
                  </div>
                  <div className="relative z-10 space-y-10">
                     <div className="flex items-center justify-between">
-                       <h3 className="text-2xl font-black uppercase tracking-tight">Performance</h3>
+                       <h3 className="text-2xl font-bold tracking-tight">Performance</h3>
                        <div className="h-11 w-11 bg-white/5 rounded-xl flex items-center justify-center text-primary shadow-inner border border-white/5"><TrendingUp className="h-5 w-5" /></div>
                     </div>
 
@@ -297,7 +297,7 @@ export default function MockTestsPage() {
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center">
                              <span className="text-4xl md:text-6xl font-black tracking-tighter tabular-nums text-white">{stats.avgScore}%</span>
-                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Mastery</span>
+                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Mastery</span>
                           </div>
                        </div>
                     </div>
@@ -307,22 +307,22 @@ export default function MockTestsPage() {
                        <PerformanceSnippet label="Merit" val="Participating" icon={<Trophy className="text-amber-500 h-3 w-3" />} />
                     </div>
 
-                    <Button asChild variant="ghost" className="w-full text-primary font-black uppercase text-[10px] tracking-[0.2em] gap-3 hover:bg-white/5 h-14 border border-white/5 rounded-2xl">
+                    <Button asChild variant="ghost" className="w-full text-primary font-bold tracking-tight gap-3 hover:bg-white/5 h-14 border border-white/5 rounded-2xl">
                        <Link href="/dashboard">View full registry <ArrowUpRight className="h-4 w-4" /></Link>
                     </Button>
                  </div>
               </Card>
 
               <div className="space-y-8">
-                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 ml-2">Quick access</h3>
+                 <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-2">Quick access</h3>
                  <div className="grid grid-cols-2 gap-4">
                     {QUICK_ACTIONS.map((action, i) => (
                        <Link key={i} href={action.href}>
-                          <div className="p-6 bg-white border border-slate-100 rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start gap-4 group active:scale-95 h-full relative overflow-hidden">
+                          <div className="p-6 bg-white border border-slate-100 rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start gap-4 group active:scale-95 h-full relative overflow-hidden text-left">
                              <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform", action.bg, action.color)}>
                                 <action.icon className="h-6 w-6" />
                              </div>
-                             <span className="text-xs font-bold text-[#0F172A] uppercase tracking-tight">{action.label}</span>
+                             <span className="text-xs font-bold text-[#0F172A] tracking-tight">{action.label}</span>
                              <ChevronRight className="absolute right-6 bottom-7 h-4 w-4 text-slate-100 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                           </div>
                        </Link>
@@ -343,7 +343,7 @@ function PerformanceSnippet({ label, val, icon }: any) {
       <div className="p-5 bg-white/5 rounded-2xl border border-white/5 space-y-2 text-left">
          <div className="flex items-center gap-2">
             {icon}
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{label}</span>
+            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{label}</span>
          </div>
          <p className="text-base md:text-xl font-black text-white tabular-nums truncate">{val}</p>
       </div>
@@ -367,14 +367,14 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
                
                <div className="flex justify-between items-start w-full">
                   <div className="relative group-hover:rotate-6 transition-transform duration-500">
-                    <AuthorityLogo board={board} boardId={mock.boardId} size="md" className="h-16 w-16 md:h-20 md:w-20 shadow-xl border-4 border-slate-50 bg-slate-50" />
+                    <AuthorityLogo board={board} boardId={mock.boardId} size="md" className="h-16 w-16 md:h-20 md:w-20 shadow-xl border-4 border-white bg-slate-50" />
                   </div>
                   <div className="flex flex-col items-end gap-2">
                      <div className="flex items-center gap-2">
                         {isPremium ? (
-                           <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest shadow-sm">Elite Pass</Badge>
+                           <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-lg font-bold text-[9px] tracking-tight">Elite Pass</Badge>
                         ) : (
-                           <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest shadow-sm">Free Test</Badge>
+                           <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-lg font-bold text-[9px] tracking-tight">Free Test</Badge>
                         )}
                         <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90 cursor-pointer shadow-inner">
                            <Bookmark className="h-4 w-4" />
@@ -382,7 +382,7 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
                      </div>
                      <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100 shadow-inner">
                         <Star className="h-3 w-3 text-amber-400 fill-current" />
-                        <span className="text-[10px] font-black text-slate-500">4.8</span>
+                        <span className="text-[10px] font-bold text-slate-500">4.8</span>
                      </div>
                   </div>
                </div>
@@ -390,7 +390,7 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
                <div className="space-y-5 flex-1">
                   <div className="space-y-1.5">
                      <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">{mock.title}</h3>
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                     <p className="text-[10px] font-bold text-slate-400 flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Official pattern verified
                      </p>
                   </div>
@@ -409,7 +409,7 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
 
                {isCompleted && (
                   <div className="space-y-2.5 pt-4">
-                     <div className="flex justify-between items-center text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                     <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                         <span>Subject mastery</span>
                         <span className="text-emerald-600">{result.accuracy}%</span>
                      </div>
@@ -421,7 +421,7 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
 
                <div className="pt-8">
                   <Button asChild className={cn(
-                    "w-full h-14 md:h-18 rounded-[18px] md:rounded-[24px] font-black uppercase text-[10px] md:text-xs shadow-2xl transition-all active:scale-95 border-none gap-3 tracking-widest",
+                    "w-full h-14 md:h-18 rounded-[18px] md:rounded-[24px] font-bold text-[10px] md:text-xs shadow-2xl transition-all active:scale-95 border-none gap-3 tracking-tight",
                     isCompleted ? "bg-emerald-600 hover:bg-emerald-700 text-white" :
                     locked ? "bg-amber-500 hover:bg-amber-600 text-white" :
                     "bg-[#0F172A] hover:bg-black text-white"

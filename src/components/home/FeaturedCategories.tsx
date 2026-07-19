@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Filtered Institutional Categories Hub v41.1.
+ * @fileOverview Filtered Institutional Categories Hub v41.2.
  * UPDATED: Standardized typography to sentence case.
  */
 
@@ -67,7 +67,7 @@ export default function FeaturedCategories() {
                transition={{ delay: idx * 0.05 }}
              >
                 <Link href={`/exams/category/${cat.id}`}>
-                  <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-10 flex flex-col group h-full relative overflow-hidden">
+                  <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-10 flex flex-col group h-full relative overflow-hidden text-left">
                      <div className="flex justify-between items-start mb-8">
                         <AuthorityLogo category={cat} size="md" />
                         <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all">

@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v501.1.
- * UPDATED: Removed uppercase from primary headings.
+ * @fileOverview Institutional Premium Hub v501.2.
+ * UPDATED: Normalized casing across the landing page.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -98,7 +98,7 @@ export default function HomePage() {
                       </div>
                     </>
                   ) : (
-                    <div className="py-10 opacity-20"><p className="text-white font-bold tracking-widest">Loading latest tests...</p></div>
+                    <div className="py-10 opacity-20"><p className="text-white font-bold">Loading latest tests...</p></div>
                   )}
                </div>
             </motion.div>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -20,16 +19,15 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Bookmarks Hub v5.0 (Premium Redesign).
- * FIXED: Integrated high-fidelity card system and sticky search hub.
- * ADDED: Direct Solution Preview Modal for frictionless revision.
+ * @fileOverview Official Bookmarks Hub v5.1.
+ * UPDATED: Normalized casing for text labels and headings.
  */
 
 const FILTER_CHIPS = [
-  { id: "all", label: "All Items" },
+  { id: "all", label: "All items" },
   { id: "Questions", label: "Questions" },
-  { id: "Notes", label: "Study Notes" },
-  { id: "CA", label: "Current Affairs" },
+  { id: "Notes", label: "Study notes" },
+  { id: "CA", label: "Current affairs" },
   { id: "History", label: "History" },
   { id: "Punjab GK", label: "Punjab GK" },
   { id: "Math", label: "Mathematics" },
@@ -108,7 +106,7 @@ export default function BookmarksPage() {
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Syncing Identity...</p>
+       <p className="text-[10px] font-bold text-slate-300 tracking-tight">Syncing identity...</p>
     </div>
   );
 
@@ -127,10 +125,10 @@ export default function BookmarksPage() {
           >
             <div className="flex items-center gap-3">
                <Bookmark className="h-5 w-5 text-primary" />
-               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Personal Registry</span>
+               <span className="text-[10px] font-bold text-slate-400 tracking-tight">Personal registry</span>
             </div>
-            <h1 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none uppercase antialiased">
-              Saved <span className="text-primary italic">Items.</span>
+            <h1 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none antialiased">
+              Saved <span className="text-primary italic">items.</span>
             </h1>
             <p className="text-slate-500 font-medium text-sm md:text-lg max-w-xl leading-snug">
               Review your bookmarked questions and notes for high-speed revision.
@@ -149,7 +147,7 @@ export default function BookmarksPage() {
                    value={searchTerm}
                    onChange={e => setSearchTerm(e.target.value)}
                    placeholder="Search saved statements..." 
-                   className="h-14 md:h-16 pl-16 pr-14 rounded-2xl bg-white border-slate-200 shadow-xl text-base md:text-lg font-bold placeholder:text-slate-200 focus:ring-4 focus:ring-primary/5 transition-all"
+                   className="h-14 md:h-16 pl-14 pr-14 rounded-2xl bg-white border-slate-200 shadow-xl text-base md:text-lg font-bold placeholder:text-slate-200 focus:ring-4 focus:ring-primary/5 transition-all"
                  />
                  {searchTerm && (
                    <button onClick={() => setSearchTerm('')} className="absolute right-6 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all">
@@ -164,7 +162,7 @@ export default function BookmarksPage() {
                       key={chip.id} 
                       onClick={() => setActiveFilter(chip.id)}
                       className={cn(
-                         "h-9 px-6 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all border active:scale-95 shadow-sm whitespace-nowrap",
+                         "h-9 px-6 rounded-full font-bold text-[9px] md:text-[10px] tracking-tight transition-all border active:scale-95 shadow-sm whitespace-nowrap",
                          activeFilter === chip.id 
                             ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" 
                             : "bg-white border-slate-100 text-slate-400 hover:border-slate-300 hover:text-slate-600"
@@ -202,10 +200,10 @@ export default function BookmarksPage() {
                     <CardContent className="p-6 md:p-10 space-y-6 text-left">
                       <div className="flex items-center justify-between">
                          <div className="flex items-center gap-4">
-                            <Badge className="bg-primary/5 text-primary border-none text-[9px] font-black uppercase tracking-widest px-3 py-1 shadow-sm">
-                               {b.subject || 'Registry Hub'}
+                            <Badge className="bg-primary/5 text-primary border-none text-[9px] font-bold px-3 py-1 shadow-sm">
+                               {b.subject || 'Registry hub'}
                             </Badge>
-                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest tabular-nums">
+                            <span className="text-[10px] font-bold text-slate-300 tabular-nums">
                                Saved: {new Date(b.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                             </span>
                          </div>
@@ -218,7 +216,7 @@ export default function BookmarksPage() {
                       </div>
                       
                       <div className="space-y-4">
-                        <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight line-clamp-2 uppercase tracking-tight">
+                        <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight line-clamp-2 tracking-tight">
                            {b.questionText || b.title}
                         </h3>
 
@@ -234,10 +232,10 @@ export default function BookmarksPage() {
                             <Button 
                               onClick={() => handleViewSolution(b.questionId)} 
                               variant="outline" 
-                              className="flex-1 sm:flex-none h-11 px-8 rounded-xl border-2 border-slate-100 font-black uppercase text-[10px] tracking-widest hover:bg-primary/5 hover:text-primary transition-all active:scale-95 gap-2"
+                              className="flex-1 sm:flex-none h-11 px-8 rounded-xl border-2 border-slate-100 font-bold text-[10px] hover:bg-primary/5 hover:text-primary transition-all active:scale-95 gap-2"
                             >
                                {loadingNode ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} 
-                               View Rationale
+                               View rationale
                             </Button>
                          </div>
                          <div className="hidden md:flex h-11 w-11 rounded-xl bg-slate-50 items-center justify-center text-slate-200 group-hover:text-primary group-hover:bg-primary/5 transition-all">
@@ -263,11 +261,11 @@ export default function BookmarksPage() {
                    </div>
                 </div>
                 <div className="space-y-4 max-w-sm px-6">
-                   <h2 className="text-3xl font-black text-[#0F172A] uppercase tracking-tighter">No Saved Content</h2>
-                   <p className="text-slate-400 font-bold text-sm md:text-base uppercase tracking-widest leading-relaxed">Bookmark important questions and notes for quick institutional revision.</p>
+                   <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter">No saved content</h2>
+                   <p className="text-slate-400 font-bold text-sm md:text-base tracking-tight leading-relaxed">Bookmark important questions and notes for quick institutional revision.</p>
                 </div>
-                <Button asChild className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl border-none transition-all active:scale-95">
-                   <Link href="/mocks">Explore Practice Hub</Link>
+                <Button asChild className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] tracking-widest rounded-2xl shadow-xl border-none transition-all active:scale-95">
+                   <Link href="/mocks">Explore practice hub</Link>
                 </Button>
               </motion.div>
             )}
@@ -282,8 +280,8 @@ export default function BookmarksPage() {
         <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto rounded-[2.5rem] md:rounded-[3.5rem] bg-white p-0 border-none shadow-5xl text-left flex flex-col">
           <div className="h-2 w-full bg-primary shrink-0" />
           <DialogHeader className="px-8 md:px-12 py-8 border-b border-slate-50 shrink-0">
-             <DialogTitle className="text-2xl md:text-4xl font-black uppercase text-[#0F172A] tracking-tighter">Official Solution</DialogTitle>
-             <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">Verified Institutional Rationale</DialogDescription>
+             <DialogTitle className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter">Official solution</DialogTitle>
+             <DialogDescription className="text-[10px] font-bold text-slate-400 tracking-widest mt-2">Verified institutional rationale</DialogDescription>
           </DialogHeader>
           <div className="px-6 md:px-12 py-10 flex-1">
              {selectedQuestion && (
@@ -296,8 +294,8 @@ export default function BookmarksPage() {
              )}
           </div>
           <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-center shrink-0">
-             <Button onClick={() => setIsViewing(false)} className="rounded-full px-12 h-14 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest shadow-xl">
-                Close Node
+             <Button onClick={() => setIsViewing(false)} className="rounded-full px-12 h-14 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] tracking-widest">
+                Close node
              </Button>
           </div>
         </DialogContent>
@@ -308,7 +306,7 @@ export default function BookmarksPage() {
 
 function MetaNode({ icon: Icon, text }: { icon: any, text: string }) {
    return (
-      <div className="flex items-center gap-2 text-slate-400 font-bold text-[9px] uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+      <div className="flex items-center gap-2 text-slate-400 font-bold text-[9px] tracking-tight bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
          <Icon className="h-3.5 w-3.5" />
          <span>{text}</span>
       </div>
