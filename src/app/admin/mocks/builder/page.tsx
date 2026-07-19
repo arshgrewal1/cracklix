@@ -71,16 +71,15 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v47.0 [Strict Lifecycle].
- * FIXED: Implemented atomic Move-and-Delete logic for question consumption.
- * Questions are moved to usedQuestions archive and deleted from bank upon publication.
+ * @fileOverview Master Mock Builder v48.0 [Granular Targeting].
+ * ADDED: Specific Exam Vertical targeting below Board selection for precise test placement.
  */
 
 export default function MockBuilderPage() {
   return (
-    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
+    <React.Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
       <MockBuilderContent />
-    </Suspense>
+    </React.Suspense>
   )
 }
 
@@ -334,6 +333,11 @@ function MockBuilderContent() {
      setMockData({ ...mockData, boardIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id] });
   };
 
+  const toggleExamId = (id: string) => {
+     const current = mockData.examIds || [];
+     setMockData({ ...mockData, examIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id] });
+  };
+
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
@@ -477,6 +481,7 @@ function MockBuilderContent() {
               </div>
 
               <div className="space-y-10 pt-10 border-t border-slate-100">
+                 {/* BOARD MAPPING */}
                  <div className="space-y-6">
                     <div className="flex items-center gap-4">
                        <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-primary shadow-sm border border-blue-100">
@@ -487,7 +492,7 @@ function MockBuilderContent() {
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Official board mapping</p>
                        </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-2.5 max-h-52 overflow-y-auto custom-scrollbar pr-2">
+                    <div className="grid grid-cols-1 gap-2.5 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                        {boards?.map((b: any) => {
                           const isSelected = mockData.boardIds?.includes(b.id);
                           return (
@@ -515,6 +520,53 @@ function MockBuilderContent() {
                              </div>
                           )
                        })}
+                    </div>
+                 </div>
+
+                 {/* EXAM TARGETING */}
+                 <div className="space-y-6 pt-6 border-t border-slate-100">
+                    <div className="flex items-center gap-4">
+                       <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100">
+                          <Target className="h-5 w-5" />
+                       </div>
+                       <div className="space-y-0.5 text-left">
+                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">Exam vertical</h4>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Target specific hubs</p>
+                       </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2.5 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+                       {uniqueExams.map((e: any) => {
+                          const isSelected = mockData.examIds?.includes(e.id);
+                          return (
+                             <div 
+                                key={e.id} 
+                                onClick={() => toggleExamId(e.id)} 
+                                className={cn(
+                                   "flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer group active:scale-[0.98]",
+                                   isSelected 
+                                      ? "bg-emerald-50 border-emerald-500 shadow-sm" 
+                                      : "bg-white border-slate-50 hover:border-slate-200"
+                                )}
+                             >
+                                <div className="flex items-center gap-3">
+                                   <div className={cn(
+                                      "h-4 w-4 rounded-md border-2 flex items-center justify-center transition-all",
+                                      isSelected ? "bg-emerald-600 border-emerald-600" : "bg-white border-slate-200 group-hover:border-slate-300"
+                                   )}>
+                                      {isSelected && <Check className="h-2.5 w-2.5 text-white stroke-[4px]" />}
+                                   </div>
+                                   <span className={cn("text-[10px] font-bold uppercase transition-colors", isSelected ? "text-emerald-700" : "text-slate-500")}>
+                                      {e.name}
+                                   </span>
+                                </div>
+                             </div>
+                          )
+                       })}
+                       {uniqueExams.length === 0 && (
+                          <div className="py-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                             <p className="text-[9px] font-bold text-slate-400 uppercase">Select board hubs first</p>
+                          </div>
+                       )}
                     </div>
                  </div>
 
