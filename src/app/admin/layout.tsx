@@ -15,12 +15,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v42.2 [Enterprise Hardened].
- * UPDATED: Further reduced mobile logo height for optimized scaling.
+ * @fileOverview Admin Layout v43.0.
+ * UPDATED: Increased header logo size for better visibility.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
-  const authInstance = useAuth();
+  const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname() ?? '';
   
@@ -73,7 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   const handleLogout = async () => {
-    await signOut(authInstance);
+    await signOut(auth);
     router.push('/login');
   };
 
@@ -131,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   variant="light" 
                   href="/admin"
                   className="flex-shrink-0 -ml-2 md:ml-4" 
-                  imgClassName="h-20 md:h-28 w-auto"
+                  imgClassName="h-24 md:h-40 w-auto"
                   align="left"
                 />
               </div>
