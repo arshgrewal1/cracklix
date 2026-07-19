@@ -18,7 +18,7 @@ export interface ExamStoreState {
   visited: number[];
   bookmarks: number[];
   timeLeft: number;
-  elapsedSeconds: number; // Precision counter
+  elapsedSeconds: number; // Precision counter for active time
   currentIdx: number;
   isPaused: boolean;
   startTime: number;
@@ -49,8 +49,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v5.5 [Active Timer Fix].
- * UPDATED: Tracking active elapsed time directly to resolve "36m taken for 20m test" accuracy issues.
+ * @fileOverview Hardened Test Store v5.6 [High-Fidelity Timer].
+ * FIXED: Precise elapsed time tracking to resolve duration reporting errors.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -72,7 +72,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   isGuest: false,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
-    // 1. Mandatory Clean Reset
+    // 1. Mandatory Clean Reset to prevent state bleed
     set({
       mockId: null,
       questions: [],
@@ -87,6 +87,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     
+    // Resume Logic
     const isAttemptFinished = resumeData?.status === 'COMPLETED' || (resumeData && resumeData.timeLeft <= 0);
     let effectiveResume = isAttemptFinished ? null : (resumeData || null);
 
@@ -146,6 +147,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         timeLeft: nextTime,
         elapsedSeconds: nextElapsed
       });
+      // Heartbeat persistence
       if (nextTime % 30 === 0) state.persistGuestData();
     }
   },
