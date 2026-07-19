@@ -14,8 +14,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Vacancy Node v2.7.
- * UPDATED: Removed uppercase from recruitment titles and labels.
+ * @fileOverview Institutional Vacancy Node v2.8.
+ * FIXED: Removed large background watermark to prevent visual overlap.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
@@ -50,13 +50,13 @@ export default function LatestVacancy() {
            <div className="space-y-3 text-left">
               <div className="flex items-center gap-2">
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-[10px] md:text-xs font-semibold text-emerald-600 tracking-tight uppercase">Registry live sync</span>
+                 <span className="text-[10px] md:text-xs font-semibold text-emerald-600 tracking-tight uppercase">Live updates</span>
               </div>
               <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-[#0F172A] antialiased">
                 Latest vacancies
               </h2>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
-                Official notifications and direct apply nodes for state recruitments.
+                Official notifications and direct apply portals for state recruitments.
               </p>
            </div>
            <Button asChild variant="ghost" className="text-primary font-bold text-xs md:text-sm tracking-tight hover:underline flex items-center gap-2 group shrink-0">
@@ -72,8 +72,6 @@ export default function LatestVacancy() {
                 <motion.div key={v.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.1 }}>
                   <Link href={`/vacancies/${v.id}`}>
                     <Card className="border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col text-left p-6 md:p-12 relative">
-                       <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000"><Landmark className="h-44 w-44" /></div>
-                       
                        <div className="flex justify-between items-start mb-8 w-full relative z-10">
                           <AuthorityLogo boardId={v.board} size="md" className="h-16 w-16 md:h-24 md:w-24 shadow-2xl border-4 border-white bg-slate-50" />
                           <div className="flex flex-col items-end gap-2">

@@ -45,9 +45,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v6.2.
- * FIXED: Desktop overlap for long titles and corrected Users icon import.
- * UPDATED: Simplified terminology and removed all uppercase styling.
+ * @fileOverview Premium Exam Detail Hub v6.3.
+ * FIXED: Removed overlapping watermark icons and simplified text labels.
  */
 
 export default function ExamHubClient() {
@@ -55,7 +54,7 @@ export default function ExamHubClient() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { toast } = useToast()
+  const toast = useToast().toast
   const { user, profile, loading: userLoading } = useUser()
 
   const [mounted, setMounted] = useState(false);
@@ -79,7 +78,6 @@ export default function ExamHubClient() {
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: platformStats } = useDoc<any>(statsRef);
 
-  // REAL-TIME DATA QUERIES
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]);
   const quizzesQuery = useMemo(() => (db ? query(collection(db, "daily_quizzes"), where("published", "==", true)) : null), [db]);
   const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid)) : null), [db, user]);
@@ -95,7 +93,6 @@ export default function ExamHubClient() {
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
 
-  // AGGREGATION LOGIC
   const groupedContent = useMemo(() => {
     if (!examId || !exam) return { FULL: [], SUBJECT: [], SECTIONAL: [], CA: [], PYQ: [], NOTES: [], SUBJECTS_WITH_CONTENT: [] };
     
@@ -141,7 +138,7 @@ export default function ExamHubClient() {
         toast({ title: "Removed from dashboard" });
       } else {
         await updateDoc(userRef, { pinnedExams: arrayUnion(examId), updatedAt: serverTimestamp() });
-        toast({ title: "Added to dashboard", description: "This hub is now pinned to your account." });
+        toast({ title: "Added to dashboard" });
       }
     } finally { setIsPinning(false); }
   };
@@ -153,7 +150,6 @@ export default function ExamHubClient() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 overflow-x-hidden w-full">
       <Navbar />
       
-      {/* 1. PREMIUM HERO SECTION (REBALANCED) */}
       <section className="bg-white border-b border-slate-100 pt-10 pb-12 md:pt-16 md:pb-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
@@ -209,7 +205,6 @@ export default function ExamHubClient() {
                </div>
             </div>
 
-            {/* QUICK STATS STRIP */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10 border-t border-slate-100">
                <HeroStat icon={Zap} label="Tests available" val={stats.totalTests} />
                <HeroStat icon={FileStack} label="Old papers" val={groupedContent.PYQ.length} />
@@ -219,7 +214,6 @@ export default function ExamHubClient() {
          </div>
       </section>
 
-      {/* 2. TABS & CONTENT HUB */}
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-w-7xl pb-40 space-y-12">
          <Tabs defaultValue="MOCK" className="space-y-10">
             <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">

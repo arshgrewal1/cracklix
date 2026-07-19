@@ -12,9 +12,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Institutional Exam Vertical Card v4.1.
- * Redesigned for production standard comparable to Testbook/Oliveboard.
- * UPDATED: Integrated real data counts.
+ * @fileOverview Premium Institutional Exam Vertical Card v4.2.
+ * FIXED: Removed overlapping background icon for cleaner presentation.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"
@@ -72,10 +71,6 @@ export default function ExamCard({ exam }: ExamCardProps) {
                <span>Start preparation</span>
                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
              </Button>
-          </div>
-
-          <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none group-hover:scale-125 transition-transform duration-1000">
-             <ShieldCheck className="h-44 w-44" />
           </div>
         </Card>
       </Link>

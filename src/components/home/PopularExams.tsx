@@ -29,9 +29,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v52.0.
- * FIXED: Imported missing Star and CheckCircle2 icons.
- * FIXED: Removed all forced uppercase styling.
+ * @fileOverview Institutional Popular Exams Hub v53.0.
+ * FIXED: Removed overlapping background watermark for better visual balance.
  */
 export default function PopularExams() {
   const db = useFirestore();

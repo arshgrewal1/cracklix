@@ -21,8 +21,9 @@ interface CategoryHubClientProps {
 }
 
 /**
- * @fileOverview Premium Category Hub Portal v5.6.
- * UPDATED: Filtered out Current Affairs from recruitment boards list as it is not a board.
+ * @fileOverview Premium Category Hub Portal v5.7.
+ * FIXED: Removed overlapping background watermarks for cleaner UI.
+ * UPDATED: Simplified terminology and removed uppercase styling.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -49,7 +50,6 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
 
   const recruitmentBoards = useMemo(() => {
      if (!boards) return [];
-     // Exclude Current Affairs from boards list as it's a content hub, not a recruitment organization
      return boards.filter((b: any) => b.id !== 'current-affairs');
   }, [boards]);
 
@@ -59,7 +59,6 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden">
       <Navbar />
       
-      {/* 1. COMPACT PREMIUM HERO */}
       <section className="bg-white border-b border-slate-100 py-10 md:py-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
@@ -87,7 +86,6 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
 
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-20 max-w-7xl flex-1 space-y-16">
          
-         {/* BOARDS GRID */}
          {recruitmentBoards && recruitmentBoards.length > 0 && (
             <section className="space-y-10 text-left">
                <div className="flex items-center gap-3 px-2">
@@ -109,10 +107,9 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                               <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest">{board.name}</p>
                            </div>
                            <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between">
-                              <span className="text-[9px] font-black text-slate-400 tracking-0.2em">Open hub registry</span>
+                              <span className="text-[9px] font-bold text-slate-400 tracking-tight">View all tests</span>
                               <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[8px] px-2 py-0.5 rounded shadow-sm">12+ Exams</Badge>
                            </div>
-                           <div className="absolute top-0 right-0 p-8 opacity-0.02 pointer-events-none group-hover:scale-125 transition-transform duration-1000"><ShieldCheck className="h-40 w-40" /></div>
                         </Card>
                      </Link>
                   ))}
@@ -120,7 +117,6 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
             </section>
          )}
 
-         {/* DIRECT EXAMS GRID */}
          {activeExams.length > 0 && (
             <section className="space-y-10 text-left">
                <div className="flex items-center gap-3 px-2">
