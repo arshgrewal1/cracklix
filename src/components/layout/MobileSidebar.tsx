@@ -33,8 +33,8 @@ import { Badge } from "@/components/ui/badge";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Mobile Sidebar v80.0.
- * UPDATED: Logo centered in the sidebar header as per request.
+ * @fileOverview Mobile Sidebar v81.0.
+ * UPDATED: Logo centered in the sidebar header for balanced vertical navigation.
  */
 export default function MobileSidebar({
   onClose,

@@ -6,8 +6,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v80.0.
- * UPDATED: Logo centered when sidebar is expanded.
+ * Cracklix Admin Sidebar Header v81.0.
+ * UPDATED: Logo centered when sidebar is expanded for symmetrical vertical navigation.
  */
 export default function SidebarHeader({
   isOpen,
