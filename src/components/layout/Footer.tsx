@@ -24,8 +24,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Footer Hub v23.0.
- * FIXED: Added significant bottom padding on mobile to prevent overlap with fixed MobileNav.
+ * @fileOverview Institutional Footer Hub v24.0.
+ * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
  */
 export default function Footer() {
   const db = useFirestore();
@@ -67,7 +67,7 @@ export default function Footer() {
 
           {/* Links Group */}
           <div className="col-span-1 lg:col-span-1 space-y-6 pt-10 md:pt-14">
-            <h3 className="text-sm font-bold text-primary tracking-tight">Quick Links</h3>
+            <h3 className="text-sm font-bold text-primary tracking-tight">Quick links</h3>
             <ul className="space-y-3">
               <FooterLink href="/">Home</FooterLink>
               <FooterLink href="/exams">Exams</FooterLink>

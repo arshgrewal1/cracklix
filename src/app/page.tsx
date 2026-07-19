@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v501.2.
- * UPDATED: Normalized casing across the landing page.
+ * @fileOverview Institutional Premium Hub v501.3.
+ * UPDATED: Removed all uppercase styling from challenge headings for better PWA scaling.
  */
 export default function HomePage() {
   const { user } = useUser();

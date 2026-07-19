@@ -21,9 +21,8 @@ interface CategoryHubClientProps {
 }
 
 /**
- * @fileOverview Premium Category Hub Portal v5.4.
- * FIXED: Added missing Link and Badge imports.
- * UPDATED: Removed uppercase from headings and refined font scaling.
+ * @fileOverview Premium Category Hub Portal v5.5.
+ * UPDATED: Removed all uppercase styling for better PWA sizing.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -60,17 +59,17 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
          
          <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
             <div className="flex items-center gap-4">
-               <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90">
+               <button onClick={() => router.back()} className="h-10 w-10 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90">
                   <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
                </button>
-               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[9px] md:text-[11px] tracking-widest shadow-sm">Official Category</Badge>
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[9px] md:text-[11px] tracking-widest shadow-sm">Official category</Badge>
             </div>
 
             <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-14">
                <AuthorityLogo category={category} size="lg" className="h-24 w-24 md:h-36 md:w-36 rounded-[2rem] md:rounded-[3rem] bg-slate-50 border-[6px] border-slate-100 shadow-5xl group-hover:scale-105 transition-transform shrink-0" />
                <div className="space-y-4 text-center lg:text-left flex-1 min-w-0">
                   <h1 className="text-2xl sm:text-4xl md:text-6xl font-[800] text-[#0F172A] leading-[1.1] tracking-tight antialiased">
-                     {category?.title || "Exam Selection"}
+                     {category?.title || "Exam selection"}
                   </h1>
                   <p className="text-sm md:text-xl text-slate-500 font-medium leading-relaxed max-w-3xl">
                      {category?.description || "Select a verified authority hub or exam vertical to start your journey."}
@@ -101,10 +100,10 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                            </div>
                            <div className="space-y-2 flex-1">
                               <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">{board.abbreviation} Hub</h3>
-                              <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">{board.name}</p>
+                              <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest">{board.name}</p>
                            </div>
                            <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between">
-                              <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Open Hub Registry</span>
+                              <span className="text-[9px] font-black text-slate-400 tracking-[0.2em]">Open hub registry</span>
                               <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[8px] px-2 py-0.5 rounded shadow-sm">12+ Exams</Badge>
                            </div>
                            <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none group-hover:scale-125 transition-transform duration-1000"><ShieldCheck className="h-40 w-40" /></div>
@@ -135,8 +134,8 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                            </div>
                            <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight mb-6 flex-1">{exam.name}</h3>
                            <div className="mt-auto">
-                              <Button className="w-full h-14 rounded-2xl bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest gap-3 shadow-xl border-none transition-all active:scale-95">
-                                 Start Prep <ChevronRight className="h-4 w-4 ml-auto opacity-30" />
+                              <Button className="w-full h-14 rounded-2xl bg-[#0F172A] hover:bg-black text-white font-black text-[10px] tracking-widest gap-3 shadow-xl border-none transition-all active:scale-95">
+                                 Start prep <ChevronRight className="h-4 w-4 ml-auto opacity-30" />
                               </Button>
                            </div>
                         </Card>
@@ -149,7 +148,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
          {!boardsLoading && !examsLoading && boards?.length === 0 && activeExams.length === 0 && (
             <div className="py-40 text-center opacity-30 italic font-black uppercase tracking-[0.5em] flex flex-col items-center gap-10">
                <Layers className="h-20 w-20 text-slate-200" />
-               <p className="text-xl md:text-3xl">Registry Standby</p>
+               <p className="text-xl md:text-3xl">Registry standby</p>
             </div>
          )}
       </main>

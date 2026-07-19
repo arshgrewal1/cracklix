@@ -34,8 +34,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Exam Selection Hub v5.4.
- * UPDATED: Removed uppercase from headings for better PWA sizing.
+ * @fileOverview Premium Exam Selection Hub v5.5.
+ * UPDATED: Removed uppercase from headings and refined font scaling for PWA.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -135,7 +135,7 @@ export default function ExamsEntryPage() {
             <div className="space-y-6 max-w-4xl">
               <div className="flex items-center justify-center md:justify-start gap-3">
                  <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs tracking-tight flex items-center gap-2">
-                   <Landmark className="h-3.5 w-3.5" /> Exam Registry
+                   <Landmark className="h-3.5 w-3.5" /> Exam registry
                  </Badge>
               </div>
               <h1 className="text-[32px] sm:text-6xl lg:text-[72px] font-black tracking-tighter leading-[1.05] text-[#0F172A] antialiased">
@@ -351,7 +351,7 @@ export default function ExamsEntryPage() {
                  <Sparkles className="h-64 w-64 text-primary" />
               </div>
               <div className="relative z-10 space-y-6">
-                 <h2 className="text-3xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] antialiased">
+                 <h2 className="text-3xl md:text-7xl lg:text-9xl font-black text-white tracking-tighter leading-[0.9] antialiased">
                    Ready to crack <br className="hidden md:block" /> your dream job?
                  </h2>
                  <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-relaxed">

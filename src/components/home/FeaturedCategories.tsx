@@ -13,8 +13,8 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Filtered Institutional Categories Hub v41.2.
- * UPDATED: Standardized typography to sentence case.
+ * @fileOverview Filtered Institutional Categories Hub v41.3.
+ * UPDATED: Removed uppercase from headings for better PWA sizing.
  */
 
 const TARGET_IDS = [

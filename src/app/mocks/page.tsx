@@ -57,8 +57,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Practice Hub v6.4.
- * UPDATED: Renamed Computer to ICT.
+ * @fileOverview Premium Practice Hub v6.5.
+ * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
  */
 
 const QUICK_ACTIONS = [

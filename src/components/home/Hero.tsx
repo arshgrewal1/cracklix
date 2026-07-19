@@ -8,8 +8,8 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v61.3.
- * UPDATED: Removed uppercase from action nodes.
+ * @fileOverview Premium Mobile-First PWA Hero v61.4.
+ * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -51,9 +51,9 @@ export default function Hero() {
           </motion.div>
 
           <div className="space-y-3 w-full max-w-[340px] md:max-w-4xl px-1">
-            <h1 className="text-[32px] sm:text-7xl lg:text-[100px] font-black tracking-tighter text-[#0F172A] leading-[1.05] antialiased">
+            <h1 className="text-[32px] sm:text-7xl lg:text-[100px] font-black tracking-tighter leading-[1.05] text-[#0F172A] antialiased">
               Crack Punjab exams <br className="hidden sm:block" />
-              <span className="text-primary italic">with confidence</span>
+              <span className="text-primary italic">with confidence.</span>
             </h1>
 
             <p className="text-[14px] md:text-2xl text-slate-500 font-medium leading-relaxed tracking-tight max-w-md mx-auto">

@@ -13,8 +13,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Current Affairs Preview Hub v22.2.
- * UPDATED: Standardized heading size to text-2xl md:text-4xl.
+ * @fileOverview Current Affairs Preview Hub v22.3.
+ * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -38,12 +38,12 @@ export default function CurrentAffairsPreview() {
            <div className="space-y-1">
               <div className="flex items-center gap-3 md:gap-5">
                  <AuthorityLogo boardId="current-affairs" size="md" className="p-0 shadow-none bg-transparent" />
-                 <h2 className="text-2xl md:text-4xl font-black tracking-tight text-[#0F172A]">Current Affairs</h2>
+                 <h2 className="text-2xl md:text-4xl font-black tracking-tight text-[#0F172A]">Current affairs</h2>
               </div>
               <p className="max-w-2xl text-[14px] md:text-[clamp(13px,1.5vw,18px)] font-medium text-slate-500">Stay updated with daily verified news and tests.</p>
            </div>
            <Link href="/current-affairs" className="text-primary font-bold text-[13px] md:text-[15px] tracking-tight hover:underline flex items-center gap-2 group shrink-0">
-              View All <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              View all <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
            </Link>
         </div>
 
@@ -82,7 +82,7 @@ export default function CurrentAffairsPreview() {
 
                        <div className="mt-auto pt-4 md:pt-8 shrink-0">
                           <Button variant="ghost" className="w-full h-12 md:h-14 lg:h-16 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[14px] md:text-[15px] tracking-tight shadow-lg border-none active:scale-95 gap-2 uppercase">
-                             Start Test
+                             Start test
                              <ChevronRight className="h-4 w-4" />
                           </Button>
                        </div>

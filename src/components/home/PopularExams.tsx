@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v51.4.
- * UPDATED: Integrated verified mock counts and synchronized branding.
+ * @fileOverview Institutional Popular Exams Hub v51.5.
+ * UPDATED: Removed uppercase from recruitment titles and labels.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -159,7 +159,7 @@ export default function PopularExams() {
                                    : "bg-white border-slate-100 text-slate-300 hover:text-primary"
                                )}
                              >
-                                {pinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4", isPinned && "fill-current")} />}
+                                {pinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : isPinned ? <CheckCircle2 className="h-4 w-4" /> : <Star className="h-4 w-4" />}
                              </button>
                           </div>
 

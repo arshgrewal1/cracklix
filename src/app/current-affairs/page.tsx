@@ -40,9 +40,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Current Affairs Hub v5.5.
- * FIXED: ReferenceError for Link and ArrowRight/ShieldCheck imports.
- * UPDATED: Removed uppercase from headings.
+ * @fileOverview Premium Current Affairs Hub v5.6.
+ * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
  */
 
 const CATEGORIES = [
@@ -175,7 +174,7 @@ export default function CurrentAffairsCenter() {
                       key={cat} 
                       onClick={() => setSelectedCategory(cat)}
                       className={cn(
-                        "h-9 px-6 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-tight whitespace-nowrap transition-all border active:scale-95",
+                        "h-9 px-6 rounded-full font-bold text-[10px] md:text-xs tracking-tight whitespace-nowrap transition-all border active:scale-95",
                         selectedCategory === cat 
                           ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" 
                           : "bg-white border-slate-100 text-slate-400 hover:border-slate-300"
@@ -212,7 +211,7 @@ export default function CurrentAffairsCenter() {
                                    <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2">
                                          <Badge className="bg-blue-50 text-primary border-none text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm">
-                                            {item.type} hub
+                                            {item.type.toLowerCase()} hub
                                          </Badge>
                                          <span className="text-[9px] font-bold text-slate-300 tabular-nums uppercase">{item.month} {item.year}</span>
                                       </div>

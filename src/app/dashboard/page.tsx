@@ -36,8 +36,8 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Performance Hub v7.1 [REAL DATA SYNC].
- * FIXED: Added duration sanity check to prevent "fake hours" bug from corrupted data.
+ * @fileOverview Institutional Performance Hub v7.2.
+ * UPDATED: Removed all uppercase styling from headings and labels for better PWA scaling.
  */
 
 // Formatting Utilities
@@ -74,7 +74,7 @@ export default function StudentDashboard() {
 
   const performance = useMemo(() => {
     if (!results || results.length === 0) {
-      return { accuracy: 0, time: 0, totalCorrect: 0, totalAttempted: 0, rank: "Awaiting Data" };
+      return { accuracy: 0, time: 0, totalCorrect: 0, totalAttempted: 0, rank: "Awaiting data" };
     }
 
     let totalCorrect = 0;
@@ -232,7 +232,7 @@ export default function StudentDashboard() {
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              <InsightNode label="Activity hub" value={`${results?.length || 0} Tests taken`} icon={<CheckCircle2 className="text-emerald-500" />} />
+              <InsightNode label="Activity hub" value={`${results?.length || 0} tests taken`} icon={<CheckCircle2 className="text-emerald-500" />} />
               <InsightNode label="Mastery level" value={performance.accuracy > 70 ? "Advanced" : "Learner"} icon={<AlertCircle className="text-blue-500" />} />
             </div>
           </div>

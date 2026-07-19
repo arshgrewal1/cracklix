@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Latest Tests Hub v42.2.
- * UPDATED: Removed fake attempts count and force-uppercase styling.
+ * @fileOverview Premium Latest Tests Hub v42.3.
+ * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
  */
 export default function LatestMocks() {
   const db = useFirestore()
