@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v501.3.
- * UPDATED: Removed all uppercase styling from challenge headings for better PWA scaling.
+ * @fileOverview Institutional Premium Hub v501.4.
+ * FIXED: Purged "node" terminology and normalized casing for PWA sizing.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -54,7 +54,6 @@ export default function HomePage() {
                transition={{ duration: 0.5 }}
                className="bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#1E293B] rounded-[24px] p-[20px] border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.35)] relative overflow-hidden group transition-all duration-500 text-center min-h-[340px] flex flex-col justify-center"
             >
-               {/* Watermark */}
                <div className="absolute top-4 right-4 p-0 opacity-[0.04] pointer-events-none group-hover:scale-110 transition-transform duration-1000">
                   <Zap className="h-40 w-40 text-primary" />
                </div>

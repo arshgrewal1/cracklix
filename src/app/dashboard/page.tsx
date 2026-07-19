@@ -36,20 +36,16 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Performance Hub v7.2.
- * UPDATED: Removed all uppercase styling from headings and labels for better PWA scaling.
+ * @fileOverview Institutional Performance Hub v7.3.
+ * FIXED: Removed "node" terminology and ensured time taken uses accurate durations.
  */
 
 // Formatting Utilities
 const formatTime = (seconds: number) => {
   if (!seconds || seconds <= 0 || isNaN(seconds)) return "0m";
-  
-  // Sanity check: If average time is reported over 24 hours, it's corrupted data
   if (seconds > 86400) return "---";
-
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
 };
@@ -85,9 +81,7 @@ export default function StudentDashboard() {
     results.forEach((r: any) => {
       totalCorrect += (r.correctCount || 0);
       totalAttempted += (r.attemptedCount || 0);
-      
       const t = Number(r.timeTaken);
-      // Sanity Check: Ignore any record that took more than 12 hours (likely corrupted session)
       if (!isNaN(t) && t > 0 && t < 43200) {
         totalTime += t;
         validTimeEntries++;
@@ -151,7 +145,7 @@ export default function StudentDashboard() {
             
             <div className="flex flex-wrap justify-center md:justify-start gap-3">
               <Badge className="bg-primary/10 text-primary border-none font-bold text-[10px] px-4 py-1.5 rounded-full">
-                {profile?.pass?.plan || 'Free'} portal
+                {profile?.pass?.plan || 'Free'} member
               </Badge>
               <Badge variant="outline" className="bg-white border-slate-100 text-slate-500 font-bold text-[10px] px-4 py-1.5 rounded-full shadow-sm">
                 🔥 {stats.currentStreak} day streak
@@ -167,41 +161,40 @@ export default function StudentDashboard() {
           </Button>
         </motion.section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
-          
-          <div className="lg:col-span-8 space-y-8 md:space-y-12">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
-              <MetricPill 
-                label="Accuracy" 
-                val={`${performance.accuracy}%`} 
-                icon={<Target />} 
-                color="text-primary" 
-                bg="bg-blue-50" 
-                progress={performance.accuracy}
-              />
-              <MetricPill 
-                label="Avg time" 
-                val={formatTime(performance.time)} 
-                icon={<Clock />} 
-                color="text-orange-500" 
-                bg="bg-orange-50" 
-              />
-              <MetricPill 
-                label="Today's study" 
-                val={formatTime(stats.today)} 
-                icon={<Zap />} 
-                color="text-emerald-500" 
-                bg="bg-emerald-50" 
-              />
-              <MetricPill 
-                label="Merit status" 
-                val={performance.rank} 
-                icon={<Trophy />} 
-                color="text-amber-500" 
-                bg="bg-amber-50" 
-              />
-            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
+          <MetricPill 
+            label="Accuracy" 
+            val={`${performance.accuracy}%`} 
+            icon={<Target />} 
+            color="text-primary" 
+            bg="bg-blue-50" 
+            progress={performance.accuracy}
+          />
+          <MetricPill 
+            label="Avg time" 
+            val={formatTime(performance.time)} 
+            icon={<Clock />} 
+            color="text-orange-500" 
+            bg="bg-orange-50" 
+          />
+          <MetricPill 
+            label="Today's study" 
+            val={formatTime(stats.today)} 
+            icon={<Zap />} 
+            color="text-emerald-500" 
+            bg="bg-emerald-50" 
+          />
+          <MetricPill 
+            label="Merit status" 
+            val={performance.rank} 
+            icon={<Trophy />} 
+            color="text-amber-500" 
+            bg="bg-amber-50" 
+          />
+        </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
+          <div className="lg:col-span-8 space-y-8 md:space-y-12">
             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden border border-slate-100">
               <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30 flex flex-row items-center justify-between">
                 <div className="text-left">
@@ -244,7 +237,7 @@ export default function StudentDashboard() {
               </div>
               <div className="relative z-10 space-y-8 text-left">
                 <div className="space-y-1">
-                  <h3 className="text-2xl md:text-3xl font-black tracking-tight leading-none uppercase">Milestones</h3>
+                  <h3 className="text-2xl font-black tracking-tight leading-none uppercase">Milestones</h3>
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Platform rewards</p>
                 </div>
                 
@@ -270,7 +263,6 @@ export default function StudentDashboard() {
               </div>
             </div>
           </div>
-
         </div>
       </main>
       <Footer />
@@ -309,7 +301,7 @@ function InsightNode({ label, value, icon }: any) {
         {icon}
       </div>
       <div className="min-w-0 text-left">
-        <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] leading-none mb-2">{label}</p>
+        <p className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em] leading-none mb-2">{label}</p>
         <p className="text-lg md:text-xl font-bold text-[#0F172A] truncate tracking-tight">{value}</p>
       </div>
     </Card>

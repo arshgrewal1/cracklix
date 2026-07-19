@@ -39,7 +39,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Elite Pass Portal v450.1.
+ * @fileOverview Institutional Elite Pass Portal v450.2.
+ * FIXED: Hydration stability for pass status checks.
  * UPDATED: Normalized casing for headings and labels.
  */
 
@@ -47,7 +48,7 @@ const BENEFITS = [
   { icon: Trophy, label: "Unlimited mocks", desc: "Full access to 500+ tests", color: "text-blue-500", bg: "bg-blue-50" },
   { icon: ShieldCheck, label: "Verified solutions", desc: "Official board rationales", color: "text-emerald-500", bg: "bg-emerald-50" },
   { icon: BarChart3, label: "State rankings", desc: "Compare with 100K+ users", color: "text-purple-500", bg: "bg-purple-50" },
-  { icon: Zap, label: "Daily challenge", desc: "Fresh practice nodes daily", color: "text-orange-500", bg: "bg-orange-50" },
+  { icon: Zap, label: "Daily challenge", desc: "Fresh practice items daily", color: "text-orange-500", bg: "bg-orange-50" },
   { icon: Award, label: "Performance analytics", desc: "Deep subject-wise insights", color: "text-indigo-500", bg: "bg-indigo-50" },
   { icon: Lock, label: "Ad-free vault", desc: "No interruptions during prep", color: "text-rose-500", bg: "bg-rose-50" },
 ];
@@ -59,6 +60,7 @@ export default function PassPage() {
   const [mounted, setMounted] = useState(false)
   const [timeLeftStr, setTimeLeftStr] = useState("");
   const [progressPercent, setProgressPercent] = useState(0);
+  const [passStatus, setPassStatus] = useState<'none' | 'active' | 'expired'>('none');
 
   useEffect(() => {
     setMounted(true);
@@ -75,11 +77,16 @@ export default function PassPage() {
      return [...rawPasses].filter(p => p.active !== false).sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
   }, [rawPasses])
 
-  const passStatus = useMemo(() => {
+  useEffect(() => {
+     if (!profile) return;
      const expiryStr = profile?.passExpiresAt;
-     if (!expiryStr) return 'none';
+     if (!expiryStr) {
+        setPassStatus('none');
+        return;
+     }
      const expiry = new Date(expiryStr).getTime();
-     return expiry > new Date().getTime() ? 'active' : 'expired';
+     const now = new Date().getTime();
+     setPassStatus(expiry > now ? 'active' : 'expired');
   }, [profile]);
 
   useEffect(() => {
@@ -97,6 +104,7 @@ export default function PassPage() {
        if (remaining <= 0) {
           setTimeLeftStr("Expired");
           setProgressPercent(100);
+          setPassStatus('expired');
           clearInterval(interval);
           return;
        }
@@ -138,7 +146,7 @@ export default function PassPage() {
                  </span>
               </div>
 
-              <h1 className="text-3xl md:text-7xl lg:text-8xl font-black tracking-tighter text-[#0F172A] leading-[0.95] antialiased">
+              <h1 className="text-3xl md:text-7xl font-black tracking-tighter text-[#0F172A] leading-[0.95] antialiased">
                 Cracklix <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Elite Pass</span>
               </h1>
 
@@ -149,7 +157,7 @@ export default function PassPage() {
 
            {/* ACTIVE PLAN HUB */}
            <AnimatePresence>
-              {passStatus === 'active' && (
+              {mounted && passStatus === 'active' && (
                  <motion.div 
                    initial={{ opacity: 0, scale: 0.95 }}
                    animate={{ opacity: 1, scale: 1 }}
@@ -171,7 +179,7 @@ export default function PassPage() {
                                   strokeWidth="12" 
                                   strokeDasharray="100 100"
                                   initial={{ strokeDashoffset: 100 }}
-                                  animate={{ strokeDashoffset: progressPercent }}
+                                  animate={{ strokeDashoffset: 100 - progressPercent }}
                                   transition={{ duration: 2, ease: "easeOut" }}
                                 />
                              </svg>
@@ -211,7 +219,7 @@ export default function PassPage() {
         <section id="plans" className="space-y-12">
            <div className="text-center space-y-2">
               <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Select your access</h2>
-              <p className="text-slate-500 font-medium text-sm md:text-lg">Institutional-grade preparation nodes starting at zero cost.</p>
+              <p className="text-slate-500 font-medium text-sm md:text-lg">Institutional-grade preparation starting at zero cost.</p>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
@@ -311,20 +319,3 @@ export default function PassPage() {
     </div>
   )
 }
-
-function MetricNode({ label, value, icon }: any) {
-  return (
-    <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-white p-6 md:p-10 flex flex-col gap-4 text-left group hover:-translate-y-1 transition-all">
-       <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-          {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}
-       </div>
-       <div className="space-y-0.5">
-          <p className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tighter tabular-nums">{value}</p>
-          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-       </div>
-    </Card>
-  )
-}
-
-function ClipboardList({ className }: any) { return <Zap className={className} /> }
-function TrendingUp({ className }: any) { return <ArrowUpRight className={className} /> }
