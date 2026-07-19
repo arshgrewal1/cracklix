@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -21,7 +22,7 @@ interface CategoryHubClientProps {
 
 /**
  * @fileOverview Premium Category Hub Portal v5.2.
- * FIXED: Imported missing Badge component to resolve ReferenceError.
+ * FIXED: Imported missing Badge and Link components to resolve ReferenceErrors.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -61,7 +62,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90">
                   <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
                </button>
-               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[9px] md:text-[11px] tracking-widest shadow-sm">Official Category</Badge>
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[9px] md:text-[11px] uppercase tracking-widest shadow-sm">Official Category</Badge>
             </div>
 
             <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-14">
