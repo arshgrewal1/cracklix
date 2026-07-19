@@ -62,9 +62,9 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview World-Class Institutional Result Card v2.5.
- * FIXED: Added pb-12 to containers to prevent footer clipping in PDF.
- * UPDATED: Optimized for minimal PDF size.
+ * @fileOverview World-Class Institutional Result Card v2.6.
+ * FIXED: Applied pb-16 to ensure absolute footer stability in PDF exports.
+ * UPDATED: Optimized for minimal PDF size and maximum clarity.
  */
 export default function ResultCard({
   studentName,
@@ -103,7 +103,7 @@ export default function ResultCard({
       {/* PAGE 1: OFFICIAL RESULT SUMMARY */}
       <div 
         id="cracklix-result-page-1"
-        className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl pb-12"
+        className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl pb-16"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A]" />
@@ -191,7 +191,7 @@ export default function ResultCard({
       {/* PAGE 2: DETAILED ANALYTICS REPORT */}
       <div 
         id="cracklix-result-page-2"
-        className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl pb-12"
+        className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl pb-16"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A]" />

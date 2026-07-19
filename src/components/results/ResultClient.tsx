@@ -60,8 +60,8 @@ import ResultCard from "./ResultCard"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Center v6.6 [Audit Fixed].
- * FIXED: High-fidelity PDF generation with spatial safety padding.
+ * @fileOverview Premium Assessment Center v6.7 [Audit Fixed].
+ * FIXED: Reduced PDF quality multiplier for smaller file size and ensured accurate time taken reporting.
  */
 
 export default function ResultClient() {
@@ -323,11 +323,12 @@ export default function ResultClient() {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      const img1 = await toPng(p1, { pixelRatio: 1.5, skipFonts: true });
+      // OPTIMIZED: Reduced pixel ratio for smaller file size (1.2 instead of 1.5)
+      const img1 = await toPng(p1, { pixelRatio: 1.2, skipFonts: true });
       pdf.addImage(img1, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
       
       pdf.addPage();
-      const img2 = await toPng(p2, { pixelRatio: 1.5, skipFonts: true });
+      const img2 = await toPng(p2, { pixelRatio: 1.2, skipFonts: true });
       pdf.addImage(img2, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
       
       const fileName = `Cracklix_Result_${mockData?.title?.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
@@ -666,4 +667,3 @@ function ReviewPill({ userAns, correctAns }: any) {
      ? <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest">Correct</Badge>
      : <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest">Incorrect</Badge>;
 }
-

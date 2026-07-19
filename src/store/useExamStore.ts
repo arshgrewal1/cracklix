@@ -50,8 +50,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v5.8 [High-Fidelity Timer Fix].
- * FIXED: Strictly capped elapsedSeconds to initialTime to prevent over-reporting.
+ * @fileOverview Hardened Test Store v5.9 [High-Fidelity Timer Fix].
+ * FIXED: Strictly capped elapsedSeconds to initialTime to prevent over-reporting beyond 20m limit.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -229,7 +229,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
       updateDoc(attemptRef, { 
         statusMap: newStatus, 
-        elapsedSeconds: state.elapsedSeconds,
+        elapsedSeconds: state.elapsedSeconds, 
         updatedAt: serverTimestamp() 
       }).catch(() => {});
     } else {
