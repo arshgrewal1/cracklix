@@ -56,7 +56,8 @@ import {
   QrCode,
   ArrowDownRight,
   ArrowUp,
-  Newspaper
+  Newspaper,
+  Layers
 } from "lucide-react"
 import { 
   Card, 
@@ -77,9 +78,9 @@ import ResultCard from "./ResultCard"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Center v6.1.
- * FIXED: Removed all uppercase utility classes.
- * FIXED: Normalized terminology (node -> item).
+ * @fileOverview Premium Assessment Center v6.2.
+ * FIXED: Added missing Layers icon import to resolve ReferenceError.
+ * UPDATED: Normalized terminology (node -> item).
  */
 
 export default function ResultClient() {
@@ -181,7 +182,7 @@ export default function ResultClient() {
               ]);
 
               mcqSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
-              legacySnap.docs.forEach(d => {
+              legacySnap.forEach(d => {
                  if (!fetchedQuestions.find(f => f.id === d.id)) {
                     fetchedQuestions.push({ ...d.data(), id: d.id });
                  }
@@ -738,15 +739,6 @@ function TimeMetric({ label, val }: any) {
       <div className="flex items-center justify-between py-1 border-b border-slate-50">
          <span className="text-[11px] font-bold text-slate-400">{label}</span>
          <span className="text-sm font-black tabular-nums">{val}</span>
-      </div>
-   )
-}
-
-function RecommendationNode({ label, text }: any) {
-   return (
-      <div className="space-y-1">
-         <p className="text-[9px] font-black text-primary tracking-widest">{label}</p>
-         <p className="text-xs font-medium text-slate-400 leading-snug">{text}</p>
       </div>
    )
 }
