@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v501.0.
- * TYPOGRAPHY: Removed uppercase from primary headings.
+ * @fileOverview Institutional Premium Hub v501.1.
+ * UPDATED: Removed uppercase from primary headings.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -44,7 +44,7 @@ export default function HomePage() {
 
       {user && <ContinueLearning />}
 
-      {/* Today's challenge - Sentence Case */}
+      {/* Today's challenge */}
       <section className="py-6 md:py-16 bg-white">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
@@ -63,7 +63,7 @@ export default function HomePage() {
                   <div className="space-y-0">
                      <div className="flex items-center justify-center gap-2">
                         <Flame className="h-6 w-6 text-orange-500 fill-current animate-pulse" />
-                        <h2 className="text-[26px] font-[700] tracking-tight text-white antialiased leading-tight">
+                        <h2 className="text-[26px] md:text-4xl font-bold tracking-tight text-white antialiased leading-tight">
                            Today's challenge
                         </h2>
                      </div>
@@ -76,7 +76,7 @@ export default function HomePage() {
                     <>
                       <div className="mt-[18px] flex flex-row flex-wrap items-center justify-center gap-[10px]">
                          <ChallengeChip icon={<Clock className="h-3.5 w-3.5" />} label={`${activeQuiz.duration} min`} />
-                         <ChallengeChip icon={<ShieldCheck className="h-3.5 w-3.5" />} label={`${activeQuiz.totalQuestions} Qs`} />
+                         <ChallengeChip icon={<ShieldCheck className="h-3.5 w-3.5" />} label={`${activeQuiz.totalQuestions} items`} />
                          <ChallengeChip icon={<Trophy className="h-3.5 w-3.5" />} label={`${activeQuiz.rewardXP} XP`} />
                       </div>
 

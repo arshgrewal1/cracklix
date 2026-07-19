@@ -56,8 +56,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Practice Hub v6.0 (Testbook Quality).
- * Redesigned as an enterprise-grade learning dashboard with tactile nodes and safe area hardiness.
+ * @fileOverview Premium Practice Hub v6.1.
+ * UPDATED: Removed fake attempts count and eliminated forced uppercase styling.
  */
 
 const QUICK_ACTIONS = [
@@ -146,7 +146,7 @@ export default function MockTestsPage() {
                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                     <Zap className="h-6 w-6 fill-current" />
                  </div>
-                 <h1 className="text-3xl md:text-[44px] font-black tracking-tighter text-[#0F172A] leading-none uppercase">Practice Hub</h1>
+                 <h1 className="text-3xl md:text-[44px] font-black tracking-tighter text-[#0F172A] leading-none">Practice Hub</h1>
               </div>
               <p className="text-[#64748B] font-medium text-sm md:text-lg">Real-time mock tests based on latest commission patterns.</p>
            </div>
@@ -194,7 +194,7 @@ export default function MockTestsPage() {
                       key={chip.id} 
                       onClick={() => setActiveFilter(chip.id)}
                       className={cn(
-                         "h-10 px-6 rounded-full font-black text-[10px] md:text-xs uppercase tracking-widest transition-all border active:scale-95 shadow-sm whitespace-nowrap",
+                         "h-10 px-6 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all border active:scale-95 shadow-sm whitespace-nowrap",
                          activeFilter === chip.id 
                             ? "bg-[#0F172A] border-[#0F172A] text-white shadow-xl" 
                             : "bg-white border-slate-100 text-slate-400 hover:border-primary/40 hover:text-primary"
@@ -215,7 +215,7 @@ export default function MockTestsPage() {
                     <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tighter uppercase">Available tests</h2>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Showing {filteredMocks.length} specialized series</p>
                  </div>
-                 <Badge className="bg-primary/10 text-primary border-none font-black text-[10px] px-3 py-1 rounded-lg">LIVE HUB</Badge>
+                 <Badge className="bg-primary/10 text-primary border-none font-bold text-[10px] px-3 py-1 rounded-lg">Live hub</Badge>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -231,7 +231,7 @@ export default function MockTestsPage() {
                     <div className="col-span-full py-40 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100 space-y-8 opacity-40">
                        <Zap className="h-20 w-20 mx-auto text-slate-200" />
                        <p className="text-xl font-black text-slate-400 uppercase tracking-widest">No tests found in this filter</p>
-                       <Button onClick={() => { setActiveFilter('all'); setSearchTerm(''); }} variant="outline" className="rounded-full px-8 uppercase font-bold text-[10px]">Clear Filter</Button>
+                       <button onClick={() => { setActiveFilter('all'); setSearchTerm(''); }} className="h-11 px-8 rounded-full border border-slate-200 uppercase font-bold text-[10px] bg-white hover:bg-slate-50 transition-all">Clear Filter</button>
                     </div>
                  )}
               </div>
@@ -251,7 +251,7 @@ export default function MockTestsPage() {
                                    <cat.icon className="h-8 w-8 md:h-10 md:w-10" />
                                 </div>
                                 <div className="space-y-2 relative z-10">
-                                   <h4 className="font-black text-sm md:text-xl text-[#0F172A] uppercase leading-tight">{cat.label}</h4>
+                                   <h4 className="font-bold text-sm md:text-xl text-[#0F172A] uppercase leading-tight">{cat.label}</h4>
                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">12+ Test Hubs</p>
                                 </div>
                                 <div className="pt-4 mt-auto">
@@ -308,7 +308,7 @@ export default function MockTestsPage() {
                     </div>
 
                     <Button asChild variant="ghost" className="w-full text-primary font-black uppercase text-[10px] tracking-[0.2em] gap-3 hover:bg-white/5 h-14 border border-white/5 rounded-2xl">
-                       <Link href="/dashboard">View Full Registry <ArrowUpRight className="h-4 w-4" /></Link>
+                       <Link href="/dashboard">View full registry <ArrowUpRight className="h-4 w-4" /></Link>
                     </Button>
                  </div>
               </Card>
@@ -322,7 +322,7 @@ export default function MockTestsPage() {
                              <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform", action.bg, action.color)}>
                                 <action.icon className="h-6 w-6" />
                              </div>
-                             <span className="text-xs font-black text-[#0F172A] uppercase tracking-tight">{action.label}</span>
+                             <span className="text-xs font-bold text-[#0F172A] uppercase tracking-tight">{action.label}</span>
                              <ChevronRight className="absolute right-6 bottom-7 h-4 w-4 text-slate-100 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                           </div>
                        </Link>
@@ -372,9 +372,9 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
                   <div className="flex flex-col items-end gap-2">
                      <div className="flex items-center gap-2">
                         {isPremium ? (
-                           <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest shadow-sm">ELITE PASS</Badge>
+                           <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest shadow-sm">Elite Pass</Badge>
                         ) : (
-                           <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest shadow-sm">FREE TEST</Badge>
+                           <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest shadow-sm">Free Test</Badge>
                         )}
                         <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90 cursor-pointer shadow-inner">
                            <Bookmark className="h-4 w-4" />
@@ -389,9 +389,9 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
 
                <div className="space-y-5 flex-1">
                   <div className="space-y-1.5">
-                     <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 uppercase tracking-tight">{mock.title}</h3>
+                     <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">{mock.title}</h3>
                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Official Pattern Verified
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Official pattern verified
                      </p>
                   </div>
 
@@ -402,7 +402,7 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
                      {isCompleted ? (
                         <Metric icon={Trophy} label={`Score: ${result.score}`} highlight />
                      ) : (
-                        <Metric icon={UserPlus} label={`12.4K+ Attempts`} />
+                        <Metric icon={Layers} label={mock.difficulty || "Standard"} />
                      )}
                   </div>
                </div>
@@ -410,7 +410,7 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
                {isCompleted && (
                   <div className="space-y-2.5 pt-4">
                      <div className="flex justify-between items-center text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                        <span>Subject Mastery</span>
+                        <span>Subject mastery</span>
                         <span className="text-emerald-600">{result.accuracy}%</span>
                      </div>
                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
@@ -428,7 +428,7 @@ function PremiumMockCard({ mock, result, board, isPassActive, index }: any) {
                   )}>
                      <Link href={locked ? '/pass' : isCompleted ? `/results/view?id=${mock.id}` : `/mocks/instructions?id=${mock.id}`}>
                         {isCompleted ? <BarChart3 className="h-4 w-4" /> : locked ? <Lock className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current text-primary" />}
-                        {isCompleted ? 'View Analysis' : locked ? 'Unlock Pass' : 'Start Preparation'}
+                        {isCompleted ? 'View analysis' : locked ? 'Unlock pass' : 'Start preparation'}
                         <ChevronRight className="h-4 w-4 ml-auto opacity-30" />
                      </Link>
                   </Button>
@@ -444,7 +444,7 @@ function Metric({ icon: Icon, label, highlight }: any) {
       <div className="flex items-center gap-2.5 text-left">
          <Icon className="h-4 w-4 text-slate-300 shrink-0" />
          <div className="min-w-0">
-            <p className={cn("text-[11px] font-black leading-none truncate uppercase tracking-tight", highlight ? "text-primary" : "text-[#0F172A]")}>{label}</p>
+            <p className={cn("text-[11px] font-bold leading-none truncate tracking-tight", highlight ? "text-primary" : "text-[#0F172A]")}>{label}</p>
          </div>
       </div>
    )

@@ -2,7 +2,7 @@
 
 import React, { useMemo, useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Clock, Zap, Lock, ChevronRight, Star, Activity, UserPlus } from "lucide-react"
+import { BookOpen, Clock, Zap, Lock, ChevronRight, Star, Activity, UserPlus, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Latest Tests Hub v42.1.
- * UPDATED: Removed uppercase from mock titles.
+ * @fileOverview Premium Latest Tests Hub v42.2.
+ * UPDATED: Removed fake attempts count and force-uppercase styling.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -97,7 +97,7 @@ export default function LatestMocks() {
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
                        <StatPill icon={BookOpen} label={`${mock.totalQuestions} Qs`} />
                        <StatPill icon={Clock} label={`${mock.duration}m`} />
-                       <StatPill icon={UserPlus} label={`Attempts`} />
+                       <StatPill icon={Layers} label={mock.difficulty || "Pattern"} />
                        <StatPill icon={Star} label={`4.8`} />
                     </div>
                   </div>

@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v51.2.
- * FIXED: Standardized routing to /exams/view?id={id} to prevent 404s in static export.
+ * @fileOverview Institutional Popular Exams Hub v51.3.
+ * UPDATED: Removed fake student count and uppercase styling.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -108,7 +108,7 @@ export default function PopularExams() {
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
            <div className="space-y-2 text-left">
-              <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-[#0F172A] antialiased">
+              <h2 className="text-2xl md:text-4xl font-bold tracking-tighter text-[#0F172A] antialiased">
                 Trending hubs
               </h2>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
@@ -140,14 +140,14 @@ export default function PopularExams() {
                     className="flex flex-col h-full"
                  >
                     <Link href={`/exams/view?id=${exam.id}`} className="flex-1 flex flex-col h-full">
-                       <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-8 flex flex-col relative overflow-hidden group hover:-translate-y-2 flex-1">
+                       <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-8 flex flex-col relative overflow-hidden group hover:-translate-y-2 flex-1">
                           
                           <div className="flex justify-between items-start mb-8 w-full relative z-10">
                              <AuthorityLogo 
                                board={board} 
                                boardId={exam.boardId} 
                                size="sm" 
-                               className="h-12 w-12 md:h-16 md:w-16 shadow-xl border-4 border-slate-50 bg-slate-50" 
+                               className="h-12 w-12 md:h-16 md:w-16 shadow-xl border-4 border-white bg-slate-50" 
                              />
                              <button 
                                onClick={(e) => handleTogglePin(e, exam.id)}
@@ -164,18 +164,18 @@ export default function PopularExams() {
                           </div>
 
                           <div className="space-y-4 flex-1 text-left relative z-10">
-                             <h3 className="text-lg md:text-xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                             <h3 className="text-lg md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
                                 {exam.name}
                              </h3>
                              
                              <div className="flex flex-wrap items-center gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                                 <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-primary" /> {stats.mocks}+ Tests</span>
-                                <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5 text-primary" /> Active</span>
+                                <span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Verified</span>
                              </div>
                           </div>
 
                           <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between group-hover:text-primary relative z-10">
-                             <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest group-hover:text-primary transition-colors">Start prep</span>
+                             <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest group-hover:text-primary transition-colors">Start prep</span>
                              <ChevronRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1" />
                           </div>
                        </Card>
