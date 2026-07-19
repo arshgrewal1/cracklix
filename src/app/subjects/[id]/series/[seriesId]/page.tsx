@@ -27,7 +27,8 @@ import {
   Activity,
   History,
   Star,
-  Check
+  Check,
+  Target
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -39,9 +40,9 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Series Registry & Path v6.0.
+ * @fileOverview Premium Series Hub Portal v6.2.
+ * FIXED: Resolved ReferenceError: Target is not defined.
  * UPDATED: Simplified language - replaced "Registry Path" with "Test path".
- * UPDATED: Removed all uppercase styling.
  */
 
 export default function SeriesDetailPortal() {
@@ -83,7 +84,7 @@ export default function SeriesDetailPortal() {
       <section className="bg-[#0F172A] text-white pt-10 pb-12 md:pt-16 md:pb-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
-         <div className="container mx-auto px-4 md:px-12 max-get-7xl relative z-10 space-y-10">
+         <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
                <button onClick={() => router.back()} className="hover:text-white transition-colors flex items-center gap-2">
                  <ArrowLeft className="h-3 w-3" /> {subject?.name || "Subject"}
