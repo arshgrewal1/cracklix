@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v89.0.
- * UPDATED: Increased logo size for better visibility and adjusted positioning.
+ * @fileOverview Cracklix Navigation Hub v90.0.
+ * UPDATED: Reduced desktop logo size and repositioned it exact right to the menu.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -103,7 +103,7 @@ export default function Navbar() {
         <nav className="w-full h-20 lg:h-24 transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
-            {/* LEFT BLOCK: MENU | LOGO (SYNCED WITH ADMIN STYLE) */}
+            {/* LEFT BLOCK: MENU | LOGO (EXACT RIGHT TO BURGER) */}
             <div className="flex items-center gap-0 z-10">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
@@ -125,8 +125,8 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-4 md:ml-1"
-                imgClassName="h-28 md:h-48 w-auto"
+                className="flex-shrink-0 -ml-4 md:ml-2"
+                imgClassName="h-28 md:h-32 w-auto"
                 align="left"
               />
             </div>

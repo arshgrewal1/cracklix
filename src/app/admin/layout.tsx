@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v43.0.
- * UPDATED: Increased header logo size and adjusted left positioning next to menu.
+ * @fileOverview Admin Layout v44.0.
+ * UPDATED: Reduced desktop logo height and repositioned it to the right of menu.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -130,8 +130,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Logo 
                   variant="light" 
                   href="/admin"
-                  className="flex-shrink-0 -ml-4 md:ml-1" 
-                  imgClassName="h-24 md:h-40 w-auto"
+                  className="flex-shrink-0 -ml-4 md:ml-2" 
+                  imgClassName="h-20 md:h-28 w-auto"
                   align="left"
                 />
               </div>
