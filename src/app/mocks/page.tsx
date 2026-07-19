@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -57,8 +58,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Practice Hub v6.5.
- * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
+ * @fileOverview Premium Practice Hub v6.6.
+ * FIXED: Resolved stats card overflow in PWA mode and corrected avg score visibility.
  */
 
 const QUICK_ACTIONS = [
@@ -140,11 +141,11 @@ export default function MockTestsPage() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden">
       <Navbar />
       
-      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-20 pb-[env(safe-area-inset-bottom,60px)]">
+      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-8 md:space-y-20 pb-[env(safe-area-inset-bottom,60px)]">
         
         {/* 1. PREMIUM DASHBOARD HEADER */}
         <section className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 px-1">
-           <div className="space-y-3">
+           <div className="space-y-2">
               <div className="flex items-center gap-3">
                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                     <Zap className="h-6 w-6 fill-current" />
@@ -154,21 +155,21 @@ export default function MockTestsPage() {
               <p className="text-[#64748B] font-medium text-sm md:text-lg">Real-time mock tests based on latest commission patterns.</p>
            </div>
 
-           <Card className="bg-white border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[24px] p-5 md:p-8 flex items-center gap-10 md:gap-16 shrink-0 relative overflow-hidden border">
-              <div className="absolute top-0 right-0 p-4 opacity-[0.02]"><Activity className="h-24 w-24" /></div>
-              <div className="flex flex-col gap-1 text-left">
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Available</p>
-                 <p className="text-2xl md:text-4xl font-black text-[#0F172A] tabular-nums tracking-tighter">{stats.available}</p>
+           <Card className="w-full lg:w-auto bg-white border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[24px] p-5 md:p-8 flex items-center justify-between lg:justify-start gap-4 md:gap-16 shrink-0 relative overflow-hidden border">
+              <div className="absolute top-0 right-0 p-4 opacity-[0.01]"><Activity className="h-24 w-24" /></div>
+              <div className="flex flex-col gap-0.5 text-left">
+                 <p className="text-[10px] font-bold text-slate-400 leading-none">Available</p>
+                 <p className="text-xl md:text-4xl font-black text-[#0F172A] tabular-nums tracking-tighter">{stats.available}</p>
               </div>
-              <div className="w-px h-10 bg-slate-100" />
-              <div className="flex flex-col gap-1 text-left">
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">My solved</p>
-                 <p className="text-2xl md:text-4xl font-black text-primary tabular-nums tracking-tighter">{stats.attempted}</p>
+              <div className="w-px h-8 md:h-12 bg-slate-100" />
+              <div className="flex flex-col gap-0.5 text-left">
+                 <p className="text-[10px] font-bold text-slate-400 leading-none">My solved</p>
+                 <p className="text-xl md:text-4xl font-black text-primary tabular-nums tracking-tighter">{stats.attempted}</p>
               </div>
-              <div className="w-px h-10 bg-slate-100" />
-              <div className="flex flex-col gap-1 text-left">
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Avg score</p>
-                 <p className="text-2xl md:text-4xl font-black text-emerald-50 tabular-nums tracking-tighter">{stats.avgScore}%</p>
+              <div className="w-px h-8 md:h-12 bg-slate-100" />
+              <div className="flex flex-col gap-0.5 text-left">
+                 <p className="text-[10px] font-bold text-slate-400 leading-none">Avg score</p>
+                 <p className="text-xl md:text-4xl font-black text-emerald-600 tabular-nums tracking-tighter">{stats.avgScore}%</p>
               </div>
            </Card>
         </section>
@@ -212,7 +213,7 @@ export default function MockTestsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-14">
            {/* 3. MAIN TEST GRID */}
-           <div className="lg:col-span-8 space-y-12">
+           <div className="lg:col-span-8 space-y-8 md:space-y-12">
               <div className="flex items-center justify-between px-2">
                  <div className="text-left space-y-1">
                     <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tighter">Available tests</h2>
