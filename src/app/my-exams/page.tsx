@@ -32,7 +32,9 @@ import {
   Timer,
   BarChart3,
   TrendingUp,
-  Award
+  Award,
+  Info,
+  Clock
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -55,8 +57,9 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import Link from "next/link"
 
 /**
- * @fileOverview World-Class Personalized Dashboard v4.0.
- * Redesigned for premium production standards (Testbook/Adda247 quality).
+ * @fileOverview Premium Personalized Dashboard v4.5.
+ * FIXED: Metrics aligned in a single row with horizontal scroll for PWA.
+ * FIXED: Implemented Settings icon functionality.
  */
 
 const MODAL_CATEGORIES = [
@@ -77,6 +80,7 @@ export default function MyExamsPage() {
   const [mounted, setMounted] = useState(false)
   const [unpinningId, setUnpinningId] = useState<string | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [settingsExam, setSettingsExam] = useState<any>(null)
   const [modalSearch, setModalSearch] = useState("")
   const [modalCategory, setModalCategory] = useState("all")
 
@@ -103,7 +107,7 @@ export default function MyExamsPage() {
 
   // STATS CALCULATION
   const statsMap = useMemo(() => {
-    const map: Record<string, any> = {};
+    const map: Record<string, { mocks: number, total: number, attempted: number, pyq: number }> = {};
     if (!mocks) return map;
 
     mocks.forEach(m => {
@@ -147,7 +151,7 @@ export default function MyExamsPage() {
       { label: "Total Exams", val: totalExams, icon: GraduationCap, color: "text-blue-500", bg: "bg-blue-50", trend: "+1 this week" },
       { label: "Mock Tests", val: totalMocks, icon: Zap, color: "text-orange-500", bg: "bg-orange-50", trend: "Latest pattern" },
       { label: "Practice Rate", val: results?.length || 0, icon: Activity, color: "text-rose-500", bg: "bg-rose-50", trend: "Last 30 days" },
-      { label: "Mastery Level", val: `${avgProg}%`, icon: Trophy, color: "text-emerald-500", bg: "bg-emerald-50", trend: "Regional rank: 12" },
+      { label: "Mastery Level", val: `${avgProg}%`, icon: Trophy, color: "text-emerald-500", bg: "bg-emerald-50", trend: "Regional Rank: 12" },
     ];
   }, [pinnedExams, statsMap, results]);
 
@@ -157,6 +161,7 @@ export default function MyExamsPage() {
     try {
       await updateDoc(doc(db, "users", user.uid), { pinnedExams: arrayRemove(examId), updatedAt: serverTimestamp() });
       toast({ title: "Removed from dashboard" });
+      if (settingsExam?.id === examId) setSettingsExam(null);
     } finally { setUnpinningId(null); }
   };
 
@@ -189,24 +194,24 @@ export default function MyExamsPage() {
         
         {/* 1. PREMIUM DASHBOARD HEADER */}
         <section className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-1">
-           <div className="space-y-3">
+           <div className="space-y-2">
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                 <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[10px] tracking-widest uppercase">
+                 <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-tight uppercase">
                     📚 My Preparation
                  </Badge>
               </motion.div>
-              <div className="space-y-2">
-                 <h1 className="text-3xl md:text-[44px] font-black tracking-tighter text-[#0F172A] leading-none">
+              <div className="space-y-1">
+                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-[#0F172A] leading-none antialiased">
                     My Exams
                  </h1>
-                 <p className="text-slate-500 font-medium text-sm md:text-lg">Manage all your selected exams from one smart dashboard.</p>
+                 <p className="text-slate-500 font-medium text-sm md:text-lg">Manage your target verticals from one hub.</p>
               </div>
            </div>
 
            <div className="flex items-center gap-4 w-full md:w-auto">
              <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                 <DialogTrigger asChild>
-                   <Button className="flex-1 md:flex-none h-14 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white rounded-[20px] font-black uppercase text-[10px] tracking-widest shadow-2xl transition-all active:scale-95 border-none shrink-0">
+                   <Button className="flex-1 md:flex-none h-14 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white rounded-[20px] font-bold text-sm shadow-2xl transition-all active:scale-95 border-none shrink-0">
                       <Plus className="h-5 w-5 mr-3" /> Add New Exam
                    </Button>
                 </DialogTrigger>
@@ -214,7 +219,7 @@ export default function MyExamsPage() {
                    <div className="h-2 w-full bg-primary shrink-0" />
                    <DialogHeader className="p-8 md:p-12 pb-4 shrink-0 text-left">
                       <DialogTitle className="text-3xl font-black text-[#0F172A] tracking-tighter">Exam Registry</DialogTitle>
-                      <DialogDescription className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-2">Select a vertical to begin your journey.</DialogDescription>
+                      <DialogDescription className="text-slate-400 font-bold text-[10px] mt-2">Select a vertical to begin your journey.</DialogDescription>
                    </DialogHeader>
 
                    <div className="px-8 md:px-12 py-4 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
@@ -234,7 +239,7 @@ export default function MyExamsPage() {
                               key={cat.id} 
                               onClick={() => setModalCategory(cat.id)}
                               className={cn(
-                                "h-10 px-6 rounded-full font-black text-[9px] uppercase tracking-widest transition-all border",
+                                "h-10 px-6 rounded-full font-bold text-[10px] tracking-tight transition-all border",
                                 modalCategory === cat.id ? "bg-[#0F172A] border-[#0F172A] text-white shadow-xl" : "bg-white border-slate-100 text-slate-400 hover:border-slate-300"
                               )}
                             >
@@ -275,7 +280,7 @@ export default function MyExamsPage() {
                    </div>
                    
                    <DialogFooter className="p-8 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row justify-center shrink-0">
-                      <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                      <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
                          <ShieldCheck className="h-3 w-3" /> Official Registry Sync Active
                       </p>
                    </DialogFooter>
@@ -284,46 +289,45 @@ export default function MyExamsPage() {
            </div>
         </section>
 
-        {/* 2. QUICK OVERVIEW STATS */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-           {topStats.map((stat, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                 <Card className="border border-slate-100 bg-white shadow-xl shadow-slate-200/50 rounded-[28px] p-6 md:p-8 flex flex-col items-center justify-center text-center group hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden">
-                    <div className={cn("absolute -right-4 -bottom-4 w-16 h-16 rounded-full blur-3xl opacity-20", stat.bg)} />
-                    <div className={cn("h-12 w-12 md:h-16 md:w-16 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform mb-5", stat.bg, stat.color)}>
-                       <stat.icon className="h-6 w-6 md:h-8 md:w-8" />
-                    </div>
-                    <div className="space-y-1 z-10">
-                       <p className="text-xl md:text-[38px] font-black text-[#0F172A] tracking-tighter antialiased tabular-nums">{stat.val}</p>
-                       <p className="text-[9px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                       <Badge variant="ghost" className="text-[8px] font-bold text-emerald-600 mt-2 bg-emerald-50 px-2 rounded">{stat.trend}</Badge>
-                    </div>
-                 </Card>
-              </motion.div>
-           ))}
+        {/* 2. PERFORMANCE HUB: ONE ROW GRID */}
+        <section className="overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
+           <div className="flex gap-4 md:gap-8 min-w-max md:min-w-0 md:grid md:grid-cols-4">
+              {topStats.map((stat, i) => (
+                 <motion.div 
+                   key={i}
+                   initial={{ opacity: 0, scale: 0.9 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   transition={{ delay: i * 0.05 }}
+                   className="w-[180px] md:w-full shrink-0"
+                 >
+                    <Card className="border border-slate-100 bg-white shadow-xl shadow-slate-200/40 rounded-[28px] p-6 flex flex-col items-center justify-center text-center group hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden h-[180px] md:h-auto">
+                       <div className={cn("absolute -right-4 -bottom-4 w-16 h-16 rounded-full blur-3xl opacity-20", stat.bg)} />
+                       <div className={cn("h-10 w-10 md:h-14 md:w-14 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform mb-4", stat.bg, stat.color)}>
+                          <stat.icon className="h-5 w-5 md:h-7 md:w-7" />
+                       </div>
+                       <div className="space-y-0.5 z-10">
+                          <p className="text-xl md:text-[34px] font-[900] text-[#0F172A] tracking-tighter antialiased tabular-nums leading-none">{stat.val}</p>
+                          <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{stat.label}</p>
+                          <Badge variant="ghost" className="text-[7px] md:text-[8px] font-bold text-emerald-600 mt-2 bg-emerald-50 px-2 py-0.5 rounded-md">{stat.trend}</Badge>
+                       </div>
+                    </Card>
+                 </motion.div>
+              ))}
+           </div>
         </section>
 
         {/* 3. PINNED EXAMS GRID */}
         <section className="space-y-10 md:space-y-14">
            <div className="flex items-center justify-between px-2">
               <div className="space-y-1">
-                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tighter">Selected Verticals</h2>
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active nodes in your preparation cycle</p>
-              </div>
-              <div className="hidden sm:flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
-                 <button className="h-9 px-4 rounded-lg font-bold text-[10px] uppercase bg-white shadow-sm text-primary">Grid</button>
-                 <button className="h-9 px-4 rounded-lg font-bold text-[10px] uppercase text-slate-400">List</button>
+                 <h2 className="text-xl md:text-3xl font-[800] text-[#0F172A] tracking-tighter">Target verticals</h2>
+                 <p className="text-[10px] font-bold text-slate-400 tracking-tight">Active hubs in your preparation cycle</p>
               </div>
            </div>
 
            {examsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-                 {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem] bg-white border border-slate-50" />)}
+                 {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem] bg-white border border-slate-100" />)}
               </div>
            ) : pinnedExams.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
@@ -338,16 +342,17 @@ export default function MyExamsPage() {
                          initial={{ opacity: 0, y: 25 }}
                          animate={{ opacity: 1, y: 0 }}
                          transition={{ delay: idx * 0.1 }}
+                         className="flex"
                        >
-                          <Card className="border border-slate-100 shadow-2xl hover:shadow-[0_40px_100px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] bg-white group flex flex-col relative overflow-hidden h-full">
+                          <Card className="border border-slate-100 shadow-2xl hover:shadow-[0_40px_100px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] bg-white group flex flex-col relative overflow-hidden w-full">
                              
                              <div className="absolute top-6 right-6 z-10 flex items-center gap-2">
                                 <button 
                                   onClick={() => handleUnpin(exam.id)}
                                   disabled={unpinningId === exam.id}
-                                  className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-300 hover:text-rose-500 active:scale-90 transition-all shadow-sm"
+                                  className="h-10 w-10 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-300 hover:text-rose-500 active:scale-90 transition-all shadow-sm"
                                 >
-                                   {unpinningId === exam.id ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Trash2 className="h-4 w-4" />}
+                                   {unpinningId === exam.id ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <X className="h-4 w-4" />}
                                 </button>
                              </div>
 
@@ -368,14 +373,14 @@ export default function MyExamsPage() {
                                             Live Patterns
                                          </Badge>
                                       </div>
-                                      <h3 className="text-xl md:text-[32px] font-black text-[#0F172A] leading-[1.1] group-hover:text-primary transition-colors tracking-tight antialiased uppercase">
+                                      <h3 className="text-xl md:text-[28px] font-[800] text-[#0F172A] leading-[1.1] group-hover:text-primary transition-colors tracking-tight antialiased">
                                          {exam.name}
                                       </h3>
                                    </div>
 
                                    <div className="space-y-3">
-                                      <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                                         <span>Mastery Progress</span>
+                                      <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                         <span>Preparation Progress</span>
                                          <span className="text-primary tabular-nums">{progress}%</span>
                                       </div>
                                       <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner">
@@ -391,7 +396,7 @@ export default function MyExamsPage() {
                                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
                                       <ExamMiniStat icon={Layers} label="Full Mocks" val={s.mocks} />
                                       <ExamMiniStat icon={Zap} label="Topic Wise" val={s.total - s.mocks} />
-                                      <ExamMiniStat icon={FileStack} label="PYQ Papers" val={s.pyq} />
+                                      <ExamMiniStat icon={FileStack} label="Old Papers" val={s.pyq} />
                                       <ExamMiniStat icon={BookOpen} label="Notes Hub" val="Active" />
                                    </div>
                                 </div>
@@ -399,13 +404,14 @@ export default function MyExamsPage() {
                                 <div className="mt-10 md:mt-14 pt-8 border-t border-slate-50 flex flex-col sm:flex-row items-center gap-4">
                                    <Button 
                                      onClick={() => router.push(`/exams/view?id=${exam.id}`)}
-                                     className="w-full h-14 md:h-18 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] md:text-sm tracking-widest shadow-2xl transition-all active:scale-95 border-none gap-3"
+                                     className="w-full h-14 md:h-16 bg-[#0F172A] hover:bg-black text-white font-bold text-sm tracking-tight shadow-3xl transition-all active:scale-95 border-none gap-3 rounded-2xl"
                                    >
-                                      Continue Prep <ArrowRight className="h-5 w-5" />
+                                      Continue Prep <ArrowRight className="h-4 w-4" />
                                    </Button>
                                    <Button 
                                      variant="outline"
-                                     className="w-full sm:w-14 h-14 md:h-18 p-0 rounded-2xl border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-primary transition-all active:scale-95 shadow-sm"
+                                     onClick={() => setSettingsExam(exam)}
+                                     className="w-full sm:w-14 h-14 md:h-16 p-0 rounded-2xl border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-primary transition-all active:scale-95 shadow-sm"
                                    >
                                       <Settings className="h-5 w-5" />
                                    </Button>
@@ -431,16 +437,16 @@ export default function MyExamsPage() {
                     </div>
                  </div>
 
-                 <div className="space-y-4 max-w-md">
-                    <h2 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none">No exams added yet</h2>
-                    <p className="text-slate-500 font-medium text-sm md:text-lg leading-relaxed">
-                       Personalize your dashboard by adding the recruitment verticals you are targeting from the official registry.
+                 <div className="space-y-2">
+                    <h2 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none">Your list is empty</h2>
+                    <p className="text-slate-500 font-medium text-sm md:text-lg">
+                       Personalize your dashboard by adding target exams from the registry.
                     </p>
                  </div>
 
                  <Button 
                    onClick={() => setIsAddModalOpen(true)}
-                   className="h-16 md:h-20 px-12 md:px-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[11px] md:text-sm tracking-widest rounded-2xl md:rounded-[2.5rem] shadow-4xl border-none transition-all active:scale-95 flex items-center gap-4 group"
+                   className="h-16 md:h-20 px-12 md:px-16 bg-primary hover:bg-blue-700 text-white font-bold text-sm tracking-tight rounded-2xl md:rounded-[2.5rem] shadow-4xl border-none transition-all active:scale-95 flex items-center gap-4 group"
                  >
                     Start Selection <ChevronRight className="h-5 w-5 md:h-7 md:w-7 group-hover:translate-x-2 transition-transform" />
                  </Button>
@@ -455,7 +461,7 @@ export default function MyExamsPage() {
                  <div className="flex items-center justify-between">
                     <div className="space-y-1">
                        <CardTitle className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Merit Analytics</CardTitle>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Real-time performance audit</p>
+                       <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Real-time performance audit</p>
                     </div>
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                        <BarChart3 className="h-6 w-6" />
@@ -469,7 +475,7 @@ export default function MyExamsPage() {
                     <ProgressNode label="Solved Items" val="1.2K+" color="text-orange-500" />
                  </div>
                  <div className="pt-10 border-t border-slate-50">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">Subject Weightage Index</h4>
+                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8">Subject Weightage Index</h4>
                     <div className="space-y-6">
                        <SubjectProg label="Punjab General Knowledge" val={82} color="bg-primary" />
                        <SubjectProg label="Quantitative Aptitude" val={64} color="bg-orange-500" />
@@ -484,18 +490,18 @@ export default function MyExamsPage() {
                  <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000">
                     <ShieldCheck className="h-64 w-64 text-primary" />
                  </div>
-                 <div className="relative z-10 space-y-10">
+                 <div className="relative z-10 space-y-10 text-left">
                     <div className="space-y-2">
                        <h3 className="text-3xl font-black tracking-tight leading-none uppercase">Recommendations</h3>
                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Based on your activity</p>
                     </div>
                     <div className="space-y-4">
                        <RecNode label="Continue Punjab Police" time="2h ago" />
-                       <RecNode label="Revise Current Affairs" time="New Hub" />
+                       <RecNode label="Revise Current Affairs" time="New hub" />
                        <RecNode label="Attempt Full Mock 12" time="Recommended" />
                     </div>
                     <div className="pt-6 border-t border-white/5">
-                       <Button variant="ghost" className="w-full text-slate-400 hover:text-white group font-black uppercase text-[10px] tracking-widest gap-2">
+                       <Button variant="ghost" className="w-full text-slate-400 hover:text-white group font-bold text-xs tracking-tight gap-2">
                           View Deep Insights <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-all" />
                        </Button>
                     </div>
@@ -507,9 +513,9 @@ export default function MyExamsPage() {
                     <div className="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500 shadow-inner group-hover:scale-110 transition-transform">
                        <ShieldCheck className="h-6 w-6" />
                     </div>
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#0F172A]">Registry Secured</h4>
+                    <h4 className="text-[11px] font-black uppercase tracking-widest text-[#0F172A]">Security Protocol</h4>
                  </div>
-                 <p className="text-xs text-slate-500 leading-relaxed font-medium">Your preparation nodes and attempt results are synchronized with the master registry for state ranking calculations.</p>
+                 <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">Your preparation verticals and attempt results are synchronized with the master registry for state ranking calculations.</p>
               </div>
            </div>
         </section>
@@ -523,6 +529,55 @@ export default function MyExamsPage() {
 
       </main>
       <Footer />
+
+      {/* SETTINGS DIALOG */}
+      <Dialog open={!!settingsExam} onOpenChange={(o) => !o && setSettingsExam(null)}>
+         <DialogContent className="sm:max-w-md w-[95vw] rounded-[2rem] md:rounded-[3rem] bg-white border-none shadow-5xl p-8 md:p-12 text-left">
+            <div className="h-1.5 w-full bg-primary absolute top-0 left-0" />
+            <DialogHeader className="space-y-4">
+               <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center text-primary shadow-inner">
+                     <Settings className="h-6 w-6" />
+                  </div>
+                  <div className="text-left">
+                     <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tighter uppercase">{settingsExam?.name}</DialogTitle>
+                     <DialogDescription className="text-slate-400 font-bold text-[9px] uppercase tracking-widest">Vertical Settings Hub</DialogDescription>
+                  </div>
+               </div>
+            </DialogHeader>
+
+            <div className="py-8 space-y-6">
+               <div className="bg-slate-50 rounded-2xl p-6 space-y-4 border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                     <Info className="h-3 w-3" /> Quick Stats
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                     <div><p className="text-[8px] font-black text-slate-400 uppercase">Tests Taken</p><p className="text-lg font-black text-[#0F172A]">{statsMap[settingsExam?.id]?.attempted || 0}</p></div>
+                     <div><p className="text-[8px] font-black text-slate-400 uppercase">Available</p><p className="text-lg font-black text-primary">{statsMap[settingsExam?.id]?.total || 0}</p></div>
+                  </div>
+               </div>
+
+               <div className="space-y-3">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Account Control</p>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleUnpin(settingsExam?.id)}
+                    disabled={unpinningId === settingsExam?.id}
+                    className="w-full h-14 justify-start text-rose-500 hover:bg-rose-50 rounded-xl font-bold gap-3"
+                  >
+                     {unpinningId === settingsExam?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                     Remove from dashboard
+                  </Button>
+               </div>
+            </div>
+
+            <DialogFooter>
+               <Button onClick={() => setSettingsExam(null)} className="w-full h-14 rounded-full bg-[#0F172A] hover:bg-black font-bold text-sm tracking-tight border-none shadow-xl">
+                  Done
+               </Button>
+            </DialogFooter>
+         </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -532,8 +587,8 @@ function ExamMiniStat({ icon: Icon, label, val }: any) {
     <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-left space-y-1.5 group hover:bg-primary/5 transition-all">
        <Icon className="h-4 w-4 text-primary opacity-40 group-hover:opacity-100 transition-all" />
        <div className="space-y-0.5">
-          <p className="text-sm md:text-base font-black text-[#0F172A] tabular-nums">{val}</p>
-          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest truncate">{label}</p>
+          <p className="text-sm md:text-base font-[900] text-[#0F172A] tabular-nums leading-none">{val}</p>
+          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest truncate leading-none mt-1">{label}</p>
        </div>
     </div>
   )
@@ -542,8 +597,8 @@ function ExamMiniStat({ icon: Icon, label, val }: any) {
 function ProgressNode({ label, val, color }: any) {
    return (
       <div className="text-center md:text-left space-y-2">
-         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-         <p className={cn("text-2xl md:text-4xl font-black tabular-nums tracking-tighter antialiased", color)}>{val}</p>
+         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+         <p className={cn("text-2xl md:text-[40px] font-black tabular-nums tracking-tighter antialiased leading-none", color)}>{val}</p>
       </div>
    )
 }
@@ -551,7 +606,7 @@ function ProgressNode({ label, val, color }: any) {
 function SubjectProg({ label, val, color }: any) {
    return (
       <div className="space-y-2.5">
-         <div className="flex justify-between items-center text-[10px] md:text-xs font-black uppercase tracking-tight text-[#0F172A]">
+         <div className="flex justify-between items-center text-[10px] md:text-xs font-bold uppercase tracking-tight text-[#0F172A]">
             <span>{label}</span>
             <span className="text-slate-400 tabular-nums">{val}%</span>
          </div>
@@ -573,4 +628,3 @@ function RecNode({ label, time }: any) {
       </div>
    )
 }
-
