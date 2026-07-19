@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v67.0.
- * UPDATED: Increased header height and logo size for consistent bold branding.
+ * @fileOverview Admin Layout v68.0.
+ * UPDATED: Increased header height and logo size for bold brand visibility.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -117,31 +117,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
           isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
         )}>
-          <header className="h-20 md:h-28 border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
+          <header className="h-24 md:h-36 border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
             {/* LEFT BLOCK: TOGGLE + LOGO (STRICT ZERO GAP) */}
             <div className="flex items-center gap-0">
               <button 
                 onClick={toggleSidebar}
-                className="bg-white border border-slate-200 h-9 w-9 md:h-11 md:w-11 rounded-lg flex items-center justify-center shrink-0 active:scale-95 shadow-sm hover:border-primary/30 cursor-pointer"
+                className="bg-white border border-slate-200 h-10 w-10 md:h-12 md:w-12 rounded-lg flex items-center justify-center shrink-0 active:scale-95 shadow-sm hover:border-primary/30 cursor-pointer"
               >
-                <Menu className="w-5 h-5 md:w-6 md:h-6" />
+                <Menu className="w-6 h-6 md:w-7 md:h-7" />
               </button>
               <div className="shrink-0">
                 <Logo 
                   variant="light" 
                   href="/admin"
                   className="flex-shrink-0 ml-0 p-0" 
-                  imgClassName="h-20 md:h-32 w-auto"
+                  imgClassName="h-28 md:h-48 w-auto"
                   align="left"
                 />
               </div>
             </div>
             
             <div className="flex items-center gap-4">
-               <Button asChild variant="outline" className="hidden sm:flex h-10 rounded-full text-[10px] font-bold tracking-tight px-6 gap-2">
-                  <Link href="/">Student View <ExternalLink className="h-3 w-3 opacity-40" /></Link>
+               <Button asChild variant="outline" className="hidden sm:flex h-11 rounded-full text-[11px] font-bold tracking-tight px-6 gap-2">
+                  <Link href="/">Student View <ExternalLink className="h-3.5 w-3.5 opacity-40" /></Link>
                </Button>
-               <div className="h-10 w-10 md:h-11 md:w-11 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">
+               <div className="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">
                   {profile?.name?.[0] || 'A'}
                </div>
             </div>
