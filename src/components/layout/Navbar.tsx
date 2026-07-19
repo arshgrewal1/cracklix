@@ -38,9 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v110.0.
- * FIXED: Logo size reduced and anchored left with 0 space gap from menu.
- * FIXED: Link contrast improved for better visibility.
+ * @fileOverview Cracklix Navigation Hub v111.0.
+ * UPDATED: Increased header logo size and maintained zero-gap alignment.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -101,7 +100,7 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
-        <nav className="w-full h-20 md:h-24 lg:h-32 transition-all">
+        <nav className="w-full h-20 md:h-28 Transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU TRIGGER + LOGO (STRICT ZERO SPACE) */}
@@ -127,7 +126,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0 ml-0 p-0"
-                imgClassName="h-12 md:h-16 lg:h-20 w-auto"
+                imgClassName="h-14 md:h-20 lg:h-24 w-auto"
                 align="left"
               />
             </div>
@@ -214,20 +213,17 @@ export default function Navbar() {
     return (
       <Link href={href} className={cn(
         "text-[14px] xl:text-[15px] font-bold transition-all whitespace-nowrap border-b-2 py-1", 
-        active ? "text-primary border-primary" : "text-slate-600 border-transparent hover:text-primary hover:border-primary/20"
+        active ? "text-primary border-primary" : "text-slate-400 border-transparent hover:text-primary hover:border-primary/20"
       )}>
         {label}
       </Link>
     );
   }
 
-  function ProfileMenuItem({ href, icon: Icon, label, highlight }: { href: string, icon: any, label: string, highlight?: boolean }) {
+  function ProfileMenuItem({ href, icon: Icon, label }: { href: string, icon: any, label: string }) {
     return (
-      <Link href={href} className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-[13px] font-semibold",
-        highlight ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
-      )}>
-         <Icon className={cn("h-4 w-4 shrink-0", highlight ? "text-primary" : "text-slate-400")} />
+      <Link href={href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-[13px] font-semibold text-slate-600 hover:bg-slate-50">
+         <Icon className="h-4 w-4 shrink-0 text-slate-400" />
          <span className="truncate">{label}</span>
       </Link>
     );

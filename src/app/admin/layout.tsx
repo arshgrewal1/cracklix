@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v61.0.
- * UPDATED: Logo size reduced and anchored left with 0 gap.
+ * @fileOverview Admin Layout v62.0.
+ * UPDATED: Increased header logo size and maintained zero-gap alignment.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -131,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   variant="light" 
                   href="/admin"
                   className="flex-shrink-0 ml-0 p-0" 
-                  imgClassName="h-12 md:h-16 w-auto"
+                  imgClassName="h-14 md:h-20 w-auto"
                   align="left"
                 />
               </div>
