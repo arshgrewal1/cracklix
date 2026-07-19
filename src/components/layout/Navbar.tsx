@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v115.0.
- * UPDATED: Reduced header height (h-16 md:h-20) and logo size (h-16 md:h-24) for a cleaner look.
+ * @fileOverview Cracklix Navigation Hub v116.0.
+ * UPDATED: Increased header height and logo size for bold brand visibility.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -94,13 +94,13 @@ export default function Navbar() {
   };
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-16 md:h-20" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-20 md:h-28" />;
   }
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
-        <nav className="w-full h-16 md:h-20 transition-all">
+        <nav className="w-full h-20 md:h-28 transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU TRIGGER + LOGO (STRICT ZERO SPACE) */}
@@ -126,7 +126,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0 ml-0 p-0"
-                imgClassName="h-16 md:h-24 w-auto"
+                imgClassName="h-20 md:h-32 w-auto"
                 align="left"
               />
             </div>

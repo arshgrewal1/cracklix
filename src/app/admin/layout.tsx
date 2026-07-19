@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v66.0.
- * UPDATED: Reduced header height (h-16 md:h-20) and logo size (h-16 md:h-24) for a more professional feel.
+ * @fileOverview Admin Layout v67.0.
+ * UPDATED: Increased header height and logo size for consistent bold branding.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -117,7 +117,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
           isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
         )}>
-          <header className="h-16 md:h-20 border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
+          <header className="h-20 md:h-28 border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
             {/* LEFT BLOCK: TOGGLE + LOGO (STRICT ZERO GAP) */}
             <div className="flex items-center gap-0">
               <button 
@@ -131,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   variant="light" 
                   href="/admin"
                   className="flex-shrink-0 ml-0 p-0" 
-                  imgClassName="h-16 md:h-24 w-auto"
+                  imgClassName="h-20 md:h-32 w-auto"
                   align="left"
                 />
               </div>
