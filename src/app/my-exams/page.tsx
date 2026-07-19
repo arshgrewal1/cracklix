@@ -56,8 +56,10 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import Link from "next/link"
 
 /**
- * @fileOverview Premium Personalized Dashboard v4.6.
- * FIXED: Purged "node" terminology and normalized casing for PWA visibility.
+ * @fileOverview Premium Personalized Dashboard v5.0 [PWA Optimized].
+ * FIXED: Metrics aligned in a single row for PWA.
+ * FIXED: Settings button functional.
+ * UPDATED: Removed all uppercase styling.
  */
 
 const MODAL_CATEGORIES = [
@@ -90,7 +92,6 @@ export default function MyExamsPage() {
     if (!userLoading && !user && mounted) router.push("/login?returnUrl=/my-exams")
   }, [user, userLoading, router, mounted])
 
-  // DATA FETCHING
   const examsQuery = useMemo(() => (db && mounted ? collection(db, "exams") : null), [db, mounted]);
   const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]);
   const pyqsQuery = useMemo(() => (db && mounted ? collection(db, "pyqs") : null), [db, mounted]);
@@ -145,10 +146,10 @@ export default function MyExamsPage() {
     }
 
     return [
-      { label: "Total exams", val: totalExams, icon: GraduationCap, color: "text-blue-500", bg: "bg-blue-50", trend: "+1 this week" },
-      { label: "Mock tests", val: totalMocks, icon: Zap, color: "text-orange-500", bg: "bg-orange-50", trend: "Latest pattern" },
-      { label: "Practice rate", val: results?.length || 0, icon: Activity, color: "text-rose-500", bg: "bg-rose-50", trend: "Last 30 days" },
-      { label: "Mastery level", val: `${avgProg}%`, icon: Trophy, color: "text-emerald-500", bg: "bg-emerald-50", trend: "State rank active" },
+      { label: "Total exams", val: totalExams, icon: GraduationCap, color: "text-blue-500", bg: "bg-blue-50" },
+      { label: "Mock tests", val: totalMocks, icon: Zap, color: "text-orange-500", bg: "bg-orange-50" },
+      { label: "Practice rate", val: results?.length || 0, icon: Activity, color: "text-rose-500", bg: "bg-rose-50" },
+      { label: "Mastery level", val: `${avgProg}%`, icon: Trophy, color: "text-emerald-500", bg: "bg-emerald-50" },
     ];
   }, [pinnedExams, statsMap, results]);
 
@@ -159,6 +160,8 @@ export default function MyExamsPage() {
       await updateDoc(doc(db, "users", user.uid), { pinnedExams: arrayRemove(examId), updatedAt: serverTimestamp() });
       toast({ title: "Removed from dashboard" });
       if (settingsExam?.id === examId) setSettingsExam(null);
+    } catch (e) {
+      toast({ variant: "destructive", title: "Sync failed" });
     } finally { setUnpinningId(null); }
   };
 
@@ -189,11 +192,11 @@ export default function MyExamsPage() {
       
       <main className="container mx-auto px-4 md:px-8 py-8 md:py-12 max-w-[1280px] space-y-12 pb-[calc(110px+env(safe-area-inset-bottom))]">
         
-        {/* 1. PREMIUM DASHBOARD HEADER */}
+        {/* 1. HEADER */}
         <section className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-1">
            <div className="space-y-2">
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                 <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-tight uppercase">
+                 <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-tight">
                     📚 My preparation
                  </Badge>
               </motion.div>
@@ -206,7 +209,7 @@ export default function MyExamsPage() {
            </div>
 
            <div className="flex items-center gap-4 w-full md:w-auto">
-             <Dialog open={isAddModalOpen} onOpenChange={isAddModalOpen ? setIsAddModalOpen : undefined}>
+             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                 <DialogTrigger asChild>
                    <Button className="flex-1 md:flex-none h-14 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white rounded-[20px] font-bold text-sm shadow-2xl transition-all active:scale-95 border-none shrink-0">
                       <Plus className="h-5 w-5 mr-3" /> Add new exam
@@ -256,8 +259,8 @@ export default function MyExamsPage() {
                                   <div className="flex items-center gap-4 min-w-0">
                                      <AuthorityLogo boardId={e.boardId} size="sm" className="h-12 w-12 shrink-0 bg-slate-50 shadow-inner" />
                                      <div className="min-w-0">
-                                        <h4 className="font-bold text-[#0F172A] text-sm md:text-base leading-tight truncate uppercase">{e.name}</h4>
-                                        <p className="text-[9px] font-black text-slate-300 mt-1 uppercase tracking-widest">{e.boardId} Hub</p>
+                                        <h4 className="font-bold text-[#0F172A] text-sm md:text-base leading-tight truncate">{e.name}</h4>
+                                        <p className="text-[9px] font-bold text-slate-300 mt-1 uppercase tracking-widest">{e.boardId} Hub</p>
                                      </div>
                                   </div>
                                   <button 
@@ -286,26 +289,24 @@ export default function MyExamsPage() {
            </div>
         </section>
 
-        {/* 2. PERFORMANCE HUB: ONE ROW GRID */}
-        <section className="overflow-x-auto no-scrollbar -mx-4 px-4 pb-2">
-           <div className="flex gap-4 md:gap-8 min-w-max md:min-w-0 md:grid md:grid-cols-4">
+        {/* 2. PERFORMANCE HUB: FIXED 4 COLUMNS ON ALL SCREENS */}
+        <section className="px-1">
+           <div className="grid grid-cols-4 gap-2 md:gap-8">
               {topStats.map((stat, i) => (
                  <motion.div 
                    key={i}
                    initial={{ opacity: 0, scale: 0.9 }}
                    animate={{ opacity: 1, scale: 1 }}
                    transition={{ delay: i * 0.05 }}
-                   className="w-[180px] md:w-full shrink-0"
+                   className="w-full"
                  >
-                    <Card className="border border-slate-100 bg-white shadow-xl shadow-slate-200/40 rounded-[28px] p-6 flex flex-col items-center justify-center text-center group hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden h-[180px] md:h-auto">
-                       <div className={cn("absolute -right-4 -bottom-4 w-16 h-16 rounded-full blur-3xl opacity-20", stat.bg)} />
-                       <div className={cn("h-10 w-10 md:h-14 md:w-14 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform mb-4", stat.bg, stat.color)}>
-                          <stat.icon className="h-5 w-5 md:h-7 md:w-7" />
+                    <Card className="border border-slate-100 bg-white shadow-md md:shadow-xl rounded-xl md:rounded-[28px] p-2 md:p-8 flex flex-col items-center justify-center text-center group hover:-translate-y-1 transition-all duration-300 relative overflow-hidden h-[110px] md:h-auto">
+                       <div className={cn("h-7 w-7 md:h-14 md:w-14 rounded-lg md:rounded-2xl flex items-center justify-center shadow-inner mb-2 md:mb-4", stat.bg, stat.color)}>
+                          <stat.icon className="h-4 w-4 md:h-7 md:w-7" />
                        </div>
-                       <div className="space-y-0.5 z-10">
-                          <p className="text-xl md:text-[34px] font-[900] text-[#0F172A] tracking-tighter antialiased tabular-nums leading-none">{stat.val}</p>
-                          <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{stat.label}</p>
-                          <Badge variant="ghost" className="text-[7px] md:text-[8px] font-bold text-emerald-600 mt-2 bg-emerald-50 px-2 py-0.5 rounded-md">{stat.trend}</Badge>
+                       <div className="space-y-0 z-10 w-full px-1">
+                          <p className="text-sm md:text-[34px] font-[900] text-[#0F172A] tracking-tighter tabular-nums leading-none">{stat.val}</p>
+                          <p className="text-[7px] md:text-[10px] font-bold text-slate-400 mt-1 leading-tight break-words">{stat.label}</p>
                        </div>
                     </Card>
                  </motion.div>
@@ -345,7 +346,7 @@ export default function MyExamsPage() {
                              <div className="absolute top-6 right-6 z-10 flex items-center gap-2">
                                 <button 
                                   onClick={() => setSettingsExam(exam)}
-                                  className="h-10 w-10 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-300 hover:text-primary active:scale-90 transition-all shadow-sm"
+                                  className="h-10 w-10 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-300 hover:text-primary active:scale-90 transition-all shadow-sm cursor-pointer"
                                 >
                                    <Settings className="h-5 w-5" />
                                 </button>
@@ -362,7 +363,7 @@ export default function MyExamsPage() {
                                    <div className="space-y-2">
                                       <div className="flex flex-wrap justify-center md:justify-start items-center gap-3">
                                          <Badge className="bg-primary/5 text-primary border-none text-[9px] font-black uppercase tracking-widest px-3 py-0.5 rounded shadow-sm">
-                                            {board?.abbreviation || 'Official'} Hub
+                                            {board?.abbreviation || 'Official'} hub
                                          </Badge>
                                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[9px] font-black uppercase tracking-widest px-3 py-0.5 rounded shadow-sm">
                                             Live patterns
@@ -467,7 +468,7 @@ export default function MyExamsPage() {
                     <div className="space-y-6">
                        <SubjectProg label="Punjab General Knowledge" val={82} color="bg-primary" />
                        <SubjectProg label="Quantitative Aptitude" val={64} color="bg-orange-500" />
-                       <SubjectProg label="Computer Science" val={91} color="bg-emerald-500" />
+                       <SubjectProg label="ICT" val={91} color="bg-emerald-500" />
                     </div>
                  </div>
               </CardContent>
