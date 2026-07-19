@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v117.0.
- * UPDATED: Increased header height and logo size for maximized brand visibility.
+ * @fileOverview Cracklix Navigation Hub v118.0.
+ * UPDATED: Anchored logo tightly to the left of the menu button with zero gap.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -104,7 +104,7 @@ export default function Navbar() {
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU TRIGGER + LOGO (STRICT ZERO SPACE) */}
-            <div className="flex items-center gap-0 z-10 shrink-0">
+            <div className="flex items-center gap-0 z-10 shrink-0 h-full">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
                   <button
@@ -125,13 +125,13 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 ml-0 p-0"
+                className="flex-shrink-0 ml-0 p-0 h-full"
                 imgClassName="h-28 md:h-48 w-auto"
                 align="left"
               />
             </div>
 
-            {/* CENTER BLOCK: NAVIGATION */}
+            {/* CENTER BLOCK: NAVIGATION (ABSOLUTE CENTERING) */}
             <div className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-6 xl:gap-8 h-full">
               <NavLink href="/" label="Home" active={pathname === '/'} />
               <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
@@ -140,7 +140,7 @@ export default function Navbar() {
               <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
             </div>
 
-            {/* RIGHT BLOCK: PROFILE */}
+            {/* RIGHT BLOCK: SEARCH & PROFILE */}
             <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10 shrink-0">
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden lg:flex flex-col items-end shrink-0">

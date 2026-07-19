@@ -16,8 +16,8 @@ import { Phone, User as UserIcon, GraduationCap, Calendar, MapPin, ChevronLeft, 
 import { Gender } from "@/types"
 
 /**
- * @file Overview Student Profile Setup v14.4 (Logo Sizing).
- * UPDATED: Further reduced logo size for a cleaner onboarding experience.
+ * @file Overview Student Profile Setup v15.0.
+ * UPDATED: Moved logo to the left side for a more natural layout flow.
  */
 export default function ProfileSetup() {
   const router = useRouter()
@@ -98,12 +98,11 @@ export default function ProfileSetup() {
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-start p-4 md:p-12 relative overflow-hidden">
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full" />
       
-      <div className="w-full max-w-xl flex items-center justify-between mb-8 z-10">
-         <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 shadow-sm active:scale-95 transition-all">
+      <div className="w-full max-w-xl flex items-center justify-start mb-8 z-10 gap-0">
+         <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 shadow-sm active:scale-95 transition-all shrink-0">
             <ChevronLeft className="h-5 w-5" />
          </button>
-         <Logo variant="light" align="center" imgClassName="h-[40px] md:h-[56px]" />
-         <div className="w-10 md:w-12" />
+         <Logo variant="light" align="left" className="h-16 md:h-20 -ml-2" imgClassName="h-full w-auto" />
       </div>
 
       <Card className="w-full max-w-xl border-none shadow-2xl rounded-[2rem] md:rounded-[3rem] overflow-hidden z-10 bg-white/80 backdrop-blur-xl">
