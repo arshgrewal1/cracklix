@@ -6,8 +6,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v85.0.
- * UPDATED: Reduced sidebar logo size (h-10 md:h-18) for an elegant vertical profile as requested.
+ * Cracklix Admin Sidebar Header v86.0.
+ * UPDATED: Refined sidebar logo size (h-8 md:h-12) for a more elegant vertical profile.
  */
 export default function SidebarHeader({
   isOpen,
@@ -19,7 +19,7 @@ export default function SidebarHeader({
   return (
     <div
       className={cn(
-        "h-[120px] md:h-[150px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300",
+        "h-[100px] md:h-[120px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300",
         isOpen ? "justify-center relative" : "flex-col justify-center py-4 gap-4"
       )}
     >
@@ -43,7 +43,7 @@ export default function SidebarHeader({
             variant="light"
             align="center"
             className="transition-all"
-            imgClassName="h-10 md:h-18 w-auto"
+            imgClassName="h-8 md:h-12 w-auto"
           />
         )}
       </div>
