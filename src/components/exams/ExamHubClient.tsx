@@ -45,8 +45,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v6.1.
- * FIXED: Imported missing Users icon.
+ * @fileOverview Premium Exam Detail Hub v6.2.
+ * FIXED: Desktop overlap for long titles and corrected Users icon import.
  * UPDATED: Simplified terminology and removed all uppercase styling.
  */
 
@@ -153,7 +153,7 @@ export default function ExamHubClient() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 overflow-x-hidden w-full">
       <Navbar />
       
-      {/* 1. PREMIUM HERO SECTION */}
+      {/* 1. PREMIUM HERO SECTION (REBALANCED) */}
       <section className="bg-white border-b border-slate-100 pt-10 pb-12 md:pt-16 md:pb-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
@@ -173,7 +173,7 @@ export default function ExamHubClient() {
                     </div>
                   </div>
                   <div className="space-y-4 text-center md:text-left flex-1 min-w-0">
-                    <h1 className="text-2xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.1] text-[#0F172A] antialiased">
+                    <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-[800] tracking-tight leading-[1.1] text-[#0F172A] antialiased break-words">
                        {exam.name} <br className="hidden md:block" /> <span className="text-primary italic">Preparation hub.</span>
                     </h1>
                     <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl line-clamp-2">
@@ -188,7 +188,7 @@ export default function ExamHubClient() {
                   </div>
                </div>
 
-               <div className="flex flex-col gap-4 w-full md:w-auto shrink-0">
+               <div className="flex flex-col gap-4 w-full md:w-auto md:min-w-[240px] shrink-0">
                   {user && (
                     <Button 
                       onClick={togglePin} 
