@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback } from "react"
@@ -28,7 +27,8 @@ import {
   X,
   ShieldCheck,
   ExternalLink,
-  Copy
+  Copy,
+  Zap
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { 
