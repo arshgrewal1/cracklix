@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -71,9 +70,8 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v51.0 [Global Numbering].
- * FIXED: Implemented continuous global numbering across all sections.
- * FIXED: Added serial numbers to the database pool selection list.
+ * @fileOverview Master Mock Builder v52.0.
+ * UPDATED: Added Official Paper (PYQ) and Current Affairs Quiz to Test type options.
  */
 
 export default function MockBuilderPage() {
@@ -383,7 +381,7 @@ function MockBuilderContent() {
           <Button onClick={() => window.location.reload()} className="h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl font-bold gap-2">
              <RefreshCw className="h-4 w-4" /> Retry synchronization
           </Button>
-          <Button onClick={() => router.replace('/admin/mocks')} variant="ghost" className="h-12 text-slate-400 font-bold uppercase text-[10px]">Return to list</Button>
+          <Button onClick={() => router.replace('/admin/daily-quiz')} variant="ghost" className="h-12 text-slate-400 font-bold uppercase text-[10px]">Return to list</Button>
        </div>
     </div>
   );
@@ -424,7 +422,8 @@ function MockBuilderContent() {
                        <option value="FULL">Full Length</option>
                        <option value="SUBJECT">Subject-Wise</option>
                        <option value="SECTIONAL">Sectional</option>
-                       <option value="PYQ">Official Paper</option>
+                       <option value="PYQ">Official Paper (PYQ)</option>
+                       <option value="CA_QUIZ">Current Affairs Quiz</option>
                     </select>
                  </div>
                  <div className="space-y-2 text-left">
@@ -466,7 +465,7 @@ function MockBuilderContent() {
                             <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Series node</Label>
                             <select 
                               value={mockData.seriesId || ""} 
-                              onChange={e => setEvent({...mockData, seriesId: e.target.value})}
+                              onChange={e => setMockData({...mockData, seriesId: e.target.value})}
                               className="w-full h-11 bg-blue-50 border-none rounded-xl px-4 font-bold text-[11px] outline-none shadow-sm text-[#0F172A]"
                               disabled={!mockData.learningSubjectId}
                             >

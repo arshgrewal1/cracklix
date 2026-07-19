@@ -24,8 +24,6 @@ import {
   Gem,
   CheckCircle2,
   ArrowRight,
-  Star,
-  Users,
   BarChart3,
   FileText,
   Bookmark,
@@ -46,9 +44,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v5.8.
- * FIXED: Missing Navbar, Footer, and Newspaper imports.
- * FIXED: Malformed variable declaration syntax.
+ * @fileOverview Premium Exam Detail Hub v6.0.
+ * UPDATED: Added Sectional tests tab and refined grouped content logic.
  */
 
 export default function ExamHubClient() {
@@ -124,7 +121,7 @@ export default function ExamHubClient() {
 
   const stats = useMemo(() => {
      const totalTests = (groupedContent.FULL.length + groupedContent.SUBJECT.length + groupedContent.SECTIONAL.length);
-     const attempted = results?.filter(r => (groupedContent.FULL.some(m => m.id === r.mockId) || groupedContent.SUBJECT.some(m => m.id === r.mockId))).length || 0;
+     const attempted = results?.filter(r => (groupedContent.FULL.some(m => m.id === r.mockId) || groupedContent.SUBJECT.some(m => m.id === r.mockId) || groupedContent.SECTIONAL.some(m => m.id === r.mockId))).length || 0;
      const avgAccuracy = results?.length ? Math.round(results.reduce((acc, r) => acc + (r.accuracy || 0), 0) / results.length) : 0;
      return { totalTests, attempted, avgAccuracy };
   }, [groupedContent, results]);
@@ -224,10 +221,11 @@ export default function ExamHubClient() {
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-w-7xl pb-40 space-y-12">
          <Tabs defaultValue="MOCK" className="space-y-10">
             <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
-               <div className="bg-white border border-slate-200 shadow-sm rounded-[20px] p-1 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-4xl mx-auto">
+               <div className="bg-white border border-slate-200 shadow-sm rounded-[20px] p-1 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">
                   <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-between gap-1 overflow-x-auto no-scrollbar snap-x">
                      <HubTab value="MOCK" label="Mock series" icon={Zap} />
                      <HubTab value="SUBJECT" label="Subject tests" icon={BookOpen} />
+                     <HubTab value="SECTIONAL" label="Sectional tests" icon={Layers} />
                      <HubTab value="PYQ" label="Old papers" icon={FileStack} />
                      <HubTab value="NOTES" label="Study notes" icon={FileText} />
                      <HubTab value="CA" label="Current affairs" icon={Newspaper} />
@@ -265,6 +263,7 @@ export default function ExamHubClient() {
                     </div>
                   ) : <div className="py-20 text-center opacity-30 font-bold">No subject tests available</div>}
                </TabsContent>
+               <TabsContent value="SECTIONAL"><TestGrid data={groupedContent.SECTIONAL} loading={mocksLoading} /></TabsContent>
                <TabsContent value="PYQ"><TestGrid data={groupedContent.PYQ} isPYQ loading={false} /></TabsContent>
                <TabsContent value="NOTES"><TestGrid data={groupedContent.NOTES} isNote loading={false} /></TabsContent>
                <TabsContent value="CA"><TestGrid data={groupedContent.CA} loading={quizzesLoading} /></TabsContent>
