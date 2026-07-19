@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v118.0.
- * UPDATED: Anchored logo tightly to the left of the menu button with zero gap.
+ * @fileOverview Cracklix Navigation Hub v119.0.
+ * UPDATED: Anchored logo tightly to the far left next to the menu toggle.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -103,7 +103,7 @@ export default function Navbar() {
         <nav className="w-full h-24 md:h-36 transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
-            {/* LEFT BLOCK: MENU TRIGGER + LOGO (STRICT ZERO SPACE) */}
+            {/* LEFT BLOCK: MENU TRIGGER + LOGO (STRICT ZERO GAP) */}
             <div className="flex items-center gap-0 z-10 shrink-0 h-full">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
