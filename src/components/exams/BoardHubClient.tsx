@@ -21,8 +21,9 @@ interface BoardHubClientProps {
 }
 
 /**
- * @fileOverview Premium Board Hub Portal v5.4.
- * UPDATED: Removed uppercase and optimized font scaling for PWA sizing stability.
+ * @fileOverview Premium Board Hub Portal v5.5.
+ * UPDATED: Simplified language - replaced "registry hub" with "view tests."
+ * UPDATED: Removed all uppercase styling.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
@@ -86,10 +87,10 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
          
          <div className="container mx-auto px-4 md:px-12 max-get-7xl relative z-10 space-y-10">
             <div className="flex items-center gap-4">
-               <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
+               <button onClick={() => router.back()} className="h-10 w-10 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
                   <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
                </button>
-               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[9px] md:text-[11px] tracking-widest shadow-sm">Verified authority hub</Badge>
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[9px] md:text-[11px] tracking-tight shadow-sm">Official board hub</Badge>
             </div>
 
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-14">
@@ -151,8 +152,8 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
                              </div>
                              
                              <div className="mt-12 pt-4 relative z-10">
-                                <Button className="w-full h-14 md:h-18 rounded-[20px] bg-[#0F172A] hover:bg-black text-white group-hover:bg-primary transition-all font-black text-[10px] md:text-xs tracking-widest border-none shadow-3xl gap-3">
-                                   Enter registry hub <ChevronRight className="h-4 w-4 ml-auto opacity-30" />
+                                <Button className="w-full h-14 md:h-18 rounded-[20px] bg-[#0F172A] hover:bg-black text-white group-hover:bg-primary transition-all font-bold text-sm tracking-tight border-none shadow-3xl gap-3">
+                                   View tests <ChevronRight className="h-4 w-4 ml-auto opacity-30" />
                                 </Button>
                              </div>
                              <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none group-hover:scale-125 transition-transform duration-1000"><Landmark className="h-48 w-48" /></div>
@@ -165,7 +166,7 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
          ) : (
             <div className="py-40 text-center opacity-30 flex flex-col items-center gap-10">
                <div className="h-24 w-24 bg-slate-100 rounded-[3rem] flex items-center justify-center text-slate-300"><Layers className="h-10 w-10" /></div>
-               <p className="font-headline font-black text-2xl md:text-5xl uppercase tracking-[0.5em]">Vault standby</p>
+               <p className="font-black text-2xl md:text-5xl tracking-tight">Hub standby</p>
             </div>
          )}
       </main>
@@ -179,7 +180,7 @@ function MetricPlate({ icon: Icon, label, val }: any) {
       <div className="flex flex-col gap-1.5">
          <div className="flex items-center gap-2 text-slate-400">
             <Icon className="h-4 w-4" />
-            <span className="text-[9px] font-black tracking-widest">{label}</span>
+            <span className="text-[9px] font-bold tracking-tight">{label}</span>
          </div>
          <p className="text-lg md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter">{val}</p>
       </div>

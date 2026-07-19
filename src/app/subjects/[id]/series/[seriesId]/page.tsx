@@ -40,7 +40,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
  * @fileOverview Premium Series Registry & Path v6.0.
- * Redesigned as a timeline-style "Node Progress" registry with connectors and premium status chips.
+ * UPDATED: Simplified language - replaced "Registry Path" with "Test path".
+ * UPDATED: Removed all uppercase styling.
  */
 
 export default function SeriesDetailPortal() {
@@ -82,13 +83,13 @@ export default function SeriesDetailPortal() {
       <section className="bg-[#0F172A] text-white pt-10 pb-12 md:pt-16 md:pb-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
-         <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
+         <div className="container mx-auto px-4 md:px-12 max-get-7xl relative z-10 space-y-10">
             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
                <button onClick={() => router.back()} className="hover:text-white transition-colors flex items-center gap-2">
                  <ArrowLeft className="h-3 w-3" /> {subject?.name || "Subject"}
                </button>
                <ChevronRight className="h-3 w-3" />
-               <span className="text-primary">Registry Path</span>
+               <span className="text-primary">Test path</span>
             </div>
 
             <div className="flex flex-col md:flex-row items-center justify-between gap-10">
@@ -101,11 +102,11 @@ export default function SeriesDetailPortal() {
                   </div>
                   <div className="space-y-3 text-center md:text-left flex-1 min-w-0">
                      <h1 className="text-2xl md:text-5xl font-black tracking-tight leading-tight uppercase antialiased">{series?.title}</h1>
-                     <p className="text-slate-400 font-medium text-sm md:text-lg max-w-xl line-clamp-2">{series?.description || "High-speed tactical mock test nodes for competitive mastery."}</p>
+                     <p className="text-slate-400 font-medium text-sm md:text-lg max-w-xl line-clamp-2">{series?.description || "High-speed tactical mock test items for competitive mastery."}</p>
                      <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 pt-2">
-                        <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">Registry Sync Active</Badge>
+                        <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full font-bold text-[9px]">Live sync active</Badge>
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                           <Zap className="h-3.5 w-3.5" /> {mocks?.length || 0} Test Nodes
+                           <Zap className="h-3.5 w-3.5" /> {mocks?.length || 0} Test items
                         </span>
                      </div>
                   </div>
@@ -113,7 +114,7 @@ export default function SeriesDetailPortal() {
                <div className="shrink-0 w-full md:w-auto">
                   <Card className="bg-white/5 border-white/10 p-6 rounded-[24px] backdrop-blur-md space-y-4 min-w-[240px]">
                      <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-slate-400">
-                        <span>Series Progress</span>
+                        <span>Series progress</span>
                         <span className="text-primary">{Math.round((results?.filter(r => mocks?.some(m => m.id === r.mockId)).length || 0) / (mocks?.length || 1) * 100)}%</span>
                      </div>
                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
@@ -174,13 +175,13 @@ export default function SeriesDetailPortal() {
                                 <div className="space-y-2">
                                    <div className="flex flex-wrap justify-center md:justify-start items-center gap-3">
                                       {isCompleted ? (
-                                         <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 shadow-sm">Verified Success</Badge>
+                                         <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[9px] px-3 py-1 shadow-sm">Verified success</Badge>
                                       ) : locked ? (
-                                         <Badge className="bg-amber-50 text-amber-600 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 shadow-sm">Elite Hub Required</Badge>
+                                         <Badge className="bg-amber-50 text-amber-600 border-none font-bold text-[9px] px-3 py-1 shadow-sm">Elite hub required</Badge>
                                       ) : (
-                                         <Badge className="bg-blue-50 text-primary border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 shadow-sm">Ready for Attempt</Badge>
+                                         <Badge className="bg-blue-50 text-primary border-none font-bold text-[9px] px-3 py-1 shadow-sm">Ready for attempt</Badge>
                                       )}
-                                      <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Test node – {idx + 1}</span>
+                                      <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Test item – {idx + 1}</span>
                                    </div>
                                    <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight truncate-multiline uppercase">{mock.title}</h3>
                                 </div>
@@ -189,19 +190,19 @@ export default function SeriesDetailPortal() {
                                    <MetricNode icon={BookOpen} label="Questions" val={mock.totalQuestions} />
                                    <MetricNode icon={Timer} label="Duration" val={`${mock.duration}m`} />
                                    {isCompleted && (
-                                      <MetricNode icon={Trophy} label="Best Score" val={result.score} highlight />
+                                      <MetricNode icon={Trophy} label="Best score" val={result.score} highlight />
                                    )}
                                 </div>
                              </div>
 
                              <div className="shrink-0 w-full md:w-auto">
                                 <Button asChild className={cn(
-                                   "w-full md:w-auto h-16 md:h-20 px-10 md:px-16 rounded-[22px] md:rounded-[2rem] font-black uppercase text-[11px] md:text-sm tracking-widest shadow-2xl transition-all active:scale-95 border-none gap-3",
+                                   "w-full md:w-auto h-16 md:h-20 px-10 md:px-16 rounded-[22px] md:rounded-[2rem] font-bold text-sm tracking-tight shadow-2xl transition-all active:scale-95 border-none gap-3",
                                    isCompleted ? "bg-emerald-600 hover:bg-emerald-700 text-white" : locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                                 )}>
                                    <Link href={locked ? '/pass' : isCompleted ? `/results/view?id=${mock.id}` : `/mocks/instructions?id=${mock.id}`}>
                                       {isCompleted ? <BarChart3 className="h-5 w-5" /> : locked ? <Lock className="h-5 w-5" /> : <Play className="h-5 w-5 fill-current text-primary" />}
-                                      {isCompleted ? "Full Analysis" : locked ? "Get Elite" : "Start Now"}
+                                      {isCompleted ? "Full analysis" : locked ? "Get elite" : "Start now"}
                                    </Link>
                                 </Button>
                              </div>
@@ -213,16 +214,16 @@ export default function SeriesDetailPortal() {
             ) : (
                <div className="py-40 text-center space-y-8 bg-white rounded-[4rem] border-2 border-dashed border-slate-100 opacity-20">
                   <Layers className="h-20 w-20 mx-auto text-slate-300" />
-                  <p className="font-headline font-black text-2xl md:text-4xl uppercase tracking-[0.4em]">Hub In Standby</p>
+                  <p className="font-bold text-2xl md:text-4xl tracking-tight">Hub in standby</p>
                </div>
             )}
          </div>
 
          {/* 3. BOTTOM ANALYTICS LEDGER */}
          <section className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8 pt-20 border-t border-slate-100">
-            <StatsMiniCard label="Best Score" val={Math.round(Math.max(...(results?.map(r => r.score) || [0])))} icon={<Trophy className="text-amber-500" />} />
-            <StatsMiniCard label="Avg Accuracy" val={`${Math.round((results?.reduce((acc, r) => acc + (r.accuracy || 0), 0) || 0) / (results?.length || 1))}%`} icon={<Target className="text-emerald-500" />} />
-            <StatsMiniCard label="Nodes Completed" val={results?.length || 0} icon={<Layers className="text-blue-500" />} />
+            <StatsMiniCard label="Best score" val={Math.round(Math.max(...(results?.map(r => r.score) || [0])))} icon={<Trophy className="text-amber-500" />} />
+            <StatsMiniCard label="Avg accuracy" val={`${Math.round((results?.reduce((acc, r) => acc + (r.accuracy || 0), 0) || 0) / (results?.length || 1))}%`} icon={<Target className="text-emerald-500" />} />
+            <StatsMiniCard label="Completed" val={results?.length || 0} icon={<Layers className="text-blue-500" />} />
             <StatsMiniCard label="Percentile" val="High" icon={<TrendingUp className="text-purple-500" />} />
          </section>
 
@@ -238,7 +239,7 @@ function MetricNode({ icon: Icon, label, val, highlight }: any) {
      <div className="flex flex-col items-center md:items-start gap-1">
         <div className="flex items-center gap-2">
            <Icon className="h-3.5 w-3.5 text-slate-300" />
-           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
+           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{label}</span>
         </div>
         <p className={cn("text-base md:text-2xl font-black tabular-nums tracking-tighter", highlight ? "text-primary" : "text-[#0F172A]")}>{val}</p>
      </div>
@@ -256,21 +257,5 @@ function StatsMiniCard({ label, val, icon }: any) {
             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
          </div>
       </Card>
-   )
-}
-
-function HubTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
-   return (
-      <TabsTrigger value={value} className="px-6 h-full font-black text-[10px] md:text-[11px] uppercase tracking-widest text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
-         <Icon className="h-4 w-4 shrink-0" /> {label}
-      </TabsTrigger>
-   )
-}
-
-function FormTab({ value, label, icon: Icon }: any) {
-   return (
-      <TabsTrigger value={value} className="rounded-xl px-6 font-black uppercase text-[9px] tracking-tight h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all whitespace-nowrap gap-2">
-         <Icon className="h-3.5 w-3.5" /> {label}
-      </TabsTrigger>
    )
 }

@@ -34,8 +34,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Exam Selection Hub v5.5.
- * UPDATED: Removed uppercase from headings and refined font scaling for PWA.
+ * @fileOverview Premium Exam Selection Hub v5.6.
+ * UPDATED: Simplified language - replaced "registry," "boards," and "trending" with easy words.
+ * UPDATED: Removed all uppercase styling.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -123,7 +124,7 @@ export default function ExamsEntryPage() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full">
       <Navbar />
       
-      <main className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-24 pb-[env(safe-area-inset-bottom,40px)]">
+      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-24 pb-[env(safe-area-inset-bottom,40px)]">
         
         {/* 1. PREMIUM HERO SECTION */}
         <section className="relative px-1 overflow-hidden">
@@ -135,12 +136,12 @@ export default function ExamsEntryPage() {
             <div className="space-y-6 max-w-4xl">
               <div className="flex items-center justify-center md:justify-start gap-3">
                  <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs tracking-tight flex items-center gap-2">
-                   <Landmark className="h-3.5 w-3.5" /> Exam registry
+                   <Landmark className="h-3.5 w-3.5" /> Exam list
                  </Badge>
               </div>
               <h1 className="text-[32px] sm:text-6xl lg:text-[72px] font-black tracking-tighter leading-[1.05] text-[#0F172A] antialiased">
                 Find your <br className="hidden md:block"/>
-                <span className="text-primary">Recruitment portal.</span>
+                <span className="text-primary">Exam preparation portal.</span>
               </h1>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl leading-relaxed tracking-tight">
                 Select your target board or exam vertical to begin practicing with Punjab's most accurate mock tests.
@@ -190,7 +191,7 @@ export default function ExamsEntryPage() {
                             <AuthorityLogo boardId={e.boardId} size="sm" className="h-12 w-12 shrink-0" />
                             <div className="min-w-0">
                               <span className="font-bold text-[#0F172A] text-sm md:text-lg block truncate">{e.name}</span>
-                              <span className="text-[10px] font-bold text-slate-400">{e.boardId} Hub</span>
+                              <span className="text-[10px] font-bold text-slate-400">{e.boardId} hub</span>
                             </div>
                           </div>
                           <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all" />
@@ -224,8 +225,8 @@ export default function ExamsEntryPage() {
                     <Landmark className="h-6 w-6" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Official boards</h2>
-                    <p className="text-[10px] md:text-sm font-bold text-slate-400 mt-1">Verified Authority Hubs</p>
+                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Exam boards</h2>
+                    <p className="text-[10px] md:text-sm font-bold text-slate-400 mt-1">Official authority hubs</p>
                  </div>
               </div>
            </div>
@@ -271,8 +272,8 @@ export default function ExamsEntryPage() {
                     <Star className="h-6 w-6 fill-current" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Trending hubs</h2>
-                    <p className="text-[10px] md:text-sm font-bold text-slate-400 mt-1">Highest Aspirant Velocity</p>
+                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Popular exams</h2>
+                    <p className="text-[10px] md:text-sm font-bold text-slate-400 mt-1">High aspirant traffic verticals</p>
                  </div>
               </div>
            </div>
@@ -328,11 +329,11 @@ export default function ExamsEntryPage() {
            <div className="container mx-auto px-8 md:px-20 space-y-16">
               <div className="space-y-4 max-w-3xl mx-auto">
                  <h2 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">The Cracklix standard</h2>
-                 <p className="text-slate-400 font-bold text-[11px] md:text-sm uppercase tracking-widest">Verified Institutional Learning Items</p>
+                 <p className="text-slate-400 font-bold text-[11px] md:text-sm uppercase tracking-widest">Verified institutional learning items</p>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-16">
                  <ValueNode icon={ShieldCheck} title="Verified patterns" desc="Updated 24x7 as per official gazettes." />
-                 <ValueNode icon={Zap} title="Instant solutions" desc="Bilingual rationale for every MCQ node." />
+                 <ValueNode icon={Zap} title="Instant solutions" desc="Bilingual rationale for every MCQ item." />
                  <ValueNode icon={GraduationCap} title="Merit ranking" desc="See your All Punjab Rank in real-time." />
                  <ValueNode icon={Users} title="Student community" desc="Join 100K+ aspirants preparing smarter." />
               </div>
@@ -355,7 +356,7 @@ export default function ExamsEntryPage() {
                    Ready to crack <br className="hidden md:block" /> your dream job?
                  </h2>
                  <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-relaxed">
-                   Join Punjab's most trusted mock test platform. Official patterns, expert rationales, and verified success nodes.
+                   Join Punjab's most trusted mock test platform. Official patterns, expert rationales, and verified success entries.
                  </p>
               </div>
               <div className="relative z-10 pt-4 flex justify-center">
