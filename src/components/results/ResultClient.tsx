@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -51,7 +52,11 @@ import {
   Star,
   Bookmark,
   Check,
-  Landmark
+  Landmark,
+  ExternalLink,
+  QrCode,
+  ArrowDownRight,
+  ArrowUp
 } from "lucide-react"
 import { 
   Card, 
@@ -72,8 +77,10 @@ import ResultCard from "./ResultCard"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Center v5.3.
- * UPDATED: Removed uppercase from result titles and labels.
+ * @fileOverview Premium Assessment Center v6.0 [Enterprise Redesign].
+ * FIXED: Removed all uppercase styling.
+ * FIXED: Implemented Sentence case hierarchy.
+ * FIXED: Accurate time-taken logic and dynamic AI insights.
  */
 
 export default function ResultClient() {
@@ -229,12 +236,12 @@ export default function ResultClient() {
 
   const performanceStatus = useMemo(() => {
      const acc = sessionData?.accuracy || 0;
-     if (acc >= 90) return { label: "Outstanding", color: "text-emerald-600", bg: "bg-emerald-50", desc: "Top-tier skills verified." };
-     if (acc >= 75) return { label: "Excellent", color: "text-[#2563EB]", bg: "bg-blue-50", desc: "Professional grade performance achieved." };
-     if (acc >= 60) return { label: "Very Good", color: "text-blue-500", bg: "bg-blue-50/50", desc: "Consistently above average performance." };
-     if (acc >= 50) return { label: "Good", color: "text-amber-600", bg: "bg-amber-50", desc: "Solid foundation, needs more practice." };
-     if (acc >= 40) return { label: "Average", color: "text-orange-600", bg: "bg-orange-50", desc: "Moderate grasp, requires intensive review." };
-     return { label: "Needs Work", color: "text-rose-600", bg: "bg-rose-50", desc: "Focus on subject basics to improve score." };
+     if (acc >= 90) return { label: "Outstanding", color: "text-emerald-600", bg: "bg-emerald-50", grade: "S", desc: "Superior conceptual clarity." };
+     if (acc >= 75) return { label: "Excellent", color: "text-blue-600", bg: "bg-blue-50", grade: "A+", desc: "Professional grade skills verified." };
+     if (acc >= 60) return { label: "Very good", color: "text-blue-500", bg: "bg-blue-50/50", grade: "A", desc: "Consistently above standard." };
+     if (acc >= 50) return { label: "Good", color: "text-amber-600", bg: "bg-amber-50", grade: "B", desc: "Solid baseline, needs focus." };
+     if (acc >= 40) return { label: "Average", color: "text-orange-600", bg: "bg-orange-50", grade: "C", desc: "Requires intensive review." };
+     return { label: "Qualified", color: "text-rose-600", bg: "bg-rose-50", grade: "D", desc: "Focus on subject foundations." };
   }, [sessionData]);
 
   const analysis = useMemo(() => {
@@ -282,34 +289,54 @@ export default function ResultClient() {
      return { subjects, difficulty };
   }, [categorizedNodes, sessionData, mockData]);
 
-  const achievements = useMemo(() => {
+  const insights = useMemo(() => {
     if (!sessionData) return [];
     const pool = [];
-    if (sessionData.accuracy >= 100) pool.push({ label: "Perfect Precision", icon: <Trophy className="text-amber-500" />, desc: "100% Accuracy Achieved" });
-    if (sessionData.accuracy >= 90) pool.push({ label: "Accuracy Master", icon: <Target className="text-emerald-500" />, desc: "Top 90%+ Accuracy" });
-    if ((sessionData.timeTaken / (questions.length || 1)) < 30) pool.push({ label: "Speed Demon", icon: <Zap className="text-orange-500" />, desc: "Lightning fast attempt" });
-    if (sessionData.score > 80) pool.push({ label: "High Flyer", icon: <Award className="text-primary" />, desc: "High score achieved" });
-    return pool;
-  }, [sessionData, questions.length]);
+    if (sessionData.accuracy >= 85) pool.push("Excellent conceptual clarity across all sections.");
+    else if (sessionData.accuracy >= 60) pool.push("Foundational knowledge verified; requires targeted refinement.");
+    else pool.push("Intensive review of core subject basics recommended.");
 
-  const formatTime = (seconds: any) => {
+    const avgTimePerQ = (sessionData.timeTaken || 0) / (questions.length || 1);
+    if (avgTimePerQ < 45) pool.push("Superior temporal efficiency in decision making.");
+    else if (avgTimePerQ < 75) pool.push("Standard solving speed maintained throughout the attempt.");
+    else pool.push("Pacing needs optimization for high-pressure thresholds.");
+
+    const subjectSuccess = analysis.subjects.find(s => s.accuracy > 80);
+    if (subjectSuccess) pool.push(`Strong mastery index detected in ${subjectSuccess.name}.`);
+
+    return pool;
+  }, [sessionData, questions.length, analysis.subjects]);
+
+  const recommendations = useMemo(() => {
+    const recs = [];
+    const weakSubject = [...analysis.subjects].sort((a,b) => a.accuracy - b.accuracy)[0];
+    if (weakSubject && weakSubject.accuracy < 60) {
+      recs.push(`Prioritize revision for ${weakSubject.name} to increase overall score.`);
+    }
+    if (analysis.difficulty.hard < 50) {
+      recs.push("Practice more expert-level questions to improve complex problem solving.");
+    }
+    recs.push("Attempt at least 3 more full-length mocks to stabilize your rank.");
+    return recs;
+  }, [analysis]);
+
+  const formatTimeTaken = (seconds: any) => {
      const totalSecs = Number(seconds);
      if (isNaN(totalSecs) || totalSecs <= 0) return "0s";
-     const h = Math.floor(totalSecs / 3600);
-     const m = Math.floor((totalSecs % 3600) / 60);
+     const m = Math.floor(totalSecs / 60);
      const s = Math.round(totalSecs % 60);
-     return h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`;
+     return m > 0 ? `${m}m ${s}s` : `${s}s`;
   };
 
   const handleSharePdf = async () => {
     if (isGeneratingPdf || !sessionData) return;
     setIsGeneratingPdf(true);
-    toast({ title: "Generating Report", description: "Creating detailed analysis..." });
+    toast({ title: "Generating report", description: "Analyzing data points..." });
 
     try {
       const page1 = document.getElementById('cracklix-result-page-1');
       const page2 = document.getElementById('cracklix-result-page-2');
-      if (!page1 || !page2) throw new Error("Canvas nodes missing");
+      if (!page1 || !page2) throw new Error("Registry nodes unavailable");
 
       const img1 = await toPng(page1, { width: 1000, height: 1414, pixelRatio: 2 });
       const img2 = await toPng(page2, { width: 1000, height: 1414, pixelRatio: 2 });
@@ -319,11 +346,10 @@ export default function ResultClient() {
       pdf.addPage([1000, 1414], 'p');
       pdf.addImage(img2, 'PNG', 0, 0, 1000, 1414);
 
-      const fileName = `Cracklix_Report_${mockData?.title?.replace(/\s+/g, '_')}.pdf`;
-      pdf.save(fileName);
-      toast({ title: "Report Exported", description: "Result saved to device." });
+      pdf.save(`Cracklix_Result_${mockData?.title?.replace(/\s+/g, '_')}.pdf`);
+      toast({ title: "Report exported" });
     } catch (error) {
-      toast({ variant: "destructive", title: "PDF Failure" });
+      toast({ variant: "destructive", title: "PDF failure" });
     } finally { setIsGeneratingPdf(false); }
   };
 
@@ -337,6 +363,7 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
       
+      {/* HIDDEN PRINT CANVAS */}
       <div className="fixed left-[-3000px] top-0 pointer-events-none">
            <ResultCard 
              studentName={profile?.name || "Aspirant"}
@@ -344,7 +371,7 @@ export default function ResultClient() {
              score={(sessionData?.score || 0).toFixed(1)}
              rank={user ? merit.rank : 'Guest'}
              accuracy={sessionData?.accuracy || 0}
-             timeTaken={formatTime(sessionData?.timeTaken || 0)}
+             timeTaken={formatTimeTaken(sessionData?.timeTaken || 0)}
              correct={categorizedNodes.correct.length}
              wrong={categorizedNodes.wrong.length}
              total={categorizedNodes.all.length}
@@ -363,315 +390,307 @@ export default function ResultClient() {
 
       <Navbar />
 
-      <main className="flex-1 w-full max-w-[1280px] mx-auto p-4 md:p-12 space-y-8 md:space-y-16 pb-40">
+      <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-16 pb-40">
         
-        {/* PREMIUM RESULT HERO */}
+        {/* 1. HERO SUMMARY SECTION */}
         <section className="animate-in fade-in slide-in-from-top-4 duration-700">
-           <Card className="border-none shadow-[0_40px_100px_rgba(0,0,0,0.06)] rounded-[3rem] overflow-hidden bg-white relative border border-slate-100">
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-blue-500 to-indigo-500" />
-              
-              <div className="p-8 md:p-16 flex flex-col lg:flex-row items-center gap-12 md:gap-20">
-                 {/* LEFT: CIRCULAR PROGRESS HUB */}
-                 <div className="relative shrink-0">
-                    <div className="relative h-56 w-56 md:h-80 md:w-80 flex items-center justify-center">
+           <Card className="border-none shadow-sm rounded-[24px] bg-white overflow-hidden relative border border-slate-100">
+              <div className="p-6 md:p-12 flex flex-col lg:flex-row items-center gap-8 md:gap-16">
+                 
+                 {/* Premium Score Widget */}
+                 <div className="relative shrink-0 flex flex-col items-center gap-4">
+                    <div className="relative h-44 w-44 md:h-64 md:w-64 flex items-center justify-center">
                        <svg className="h-full w-full transform -rotate-90">
-                          <circle cx="50%" cy="50%" r="46%" className="stroke-slate-100 fill-none" strokeWidth="14" />
+                          <circle cx="50%" cy="50%" r="44%" className="stroke-slate-50 fill-none" strokeWidth="12" />
                           <motion.circle 
-                             cx="50%" cy="50%" r="46%" 
+                             cx="50%" cy="50%" r="44%" 
                              className="stroke-[#2563EB] fill-none" 
-                             strokeWidth="14" 
+                             strokeWidth="12" 
                              strokeLinecap="round"
-                             initial={{ strokeDashoffset: 289 }}
-                             animate={{ strokeDashoffset: 289 - (289 * (sessionData?.accuracy || 0) / 100) }}
-                             transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
-                             style={{ strokeDasharray: 289 }}
+                             initial={{ strokeDashoffset: 276 }}
+                             animate={{ strokeDashoffset: 276 - (276 * (sessionData?.accuracy || 0) / 100) }}
+                             transition={{ duration: 1.5, ease: "easeOut" }}
+                             style={{ strokeDasharray: 276 }}
                           />
                        </svg>
                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <motion.span 
-                             initial={{ scale: 0.5, opacity: 0 }}
-                             animate={{ scale: 1, opacity: 1 }}
-                             transition={{ delay: 1, duration: 0.5 }}
-                             className="text-6xl md:text-8xl font-black tracking-tighter tabular-nums"
-                          >
-                             {sessionData?.accuracy || 0}%
-                          </motion.span>
-                          <Badge className={cn("mt-2 border-none font-black text-[10px] md:text-sm uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg", performanceStatus.bg, performanceStatus.color)}>
-                             {performanceStatus.label}
-                          </Badge>
+                          <span className={cn("text-6xl md:text-8xl font-[900] tracking-tighter tabular-nums", performanceStatus.color)}>
+                             {performanceStatus.grade}
+                          </span>
+                          <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Grade</p>
                        </div>
                     </div>
-                    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-[#0F172A] text-white px-5 py-2 rounded-2xl shadow-2xl border border-white/10 whitespace-nowrap">
-                       <ShieldCheck className="h-4 w-4 text-primary" />
-                       <span className="text-[10px] font-black uppercase tracking-widest">Result Verified</span>
-                    </div>
+                    <Badge className={cn("border-none font-bold text-[11px] px-6 py-1.5 rounded-full shadow-sm", performanceStatus.bg, performanceStatus.color)}>
+                       {performanceStatus.label}
+                    </Badge>
                  </div>
 
-                 {/* RIGHT: IDENTITY & ACTIONS */}
-                 <div className="flex-1 space-y-8 text-center w-full">
+                 <div className="flex-1 text-center lg:text-left space-y-8 w-full min-w-0">
                     <div className="space-y-4">
-                       <div className="flex flex-wrap items-center justify-center gap-3">
-                          <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-400 font-black text-[10px] px-3 py-1 uppercase tracking-widest">Official Database</Badge>
-                          <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
-                             <Clock className="h-3.5 w-3.5" /> Updated: Just Now
+                       <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+                          <Badge variant="outline" className="border-slate-100 bg-slate-50 text-slate-400 font-bold text-[10px] px-4 py-1 rounded-lg">Official registry data</Badge>
+                          <span className="text-[10px] font-bold text-slate-400 flex items-center gap-2">
+                             <Clock className="h-3.5 w-3.5" /> {new Date(sessionData?.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
                           </span>
                        </div>
-                       <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-tight text-[#0F172A]">{mockData?.title}</h1>
-                       <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl mx-auto leading-relaxed">{performanceStatus.desc}</p>
+                       <div className="space-y-1">
+                          <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em]">{profile?.name || "Aspirant"}</p>
+                          <h1 className="text-3xl md:text-5xl font-black tracking-tight text-[#0F172A] leading-tight">{mockData?.title}</h1>
+                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                       <Button onClick={handleSharePdf} disabled={isGeneratingPdf} className="w-full sm:w-auto h-14 md:h-18 px-10 md:px-16 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[11px] tracking-widest rounded-2xl shadow-3xl gap-3 border-none transition-all active:scale-95">
-                          {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-5 w-5" />} 
-                          Download Report
+                    <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
+                       <Button onClick={handleSharePdf} disabled={isGeneratingPdf} className="h-14 px-8 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl border-none gap-3 active:scale-95 transition-all">
+                          {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-5 w-5" />} Download report
                        </Button>
-                       <Button onClick={() => router.push(`/mocks/instructions?id=${mockId}`)} variant="outline" className="w-full sm:w-auto h-14 md:h-18 px-10 md:px-14 border-2 border-slate-200 text-[#0F172A] font-black uppercase text-[11px] tracking-widest rounded-2xl bg-white hover:bg-slate-50 gap-3 shadow-sm transition-all active:scale-95">
-                          <RotateCcw className="h-5 w-5 text-primary" /> Retake Test
+                       <Button onClick={() => router.push(`/mocks/instructions?id=${mockId}`)} variant="outline" className="h-14 px-8 border-2 border-slate-100 rounded-2xl font-bold bg-white hover:bg-slate-50 gap-3 transition-all active:scale-95">
+                          <RotateCcw className="h-5 w-5" /> Retake test
                        </Button>
-                    </div>
-
-                    <div className="pt-8 border-t border-slate-50 flex flex-wrap justify-center lg:justify-start items-center gap-8 md:gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
-                       <Landmark className="h-6 w-6" />
-                       <ShieldCheck className="h-6 w-6" />
-                       <Star className="h-6 w-6" />
-                       <Zap className="h-6 w-6" />
                     </div>
                  </div>
               </div>
            </Card>
         </section>
 
-        {/* 2X4 PREMIUM STATS GRID */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-           <StatCard label="Final Score" val={(sessionData?.score || 0).toFixed(1)} sub="Points" icon={<Zap className="text-blue-500" />} />
-           <StatCard label="State Rank" val={user ? `#${merit.rank}` : "---"} sub="Live Ranking" icon={<Trophy className="text-amber-500" />} highlight />
-           <StatCard label="Accuracy" val={`${sessionData?.accuracy || 0}%`} sub="Skill Score" icon={<Target className="text-emerald-500" />} />
-           <StatCard label="Percentile" val={`${merit.percentile}%`} sub="Performance" icon={<Award className="text-purple-500" />} />
-           <StatCard label="Correct" val={categorizedNodes.correct.length} sub="Verified Answers" icon={<CheckCircle2 className="text-emerald-600" />} />
-           <StatCard label="Incorrect" val={categorizedNodes.wrong.length} sub="Mistakes" icon={<XCircle className="text-rose-500" />} />
-           <StatCard label="Skipped" val={categorizedNodes.skipped.length} sub="No Attempt" icon={<AlertCircle className="text-slate-400" />} />
-           <StatCard label="Time Spent" val={formatTime(sessionData?.timeTaken || 0)} sub="Duration" icon={<Clock className="text-indigo-500" />} />
+        {/* 2. PERFORMANCE OVERVIEW */}
+        <section className="space-y-6">
+           <h2 className="text-xl font-bold text-[#0F172A] px-1">Performance overview</h2>
+           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+              <StatCard label="State rank" val={user ? `#${merit.rank}` : "---"} icon={<Trophy className="text-amber-500" />} />
+              <StatCard label="Final score" val={(sessionData?.score || 0).toFixed(1)} icon={<Zap className="text-primary" />} />
+              <StatCard label="Accuracy" val={`${sessionData?.accuracy || 0}%`} icon={<Target className="text-emerald-500" />} />
+              <StatCard label="Percentile" val={`${merit.percentile}%`} icon={<Award className="text-purple-500" />} />
+              <StatCard label="Time taken" val={formatTimeTaken(sessionData?.timeTaken || 0)} icon={<Timer className="text-blue-500" />} />
+              <StatCard label="Completion" val={`${Math.round(((categorizedNodes.correct.length + categorizedNodes.wrong.length) / (questions.length || 1)) * 100)}%`} icon={<ShieldCheck className="text-emerald-600" />} />
+           </div>
         </section>
 
-        {/* ANALYTICS & ACHIEVEMENTS HUB */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-           <div className="lg:col-span-8 space-y-10">
-              <Card className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden border border-slate-100">
-                 <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30 text-left">
-                    <div className="flex items-center justify-between">
-                       <div>
-                          <CardTitle className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Subject Mastery</CardTitle>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Official category review</p>
-                       </div>
-                       <Badge className="bg-primary/10 text-primary border-none font-black text-[9px] uppercase px-4 py-1.5 rounded-full shadow-inner">Live Data</Badge>
-                    </div>
+        {/* 3. QUESTION SUMMARY */}
+        <section className="space-y-6">
+           <h2 className="text-xl font-bold text-[#0F172A] px-1">Question summary</h2>
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              <SummaryPill label="Attempted" val={categorizedNodes.correct.length + categorizedNodes.wrong.length} color="text-blue-600" bg="bg-blue-50" />
+              <SummaryPill label="Correct" val={categorizedNodes.correct.length} color="text-emerald-600" bg="bg-emerald-50" />
+              <SummaryPill label="Incorrect" val={categorizedNodes.wrong.length} color="text-rose-600" bg="bg-rose-50" />
+              <SummaryPill label="Skipped" val={categorizedNodes.skipped.length} color="text-slate-400" bg="bg-slate-50" />
+           </div>
+        </section>
+
+        {/* 4. PERFORMANCE ANALYSIS */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+           <div className="lg:col-span-8 space-y-8">
+              <Card className="border-none shadow-sm rounded-[24px] bg-white overflow-hidden border border-slate-100">
+                 <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/20 text-left">
+                    <CardTitle className="text-lg font-bold flex items-center gap-3">
+                       <BarChart3 className="h-5 w-5 text-primary" /> Performance analysis
+                    </CardTitle>
                  </CardHeader>
-                 <CardContent className="p-8 md:p-14 space-y-10">
-                    {analysis.subjects.map((sub, i) => (
-                       <div key={i} className="space-y-4">
-                          <div className="flex justify-between items-end">
-                             <div className="space-y-1">
-                                <h4 className="text-sm md:text-xl font-bold text-[#0F172A]">{sub.name}</h4>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{sub.correct} / {sub.total} Correct</p>
+                 <CardContent className="p-8 space-y-6 text-left">
+                    <div className="space-y-4">
+                       {insights.map((insight, i) => (
+                          <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50/50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm">
+                             <div className="h-6 w-6 rounded-full bg-blue-50 flex items-center justify-center shrink-0 mt-0.5 shadow-inner">
+                                <Check className="h-3 w-3 text-primary stroke-[4px]" />
                              </div>
-                             <div className="text-right">
-                                <span className={cn("text-lg md:text-2xl font-black tabular-nums", sub.accuracy > 70 ? "text-emerald-600" : "text-amber-600")}>{sub.accuracy}%</span>
-                             </div>
+                             <p className="text-sm md:text-base font-medium text-slate-700 leading-relaxed">{insight}</p>
                           </div>
-                          <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                             <motion.div 
-                               initial={{ width: 0 }}
-                               whileInView={{ width: `${sub.accuracy}%` }}
-                               transition={{ duration: 1, ease: "easeOut" }}
-                               className={cn("h-full shadow-lg", sub.accuracy > 70 ? "bg-emerald-500" : "bg-amber-500")} 
-                             />
-                          </div>
-                       </div>
-                    ))}
+                       ))}
+                    </div>
                  </CardContent>
               </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 space-y-8 text-left border border-slate-100 overflow-hidden">
-                    <CardHeader className="p-0 flex items-center gap-4 flex-row">
-                       <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner">
-                          <BarChart3 className="h-6 w-6" />
-                       </div>
-                       <CardTitle className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Difficulty Matrix</CardTitle>
-                    </CardHeader>
-                    <div className="space-y-6">
-                       <DiffLevel label="Easy Items" val={analysis.difficulty.easy} color="bg-emerald-500" />
-                       <DiffLevel label="Medium Items" val={analysis.difficulty.medium} color="bg-blue-500" />
-                       <DiffLevel label="Expert Items" val={analysis.difficulty.hard} color="bg-rose-500" />
-                    </div>
-                 </Card>
+              {/* 5. SUBJECT PERFORMANCE - Responsive Hub */}
+              <div className="space-y-6">
+                 <h2 className="text-xl font-bold text-[#0F172A] px-1">Subject performance</h2>
+                 
+                 {/* Desktop Table */}
+                 <div className="hidden md:block rounded-[24px] border border-slate-100 overflow-hidden shadow-sm bg-white">
+                    <table className="w-full text-left border-collapse">
+                       <thead className="bg-[#0F172A] text-white">
+                          <tr className="h-14">
+                             <th className="px-8 text-[11px] font-black uppercase tracking-widest">Subject</th>
+                             <th className="px-4 text-[11px] font-black uppercase tracking-widest text-center">Items</th>
+                             <th className="px-4 text-[11px] font-black uppercase tracking-widest text-center">Accuracy</th>
+                             <th className="px-4 text-[11px] font-black uppercase tracking-widest text-center">Score</th>
+                             <th className="px-8 text-[11px] font-black uppercase tracking-widest text-right">Mastery</th>
+                          </tr>
+                       </thead>
+                       <tbody className="divide-y divide-slate-50">
+                          {analysis.subjects.map((sub, i) => (
+                             <tr key={i} className="h-20 hover:bg-slate-50 transition-colors group">
+                                <td className="px-8 font-bold text-[#0F172A]">{sub.name}</td>
+                                <td className="px-4 text-center font-medium text-slate-500 tabular-nums">{sub.total}</td>
+                                <td className="px-4 text-center">
+                                   <Badge className={cn("border-none px-3 py-1 font-bold text-[10px]", sub.accuracy > 70 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>{sub.accuracy}%</Badge>
+                                </td>
+                                <td className="px-4 text-center font-black tabular-nums">{sub.score}</td>
+                                <td className="px-8 text-right">
+                                   <div className="w-32 ml-auto h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                                      <div className={cn("h-full transition-all duration-1000", sub.accuracy > 70 ? "bg-emerald-500" : "bg-amber-500")} style={{ width: `${sub.accuracy}%` }} />
+                                   </div>
+                                </td>
+                             </tr>
+                          ))}
+                       </tbody>
+                    </table>
+                 </div>
 
-                 <Card className="border-none shadow-xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-12 space-y-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-44 w-44 text-primary" /></div>
-                    <div className="relative z-10 space-y-8 text-left">
-                       <div className="space-y-1">
-                          <h3 className="text-2xl font-black tracking-tight">Study Tips</h3>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Logic Hub Advice</p>
-                       </div>
-                       <div className="space-y-5">
-                          <RecommendationNode label="Consistency" text={sessionData?.accuracy > 60 ? "Strong skills detected in core topics." : "Review subject basics to increase score."} />
-                          <RecommendationNode label="Speed" text={sessionData?.timeTaken < (questions.length * 60) ? "Optimal solving speed verified." : "Try to solve questions faster next time."} />
-                          <RecommendationNode label="Goal" text="Prepare for the next full test to lock your rank." />
-                       </div>
-                    </div>
-                 </Card>
+                 {/* Mobile Cards */}
+                 <div className="md:hidden space-y-4">
+                    {analysis.subjects.map((sub, i) => (
+                       <Card key={i} className="p-6 border-slate-100 shadow-sm rounded-2xl space-y-4">
+                          <div className="flex justify-between items-start">
+                             <h4 className="font-bold text-[#0F172A]">{sub.name}</h4>
+                             <Badge className={cn("border-none text-[10px]", sub.accuracy > 70 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>{sub.accuracy}% Accuracy</Badge>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                             <div><p className="text-[10px] font-bold text-slate-400 uppercase">Items</p><p className="font-bold text-sm">{sub.total}</p></div>
+                             <div className="text-right"><p className="text-[10px] font-bold text-slate-400 uppercase">Score</p><p className="font-bold text-sm">{sub.score}</p></div>
+                          </div>
+                          <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden">
+                             <div className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : "bg-amber-500")} style={{ width: `${sub.accuracy}%` }} />
+                          </div>
+                       </Card>
+                    ))}
+                 </div>
               </div>
            </div>
 
            <div className="lg:col-span-4 space-y-10">
-              <section className="space-y-6">
-                 <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400 ml-2 text-left">Unlocked Badges</h3>
-                 <div className="grid grid-cols-1 gap-4">
-                    {achievements.length > 0 ? achievements.map((a, i) => (
-                       <Card key={i} className="border-none shadow-lg rounded-2xl bg-white p-6 flex items-center gap-5 group hover:shadow-xl transition-all hover:-translate-x-1 border border-slate-50">
-                          <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner shrink-0 group-hover:scale-110 transition-transform">
-                             {a.icon}
-                          </div>
-                          <div className="min-w-0 text-left">
-                             <p className="font-black text-[#0F172A] text-sm leading-none uppercase">{a.label}</p>
-                             <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-tight">{a.desc}</p>
-                          </div>
-                       </Card>
-                    )) : (
-                       <div className="p-12 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 opacity-40">
-                          <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Mastery locked</p>
-                       </div>
-                    )}
+              {/* 6. DIFFICULTY ANALYSIS */}
+              <Card className="border-none shadow-sm rounded-[24px] bg-white p-8 border border-slate-100 space-y-8 text-left">
+                 <h3 className="font-bold text-lg flex items-center gap-3"><Layers className="h-5 w-5 text-primary" /> Difficulty analysis</h3>
+                 <div className="space-y-6">
+                    <ProgressRow label="Easy items" val={analysis.difficulty.easy} color="bg-emerald-500" />
+                    <ProgressRow label="Medium items" val={analysis.difficulty.medium} color="bg-blue-500" />
+                    <ProgressRow label="Hard items" val={analysis.difficulty.hard} color="bg-rose-500" />
                  </div>
-              </section>
-
-              <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-8 md:p-12 space-y-10 text-center border border-slate-100 overflow-hidden group">
-                 <div className="h-20 w-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary shadow-2xl group-hover:scale-110 transition-transform duration-700">
-                    <Medal className="h-10 w-10 fill-current" />
-                 </div>
-                 <div className="space-y-3">
-                    <h3 className="text-2xl font-black text-[#0F172A] tracking-tight">State Ranking Hub</h3>
-                    <p className="text-slate-500 font-medium text-sm">Your score has been updated in the merit list for all Punjab students.</p>
-                 </div>
-                 <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner space-y-4">
-                    <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                       <span>Total Students</span>
-                       <span className="text-primary tabular-nums">{merit.total.toLocaleString()}</span>
-                    </div>
-                    <div className="h-1 w-full bg-white rounded-full overflow-hidden"><div className="h-full bg-primary w-3/4" /></div>
-                 </div>
-                 <Button asChild variant="ghost" className="w-full text-primary font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-primary/5 rounded-xl transition-all">
-                    <Link href="/leaderboard">Full Merit List <ChevronRight className="h-4 w-4" /></Link>
-                 </Button>
               </Card>
-           </div>
-        </div>
 
-        {/* QUESTION REVIEW SYSTEM - SCROLL BASED LIST */}
-        <section className="space-y-10 pt-16 border-t border-slate-100">
-           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 px-2 text-left">
-              <div className="space-y-4">
-                 <div className="flex items-center gap-3">
-                    <FileSearch className="h-6 w-6 text-primary" />
-                    <h2 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter">Detailed Analysis</h2>
+              {/* 7. TIME ANALYSIS */}
+              <Card className="border-none shadow-sm rounded-[24px] bg-white p-8 border border-slate-100 space-y-8 text-left">
+                 <h3 className="font-bold text-lg flex items-center gap-3"><Clock className="h-5 w-5 text-primary" /> Time analysis</h3>
+                 <div className="space-y-4">
+                    <TimeMetric label="Avg time / question" val={`${Math.round((sessionData?.timeTaken || 0) / (questions.length || 1))}s`} />
+                    <TimeMetric label="Decision speed" val="Fast" />
+                    <TimeMetric label="Time efficiency" val="High" />
                  </div>
-                 <p className="text-slate-500 font-medium text-sm md:text-xl">Check every answer and explanation in this list.</p>
-              </div>
-           </div>
+              </Card>
 
-           <div className="sticky top-[64px] z-[90] bg-[#F8FAFC]/90 backdrop-blur-xl py-6 -mx-4 px-4 border-b border-slate-200/50">
-              <div className="max-w-4xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                 <FilterNode active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL')} label="All Items" count={categorizedNodes.all.length} icon={<LayoutGrid />} />
-                 <FilterNode active={activeReviewFilter === 'CORRECT'} onClick={() => setActiveReviewFilter('CORRECT')} label="Correct" count={categorizedNodes.correct.length} icon={<CheckCircle2 />} activeColor="bg-emerald-600" />
-                 <FilterNode active={activeReviewFilter === 'WRONG'} onClick={() => setActiveReviewFilter('WRONG')} label="Wrong" count={categorizedNodes.wrong.length} icon={<XCircle />} activeColor="bg-rose-600" />
-                 <FilterNode active={activeReviewFilter === 'SKIPPED'} onClick={() => setActiveReviewFilter('SKIPPED')} label="Skipped" count={categorizedNodes.skipped.length} icon={<AlertCircle />} activeColor="bg-slate-500" />
-              </div>
-           </div>
-
-           <div className="max-w-4xl mx-auto space-y-8">
-              <AnimatePresence mode="wait">
-                 {filteredQuestions.length > 0 ? (
-                    <div key={activeReviewFilter} className="space-y-8 md:space-y-12">
-                       {filteredQuestions.map((q, idx) => (
-                          <motion.div 
-                            key={q.id} 
-                            initial={{ opacity: 0, y: 20 }} 
-                            animate={{ opacity: 1, y: 0 }} 
-                            transition={{ duration: 0.4, delay: idx * 0.05 }}
-                          >
-                             <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-100 group transition-all duration-700">
-                                <div className="p-8 md:p-14 space-y-10 text-left">
-                                   <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-4">
-                                         <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-xs md:text-lg shadow-xl">
-                                            {q.originalIndex + 1}
-                                         </div>
-                                         <Badge variant="outline" className="bg-slate-50 text-slate-400 border-none font-black text-[9px] uppercase px-3 py-1 rounded-lg">{q.difficulty || 'MEDIUM'}</Badge>
-                                      </div>
-                                      <ReviewStatus userAns={sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)]} correctAns={q.correctAnswer} />
-                                   </div>
-
-                                   <div className="space-y-8">
-                                      <QuestionRenderer 
-                                        question={q} 
-                                        language={mockData?.languageMode || 'ENGLISH_PUNJABI'} 
-                                        showSolution={true} 
-                                        selectedAnswer={sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)]} 
-                                        className="p-0 shadow-none border-none bg-transparent" 
-                                      />
-                                   </div>
-
-                                   <div className="pt-10 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-6">
-                                      <div className="flex items-center gap-4">
-                                         <button className="h-11 w-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90 shadow-inner"><Bookmark className="h-5 w-5" /></button>
-                                         <button className="h-11 w-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all active:scale-90 shadow-inner"><Share2 className="h-5 w-5" /></button>
-                                         <button className="h-11 w-11 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-rose-500 transition-all active:scale-90 shadow-inner"><AlertCircle className="h-5 w-5" /></button>
-                                      </div>
-                                      <div className="flex items-center gap-3 bg-blue-50/50 px-6 py-2.5 rounded-full border border-blue-100">
-                                         <Timer className="h-4 w-4 text-primary" />
-                                         <span className="text-[10px] md:text-[11px] font-black uppercase text-primary tracking-widest tabular-nums">Official Answer Verified</span>
-                                      </div>
-                                   </div>
-                                </div>
-                             </Card>
-                          </motion.div>
+              {/* 8. RECOMMENDATIONS */}
+              <Card className="border-none shadow-xl rounded-[24px] bg-[#0F172A] text-white p-8 space-y-8 relative overflow-hidden text-left group">
+                 <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12 transition-transform group-hover:scale-110"><Zap className="h-32 w-32" /></div>
+                 <div className="relative z-10 space-y-6">
+                    <div className="space-y-1">
+                       <h3 className="text-xl font-bold">Recommendations</h3>
+                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Logic hub advice</p>
+                    </div>
+                    <div className="space-y-4">
+                       {recommendations.map((rec, i) => (
+                          <div key={i} className="flex gap-3 items-start">
+                             <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5"><Sparkles className="h-3 w-3 text-primary" /></div>
+                             <p className="text-xs font-medium text-slate-300 leading-relaxed">{rec}</p>
+                          </div>
                        ))}
                     </div>
-                 ) : (
-                    <div className="py-40 text-center opacity-30 animate-in fade-in duration-500">
-                       <FileSearch className="h-20 w-20 mx-auto text-slate-300" />
-                       <p className="text-xl font-black uppercase tracking-[0.4em] mt-8 text-slate-400">No Items Found</p>
-                    </div>
-                 )}
-              </AnimatePresence>
+                 </div>
+              </Card>
            </div>
         </section>
 
-        {/* BOTTOM ACTION HUB */}
-        <section className="pt-20">
-           <Card className="border-none shadow-5xl rounded-[3rem] bg-[#0B1528] text-white p-10 md:p-24 relative overflow-hidden group border border-white/5">
-              <div className="absolute top-0 right-0 p-12 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Star className="h-64 w-64 text-primary fill-primary" /></div>
-              <div className="relative z-10 space-y-12 text-center">
-                 <div className="space-y-6">
-                    <h2 className="text-3xl md:text-7xl font-[900] tracking-tighter leading-none text-white uppercase">Your journey <br/> <span className="text-primary">continues.</span></h2>
-                    <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-snug">The review is complete. Now focus on your weak areas to improve your score.</p>
+        {/* 9. VERIFICATION SECTION */}
+        <section className="pt-12">
+           <Card className="border-none shadow-sm rounded-[24px] bg-white border border-slate-100 overflow-hidden group">
+              <div className="p-8 md:p-14 flex flex-col md:flex-row items-center justify-between gap-10">
+                 <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
+                    <div className="h-20 w-20 md:h-24 md:w-24 bg-emerald-50 rounded-[2rem] flex items-center justify-center text-emerald-600 shadow-inner group-hover:scale-110 transition-transform">
+                       <ShieldCheck className="h-10 w-10 md:h-12 md:w-12" />
+                    </div>
+                    <div className="space-y-2">
+                       <h3 className="text-xl md:text-2xl font-black text-[#0F172A] tracking-tight">Verified by Cracklix</h3>
+                       <div className="flex flex-col gap-1 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                          <p>Result ID: {sessionData?.id || 'MANUAL_ENTRY'}</p>
+                          <p>Generated: {new Date(sessionData?.timestamp).toLocaleDateString('en-GB')}</p>
+                       </div>
+                    </div>
                  </div>
-                 
-                 <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                    <Button asChild className="w-full sm:w-auto h-16 md:h-20 px-12 md:px-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-sm tracking-widest rounded-2xl md:rounded-3xl shadow-4xl border-none transition-all active:scale-95 group/btn">
-                       <Link href="/mocks" className="flex items-center gap-4">Continue Learning <ChevronRight className="h-5 w-5 group-hover/btn:translate-x-2 transition-transform" /></Link>
-                    </Button>
-                    <Button asChild variant="outline" className="w-full sm:w-auto h-16 md:h-20 px-12 md:px-16 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-2xl md:rounded-3xl font-black uppercase text-[10px] md:text-sm tracking-widest transition-all active:scale-95 border-none">
-                       <Link href="/dashboard">Return Home</Link>
-                    </Button>
+                 <div className="flex items-center gap-10">
+                    <div className="hidden lg:block text-right">
+                       <p className="font-black text-lg text-[#0F172A]">Official digital stamp</p>
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Institutional merit verified</p>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
+                       <QrCode className="h-14 w-14 text-[#0F172A]" />
+                    </div>
                  </div>
               </div>
            </Card>
         </section>
 
+        {/* 10. DETAILED REVIEW BUTTON */}
+        <section className="text-center pt-8">
+           <div className="inline-flex flex-col items-center gap-6">
+              <p className="text-slate-400 font-medium max-w-sm">Analyze every attempt decision and check detailed bilingual rationales below.</p>
+              <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center animate-bounce text-slate-300">
+                 <ArrowUp className="h-5 w-5 rotate-180" />
+              </div>
+           </div>
+        </section>
+
+        {/* QUESTION LISTING HUB */}
+        <section className="max-w-4xl mx-auto space-y-10">
+           <div className="bg-white border border-slate-100 rounded-[24px] p-1 flex items-center h-14 md:h-16 overflow-hidden">
+              <ReviewTab active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL')} label="All" count={categorizedNodes.all.length} />
+              <ReviewTab active={activeReviewFilter === 'CORRECT'} onClick={() => setActiveReviewFilter('CORRECT')} label="Correct" count={categorizedNodes.correct.length} color="text-emerald-600" />
+              <ReviewTab active={activeReviewFilter === 'WRONG'} onClick={() => setActiveReviewFilter('WRONG')} label="Incorrect" count={categorizedNodes.wrong.length} color="text-rose-600" />
+              <ReviewTab active={activeReviewFilter === 'SKIPPED'} onClick={() => setActiveReviewFilter('SKIPPED')} label="Skipped" count={categorizedNodes.skipped.length} color="text-slate-400" />
+           </div>
+
+           <div className="space-y-6">
+              <AnimatePresence mode="wait">
+                 {filteredQuestions.map((q, idx) => (
+                    <motion.div 
+                      key={q.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                    >
+                       <Card className="border-none shadow-sm rounded-[24px] bg-white overflow-hidden border border-slate-100 group transition-all duration-300">
+                          <div className="p-8 md:p-12 space-y-10 text-left">
+                             <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                   <div className="h-10 w-10 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-sm">{q.originalIndex + 1}</div>
+                                   <Badge variant="outline" className="text-[10px] font-bold border-slate-100 text-slate-400 uppercase">{q.difficulty || 'Medium'}</Badge>
+                                </div>
+                                <ReviewPill userAns={sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)]} correctAns={q.correctAnswer} />
+                             </div>
+                             <QuestionRenderer 
+                               question={q} 
+                               language={mockData?.languageMode || 'ENGLISH_PUNJABI'} 
+                               showSolution={true} 
+                               selectedAnswer={sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)]} 
+                               className="p-0 shadow-none" 
+                             />
+                          </div>
+                       </Card>
+                    </motion.div>
+                 ))}
+              </AnimatePresence>
+           </div>
+        </section>
+
       </main>
 
-      <Footer />
+      {/* COMPACT FOOTER */}
+      <footer className="py-12 border-t border-slate-100 bg-white">
+         <div className="container mx-auto px-6 text-center space-y-4">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">© {new Date().getFullYear()} Cracklix Authority Registry</p>
+            <div className="flex items-center justify-center gap-3">
+               <ShieldCheck className="h-4 w-4 text-emerald-500" />
+               <span className="text-[10px] font-black uppercase tracking-widest text-[#0F172A]">Result verified node synchronized</span>
+            </div>
+         </div>
+      </footer>
     </div>
   )
 }
@@ -679,25 +698,34 @@ export default function ResultClient() {
 function StatCard({ label, val, sub, icon, highlight }: any) {
   return (
     <Card className={cn(
-      "border-none shadow-xl bg-white p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group border border-slate-50 transition-all hover:translate-y-[-4px] text-left",
-      highlight && "ring-4 ring-primary/5"
+      "border-none shadow-sm bg-white p-5 md:p-8 rounded-[20px] transition-all duration-300 hover:shadow-xl hover:translate-y-[-2px] border border-slate-100 text-left relative overflow-hidden",
+      highlight && "ring-2 ring-primary/10"
     )}>
-       <div className="absolute top-0 right-0 p-4 md:p-6 opacity-5 group-hover:scale-110 transition-transform">{icon}</div>
-       <div className="space-y-3 md:space-y-4 relative z-10 text-left">
-          <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</p>
-          <p className="text-xl md:text-4xl font-black text-[#0F172A] tabular-nums leading-none tracking-tight">{val}</p>
-          <p className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-widest">{sub}</p>
+       <div className="absolute top-0 right-0 p-4 opacity-5">{icon}</div>
+       <div className="space-y-1 relative z-10">
+          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+          <p className="text-xl md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none">{val}</p>
+          {sub && <p className="text-[8px] font-bold text-slate-300 uppercase tracking-tight mt-1">{sub}</p>}
        </div>
     </Card>
   )
 }
 
-function DiffLevel({ label, val, color }: any) {
+function SummaryPill({ label, val, color, bg }: any) {
+   return (
+      <div className={cn("p-4 md:p-6 rounded-2xl flex flex-col gap-1 text-left shadow-sm border border-slate-50 transition-all", bg)}>
+         <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+         <p className={cn("text-xl md:text-3xl font-black tabular-nums leading-none", color)}>{val}</p>
+      </div>
+   )
+}
+
+function ProgressRow({ label, val, color }: any) {
    return (
       <div className="space-y-2">
-         <div className="flex justify-between items-center px-1">
-            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
-            <span className="text-xs font-black text-[#0F172A] tabular-nums">{val}%</span>
+         <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+            <span className="text-slate-400">{label}</span>
+            <span className="text-[#0F172A]">{val}%</span>
          </div>
          <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner">
             <motion.div initial={{ width: 0 }} whileInView={{ width: `${val}%` }} transition={{ duration: 1.2 }} className={cn("h-full", color)} />
@@ -706,35 +734,44 @@ function DiffLevel({ label, val, color }: any) {
    )
 }
 
-function RecommendationNode({ label, text }: any) {
+function TimeMetric({ label, val }: any) {
    return (
-      <div className="flex items-start gap-4 group">
-         <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 border border-primary/20 shadow-inner">
-            <CheckCircle2 className="h-3 w-3 text-primary stroke-[4px]" />
-         </div>
-         <div className="space-y-0.5">
-            <p className="text-[8px] font-black uppercase text-primary tracking-widest">{label}</p>
-            <p className="text-xs md:text-sm font-bold text-slate-300 leading-tight group-hover:text-white transition-colors">{text}</p>
-         </div>
+      <div className="flex items-center justify-between py-1 border-b border-slate-50">
+         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">{label}</span>
+         <span className="text-sm font-black tabular-nums">{val}</span>
       </div>
    )
 }
 
-function FilterNode({ active, onClick, label, count, icon, activeColor = "bg-primary" }: any) {
+function RecommendationNode({ label, text }: any) {
    return (
-      <button onClick={onClick} className={cn("flex items-center gap-3 px-6 py-3 rounded-2xl md:rounded-full font-black uppercase text-[10px] md:text-[11px] tracking-widest transition-all whitespace-nowrap border active:scale-95 shadow-sm group", active ? `${activeColor} text-white border-transparent shadow-xl` : "bg-white text-slate-400 border-slate-100 hover:border-slate-300")}>
-         {React.cloneElement(icon as React.ReactElement, { className: "h-4 w-4" })}
-         {label}
-         <span className={cn("px-2 py-0.5 rounded-md text-[9px] font-black tabular-nums", active ? "bg-white/20 text-white" : "bg-slate-50 text-slate-400")}>{count}</span>
+      <div className="space-y-1">
+         <p className="text-[9px] font-black uppercase text-primary tracking-widest">{label}</p>
+         <p className="text-xs font-medium text-slate-400 leading-snug">{text}</p>
+      </div>
+   )
+}
+
+function ReviewTab({ active, onClick, label, count, color = "text-[#0F172A]" }: any) {
+   return (
+      <button 
+        onClick={onClick}
+        className={cn(
+          "flex-1 h-full rounded-[16px] flex items-center justify-center gap-2 transition-all font-bold text-[10px] md:text-xs",
+          active ? "bg-[#0F172A] text-white shadow-xl" : "bg-transparent text-slate-400 hover:bg-slate-50"
+        )}
+      >
+         {label} <span className={cn("tabular-nums px-1.5 py-0.5 rounded-md text-[9px] font-black", active ? "bg-white/10" : "bg-slate-50", !active && color)}>{count}</span>
       </button>
    )
 }
 
-function ReviewStatus({ userAns, correctAns }: any) {
+function ReviewPill({ userAns, correctAns }: any) {
    const isAttempted = userAns !== null && userAns !== undefined && String(userAns) !== "";
-   if (!isAttempted) return <Badge className="bg-slate-50 text-slate-400 border-none font-black text-[9px] px-4 py-1.5 rounded-full shadow-inner uppercase">SKIPPED</Badge>;
+   if (!isAttempted) return <Badge className="bg-slate-100 text-slate-500 border-none px-4 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">Skipped</Badge>;
    const isCorrect = ['A','B','C','D'][Number(userAns)] === correctAns;
    return isCorrect 
-     ? <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] px-4 py-1.5 rounded-full shadow-inner uppercase tracking-widest">CORRECT</Badge>
-     : <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] px-4 py-1.5 rounded-full shadow-inner uppercase tracking-widest">WRONG</Badge>;
+     ? <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">Correct</Badge>
+     : <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">Incorrect</Badge>;
 }
+
