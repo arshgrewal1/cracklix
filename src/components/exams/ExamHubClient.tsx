@@ -46,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v6.7.
- * FIXED: Refined hero title scaling to prevent visual dominance on large screens.
+ * @fileOverview Premium Exam Detail Hub v6.8.
+ * UPDATED: Removed uppercase styling.
  */
 
 export default function ExamHubClient() {

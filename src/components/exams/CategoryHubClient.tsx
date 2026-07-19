@@ -21,9 +21,8 @@ interface CategoryHubClientProps {
 }
 
 /**
- * @fileOverview Premium Category Hub Portal v5.7.
- * FIXED: Removed overlapping background watermarks for cleaner UI.
- * UPDATED: Simplified terminology and removed uppercase styling.
+ * @fileOverview Premium Category Hub Portal v5.8.
+ * UPDATED: Removed uppercase styling and refined layouts.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -103,7 +102,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                               </div>
                            </div>
                            <div className="space-y-2 flex-1">
-                              <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">{board.abbreviation} Hub</h3>
+                              <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">{board.abbreviation} hub</h3>
                               <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest">{board.name}</p>
                            </div>
                            <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between">

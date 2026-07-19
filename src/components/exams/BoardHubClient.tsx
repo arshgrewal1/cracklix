@@ -21,8 +21,8 @@ interface BoardHubClientProps {
 }
 
 /**
- * @fileOverview Premium Board Hub Portal v5.6.
- * FIXED: Reduced card title font size to prevent text cutoff on long titles.
+ * @fileOverview Premium Board Hub Portal v5.7.
+ * FIXED: Removed uppercase styling and refined title scaling.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
@@ -142,7 +142,7 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
                              </div>
                              
                              <div className="space-y-6 flex-1 text-left relative z-10">
-                                <h3 className="text-xl md:text-2xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tight line-clamp-2 break-words uppercase">{exam.name}</h3>
+                                <h3 className="text-xl md:text-2xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tight line-clamp-2 break-words">{exam.name}</h3>
                                 
                                 <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-50">
                                    <MetricPlate icon={Zap} label="Mocks" val={s.mocks || "New"} />

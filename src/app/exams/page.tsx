@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -35,8 +34,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Exam Selection Hub v5.7.
- * UPDATED: Refined headline copy for better clarity.
+ * @fileOverview Premium Exam Selection Hub v5.8.
+ * UPDATED: Removed uppercase styling and fixed syntax error.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -124,7 +123,7 @@ export default function ExamsEntryPage() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full">
       <Navbar />
       
-      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-24 pb-[env(safe-area-inset-bottom,40px)]">
+      <main className="w-full max-w-[1440px] auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-24 pb-[env(safe-area-inset-bottom,40px)]">
         
         {/* 1. PREMIUM HERO SECTION */}
         <section className="relative px-1 overflow-hidden">
@@ -141,7 +140,7 @@ export default function ExamsEntryPage() {
               </div>
               <h1 className="text-[32px] sm:text-6xl lg:text-[72px] font-black tracking-tighter leading-[1.05] text-[#0F172A] antialiased">
                 Find your <br className="hidden md:block"/>
-                <span className="text-primary">target exam.</span>
+                <span className="text-primary italic">target exam.</span>
               </h1>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl leading-relaxed tracking-tight">
                 Select your target board or exam vertical to begin practicing with Punjab's most accurate mock tests.
@@ -386,4 +385,5 @@ function ValueNode({ icon: Icon, title, desc }: any) {
             <p className="text-[10px] md:text-xs font-medium text-slate-400 leading-snug">{desc}</p>
          </div>
       </div>
+   );
 }

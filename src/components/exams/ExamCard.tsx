@@ -12,8 +12,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Institutional Exam Vertical Card v4.3.
- * FIXED: Reduced title font size to prevent overflow in grid layouts.
+ * @fileOverview Premium Institutional Exam Vertical Card v4.4.
+ * UPDATED: Removed uppercase styling.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"
@@ -33,7 +33,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
                   <span className="text-[10px] font-black text-[#0F172A]">4.9</span>
                </div>
                <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-sm">
-                 Verified HUB
+                 Verified hub
                </Badge>
             </div>
           </div>
@@ -41,8 +41,8 @@ export default function ExamCard({ exam }: ExamCardProps) {
           {/* CONTENT NODE */}
           <div className="flex-1 space-y-6 text-left relative z-10">
             <div className="space-y-2">
-               <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">{exam.boardId} Registry</p>
-               <h3 className="text-xl md:text-2xl font-black text-[#0F172A] leading-tight tracking-tight uppercase group-hover:text-primary transition-colors line-clamp-2 break-words">
+               <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">{exam.boardId} registry</p>
+               <h3 className="text-xl md:text-2xl font-black text-[#0F172A] leading-tight tracking-tight group-hover:text-primary transition-colors line-clamp-2 break-words">
                  {examName}
                </h3>
             </div>
