@@ -60,9 +60,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Hub Client v8.4.
+ * @fileOverview Premium Assessment Hub Client v8.5 [PWA Optimized].
  * FIXED: Optimized header to single-row layout without scrolling.
- * UPDATED: Renamed "Review Items" to "Review test".
+ * UPDATED: Reduced padding and scaled typography for mobile ergonomics.
  */
 
 export default function ResultClient() {
@@ -375,47 +375,47 @@ export default function ResultClient() {
 
       <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-16 pb-40">
         
-        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
-           <div className="flex flex-col xl:flex-row justify-between items-center gap-6">
-              <div className="bg-white border border-slate-100 p-1.5 rounded-2xl flex flex-col md:flex-row gap-2 h-auto md:h-14 shadow-sm w-full xl:w-auto">
-                 <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-between gap-1 overflow-x-auto no-scrollbar">
-                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
-                       <BarChart3 className="h-4 w-4" /> Performance
+        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-12">
+           <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+              <div className="bg-white border border-slate-100 p-1 rounded-xl flex items-center h-12 md:h-14 shadow-sm w-full lg:w-auto overflow-hidden">
+                 <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-between gap-0.5">
+                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-3 md:px-6 font-bold text-[9px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
+                       <BarChart3 className="h-3.5 w-3.5" /> Performance
                     </TabsTrigger>
-                    <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
-                       <List className="h-4 w-4" /> Review test
+                    <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-3 md:px-6 font-bold text-[9px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
+                       <List className="h-3.5 w-3.5" /> Review test
                     </TabsTrigger>
-                    <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
-                       <ShieldCheck className="h-4 w-4" /> Official Report
+                    <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-3 md:px-6 font-bold text-[9px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
+                       <ShieldCheck className="h-3.5 w-3.5" /> Report
                     </TabsTrigger>
                  </TabsList>
               </div>
 
-              <div className="flex items-center gap-3 w-full xl:w-auto">
+              <div className="flex items-center gap-2 w-full lg:w-auto">
                  <Button 
                    onClick={handleSharePdf} 
                    disabled={isGeneratingPdf} 
-                   className="flex-1 xl:flex-none h-14 md:h-16 px-8 md:px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-xl border-none gap-3 transition-all active:scale-95"
+                   className="flex-1 lg:flex-none h-12 md:h-14 px-5 md:px-8 bg-[#2563EB] hover:bg-blue-700 text-white font-bold uppercase text-[9px] md:text-[11px] tracking-widest rounded-xl shadow-lg border-none gap-2 transition-all active:scale-95"
                  >
-                    {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-5 w-5" />} 
-                    Download PDF
+                    {isGeneratingPdf ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} 
+                    PDF
                  </Button>
                  <Button 
                    onClick={() => router.push(`/mocks/instructions?id=${mockId}`)} 
                    variant="outline" 
-                   className="flex-1 xl:flex-none h-14 md:h-16 px-8 md:px-10 border-2 border-slate-200 rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest bg-white hover:bg-slate-50 text-[#0F172A] gap-3 transition-all active:scale-95"
+                   className="flex-1 lg:flex-none h-12 md:h-14 px-5 md:px-8 border-2 border-slate-200 rounded-xl font-bold uppercase text-[9px] md:text-[11px] tracking-widest bg-white hover:bg-slate-50 text-[#0F172A] gap-2 transition-all active:scale-95"
                  >
-                    <RotateCcw className="h-4 w-4" /> Retake
+                    <RotateCcw className="h-3.5 w-3.5" /> Retake
                  </Button>
               </div>
            </div>
 
-           <TabsContent value="OVERVIEW" className="space-y-12 animate-in fade-in duration-500">
+           <TabsContent value="OVERVIEW" className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
               <section>
                  <Card className="border-none shadow-sm rounded-[24px] bg-white overflow-hidden border border-slate-100">
-                    <div className="p-6 md:p-12 flex flex-col lg:flex-row items-center gap-8 md:gap-16">
+                    <div className="p-5 md:p-12 flex flex-col lg:flex-row items-center gap-6 md:gap-16">
                        <div className="relative shrink-0 flex flex-col items-center gap-4">
-                          <div className="relative h-44 w-44 md:h-64 md:w-64 flex items-center justify-center">
+                          <div className="relative h-40 w-44 md:h-64 md:w-64 flex items-center justify-center">
                              <svg className="h-full w-full transform -rotate-90">
                                 <circle cx="50%" cy="50%" r="44%" className="stroke-slate-50 fill-none" strokeWidth="12" />
                                 <motion.circle 
@@ -430,33 +430,33 @@ export default function ResultClient() {
                                 />
                              </svg>
                              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className={cn("text-6xl md:text-8xl font-[900] tracking-tighter tabular-nums", performanceStatus.color)}>
+                                <span className={cn("text-5xl md:text-8xl font-[900] tracking-tighter tabular-nums", performanceStatus.color)}>
                                    {performanceStatus.grade}
                                 </span>
-                                <p className="text-[10px] font-black text-slate-400 tracking-widest mt-1 uppercase">Grade</p>
+                                <p className="text-[9px] font-black text-slate-400 tracking-widest mt-0.5 uppercase">Grade</p>
                              </div>
                           </div>
-                          <Badge className={cn("border-none font-bold text-[11px] px-6 py-1.5 rounded-full shadow-sm", performanceStatus.bg, performanceStatus.color)}>
+                          <Badge className={cn("border-none font-bold text-[10px] md:text-[11px] px-5 py-1.5 rounded-full shadow-sm", performanceStatus.bg, performanceStatus.color)}>
                              {performanceStatus.label}
                           </Badge>
                        </div>
 
-                       <div className="flex-1 text-center lg:text-left space-y-8 w-full min-w-0">
-                          <div className="space-y-4">
-                             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-                                <Badge variant="outline" className="border-slate-100 bg-slate-50 text-slate-400 font-bold text-[10px] px-4 py-1 rounded-lg">Official registry sync</Badge>
-                                <span className="text-[10px] font-bold text-slate-400 flex items-center gap-2">
-                                   <Clock className="h-3.5 w-3.5" /> {new Date(sessionData?.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
+                       <div className="flex-1 text-center lg:text-left space-y-6 w-full min-w-0">
+                          <div className="space-y-3">
+                             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                                <Badge variant="outline" className="border-slate-100 bg-slate-50 text-slate-400 font-bold text-[9px] px-3 py-1 rounded-lg">Verified hub</Badge>
+                                <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5">
+                                   <Clock className="h-3 w-3" /> {new Date(sessionData?.timestamp).toLocaleDateString('en-GB')}
                                 </span>
                              </div>
                              <div className="space-y-1">
-                                <p className="text-[10px] font-black text-primary tracking-[0.3em] uppercase">{profile?.name || "Aspirant"}</p>
-                                <h1 className="text-3xl md:text-5xl font-black tracking-tight text-[#0F172A] leading-tight">{mockData?.title}</h1>
+                                <p className="text-[9px] font-black text-primary tracking-[0.2em] uppercase">{profile?.name || "Aspirant"}</p>
+                                <h1 className="text-2xl md:text-5xl font-black tracking-tight text-[#0F172A] leading-tight">{mockData?.title}</h1>
                              </div>
                           </div>
-                          <div className="p-6 md:p-8 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-4">
-                             <AlertCircle className="h-6 w-6 text-primary shrink-0" />
-                             <p className="text-sm md:text-lg font-medium text-slate-600 leading-relaxed text-left">
+                          <div className="p-5 md:p-8 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3">
+                             <AlertCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                             <p className="text-xs md:text-lg font-medium text-slate-600 leading-relaxed text-left">
                                 {performanceStatus.desc} View the detailed official report in the next tab for depth analysis.
                              </p>
                           </div>
@@ -465,7 +465,7 @@ export default function ResultClient() {
                  </Card>
               </section>
 
-              <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+              <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-6">
                  <StatCard label="State rank" val={user ? `#${merit.rank}` : "---"} icon={<Trophy className="text-amber-500" />} />
                  <StatCard label="Final score" val={(sessionData?.score || 0).toFixed(1)} icon={<Zap className="text-primary" />} />
                  <StatCard label="Accuracy" val={`${sessionData?.accuracy || 0}%`} icon={<Target className="text-emerald-500" />} />
@@ -474,32 +474,32 @@ export default function ResultClient() {
                  <StatCard label="Completion" val={`${completionPercent}%`} icon={<ShieldCheck className="text-emerald-600" />} />
               </section>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-                 <div className="lg:col-span-8 space-y-12">
-                    <div className="space-y-6">
-                       <h2 className="text-xl font-bold text-[#0F172A] px-1">Subject performance</h2>
-                       <div className="rounded-[24px] border border-slate-100 overflow-hidden shadow-sm bg-white overflow-x-auto">
-                          <table className="w-full text-left border-collapse min-w-[600px]">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-12">
+                 <div className="lg:col-span-8 space-y-8">
+                    <div className="space-y-5">
+                       <h2 className="text-lg md:text-xl font-bold text-[#0F172A] px-1">Subject performance</h2>
+                       <div className="rounded-[20px] border border-slate-100 overflow-hidden shadow-sm bg-white overflow-x-auto">
+                          <table className="w-full text-left border-collapse min-w-[500px]">
                              <thead className="bg-[#0F172A] text-white">
-                                <tr className="h-14">
-                                   <th className="px-8 text-[11px] font-black uppercase tracking-widest">Subject</th>
-                                   <th className="px-4 text-[11px] font-black uppercase tracking-widest text-center">Items</th>
-                                   <th className="px-4 text-[11px] font-black uppercase tracking-widest text-center">Accuracy</th>
-                                   <th className="px-4 text-[11px] font-black uppercase tracking-widest text-center">Score</th>
-                                   <th className="px-8 text-[11px] font-black uppercase tracking-widest text-right">Mastery</th>
+                                <tr className="h-12">
+                                   <th className="px-6 text-[10px] font-black uppercase tracking-widest">Subject</th>
+                                   <th className="px-3 text-[10px] font-black uppercase tracking-widest text-center">Items</th>
+                                   <th className="px-3 text-[10px] font-black uppercase tracking-widest text-center">Accuracy</th>
+                                   <th className="px-3 text-[10px] font-black uppercase tracking-widest text-center">Score</th>
+                                   <th className="px-6 text-[10px] font-black uppercase tracking-widest text-right">Mastery</th>
                                 </tr>
                              </thead>
                              <tbody className="divide-y divide-slate-50">
                                 {analysis.subjects.map((sub, i) => (
-                                   <tr key={i} className="h-20 hover:bg-slate-50/50 transition-colors group">
-                                      <td className="px-8 font-bold text-[#0F172A]">{sub.name}</td>
-                                      <td className="px-4 text-center font-medium text-slate-500 tabular-nums">{sub.total}</td>
-                                      <td className="px-4 text-center">
-                                         <Badge className={cn("border-none px-3 py-1 font-bold text-[10px]", sub.accuracy > 70 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>{sub.accuracy}%</Badge>
+                                   <tr key={i} className="h-16 hover:bg-slate-50/50 transition-colors">
+                                      <td className="px-6 font-bold text-[#0F172A] text-sm">{sub.name}</td>
+                                      <td className="px-3 text-center font-medium text-slate-500 tabular-nums text-xs">{sub.total}</td>
+                                      <td className="px-3 text-center">
+                                         <Badge className={cn("border-none px-2 py-0.5 font-bold text-[9px]", sub.accuracy > 70 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>{sub.accuracy}%</Badge>
                                       </td>
-                                      <td className="px-4 text-center font-black tabular-nums">{sub.score}</td>
-                                      <td className="px-8 text-right">
-                                         <div className="w-32 ml-auto h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                                      <td className="px-3 text-center font-black tabular-nums text-xs">{sub.score}</td>
+                                      <td className="px-6 text-right">
+                                         <div className="w-24 ml-auto h-1 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                                             <div className={cn("h-full transition-all duration-1000", sub.accuracy > 70 ? "bg-emerald-500" : "bg-amber-500")} style={{ width: `${sub.accuracy}%` }} />
                                          </div>
                                       </td>
@@ -511,19 +511,19 @@ export default function ResultClient() {
                     </div>
                  </div>
 
-                 <div className="lg:col-span-4 space-y-10">
-                    <Card className="border-none shadow-sm rounded-[24px] bg-white p-8 border border-slate-100 space-y-8 text-left">
-                       <h3 className="font-bold text-lg flex items-center gap-3"><Layers className="h-5 w-5 text-primary" /> Complexity audit</h3>
-                       <div className="space-y-6">
+                 <div className="lg:col-span-4 space-y-6">
+                    <Card className="border-none shadow-sm rounded-[20px] bg-white p-6 border border-slate-100 space-y-6 text-left">
+                       <h3 className="font-bold text-base flex items-center gap-2.5"><Layers className="h-4 w-4 text-primary" /> Complexity audit</h3>
+                       <div className="space-y-5">
                           <AuditRow label="Easy items" val={analysis.difficulty.easy} color="bg-emerald-500" />
                           <AuditRow label="Medium items" val={analysis.difficulty.medium} color="bg-blue-500" />
                           <AuditRow label="Expert items" val={analysis.difficulty.hard} color="bg-rose-500" />
                        </div>
                     </Card>
 
-                    <Card className="border-none shadow-sm rounded-[24px] bg-white p-8 border border-slate-100 space-y-8 text-left">
-                       <h3 className="font-bold text-lg flex items-center gap-3"><Clock className="h-5 w-5 text-primary" /> Temporal audit</h3>
-                       <div className="space-y-4">
+                    <Card className="border-none shadow-sm rounded-[20px] bg-white p-6 border border-slate-100 space-y-6 text-left">
+                       <h3 className="font-bold text-base flex items-center gap-2.5"><Clock className="h-4 w-4 text-primary" /> Temporal audit</h3>
+                       <div className="space-y-3.5">
                           <TimeAuditNode label="Avg ingestion speed" val={`${Math.round((sessionData?.timeTaken || 0) / (questions.length || 1))}s`} />
                           <TimeAuditNode label="Decision speed" val="High" />
                           <TimeAuditNode label="Efficiency node" val="Active" />
@@ -533,31 +533,31 @@ export default function ResultClient() {
               </div>
            </TabsContent>
 
-           <TabsContent value="REVIEW" className="space-y-10 animate-in fade-in duration-500">
-              <div className="max-w-4xl mx-auto space-y-10">
-                 <div className="bg-white border border-slate-100 rounded-[2rem] p-2 flex flex-row items-center justify-between shadow-lg h-16 md:h-20">
+           <TabsContent value="REVIEW" className="space-y-8 animate-in fade-in duration-500">
+              <div className="max-w-4xl mx-auto space-y-8">
+                 <div className="bg-white border border-slate-100 rounded-2xl p-1.5 flex flex-row items-center justify-between shadow-md h-14 md:h-16 overflow-hidden">
                     <ReviewTab active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL')} label="All" count={categorizedNodes.all.length} />
                     <ReviewTab active={activeReviewFilter === 'CORRECT'} onClick={() => setActiveReviewFilter('CORRECT')} label="Correct" count={categorizedNodes.correct.length} color="text-emerald-600" />
                     <ReviewTab active={activeReviewFilter === 'WRONG'} onClick={() => setActiveReviewFilter('WRONG')} label="Incorrect" count={categorizedNodes.wrong.length} color="text-rose-600" />
                     <ReviewTab active={activeReviewFilter === 'SKIPPED'} onClick={() => setActiveReviewFilter('SKIPPED')} label="Skipped" count={categorizedNodes.skipped.length} color="text-slate-400" />
                  </div>
 
-                 <div className="space-y-6">
+                 <div className="space-y-5">
                     <AnimatePresence mode="wait">
                        {filteredQuestions.map((q, idx) => (
                           <motion.div 
                             key={q.id}
-                            initial={{ opacity: 0, y: 15 }}
+                            initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ delay: idx * 0.03 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ delay: idx * 0.02 }}
                           >
-                             <Card className="border-none shadow-sm rounded-[24px] bg-white overflow-hidden border border-slate-100 text-left">
-                                <div className="p-8 md:p-12 space-y-10">
+                             <Card className="border-none shadow-sm rounded-[20px] bg-white overflow-hidden border border-slate-100 text-left">
+                                <div className="p-6 md:p-12 space-y-8">
                                    <div className="flex justify-between items-center">
                                       <div className="flex items-center gap-3">
-                                         <div className="h-9 w-9 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-xs">{q.originalIndex + 1}</div>
-                                         <Badge variant="outline" className="text-[10px] font-bold border-slate-100 text-slate-400 uppercase">Registry node</Badge>
+                                         <div className="h-8 w-8 rounded-lg bg-[#0F172A] text-white flex items-center justify-center font-black text-[10px]">{q.originalIndex + 1}</div>
+                                         <Badge variant="outline" className="text-[9px] font-bold border-slate-100 text-slate-400 uppercase">Registry node</Badge>
                                       </div>
                                       <ReviewStatusPill userAns={sessionData.answers?.[q.originalIndex]} correctAns={q.correctAnswer} />
                                    </div>
@@ -579,29 +579,31 @@ export default function ResultClient() {
 
            <TabsContent value="REPORT" className="animate-in fade-in zoom-in-95 duration-700">
               <div className="flex flex-col items-center">
-                 <div className="w-full flex justify-center bg-slate-100 p-4 md:p-10 rounded-[3rem] border-2 border-dashed border-slate-200 shadow-inner">
-                    <ResultCard 
-                       studentName={profile?.name || "Aspirant"} 
-                       examTitle={mockData?.title || "Mock test"} 
-                       score={(sessionData?.score || 0).toFixed(1)} 
-                       rank={merit.rank} 
-                       accuracy={sessionData?.accuracy || 0} 
-                       timeTaken={formatTimeTaken(sessionData?.timeTaken || 0)} 
-                       correct={categorizedNodes.correct.length} 
-                       wrong={categorizedNodes.wrong.length} 
-                       total={questions.length} 
-                       date={new Date(sessionData?.timestamp).toLocaleDateString('en-GB')} 
-                       resultId={sessionData?.id || "REG_NODE"} 
-                       percentile={merit.percentile} 
-                       subjects={analysis.subjects}
-                       difficulty={analysis.difficulty}
-                       timeMetrics={{
-                          avg: `${Math.round((sessionData?.timeTaken || 0) / (questions.length || 1))}s`,
-                          fastest: "8s",
-                          slowest: "52s"
-                       }}
-                       isForPdf={true}
-                    />
+                 <div className="w-full flex justify-center bg-slate-100 p-2 md:p-10 rounded-[2rem] border-2 border-dashed border-slate-200 shadow-inner overflow-hidden">
+                    <div className="transform scale-[0.35] sm:scale-[0.6] md:scale-[0.8] lg:scale-100 origin-top">
+                       <ResultCard 
+                          studentName={profile?.name || "Aspirant"} 
+                          examTitle={mockData?.title || "Mock test"} 
+                          score={(sessionData?.score || 0).toFixed(1)} 
+                          rank={merit.rank} 
+                          accuracy={sessionData?.accuracy || 0} 
+                          timeTaken={formatTimeTaken(sessionData?.timeTaken || 0)} 
+                          correct={categorizedNodes.correct.length} 
+                          wrong={categorizedNodes.wrong.length} 
+                          total={questions.length} 
+                          date={new Date(sessionData?.timestamp).toLocaleDateString('en-GB')} 
+                          resultId={sessionData?.id || "REG_NODE"} 
+                          percentile={merit.percentile} 
+                          subjects={analysis.subjects}
+                          difficulty={analysis.difficulty}
+                          timeMetrics={{
+                             avg: `${Math.round((sessionData?.timeTaken || 0) / (questions.length || 1))}s`,
+                             fastest: "8s",
+                             slowest: "52s"
+                          }}
+                          isForPdf={true}
+                       />
+                    </div>
                  </div>
               </div>
            </TabsContent>
@@ -615,11 +617,11 @@ export default function ResultClient() {
 
 function StatCard({ label, val, icon }: any) {
   return (
-    <Card className="border-none shadow-sm bg-white p-5 md:p-8 rounded-[20px] transition-all hover:shadow-xl hover:translate-y-[-2px] border border-slate-100 text-left relative overflow-hidden">
-       <div className="absolute top-0 right-0 p-4 opacity-5">{icon}</div>
-       <div className="space-y-1 relative z-10">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
-          <p className="text-xl md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none">{val}</p>
+    <Card className="border-none shadow-sm bg-white p-4 md:p-8 rounded-[18px] transition-all hover:shadow-xl hover:translate-y-[-2px] border border-slate-100 text-left relative overflow-hidden">
+       <div className="absolute top-0 right-0 p-3 opacity-5">{icon}</div>
+       <div className="space-y-0.5 relative z-10">
+          <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
+          <p className="text-lg md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none">{val}</p>
        </div>
     </Card>
   )
@@ -627,12 +629,12 @@ function StatCard({ label, val, icon }: any) {
 
 function AuditRow({ label, val, color }: any) {
    return (
-      <div className="space-y-2">
+      <div className="space-y-1.5">
          <div className="flex justify-between items-center px-1">
-            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
-            <span className="text-xs font-black text-[#0F172A] tabular-nums">{val}%</span>
+            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
+            <span className="text-[11px] font-black text-[#0F172A] tabular-nums">{val}%</span>
          </div>
-         <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner">
+         <div className="h-1 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner">
             <motion.div initial={{ width: 0 }} whileInView={{ width: `${val}%` }} transition={{ duration: 1.2 }} className={cn("h-full", color)} />
          </div>
       </div>
@@ -642,8 +644,8 @@ function AuditRow({ label, val, color }: any) {
 function TimeAuditNode({ label, val }: any) {
    return (
       <div className="flex items-center justify-between py-1.5 border-b border-slate-50">
-         <span className="text-[11px] font-bold text-slate-400">{label}</span>
-         <span className="text-sm font-black tabular-nums">{val}</span>
+         <span className="text-[10px] font-bold text-slate-400">{label}</span>
+         <span className="text-xs font-black tabular-nums">{val}</span>
       </div>
    )
 }
@@ -653,21 +655,22 @@ function ReviewTab({ active, onClick, label, count, color = "text-[#0F172A]" }: 
       <button 
         onClick={() => onClick()}
         className={cn(
-          "flex-1 h-full rounded-[1.25rem] flex items-center justify-center gap-2 transition-all font-[800] text-[10px] md:text-[13px] uppercase tracking-tight px-2",
-          active ? "bg-[#0F172A] text-white shadow-xl scale-105 z-10" : "bg-transparent text-slate-400 hover:text-slate-600"
+          "flex-1 h-full rounded-xl flex items-center justify-center gap-1.5 transition-all font-[800] text-[9px] md:text-[11px] uppercase tracking-tight px-1",
+          active ? "bg-[#0F172A] text-white shadow-xl scale-[1.03] z-10" : "bg-transparent text-slate-400 hover:text-slate-600"
         )}
       >
          <span className="truncate">{label}</span>
-         <span className={cn("tabular-nums px-2 py-0.5 rounded-lg text-[9px] font-black", active ? "bg-white/10" : "bg-slate-50", !active && color)}>{count}</span>
+         <span className={cn("tabular-nums px-1.5 py-0.5 rounded-lg text-[8px] font-black", active ? "bg-white/10" : "bg-slate-50", !active && color)}>{count}</span>
       </button>
    )
 }
 
 function ReviewStatusPill({ userAns, correctAns }: any) {
    const isAttempted = userAns !== null && userAns !== undefined && String(userAns) !== "";
-   if (!isAttempted) return <Badge className="bg-slate-100 text-slate-500 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest uppercase">Skipped</Badge>;
+   if (!isAttempted) return <Badge className="bg-slate-100 text-slate-500 border-none px-3 py-1 rounded-full font-black text-[8px] tracking-widest uppercase">Skipped</Badge>;
    const isCorrect = ['A','B','C','D'][Number(userAns)] === correctAns;
    return isCorrect 
-     ? <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest uppercase">Correct</Badge>
-     : <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest uppercase">Incorrect</Badge>;
+     ? <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-full font-black text-[8px] tracking-widest uppercase">Correct</Badge>
+     : <Badge className="bg-rose-50 text-rose-600 border-none px-3 py-1 rounded-full font-black text-[8px] tracking-widest uppercase">Incorrect</Badge>;
 }
+
