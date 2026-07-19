@@ -70,8 +70,8 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v52.0.
- * UPDATED: Added Official Paper (PYQ) and Current Affairs Quiz to Test type options.
+ * @fileOverview Master Mock Builder v52.1 [Audit Fixed].
+ * FIXED: Resilient hydration now searches mcqBank, questions, and usedQuestions archive.
  */
 
 export default function MockBuilderPage() {
@@ -190,12 +190,16 @@ function MockBuilderContent() {
           chunks.push(questionIds.slice(i, i + 30));
         }
         for (const chunk of chunks) {
-          const [mcqSnap, usedSnap] = await Promise.all([
+          const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
             getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-            getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
+            getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
+            getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
           ]);
           mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
           usedSnap.forEach(d => {
+            if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
+          });
+          legacySnap.forEach(d => {
             if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
           });
         }
@@ -462,7 +466,7 @@ function MockBuilderContent() {
                             </select>
                         </div>
                         <div className="space-y-2 text-left">
-                            <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Series node</Label>
+                            <Label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Series node</Label>
                             <select 
                               value={mockData.seriesId || ""} 
                               onChange={e => setMockData({...mockData, seriesId: e.target.value})}

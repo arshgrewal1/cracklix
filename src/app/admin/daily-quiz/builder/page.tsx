@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -63,8 +62,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v45.1 [Clean Terminology].
- * UPDATED: Replaced 'node' with 'entry' or 'item'.
+ * @fileOverview Daily Challenge Builder v45.2 [Audit Fixed].
+ * FIXED: Resilient hydration now searches mcqBank, questions, and usedQuestions archive.
  */
 
 export default function DailyQuizBuilder() {
@@ -165,12 +164,16 @@ function DailyQuizBuilderContent() {
           chunks.push(questionIds.slice(i, i + 30));
         }
         for (const chunk of chunks) {
-          const [mcqSnap, usedSnap] = await Promise.all([
+          const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
              getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-             getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
+             getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
+             getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
           ]);
           mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
           usedSnap.forEach(d => {
+            if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
+          });
+          legacySnap.forEach(d => {
             if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
           });
         }
@@ -518,4 +521,34 @@ function DailyQuizBuilderContent() {
       </div>
     </div>
   )
+}
+
+function ConfigSwitch({ label, checked, onChange }: any) {
+   return (
+      <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
+         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>
+         <Switch checked={checked} onCheckedChange={onChange} />
+      </div>
+   )
+}
+
+function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
+   return (
+      <Card className="border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300 rounded-[18px] p-5 space-y-4 group">
+         <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+               {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" }) : null}
+            </div>
+            <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
+         </div>
+         <select 
+            value={value} 
+            onChange={e => onChange(e.target.value)} 
+            className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none appearance-none cursor-pointer hover:bg-slate-100 focus:ring-2 focus:ring-primary/10 transition-all text-[#0F172A]"
+         >
+            <option value="all">All {label}s</option>
+            {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+         </select>
+      </Card>
+   );
 }

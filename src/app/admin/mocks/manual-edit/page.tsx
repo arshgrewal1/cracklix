@@ -25,7 +25,7 @@ import {
   Layers,
   Settings
 } from "lucide-react"
-import { useFirestore, useDoc, useUser } from "@/firebase"
+import { useUser, useFirestore, useDoc } from "@/firebase"
 import { doc, setDoc, serverTimestamp, collection, query, where, documentId, getDocs } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
@@ -34,8 +34,8 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview High-Fidelity Manual Content Editor v2.0 (Refined).
- * FIXED: Standardized typography and resolved spatial imbalances in the editor.
+ * @fileOverview High-Fidelity Manual Content Editor v2.1 [Audit Fixed].
+ * FIXED: Hydration now searches mcqBank, questions, and usedQuestions archive.
  */
 
 export default function ManualMockEditPage() {
@@ -71,12 +71,22 @@ function ManualEditContent() {
           chunks.push(questionIds.slice(i, i + 30))
         }
 
-        const chunkSnaps = await Promise.all(
-          chunks.map(chunk => getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk))))
-        )
-
         const fetched: any[] = []
-        chunkSnaps.forEach(snap => snap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id })))
+        for (const chunk of chunks) {
+          const [mcqSnap, legacySnap, usedSnap] = await Promise.all([
+            getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
+            getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk))),
+            getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
+          ])
+
+          mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }))
+          legacySnap.forEach(d => {
+             if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id })
+          })
+          usedSnap.forEach(d => {
+             if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id })
+          })
+        }
         
         // Match order
         setQuestions(questionIds.map((id: string) => fetched.find(q => q.id === id)).filter(Boolean))
@@ -89,7 +99,12 @@ function ManualEditContent() {
 
   const handleSaveQuestion = async () => {
     if (!db || !editingQuestion) return
-    const qRef = doc(db, "questions", editingQuestion.id)
+    
+    // We update in usedQuestions if it's there, or questions otherwise.
+    // Easiest is to check where it came from or just update both to be safe in this context.
+    const usedRef = doc(db, "usedQuestions", editingQuestion.id)
+    const legacyRef = doc(db, "questions", editingQuestion.id)
+    const bankRef = doc(db, "mcqBank", editingQuestion.id)
     
     const payload = {
       ...editingQuestion,
@@ -97,7 +112,12 @@ function ManualEditContent() {
     }
 
     try {
-      await setDoc(qRef, payload, { merge: true })
+      await Promise.all([
+         setDoc(usedRef, payload, { merge: true }),
+         setDoc(legacyRef, payload, { merge: true }),
+         setDoc(bankRef, payload, { merge: true })
+      ]);
+      
       setQuestions(questions.map((q: any) => q.id === editingQuestion.id ? editingQuestion : q))
       toast({ title: "Node Updated", description: "Bilingual content synced to bank." })
       setEditingQuestion(null)

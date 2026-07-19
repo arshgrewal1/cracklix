@@ -29,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v8.3.
- * FIXED: Precise time tracking using elapsedSeconds from store.
+ * @fileOverview Official Mock Attempt Hub v8.4.
+ * FIXED: Resilient hydration now searches mcqBank, questions, and usedQuestions archive.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -164,13 +164,19 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }
       
       for (const chunk of chunks) {
-         const [mcqSnap, legacySnap] = await Promise.all([
+         const [mcqSnap, legacySnap, usedSnap] = await Promise.all([
            getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-           getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+           getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk))),
+           getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
          ]);
 
          mcqSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
          legacySnap.forEach(d => {
+            if (!fetchedQuestions.find(f => f.id === d.id)) {
+               fetchedQuestions.push({ ...d.data(), id: d.id });
+            }
+         });
+         usedSnap.forEach(d => {
             if (!fetchedQuestions.find(f => f.id === d.id)) {
                fetchedQuestions.push({ ...d.data(), id: d.id });
             }

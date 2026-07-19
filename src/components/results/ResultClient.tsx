@@ -58,8 +58,8 @@ import ResultCard from "./ResultCard"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Center v6.4.
- * FIXED: Precise time taken formatting (h/m/s) and summary count resilience.
+ * @fileOverview Premium Assessment Center v6.5.
+ * FIXED: Resilient hydration searches mcqBank, questions, and usedQuestions archive.
  */
 
 export default function ResultClient() {
@@ -155,13 +155,19 @@ export default function ResultClient() {
             for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
             
             for (const chunk of chunks) {
-              const [mcqSnap, legacySnap] = await Promise.all([
+              const [mcqSnap, legacySnap, usedSnap] = await Promise.all([
                  getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-                 getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+                 getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk))),
+                 getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
               ]);
 
               mcqSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
               legacySnap.forEach(d => {
+                 if (!fetchedQuestions.find(f => f.id === d.id)) {
+                    fetchedQuestions.push({ ...d.data(), id: d.id });
+                 }
+              });
+              usedSnap.forEach(d => {
                  if (!fetchedQuestions.find(f => f.id === d.id)) {
                     fetchedQuestions.push({ ...d.data(), id: d.id });
                  }
@@ -313,6 +319,12 @@ export default function ResultClient() {
   const completionPercent = questions.length > 0 
     ? Math.round(((categorizedNodes.correct.length + categorizedNodes.wrong.length) / questions.length) * 100) 
     : 0;
+
+  const recommendations = [
+    "Focus on subject accuracy consistency.",
+    "Review incorrect rationale nodes immediately.",
+    "Optimize temporal efficiency for long-form series."
+  ];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
