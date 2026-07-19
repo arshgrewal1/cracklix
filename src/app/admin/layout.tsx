@@ -15,7 +15,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v52.0.
+ * @fileOverview Admin Layout v53.0.
  * UPDATED: Logo positioned exactly to the right of the toggle with 0 gap and 0 space.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
