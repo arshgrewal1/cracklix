@@ -34,7 +34,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
  * @fileOverview Mobile Sidebar v86.0.
- * UPDATED: Reduced logo size to a more professional scale.
+ * UPDATED: Refined logo size for better balance.
  */
 export default function MobileSidebar({
   onClose,
@@ -92,7 +92,7 @@ export default function MobileSidebar({
            variant="light"
            align="center"
            className="flex-shrink-0"
-           imgClassName="h-16 md:h-24 w-auto"
+           imgClassName="h-20 md:h-28 w-auto"
            onClick={onClose}
          />
          <button

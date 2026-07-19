@@ -17,7 +17,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 /**
  * @fileOverview Admin Layout v72.0.
  * FIXED: Removed all gaps and margins between Menu icon and Logo for an integrated "attached" look.
- * UPDATED: Reduced logo size.
+ * UPDATED: Increased logo size for better visibility.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -131,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 variant="light" 
                 href="/admin"
                 className="flex-shrink-0 p-0 h-full" 
-                imgClassName="h-10 md:h-14 w-auto"
+                imgClassName="h-14 md:h-18 w-auto"
                 align="left"
               />
             </div>

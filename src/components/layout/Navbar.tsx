@@ -40,7 +40,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 /**
  * @fileOverview Cracklix Navigation Hub v121.0.
  * FIXED: Removed all gaps and margins between Menu icon and Logo for an integrated "attached" look.
- * UPDATED: Reduced logo size for a more professional look.
+ * UPDATED: Increased logo size for better visibility.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -127,7 +127,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0 p-0 h-full"
-                imgClassName="h-10 md:h-14 w-auto"
+                imgClassName="h-14 md:h-18 w-auto"
                 align="left"
               />
             </div>
