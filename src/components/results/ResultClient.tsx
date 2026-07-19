@@ -60,8 +60,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Hub Client v8.1.
- * FIXED: Wrapped TabItem in TabsList to resolve RovingFocusGroup error.
+ * @fileOverview Premium Assessment Hub Client v8.2.
+ * FIXED: Syntax errors in ReviewTab onClick handlers.
  */
 
 export default function ResultClient() {
@@ -299,7 +299,7 @@ export default function ResultClient() {
     try {
       await new Promise(resolve => setTimeout(resolve, 500)); // Delay to ensure tab transition
       
-      const { jsPDF } = await import('jsPDF');
+      const { jsPDF } = await import('jspdf');
       const { toCanvas } = await import('html-to-image');
       
       // Ensure everything is ready
@@ -522,7 +522,7 @@ export default function ResultClient() {
            <TabsContent value="REVIEW" className="space-y-10 animate-in fade-in duration-500">
               <div className="max-w-4xl mx-auto space-y-10">
                  <div className="bg-white border border-slate-100 rounded-[24px] p-1.5 flex items-center h-14 md:h-16 overflow-hidden">
-                    <ReviewTab active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL'} label="All" count={categorizedNodes.all.length} />
+                    <ReviewTab active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL')} label="All" count={categorizedNodes.all.length} />
                     <ReviewTab active={activeReviewFilter === 'CORRECT'} onClick={() => setActiveReviewFilter('CORRECT')} label="Correct" count={categorizedNodes.correct.length} color="text-emerald-600" />
                     <ReviewTab active={activeReviewFilter === 'WRONG'} onClick={() => setActiveReviewFilter('WRONG')} label="Incorrect" count={categorizedNodes.wrong.length} color="text-rose-600" />
                     <ReviewTab active={activeReviewFilter === 'SKIPPED'} onClick={() => setActiveReviewFilter('SKIPPED')} label="Skipped" count={categorizedNodes.skipped.length} color="text-slate-400" />
