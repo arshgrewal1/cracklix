@@ -6,7 +6,7 @@ import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, doc, deleteDoc, getDoc } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
-import { Bookmark, Search, Trash2, ChevronRight, BookOpen, ShieldCheck, Languages, Zap, X, AlertCircle, Loader2 } from "lucide-react"
+import { Bookmark, Search, Trash2, ChevronRight, BookOpen, ShieldCheck, Languages, Zap, X, AlertCircle, Loader2, Target } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,8 +19,9 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Bookmarks Hub v5.1.
- * UPDATED: Normalized casing for text labels and headings.
+ * @fileOverview Official Bookmarks Hub v5.2.
+ * FIXED: Imported missing Target icon from lucide-react.
+ * LINGUISTIC: Removed remaining 'node' references in UI text.
  */
 
 const FILTER_CHIPS = [
@@ -85,7 +86,7 @@ export default function BookmarksPage() {
     if (!db || !questionId) return;
     setLoadingNode(true);
     try {
-      // Audit both collections for the question node
+      // Audit both collections for the question item
       let qSnap = await getDoc(doc(db, "mcqBank", questionId));
       if (!qSnap.exists()) {
         qSnap = await getDoc(doc(db, "questions", questionId));
@@ -95,8 +96,8 @@ export default function BookmarksPage() {
         setSelectedQuestion(qSnap.data());
         setIsViewing(true);
       } else {
-        // Handle case where original node was purged
-        alert("Original question node has been archived from the bank.");
+        // Handle case where original item was purged
+        alert("Original question has been archived from the bank.");
       }
     } finally {
       setLoadingNode(false);
@@ -295,7 +296,7 @@ export default function BookmarksPage() {
           </div>
           <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-center shrink-0">
              <Button onClick={() => setIsViewing(false)} className="rounded-full px-12 h-14 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] tracking-widest">
-                Close node
+                Close
              </Button>
           </div>
         </DialogContent>
