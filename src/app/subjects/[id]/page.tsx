@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -43,15 +42,16 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Subject Selection Hub v4.1.
- * UPDATED: Replaced fake 1.2M attempts with real personal attempt counts.
+ * @fileOverview Premium Subject Selection Hub v5.0.
+ * FIXED: Replaced hardcoded durations with real average time from Firestore.
+ * FIXED: Optimized top metrics for PWA single-row presentation.
  */
 
 const QUICK_ACTIONS = [
   { label: "Practice", icon: Target, color: "text-blue-500", bg: "bg-blue-50", href: "#series" },
-  { label: "Mock Tests", icon: Zap, color: "text-orange-500", bg: "bg-orange-50", href: "#series" },
-  { label: "PYQs", icon: FileStack, color: "text-purple-500", bg: "bg-purple-50", href: "/pyqs" },
-  { label: "Bookmarks", icon: Bookmark, color: "text-rose-500", bg: "bg-rose-50", href: "/bookmarks" },
+  { label: "Mock tests", icon: Zap, color: "text-orange-500", bg: "bg-orange-50", href: "#series" },
+  { label: "Papers", icon: FileStack, color: "text-purple-500", bg: "bg-purple-50", href: "/pyqs" },
+  { label: "Saved", icon: Bookmark, color: "text-rose-500", bg: "bg-rose-50", href: "/bookmarks" },
   { label: "Progress", icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-50", href: "/dashboard" },
 ];
 
@@ -62,8 +62,6 @@ const FILTER_CHIPS = [
   { id: "Easy", label: "Easy" },
   { id: "Medium", label: "Medium" },
   { id: "Hard", label: "Hard" },
-  { id: "newest", label: "Newest" },
-  { id: "popular", label: "Popular" }
 ];
 
 export default function SubjectDetailPortal() {
@@ -117,7 +115,7 @@ export default function SubjectDetailPortal() {
   }, [rawSeries, searchTerm, activeFilter]);
 
   const seriesStats = useMemo(() => {
-    const map: Record<string, { total: number, qCount: number, attempted: number, progress: number }> = {};
+    const map: Record<string, { total: number, qCount: number, attempted: number, progress: number, avgTime: number }> = {};
     if (!rawSeries) return map;
 
     rawSeries.forEach(ser => {
@@ -125,10 +123,15 @@ export default function SubjectDetailPortal() {
       const attempted = testsInSer.filter(m => (results || []).some((r: any) => r.mockId === m.id)).length;
       const qCount = testsInSer.reduce((acc, m) => acc + (m.totalQuestions || 0), 0);
       
+      // Calculate real average duration for this series
+      const totalDuration = testsInSer.reduce((acc, m) => acc + (Number(m.duration) || 0), 0);
+      const avgTime = testsInSer.length > 0 ? Math.round(totalDuration / testsInSer.length) : 0;
+      
       map[ser.id] = {
         total: testsInSer.length,
         qCount,
         attempted,
+        avgTime,
         progress: testsInSer.length > 0 ? Math.round((attempted / testsInSer.length) * 100) : 0
       };
     });
@@ -140,7 +143,6 @@ export default function SubjectDetailPortal() {
      const totalTests = mocks.length;
      const totalQuestions = mocks.reduce((acc, m) => acc + (m.totalQuestions || 0), 0);
      
-     // FIXED: Calculate real personal attempts for this subject
      const subjectMockIds = new Set(mocks.map(m => m.id));
      const totalAttempts = results?.filter(r => subjectMockIds.has(r.mockId)).length || 0;
 
@@ -164,8 +166,8 @@ export default function SubjectDetailPortal() {
       <section className="bg-white border-b border-slate-100 pt-6 pb-8 md:pt-12 md:pb-14 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
-         <div className="container mx-auto px-4 md:px-8 max-get-7xl relative z-10 space-y-8">
-            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+         <div className="container mx-auto px-4 md:px-8 max-w-7xl relative z-10 space-y-8">
+            <div className="flex flex-col lg:flex-row items-center gap-6 md:gap-10">
                <div className="relative shrink-0">
                   <div className="h-16 w-16 md:h-24 md:w-24 rounded-2xl md:rounded-[2rem] bg-primary/10 flex items-center justify-center text-primary shadow-inner group-hover:scale-110 transition-transform duration-500 overflow-hidden relative">
                      {subject.imageUrl ? (
@@ -177,15 +179,16 @@ export default function SubjectDetailPortal() {
                </div>
 
                <div className="flex-1 text-center md:text-left space-y-3">
-                  <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none">{subject.name}</h1>
+                  <h1 className="text-2xl md:text-5xl font-[800] text-[#0F172A] tracking-tighter leading-none">{subject.name}</h1>
                   <p className="text-slate-500 font-medium text-sm md:text-lg max-w-2xl leading-relaxed">{subject.description || "Master core concepts through verified mock tests."}</p>
                </div>
 
-               <div className="flex flex-wrap justify-center md:justify-end gap-2 md:gap-3 shrink-0">
+               {/* PWA OPTIMIZED TOP STATS - SINGLE ROW RESPONSIVE */}
+               <div className="flex flex-row items-center justify-center md:justify-end gap-1.5 md:gap-3 shrink-0 w-full md:w-auto">
                   <StatsChip label="Series" val={totalSubjectStats.totalSeries} />
                   <StatsChip label="Tests" val={totalSubjectStats.totalTests} />
                   <StatsChip label="Items" val={totalSubjectStats.totalQuestions} />
-                  <StatsChip label="My Solved" val={totalSubjectStats.totalAttempts} highlight />
+                  <StatsChip label="My solved" val={totalSubjectStats.totalAttempts} highlight />
                </div>
             </div>
          </div>
@@ -200,7 +203,7 @@ export default function SubjectDetailPortal() {
                         <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center transition-all", action.bg, action.color)}>
                            <action.icon className="h-4 w-4" />
                         </div>
-                        <span className="text-xs font-bold text-[#0F172A] uppercase tracking-tight">{action.label}</span>
+                        <span className="text-xs font-bold text-[#0F172A] tracking-tight">{action.label}</span>
                      </div>
                   </Link>
                ))}
@@ -240,12 +243,9 @@ export default function SubjectDetailPortal() {
          <section id="series" className="space-y-8 md:space-y-12">
             <div className="flex items-center justify-between px-1">
                <div className="space-y-1">
-                  <h2 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Test series</h2>
+                  <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tighter">Test series</h2>
                   <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Targeted practice modules</p>
                </div>
-               <Button variant="ghost" className="text-primary font-black uppercase text-[10px] tracking-widest">
-                  View all hubs
-               </Button>
             </div>
 
             {serLoading ? (
@@ -255,13 +255,13 @@ export default function SubjectDetailPortal() {
             ) : series.length > 0 ? (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                   {series.map((item, idx) => {
-                     const stats = seriesStats[item.id] || { total: 0, qCount: 0, attempted: 0, progress: 0 };
+                     const stats = seriesStats[item.id] || { total: 0, qCount: 0, attempted: 0, progress: 0, avgTime: 0 };
                      return (
                         <motion.div 
                           key={item.id} 
                           whileHover={{ y: -8 }}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.4, delay: idx * 0.05 }}
                         >
                            <Link href={`/subjects/${subjectId}/series/${item.id}`}>
@@ -282,7 +282,7 @@ export default function SubjectDetailPortal() {
                                     <div className="grid grid-cols-2 gap-4">
                                        <SeriesStat icon={Zap} label="Tests" val={stats.total} />
                                        <SeriesStat icon={Layers} label="Questions" val={stats.qCount} />
-                                       <SeriesStat icon={Timer} label="Avg Time" val="120m" />
+                                       <SeriesStat icon={Timer} label="Avg time" val={stats.avgTime > 0 ? `${stats.avgTime}m` : "Self"} />
                                        <SeriesStat icon={CheckCircle2} label="Solved" val={stats.attempted} color={stats.attempted > 0 ? "text-emerald-600" : ""} />
                                     </div>
                                  </div>
@@ -309,7 +309,10 @@ export default function SubjectDetailPortal() {
                   })}
                </div>
             ) : (
-               <EmptyState title="No series available" sub="This hub is being populated by our audit team. Please check back later." />
+               <div className="py-24 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100 flex flex-col items-center gap-6 opacity-30">
+                  <Layers className="h-16 w-16 text-slate-300" />
+                  <p className="text-xl font-bold uppercase tracking-widest text-slate-400">No series available</p>
+               </div>
             )}
          </section>
       </main>
@@ -323,11 +326,11 @@ export default function SubjectDetailPortal() {
 function StatsChip({ label, val, highlight }: { label: string, val: string | number, highlight?: boolean }) {
    return (
       <div className={cn(
-         "px-4 py-2 rounded-xl flex flex-col items-center justify-center text-center shadow-sm border transition-all",
+         "px-2 md:px-4 py-2 rounded-xl flex flex-col items-center justify-center text-center shadow-sm border transition-all flex-1 md:flex-none max-w-[80px] md:max-w-none",
          highlight ? "bg-primary border-primary text-white shadow-xl shadow-primary/20" : "bg-white border-slate-100 text-[#0F172A]"
       )}>
-         <span className="text-sm md:text-xl font-black leading-none tabular-nums">{val}</span>
-         <span className={cn("text-[7px] md:text-[8px] font-bold uppercase tracking-wider mt-1 opacity-60", highlight && "opacity-80")}>{label}</span>
+         <span className="text-sm md:text-xl font-black leading-none tabular-nums truncate w-full">{val}</span>
+         <span className={cn("text-[6px] md:text-[8px] font-bold uppercase tracking-wider mt-1 opacity-60", highlight && "opacity-80")}>{label}</span>
       </div>
    )
 }
@@ -344,29 +347,4 @@ function SeriesStat({ icon: Icon, label, val, color }: any) {
          </div>
       </div>
    )
-}
-
-function EmptyState({ title, sub }: { title: string, sub: string }) {
-  return (
-    <div className="py-24 md:py-40 flex flex-col items-center justify-center text-center space-y-10 bg-white rounded-[4rem] border border-slate-100 shadow-2xl mx-1 animate-in zoom-in-95 duration-700 relative overflow-hidden w-full max-w-4xl mx-auto">
-       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
-       <div className="relative">
-          <div className="h-32 w-32 md:h-44 md:w-44 bg-slate-50 rounded-[3rem] md:rounded-[4rem] flex items-center justify-center text-slate-200 border-2 border-dashed border-slate-200 relative z-10">
-             <Layers className="h-12 w-12 md:h-20 md:w-20" />
-          </div>
-          <div className="absolute -bottom-2 -right-2 h-12 w-12 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-slate-100 z-20">
-             <AlertCircle className="h-6 w-6 text-primary animate-pulse" />
-          </div>
-       </div>
-       <div className="space-y-4 max-w-sm px-6 relative z-10">
-          <h3 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tight uppercase leading-none">{title}</h3>
-          <p className="text-slate-400 font-bold text-sm md:text-lg tracking-tight leading-relaxed">{sub}</p>
-       </div>
-       <div className="relative z-10 pt-4">
-          <Button asChild className="h-14 px-10 bg-[#0F172A] text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none active:scale-95 transition-all">
-             <Link href="/exams">Return to exam vault</Link>
-          </Button>
-       </div>
-    </div>
-  );
 }
