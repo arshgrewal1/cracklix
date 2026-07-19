@@ -62,8 +62,9 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview World-Class Institutional Result Card v2.4.
- * FIXED: Removed all uppercase styling for premium Sentence case presentation.
+ * @fileOverview World-Class Institutional Result Card v2.5.
+ * FIXED: Added pb-12 to containers to prevent footer clipping in PDF.
+ * UPDATED: Optimized for minimal PDF size.
  */
 export default function ResultCard({
   studentName,
@@ -97,12 +98,12 @@ export default function ResultCard({
   const grade = getGrade(Number(accuracy) || 0);
 
   return (
-    <div className="flex flex-col gap-0 bg-slate-100">
+    <div className="flex flex-col gap-0 bg-slate-100 pb-20">
       
       {/* PAGE 1: OFFICIAL RESULT SUMMARY */}
       <div 
         id="cracklix-result-page-1"
-        className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl"
+        className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl pb-12"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A]" />
@@ -169,7 +170,7 @@ export default function ResultCard({
                  <p className="text-3xl font-black tracking-tight">Cracklix Authority</p>
               </div>
               <div className="flex flex-col gap-2">
-                 <p className="text-slate-500 text-sm font-bold tracking-widest">Registry ID: {resultId}</p>
+                 <p className="text-slate-500 text-sm font-bold tracking-widest">Registry ID: {resultId.slice(0, 16)}...</p>
                  <p className="text-slate-500 text-sm font-bold tracking-widest">Verification entry: WWW.CRACKLIX.COM</p>
               </div>
            </div>
@@ -190,12 +191,12 @@ export default function ResultCard({
       {/* PAGE 2: DETAILED ANALYTICS REPORT */}
       <div 
         id="cracklix-result-page-2"
-        className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl"
+        className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl pb-12"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A]" />
         
-        <div className="px-20 pt-16 space-y-12">
+        <div className="px-20 pt-16 space-y-12 flex-1">
            <div className="flex justify-between items-end border-b-4 border-slate-100 pb-10">
               <div className="space-y-3">
                  <h2 className="text-5xl font-black tracking-tighter text-[#0F172A]">Performance audit</h2>
@@ -285,7 +286,7 @@ export default function ResultCard({
            </div>
         </div>
 
-        <div className="mt-auto border-t-2 border-slate-100 p-16 flex items-center justify-between text-slate-300">
+        <div className="mt-auto border-t-2 border-slate-100 p-16 flex items-center justify-between text-slate-300 shrink-0">
            <div className="flex items-center gap-4">
               <ShieldCheck className="h-8 w-8" />
               <span className="text-[12px] font-black tracking-[0.5em]">Institutional merit registry verified</span>

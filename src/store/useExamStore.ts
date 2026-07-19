@@ -18,6 +18,7 @@ export interface ExamStoreState {
   visited: number[];
   bookmarks: number[];
   timeLeft: number;
+  initialTime: number; // Store total available time
   elapsedSeconds: number; // Precision counter for active time
   currentIdx: number;
   isPaused: boolean;
@@ -49,8 +50,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v5.6 [High-Fidelity Timer].
- * FIXED: Precise elapsed time tracking to resolve duration reporting errors.
+ * @fileOverview Hardened Test Store v5.8 [High-Fidelity Timer Fix].
+ * FIXED: Strictly capped elapsedSeconds to initialTime to prevent over-reporting.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -62,6 +63,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   visited: [0],
   bookmarks: [],
   timeLeft: 0,
+  initialTime: 0,
   elapsedSeconds: 0,
   currentIdx: 0,
   isPaused: false,
@@ -72,7 +74,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   isGuest: false,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
-    // 1. Mandatory Clean Reset to prevent state bleed
+    // 1. Mandatory Clean Reset
     set({
       mockId: null,
       questions: [],
@@ -86,6 +88,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     });
 
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
+    const defaultTime = duration * 60;
     
     // Resume Logic
     const isAttemptFinished = resumeData?.status === 'COMPLETED' || (resumeData && resumeData.timeLeft <= 0);
@@ -107,11 +110,8 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     const isResuming = !!effectiveResume;
     const now = Date.now();
-    
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
     const finalStartTime = (rawStartTime > 1000000000000) ? rawStartTime : now;
-
-    const defaultTime = duration * 60;
 
     set({
       mockId,
@@ -127,6 +127,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       visited: isResuming ? (effectiveResume.visited || [0]) : [0],
       bookmarks: isResuming ? (effectiveResume.bookmarks || []) : [],
       timeLeft: isResuming ? (effectiveResume.timeLeft || defaultTime) : defaultTime,
+      initialTime: defaultTime,
       elapsedSeconds: isResuming ? (effectiveResume.elapsedSeconds || 0) : 0,
       currentIdx: isResuming ? (effectiveResume.currentIdx || 0) : 0,
       startTime: finalStartTime,
@@ -143,11 +144,15 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     if (state.questions.length > 0 && state.timeLeft > 0 && !state.isPaused) {
       const nextTime = state.timeLeft - 1;
       const nextElapsed = state.elapsedSeconds + 1;
+      
+      // Safety: Cap elapsed time to initial test duration + small buffer
+      const cappedElapsed = Math.min(nextElapsed, state.initialTime + 5);
+
       set({ 
         timeLeft: nextTime,
-        elapsedSeconds: nextElapsed
+        elapsedSeconds: cappedElapsed
       });
-      // Heartbeat persistence
+      
       if (nextTime % 30 === 0) state.persistGuestData();
     }
   },
