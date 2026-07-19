@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -34,9 +35,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Exam Selection Hub v5.6.
- * UPDATED: Simplified language - replaced "registry," "boards," and "trending" with easy words.
- * UPDATED: Removed all uppercase styling.
+ * @fileOverview Premium Exam Selection Hub v5.7.
+ * UPDATED: Refined headline copy for better clarity.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -141,7 +141,7 @@ export default function ExamsEntryPage() {
               </div>
               <h1 className="text-[32px] sm:text-6xl lg:text-[72px] font-black tracking-tighter leading-[1.05] text-[#0F172A] antialiased">
                 Find your <br className="hidden md:block"/>
-                <span className="text-primary">Exam preparation portal.</span>
+                <span className="text-primary">target exam.</span>
               </h1>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl leading-relaxed tracking-tight">
                 Select your target board or exam vertical to begin practicing with Punjab's most accurate mock tests.
@@ -386,5 +386,4 @@ function ValueNode({ icon: Icon, title, desc }: any) {
             <p className="text-[10px] md:text-xs font-medium text-slate-400 leading-snug">{desc}</p>
          </div>
       </div>
-   )
 }
