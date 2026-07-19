@@ -7,7 +7,7 @@ import Logo from '@/components/brand/Logo';
 
 /**
  * Cracklix Admin Sidebar Header v70.0.
- * UPDATED: Increased logo size side-by-side with toggle.
+ * UPDATED: Standardized logo size to match header.
  */
 export default function SidebarHeader({
   isOpen,
@@ -40,7 +40,7 @@ export default function SidebarHeader({
             variant="light"
             align="left"
             className="transition-all"
-            imgClassName="h-18 md:h-26 w-auto"
+            imgClassName="h-20 md:h-36 w-auto"
           />
         )}
       </div>

@@ -16,7 +16,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
  * @fileOverview Admin Layout v47.0.
- * UPDATED: Increased logo size next to the sidebar toggle.
+ * UPDATED: Standardized logo size to match header.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -130,7 +130,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   variant="light" 
                   href="/admin"
                   className="flex-shrink-0" 
-                  imgClassName="h-18 md:h-28 w-auto"
+                  imgClassName="h-20 md:h-36 w-auto"
                   align="left"
                 />
               </div>

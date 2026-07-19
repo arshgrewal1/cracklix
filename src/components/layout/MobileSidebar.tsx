@@ -34,7 +34,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
  * @fileOverview Mobile Sidebar v78.0.
- * UPDATED: Increased header logo size to match new bold PWA standard.
+ * UPDATED: Standardized logo size to match header.
  */
 export default function MobileSidebar({
   onClose,
@@ -92,7 +92,7 @@ export default function MobileSidebar({
            variant="light"
            align="center"
            className="flex-shrink-0"
-           imgClassName="h-28 md:h-48 w-auto"
+           imgClassName="h-20 md:h-36 w-auto"
            onClick={onClose}
          />
          <button
