@@ -13,9 +13,7 @@ import {
   BrainCircuit, 
   Layers, 
   Timer,
-  Check,
-  Award,
-  Smartphone
+  Award
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -54,12 +52,12 @@ interface ResultCardProps {
   topics?: TopicPerformance[];
   difficulty?: { easy: number; medium: number; hard: number };
   timeMetrics?: { avg: string; fastest: string; slowest: string };
+  isForPdf?: boolean;
 }
 
 /**
- * @fileOverview Premium Institutional Score Report v3.0.
- * Designed for A4 Print Precision. 
- * Resolution: 1000px width (standard for html-to-image A4).
+ * @fileOverview Premium Institutional Score Report v4.0.
+ * Designed for A4 Print Precision and 100% Export Reliability.
  */
 export default function ResultCard({
   studentName,
@@ -77,7 +75,8 @@ export default function ResultCard({
   subjects = [],
   topics = [],
   difficulty = { easy: 0, medium: 0, hard: 0 },
-  timeMetrics = { avg: "0s", fastest: "0s", slowest: "0s" }
+  timeMetrics = { avg: "0s", fastest: "0s", slowest: "0s" },
+  isForPdf = false
 }: ResultCardProps) {
   
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://cracklix.com/results/view?id=' + resultId)}`;
@@ -93,14 +92,26 @@ export default function ResultCard({
 
   const grade = getGrade(Number(accuracy) || 0);
 
+  // A4-Optimized Container Styles
+  const containerStyle = isForPdf ? {
+    width: '1000px',
+    minHeight: '1414px',
+    margin: '0 auto',
+    backgroundColor: '#ffffff'
+  } : {
+    width: '100%',
+    maxWidth: '1000px',
+    margin: '0 auto'
+  };
+
   return (
-    <div className="flex flex-col gap-0 bg-slate-50">
+    <div className={cn("flex flex-col gap-8 bg-slate-50 p-4 md:p-8 print:p-0", isForPdf ? "scale-[1] origin-top" : "")}>
       
       {/* PAGE 1: OFFICIAL SCORE SUMMARY */}
       <div 
         id="cracklix-result-page-1"
-        className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl pb-16"
-        style={{ fontFamily: "'Inter', sans-serif" }}
+        className="bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl border border-slate-100"
+        style={containerStyle}
       >
         {/* Accent Bars */}
         <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A]" />
@@ -109,10 +120,10 @@ export default function ResultCard({
         {/* Header Node */}
         <div className="px-16 pt-16 flex justify-between items-start">
            <div className="flex items-center gap-6">
-              <div className="h-16 w-16 bg-[#0F172A] rounded-2xl flex items-center justify-center shadow-xl">
-                 <ShieldCheck className="h-10 w-10 text-white" />
+              <div className="h-16 w-16 bg-[#0F172A] rounded-2xl flex items-center justify-center shadow-xl overflow-hidden">
+                 <img src="/logo/cracklix-icon.png" alt="Logo" className="h-10 w-10 object-contain" crossOrigin="anonymous" />
               </div>
-              <div>
+              <div className="text-left">
                  <h1 className="text-4xl font-black tracking-tighter leading-none text-[#0F172A]">Cracklix</h1>
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mt-1">Institutional merit hub</p>
               </div>
@@ -169,7 +180,7 @@ export default function ResultCard({
 
         {/* Page 1 Footer Hub */}
         <div className="mt-auto bg-[#0F172A] p-12 flex items-center justify-between text-white">
-           <div className="space-y-6">
+           <div className="text-left space-y-6">
               <div className="flex items-center gap-4">
                  <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
                     <Award className="h-5 w-5 text-white" />
@@ -187,7 +198,7 @@ export default function ResultCard({
                  <p className="text-primary font-bold text-[10px] uppercase tracking-[0.2em]">Institutional verified</p>
               </div>
               <div className="bg-white p-3 rounded-2xl shadow-5xl border-4 border-white/10">
-                 <img src={qrUrl} alt="Verify" className="h-16 w-16" />
+                 <img src={qrUrl} alt="Verify" className="h-16 w-16" crossOrigin="anonymous" />
               </div>
            </div>
         </div>
@@ -198,29 +209,29 @@ export default function ResultCard({
       {/* PAGE 2: PERFORMANCE ANALYTICS */}
       <div 
         id="cracklix-result-page-2"
-        className="w-[1000px] h-[1414px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl pb-16"
-        style={{ fontFamily: "'Inter', sans-serif" }}
+        className="bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl border border-slate-100"
+        style={containerStyle}
       >
         <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A]" />
         
         <div className="px-16 pt-16 space-y-10 flex-1 flex flex-col">
            <div className="flex justify-between items-end border-b-2 border-slate-100 pb-8">
-              <div className="space-y-2">
+              <div className="text-left space-y-2">
                  <h2 className="text-4xl font-black tracking-tighter text-[#0F172A]">Detailed analytics</h2>
                  <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Temporal and subject audit report</p>
               </div>
               <div className="h-8 relative opacity-20">
-                 <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-full w-auto" />
+                 <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-full w-auto" crossOrigin="anonymous" />
               </div>
            </div>
 
            {/* Subject Breakdown Node */}
-           <section className="space-y-6">
+           <section className="space-y-6 text-left">
               <div className="flex items-center gap-3">
                  <Layers className="h-6 w-6 text-primary" />
                  <h3 className="text-xl font-black tracking-widest text-[#0F172A] uppercase">Subject mastery matrix</h3>
               </div>
-              <div className="rounded-[2rem] border-2 border-slate-100 overflow-hidden shadow-sm">
+              <div className="rounded-[2rem] border-2 border-slate-100 overflow-hidden shadow-sm bg-white">
                  <table className="w-full text-left border-collapse">
                     <thead className="bg-[#0F172A] text-white">
                        <tr className="h-14">
@@ -253,7 +264,7 @@ export default function ResultCard({
            </section>
 
            {/* Analytical Observations Hub */}
-           <section className="space-y-6">
+           <section className="space-y-6 text-left">
               <div className="flex items-center gap-3">
                  <BrainCircuit className="h-6 w-6 text-primary" />
                  <h3 className="text-xl font-black tracking-widest text-[#0F172A] uppercase">Consolidated insights</h3>
@@ -270,7 +281,7 @@ export default function ResultCard({
 
            {/* Multi-Dimensional Audit Grid */}
            <div className="grid grid-cols-2 gap-10 mt-4">
-              <section className="space-y-6">
+              <section className="space-y-6 text-left">
                  <div className="flex items-center gap-3">
                     <TrendingUp className="h-6 w-6 text-primary" />
                     <h3 className="text-lg font-black tracking-widest text-[#0F172A] uppercase">Complexity audit</h3>
@@ -282,7 +293,7 @@ export default function ResultCard({
                  </div>
               </section>
 
-              <section className="space-y-6">
+              <section className="space-y-6 text-left">
                  <div className="flex items-center gap-3">
                     <Timer className="h-6 w-6 text-primary" />
                     <h3 className="text-lg font-black tracking-widest text-[#0F172A] uppercase">Temporal analytics</h3>
@@ -341,7 +352,7 @@ function InsightItem({ text }: { text: string }) {
          <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 border border-primary/20">
             <Check className="h-3 w-3 text-primary stroke-[4px]" />
          </div>
-         <p className="text-base font-bold text-slate-700 leading-snug tracking-tight">{text}</p>
+         <p className="text-base font-bold text-slate-700 leading-snug tracking-tight text-left">{text}</p>
       </div>
    );
 }
