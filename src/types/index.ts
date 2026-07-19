@@ -35,12 +35,6 @@ export interface MatchingData {
   rows: MatchingRow[];
 }
 
-export interface MatchingData {
-  leftHeader: string;
-  rightHeader: string;
-  rows: MatchingRow[];
-}
-
 export interface Advertisement {
   id: string;
   title: string;
@@ -274,6 +268,7 @@ export interface Question {
   examId?: string;
   boardId?: string;
   subjectId: string;
+  sectionId?: string; // Metadata for CBT grouping
   chapterId?: string;
   topicId?: string;
   subtopicId?: string;

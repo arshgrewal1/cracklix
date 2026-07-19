@@ -29,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v8.4.
- * FIXED: Resilient hydration now searches mcqBank, questions, and usedQuestions archive.
+ * @fileOverview Official Mock Attempt Hub v8.5.
+ * FIXED: Enriched question nodes with section names to display correct subject labels in tabs and palette.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -183,8 +183,28 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          });
       }
 
-      const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
-      if (sortedQs.length === 0) throw new Error("Question sync failure.");
+      // Enrichment Logic: Associate questions with their parent section names
+      const sectionsConfig = mData.sections || [{ name: 'General', count: questionIds.length }];
+      const enrichedQuestions: any[] = [];
+      let qPointer = 0;
+
+      sectionsConfig.forEach((sec: any) => {
+        const count = Number(sec.count) || 0;
+        const sectionQIds = questionIds.slice(qPointer, qPointer + count);
+        qPointer += count;
+
+        sectionQIds.forEach(id => {
+          const qNode = fetchedQuestions.find(fq => fq.id === id);
+          if (qNode) {
+            enrichedQuestions.push({
+              ...qNode,
+              sectionId: sec.name // Injecting correct subject name
+            });
+          }
+        });
+      });
+
+      if (enrichedQuestions.length === 0) throw new Error("Question sync failure.");
 
       let resumeData = null;
       if (user && !isRetakeRequested) {
@@ -199,7 +219,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          }
       }
 
-      initExam(mockId, mData.title || "Cracklix Test", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
+      initExam(mockId, mData.title || "Cracklix Test", user?.uid || null, enrichedQuestions, mData.duration || 120, resumeData, mData.languageMode);
       startSession(); 
       setIsInitializing(false);
       
