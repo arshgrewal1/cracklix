@@ -3,6 +3,8 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Link from "next/link"
+import Navbar from "@/components/layout/Navbar"
+import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
 import { 
   collection, 
@@ -37,7 +39,8 @@ import {
   Check,
   FileText,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  List
 } from "lucide-react"
 import { 
   Card, 
@@ -58,7 +61,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
  * @fileOverview Premium Assessment Hub Client v8.0.
- * FIXED: 100% reliable PDF generation by making the report visible and waiting for hydration.
+ * FIXED: Added missing Navbar and Footer imports to resolve runtime errors.
  */
 
 export default function ResultClient() {
