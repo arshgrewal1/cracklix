@@ -35,7 +35,8 @@ import {
   Activity,
   Newspaper,
   Loader2,
-  Users
+  Users,
+  Timer
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -45,7 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v6.3.
+ * @fileOverview Premium Exam Detail Hub v6.5.
+ * FIXED: Added missing Timer icon import.
  * FIXED: Removed overlapping watermark icons and simplified text labels.
  */
 
@@ -54,7 +56,7 @@ export default function ExamHubClient() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const toast = useToast().toast
+  const { toast } = useToast()
   const { user, profile, loading: userLoading } = useUser()
 
   const [mounted, setMounted] = useState(false);
