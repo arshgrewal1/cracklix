@@ -6,8 +6,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v73.0.
- * UPDATED: Logo positioned exactly to the right of the sidebar toggle with 0 gap.
+ * Cracklix Admin Sidebar Header v74.0.
+ * UPDATED: Logo positioned exactly to the right of the sidebar toggle with 0 gap and 0 space.
  */
 export default function SidebarHeader({
   isOpen,
@@ -39,7 +39,7 @@ export default function SidebarHeader({
             href="/admin"
             variant="light"
             align="left"
-            className="transition-all"
+            className="transition-all ml-0 p-0"
             imgClassName="h-24 md:h-44 w-auto"
           />
         )}

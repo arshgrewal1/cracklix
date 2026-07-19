@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v51.0.
- * UPDATED: Logo positioned exactly to the right of the toggle with 0 gap.
+ * @fileOverview Admin Layout v52.0.
+ * UPDATED: Logo positioned exactly to the right of the toggle with 0 gap and 0 space.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -134,7 +134,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   align="left"
                 />
               </div>
-              <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-2 uppercase tracking-[0.2em]">
+              <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-0 uppercase tracking-[0.2em]">
                  Admin Hub
               </p>
             </div>
