@@ -299,7 +299,7 @@ export default function ResultClient() {
     try {
       await new Promise(resolve => setTimeout(resolve, 500)); // Delay to ensure tab transition
       
-      const { jsPDF } = await import('jspdf');
+      const { jsPDF } = await import('jsPDF');
       const { toCanvas } = await import('html-to-image');
       
       // Ensure everything is ready
@@ -664,3 +664,4 @@ function ReviewStatusPill({ userAns, correctAns }: any) {
      ? <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest uppercase">Correct</Badge>
      : <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest uppercase">Incorrect</Badge>;
 }
+
