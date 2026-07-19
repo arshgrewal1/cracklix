@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState } from "react"
@@ -14,7 +15,8 @@ import {
   ShieldCheck, 
   Layers, 
   Search,
-  BookMarked
+  BookMarked,
+  AlertCircle
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -26,8 +28,8 @@ import Image from "next/image"
 import { Subject } from "@/types"
 
 /**
- * @fileOverview Level 1: Subject Selection Hub v1.2.
- * UPDATED: Replaced technical empty state with "No test" / "Free coming soon".
+ * @fileOverview Level 1: Subject Selection Hub v1.3.
+ * UPDATED: Standardized 'Coming Soon' notice for empty registry states.
  */
 
 export default function SubjectsPage() {
@@ -161,14 +163,19 @@ export default function SubjectsPage() {
                  </motion.div>
               )
            }) : (
-              <div className="col-span-full py-40 text-center space-y-6 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 opacity-30">
-                 <Layers className="h-20 w-20 mx-auto text-slate-300" />
-                 <p className="font-black text-2xl uppercase tracking-widest">No test</p>
-                 <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Free coming soon</p>
+              <div className="col-span-full py-40 text-center space-y-6 bg-white rounded-[3rem] border-2 border-dashed border-slate-200 shadow-inner flex flex-col items-center justify-center">
+                 <div className="h-20 w-20 bg-blue-50 rounded-3xl flex items-center justify-center text-primary">
+                    <Zap className="h-10 w-10 animate-pulse" />
+                 </div>
+                 <div className="space-y-2">
+                    <p className="font-black text-2xl uppercase tracking-widest text-[#0F172A]">Coming Soon</p>
+                    <p className="text-primary font-black text-[10px] uppercase tracking-[0.3em]">Mock available nahi hai</p>
+                 </div>
               </div>
            )}
         </div>
       </main>
+
       <Footer />
     </div>
   )

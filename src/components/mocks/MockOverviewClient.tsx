@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -24,7 +25,8 @@ import {
   CheckCircle2,
   ArrowRight,
   AlertCircle,
-  BarChart3
+  BarChart3,
+  Home
 } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -33,8 +35,8 @@ import { cn } from "@/lib/utils"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client v4.3.
- * FIXED: Detects already completed tests and provides "View Analysis" option.
+ * @fileOverview Universal Mock Overview Hub Client v4.4.
+ * UPDATED: Integrated standardized 'Coming Soon' notice for missing nodes.
  */
 
 export default function MockOverviewClient() {
@@ -100,19 +102,31 @@ export default function MockOverviewClient() {
   );
 
   if (!mockId || (!mock && !mockLoading)) return (
-    <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
-       <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center text-primary shadow-xl border border-blue-100">
-          <AlertCircle className="h-8 w-8" />
-       </div>
-       <div className="space-y-2">
-          <h2 className="text-2xl font-black text-[#0F172A]">Mock available nahi hai</h2>
-          <p className="text-slate-500 font-medium max-w-xs mx-auto">
-             Coming Soon: This test is being prepared for the database.
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center font-body">
+      <div className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-16 shadow-5xl border border-slate-100 space-y-10">
+        <div className="relative mx-auto w-24 h-24">
+           <div className="h-24 w-24 bg-blue-50 rounded-[2rem] flex items-center justify-center text-primary shadow-inner border border-blue-100">
+              <Zap className="h-10 w-10 animate-pulse" />
+           </div>
+           <div className="absolute -bottom-2 -right-2 h-10 w-10 bg-[#0F172A] rounded-xl flex items-center justify-center text-white shadow-2xl border-4 border-white">
+              <AlertCircle className="h-5 w-5 text-primary" />
+           </div>
+        </div>
+
+        <div className="space-y-3">
+          <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter uppercase leading-none">Coming Soon</h1>
+          <p className="text-primary font-black text-[10px] md:text-xs uppercase tracking-[0.3em]">Mock available nahi hai</p>
+          <p className="text-slate-500 font-medium leading-relaxed pt-4">
+            This preparation node is currently being updated with the latest official patterns. Please check back later.
           </p>
-       </div>
-       <div className="flex flex-col gap-3">
-          <Button onClick={() => router.back()} variant="outline" className="rounded-xl h-12 px-8">Return back</Button>
-       </div>
+        </div>
+
+        <div className="pt-4">
+           <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-3xl border-none transition-all active:scale-95">
+              <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to Hub</Link>
+           </Button>
+        </div>
+      </div>
     </div>
   );
 
