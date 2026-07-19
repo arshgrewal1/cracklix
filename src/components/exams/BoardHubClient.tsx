@@ -21,9 +21,8 @@ interface BoardHubClientProps {
 }
 
 /**
- * @fileOverview Premium Board Hub Portal v5.5.
- * UPDATED: Simplified language - replaced "registry hub" with "view tests."
- * UPDATED: Removed all uppercase styling.
+ * @fileOverview Premium Board Hub Portal v5.6.
+ * FIXED: Reduced card title font size to prevent text cutoff on long titles.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
@@ -78,7 +77,7 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
   if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden w-full">
       <Navbar />
       
       {/* 1. PREMIUM RECRUITMENT HERO */}
@@ -143,7 +142,7 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
                              </div>
                              
                              <div className="space-y-6 flex-1 text-left relative z-10">
-                                <h3 className="text-xl md:text-[32px] font-black text-[#0F172A] leading-[1.1] group-hover:text-primary transition-colors tracking-tight">{exam.name}</h3>
+                                <h3 className="text-xl md:text-2xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tight line-clamp-2 break-words uppercase">{exam.name}</h3>
                                 
                                 <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-50">
                                    <MetricPlate icon={Zap} label="Mocks" val={s.mocks || "New"} />

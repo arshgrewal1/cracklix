@@ -46,9 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v6.6.
- * FIXED: Added missing Timer icon import to resolve ReferenceError.
- * FIXED: Removed overlapping watermark icons and simplified text labels.
+ * @fileOverview Premium Exam Detail Hub v6.7.
+ * FIXED: Refined hero title scaling to prevent visual dominance on large screens.
  */
 
 export default function ExamHubClient() {
@@ -171,7 +170,7 @@ export default function ExamHubClient() {
                     </div>
                   </div>
                   <div className="space-y-4 text-center md:text-left flex-1 min-w-0">
-                    <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-[800] tracking-tight leading-[1.1] text-[#0F172A] antialiased break-words">
+                    <h1 className="text-2xl sm:text-4xl md:text-5xl font-[800] tracking-tight leading-[1.1] text-[#0F172A] antialiased break-words">
                        {exam.name} <br className="hidden md:block" /> <span className="text-primary italic">Preparation hub.</span>
                     </h1>
                     <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl line-clamp-2">
