@@ -17,6 +17,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 /**
  * @fileOverview Admin Layout v72.0.
  * FIXED: Removed all gaps and margins between Menu icon and Logo for an integrated "attached" look.
+ * UPDATED: Reduced logo size.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -117,7 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
           isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
         )}>
-          <header className="h-24 md:h-36 border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
+          <header className="h-20 md:h-24 border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
             {/* LEFT BLOCK: TOGGLE + LOGO (TIGHT ALIGNMENT - ZERO GAP) */}
             <div className="flex items-center shrink-0 h-full">
               <button 
@@ -129,8 +130,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Logo 
                 variant="light" 
                 href="/admin"
-                className="flex-shrink-0 p-0 h-full -ml-2" 
-                imgClassName="h-28 md:h-48 w-auto"
+                className="flex-shrink-0 p-0 h-full" 
+                imgClassName="h-10 md:h-14 w-auto"
                 align="left"
               />
             </div>
