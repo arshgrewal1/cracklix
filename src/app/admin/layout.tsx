@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v44.0.
- * UPDATED: Reduced desktop logo height and repositioned it to the right of menu.
+ * @fileOverview Admin Layout v45.0.
+ * UPDATED: Repositioned header logo to the right of toggle button.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -79,7 +79,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const isGlobalLoading = !mounted || loading || (user && !profile && profileLoading);
 
-  // PREVENT SSR CRASH: Do not render interactive shell until mounted
   if (!mounted) return (
     <div className="h-screen w-full bg-white flex items-center justify-center">
        <Loader2 className="h-10 w-10 text-primary animate-spin" />
@@ -119,10 +118,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
         )}>
           <header className="h-[80px] md:h-[110px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
-            <div className="flex items-center gap-0">
+            <div className="flex items-center gap-2">
               <button 
                 onClick={toggleSidebar}
-                className="lg:hidden bg-white border border-slate-200 h-10 w-10 rounded-xl flex items-center justify-center shrink-0 active:scale-95 mr-0"
+                className="lg:hidden bg-white border border-slate-200 h-10 w-10 rounded-xl flex items-center justify-center shrink-0 active:scale-95"
               >
                 <Menu className="w-5 h-5" />
               </button>
@@ -130,12 +129,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Logo 
                   variant="light" 
                   href="/admin"
-                  className="flex-shrink-0 -ml-4 md:ml-2" 
+                  className="flex-shrink-0" 
                   imgClassName="h-20 md:h-28 w-auto"
                   align="left"
                 />
               </div>
-              <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-4 uppercase tracking-[0.2em]">
+              <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-2 uppercase tracking-[0.2em]">
                  Admin Hub
               </p>
             </div>

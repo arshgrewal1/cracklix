@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v90.0.
- * UPDATED: Reduced desktop logo size and repositioned it exact right to the menu.
+ * @fileOverview Cracklix Navigation Hub v91.0.
+ * UPDATED: Repositioned logo to sit immediately right of the menu trigger with gap-2.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -103,13 +103,13 @@ export default function Navbar() {
         <nav className="w-full h-20 lg:h-24 transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
-            {/* LEFT BLOCK: MENU | LOGO (EXACT RIGHT TO BURGER) */}
-            <div className="flex items-center gap-0 z-10">
+            {/* LEFT BLOCK: MENU | LOGO (IMMEDIATELY RIGHT OF BURGER) */}
+            <div className="flex items-center gap-2 z-10">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
                   <button
                     aria-label="Open menu"
-                    className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 cursor-pointer mr-0"
+                    className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 cursor-pointer"
                   >
                     <Menu className="w-5 h-5 md:w-6 md:h-6" />
                   </button>
@@ -125,8 +125,8 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-4 md:ml-2"
-                imgClassName="h-28 md:h-32 w-auto"
+                className="flex-shrink-0"
+                imgClassName="h-24 md:h-28 w-auto"
                 align="left"
               />
             </div>
