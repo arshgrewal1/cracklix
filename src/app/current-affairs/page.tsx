@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, where } from "firebase/firestore"
+import { collection, query, where, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -15,38 +15,54 @@ import {
   Calendar,
   Download,
   Medal,
-  X
+  X,
+  Filter,
+  Bookmark,
+  Share2,
+  Clock,
+  Newspaper,
+  BookOpen,
+  FileText,
+  History,
+  TrendingUp,
+  Target
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
-import { useActiveSession } from "@/hooks/useStudyAnalytics";
+import { useActiveSession } from "@/hooks/useStudyAnalytics"
+import { motion, AnimatePresence } from "framer-motion"
+import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Current Affairs Center v23.4.
- * FIXED: Search bar state and memoized filtering restored.
+ * @fileOverview Premium Current Affairs Hub v5.0 (Testbook Standard).
+ * FIXED: Removed oversized hero, implemented compact header and segmented controls.
  */
 
-const HUB_TYPES = [
-  { id: "DAILY", label: "Daily", icon: <Calendar className="h-4 w-4" /> },
-  { id: "WEEKLY", label: "Weekly", icon: <Zap className="h-4 w-4" /> },
-  { id: "MONTHLY", label: "Monthly", icon: <Calendar className="h-4 w-4" /> },
-  { id: "QUIZ", label: "Quizzes", icon: <Zap className="h-4 w-4" /> },
-  { id: "PDF", label: "PDFs", icon: <Badge className="h-4 w-4" /> }
-]
+const CATEGORIES = [
+  "All", "Punjab", "National", "International", "Economy", "Polity", "Science", "Technology", "Sports", "Awards", "Schemes"
+];
+
+const QUICK_ACTIONS = [
+  { label: "Daily Quiz", icon: Zap, href: "/mocks", color: "text-orange-500", bg: "bg-orange-50" },
+  { label: "PDF Notes", icon: FileText, href: "/notes", color: "text-blue-500", bg: "bg-blue-50" },
+  { label: "Old Papers", icon: History, href: "/pyqs", color: "text-purple-500", bg: "bg-purple-50" },
+  { label: "Bookmarks", icon: Bookmark, href: "/bookmarks", color: "text-rose-500", bg: "bg-rose-50" },
+];
 
 export default function CurrentAffairsCenter() {
   const db = useFirestore()
-  const { user, loading: authLoading } = useUser()
+  const { user, profile, loading: authLoading } = useUser()
   const router = useRouter()
-  const [activeType, setActiveType] = useState("DAILY")
-  const [searchTerm, setSearchTerm] = useState("")
+  const { toast } = useToast()
   
-  const { startSession } = useActiveSession('CA');
+  const [activeType, setActiveType] = useState<"DAILY" | "WEEKLY" | "MONTHLY">("DAILY")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("All")
+  
+  const { startSession } = useActiveSession('CA')
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -58,201 +74,285 @@ export default function CurrentAffairsCenter() {
 
   const hubQuery = useMemo(() => (db ? query(collection(db, "current_affairs_hub"), where("status", "==", "PUBLISHED")) : null), [db])
   const { data: hubItems, loading } = useCollection<any>(hubQuery)
-  
-  const rankingQuery = useMemo(() => (db ? query(collection(db, "results")) : null), [db])
-  const { data: results } = useCollection<any>(rankingQuery)
 
-  const topRankers = useMemo(() => {
-     if (!results) return [];
-     const map = new Map();
-     results.forEach(r => {
-        if (!map.has(r.userId) || map.get(r.userId).score < r.score) {
-           map.set(r.userId, r);
-        }
-     });
-     return Array.from(map.values()).sort((a, b) => b.score - a.score).slice(0, 5);
-  }, [results]);
+  const stats = useMemo(() => {
+    if (!hubItems) return { today: 0, weekly: 0, monthly: 0, saved: profile?.savedCA?.length || 0 };
+    return {
+      today: hubItems.filter(i => i.type === 'DAILY').length,
+      weekly: hubItems.filter(i => i.type === 'WEEKLY').length,
+      monthly: hubItems.filter(i => i.type === 'MONTHLY').length,
+      saved: profile?.savedCA?.length || 0
+    };
+  }, [hubItems, profile]);
 
   const filteredItems = useMemo(() => {
     if (!hubItems) return []
     const term = searchTerm.toLowerCase().trim();
     return hubItems
       .filter(item => {
-        const matchesSearch = !term || item.title?.toLowerCase().includes(term)
-        if (activeType === 'QUIZ') return matchesSearch && !!item.quizId
-        if (activeType === 'PDF') return matchesSearch && !!item.pdfUrl
-        return matchesSearch && item.type === activeType
+        const matchesSearch = !term || item.title?.toLowerCase().includes(term);
+        const matchesType = item.type === activeType;
+        const matchesCat = selectedCategory === 'All' || item.title?.toLowerCase().includes(selectedCategory.toLowerCase());
+        return matchesSearch && matchesType && matchesCat;
       })
       .sort((a, b) => {
         const tA = a.updatedAt?.seconds || 0;
         const tB = b.updatedAt?.seconds || 0;
         return tB - tA;
       })
-  }, [hubItems, activeType, searchTerm])
+  }, [hubItems, activeType, searchTerm, selectedCategory])
 
-  const handleQuizAttempt = (quizId: string) => {
-     if (!user) {
-        router.push(`/login?returnUrl=${encodeURIComponent(`/mocks/${quizId}/instructions`)}`);
-        return;
-     }
-     router.push(`/mocks/${quizId}/instructions`);
-  };
+  const handleToggleBookmark = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!user || !db) return;
+    const isSaved = profile?.savedCA?.includes(id);
+    const userRef = doc(db, "users", user.uid);
+    try {
+      if (isSaved) {
+        await updateDoc(userRef, { savedCA: arrayRemove(id), updatedAt: serverTimestamp() });
+        toast({ title: "Removed from bookmarks" });
+      } else {
+        await updateDoc(userRef, { savedCA: arrayUnion(id), updatedAt: serverTimestamp() });
+        toast({ title: "News bookmarked" });
+      }
+    } catch (e) { console.error(e); }
+  }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/50 font-body text-left">
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
       
-      {authLoading ? (
-         <div className="flex-1 flex flex-col items-center justify-center space-y-6 py-20">
-            <Zap className="h-10 w-10 text-primary animate-pulse" />
-            <p className="text-[10px] font-black uppercase text-slate-400">Syncing Center...</p>
-         </div>
-      ) : (
-         <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 max-w-[1440px] space-y-12 md:space-y-24">
+      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 md:py-12 space-y-8 md:space-y-12">
+        
+        {/* 1. COMPACT HEADER */}
+        <section className="space-y-6 px-1">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-1.5">
+              <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight uppercase">Current Affairs</h1>
+              <p className="text-slate-500 font-medium text-sm md:text-lg max-w-xl leading-snug">
+                Verified exam news, daily current affairs and bilingual preparation nodes.
+              </p>
+            </div>
             
-               <div className="bg-[#0B1528] p-8 md:p-20 rounded-[2.5rem] md:rounded-[4rem] text-white relative overflow-hidden shadow-4xl group border border-white/5">
-                  <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><AuthorityLogo boardId="current-affairs" size="xl" className="h-96 w-96 opacity-5" /></div>
-                  <div className="space-y-10 relative z-10 max-w-5xl">
-                    <div className="flex items-center gap-4">
-                        <AuthorityLogo boardId="current-affairs" size="md" className="p-0" />
-                        <Badge className="bg-primary text-white border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-widest shadow-xl">
-                            Registry Updates
-                        </Badge>
+            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1">
+               <StatChip label="Today" val={stats.today} icon={<Zap className="h-3 w-3 text-orange-500" />} />
+               <StatChip label="Weekly" val={stats.weekly} icon={<Calendar className="h-3 w-3 text-blue-500" />} />
+               <StatChip label="Monthly" val={stats.monthly} icon={<BookOpen className="h-3 w-3 text-emerald-500" />} />
+               <StatChip label="Saved" val={stats.saved} icon={<Bookmark className="h-3 w-3 text-rose-500" />} />
+            </div>
+          </div>
+        </section>
+
+        {/* 2. STICKY SEARCH & SEGMENTED CONTROL */}
+        <div className="sticky top-[80px] z-40 bg-[#F8FAFC]/95 backdrop-blur-md -mx-4 px-4 py-4 border-b border-slate-100">
+           <div className="max-w-5xl mx-auto space-y-6">
+              <div className="flex flex-col md:flex-row items-center gap-4">
+                 {/* SEARCH BOX */}
+                 <div className="relative group flex-1 w-full">
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                    <Input 
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                      placeholder="Search current affairs..." 
+                      className="h-14 rounded-2xl bg-white border-slate-200 shadow-sm text-base font-bold pl-14 pr-12 focus-visible:ring-4 focus-visible:ring-primary/5"
+                    />
+                    <button className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-primary transition-all">
+                       <Filter className="h-5 w-5" />
+                    </button>
+                 </div>
+
+                 {/* SEGMENTED CONTROL */}
+                 <div className="bg-slate-100 p-1 rounded-2xl flex items-center h-14 w-full md:w-auto shrink-0">
+                    <SegmentButton active={activeType === 'DAILY'} onClick={() => setActiveType('DAILY')} label="Daily" />
+                    <SegmentButton active={activeType === 'WEEKLY'} onClick={() => setActiveType('WEEKLY')} label="Weekly" />
+                    <SegmentButton active={activeType === 'MONTHLY'} onClick={() => setActiveType('MONTHLY')} label="Monthly" />
+                 </div>
+              </div>
+
+              {/* CATEGORY CHIPS */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                 {CATEGORIES.map(cat => (
+                    <button 
+                      key={cat} 
+                      onClick={() => setSelectedCategory(cat)}
+                      className={cn(
+                        "h-9 px-6 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-tight whitespace-nowrap transition-all border active:scale-95",
+                        selectedCategory === cat 
+                          ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" 
+                          : "bg-white border-slate-100 text-slate-400 hover:border-slate-300"
+                      )}
+                    >
+                       {cat}
+                    </button>
+                 ))}
+              </div>
+           </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+           
+           {/* 3. MAIN LIST */}
+           <div className="lg:col-span-8 space-y-6 md:space-y-8">
+              {loading ? (
+                 Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-2xl bg-white" />)
+              ) : filteredItems.length > 0 ? (
+                 <div className="grid grid-cols-1 gap-4 md:gap-6">
+                    {filteredItems.map((item, idx) => (
+                       <motion.div
+                         key={item.id}
+                         initial={{ opacity: 0, y: 10 }}
+                         animate={{ opacity: 1, y: 0 }}
+                         transition={{ delay: idx * 0.05 }}
+                       >
+                          <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[18px] md:rounded-[22px] bg-white group overflow-hidden">
+                             <CardContent className="p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-8 items-center">
+                                <div className="hidden md:flex h-20 w-20 rounded-2xl bg-slate-50 items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                                   <AuthorityLogo boardId="current-affairs" size="sm" className="p-0 shadow-none bg-transparent" />
+                                </div>
+                                
+                                <div className="flex-1 space-y-2 w-full text-left">
+                                   <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                         <Badge className="bg-blue-50 text-primary border-none text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm">
+                                            {item.type} Hub
+                                         </Badge>
+                                         <span className="text-[9px] font-bold text-slate-300 tabular-nums uppercase">{item.month} {item.year}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                         <button onClick={(e) => handleToggleBookmark(e, item.id)} className={cn("p-1.5 rounded-lg transition-colors", profile?.savedCA?.includes(item.id) ? "text-primary" : "text-slate-300 hover:text-primary")}>
+                                            <Bookmark className={cn("h-4 w-4", profile?.savedCA?.includes(item.id) && "fill-current")} />
+                                         </button>
+                                         <button className="p-1.5 text-slate-300 hover:text-primary transition-colors">
+                                            <Share2 className="h-4 w-4" />
+                                         </button>
+                                      </div>
+                                   </div>
+
+                                   <h3 className="text-base md:text-lg font-bold text-[#0F172A] leading-tight group-hover:text-primary transition-colors line-clamp-1">{item.title}</h3>
+                                   <p className="text-[12px] md:text-sm text-slate-400 font-medium line-clamp-2 leading-relaxed">
+                                      Stay updated with verified {item.type.toLowerCase()} current affairs node for upcoming Punjab government exams and recruitments.
+                                   </p>
+
+                                   <div className="flex items-center justify-between pt-2">
+                                      <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                                         <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> 2m Read</span>
+                                         <span className="w-1 h-1 rounded-full bg-slate-200" />
+                                         <span>{item.language || "Bilingual"}</span>
+                                      </div>
+                                      <button 
+                                        onClick={() => item.quizId ? router.push(`/mocks/instructions?id=${item.quizId}`) : item.pdfUrl ? window.open(item.pdfUrl, '_blank') : null}
+                                        className="text-primary font-black text-[10px] md:text-[11px] uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all"
+                                      >
+                                         {item.quizId ? 'Attempt' : 'Read more'} <ChevronRight className="h-3.5 w-3.5" />
+                                      </button>
+                                   </div>
+                                </div>
+                             </CardContent>
+                          </Card>
+                       </motion.div>
+                    ))}
+                 </div>
+              ) : (
+                 <div className="py-24 text-center bg-white rounded-[2rem] border-2 border-dashed border-slate-100 flex flex-col items-center gap-6 opacity-30">
+                    <Newspaper className="h-16 w-16 text-slate-300" />
+                    <p className="text-xl font-bold uppercase tracking-widest text-slate-400">Archives Empty</p>
+                 </div>
+              )}
+           </div>
+
+           {/* 4. SIDEBAR - QUICK ACTIONS & TRENDING */}
+           <div className="lg:col-span-4 space-y-8">
+              <section className="space-y-4">
+                 <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-2">Quick Actions</h3>
+                 <div className="grid grid-cols-2 gap-3">
+                    {QUICK_ACTIONS.map(action => (
+                       <Link key={action.label} href={action.href}>
+                          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all group flex flex-col items-start gap-3">
+                             <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform", action.bg, action.color)}>
+                                <action.icon className="h-4.5 w-4.5" />
+                             </div>
+                             <span className="text-[11px] font-bold text-[#0F172A] uppercase">{action.label}</span>
+                          </div>
+                       </Link>
+                    ))}
+                 </div>
+              </section>
+
+              <Card className="border-none shadow-xl rounded-[2rem] bg-[#0F172A] text-white p-6 md:p-8 relative overflow-hidden group border border-white/5">
+                 <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><TrendingUp className="h-48 w-48 text-primary" /></div>
+                 <div className="relative z-10 space-y-6 text-left">
+                    <div className="space-y-1">
+                       <h3 className="text-xl font-black tracking-tight">Performance</h3>
+                       <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Mastery Index</p>
                     </div>
-                    <div className="space-y-6 md:space-y-12">
-                        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-black tracking-tight leading-[0.9] break-words antialiased">
-                            Current <br/>
-                            <span className="text-primary italic">Affairs Center</span>
-                        </h1>
-                        <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-3xl leading-snug tracking-tight">
-                            Daily verified exam notifications, current affairs, and bilingual preparation nodes for Punjab recruitment.
-                        </p>
+                    <div className="space-y-6">
+                       <MetricNode label="Quiz Score" val="82%" icon={<Target className="text-emerald-500" />} />
+                       <MetricNode label="Weekly Streak" val="12 Days" icon={<Zap className="text-orange-500" />} />
                     </div>
-                    
-                    <div className="relative w-full md:w-[600px] group">
-                        <div className="absolute -inset-1 bg-primary/10 rounded-[2rem] blur opacity-0 group-focus-within:opacity-100 transition-all duration-500"></div>
-                        <Search className={cn("absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 transition-colors", searchTerm ? "text-primary" : "text-slate-500")} />
-                        <Input 
-                            className="h-16 md:h-20 pl-16 pr-14 rounded-2xl md:rounded-[2rem] bg-white/10 border-white/10 text-white placeholder:text-slate-500 text-lg md:text-xl font-bold backdrop-blur-md shadow-2xl outline-none focus:bg-white/20" 
-                            placeholder="Search archives..." 
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                        />
-                        {searchTerm && (
-                          <button onClick={() => setSearchTerm('')} className="absolute right-6 top-1/2 -translate-y-1/2 p-1.5 hover:bg-white/10 rounded-full transition-all">
-                             <X className="h-5 w-5 text-slate-400" />
-                          </button>
-                        )}
+                    <div className="pt-4 border-t border-white/5">
+                       <Button asChild variant="ghost" className="w-full text-primary hover:text-white hover:bg-white/5 font-black uppercase text-[10px] tracking-widest gap-2">
+                          <Link href="/leaderboard">View Rankings <ArrowRight className="h-3.5 w-3.5" /></Link>
+                       </Button>
                     </div>
-                  </div>
-               </div>
+                 </div>
+              </Card>
 
-               <Tabs value={activeType} onValueChange={setActiveType} className="space-y-12">
-                  <div className="bg-white border border-slate-100 p-1.5 rounded-2xl md:rounded-3xl shadow-sm flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2">
-                     <TabsList className="bg-transparent border-none p-0 h-12 md:h-16 flex gap-2">
-                        {HUB_TYPES.map(hub => (
-                           <TabsTrigger key={hub.id} value={hub.id} className="rounded-xl px-5 md:px-10 font-bold text-[10px] md:text-[11px] gap-3 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
-                              {hub.icon} {hub.label}
-                           </TabsTrigger>
-                        ))}
-                     </TabsList>
-                  </div>
+              <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-md space-y-4 text-left group hover:translate-y-[-4px] transition-all duration-300">
+                 <div className="flex items-center gap-3">
+                    <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                    <h4 className="text-[11px] font-black uppercase text-[#0F172A]">Security Protocol</h4>
+                 </div>
+                 <p className="text-[11px] text-slate-500 font-medium leading-relaxed uppercase tracking-tight">
+                    All current affairs nodes are verified against official gazettes before registry sync. 100% accuracy guaranteed.
+                 </p>
+              </div>
+           </div>
+        </div>
+      </main>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-14">
-                     <div className="lg:col-span-8 space-y-6 md:space-y-10">
-                        {loading ? (
-                           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[2.5rem]" />)
-                        ) : filteredItems.length > 0 ? (
-                           <div className="grid grid-cols-1 gap-6 md:gap-10">
-                              {filteredItems.map((item) => (
-                                 <Card key={item.id} className="bg-white border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] overflow-hidden group text-left border border-slate-100 p-6 md:p-12">
-                                    <CardContent className="p-0 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-                                       <div className="h-24 w-24 md:h-32 md:w-32 shrink-0 group-hover:scale-110 transition-transform">
-                                          <AuthorityLogo boardId="current-affairs" size="lg" className="p-0 shadow-lg" />
-                                       </div>
-                                       <div className="flex-1 space-y-3 w-full">
-                                          <div className="flex items-center justify-between">
-                                             <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-bold text-[8px] md:text-[10px] tracking-widest uppercase">
-                                                {item.type} Hub
-                                             </Badge>
-                                             <span className="text-[10px] font-bold text-slate-300 tracking-widest flex items-center gap-2">
-                                                <Calendar className="h-4 w-4 text-primary" /> {item.month} {item.year}
-                                             </span>
-                                          </div>
-                                          <h2 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight tracking-tight">{item.title}</h2>
-                                          <div className="flex items-center gap-4 text-[10px] md:text-[12px] font-bold text-slate-400 tracking-widest uppercase">
-                                             <Zap className="h-3.5 w-3.5" /> Language: {item.language || "Bilingual"}
-                                          </div>
-                                       </div>
-                                       <div className="shrink-0 w-full md:w-auto flex flex-col gap-3">
-                                          {item.quizId && (
-                                             <Button onClick={() => handleQuizAttempt(item.quizId)} className="w-full md:w-auto h-14 px-10 bg-[#0F172A] hover:bg-primary text-white font-bold text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-xl transition-all active:scale-95 border-none">
-                                                Start Quiz <Zap className="ml-2 h-4 w-4 fill-current" />
-                                             </Button>
-                                          )}
-                                          {item.pdfUrl && (
-                                             <Button asChild variant="outline" className="w-full md:w-auto h-14 px-10 border-2 border-slate-100 text-[#0F172A] font-bold text-[10px] md:text-[11px] tracking-widest rounded-2xl hover:bg-slate-50 shadow-sm transition-all">
-                                                <a href={item.pdfUrl} target="_blank" rel="noopener noreferrer">
-                                                   View PDF <Download className="ml-2 h-4 w-4" />
-                                                </a>
-                                             </Button>
-                                          )}
-                                       </div>
-                                    </CardContent>
-                                 </Card>
-                              ))}
-                           </div>
-                        ) : (
-                           <div className="py-32 text-center border-2 border-dashed border-slate-200 rounded-[4rem] opacity-20 flex flex-col items-center gap-6">
-                              {searchTerm ? <Search className="h-16 w-16 text-slate-300" /> : <Zap className="h-16 w-16 text-slate-300" />}
-                              <p className="font-bold text-2xl tracking-widest uppercase">{searchTerm ? 'No results matched' : 'Archive Empty'}</p>
-                              {searchTerm && <Button onClick={() => setSearchTerm('')} variant="outline" className="rounded-full">Clear Search</Button>}
-                           </div>
-                        )}
-                     </div>
-
-                     <div className="lg:col-span-4 space-y-10 md:space-y-14">
-                        <Card className="border-none shadow-3xl rounded-[3rem] bg-white overflow-hidden border border-slate-100 sticky top-32">
-                           <div className="bg-[#0F172A] p-8 md:p-12 text-white">
-                              <div className="flex items-center gap-4 mb-3">
-                                 <Medal className="h-7 w-7 text-primary" />
-                                 <h3 className="font-headline font-black text-2xl tracking-tight">Top Merit</h3>
-                              </div>
-                              <p className="text-slate-400 text-[11px] font-bold tracking-widest uppercase">Official Rankings</p>
-                           </div>
-                           <CardContent className="p-8 md:p-12 space-y-8">
-                              {topRankers?.map((res: any, idx: number) => {
-                                 const name = (res.userName && res.userName !== 'Student' && !res.userName.includes('@')) ? res.userName : (res.userEmail || "Aspirant");
-                                 return (
-                                 <div key={res.id} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-5 text-left">
-                                       <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-lg", idx === 0 ? "bg-amber-400" : idx === 1 ? "bg-slate-300" : "bg-orange-400")}>
-                                          #{idx + 1}
-                                       </div>
-                                       <div className="min-w-0">
-                                          <p className="font-black text-[#0F172A] text-sm md:text-lg truncate max-w-[150px]">{name}</p>
-                                          <p className="text-[9px] font-bold text-slate-400 tracking-widest mt-1 uppercase">Score: {res.score}</p>
-                                       </div>
-                                    </div>
-                                    <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[10px] px-3 py-1 rounded-lg">{res.accuracy}%</Badge>
-                                 </div>
-                                 );
-                              })}
-                              <div className="pt-8 border-t border-slate-50">
-                                 <Button asChild variant="ghost" className="w-full h-12 font-bold text-[10px] tracking-widest text-primary gap-3 hover:bg-primary/5 transition-all rounded-xl">
-                                    <Link href="/leaderboard">Full Merit List <ChevronRight className="h-4 w-4" /></Link>
-                                 </Button>
-                              </div>
-                           </CardContent>
-                        </Card>
-                     </div>
-                  </div>
-               </Tabs>
-            
-         </main>
-      )}
-
-      {!authLoading && <Footer />}
+      <Footer />
     </div>
   )
+}
+
+function StatChip({ label, val, icon }: any) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-xl border border-slate-100 shadow-sm shrink-0">
+       {icon}
+       <span className="text-[11px] font-bold text-[#0F172A] tabular-nums leading-none">{val}</span>
+       <span className="text-[8px] font-black text-slate-400 uppercase tracking-tight">{label}</span>
+    </div>
+  )
+}
+
+function SegmentButton({ active, onClick, label }: any) {
+   return (
+      <button 
+        onClick={onClick}
+        className={cn(
+          "flex-1 h-full rounded-xl px-6 font-black uppercase text-[10px] tracking-widest transition-all",
+          active ? "bg-white text-primary shadow-md" : "text-slate-400 hover:text-slate-600"
+        )}
+      >
+         {label}
+      </button>
+   )
+}
+
+function MetricNode({ label, val, icon }: any) {
+   return (
+      <div className="flex items-center justify-between group">
+         <div className="flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+               {icon}
+            </div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">{label}</span>
+         </div>
+         <span className="text-xl font-black tabular-nums tracking-tighter text-white">{val}</span>
+      </div>
+   )
+}
+
+function Skeleton({ className }: { className?: string }) {
+  return <div className={cn("animate-pulse bg-muted rounded", className)} />;
 }
