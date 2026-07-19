@@ -71,8 +71,9 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v50.0 [Intelligent Targeting].
- * FIXED: Board selection now auto-selects all child exams for board-wide targeting.
+ * @fileOverview Master Mock Builder v51.0 [Global Numbering].
+ * FIXED: Implemented continuous global numbering across all sections.
+ * FIXED: Added serial numbers to the database pool selection list.
  */
 
 export default function MockBuilderPage() {
@@ -313,7 +314,7 @@ function MockBuilderContent() {
 
       await addDoc(collection(db, "audit_logs"), {
         user: profile?.name || "Administrator",
-        action: isEditing ? "MOCK_UPDATE" : "MOCK_CREATE",
+        action: "MOCK_UPDATE" : "MOCK_CREATE",
         details: `Mock test "${payload.title}" synchronized. ${isDraft ? 'Saved as Draft' : 'Published & Questions Moved to Archive'}.`,
         timestamp: serverTimestamp()
       });
@@ -712,7 +713,7 @@ function MockBuilderContent() {
                 <div className="grid grid-cols-1 gap-4 pt-10">
                    {bankLoading ? (
                       Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-2xl bg-white" />)
-                   ) : displayBank.length > 0 ? displayBank.map((q: any) => {
+                   ) : displayBank.length > 0 ? displayBank.map((q: any, bIdx: number) => {
                       const isSelected = bankSelection.includes(q.id);
                       return (
                         <motion.div key={q.id} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
@@ -722,7 +723,10 @@ function MockBuilderContent() {
                                     {isSelected && <Check className="h-4 w-4 text-white stroke-[4px]" />}
                                  </div>
                                  <div className="min-w-0 text-left">
-                                    <p className="font-bold text-[#0F172A] truncate text-base md:text-lg leading-tight">{q.englishQuestion}</p>
+                                    <div className="flex items-center gap-3 mb-1">
+                                       <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded">Node #{bIdx + 1}</span>
+                                       <p className="font-bold text-[#0F172A] truncate text-base md:text-lg leading-tight">{q.englishQuestion}</p>
+                                    </div>
                                     <div className="flex items-center gap-4 mt-2">
                                        <Badge className="bg-slate-50 text-slate-500 border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-md shadow-sm">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'}</Badge>
                                        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{q.difficulty}</span>
@@ -767,35 +771,40 @@ function MockBuilderContent() {
                 </div>
                 
                 <div className="grid grid-cols-1 gap-6">
-                   {sections.map((sec: any, sIdx: number) => (
-                      <Card key={sec.id} className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-100">
-                         <div className="flex items-center justify-between p-6 md:p-10 bg-slate-50/50 border-b border-slate-50">
-                            <div className="flex items-center gap-4">
-                               <div className="h-10 w-10 md:h-12 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-lg shadow-xl">{sIdx + 1}</div>
-                               <div className="text-left">
-                                  <Input value={sec.name} onChange={e => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, name: e.target.value } : s))} className="h-10 p-0 bg-transparent border-none font-black text-xl md:text-2xl focus-visible:ring-0 text-[#0F172A] uppercase" />
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{(sec.questions?.length || 0)} items linked</p>
-                               </div>
-                            </div>
-                            <div className="flex gap-2">
-                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active' : 'Focus'}</button>
-                               <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></Button>
-                            </div>
-                         </div>
-                         <div className="p-6 md:p-10 space-y-3">
-                            {sec.questions?.map((q: any, qIdx: number) => (
-                               <div key={q.id} className="flex items-center justify-between p-4 md:px-8 bg-white border border-slate-100 rounded-xl md:rounded-2xl hover:shadow-lg transition-all group">
-                                  <div className="flex items-center gap-4 md:gap-8 min-w-0">
-                                     <span className="text-xs md:text-lg font-black text-slate-200 tabular-nums">#{qIdx + 1}</span>
-                                     <p className="text-sm font-bold text-slate-600 truncate">{q.englishQuestion}</p>
-                                  </div>
-                                  <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
-                               </div>
-                            ))}
-                            {(!sec.questions || sec.questions.length === 0) && <div className="py-12 text-center opacity-30 italic font-black uppercase text-[10px]">No items linked</div>}
-                         </div>
-                      </Card>
-                   ))}
+                   {sections.map((sec: any, sIdx: number) => {
+                      // Calculate global numbering offset
+                      const offset = sections.slice(0, sIdx).reduce((acc, s) => acc + (s.questions?.length || 0), 0);
+                      
+                      return (
+                        <Card key={sec.id} className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-100">
+                           <div className="flex items-center justify-between p-6 md:p-10 bg-slate-50/50 border-b border-slate-50">
+                              <div className="flex items-center gap-4">
+                                 <div className="h-10 w-10 md:h-12 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-lg shadow-xl">{sIdx + 1}</div>
+                                 <div className="text-left">
+                                    <Input value={sec.name} onChange={e => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, name: e.target.value } : s))} className="h-10 p-0 bg-transparent border-none font-black text-xl md:text-2xl focus-visible:ring-0 text-[#0F172A] uppercase" />
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{(sec.questions?.length || 0)} items linked</p>
+                                 </div>
+                              </div>
+                              <div className="flex gap-2">
+                                 <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active' : 'Focus'}</button>
+                                 <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></Button>
+                              </div>
+                           </div>
+                           <div className="p-6 md:p-10 space-y-3">
+                              {sec.questions?.map((q: any, qIdx: number) => (
+                                 <div key={q.id} className="flex items-center justify-between p-4 md:px-8 bg-white border border-slate-100 rounded-xl md:rounded-2xl hover:shadow-lg transition-all group">
+                                    <div className="flex items-center gap-4 md:gap-8 min-w-0">
+                                       <span className="text-xs md:text-lg font-black text-primary tabular-nums">#{offset + qIdx + 1}</span>
+                                       <p className="text-sm font-bold text-slate-600 truncate">{q.englishQuestion}</p>
+                                    </div>
+                                    <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
+                                 </div>
+                              ))}
+                              {(!sec.questions || sec.questions.length === 0) && <div className="py-12 text-center opacity-30 italic font-black uppercase text-[10px]">No items linked</div>}
+                           </div>
+                        </Card>
+                      )
+                   })}
                 </div>
              </div>
            )}
