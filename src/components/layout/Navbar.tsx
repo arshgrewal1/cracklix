@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v92.0.
- * UPDATED: Logo and Menu trigger anchored left with tight gap-2 for exact side-by-side alignment.
+ * @fileOverview Cracklix Navigation Hub v93.0.
+ * UPDATED: Grouped Menu Trigger and Logo on the far left with tight gap for exact side-by-side alignment.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -103,8 +103,8 @@ export default function Navbar() {
         <nav className="w-full h-20 lg:h-24 transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
-            {/* LEFT BLOCK: MENU | LOGO (IMMEDIATELY RIGHT OF BURGER) */}
-            <div className="flex items-center gap-2 z-10">
+            {/* LEFT BLOCK: MENU TRIGGER + LOGO (SIDE-BY-SIDE) */}
+            <div className="flex items-center gap-2 z-10 shrink-0">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
                   <button
@@ -126,7 +126,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0"
-                imgClassName="h-24 md:h-28 w-auto"
+                imgClassName="h-14 md:h-24 w-auto"
                 align="left"
               />
             </div>
@@ -141,7 +141,7 @@ export default function Navbar() {
             </div>
 
             {/* RIGHT BLOCK: ELITE ACCESS | SEARCH | PROFILE */}
-            <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10">
+            <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10 shrink-0">
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden lg:flex flex-col items-end shrink-0">
                     <span className="text-[9px] font-bold text-emerald-600 leading-none">Elite Access</span>

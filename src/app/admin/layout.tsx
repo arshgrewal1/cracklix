@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v45.0.
- * UPDATED: Repositioned header logo to the right of toggle button.
+ * @fileOverview Admin Layout v46.0.
+ * UPDATED: Repositioned mobile toggle and logo to be side-by-side on the left.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -125,12 +125,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 <Menu className="w-5 h-5" />
               </button>
-              <div className="lg:hidden shrink-0">
+              <div className="shrink-0">
                 <Logo 
                   variant="light" 
                   href="/admin"
                   className="flex-shrink-0" 
-                  imgClassName="h-20 md:h-28 w-auto"
+                  imgClassName="h-16 md:h-24 w-auto"
                   align="left"
                 />
               </div>

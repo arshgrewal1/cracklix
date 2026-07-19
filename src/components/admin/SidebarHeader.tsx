@@ -6,8 +6,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v68.0.
- * UPDATED: Repositioned toggle and logo into a standard flex row for exact side-by-side alignment.
+ * Cracklix Admin Sidebar Header v69.0.
+ * UPDATED: Refined side-by-side positioning for toggle and logo.
  */
 export default function SidebarHeader({
   isOpen,
@@ -20,7 +20,7 @@ export default function SidebarHeader({
     <div
       className={cn(
         "h-[100px] md:h-[130px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300",
-        isOpen ? "justify-start gap-3" : "flex-col justify-center py-4 gap-4"
+        isOpen ? "justify-start gap-2" : "flex-col justify-center py-4 gap-4"
       )}
     >
       <div className="shrink-0">
@@ -31,7 +31,7 @@ export default function SidebarHeader({
       </div>
 
       <div className={cn(
-        "flex items-center overflow-hidden transition-all", 
+        "flex items-center overflow-hidden transition-all duration-500", 
         !isOpen && "opacity-0 scale-95 pointer-events-none absolute"
       )}>
         {isOpen && (
@@ -39,8 +39,8 @@ export default function SidebarHeader({
             href="/admin"
             variant="light"
             align="left"
-            className="transition-all duration-500 animate-in fade-in zoom-in-95"
-            imgClassName="h-20 md:h-24 w-auto"
+            className="transition-all"
+            imgClassName="h-16 md:h-22 w-auto"
           />
         )}
       </div>
