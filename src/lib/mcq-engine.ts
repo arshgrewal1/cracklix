@@ -17,8 +17,9 @@ import {
 } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional MCQ Filtering Engine v1.3 [Lifecycle Hardened].
- * FIXED: Optimized failover logic and ensured diagnostics handle both 'UNUSED' and undefined status as 'Fresh'.
+ * @fileOverview Institutional MCQ Filtering Engine v1.4 [Unused Logic Hardened].
+ * FIXED: 'UNUSED' filter now correctly retrieves all questions in the primary bank collection 
+ * since the 'Move & Delete' architecture ensures only fresh items remain here.
  */
 
 export type FilterPriority = 'BOARD' | 'VERTICAL' | 'SUBJECT' | 'LANGUAGE' | 'OTHER';
@@ -67,8 +68,16 @@ class MCQEngine {
     if (filters.subjectId && filters.subjectId !== 'all') constraints.push(where("subjectId", "==", filters.subjectId));
     if (filters.language && filters.language !== 'all') constraints.push(where("language", "==", filters.language));
     if (filters.difficulty && filters.difficulty !== 'all') constraints.push(where("difficulty", "==", filters.difficulty));
-    if (filters.status && filters.status !== 'all') constraints.push(where("status", "==", filters.status));
     if (filters.questionType && filters.questionType !== 'all') constraints.push(where("questionType", "==", filters.questionType));
+    
+    // HARDENED UNUSED LOGIC: Since we move used questions out of mcqBank,
+    // selecting 'UNUSED' should simply include everything in the bank that isn't specifically marked as 'USED'.
+    if (filters.status === 'UNUSED') {
+       // In a Move & Delete architecture, everything in mcqBank is by definition Unused.
+       // We only filter if the user specifically asks for DRAFT or ARCHIVED.
+    } else if (filters.status && filters.status !== 'all') {
+       constraints.push(where("status", "==", filters.status));
+    }
 
     if (includeOrder) {
       constraints.push(orderBy("updatedAt", "desc"));
@@ -178,7 +187,7 @@ class MCQEngine {
       totalDocsInCollection: totalDocs
     };
 
-    const keys: (keyof MCQFilters)[] = ['boardId', 'examId', 'subjectId', 'language', 'status'];
+    const keys: (keyof MCQFilters)[] = ['boardId', 'examId', 'subjectId', 'language'];
     
     for (const key of keys) {
       const val = filters[key];

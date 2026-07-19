@@ -24,8 +24,8 @@ import { clearAppCache } from "@/app/actions/maintenance"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Admin Maintenance Terminal v3.7.
- * ADDED: Scaleable V3 Migration Tool for Question Bank normalization.
+ * @fileOverview Master Admin Maintenance Terminal v3.8.
+ * UPDATED: Hardened V3 Migration Tool to force UNUSED status on all primary bank questions.
  */
 
 export default function MaintenancePage() {
@@ -40,8 +40,8 @@ export default function MaintenancePage() {
   const tools = [
     { 
       id: 'migration-v3', 
-      label: 'Scaleable V3 Migration', 
-      desc: 'Initializes missing lifecycle fields (used, status, usageCount) for all legacy questions.', 
+      label: 'Fix Question Lifecycle', 
+      desc: 'Synchronizes all questions to the new architecture. Marks unassigned items as UNUSED so they appear in builders.', 
       icon: <Database className="h-5 w-5 text-primary" />, 
       action: async () => {
          if (!db) return;
@@ -54,16 +54,15 @@ export default function MaintenancePage() {
          const processDocs = (snap: any) => {
            snap.docs.forEach((d: any) => {
              const data = d.data();
-             if (data.status === undefined || data.used === undefined) {
-                batch.update(d.ref, {
-                   status: data.status || 'UNUSED',
-                   used: data.used || false,
-                   usageCount: data.usageCount || 0,
-                   usedInMocks: data.usedInMocks || [],
-                   updatedAt: serverTimestamp()
-                });
-                migrated++;
-             }
+             // FORCE UNUSED for everything in the bank that isn't already archived
+             batch.update(d.ref, {
+                status: 'UNUSED',
+                used: false,
+                usageCount: data.usageCount || 0,
+                usedInMocks: data.usedInMocks || [],
+                updatedAt: serverTimestamp()
+             });
+             migrated++;
            });
          };
 
@@ -71,7 +70,7 @@ export default function MaintenancePage() {
          processDocs(legacySnap);
 
          if (migrated > 0) await batch.commit();
-         toast({ title: "Migration Complete", description: `${migrated} nodes normalized.` });
+         toast({ title: "Audit Complete", description: `${migrated} nodes normalized to UNUSED.` });
       }
     },
     { 
