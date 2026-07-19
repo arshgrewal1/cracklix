@@ -34,7 +34,8 @@ import {
   FileStack,
   Activity,
   Newspaper,
-  Loader2
+  Loader2,
+  Users
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -44,8 +45,9 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v6.0.
- * UPDATED: Added Sectional tests tab and refined grouped content logic.
+ * @fileOverview Premium Exam Detail Hub v6.1.
+ * FIXED: Imported missing Users icon.
+ * UPDATED: Simplified terminology and removed all uppercase styling.
  */
 
 export default function ExamHubClient() {
@@ -151,7 +153,7 @@ export default function ExamHubClient() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 overflow-x-hidden w-full">
       <Navbar />
       
-      {/* 1. PREMIUM HERO SECTION (REBALANCED) */}
+      {/* 1. PREMIUM HERO SECTION */}
       <section className="bg-white border-b border-slate-100 pt-10 pb-12 md:pt-16 md:pb-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
@@ -171,7 +173,7 @@ export default function ExamHubClient() {
                     </div>
                   </div>
                   <div className="space-y-4 text-center md:text-left flex-1 min-w-0">
-                    <h1 className="text-2xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.1] text-[#0F172A] antialiased truncate-multiline">
+                    <h1 className="text-2xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.1] text-[#0F172A] antialiased">
                        {exam.name} <br className="hidden md:block" /> <span className="text-primary italic">Preparation hub.</span>
                     </h1>
                     <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl line-clamp-2">
