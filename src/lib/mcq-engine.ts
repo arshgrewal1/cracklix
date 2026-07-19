@@ -1,3 +1,4 @@
+
 'use client';
 
 import { 
@@ -17,7 +18,7 @@ import {
 } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional MCQ Filtering Engine v1.4 [Unused Logic Hardened].
+ * @fileOverview Institutional MCQ Filtering Engine v1.5 [Duplicate Support].
  * FIXED: 'UNUSED' filter now correctly retrieves all questions in the primary bank collection 
  * since the 'Move & Delete' architecture ensures only fresh items remain here.
  */
@@ -70,12 +71,11 @@ class MCQEngine {
     if (filters.difficulty && filters.difficulty !== 'all') constraints.push(where("difficulty", "==", filters.difficulty));
     if (filters.questionType && filters.questionType !== 'all') constraints.push(where("questionType", "==", filters.questionType));
     
-    // HARDENED UNUSED LOGIC: Since we move used questions out of mcqBank,
-    // selecting 'UNUSED' should simply include everything in the bank that isn't specifically marked as 'USED'.
+    // In a Move & Delete architecture, DUPLICATE detection happens client-side or via hashing.
+    // For general fetching, we don't apply a status filter for 'DUPLICATE' since it's an integrity flag, not a state.
     if (filters.status === 'UNUSED') {
-       // In a Move & Delete architecture, everything in mcqBank is by definition Unused.
-       // We only filter if the user specifically asks for DRAFT or ARCHIVED.
-    } else if (filters.status && filters.status !== 'all') {
+       // Everything in mcqBank is by definition Unused.
+    } else if (filters.status && filters.status !== 'all' && filters.status !== 'DUPLICATE') {
        constraints.push(where("status", "==", filters.status));
     }
 
