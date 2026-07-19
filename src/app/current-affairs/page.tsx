@@ -30,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { useActiveSession } from "@/hooks/useStudyAnalytics"
@@ -348,7 +349,7 @@ function MetricNode({ label, val, icon }: any) {
             </div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">{label}</span>
          </div>
-         <span className="text-xl font-black tabular-nums tracking-tighter text-white">{val}</span>
+         <span className="text-2xl md:text-3xl font-black tabular-nums tracking-tighter text-white">{val}</span>
       </div>
    )
 }

@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
@@ -22,6 +23,7 @@ interface BoardHubClientProps {
 /**
  * @fileOverview Premium Board Hub Portal v5.1.
  * FIXED: Removed mandatory user session check to allow guest access.
+ * FIXED: Added missing Link import.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
