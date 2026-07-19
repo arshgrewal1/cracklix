@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v93.0.
- * UPDATED: Grouped Menu Trigger and Logo on the far left with tight gap for exact side-by-side alignment.
+ * @fileOverview Cracklix Navigation Hub v94.0.
+ * UPDATED: Increased logo size to h-16/h-28 for enhanced brand prominence.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -126,7 +126,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0"
-                imgClassName="h-14 md:h-24 w-auto"
+                imgClassName="h-16 md:h-28 w-auto"
                 align="left"
               />
             </div>
