@@ -55,7 +55,8 @@ import {
   ExternalLink,
   QrCode,
   ArrowDownRight,
-  ArrowUp
+  ArrowUp,
+  Newspaper
 } from "lucide-react"
 import { 
   Card, 
@@ -76,10 +77,9 @@ import ResultCard from "./ResultCard"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Center v6.0 [Enterprise Redesign].
- * FIXED: Removed all uppercase styling.
- * FIXED: Implemented Sentence case hierarchy.
- * FIXED: Accurate time-taken logic and dynamic AI insights.
+ * @fileOverview Premium Assessment Center v6.1.
+ * FIXED: Removed all uppercase utility classes.
+ * FIXED: Normalized terminology (node -> item).
  */
 
 export default function ResultClient() {
@@ -416,7 +416,7 @@ export default function ResultClient() {
                           <span className={cn("text-6xl md:text-8xl font-[900] tracking-tighter tabular-nums", performanceStatus.color)}>
                              {performanceStatus.grade}
                           </span>
-                          <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Grade</p>
+                          <p className="text-[10px] font-black text-slate-400 tracking-widest mt-1">Grade</p>
                        </div>
                     </div>
                     <Badge className={cn("border-none font-bold text-[11px] px-6 py-1.5 rounded-full shadow-sm", performanceStatus.bg, performanceStatus.color)}>
@@ -433,7 +433,7 @@ export default function ResultClient() {
                           </span>
                        </div>
                        <div className="space-y-1">
-                          <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em]">{profile?.name || "Aspirant"}</p>
+                          <p className="text-[10px] font-black text-primary tracking-[0.3em]">{profile?.name || "Aspirant"}</p>
                           <h1 className="text-3xl md:text-5xl font-black tracking-tight text-[#0F172A] leading-tight">{mockData?.title}</h1>
                        </div>
                     </div>
@@ -507,11 +507,11 @@ export default function ResultClient() {
                     <table className="w-full text-left border-collapse">
                        <thead className="bg-[#0F172A] text-white">
                           <tr className="h-14">
-                             <th className="px-8 text-[11px] font-black uppercase tracking-widest">Subject</th>
-                             <th className="px-4 text-[11px] font-black uppercase tracking-widest text-center">Items</th>
-                             <th className="px-4 text-[11px] font-black uppercase tracking-widest text-center">Accuracy</th>
-                             <th className="px-4 text-[11px] font-black uppercase tracking-widest text-center">Score</th>
-                             <th className="px-8 text-[11px] font-black uppercase tracking-widest text-right">Mastery</th>
+                             <th className="px-8 text-[11px] font-black tracking-widest">Subject</th>
+                             <th className="px-4 text-[11px] font-black tracking-widest text-center">Items</th>
+                             <th className="px-4 text-[11px] font-black tracking-widest text-center">Accuracy</th>
+                             <th className="px-4 text-[11px] font-black tracking-widest text-center">Score</th>
+                             <th className="px-8 text-[11px] font-black tracking-widest text-right">Mastery</th>
                           </tr>
                        </thead>
                        <tbody className="divide-y divide-slate-50">
@@ -540,11 +540,11 @@ export default function ResultClient() {
                        <Card key={i} className="p-6 border-slate-100 shadow-sm rounded-2xl space-y-4">
                           <div className="flex justify-between items-start">
                              <h4 className="font-bold text-[#0F172A]">{sub.name}</h4>
-                             <Badge className={cn("border-none text-[10px]", sub.accuracy > 70 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>{sub.accuracy}% Accuracy</Badge>
+                             <Badge className={cn("border-none text-[10px]", sub.accuracy > 70 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>{sub.accuracy}% accuracy</Badge>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
-                             <div><p className="text-[10px] font-bold text-slate-400 uppercase">Items</p><p className="font-bold text-sm">{sub.total}</p></div>
-                             <div className="text-right"><p className="text-[10px] font-bold text-slate-400 uppercase">Score</p><p className="font-bold text-sm">{sub.score}</p></div>
+                             <div><p className="text-[10px] font-bold text-slate-400">Items</p><p className="font-bold text-sm">{sub.total}</p></div>
+                             <div className="text-right"><p className="text-[10px] font-bold text-slate-400">Score</p><p className="font-bold text-sm">{sub.score}</p></div>
                           </div>
                           <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden">
                              <div className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : "bg-amber-500")} style={{ width: `${sub.accuracy}%` }} />
@@ -582,7 +582,7 @@ export default function ResultClient() {
                  <div className="relative z-10 space-y-6">
                     <div className="space-y-1">
                        <h3 className="text-xl font-bold">Recommendations</h3>
-                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Logic hub advice</p>
+                       <p className="text-[10px] font-bold text-slate-500 tracking-widest">Logic hub advice</p>
                     </div>
                     <div className="space-y-4">
                        {recommendations.map((rec, i) => (
@@ -607,7 +607,7 @@ export default function ResultClient() {
                     </div>
                     <div className="space-y-2">
                        <h3 className="text-xl md:text-2xl font-black text-[#0F172A] tracking-tight">Verified by Cracklix</h3>
-                       <div className="flex flex-col gap-1 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                       <div className="flex flex-col gap-1 text-[11px] font-bold text-slate-400 tracking-widest">
                           <p>Result ID: {sessionData?.id || 'MANUAL_ENTRY'}</p>
                           <p>Generated: {new Date(sessionData?.timestamp).toLocaleDateString('en-GB')}</p>
                        </div>
@@ -616,7 +616,7 @@ export default function ResultClient() {
                  <div className="flex items-center gap-10">
                     <div className="hidden lg:block text-right">
                        <p className="font-black text-lg text-[#0F172A]">Official digital stamp</p>
-                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Institutional merit verified</p>
+                       <p className="text-[10px] font-bold text-slate-400 tracking-widest mt-1">Institutional merit verified</p>
                     </div>
                     <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
                        <QrCode className="h-14 w-14 text-[#0F172A]" />
@@ -659,7 +659,7 @@ export default function ResultClient() {
                              <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-3">
                                    <div className="h-10 w-10 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-sm">{q.originalIndex + 1}</div>
-                                   <Badge variant="outline" className="text-[10px] font-bold border-slate-100 text-slate-400 uppercase">{q.difficulty || 'Medium'}</Badge>
+                                   <Badge variant="outline" className="text-[10px] font-bold border-slate-100 text-slate-400">{q.difficulty || 'Medium'}</Badge>
                                 </div>
                                 <ReviewPill userAns={sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)]} correctAns={q.correctAnswer} />
                              </div>
@@ -683,10 +683,10 @@ export default function ResultClient() {
       {/* COMPACT FOOTER */}
       <footer className="py-12 border-t border-slate-100 bg-white">
          <div className="container mx-auto px-6 text-center space-y-4">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">© {new Date().getFullYear()} Cracklix Authority Registry</p>
+            <p className="text-[11px] font-bold text-slate-400 tracking-widest">© {new Date().getFullYear()} Cracklix Authority Registry</p>
             <div className="flex items-center justify-center gap-3">
                <ShieldCheck className="h-4 w-4 text-emerald-500" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-[#0F172A]">Result verified node synchronized</span>
+               <span className="text-[10px] font-black tracking-widest text-[#0F172A]">Result verified item synchronized</span>
             </div>
          </div>
       </footer>
@@ -702,9 +702,9 @@ function StatCard({ label, val, sub, icon, highlight }: any) {
     )}>
        <div className="absolute top-0 right-0 p-4 opacity-5">{icon}</div>
        <div className="space-y-1 relative z-10">
-          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+          <p className="text-[9px] font-black text-slate-400 tracking-widest">{label}</p>
           <p className="text-xl md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none">{val}</p>
-          {sub && <p className="text-[8px] font-bold text-slate-300 uppercase tracking-tight mt-1">{sub}</p>}
+          {sub && <p className="text-[8px] font-bold text-slate-300 mt-1">{sub}</p>}
        </div>
     </Card>
   )
@@ -713,7 +713,7 @@ function StatCard({ label, val, sub, icon, highlight }: any) {
 function SummaryPill({ label, val, color, bg }: any) {
    return (
       <div className={cn("p-4 md:p-6 rounded-2xl flex flex-col gap-1 text-left shadow-sm border border-slate-50 transition-all", bg)}>
-         <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+         <p className="text-[9px] font-black text-slate-400 tracking-widest">{label}</p>
          <p className={cn("text-xl md:text-3xl font-black tabular-nums leading-none", color)}>{val}</p>
       </div>
    )
@@ -722,7 +722,7 @@ function SummaryPill({ label, val, color, bg }: any) {
 function ProgressRow({ label, val, color }: any) {
    return (
       <div className="space-y-2">
-         <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+         <div className="flex justify-between items-center text-[10px] font-black tracking-widest">
             <span className="text-slate-400">{label}</span>
             <span className="text-[#0F172A]">{val}%</span>
          </div>
@@ -736,7 +736,7 @@ function ProgressRow({ label, val, color }: any) {
 function TimeMetric({ label, val }: any) {
    return (
       <div className="flex items-center justify-between py-1 border-b border-slate-50">
-         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">{label}</span>
+         <span className="text-[11px] font-bold text-slate-400">{label}</span>
          <span className="text-sm font-black tabular-nums">{val}</span>
       </div>
    )
@@ -745,7 +745,7 @@ function TimeMetric({ label, val }: any) {
 function RecommendationNode({ label, text }: any) {
    return (
       <div className="space-y-1">
-         <p className="text-[9px] font-black uppercase text-primary tracking-widest">{label}</p>
+         <p className="text-[9px] font-black text-primary tracking-widest">{label}</p>
          <p className="text-xs font-medium text-slate-400 leading-snug">{text}</p>
       </div>
    )
@@ -767,9 +767,9 @@ function ReviewTab({ active, onClick, label, count, color = "text-[#0F172A]" }: 
 
 function ReviewPill({ userAns, correctAns }: any) {
    const isAttempted = userAns !== null && userAns !== undefined && String(userAns) !== "";
-   if (!isAttempted) return <Badge className="bg-slate-100 text-slate-500 border-none px-4 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">Skipped</Badge>;
+   if (!isAttempted) return <Badge className="bg-slate-100 text-slate-500 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest">Skipped</Badge>;
    const isCorrect = ['A','B','C','D'][Number(userAns)] === correctAns;
    return isCorrect 
-     ? <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">Correct</Badge>
-     : <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">Incorrect</Badge>;
+     ? <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest">Correct</Badge>
+     : <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest">Incorrect</Badge>;
 }

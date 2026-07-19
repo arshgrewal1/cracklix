@@ -35,7 +35,8 @@ import {
   List,
   FileStack,
   MoreVertical,
-  Activity
+  Activity,
+  Newspaper
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -45,8 +46,9 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v5.2.
- * FIXED: Renamed query variables to resolve ReferenceError in useCollection.
+ * @fileOverview Premium Exam Detail Hub v5.3.
+ * FIXED: Added missing Newspaper icon import.
+ * FIXED: Removed all uppercase utility classes and normalized to Sentence case.
  */
 
 export default function ExamHubClient() {
@@ -134,28 +136,28 @@ export default function ExamHubClient() {
     try {
       if (isPinned) {
         await updateDoc(userRef, { pinnedExams: arrayRemove(examId), updatedAt: serverTimestamp() });
-        toast({ title: "Removed from My Exams" });
+        toast({ title: "Removed from my exams" });
       } else {
         await updateDoc(userRef, { pinnedExams: arrayUnion(examId), updatedAt: serverTimestamp() });
-        toast({ title: "Added to My Exams", description: "This hub is now pinned to your dashboard." });
+        toast({ title: "Added to my exams", description: "This hub is now pinned to your dashboard." });
       }
     } finally { setIsPinning(false); }
   };
 
   if (!mounted || examLoading || userLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
-  if (!exam) return <div className="p-20 text-center uppercase font-black text-slate-300">Exam Vertical Not Registered</div>
+  if (!exam) return <div className="p-20 text-center font-black text-slate-300">Exam vertical not registered</div>
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 overflow-x-hidden">
       <Navbar />
       
-      {/* 1. PREMIUM TESTBOOK-STYLE HERO */}
+      {/* 1. PREMIUM HERO */}
       <section className="bg-[#0F172A] text-white pt-10 pb-12 md:pt-16 md:pb-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-blue-600/5 rounded-full blur-[80px]" />
          
          <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
-            <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs tracking-widest">
                <Link href="/exams" className="hover:text-white transition-colors">Exams</Link>
                <ChevronRight className="h-3 w-3" />
                <span className="text-primary">{exam.name}</span>
@@ -171,15 +173,15 @@ export default function ExamHubClient() {
                   </div>
                   <div className="space-y-4 text-center md:text-left flex-1 min-w-0">
                     <h1 className="text-2xl sm:text-5xl md:text-7xl font-[800] tracking-tight leading-[1.1] antialiased truncate-multiline">
-                       {exam.name} <br className="hidden md:block" /> <span className="text-primary italic">Selection Hub.</span>
+                       {exam.name} <br className="hidden md:block" /> <span className="text-primary italic">Selection hub.</span>
                     </h1>
                     <p className="text-slate-400 font-medium text-sm md:text-xl leading-relaxed max-w-2xl line-clamp-2">
                        {exam.description || "Master the official Punjab recruitment pattern with verified practice series."}
                     </p>
                     <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 pt-2">
-                       <Badge className="bg-primary/20 text-primary border border-primary/20 px-4 py-1.5 rounded-full font-black text-[9px] uppercase tracking-widest">Live Content Registry</Badge>
-                       <span className="text-[11px] md:text-xs font-bold text-slate-500 flex items-center gap-2 uppercase tracking-widest">
-                          <Users className="h-3.5 w-3.5" /> 12.4K+ Aspirants Active
+                       <Badge className="bg-primary/20 text-primary border border-primary/20 px-4 py-1.5 rounded-full font-black text-[9px] tracking-widest">Live content registry</Badge>
+                       <span className="text-[11px] md:text-xs font-bold text-slate-500 flex items-center gap-2 tracking-widest">
+                          <Users className="h-3.5 w-3.5" /> 12.4K+ Aspirants active
                        </span>
                     </div>
                   </div>
@@ -192,25 +194,25 @@ export default function ExamHubClient() {
                       disabled={isPinning}
                       variant="outline" 
                       className={cn(
-                        "h-14 md:h-16 px-10 rounded-2xl border-white/10 font-black uppercase text-[10px] tracking-widest gap-3 transition-all",
+                        "h-14 md:h-16 px-10 rounded-2xl border-white/10 font-black text-[10px] tracking-widest transition-all",
                         isPinned ? "bg-primary border-primary text-white" : "bg-white/5 text-white hover:bg-white/10"
                       )}
                     >
-                       {isPinning ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4", isPinned && "fill-current")} />}
-                       {isPinned ? "In My Exams" : "Add to Dashboard"}
+                       {isPinning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4", isPinned && "fill-current")} />}
+                       {isPinned ? "In my exams" : "Add to dashboard"}
                     </Button>
                   )}
-                  <Button asChild className="h-14 md:h-16 px-10 bg-white text-[#0F172A] hover:bg-slate-50 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-3xl border-none">
-                     <Link href="/pass"><Gem className="h-5 w-5 text-primary" /> Unlock Elite Hub</Link>
+                  <Button asChild className="h-14 md:h-16 px-10 bg-white text-[#0F172A] hover:bg-slate-50 rounded-2xl font-black text-[10px] tracking-widest gap-3 shadow-3xl border-none">
+                     <Link href="/pass"><Gem className="h-5 w-5 text-primary" /> Unlock elite hub</Link>
                   </Button>
                </div>
             </div>
 
             {/* QUICK STATS STRIP */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10 border-t border-white/5">
-               <HeroStat icon={Zap} label="Mock Tests" val={stats.totalTests} />
-               <HeroStat icon={FileStack} label="Old Papers" val={groupedContent.PYQ.length} />
-               <HeroStat icon={Target} label="My Progress" val={user ? `${stats.avgAccuracy}%` : 'Login'} />
+               <HeroStat icon={Zap} label="Mock tests" val={stats.totalTests} />
+               <HeroStat icon={FileStack} label="Old papers" val={groupedContent.PYQ.length} />
+               <HeroStat icon={Target} label="My progress" val={user ? `${stats.avgAccuracy}%` : 'Login'} />
                <HeroStat icon={Trophy} label="Ranking" val="Verified" />
             </div>
          </div>
@@ -222,11 +224,11 @@ export default function ExamHubClient() {
             <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
                <div className="bg-white border border-slate-200 shadow-sm rounded-[20px] p-1 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-4xl mx-auto">
                   <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-between gap-1 overflow-x-auto no-scrollbar snap-x">
-                     <HubTab value="MOCK" label="Mock Series" icon={Zap} />
-                     <HubTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
-                     <HubTab value="PYQ" label="Previous Papers" icon={FileStack} />
-                     <HubTab value="NOTES" label="Study Notes" icon={FileText} />
-                     <HubTab value="CA" label="Current Affairs" icon={Newspaper} />
+                     <HubTab value="MOCK" label="Mock series" icon={Zap} />
+                     <HubTab value="SUBJECT" label="Subject tests" icon={BookOpen} />
+                     <HubTab value="PYQ" label="Previous papers" icon={FileStack} />
+                     <HubTab value="NOTES" label="Study notes" icon={FileText} />
+                     <HubTab value="CA" label="Current affairs" icon={Newspaper} />
                   </TabsList>
                </div>
             </div>
@@ -243,23 +245,23 @@ export default function ExamHubClient() {
                                   <div className="h-16 w-16 md:h-20 md:w-20 rounded-[1.5rem] bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                                     <BookOpen className="h-8 w-8" />
                                   </div>
-                                  <Badge className="bg-slate-50 text-slate-400 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest">Subject Hub</Badge>
+                                  <Badge className="bg-slate-50 text-slate-400 border-none px-3 py-1 font-black text-[9px] tracking-widest">Subject hub</Badge>
                               </div>
                               <div className="space-y-4 flex-1">
-                                  <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase tracking-tight">{sub.name}</h3>
-                                  <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <Zap className="h-3.5 w-3.5 text-primary" /> Multi-Series Active
+                                  <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight tracking-tight">{sub.name}</h3>
+                                  <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest flex items-center gap-2">
+                                    <Zap className="h-3.5 w-3.5 text-primary" /> Multi-series active
                                   </p>
                               </div>
-                              <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between text-primary font-black text-[10px] uppercase tracking-[0.2em]">
-                                  <span>Start Exploring</span>
+                              <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between text-primary font-black text-[10px] tracking-[0.2em]">
+                                  <span>Start exploring</span>
                                   <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                               </div>
                             </Card>
                         </Link>
                       ))}
                     </div>
-                  ) : <div className="py-20 text-center opacity-30 font-black uppercase">No Subject Items Available</div>}
+                  ) : <div className="py-20 text-center opacity-30 font-black">No subject items available</div>}
                </TabsContent>
                <TabsContent value="PYQ"><TestGrid data={groupedContent.PYQ} isPYQ loading={false} /></TabsContent>
                <TabsContent value="NOTES"><TestGrid data={groupedContent.NOTES} isNote loading={false} /></TabsContent>
@@ -281,7 +283,7 @@ function HeroStat({ icon: Icon, label, val }: any) {
        </div>
        <div className="text-center md:text-left space-y-0.5">
           <p className="text-lg md:text-2xl font-black tabular-nums">{val}</p>
-          <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{label}</p>
+          <p className="text-[9px] font-bold text-slate-500 tracking-widest">{label}</p>
        </div>
     </div>
   )
@@ -289,7 +291,7 @@ function HeroStat({ icon: Icon, label, val }: any) {
 
 function HubTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-6 h-full font-black text-[10px] md:text-[11px] uppercase tracking-widest text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
+      <TabsTrigger value={value} className="px-6 h-full font-black text-[10px] md:text-[11px] tracking-widest text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
          <Icon className="h-4 w-4 shrink-0" /> {label}
       </TabsTrigger>
    )
@@ -305,7 +307,7 @@ function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
    if (!data || data.length === 0) return (
       <div className="py-40 text-center opacity-20 flex flex-col items-center gap-6">
          <Zap className="h-20 w-20" />
-         <p className="font-headline font-black text-2xl md:text-4xl uppercase tracking-[0.4em]">Vault Empty</p>
+         <p className="font-headline font-black text-2xl md:text-4xl tracking-[0.4em]">Vault empty</p>
       </div>
    );
 
@@ -318,14 +320,14 @@ function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
                      <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-primary shadow-inner">
                         {isNote ? <FileText className="h-7 w-7" /> : isPYQ ? <FileStack className="h-7 w-7" /> : <Zap className="h-7 w-7" />}
                      </div>
-                     <Badge className={cn("border-none text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg", item.accessLevel === 'PREMIUM' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600')}>
-                        {item.accessLevel === 'PREMIUM' ? 'ELITE' : 'FREE'}
+                     <Badge className={cn("border-none text-[8px] font-black tracking-widest px-2.5 py-1 rounded-lg", item.accessLevel === 'PREMIUM' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600')}>
+                        {item.accessLevel === 'PREMIUM' ? 'Elite' : 'Free'}
                      </Badge>
                   </div>
                   <div className="space-y-4 flex-1 text-left">
                      <div className="space-y-1.5">
-                        <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">{item.difficulty || 'Standard'} Pattern</p>
-                        <h3 className="text-xl md:text-2xl font-black text-[#0F172A] leading-tight line-clamp-2 uppercase">{item.title}</h3>
+                        <p className="text-[10px] font-black text-primary tracking-[0.3em]">{item.difficulty || 'Standard'} pattern</p>
+                        <h3 className="text-xl md:text-2xl font-black text-[#0F172A] leading-tight line-clamp-2">{item.title}</h3>
                      </div>
                      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
                         <MetricNode icon={BookOpen} label="Items" val={item.totalQuestions || "Verified"} />
@@ -333,10 +335,10 @@ function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
                      </div>
                   </div>
                   <div className="mt-10">
-                     <Button asChild className="w-full h-14 md:h-16 rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest shadow-xl border-none active:scale-95 gap-3 bg-[#0F172A] hover:bg-black text-white">
+                     <Button asChild className="w-full h-14 md:h-16 rounded-2xl font-black text-[10px] md:text-[11px] tracking-widest shadow-xl border-none active:scale-95 gap-3 bg-[#0F172A] hover:bg-black text-white">
                         <Link href={isNote || isPYQ ? (item.pdfUrl || '#') : `/mocks/instructions?id=${item.id}`}>
                            {isNote || isPYQ ? <Download className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
-                           {isNote || isPYQ ? "Download PDF" : "Start Mock"}
+                           {isNote || isPYQ ? "Download PDF" : "Start mock"}
                            <ChevronRight className="h-4 w-4 ml-auto opacity-40" />
                         </Link>
                      </Button>
@@ -354,7 +356,7 @@ function MetricNode({ icon: Icon, label, val }: any) {
          <Icon className="h-3.5 w-3.5 text-slate-300" />
          <div className="text-left">
             <p className="text-[11px] font-black text-[#0F172A] leading-none">{val}</p>
-            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tight mt-0.5">{label}</p>
+            <p className="text-[8px] font-bold text-slate-400 tracking-tight mt-0.5">{label}</p>
          </div>
       </div>
    )

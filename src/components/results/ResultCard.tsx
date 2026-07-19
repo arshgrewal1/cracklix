@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -63,8 +62,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview World-Class Institutional Result Card v2.3.
- * UPDATED: Replaced 'node' with 'point' or 'hub'.
+ * @fileOverview World-Class Institutional Result Card v2.4.
+ * FIXED: Removed all uppercase styling for premium Sentence case presentation.
  */
 export default function ResultCard({
   studentName,
@@ -115,12 +114,12 @@ export default function ResultCard({
                  <ShieldCheck className="h-12 w-12 text-white" />
               </div>
               <div>
-                 <h1 className="text-5xl font-black tracking-tighter uppercase leading-none text-[#0F172A]">Cracklix</h1>
-                 <p className="text-[11px] font-black text-slate-400 tracking-[0.4em] uppercase mt-1">Official Result Hub</p>
+                 <h1 className="text-5xl font-black tracking-tighter leading-none text-[#0F172A]">Cracklix</h1>
+                 <p className="text-[11px] font-black text-slate-400 tracking-[0.4em] mt-1">Official result hub</p>
               </div>
            </div>
            <div className="text-right space-y-1">
-              <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px]">Attempt Synchronized</p>
+              <p className="text-slate-400 font-black tracking-[0.3em] text-[10px]">Attempt synchronized</p>
               <p className="text-2xl font-black tabular-nums text-[#0F172A]">{date}</p>
            </div>
         </div>
@@ -129,26 +128,26 @@ export default function ResultCard({
            <div className="relative">
               <div className="h-56 w-56 rounded-full border-[12px] border-slate-50 flex flex-col items-center justify-center bg-white shadow-2xl relative z-10">
                  <span className={cn("text-[90px] font-black leading-none", grade.color)}>{grade.label}</span>
-                 <span className="text-[12px] font-black uppercase tracking-widest text-slate-400 mt-2">{grade.sub}</span>
+                 <span className="text-[12px] font-black tracking-widest text-slate-400 mt-2">{grade.sub}</span>
               </div>
               <div className="absolute -inset-6 bg-blue-600/5 blur-3xl rounded-full animate-pulse" />
            </div>
            <div className="mt-8 space-y-4 text-center">
-              <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-200 px-8 py-2 rounded-full font-black text-[12px] uppercase tracking-[0.2em] shadow-sm">
-                 <CheckCircle2 className="h-4 w-4 mr-2" /> Performance Verified
+              <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-200 px-8 py-2 rounded-full font-black text-[12px] tracking-[0.2em] shadow-sm">
+                 <CheckCircle2 className="h-4 w-4 mr-2" /> Performance verified
               </Badge>
-              <h2 className="text-7xl font-black tracking-tighter text-[#0F172A] uppercase">{studentName}</h2>
-              <p className="text-2xl font-bold text-primary uppercase tracking-[0.1em]">{examTitle}</p>
+              <h2 className="text-7xl font-black tracking-tighter text-[#0F172A]">{studentName}</h2>
+              <p className="text-2xl font-bold text-primary tracking-[0.1em]">{examTitle}</p>
            </div>
         </div>
 
         <div className="px-20 mt-14 grid grid-cols-3 gap-8">
-           <Metric label="State Rank" val={`#${rank}`} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50" />
-           <Metric label="Final Score" val={score} icon={<Zap />} color="text-[#2563EB]" bg="bg-blue-50" />
+           <Metric label="State rank" val={`#${rank}`} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50" />
+           <Metric label="Final score" val={score} icon={<Zap />} color="text-[#2563EB]" bg="bg-blue-50" />
            <Metric label="Accuracy" val={`${accuracy}%`} icon={<Target />} color="text-emerald-500" bg="bg-emerald-50" />
            <Metric label="Percentile" val={`${percentile}%`} icon={<TrendingUp />} color="text-indigo-500" bg="bg-indigo-50" />
-           <Metric label="Time Taken" val={timeTaken} icon={<Clock />} color="text-slate-500" bg="bg-slate-50" />
-           <Metric label="Attempt Rate" val={`${Math.round(((correct + wrong) / (total || 1)) * 100)}%`} icon={<BarChart3 />} color="text-purple-500" bg="bg-purple-50" />
+           <Metric label="Time taken" val={timeTaken} icon={<Clock />} color="text-slate-500" bg="bg-slate-50" />
+           <Metric label="Attempt rate" val={`${Math.round(((correct + wrong) / (total || 1)) * 100)}%`} icon={<BarChart3 />} color="text-purple-500" bg="bg-purple-50" />
         </div>
 
         <div className="px-20 mt-12">
@@ -167,17 +166,17 @@ export default function ResultCard({
            <div className="space-y-6">
               <div className="flex items-center gap-4">
                  <Crown className="h-10 w-10 text-primary fill-primary" />
-                 <p className="text-3xl font-black tracking-tight uppercase">Cracklix Authority</p>
+                 <p className="text-3xl font-black tracking-tight">Cracklix Authority</p>
               </div>
               <div className="flex flex-col gap-2">
-                 <p className="text-slate-500 text-sm font-bold uppercase tracking-widest">Registry ID: {resultId}</p>
-                 <p className="text-slate-500 text-sm font-bold uppercase tracking-widest">Verification Entry: WWW.CRACKLIX.COM</p>
+                 <p className="text-slate-500 text-sm font-bold tracking-widest">Registry ID: {resultId}</p>
+                 <p className="text-slate-500 text-sm font-bold tracking-widest">Verification entry: WWW.CRACKLIX.COM</p>
               </div>
            </div>
            <div className="flex items-center gap-12">
               <div className="text-right space-y-1">
-                 <p className="text-white font-black text-2xl uppercase tracking-widest">Digital Stamp</p>
-                 <p className="text-primary font-bold text-[11px] uppercase tracking-[0.3em]">Verified assessment cycle</p>
+                 <p className="text-white font-black text-2xl tracking-widest">Digital stamp</p>
+                 <p className="text-primary font-bold text-[11px] tracking-[0.3em]">Verified assessment process</p>
               </div>
               <div className="bg-white p-4 rounded-[1.5rem] shadow-5xl border-[6px] border-white/10">
                  <img src={qrUrl} alt="Verify" className="h-24 w-24" />
@@ -185,7 +184,7 @@ export default function ResultCard({
            </div>
         </div>
 
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[11px] font-black text-slate-500 uppercase tracking-widest opacity-20">Page 1 of 2</div>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[11px] font-black text-slate-500 tracking-widest opacity-20">Page 1 of 2</div>
       </div>
 
       {/* PAGE 2: DETAILED ANALYTICS REPORT */}
@@ -199,8 +198,8 @@ export default function ResultCard({
         <div className="px-20 pt-16 space-y-12">
            <div className="flex justify-between items-end border-b-4 border-slate-100 pb-10">
               <div className="space-y-3">
-                 <h2 className="text-5xl font-black tracking-tighter text-[#0F172A] uppercase">Performance Audit</h2>
-                 <p className="text-lg font-bold text-slate-400 uppercase tracking-widest">Deep-Dive Registry Analysis</p>
+                 <h2 className="text-5xl font-black tracking-tighter text-[#0F172A]">Performance audit</h2>
+                 <p className="text-lg font-bold text-slate-400 tracking-widest">Deep-dive registry analysis</p>
               </div>
               <div className="h-10 relative grayscale opacity-20">
                  <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-full w-auto" />
@@ -210,7 +209,7 @@ export default function ResultCard({
            <section className="space-y-6">
               <div className="flex items-center gap-4">
                  <BrainCircuit className="h-8 w-8 text-primary" />
-                 <h3 className="text-2xl font-black uppercase tracking-widest text-[#0F172A]">Consolidated Rationale</h3>
+                 <h3 className="text-2xl font-black tracking-widest text-[#0F172A]">Consolidated rationale</h3>
               </div>
               <div className="bg-[#F8FAFC] p-10 rounded-[3rem] border border-slate-100 relative overflow-hidden">
                  <div className="absolute top-0 right-0 p-10 opacity-[0.03]"><Zap className="h-32 w-32" /></div>
@@ -225,23 +224,23 @@ export default function ResultCard({
            <section className="space-y-6">
               <div className="flex items-center gap-4">
                  <Layers className="h-8 w-8 text-primary" />
-                 <h3 className="text-2xl font-black uppercase tracking-widest text-[#0F172A]">Subject Mastery Matrix</h3>
+                 <h3 className="text-2xl font-black tracking-widest text-[#0F172A]">Subject mastery matrix</h3>
               </div>
               <div className="rounded-[3rem] border-2 border-slate-100 overflow-hidden shadow-2xl">
                  <table className="w-full text-left border-collapse">
                     <thead className="bg-[#0F172A] text-white">
                        <tr className="h-16">
-                          <th className="px-10 font-black uppercase text-[12px] tracking-widest">Registry Hub</th>
-                          <th className="px-6 font-black uppercase text-[12px] tracking-widest text-center">Items</th>
-                          <th className="px-6 font-black uppercase text-[12px] tracking-widest text-center">Correct</th>
-                          <th className="px-6 font-black uppercase text-[12px] tracking-widest text-center">Accuracy</th>
-                          <th className="px-10 font-black uppercase text-[12px] tracking-widest text-right">Score</th>
+                          <th className="px-10 font-black text-[12px] tracking-widest">Registry hub</th>
+                          <th className="px-6 font-black text-[12px] tracking-widest text-center">Items</th>
+                          <th className="px-6 font-black text-[12px] tracking-widest text-center">Correct</th>
+                          <th className="px-6 font-black text-[12px] tracking-widest text-center">Accuracy</th>
+                          <th className="px-10 font-black text-[12px] tracking-widest text-right">Score</th>
                        </tr>
                     </thead>
                     <tbody className="divide-y-2 divide-slate-100">
                        {subjects.length > 0 ? subjects.map((s, idx) => (
                           <tr key={idx} className="h-16 hover:bg-slate-50 transition-colors">
-                             <td className="px-10 font-black text-lg text-[#0F172A] uppercase">{s.name}</td>
+                             <td className="px-10 font-black text-lg text-[#0F172A]">{s.name}</td>
                              <td className="px-6 text-center font-bold text-slate-400 tabular-nums text-lg">{s.total}</td>
                              <td className="px-6 text-center font-black text-emerald-600 tabular-nums text-xl">{s.correct}</td>
                              <td className="px-6 text-center">
@@ -263,24 +262,24 @@ export default function ResultCard({
               <section className="space-y-6">
                  <div className="flex items-center gap-4">
                     <TrendingUp className="h-8 w-8 text-primary" />
-                    <h3 className="text-xl font-black uppercase tracking-widest text-slate-400">Difficulty Distribution</h3>
+                    <h3 className="text-xl font-black tracking-widest text-slate-400">Difficulty distribution</h3>
                  </div>
                  <div className="space-y-6 p-10 bg-slate-50 rounded-[3rem] border border-slate-100">
-                    <Diff label="Easy Items" val={difficulty.easy} color="bg-emerald-500" />
-                    <Diff label="Medium Items" val={difficulty.medium} color="bg-blue-500" />
-                    <Diff label="Expert Items" val={difficulty.hard} color="bg-rose-500" />
+                    <Diff label="Easy items" val={difficulty.easy} color="bg-emerald-500" />
+                    <Diff label="Medium items" val={difficulty.medium} color="bg-blue-500" />
+                    <Diff label="Expert items" val={difficulty.hard} color="bg-rose-500" />
                  </div>
               </section>
 
               <section className="space-y-6">
                  <div className="flex items-center gap-4">
                     <Timer className="h-8 w-8 text-primary" />
-                    <h3 className="text-xl font-black uppercase tracking-widest text-slate-400">Temporal Audit</h3>
+                    <h3 className="text-xl font-black tracking-widest text-slate-400">Temporal audit</h3>
                  </div>
                  <div className="space-y-6 p-10 bg-slate-50 rounded-[3rem] border border-slate-100">
-                    <MetricValue label="Avg Ingestion / Q" val={timeMetrics.avg} />
-                    <MetricValue label="Fastest Decision" val={timeMetrics.fastest} />
-                    <MetricValue label="Slowest Logic Item" val={timeMetrics.slowest} />
+                    <MetricValue label="Avg ingestion / Q" val={timeMetrics.avg} />
+                    <MetricValue label="Fastest decision" val={timeMetrics.fastest} />
+                    <MetricValue label="Slowest logic item" val={timeMetrics.slowest} />
                  </div>
               </section>
            </div>
@@ -289,9 +288,9 @@ export default function ResultCard({
         <div className="mt-auto border-t-2 border-slate-100 p-16 flex items-center justify-between text-slate-300">
            <div className="flex items-center gap-4">
               <ShieldCheck className="h-8 w-8" />
-              <span className="text-[12px] font-black uppercase tracking-[0.5em]">Institutional Merit Registry Verified</span>
+              <span className="text-[12px] font-black tracking-[0.5em]">Institutional merit registry verified</span>
            </div>
-           <p className="text-[12px] font-black uppercase tracking-[0.2em]">Page 2 of 2</p>
+           <p className="text-[12px] font-black tracking-[0.2em]">Page 2 of 2</p>
         </div>
       </div>
 
@@ -306,7 +305,7 @@ function Metric({ label, val, icon, color, bg }: any) {
             {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-7 w-7" }) : null}
          </div>
          <div className="space-y-1">
-            <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[9px]">{label}</p>
+            <p className="text-slate-400 font-black tracking-[0.3em] text-[9px]">{label}</p>
             <p className={cn("text-3xl font-black tracking-tighter tabular-nums", color)}>{val}</p>
          </div>
       </div>
@@ -316,7 +315,7 @@ function Metric({ label, val, icon, color, bg }: any) {
 function DataPoint({ label, val, color }: any) {
    return (
       <div className="text-center space-y-1">
-         <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">{label}</p>
+         <p className="text-slate-400 font-black tracking-widest text-[10px]">{label}</p>
          <p className={cn("text-3xl font-black tabular-nums leading-none", color)}>{val}</p>
       </div>
    );
