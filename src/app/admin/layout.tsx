@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v42.1 [Enterprise Hardened].
- * UPDATED: Reduced mobile logo height for better visual balance.
+ * @fileOverview Admin Layout v42.2 [Enterprise Hardened].
+ * UPDATED: Further reduced mobile logo height for optimized scaling.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -131,11 +131,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   variant="light" 
                   href="/admin"
                   className="flex-shrink-0 -ml-2 md:ml-4" 
-                  imgClassName="h-20 md:h-36 w-auto"
+                  imgClassName="h-20 md:h-28 w-auto"
                   align="left"
                 />
               </div>
-              <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-4 uppercase tracking-[0.2em]
+              <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-4 uppercase tracking-[0.2em]">
                  Admin Hub
               </p>
             </div>

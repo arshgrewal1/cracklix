@@ -245,7 +245,7 @@ function LoginContent() {
       <div className="hidden lg:flex flex-[1.1] bg-[#020B2D] text-white px-12 xl:px-20 py-0 flex-col justify-center relative overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
         <div className="relative z-10 space-y-12 xl:space-y-16 max-w-[650px]">
-          <Logo variant="dark" align="left" className="my-0" imgClassName="h-32 md:h-52" />
+          <Logo variant="dark" align="left" className="my-0" imgClassName="h-24 md:h-40" />
           <div className="space-y-8">
             <h1 className="text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.05]">
               Punjab's Smart <br/> 
@@ -271,7 +271,7 @@ function LoginContent() {
           <Card className="border-none shadow-5xl lg:shadow-none bg-white rounded-[32px] p-6 md:p-12 space-y-6 md:space-y-10">
             <div className="space-y-4 text-center lg:text-left">
                <div className="flex justify-center lg:justify-start -ml-4 md:-ml-8">
-                  <Logo variant="light" align="left" imgClassName="h-28 md:h-36" />
+                  <Logo variant="light" align="left" imgClassName="h-20 md:h-28" />
                </div>
                <div className="space-y-1">
                   <h2 className="text-2xl md:text-3xl font-black tracking-tight text-[#0F172A]">
