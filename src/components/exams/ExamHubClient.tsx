@@ -44,17 +44,16 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v5.5.
- * FIXED: Replaced dark background with clean light theme hero.
- * FIXED: Real data sync for aspirant counts.
- * UPDATED: Simplified terminology (easy words).
+ * @fileOverview Premium Exam Detail Hub v5.7.
+ * FIXED: Corrected syntax error in filtering logic.
+ * FIXED: Ensured Newspaper icon is imported.
  */
 
 export default function ExamHubClient() {
+  const db = useFirestore()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const db = useFirestore()
   const { toast } = useToast()
   const { user, profile, loading: userLoading } = useUser()
 
@@ -103,8 +102,8 @@ export default function ExamHubClient() {
     const mocks = allMocks.filter(m => {
        const isDirectMatch = m.examId === examId || (m.examIds && m.examIds.includes(examId));
        const boardMatch = m.boardId === exam.boardId || (m.boardIds && m.boardIds.includes(exam.boardId));
-       const isGeneric boardTest = boardMatch && (!m.examIds || m.examIds.length === 0 || (m.examIds.length === 1 && m.examIds[0] === 'GENERAL'));
-       return isDirectMatch || boardMatch;
+       const isGenericBoardTest = boardMatch && (!m.examIds || m.examIds.length === 0 || (m.examIds.length === 1 && m.examIds[0] === 'GENERAL'));
+       return isDirectMatch || isGenericBoardTest;
     });
 
     const subjectIdsWithTests = new Set(mocks.map(m => m.learningSubjectId).filter(Boolean));
@@ -209,7 +208,7 @@ export default function ExamHubClient() {
                </div>
             </div>
 
-            {/* QUICK STATS STRIP (EASY WORDS) */}
+            {/* QUICK STATS STRIP */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10 border-t border-slate-100">
                <HeroStat icon={Zap} label="Tests available" val={stats.totalTests} />
                <HeroStat icon={FileStack} label="Old papers" val={groupedContent.PYQ.length} />
@@ -316,7 +315,7 @@ function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
          {data.map((item: any, i: number) => (
             <motion.div key={item.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-               <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white group h-full flex flex-col p-8 md:p-10 relative overflow-hidden">
+               <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2.5rem] bg-white group h-full flex flex-col p-8 md:p-10 relative overflow-hidden">
                   <div className="flex justify-between items-start mb-8">
                      <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-primary shadow-inner">
                         {isNote ? <FileText className="h-7 w-7" /> : isPYQ ? <FileStack className="h-7 w-7" /> : <Zap className="h-7 w-7" />}
