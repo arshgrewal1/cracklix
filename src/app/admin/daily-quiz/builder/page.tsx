@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -62,8 +63,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v44.1 [Lifecycle Hardened].
- * FIXED: Explicitly scoped displayBank and initError to resolve reference errors.
+ * @fileOverview Daily Challenge Builder v45.0 [Move & Delete].
+ * FIXED: Atomic logic to move questions to usedQuestions and purge from bank upon publication.
  */
 
 export default function DailyQuizBuilder() {
@@ -100,7 +101,7 @@ function DailyQuizBuilderContent() {
   const [filterBoard, setFilterBoard] = useState("all")
   const [filterSubject, setSubjectFilter] = useState("all")
   const [filterDifficulty, setDifficultyFilter] = useState("all")
-  const [filterStatus, setFilterStatus] = useState("all")
+  const [filterStatus, setFilterStatus] = useState("UNUSED") // Default to fresh items
   const [searchTerm, setSearchTerm] = useState("")
   const [bankSelection, setBankSelection] = useState<string[]>([])
   
@@ -240,6 +241,7 @@ function DailyQuizBuilderContent() {
 
        batch.set(quizRef, payload, { merge: true });
 
+       // MOVE QUESTIONS TO USED POOL AND DELETE FROM BANK
        if (!isDraft) {
          stagedQuestions.forEach(q => {
             const usedRef = doc(db, "usedQuestions", q.id);
@@ -265,7 +267,7 @@ function DailyQuizBuilderContent() {
        await addDoc(collection(db, "audit_logs"), {
           user: profile?.name || "Administrator",
           action: isEditing ? "QUIZ_UPDATE" : "QUIZ_CREATE",
-          details: `Daily challenge "${payload.title}" synchronized. Questions moved to archive.`,
+          details: `Daily challenge "${payload.title}" synchronized. ${isDraft ? 'Saved as Draft' : 'Questions Moved to usedQuestions Archive'}.`,
           timestamp: serverTimestamp()
        });
 
@@ -307,7 +309,7 @@ function DailyQuizBuilderContent() {
         icon={Flame}
         label="Challenge builder"
         title={isEditing ? "Modify challenge" : "New daily quiz"}
-        subtitle="Configure the official daily preparation items for the database."
+        subtitle="Configure the official daily items for the selection bank."
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
            <button onClick={() => setStagedQuestions([])} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all border-none cursor-pointer">Reset</button>
@@ -362,7 +364,7 @@ function DailyQuizBuilderContent() {
 
          <div className="lg:col-span-8 space-y-10">
             <div className="flex bg-slate-100 p-1.5 rounded-2xl w-fit gap-2">
-               <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Question database</button>
+               <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Database pool</button>
                <button onClick={() => setActiveTab('ASSEMBLY')} className={cn("px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Active area</button>
             </div>
 
@@ -378,7 +380,7 @@ function DailyQuizBuilderContent() {
                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                        <PremiumFilterCard 
                           icon={<Landmark className="text-blue-500" />}
                           label="Board center"
@@ -395,10 +397,10 @@ function DailyQuizBuilderContent() {
                        />
                        <PremiumFilterCard 
                           icon={<Target className="text-purple-500" />}
-                          label="Difficulty center"
-                          value={filterDifficulty}
-                          onChange={setDifficultyFilter}
-                          options={['Easy', 'Medium', 'Hard'].map(d => ({ label: d, value: d }))}
+                          label="Status"
+                          value={filterStatus}
+                          onChange={setFilterStatus}
+                          options={[{ label: 'Unused Items', value: 'UNUSED' }, { label: 'Used Items', value: 'USED' }]}
                        />
                     </div>
 
@@ -444,7 +446,7 @@ function DailyQuizBuilderContent() {
                                 disabled={bankSelection.length === 0} 
                                 className="w-full md:w-auto h-[52px] bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
                               >
-                                 Link staged items <ArrowRight className="h-4 w-4" />
+                                 Link items <ArrowRight className="h-4 w-4" />
                               </Button>
                            </div>
                         </div>
@@ -477,7 +479,7 @@ function DailyQuizBuilderContent() {
                      }) : (
                         <div className="py-24 text-center opacity-30 italic font-black uppercase text-xl flex flex-col items-center gap-4">
                            <AlertCircle className="h-12 w-12 text-slate-300" />
-                           Database bank empty
+                           No items available
                         </div>
                      )}
                   </div>
@@ -485,8 +487,8 @@ function DailyQuizBuilderContent() {
             ) : (
                <div className="space-y-8 animate-in fade-in duration-500">
                   <div className="flex items-center justify-between px-2">
-                     <h3 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Active area composition</h3>
-                     <Badge className="bg-[#0F172A] text-white border-none font-bold text-[10px] px-4 py-1.5 rounded-lg shadow-sm">{stagedQuestions.length} Nodes</Badge>
+                     <h3 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Active area</h3>
+                     <Badge className="bg-[#0F172A] text-white border-none font-bold text-[10px] px-4 py-1.5 rounded-lg shadow-sm">{stagedQuestions.length} items</Badge>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
                      {stagedQuestions.map((q, idx) => (
@@ -499,7 +501,7 @@ function DailyQuizBuilderContent() {
                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {q.id.slice(-8)}</p>
                                  </div>
                               </div>
-                              <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 rounded-xl hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all flex items-center justify-center active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
+                              <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 rounded-xl hover:bg-rose-50 text-slate-300 hover:text-rose-50 transition-all flex items-center justify-center active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
                            </CardContent>
                         </Card>
                      ))}
@@ -532,7 +534,7 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
             onChange={e => onChange(e.target.value)} 
             className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none appearance-none cursor-pointer hover:bg-slate-100 focus:ring-2 focus:ring-primary/10 transition-all text-[#0F172A]"
          >
-            <option value="all">All {label.split(' ')[0]}s</option>
+            <option value="all">All {label}s</option>
             {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
          </select>
       </Card>

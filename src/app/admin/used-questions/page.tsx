@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback } from "react"
@@ -45,12 +46,12 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Used Questions Archive Hub v1.0.
- * Managed collection for questions that have been moved out of the primary Question Bank.
+ * Managed collection for questions that have been moved out of the primary selection bank.
  */
 
 export default function UsedQuestionsPage() {
   const db = useFirestore()
-  const { profile } = useUser()
+  const { user } = useUser()
   const { toast } = useToast()
   
   const [searchTerm, setSearchTerm] = useState("")
@@ -129,6 +130,7 @@ export default function UsedQuestionsPage() {
       const legacyRef = doc(db, "questions", q.id);
       const usedRef = doc(db, "usedQuestions", q.id);
 
+      // Clean metadata before restoring to fresh bank
       const { usedAt, usedBy, mockId, mockName, originalQuestionId, ...rest } = q;
       
       const restoredData = {
@@ -144,7 +146,7 @@ export default function UsedQuestionsPage() {
       await batch.commit();
       
       setQuestions(prev => prev.filter(item => item.id !== q.id));
-      toast({ title: "Question Restored", description: "Node moved back to primary bank pool." });
+      toast({ title: "Question Restored", description: "Item moved back to primary pool." });
     } catch (e) {
       toast({ variant: "destructive", title: "Restore Failed" });
     } finally {
@@ -177,13 +179,13 @@ export default function UsedQuestionsPage() {
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white border border-slate-50 p-6 md:p-8 space-y-6">
          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FilterNode 
-              label="Subject Hub" 
+              label="Subject Center" 
               value={filters.subjectId} 
               onChange={v => setFilters({...filters, subjectId: v})}
               options={subjects?.map(s => ({ label: s.name, value: s.id })) || []}
             />
             <FilterNode 
-              label="Source Mock" 
+              label="Source Test" 
               value={filters.mockId} 
               onChange={v => setFilters({...filters, mockId: v})}
               options={mocks?.map(m => ({ label: m.title, value: m.id })) || []}
@@ -192,7 +194,7 @@ export default function UsedQuestionsPage() {
          <AdminSearchInput
            value={searchTerm}
            onChange={setSearchTerm}
-           placeholder="Search archived statements..."
+           placeholder="Search archived statements or test names..."
          />
       </Card>
 
@@ -252,7 +254,7 @@ export default function UsedQuestionsPage() {
                     <TableCell colSpan={4} className="h-80 text-center">
                        <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
                           <Layers className="h-20 w-20 text-slate-400" />
-                          <p className="font-black text-2xl uppercase tracking-[0.4em]">Archive Empty</p>
+                          <p className="font-black text-2xl uppercase tracking-[0.4em]">Archive empty</p>
                        </div>
                     </TableCell>
                  </TableRow>
@@ -265,14 +267,14 @@ export default function UsedQuestionsPage() {
       {hasMore && questions.length > 0 && (
         <div className="flex justify-center mt-10">
           <Button variant="outline" onClick={() => fetchQuestions(true)} disabled={loading} className="gap-3 h-14 px-12 rounded-full font-black uppercase text-[10px] tracking-widest border-slate-200 shadow-xl bg-white hover:bg-slate-50">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <RefreshCw className="h-4 w-4 text-primary" />} Load Next Page
+            {loading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <RefreshCw className="h-4 w-4 text-primary" />} Load more items
           </Button>
         </div>
       )}
 
       <div className="flex items-center justify-center gap-4 text-slate-300 py-10 opacity-30">
         <ShieldCheck className="h-5 w-5" />
-        <span className="text-[9px] font-black uppercase tracking-[0.5em]">Institutional Archive Hub Secure</span>
+        <span className="text-[9px] font-black uppercase tracking-[0.5em]">Institutional archive secure</span>
       </div>
     </div>
   )

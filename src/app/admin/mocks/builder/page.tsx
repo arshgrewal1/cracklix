@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -70,8 +71,9 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v46.1 [Lifecycle Hardened].
- * FIXED: Explicitly scoped displayBank and initError to resolve reference errors.
+ * @fileOverview Master Mock Builder v47.0 [Strict Lifecycle].
+ * FIXED: Implemented atomic Move-and-Delete logic for question consumption.
+ * Questions are moved to usedQuestions archive and deleted from bank upon publication.
  */
 
 export default function MockBuilderPage() {
@@ -195,7 +197,7 @@ function MockBuilderContent() {
             getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
           ]);
           mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
-          usedSnap.docs.forEach(d => {
+          usedSnap.forEach(d => {
             if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
           });
         }
@@ -259,12 +261,6 @@ function MockBuilderContent() {
        return;
     }
 
-    const hierarchyTypes = ['FULL', 'SUBJECT', 'SECTIONAL'];
-    if (hierarchyTypes.includes(mockData.mockType) && !mockData.learningSubjectId) {
-      toast({ variant: "destructive", title: "Hierarchy failure", description: "Assign to a Subject Hub first." });
-      return;
-    }
-
     setIsPublishing(true)
     const finalId = mockId || `mock-${Date.now()}`
     const mockRef = doc(db, "mocks", finalId)
@@ -290,6 +286,7 @@ function MockBuilderContent() {
       
       batch.set(mockRef, payload, { merge: true });
 
+      // MOVE TO USED QUESTIONS AND DELETE FROM BANK
       if (!isDraft) {
         flatQuestions.forEach(q => {
           const usedRef = doc(db, "usedQuestions", q.id);
@@ -316,6 +313,13 @@ function MockBuilderContent() {
         await updateDoc(doc(db, 'settings', 'stats'), { totalMocks: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
       }
 
+      await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: isEditing ? "MOCK_UPDATE" : "MOCK_CREATE",
+        details: `Mock test "${payload.title}" synchronized. ${isDraft ? 'Saved as Draft' : 'Published & Questions Moved to Archive'}.`,
+        timestamp: serverTimestamp()
+      });
+
       toast({ title: "Database synced" });
       router.push("/admin/mocks")
     } catch (e: any) {
@@ -328,11 +332,6 @@ function MockBuilderContent() {
   const toggleBoardId = (id: string) => {
      const current = mockData.boardIds || [];
      setMockData({ ...mockData, boardIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id] });
-  };
-
-  const toggleExamId = (id: string) => {
-     const current = mockData.examIds || [];
-     setMockData({ ...mockData, examIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id] });
   };
 
   if (isInitializing) return (
@@ -418,24 +417,24 @@ function MockBuilderContent() {
                   >
                     <div className="flex items-center justify-between px-1">
                         <Label className="text-[10px] font-black uppercase text-primary flex items-center gap-2">
-                           <Layers className="h-3 w-3" /> Hierarchy Registry
+                           <Layers className="h-3 w-3" /> Folder mapping
                         </Label>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2 text-left">
-                            <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Subject Hub</Label>
+                            <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Subject hub</Label>
                             <select 
                               value={mockData.learningSubjectId || ""} 
                               onChange={e => setMockData({...mockData, learningSubjectId: e.target.value, seriesId: ""})}
                               className="w-full h-11 bg-blue-50 border-none rounded-xl px-4 font-bold text-[11px] outline-none shadow-sm text-[#0F172A]"
                             >
-                                <option value="">Select Hub</option>
+                                <option value="">Select hub</option>
                                 {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                             </select>
                         </div>
                         <div className="space-y-2 text-left">
-                            <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Series Node</Label>
+                            <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Series node</Label>
                             <select 
                               value={mockData.seriesId || ""} 
                               onChange={e => setMockData({...mockData, seriesId: e.target.value})}
@@ -484,8 +483,8 @@ function MockBuilderContent() {
                           <Landmark className="h-5 w-5" />
                        </div>
                        <div className="space-y-0.5 text-left">
-                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">Board mapping</h4>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Authority center</p>
+                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">Authority hub</h4>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Official board mapping</p>
                        </div>
                     </div>
                     <div className="grid grid-cols-1 gap-2.5 max-h-52 overflow-y-auto custom-scrollbar pr-2">
@@ -525,7 +524,7 @@ function MockBuilderContent() {
                           <CheckCircle2 className="h-5 w-5" />
                        </div>
                        <div className="space-y-0.5 text-left">
-                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">Master governance</h4>
+                          <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">System control</h4>
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Visibility control</p>
                        </div>
                     </div>
@@ -543,8 +542,8 @@ function MockBuilderContent() {
 
         <div className="lg:col-span-8 space-y-10">
            <div className="flex items-center gap-3 bg-slate-100 p-1 rounded-2xl w-fit mb-4">
-              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Question database</button>
-              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeRightTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Active area</button>
+              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Database pool</button>
+              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-tight transition-all bg-transparent border-none cursor-pointer", activeRightTab === 'ASSEMBLY' ? "bg-white text-[#0F172A] shadow-md" : "text-slate-400 hover:text-slate-600")}>Composition area</button>
            </div>
 
            {activeRightTab === 'BANK' ? (
@@ -559,7 +558,7 @@ function MockBuilderContent() {
                      </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                      <PremiumFilterCard 
                         icon={<Landmark className="text-blue-500" />}
                         label="Authority board"
@@ -568,18 +567,18 @@ function MockBuilderContent() {
                         options={boards?.map((b: any) => ({ label: b.abbreviation, value: b.id })) || []}
                      />
                      <PremiumFilterCard 
-                        icon={<GraduationCap className="text-purple-500" />}
-                        label="Exam category"
-                        value={filterExam}
-                        onChange={setFilterExam}
-                        options={uniqueExams.map((e: any) => ({ label: e.name, value: e.id }))}
-                     />
-                     <PremiumFilterCard 
                         icon={<BookOpen className="text-emerald-500" />}
                         label="Subject center"
                         value={filterSubject}
                         onChange={setSubjectFilter}
                         options={subjects?.map((s: any) => ({ label: s.name, value: s.id })) || []}
+                     />
+                     <PremiumFilterCard 
+                        icon={<Target className="text-rose-500" />}
+                        label="Status"
+                        value={filterStatus}
+                        onChange={setFilterStatus}
+                        options={[{ label: 'Unused Items', value: 'UNUSED' }, { label: 'Used Items', value: 'USED' }]}
                      />
                   </div>
 
@@ -587,7 +586,7 @@ function MockBuilderContent() {
                      <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-all duration-500" />
                      <div className="relative flex items-center h-16 bg-white border border-slate-100 rounded-[18px] shadow-sm px-6 gap-4 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
                         <Search className="h-5 w-5 text-slate-400 group-focus-within:text-primary" />
-                        <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-xl" placeholder="Search database bank for statements..." />
+                        <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-xl" placeholder="Search statements..." />
                      </div>
                   </div>
 
@@ -619,14 +618,14 @@ function MockBuilderContent() {
                            <div className="flex-1 space-y-4 text-center md:text-left w-full min-w-0">
                               <div className="space-y-1">
                                  <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Assets Staged</h4>
-                                 <p className="text-sm font-medium text-slate-500">Node selection verified and ready for registry integration.</p>
+                                 <p className="text-sm font-medium text-slate-500">Selection verified and ready for test integration.</p>
                               </div>
                               <Button 
                                 onClick={handleLinkQuestions} 
                                 disabled={bankSelection.length === 0} 
                                 className="w-full md:w-auto h-[52px] bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
                               >
-                                 Link staged items <ArrowRight className="h-4 w-4" />
+                                 Link items <ArrowRight className="h-4 w-4" />
                               </Button>
                            </div>
                         </div>
@@ -660,7 +659,7 @@ function MockBuilderContent() {
                    }) : (
                       <div className="py-24 text-center opacity-20 italic uppercase font-black tracking-widest text-lg flex flex-col items-center gap-4">
                          <Database className="h-12 w-12" />
-                         Database bank empty
+                         No items available
                       </div>
                    )}
                 </div>
@@ -669,7 +668,7 @@ function MockBuilderContent() {
              <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between px-2">
                    <h3 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase flex items-center gap-4">
-                      <Layers className="h-6 w-6 text-primary" /> Active area composition
+                      <Layers className="h-6 w-6 text-primary" /> Active area
                    </h3>
                    <Popover>
                       <PopoverTrigger asChild>
@@ -699,11 +698,11 @@ function MockBuilderContent() {
                                <div className="h-10 w-10 md:h-12 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-lg shadow-xl">{sIdx + 1}</div>
                                <div className="text-left">
                                   <Input value={sec.name} onChange={e => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, name: e.target.value } : s))} className="h-10 p-0 bg-transparent border-none font-black text-xl md:text-2xl focus-visible:ring-0 text-[#0F172A] uppercase" />
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{(sec.questions?.length || 0)} Items linked</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{(sec.questions?.length || 0)} items linked</p>
                                </div>
                             </div>
                             <div className="flex gap-2">
-                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active area' : 'Set focus'}</button>
+                               <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active' : 'Focus'}</button>
                                <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></Button>
                             </div>
                          </div>
@@ -717,7 +716,7 @@ function MockBuilderContent() {
                                   <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
                                </div>
                             ))}
-                            {(!sec.questions || sec.questions.length === 0) && <div className="py-12 text-center opacity-30 italic font-black uppercase text-[10px]">No items linked to this area</div>}
+                            {(!sec.questions || sec.questions.length === 0) && <div className="py-12 text-center opacity-30 italic font-black uppercase text-[10px]">No items linked</div>}
                          </div>
                       </Card>
                    ))}
@@ -744,7 +743,7 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
             onChange={e => onChange(e.target.value)} 
             className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none appearance-none cursor-pointer hover:bg-slate-100 focus:ring-2 focus:ring-primary/10 transition-all text-[#0F172A]"
          >
-            <option value="all">All {label.split(' ')[0]}s</option>
+            <option value="all">All {label}s</option>
             {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
          </select>
       </Card>
