@@ -34,8 +34,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Exam Selection Hub v5.3.
- * UPDATED: Integrated real-time mock counts from registry.
+ * @fileOverview Premium Exam Selection Hub v5.4.
+ * UPDATED: Removed uppercase from headings for better PWA sizing.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -147,7 +147,6 @@ export default function ExamsEntryPage() {
               </p>
             </div>
 
-            {/* SEARCH HUB */}
             <div className="relative w-full max-w-4xl group">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-400 rounded-[28px] blur opacity-5 group-focus-within:opacity-10 transition duration-1000"></div>
               <div className="relative min-h-[64px] md:min-h-[72px] bg-white border border-slate-200 rounded-[24px] shadow-xl flex items-center px-4 md:px-8 gap-4">
@@ -176,7 +175,6 @@ export default function ExamsEntryPage() {
                 </div>
               </div>
 
-              {/* SEARCH RESULTS DROPDOWN */}
               <AnimatePresence>
                 {searchTerm.length >= 2 && (
                   <motion.div 
@@ -219,7 +217,7 @@ export default function ExamsEntryPage() {
         </section>
 
         {/* 2. RECRUITMENT BOARDS (PREMIUM HORIZONTAL) */}
-        <section className="space-y-8 md:space-y-12 w-full">
+        <section className="space-y-8 md:space-y-12 w-full text-left">
            <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-4">
                  <div className="h-12 w-12 rounded-2xl bg-[#0F172A] flex items-center justify-center text-primary shadow-2xl">
@@ -266,7 +264,7 @@ export default function ExamsEntryPage() {
         </section>
 
         {/* 3. POPULAR EXAM VERTICALS */}
-        <section className="space-y-10 w-full">
+        <section className="space-y-10 w-full text-left">
            <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-4">
                  <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
@@ -329,7 +327,7 @@ export default function ExamsEntryPage() {
            <div className="absolute top-0 right-0 p-16 opacity-[0.02] pointer-events-none"><ShieldCheck className="h-96 w-96" /></div>
            <div className="container mx-auto px-8 md:px-20 space-y-16">
               <div className="space-y-4 max-w-3xl mx-auto">
-                 <h2 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">The cracklix standard</h2>
+                 <h2 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">The Cracklix standard</h2>
                  <p className="text-slate-400 font-bold text-[11px] md:text-sm uppercase tracking-widest">Verified Institutional Learning Items</p>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-16">

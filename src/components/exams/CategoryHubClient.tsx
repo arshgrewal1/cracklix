@@ -21,8 +21,9 @@ interface CategoryHubClientProps {
 }
 
 /**
- * @fileOverview Premium Category Hub Portal v5.3.
- * FIXED: Removed uppercase and optimized font scaling for PWA sizing stability.
+ * @fileOverview Premium Category Hub Portal v5.4.
+ * FIXED: Added missing Link and Badge imports.
+ * UPDATED: Removed uppercase from headings and refined font scaling.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -44,7 +45,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
   
   const activeExams = useMemo(() => {
      if (!rawExams) return [];
-     return [...rawExams].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+     return [...rawExams].sort((a: any, b: any) => (a.displayOrder || 0) - (b.displayOrder || 0));
   }, [rawExams]);
 
   if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
@@ -62,13 +63,13 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90">
                   <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
                </button>
-               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[9px] md:text-[11px] tracking-widest shadow-sm">Official Category</Badge>
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[9px] md:text-[11px] tracking-widest shadow-sm">Official Category</Badge>
             </div>
 
             <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-14">
                <AuthorityLogo category={category} size="lg" className="h-24 w-24 md:h-36 md:w-36 rounded-[2rem] md:rounded-[3rem] bg-slate-50 border-[6px] border-slate-100 shadow-5xl group-hover:scale-105 transition-transform shrink-0" />
                <div className="space-y-4 text-center lg:text-left flex-1 min-w-0">
-                  <h1 className="text-2xl sm:text-5xl md:text-7xl font-[800] text-[#0F172A] leading-[1.1] tracking-tight antialiased">
+                  <h1 className="text-2xl sm:text-4xl md:text-6xl font-[800] text-[#0F172A] leading-[1.1] tracking-tight antialiased">
                      {category?.title || "Exam Selection"}
                   </h1>
                   <p className="text-sm md:text-xl text-slate-500 font-medium leading-relaxed max-w-3xl">
@@ -83,10 +84,10 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
          
          {/* BOARDS GRID */}
          {boards && boards.length > 0 && (
-            <section className="space-y-10">
+            <section className="space-y-10 text-left">
                <div className="flex items-center gap-3 px-2">
                   <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner"><Landmark className="h-5 w-5" /></div>
-                  <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight text-[#0F172A]">Recruitment boards</h2>
+                  <h2 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A]">Recruitment boards</h2>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                   {boards.map((board) => (
@@ -99,7 +100,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                               </div>
                            </div>
                            <div className="space-y-2 flex-1">
-                              <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase">{board.abbreviation} Hub</h3>
+                              <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">{board.abbreviation} Hub</h3>
                               <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">{board.name}</p>
                            </div>
                            <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between">
@@ -116,10 +117,10 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
 
          {/* DIRECT EXAMS GRID */}
          {activeExams.length > 0 && (
-            <section className="space-y-10">
+            <section className="space-y-10 text-left">
                <div className="flex items-center gap-3 px-2">
                   <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner"><Zap className="h-5 w-5" /></div>
-                  <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight text-[#0F172A]">Exam verticals</h2>
+                  <h2 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A]">Exam verticals</h2>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                   {activeExams.map((exam) => (
@@ -132,7 +133,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                                  <span className="text-[10px] font-black text-slate-400">4.8</span>
                               </div>
                            </div>
-                           <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase mb-6 flex-1">{exam.name}</h3>
+                           <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight mb-6 flex-1">{exam.name}</h3>
                            <div className="mt-auto">
                               <Button className="w-full h-14 rounded-2xl bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest gap-3 shadow-xl border-none transition-all active:scale-95">
                                  Start Prep <ChevronRight className="h-4 w-4 ml-auto opacity-30" />

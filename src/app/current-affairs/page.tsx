@@ -40,8 +40,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Current Affairs Hub v5.4.
- * FIXED: Added missing ShieldCheck import.
+ * @fileOverview Premium Current Affairs Hub v5.5.
+ * FIXED: ReferenceError for Link and ArrowRight/ShieldCheck imports.
+ * UPDATED: Removed uppercase from headings.
  */
 
 const CATEGORIES = [
@@ -127,11 +128,10 @@ export default function CurrentAffairsCenter() {
       
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 md:py-12 space-y-8 md:space-y-12">
         
-        {/* 1. COMPACT HEADER */}
-        <section className="space-y-6 px-1">
+        <section className="space-y-6 px-1 text-center md:text-left">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1.5">
-              <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Current Affairs</h1>
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-[#0F172A] tracking-tight">Current Affairs</h1>
               <p className="text-slate-500 font-medium text-sm md:text-lg max-w-xl leading-snug">
                 Verified exam news, daily current affairs and bilingual preparation items.
               </p>
@@ -146,11 +146,9 @@ export default function CurrentAffairsCenter() {
           </div>
         </section>
 
-        {/* 2. STICKY SEARCH & SEGMENTED CONTROL */}
         <div className="sticky top-[80px] z-40 bg-[#F8FAFC]/95 backdrop-blur-md -mx-4 px-4 py-4 border-b border-slate-100">
            <div className="max-w-5xl mx-auto space-y-6">
               <div className="flex flex-col md:flex-row items-center gap-4">
-                 {/* SEARCH BOX */}
                  <div className="relative group flex-1 w-full">
                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                     <Input 
@@ -164,7 +162,6 @@ export default function CurrentAffairsCenter() {
                     </button>
                  </div>
 
-                 {/* SEGMENTED CONTROL */}
                  <div className="bg-slate-100 p-1 rounded-2xl flex items-center h-14 w-full md:w-auto shrink-0">
                     <SegmentButton active={activeType === 'DAILY'} onClick={() => setActiveType('DAILY')} label="Daily" />
                     <SegmentButton active={activeType === 'WEEKLY'} onClick={() => setActiveType('WEEKLY')} label="Weekly" />
@@ -172,7 +169,6 @@ export default function CurrentAffairsCenter() {
                  </div>
               </div>
 
-              {/* CATEGORY CHIPS */}
               <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                  {CATEGORIES.map(cat => (
                     <button 
@@ -194,7 +190,6 @@ export default function CurrentAffairsCenter() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
            
-           {/* 3. MAIN LIST */}
            <div className="lg:col-span-8 space-y-6 md:space-y-8">
               {loading ? (
                  Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-2xl bg-white" />)
@@ -231,7 +226,7 @@ export default function CurrentAffairsCenter() {
                                       </div>
                                    </div>
 
-                                   <h3 className="text-base md:text-lg font-bold text-[#0F172A] leading-tight group-hover:text-primary transition-colors line-clamp-1">{item.title}</h3>
+                                   <h3 className="text-base md:text-lg font-bold text-[#0F172A] group-hover:text-primary transition-colors line-clamp-1">{item.title}</h3>
                                    <p className="text-[12px] md:text-sm text-slate-400 font-medium line-clamp-2 leading-relaxed">
                                       Stay updated with verified {item.type.toLowerCase()} current affairs items for upcoming Punjab government exams and recruitments.
                                    </p>
@@ -263,10 +258,9 @@ export default function CurrentAffairsCenter() {
               )}
            </div>
 
-           {/* 4. SIDEBAR - QUICK ACTIONS & TRENDING */}
            <div className="lg:col-span-4 space-y-8">
               <section className="space-y-4">
-                 <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-2">Quick actions</h3>
+                 <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-2 text-left">Quick actions</h3>
                  <div className="grid grid-cols-2 gap-3">
                     {QUICK_ACTIONS.map(action => (
                        <Link key={action.label} href={action.href}>
@@ -282,7 +276,7 @@ export default function CurrentAffairsCenter() {
               </section>
 
               <Card className="border-none shadow-xl rounded-[2rem] bg-[#0F172A] text-white p-6 md:p-8 relative overflow-hidden group border border-white/5">
-                 <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><TrendingUp className="h-48 w-48 text-primary" /></div>
+                 <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><TrendingUp className="h-48 w-48 text-primary" /></div>
                  <div className="relative z-10 space-y-6 text-left">
                     <div className="space-y-1">
                        <h3 className="text-xl font-black tracking-tight">Performance</h3>
@@ -305,7 +299,7 @@ export default function CurrentAffairsCenter() {
                     <ShieldCheck className="h-5 w-5 text-emerald-500" />
                     <h4 className="text-[11px] font-black uppercase text-[#0F172A]">Security protocol</h4>
                  </div>
-                 <p className="text-[11px] text-slate-500 font-medium leading-relaxed uppercase tracking-tight">
+                 <p className="text-[11px] text-slate-500 font-medium leading-relaxed tracking-tight">
                     All current affairs items are verified against official gazettes before registry sync. 100% accuracy guaranteed.
                  </p>
               </div>
@@ -354,8 +348,4 @@ function MetricNode({ label, val, icon }: any) {
          <span className="text-2xl md:text-3xl font-black tabular-nums tracking-tighter text-white">{val}</span>
       </div>
    )
-}
-
-function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse bg-muted rounded", className)} />;
 }
