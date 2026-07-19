@@ -34,7 +34,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
  * @fileOverview Mobile Sidebar v79.0.
- * UPDATED: Increased logo size to h-24/h-44 to match the new bold standard.
+ * UPDATED: Increased logo size to h-24/h-44 and aligned left.
  */
 export default function MobileSidebar({
   onClose,
@@ -86,11 +86,11 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
-      {/* HEADER: Centered Logo + Absolute Close Button */}
-      <div className="h-[120px] md:h-[180px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-center relative">
+      {/* HEADER: Left Aligned Logo + Absolute Close Button */}
+      <div className="h-[120px] md:h-[180px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-start relative">
          <Logo
            variant="light"
-           align="center"
+           align="left"
            className="flex-shrink-0"
            imgClassName="h-24 md:h-44 w-auto"
            onClick={onClose}
