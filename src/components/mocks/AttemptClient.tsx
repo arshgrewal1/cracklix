@@ -29,8 +29,9 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v8.1.
- * FIXED: Reliable state initialization and hardened question retrieval.
+ * @fileOverview Official Mock Attempt Hub v8.2.
+ * FIXED: Accurate "Time Taken" logic - now calculates (Total Duration - Time Left)
+ * to ensure wall-clock drift or pauses don't result in impossible durations.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -233,9 +234,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     });
 
     const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
-    const endTime = Date.now();
-    const durationMs = endTime - startTime;
-    const timeTaken = Math.round(durationMs / 1000);
+    
+    // Accurate timeTaken calculation: (Total Duration) - (Remaining Time)
+    // This correctly ignores wall-clock drift, page exits, or periods when the test was paused.
+    const totalDurationSeconds = (Number(mockData.duration) || 0) * 60;
+    const timeTaken = totalDurationSeconds > 0 
+      ? Math.max(1, totalDurationSeconds - timeLeft)
+      : Math.round((Date.now() - startTime) / 1000);
     
     await stopSession({
       completedQuestions: attemptedCount,
@@ -278,7 +283,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       toast({ variant: "destructive", title: "Submission failed" });
       setIsSubmittingFinal(false);
     }
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime, stopSession, toast]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime, timeLeft, stopSession, toast]);
 
   useEffect(() => {
      if (!isInitializing && !initError && timeLeft === 0 && !isSubmittingFinal && questions.length > 0) {
