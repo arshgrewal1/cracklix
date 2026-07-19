@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -10,8 +11,8 @@ interface SidebarToggleProps {
 }
 
 /**
- * Cracklix Admin Sidebar Toggle v2.1
- * FIXED: Removed unconditional centering to allow side-by-side Logo alignment.
+ * Cracklix Admin Sidebar Toggle v2.2
+ * UPDATED: Increased interactive footprint for 100% reliable one-click response.
  */
 
 export default function SidebarToggle({
@@ -21,14 +22,17 @@ export default function SidebarToggle({
   return (
     <button
       type="button"
-      onClick={onToggle}
+      onClick={(e) => {
+         e.preventDefault();
+         onToggle();
+      }}
       aria-label={
         isOpen
           ? 'Collapse Sidebar'
           : 'Expand Sidebar'
       }
       className={cn(
-        "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
+        "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl cursor-pointer",
         "border border-slate-100 bg-slate-50 text-slate-400 shadow-sm",
         "transition-all duration-200",
         "hover:bg-primary hover:text-white hover:border-primary",
@@ -37,9 +41,9 @@ export default function SidebarToggle({
       )}
     >
       {isOpen ? (
-        <PanelLeft className="h-4 w-4" />
+        <PanelLeft className="h-5 w-5" />
       ) : (
-        <PanelRight className="h-4 w-4" />
+        <PanelRight className="h-5 w-5" />
       )}
     </button>
   );

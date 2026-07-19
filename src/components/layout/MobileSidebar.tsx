@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -33,8 +34,8 @@ import { Badge } from "@/components/ui/badge";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Mobile Sidebar v75.0.
- * UPDATED: Increased logo size for better visibility in the drawer.
+ * @fileOverview Mobile Sidebar v76.0.
+ * UPDATED: Optimized hit areas for navigation links to ensure high responsiveness.
  */
 export default function MobileSidebar({
   onClose,
@@ -107,14 +108,14 @@ export default function MobileSidebar({
       <div className="flex-1 overflow-y-auto custom-scrollbar">
 
         {/* USER PROFILE CARD */}
-        <div className="px-2 py-4">
+        <div className="px-3 py-4">
           <Link
             href="/profile"
             onClick={onClose}
             className="block active:scale-[0.98] transition-all cursor-pointer"
           >
             <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm hover:border-primary/20 transition-all">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50">
                 {profileLoading ? (
                   <Skeleton className="h-full w-full rounded-xl" />
                 ) : (
@@ -126,11 +127,11 @@ export default function MobileSidebar({
                 )}
               </div>
 
-              <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-black text-slate-900 tracking-tight truncate leading-none">
+              <div className="min-w-0 flex-1 text-left">
+                <h3 className="text-base font-black text-slate-900 tracking-tight truncate leading-none">
                   {profile?.name || user?.displayName || "Aspirant"}
                 </h3>
-                <p className="mt-1.5 text-[8px] text-slate-400 font-bold tracking-widest uppercase">
+                <p className="mt-1.5 text-[9px] text-slate-400 font-bold tracking-widest uppercase">
                   Account Center
                 </p>
               </div>
@@ -141,20 +142,21 @@ export default function MobileSidebar({
         </div>
 
         {/* NAVIGATION LIST */}
-        <div className="px-2">
-          <p className="mb-2 px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase">
+        <div className="px-3">
+          <p className="mb-2 px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase text-left">
             Explore
           </p>
 
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {isAdmin && (
               <Link
                 href="/admin"
                 onClick={onClose}
-                className="flex h-12 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] bg-[#0F172A] text-white shadow-lg mb-2 cursor-pointer"
+                className="flex h-14 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] bg-[#0F172A] text-white shadow-lg mb-2 cursor-pointer border-none"
               >
                 <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
-                <span className="font-bold text-[14px] tracking-tight">Admin Console</span>
+                <span className="font-bold text-[15px] tracking-tight">Admin Console</span>
+                <ChevronRight className="ml-auto h-4 w-4 opacity-30" />
               </Link>
             )}
 
@@ -167,9 +169,9 @@ export default function MobileSidebar({
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    "flex h-12 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] cursor-pointer",
+                    "flex h-14 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] cursor-pointer border border-transparent",
                     isActive
-                      ? "bg-blue-50 text-primary shadow-sm"
+                      ? "bg-blue-50 text-primary border-blue-100 shadow-sm"
                       : "text-slate-600 hover:bg-slate-50"
                   )}
                 >
@@ -182,9 +184,11 @@ export default function MobileSidebar({
                     )}
                   />
 
-                  <span className="font-bold text-[14px] tracking-tight">
+                  <span className="font-bold text-[15px] tracking-tight flex-1 text-left">
                     {item.label}
                   </span>
+                  
+                  {isActive && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
                 </Link>
               );
             })}
@@ -192,12 +196,12 @@ export default function MobileSidebar({
         </div>
 
         {/* SHARE APP PROMO */}
-        <div className="px-2 py-6">
-           <div className="bg-[#0B1528] rounded-[1.5rem] p-6 space-y-4 border border-white/5 shadow-xl relative overflow-hidden group">
+        <div className="px-3 py-6">
+           <div className="bg-[#0B1528] rounded-[2rem] p-6 space-y-4 border border-white/5 shadow-xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-16 w-16" /></div>
               <div className="relative z-10 text-left">
                 <h4 className="text-[10px] font-black text-white tracking-[0.3em] uppercase">Community</h4>
-                <p className="text-[13px] font-bold text-slate-400 mt-2">Help others prepare smarter.</p>
+                <p className="text-[14px] font-bold text-slate-400 mt-2">Help others prepare smarter.</p>
               </div>
               <ShareButton 
                 variant="dark" 
@@ -212,7 +216,7 @@ export default function MobileSidebar({
         <Button
           variant="ghost"
           onClick={handleLogout}
-          className="w-full h-14 justify-start text-red-500 text-sm font-black rounded-2xl hover:bg-red-50 transition-all active:scale-95 cursor-pointer"
+          className="w-full h-14 justify-start text-red-500 text-sm font-black rounded-2xl hover:bg-red-50 transition-all active:scale-95 cursor-pointer border-none"
         >
           <LogOut className="h-5 w-5 mr-4" />
           Sign Out

@@ -49,6 +49,7 @@ import {
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -155,14 +156,14 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
       {NAV_GROUPS.map((group) => (
         <div key={group.label} className="space-y-2">
           {isOpen ? (
-            <p className="px-4 text-[10px] font-semibold tracking-tight text-slate-400 uppercase">
+            <p className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
               {group.label}
             </p>
           ) : (
             <div className="h-px bg-slate-50 mx-2" />
           )}
 
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {group.items.map((item) => {
               const Icon = item.icon;
               const isExact = pathname === item.href;
@@ -179,27 +180,27 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
                 <Link
                   href={item.href}
                   className={cn(
-                    "group flex h-10 items-center rounded-xl transition-all duration-300 active:scale-[0.98]",
-                    isOpen ? "gap-4 px-4" : "justify-center",
+                    "group flex items-center rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer select-none border border-transparent",
+                    isOpen ? "h-11 gap-4 px-4 w-full" : "h-12 w-12 mx-auto justify-center",
                     isActive
-                      ? "bg-primary text-white shadow-lg shadow-primary/20"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-primary"
+                      ? "bg-primary text-white shadow-lg shadow-primary/20 border-primary/10"
+                      : "text-slate-500 hover:bg-slate-50 hover:text-primary hover:border-slate-100"
                   )}
                 >
                   <Icon className={cn(
-                    "h-4 w-4 shrink-0",
-                    isActive ? "text-white" : "group-hover:scale-110"
+                    "h-5 w-5 shrink-0",
+                    isActive ? "text-white" : "text-slate-400 group-hover:text-primary group-hover:scale-110"
                   )} />
 
                   <span className={cn(
-                    "truncate text-[13px] font-semibold transition-all duration-300",
-                    isOpen ? "max-w-[150px] opacity-100" : "max-w-0 opacity-0"
+                    "truncate text-[13px] font-bold transition-all duration-300",
+                    isOpen ? "max-w-[150px] opacity-100" : "max-w-0 opacity-0 hidden"
                   )}>
                     {item.label}
                   </span>
 
                   {isOpen && isActive && (
-                    <ChevronRight className="ml-auto h-3 w-3 text-white/50" />
+                    <ChevronRight className="ml-auto h-3.5 w-3.5 text-white/50" />
                   )}
                 </Link>
               );
@@ -208,10 +209,15 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
 
               return (
                 <Tooltip key={item.href}>
-                  <TooltipTrigger asChild>{navItem}</TooltipTrigger>
+                  <TooltipTrigger asChild>
+                    <div className="flex justify-center">
+                      {navItem}
+                    </div>
+                  </TooltipTrigger>
                   <TooltipContent
                     side="right"
                     align="center"
+                    className="bg-[#0F172A] text-white border-none font-bold text-xs"
                   >
                      {item.label}
                   </TooltipContent>
