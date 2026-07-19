@@ -46,7 +46,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 /**
  * @fileOverview Premium Exam Detail Hub v5.2.
- * FIXED: Removed uppercase and optimized font scaling for PWA sizing stability.
+ * FIXED: Renamed query variables to resolve ReferenceError in useCollection.
  */
 
 export default function ExamHubClient() {
@@ -85,8 +85,8 @@ export default function ExamHubClient() {
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
   const { data: rawQuizzes, loading: quizzesLoading } = useCollection<any>(quizzesQuery)
   const { data: results } = useCollection<any>(resultsQuery)
-  const { data: rawPyqs } = useCollection<any>(rawPyqsQuery)
-  const { data: rawNotes } = useCollection<any>(rawNotesQuery)
+  const { data: rawPyqs } = useCollection<any>(pyqsQuery)
+  const { data: rawNotes } = useCollection<any>(notesQuery)
   
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
