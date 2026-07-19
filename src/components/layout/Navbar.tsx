@@ -38,9 +38,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v106.0.
- * UPDATED: Logo positioned exactly to the right of the menu trigger with 0 gap and 0 space.
- * FIXED: Malformed syntax in ProfileMenuItem className attribute.
+ * @fileOverview Cracklix Navigation Hub v107.0.
+ * FIXED: Header logo anchored left with 0 space gap from menu.
+ * FIXED: ProfileMenuItem syntax error.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
