@@ -60,8 +60,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Hub Client v8.0.
- * FIXED: Added missing Navbar and Footer imports to resolve runtime errors.
+ * @fileOverview Premium Assessment Hub Client v8.1.
+ * FIXED: Wrapped TabItem in TabsList to resolve RovingFocusGroup error.
  */
 
 export default function ResultClient() {
@@ -299,7 +299,7 @@ export default function ResultClient() {
     try {
       await new Promise(resolve => setTimeout(resolve, 500)); // Delay to ensure tab transition
       
-      const { jsPDF } = await import('jspdf');
+      const { jsPDF } = await import('jsPDF');
       const { toCanvas } = await import('html-to-image');
       
       // Ensure everything is ready
@@ -381,11 +381,11 @@ export default function ResultClient() {
         
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-12">
            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-              <div className="bg-white border border-slate-100 p-1.5 rounded-2xl flex gap-1 h-14 shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar">
+              <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl flex gap-1 h-14 shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar">
                  <TabItem value="OVERVIEW" label="Performance" icon={BarChart3} />
                  <TabItem value="REVIEW" label="Review Items" icon={List} />
                  <TabItem value="REPORT" label="Official Report" icon={ShieldCheck} />
-              </div>
+              </TabsList>
               <div className="flex gap-3 w-full md:w-auto">
                  <Button onClick={handleSharePdf} disabled={isGeneratingPdf} className="flex-1 md:flex-none h-14 px-8 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl border-none gap-3 active:scale-95 transition-all">
                     {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-5 w-5" />} Download PDF
@@ -522,7 +522,7 @@ export default function ResultClient() {
            <TabsContent value="REVIEW" className="space-y-10 animate-in fade-in duration-500">
               <div className="max-w-4xl mx-auto space-y-10">
                  <div className="bg-white border border-slate-100 rounded-[24px] p-1.5 flex items-center h-14 md:h-16 overflow-hidden">
-                    <ReviewTab active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL')} label="All" count={categorizedNodes.all.length} />
+                    <ReviewTab active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL'} label="All" count={categorizedNodes.all.length} />
                     <ReviewTab active={activeReviewFilter === 'CORRECT'} onClick={() => setActiveReviewFilter('CORRECT')} label="Correct" count={categorizedNodes.correct.length} color="text-emerald-600" />
                     <ReviewTab active={activeReviewFilter === 'WRONG'} onClick={() => setActiveReviewFilter('WRONG')} label="Incorrect" count={categorizedNodes.wrong.length} color="text-rose-600" />
                     <ReviewTab active={activeReviewFilter === 'SKIPPED'} onClick={() => setActiveReviewFilter('SKIPPED')} label="Skipped" count={categorizedNodes.skipped.length} color="text-slate-400" />
@@ -617,26 +617,6 @@ function StatCard({ label, val, icon }: any) {
        </div>
     </Card>
   )
-}
-
-function SummaryPill({ label, val, color, bg }: any) {
-   return (
-      <div className={cn("p-4 md:p-6 rounded-2xl flex flex-col gap-1 text-left shadow-sm border border-slate-50 transition-all", bg)}>
-         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-         <p className={cn("text-xl md:text-3xl font-black tabular-nums leading-none", color)}>{val}</p>
-      </div>
-   )
-}
-
-function InsightRow({ text }: { text: string }) {
-   return (
-      <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50/50 border border-slate-100">
-         <div className="h-6 w-6 rounded-full bg-blue-50 flex items-center justify-center shrink-0 mt-0.5 shadow-inner">
-            <Check className="h-3 w-3 text-primary stroke-[4px]" />
-         </div>
-         <p className="text-sm md:text-base font-medium text-slate-700 leading-relaxed">{text}</p>
-      </div>
-   )
 }
 
 function AuditRow({ label, val, color }: any) {
