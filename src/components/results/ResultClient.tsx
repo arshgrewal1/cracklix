@@ -39,7 +39,9 @@ import {
   Sparkles,
   Check,
   QrCode,
-  ArrowDownRight
+  ArrowDownRight,
+  FileText,
+  TrendingUp
 } from "lucide-react"
 import { 
   Card, 
