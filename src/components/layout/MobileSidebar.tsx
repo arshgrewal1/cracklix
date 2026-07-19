@@ -33,8 +33,8 @@ import { Badge } from "@/components/ui/badge";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Mobile Sidebar v77.0.
- * UPDATED: Increased logo size for better visibility.
+ * @fileOverview Mobile Sidebar v78.0.
+ * UPDATED: Increased header logo size to match new bold PWA standard.
  */
 export default function MobileSidebar({
   onClose,
@@ -92,7 +92,7 @@ export default function MobileSidebar({
            variant="light"
            align="center"
            className="flex-shrink-0"
-           imgClassName="h-24 md:h-40 w-auto"
+           imgClassName="h-28 md:h-48 w-auto"
            onClick={onClose}
          />
          <button

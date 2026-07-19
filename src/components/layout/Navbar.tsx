@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v94.0.
- * UPDATED: Increased logo size to h-16/h-28 for enhanced brand prominence.
+ * @fileOverview Cracklix Navigation Hub v95.0.
+ * UPDATED: Maximized logo size to h-20/h-36 for bold PWA brand prominence.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -94,7 +94,7 @@ export default function Navbar() {
   };
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-20 lg:h-20" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-20 lg:h-24" />;
   }
 
   return (
@@ -126,7 +126,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0"
-                imgClassName="h-16 md:h-28 w-auto"
+                imgClassName="h-20 md:h-36 w-auto"
                 align="left"
               />
             </div>
