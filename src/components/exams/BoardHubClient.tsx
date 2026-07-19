@@ -21,9 +21,8 @@ interface BoardHubClientProps {
 }
 
 /**
- * @fileOverview Premium Board Hub Portal v5.1.
- * FIXED: Removed mandatory user session check to allow guest access.
- * FIXED: Added missing Link import.
+ * @fileOverview Premium Board Hub Portal v5.2.
+ * FIXED: Removed uppercase and optimized responsive font scaling for PWA sizing stability.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
@@ -96,10 +95,10 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-14">
                <AuthorityLogo board={hub} boardId={hubId} size="lg" className="h-24 w-24 md:h-44 md:w-44 rounded-[2rem] md:rounded-[4rem] bg-slate-50 border-[8px] border-slate-100 shadow-5xl group-hover:scale-105 transition-transform" />
                <div className="space-y-3 text-center md:text-left flex-1 min-w-0">
-                  <h1 className="text-3xl md:text-7xl font-black text-[#0F172A] tracking-[0.02em] leading-none uppercase antialiased">
+                  <h1 className="text-2xl sm:text-5xl md:text-7xl font-[800] text-[#0F172A] tracking-tight leading-none antialiased">
                      {hub?.abbreviation || "Board Hub"}
                   </h1>
-                  <p className="text-sm md:text-2xl text-slate-500 font-bold leading-tight uppercase tracking-tight max-w-3xl">
+                  <p className="text-sm md:text-xl text-slate-500 font-bold leading-tight tracking-tight max-w-3xl">
                      {hub?.name || "Official recruitment board portal."}
                   </p>
                   <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 pt-4">

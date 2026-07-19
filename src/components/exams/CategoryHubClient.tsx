@@ -21,8 +21,8 @@ interface CategoryHubClientProps {
 }
 
 /**
- * @fileOverview Premium Category Hub Portal v5.2.
- * FIXED: Imported missing Badge and Link components to resolve ReferenceErrors.
+ * @fileOverview Premium Category Hub Portal v5.3.
+ * FIXED: Removed uppercase and optimized font scaling for PWA sizing stability.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -62,16 +62,16 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90">
                   <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
                </button>
-               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[9px] md:text-[11px] uppercase tracking-widest shadow-sm">Official Category</Badge>
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[9px] md:text-[11px] tracking-widest shadow-sm">Official Category</Badge>
             </div>
 
             <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-14">
-               <AuthorityLogo category={category} size="lg" className="h-24 w-24 md:h-36 md:w-36 rounded-[2rem] md:rounded-[3rem] bg-slate-50 border-[6px] border-slate-100 shadow-5xl group-hover:scale-105 transition-transform" />
+               <AuthorityLogo category={category} size="lg" className="h-24 w-24 md:h-36 md:w-36 rounded-[2rem] md:rounded-[3rem] bg-slate-50 border-[6px] border-slate-100 shadow-5xl group-hover:scale-105 transition-transform shrink-0" />
                <div className="space-y-4 text-center lg:text-left flex-1 min-w-0">
-                  <h1 className="text-3xl md:text-7xl font-black text-[#0F172A] leading-[1.05] tracking-tighter uppercase antialiased">
+                  <h1 className="text-2xl sm:text-5xl md:text-7xl font-[800] text-[#0F172A] leading-[1.1] tracking-tight antialiased">
                      {category?.title || "Exam Selection"}
                   </h1>
-                  <p className="text-sm md:text-2xl text-slate-500 font-medium leading-relaxed max-w-3xl">
+                  <p className="text-sm md:text-xl text-slate-500 font-medium leading-relaxed max-w-3xl">
                      {category?.description || "Select a verified authority hub or exam vertical to start your journey."}
                   </p>
                </div>

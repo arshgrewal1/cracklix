@@ -45,8 +45,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v5.1.
- * FIXED: Removed mandatory user check to allow public browsing of exam verticals.
+ * @fileOverview Premium Exam Detail Hub v5.2.
+ * FIXED: Removed uppercase and optimized font scaling for PWA sizing stability.
  */
 
 export default function ExamHubClient() {
@@ -170,7 +170,7 @@ export default function ExamHubClient() {
                     </div>
                   </div>
                   <div className="space-y-4 text-center md:text-left flex-1 min-w-0">
-                    <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-[1.1] uppercase antialiased truncate-multiline">
+                    <h1 className="text-2xl sm:text-5xl md:text-7xl font-[800] tracking-tight leading-[1.1] antialiased truncate-multiline">
                        {exam.name} <br className="hidden md:block" /> <span className="text-primary italic">Selection Hub.</span>
                     </h1>
                     <p className="text-slate-400 font-medium text-sm md:text-xl leading-relaxed max-w-2xl line-clamp-2">
@@ -200,7 +200,7 @@ export default function ExamHubClient() {
                        {isPinned ? "In My Exams" : "Add to Dashboard"}
                     </Button>
                   )}
-                  <Button asChild className="h-14 md:h-16 px-10 bg-white text-[#0F172A] hover:bg-slate-50 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-2xl border-none">
+                  <Button asChild className="h-14 md:h-16 px-10 bg-white text-[#0F172A] hover:bg-slate-50 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-3xl border-none">
                      <Link href="/pass"><Gem className="h-5 w-5 text-primary" /> Unlock Elite Hub</Link>
                   </Button>
                </div>
