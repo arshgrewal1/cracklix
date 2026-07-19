@@ -60,8 +60,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Hub Client v8.2.
- * FIXED: Syntax errors in ReviewTab onClick handlers.
+ * @fileOverview Premium Assessment Hub Client v8.3.
+ * FIXED: Corrected jsPDF import to use lowercase 'jspdf'.
+ * FIXED: Resolved syntax errors in ReviewTab onClick handlers.
+ * FIXED: Inlined TabsTriggers to resolve Radix UI context issues.
  */
 
 export default function ResultClient() {
@@ -281,7 +283,7 @@ export default function ResultClient() {
      const totalSecs = Number(seconds);
      if (isNaN(totalSecs) || totalSecs <= 0) return "0s";
      const h = Math.floor(totalSecs / 3600);
-     const m = Math.floor((totalSecs % 3600) / 60);
+     const m = Math.floor((seconds % 3600) / 60);
      const s = Math.round(totalSecs % 60);
      
      if (h > 0) return `${h}h ${m}m ${s}s`;
@@ -299,7 +301,7 @@ export default function ResultClient() {
     try {
       await new Promise(resolve => setTimeout(resolve, 500)); // Delay to ensure tab transition
       
-      const { jsPDF } = await import('jsPDF');
+      const { jsPDF } = await import('jspdf');
       const { toCanvas } = await import('html-to-image');
       
       // Ensure everything is ready
@@ -382,9 +384,15 @@ export default function ResultClient() {
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-12">
            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl flex gap-1 h-14 shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar">
-                 <TabItem value="OVERVIEW" label="Performance" icon={BarChart3} />
-                 <TabItem value="REVIEW" label="Review Items" icon={List} />
-                 <TabItem value="REPORT" label="Official Report" icon={ShieldCheck} />
+                 <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-4 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full">
+                    <BarChart3 className="h-4 w-4" /> Performance
+                 </TabsTrigger>
+                 <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-4 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full">
+                    <List className="h-4 w-4" /> Review Items
+                 </TabsTrigger>
+                 <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-4 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full">
+                    <ShieldCheck className="h-4 w-4" /> Official Report
+                 </TabsTrigger>
               </TabsList>
               <div className="flex gap-3 w-full md:w-auto">
                  <Button onClick={handleSharePdf} disabled={isGeneratingPdf} className="flex-1 md:flex-none h-14 px-8 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl border-none gap-3 active:scale-95 transition-all">
@@ -599,14 +607,6 @@ export default function ResultClient() {
   )
 }
 
-function TabItem({ value, label, icon: Icon }: any) {
-   return (
-      <TabsTrigger value={value} className="flex-1 rounded-xl px-4 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full">
-         <Icon className="h-4 w-4" /> {label}
-      </TabsTrigger>
-   )
-}
-
 function StatCard({ label, val, icon }: any) {
   return (
     <Card className="border-none shadow-sm bg-white p-5 md:p-8 rounded-[20px] transition-all hover:shadow-xl hover:translate-y-[-2px] border border-slate-100 text-left relative overflow-hidden">
@@ -664,4 +664,3 @@ function ReviewStatusPill({ userAns, correctAns }: any) {
      ? <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest uppercase">Correct</Badge>
      : <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 rounded-full font-black text-[9px] tracking-widest uppercase">Incorrect</Badge>;
 }
-

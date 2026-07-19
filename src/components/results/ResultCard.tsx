@@ -57,8 +57,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Premium Institutional Score Report v4.0.
- * Designed for A4 Print Precision and 100% Export Reliability.
+ * @fileOverview Premium Institutional Score Report v4.1.
+ * FIXED: Ensured all icons including 'Check' are correctly imported and rendered.
  */
 export default function ResultCard({
   studentName,
@@ -93,7 +93,6 @@ export default function ResultCard({
 
   const grade = getGrade(Number(accuracy) || 0);
 
-  // A4-Optimized Container Styles
   const containerStyle = isForPdf ? {
     width: '1000px',
     minHeight: '1414px',
@@ -114,11 +113,9 @@ export default function ResultCard({
         className="bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl border border-slate-100"
         style={containerStyle}
       >
-        {/* Accent Bars */}
         <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A]" />
         <div className="absolute top-4 left-0 right-0 h-1 bg-[#2563EB]" />
 
-        {/* Header Node */}
         <div className="px-16 pt-16 flex justify-between items-start">
            <div className="flex items-center gap-6">
               <div className="h-16 w-16 bg-[#0F172A] rounded-2xl flex items-center justify-center shadow-xl overflow-hidden">
@@ -135,7 +132,6 @@ export default function ResultCard({
            </div>
         </div>
 
-        {/* Identity & Grade Hub */}
         <div className="px-16 mt-12 flex flex-col items-center">
            <div className="relative">
               <div className="h-48 w-48 rounded-full border-[10px] border-slate-50 flex flex-col items-center justify-center bg-white shadow-2xl relative z-10">
@@ -156,7 +152,6 @@ export default function ResultCard({
            </div>
         </div>
 
-        {/* Primary Metrics Grid */}
         <div className="px-16 mt-14 grid grid-cols-3 gap-6">
            <ReportMetric label="State rank" val={`#${rank}`} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50" />
            <ReportMetric label="Score achieved" val={score} icon={<Zap />} color="text-[#2563EB]" bg="bg-blue-50" />
@@ -166,7 +161,6 @@ export default function ResultCard({
            <ReportMetric label="Engagement rate" val={`${Math.round(((correct + wrong) / (total || 1)) * 100)}%`} icon={<BarChart3 />} color="text-purple-500" bg="bg-purple-50" />
         </div>
 
-        {/* Quant Nodes */}
         <div className="px-16 mt-10">
            <div className="bg-[#F8FAFC] border border-slate-100 rounded-[2.5rem] p-10 flex items-center justify-around shadow-inner">
               <ReportDataPoint label="Total items" val={total} color="text-slate-400" />
@@ -179,7 +173,6 @@ export default function ResultCard({
            </div>
         </div>
 
-        {/* Page 1 Footer Hub */}
         <div className="mt-auto bg-[#0F172A] p-12 flex items-center justify-between text-white">
            <div className="text-left space-y-6">
               <div className="flex items-center gap-4">
@@ -226,7 +219,6 @@ export default function ResultCard({
               </div>
            </div>
 
-           {/* Subject Breakdown Node */}
            <section className="space-y-6 text-left">
               <div className="flex items-center gap-3">
                  <Layers className="h-6 w-6 text-primary" />
@@ -264,7 +256,6 @@ export default function ResultCard({
               </div>
            </section>
 
-           {/* Analytical Observations Hub */}
            <section className="space-y-6 text-left">
               <div className="flex items-center gap-3">
                  <BrainCircuit className="h-6 w-6 text-primary" />
@@ -280,7 +271,6 @@ export default function ResultCard({
               </div>
            </section>
 
-           {/* Multi-Dimensional Audit Grid */}
            <div className="grid grid-cols-2 gap-10 mt-4">
               <section className="space-y-6 text-left">
                  <div className="flex items-center gap-3">
@@ -308,7 +298,6 @@ export default function ResultCard({
            </div>
         </div>
 
-        {/* Global Footer */}
         <div className="mt-auto border-t-2 border-slate-100 p-12 flex items-center justify-between text-slate-300 shrink-0">
            <div className="flex items-center gap-4">
               <ShieldCheck className="h-6 w-6" />
