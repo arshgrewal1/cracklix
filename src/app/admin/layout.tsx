@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v49.0.
- * UPDATED: Logo repositioned to the exact right of the sidebar toggle button.
+ * @fileOverview Admin Layout v50.0.
+ * UPDATED: Logo positioned exactly to the right of the toggle with 0 gap.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -118,7 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
         )}>
           <header className="h-[100px] md:h-[160px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-0">
               <button 
                 onClick={toggleSidebar}
                 className="bg-white border border-slate-200 h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shrink-0 active:scale-95 shadow-sm hover:border-primary/30"

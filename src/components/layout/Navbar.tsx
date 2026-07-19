@@ -38,9 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v97.0.
- * FIXED: Malformed className syntax in ProfileMenuItem.
- * UPDATED: Logo positioned exactly to the right of the menu trigger.
+ * @fileOverview Cracklix Navigation Hub v98.0.
+ * UPDATED: Logo positioned exactly to the right of the menu trigger with 0 gap.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -104,8 +103,8 @@ export default function Navbar() {
         <nav className="w-full h-24 lg:h-40 transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
-            {/* LEFT BLOCK: MENU TRIGGER + LOGO (SIDE-BY-SIDE) */}
-            <div className="flex items-center gap-3 z-10 shrink-0">
+            {/* LEFT BLOCK: MENU TRIGGER + LOGO (ZERO GAP) */}
+            <div className="flex items-center gap-0 z-10 shrink-0">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
                   <button
