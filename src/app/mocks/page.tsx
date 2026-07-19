@@ -57,8 +57,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Practice Hub v6.3.
- * UPDATED: Optimized categories to include Computer and History.
+ * @fileOverview Premium Practice Hub v6.4.
+ * UPDATED: Renamed Computer to ICT.
  */
 
 const QUICK_ACTIONS = [
@@ -77,7 +77,7 @@ const CATEGORIES = [
   { id: "punjabi", label: "Punjabi", icon: GraduationCap, color: "from-rose-400 to-pink-600" },
   { id: "english", label: "English", icon: Languages, color: "from-emerald-400 to-teal-600" },
   { id: "history", label: "History", icon: History, color: "from-orange-400 to-red-600" },
-  { id: "computer", label: "Computer", icon: Cpu, color: "from-slate-400 to-slate-600" },
+  { id: "ict", label: "ICT", icon: Cpu, color: "from-slate-400 to-slate-600" },
 ];
 
 const FILTER_CHIPS = [
@@ -124,7 +124,7 @@ export default function MockTestsPage() {
     return rawMocks.filter(m => {
       const search = searchTerm.toLowerCase().trim()
       const matchesSearch = !search || m.title?.toLowerCase().includes(search)
-      const matchesCategory = !selectedCategory || m.title?.toLowerCase().includes(selectedCategory.toLowerCase()) || m.subjectId === selectedCategory
+      const matchesCategory = !selectedCategory || m.title?.toLowerCase().includes(selectedCategory.toLowerCase()) || m.learningSubjectId === selectedCategory
       
       const res = results?.find(r => r.mockId === m.id)
       if (activeFilter === 'COMPLETED') return matchesSearch && matchesCategory && !!res
@@ -227,7 +227,7 @@ export default function MockTestsPage() {
                  ) : filteredMocks.length > 0 ? (
                     filteredMocks.map((mock, i) => {
                        const res = results?.find(r => r.mockId === mock.id);
-                       const board = boards?.find(b => b.id === (mock.boardIds?.[0] || mock.boardId));
+                       const board = boards?.find(b => b.id === (mock.boardId || mock.boardIds?.[0]));
                        return <PremiumMockCard key={mock.id} mock={mock} result={res} board={board} isPassActive={isPassActive} index={i} />
                     })
                  ) : (

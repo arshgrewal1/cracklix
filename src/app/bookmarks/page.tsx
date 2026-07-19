@@ -19,9 +19,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Bookmarks Hub v6.0.
- * UPDATED: Integrated specific filters for Math, CA, Reasoning, GK, History, and Computer.
- * DESIGN: Removed all uppercase from filter labels.
+ * @fileOverview Official Bookmarks Hub v7.0.
+ * UPDATED: Renamed Computer to ICT and expanded filtering logic.
  */
 
 const FILTER_CHIPS = [
@@ -31,7 +30,7 @@ const FILTER_CHIPS = [
   { id: "CA", label: "Current affairs", icon: Newspaper },
   { id: "GK", label: "General knowledge", icon: Landmark },
   { id: "History", label: "History", icon: HistoryIcon },
-  { id: "Computer", label: "Computer", icon: Cpu },
+  { id: "ICT", label: "ICT", icon: Cpu },
   { id: "Notes", label: "Study notes", icon: BookOpen },
 ];
 
@@ -71,7 +70,8 @@ export default function BookmarksPage() {
        const matchesFilter = activeFilter === 'all' || 
           sub.includes(activeFilter.toLowerCase()) ||
           type.includes(activeFilter.toLowerCase()) ||
-          (activeFilter === 'CA' && (sub.includes('current') || type.includes('ca')));
+          (activeFilter === 'CA' && (sub.includes('current') || type.includes('ca'))) ||
+          (activeFilter === 'ICT' && (sub.includes('computer') || sub.includes('it') || sub.includes('ict')));
 
        return matchesSearch && matchesFilter;
     }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -151,8 +151,8 @@ export default function BookmarksPage() {
                    className="h-14 md:h-16 pl-14 pr-14 rounded-2xl bg-white border-slate-200 shadow-xl text-base md:text-lg font-bold placeholder:text-slate-200 focus:ring-4 focus:ring-primary/5 transition-all"
                  />
                  {searchTerm && (
-                   <button onClick={() => setSearchTerm('')} className="absolute right-6 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all">
-                      <X className="h-5 w-5 text-slate-400" />
+                   <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all">
+                      <X className="h-4 w-4 text-slate-400" />
                    </button>
                  )}
               </div>
@@ -294,7 +294,7 @@ export default function BookmarksPage() {
              )}
           </div>
           <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-center shrink-0">
-             <Button onClick={() => setIsViewing(false)} className="rounded-full px-12 h-14 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] tracking-widest">
+             <Button onClick={() => setIsViewing(false)} className="rounded-full px-12 h-14 bg-[#0F172A] hover:bg-black font-bold text-[10px] tracking-widest">
                 Close
              </Button>
           </div>
