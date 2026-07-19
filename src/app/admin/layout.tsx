@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v47.0.
- * UPDATED: Standardized logo size to match header.
+ * @fileOverview Admin Layout v48.0.
+ * UPDATED: Increased header height and logo size for bold brand prominence.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -117,7 +117,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
           isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
         )}>
-          <header className="h-[80px] md:h-[110px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
+          <header className="h-[100px] md:h-[160px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
             <div className="flex items-center gap-2">
               <button 
                 onClick={toggleSidebar}
@@ -130,7 +130,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   variant="light" 
                   href="/admin"
                   className="flex-shrink-0" 
-                  imgClassName="h-20 md:h-36 w-auto"
+                  imgClassName="h-24 md:h-44 w-auto"
                   align="left"
                 />
               </div>

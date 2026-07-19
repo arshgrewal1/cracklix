@@ -38,8 +38,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v95.0.
- * UPDATED: Maximized logo size to h-20/h-36 for bold PWA brand prominence.
+ * @fileOverview Cracklix Navigation Hub v96.1.
+ * FIXED: Syntax error in ProfileMenuItem className attribute.
+ * UPDATED: Increased logo size to h-24 md:h-44 for bold prominence.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -94,13 +95,13 @@ export default function Navbar() {
   };
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-20 lg:h-24" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-24 lg:h-32" />;
   }
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
-        <nav className="w-full h-20 lg:h-24 transition-all">
+        <nav className="w-full h-24 lg:h-40 transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU TRIGGER + LOGO (SIDE-BY-SIDE) */}
@@ -126,7 +127,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0"
-                imgClassName="h-20 md:h-36 w-auto"
+                imgClassName="h-24 md:h-44 w-auto"
                 align="left"
               />
             </div>
