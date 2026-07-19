@@ -60,10 +60,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Hub Client v8.3.
- * FIXED: Corrected jsPDF import to use lowercase 'jspdf'.
- * FIXED: Resolved syntax errors in ReviewTab onClick handlers.
- * FIXED: Inlined TabsTriggers to resolve Radix UI context issues.
+ * @fileOverview Premium Assessment Hub Client v8.4.
+ * FIXED: Optimized header to single-row layout without scrolling.
+ * UPDATED: Renamed "Review Items" to "Review test".
  */
 
 export default function ResultClient() {
@@ -295,16 +294,14 @@ export default function ResultClient() {
     setIsGeneratingPdf(true);
     toast({ title: "Generating report", description: "Audit node sync in progress..." });
     
-    // Switch to report tab to ensure visibility
     setActiveMainTab("REPORT");
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Delay to ensure tab transition
+      await new Promise(resolve => setTimeout(resolve, 500)); 
       
       const { jsPDF } = await import('jspdf');
       const { toCanvas } = await import('html-to-image');
       
-      // Ensure everything is ready
       await document.fonts.ready;
 
       const p1 = document.getElementById('cracklix-result-page-1');
@@ -321,7 +318,6 @@ export default function ResultClient() {
         style: { transform: 'scale(1)' }
       };
 
-      // Ensure images are fully loaded
       const waitForImages = async (el: HTMLElement) => {
          const imgs = Array.from(el.querySelectorAll('img'));
          await Promise.all(imgs.map(img => {
@@ -340,12 +336,10 @@ export default function ResultClient() {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      // Page 1
       const canvas1 = await toCanvas(p1, captureOptions);
       const img1 = canvas1.toDataURL('image/jpeg', 1.0);
       pdf.addImage(img1, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
       
-      // Page 2
       const canvas2 = await toCanvas(p2, captureOptions);
       const img2 = canvas2.toDataURL('image/jpeg', 1.0);
       pdf.addPage();
@@ -381,24 +375,36 @@ export default function ResultClient() {
 
       <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-16 pb-40">
         
-        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-12">
-           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-              <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl flex gap-1 h-14 shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar">
-                 <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-4 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full">
-                    <BarChart3 className="h-4 w-4" /> Performance
-                 </TabsTrigger>
-                 <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-4 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full">
-                    <List className="h-4 w-4" /> Review Items
-                 </TabsTrigger>
-                 <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-4 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full">
-                    <ShieldCheck className="h-4 w-4" /> Official Report
-                 </TabsTrigger>
-              </TabsList>
-              <div className="flex gap-3 w-full md:w-auto">
-                 <Button onClick={handleSharePdf} disabled={isGeneratingPdf} className="flex-1 md:flex-none h-14 px-8 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl border-none gap-3 active:scale-95 transition-all">
-                    {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-5 w-5" />} Download PDF
+        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
+           <div className="flex flex-col xl:flex-row justify-between items-center gap-6">
+              <div className="bg-white border border-slate-100 p-1.5 rounded-2xl flex flex-col md:flex-row gap-2 h-auto md:h-14 shadow-sm w-full xl:w-auto">
+                 <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-between gap-1 overflow-x-auto no-scrollbar">
+                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
+                       <BarChart3 className="h-4 w-4" /> Performance
+                    </TabsTrigger>
+                    <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
+                       <List className="h-4 w-4" /> Review test
+                    </TabsTrigger>
+                    <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 font-bold text-[11px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
+                       <ShieldCheck className="h-4 w-4" /> Official Report
+                    </TabsTrigger>
+                 </TabsList>
+              </div>
+
+              <div className="flex items-center gap-3 w-full xl:w-auto">
+                 <Button 
+                   onClick={handleSharePdf} 
+                   disabled={isGeneratingPdf} 
+                   className="flex-1 xl:flex-none h-14 md:h-16 px-8 md:px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-xl border-none gap-3 transition-all active:scale-95"
+                 >
+                    {isGeneratingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-5 w-5" />} 
+                    Download PDF
                  </Button>
-                 <Button onClick={() => router.push(`/mocks/instructions?id=${mockId}`)} variant="outline" className="flex-1 md:flex-none h-14 px-8 border-2 border-slate-100 rounded-2xl font-bold bg-white hover:bg-slate-50 gap-3 transition-all active:scale-95">
+                 <Button 
+                   onClick={() => router.push(`/mocks/instructions?id=${mockId}`)} 
+                   variant="outline" 
+                   className="flex-1 xl:flex-none h-14 md:h-16 px-8 md:px-10 border-2 border-slate-200 rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest bg-white hover:bg-slate-50 text-[#0F172A] gap-3 transition-all active:scale-95"
+                 >
                     <RotateCcw className="h-4 w-4" /> Retake
                  </Button>
               </div>
@@ -485,7 +491,7 @@ export default function ResultClient() {
                              </thead>
                              <tbody className="divide-y divide-slate-50">
                                 {analysis.subjects.map((sub, i) => (
-                                   <tr key={i} className="h-20 hover:bg-slate-50 transition-colors group">
+                                   <tr key={i} className="h-20 hover:bg-slate-50/50 transition-colors group">
                                       <td className="px-8 font-bold text-[#0F172A]">{sub.name}</td>
                                       <td className="px-4 text-center font-medium text-slate-500 tabular-nums">{sub.total}</td>
                                       <td className="px-4 text-center">
@@ -529,7 +535,7 @@ export default function ResultClient() {
 
            <TabsContent value="REVIEW" className="space-y-10 animate-in fade-in duration-500">
               <div className="max-w-4xl mx-auto space-y-10">
-                 <div className="bg-white border border-slate-100 rounded-[24px] p-1.5 flex items-center h-14 md:h-16 overflow-hidden">
+                 <div className="bg-white border border-slate-100 rounded-[2rem] p-2 flex flex-row items-center justify-between shadow-lg h-16 md:h-20">
                     <ReviewTab active={activeReviewFilter === 'ALL'} onClick={() => setActiveReviewFilter('ALL')} label="All" count={categorizedNodes.all.length} />
                     <ReviewTab active={activeReviewFilter === 'CORRECT'} onClick={() => setActiveReviewFilter('CORRECT')} label="Correct" count={categorizedNodes.correct.length} color="text-emerald-600" />
                     <ReviewTab active={activeReviewFilter === 'WRONG'} onClick={() => setActiveReviewFilter('WRONG')} label="Incorrect" count={categorizedNodes.wrong.length} color="text-rose-600" />
@@ -645,13 +651,14 @@ function TimeAuditNode({ label, val }: any) {
 function ReviewTab({ active, onClick, label, count, color = "text-[#0F172A]" }: any) {
    return (
       <button 
-        onClick={onClick}
+        onClick={() => onClick()}
         className={cn(
-          "flex-1 h-full rounded-[18px] flex items-center justify-center gap-2 transition-all font-bold text-[10px] md:text-xs",
-          active ? "bg-[#0F172A] text-white shadow-xl" : "bg-transparent text-slate-400 hover:bg-slate-50"
+          "flex-1 h-full rounded-[1.25rem] flex items-center justify-center gap-2 transition-all font-[800] text-[10px] md:text-[13px] uppercase tracking-tight px-2",
+          active ? "bg-[#0F172A] text-white shadow-xl scale-105 z-10" : "bg-transparent text-slate-400 hover:text-slate-600"
         )}
       >
-         {label} <span className={cn("tabular-nums px-1.5 py-0.5 rounded-md text-[9px] font-black", active ? "bg-white/10" : "bg-slate-50", !active && color)}>{count}</span>
+         <span className="truncate">{label}</span>
+         <span className={cn("tabular-nums px-2 py-0.5 rounded-lg text-[9px] font-black", active ? "bg-white/10" : "bg-slate-50", !active && color)}>{count}</span>
       </button>
    )
 }
