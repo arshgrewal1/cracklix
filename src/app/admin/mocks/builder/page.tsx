@@ -56,7 +56,8 @@ import {
   DocumentData, 
   updateDoc, 
   increment, 
-  addDoc 
+  addDoc,
+  deleteDoc
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { MockType, Difficulty, AccessLevel, LanguageDisplayMode, MockAssignmentMode, ExamSection, Exam } from "@/types"
@@ -69,8 +70,8 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v46.0 [Enterprise Hardened].
- * FIXED: Scoped displayBank and initError variables correctly.
+ * @fileOverview Master Mock Builder v46.1 [Lifecycle Hardened].
+ * FIXED: Explicitly scoped displayBank and initError to resolve reference errors.
  */
 
 export default function MockBuilderPage() {

@@ -24,8 +24,8 @@ import { clearAppCache } from "@/app/actions/maintenance"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Admin Maintenance Terminal v3.6.
- * FIXED: Explicitly typed confirming tool parameters and added missing Input import.
+ * @fileOverview Master Admin Maintenance Terminal v3.7.
+ * ADDED: Scaleable V3 Migration Tool for Question Bank normalization.
  */
 
 export default function MaintenancePage() {
@@ -38,6 +38,42 @@ export default function MaintenancePage() {
   const [deleteMatch, setDeleteMatch] = useState("")
 
   const tools = [
+    { 
+      id: 'migration-v3', 
+      label: 'Scaleable V3 Migration', 
+      desc: 'Initializes missing lifecycle fields (used, status, usageCount) for all legacy questions.', 
+      icon: <Database className="h-5 w-5 text-primary" />, 
+      action: async () => {
+         if (!db) return;
+         const qSnap = await getDocs(collection(db, "mcqBank"));
+         const legacySnap = await getDocs(collection(db, "questions"));
+         
+         const batch = writeBatch(db);
+         let migrated = 0;
+
+         const processDocs = (snap: any) => {
+           snap.docs.forEach((d: any) => {
+             const data = d.data();
+             if (data.status === undefined || data.used === undefined) {
+                batch.update(d.ref, {
+                   status: data.status || 'UNUSED',
+                   used: data.used || false,
+                   usageCount: data.usageCount || 0,
+                   usedInMocks: data.usedInMocks || [],
+                   updatedAt: serverTimestamp()
+                });
+                migrated++;
+             }
+           });
+         };
+
+         processDocs(qSnap);
+         processDocs(legacySnap);
+
+         if (migrated > 0) await batch.commit();
+         toast({ title: "Migration Complete", description: `${migrated} nodes normalized.` });
+      }
+    },
     { 
       id: 'cache', 
       label: 'Clear Application Cache', 
@@ -94,22 +130,6 @@ export default function MaintenancePage() {
             updatedAt: serverTimestamp()
          });
          toast({ title: "Force Logout Node Broadcasted" });
-      }
-    },
-    { 
-      id: 'validate', 
-      label: 'Validate Firestore Schema', 
-      desc: 'Scans for orphan exam nodes and missing board mappings.', 
-      icon: <ShieldCheck className="h-5 w-5 text-emerald-500" />, 
-      action: async () => {
-         if (!db) return;
-         const examsSnap = await getDocs(collection(db, "exams"));
-         const orphans = examsSnap.docs.filter(d => !d.data().boardId || !d.data().categoryId);
-         if (orphans.length > 0) {
-            toast({ variant: "destructive", title: "Integrity Violation", description: `Found ${orphans.length} orphan verticals.` });
-         } else {
-            toast({ title: "Integrity Verified", description: "All registry nodes mapped correctly." });
-         }
       }
     }
   ];

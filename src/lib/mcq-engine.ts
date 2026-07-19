@@ -17,8 +17,8 @@ import {
 } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional MCQ Filtering Engine v1.2 [RESILIENT].
- * FIXED: Optimized failover logic and ensured diagnostics don't overwrite successful fetches.
+ * @fileOverview Institutional MCQ Filtering Engine v1.3 [Lifecycle Hardened].
+ * FIXED: Optimized failover logic and ensured diagnostics handle both 'UNUSED' and undefined status as 'Fresh'.
  */
 
 export type FilterPriority = 'BOARD' | 'VERTICAL' | 'SUBJECT' | 'LANGUAGE' | 'OTHER';

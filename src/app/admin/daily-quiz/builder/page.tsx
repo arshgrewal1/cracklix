@@ -51,7 +51,8 @@ import {
   DocumentData, 
   updateDoc, 
   increment, 
-  addDoc 
+  addDoc,
+  deleteDoc
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -61,8 +62,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v44.0 [Enterprise Hardened].
- * FIXED: Scoped displayBank and initError correctly.
+ * @fileOverview Daily Challenge Builder v44.1 [Lifecycle Hardened].
+ * FIXED: Explicitly scoped displayBank and initError to resolve reference errors.
  */
 
 export default function DailyQuizBuilder() {
@@ -135,6 +136,8 @@ function DailyQuizBuilderContent() {
 
       setQuestionBank(result.data);
       setDiagnostic(result.diagnostic);
+    } catch (e: any) {
+      setInitError("Registry connection degraded. Retrying...");
     } finally {
       setBankLoading(false);
     }
@@ -166,7 +169,7 @@ function DailyQuizBuilderContent() {
              getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
           ]);
           mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
-          usedSnap.docs.forEach(d => {
+          usedSnap.forEach(d => {
             if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
           });
         }
@@ -177,7 +180,7 @@ function DailyQuizBuilderContent() {
     };
 
     hydrateExisting().catch(err => {
-      setInitError("Failed to synchronize existing challenge data.");
+      setInitError("Failed to synchronize challenge data.");
       setIsInitializing(false);
     });
   }, [db, existingQuiz, isEditing]);
