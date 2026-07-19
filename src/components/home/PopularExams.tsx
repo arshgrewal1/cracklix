@@ -12,7 +12,9 @@ import {
   Lock,
   ShieldCheck,
   RefreshCw,
-  Landmark
+  Landmark,
+  Star,
+  CheckCircle2
 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,8 +29,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v51.5.
- * UPDATED: Removed uppercase from recruitment titles and labels.
+ * @fileOverview Institutional Popular Exams Hub v52.0.
+ * FIXED: Imported missing Star and CheckCircle2 icons.
+ * FIXED: Removed all forced uppercase styling.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -120,7 +123,7 @@ export default function PopularExams() {
            </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
            {loading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-64 w-full rounded-[2.5rem] bg-slate-50" />
