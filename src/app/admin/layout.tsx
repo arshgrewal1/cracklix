@@ -15,7 +15,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v54.0.
+ * @fileOverview Admin Layout v55.0.
  * UPDATED: Logo positioned exactly to the right of the toggle with 0 gap and 0 space.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -121,7 +121,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center gap-0">
               <button 
                 onClick={toggleSidebar}
-                className="bg-white border border-slate-200 h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shrink-0 active:scale-95 shadow-sm hover:border-primary/30"
+                className="bg-white border border-slate-200 h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shrink-0 active:scale-95 shadow-sm hover:border-primary/30 cursor-pointer"
               >
                 <Menu className="w-5 h-5 md:w-6 md:h-6" />
               </button>

@@ -38,9 +38,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v103.0.
+ * @fileOverview Cracklix Navigation Hub v104.0.
  * UPDATED: Logo positioned exactly to the right of the menu trigger with 0 gap and 0 space.
- * FIXED: Malformed className in ProfileMenuItem causing syntax error.
+ * FIXED: Ensured syntax correctness in ProfileMenuItem.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -214,7 +214,7 @@ export default function Navbar() {
     return (
       <Link href={href} className={cn(
         "text-[14px] xl:text-[15px] font-semibold transition-all whitespace-nowrap border-b-2 py-1", 
-        active ? "text-primary border-primary" : "text-slate-500 border-transparent hover:text-primary hover:border-primary/20"
+        active ? "text-primary border-primary" : "text-slate-50 border-transparent hover:text-primary hover:border-primary/20"
       )}>
         {label}
       </Link>

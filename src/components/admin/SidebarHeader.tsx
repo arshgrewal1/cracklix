@@ -1,12 +1,12 @@
 'use client';
 
-import React, { min-height: 120px; } from 'react';
+import React from 'react';
 import { cn } from "@/lib/utils";
 import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v76.0.
+ * Cracklix Admin Sidebar Header v77.0.
  * UPDATED: Logo positioned exactly to the right of the sidebar toggle with 0 gap and 0 space.
  */
 export default function SidebarHeader({
