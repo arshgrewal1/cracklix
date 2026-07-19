@@ -54,8 +54,9 @@ const LANGUAGE_MODES = [
 ];
 
 /**
- * @fileOverview Institutional Bulk Ingestion Hub v84.1.
- * UPDATED: Replaced 'node' with 'item'.
+ * @fileOverview Institutional Bulk Ingestion Hub v84.2.
+ * FIXED: Resolved JSX tag mismatch (Button/button) causing build failure.
+ * UPDATED: Removed all remaining uppercase styling for PWA optimization.
  */
 export default function BulkIngestionPage() {
   const router = useRouter()
@@ -165,7 +166,7 @@ export default function BulkIngestionPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
            <button 
              onClick={() => setStagedQuestions([])} 
-             className="h-[52px] md:h-11 px-6 rounded-xl border border-slate-200 font-bold text-[11px] uppercase bg-white hover:bg-slate-50 transition-all flex items-center justify-center min-w-0"
+             className="h-[52px] md:h-11 px-6 rounded-xl border border-slate-200 font-bold text-[11px] bg-white hover:bg-slate-50 transition-all flex items-center justify-center min-w-0"
            >
               Reset
            </button>
@@ -175,7 +176,7 @@ export default function BulkIngestionPage() {
              className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-[52px] md:h-11 px-8 font-bold text-[11px] gap-3 shadow-xl w-full min-w-0"
            >
               {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4 text-primary fill-current" />} Parse
-           </button>
+           </Button>
            <Button 
              onClick={handleFinalCommit} 
              disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
@@ -192,7 +193,7 @@ export default function BulkIngestionPage() {
               <div className="space-y-6">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2 w-full">
-                        <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase tracking-tight">Question Format</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 ml-1 tracking-tight">Question format</Label>
                         <Select value={metadata.parserFormat} onValueChange={(v: ParserFormat) => setMetadata({...metadata, parserFormat: v})}>
                         <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold px-4 w-full">
                             <SelectValue placeholder="Format" />
@@ -211,7 +212,7 @@ export default function BulkIngestionPage() {
                     </div>
 
                     <div className="space-y-2 w-full">
-                        <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase tracking-tight">Language Mode</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 ml-1 tracking-tight">Language mode</Label>
                         <Select value={metadata.languageMode} onValueChange={(v) => setMetadata({...metadata, languageMode: v})}>
                         <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold px-4 w-full">
                             <SelectValue />
@@ -232,14 +233,14 @@ export default function BulkIngestionPage() {
 
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2 w-full">
-                       <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Board Hub</Label>
+                       <Label className="text-[9px] font-bold text-slate-400 ml-1">Board hub</Label>
                        <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
                           <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold w-full"><SelectValue placeholder="Board" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white">{boards?.map(b => <SelectItem key={b.id} value={b.id} className="cursor-pointer">{b.abbreviation}</SelectItem>)}</SelectContent>
                        </Select>
                     </div>
                     <div className="space-y-2 w-full">
-                       <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Subject Entry</Label>
+                       <Label className="text-[9px] font-bold text-slate-400 ml-1">Subject entry</Label>
                        <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
                           <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold w-full"><SelectValue placeholder="Subject" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white">{subjects?.map(s => <SelectItem key={s.id} value={s.id} className="cursor-pointer">{s.name}</SelectItem>)}</SelectContent>
@@ -248,7 +249,7 @@ export default function BulkIngestionPage() {
                  </div>
 
                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Raw Data Feed</Label>
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1">Raw data feed</Label>
                     <Textarea 
                        value={rawText} 
                        onChange={(e) => setRawText(e.target.value)} 
@@ -270,7 +271,7 @@ export default function BulkIngestionPage() {
 
         <div className="lg:col-span-7 space-y-6 w-full min-w-0">
            <div className="flex items-center justify-between px-2">
-              <h3 className="text-xl font-bold text-[#0F172A] flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Staging Hub</h3>
+              <h3 className="text-xl font-bold text-[#0F172A] flex items-center gap-4"><Layers className="h-6 w-6 text-primary" /> Staging hub</h3>
               <Badge className="bg-[#0F172A] text-white border-none font-bold text-[10px] px-4 py-1.5 rounded-lg shadow-sm">{stagedQuestions.length} Items</Badge>
            </div>
            <div className="space-y-6 w-full">
@@ -278,15 +279,17 @@ export default function BulkIngestionPage() {
                  <Card key={q.id} className="border-none shadow-lg rounded-[2.5rem] bg-white overflow-hidden border border-slate-100 relative group w-full">
                     <div className={cn("absolute top-0 left-0 w-2 h-full transition-colors", q.isValid ? "bg-emerald-500" : "bg-rose-500")} />
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
-                       <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] px-4 py-1 rounded-lg shadow-sm">Staged Item #{idx + 1}</Badge>
-                       <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-8 w-8 text-rose-500 hover:bg-rose-50 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"><Trash2 className="h-4 w-4" /></button>
+                       <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] px-4 py-1 rounded-lg shadow-sm">Staged item #{idx + 1}</Badge>
+                       <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-8 w-8 text-rose-500 hover:bg-rose-50 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+                          <Trash2 className="h-4 w-4" />
+                       </button>
                     </CardHeader>
                     <CardContent className="p-6 md:p-10 pt-4 w-full overflow-hidden">
                        {q.isValid ? (
                           <QuestionRenderer question={q} language={metadata.languageMode} showSolution={true} className="p-0 shadow-none border-none max-w-none" />
                        ) : (
                           <div className="p-6 bg-rose-50 rounded-2xl border border-rose-100 space-y-3">
-                             <h4 className="font-bold text-rose-600 flex items-center gap-2 text-[11px] uppercase tracking-tight"><AlertTriangle className="h-4 w-4" /> Integrity Violation</h4>
+                             <h4 className="font-bold text-rose-600 flex items-center gap-2 text-[11px] tracking-tight"><AlertTriangle className="h-4 w-4" /> Integrity violation</h4>
                              <div className="space-y-1">
                                 {q.validationErrors.map((err: string, i: number) => <p key={i} className="text-[11px] font-bold text-rose-400">● {err}</p>)}
                              </div>
@@ -298,7 +301,7 @@ export default function BulkIngestionPage() {
               {stagedQuestions.length === 0 && (
                  <div className="h-[500px] flex flex-col items-center justify-center text-slate-300 opacity-20 bg-slate-50 rounded-[4rem] border-2 border-dashed border-slate-200 w-full">
                     <Database className="h-16 w-16 mb-4" />
-                    <p className="font-black uppercase tracking-[0.4em]">Awaiting Extraction</p>
+                    <p className="font-black tracking-[0.4em]">Awaiting extraction</p>
                  </div>
               )}
            </div>
