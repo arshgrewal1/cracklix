@@ -15,9 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v40.0 [Enterprise Hardened].
- * FIXED: Moved TooltipProvider to root to resolve "reading 'call'" SSR crash.
- * FIXED: Implemented strict mounting handshake to prevent ChunkLoadError.
+ * @fileOverview Admin Layout v41.0 [Enterprise Hardened].
+ * FIXED: Adjusted mobile logo alignment to shift left.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -131,7 +130,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Logo 
                   variant="light" 
                   href="/admin"
-                  className="flex-shrink-0 -ml-3 md:-ml-6" 
+                  className="flex-shrink-0 -ml-6 md:-ml-12" 
                   imgClassName="h-24 md:h-36 w-auto"
                   align="left"
                 />

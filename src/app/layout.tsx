@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -22,8 +21,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v73.3 [PRODUCTION LOCK].
- * FIXED: Added data-scroll-behavior="smooth" to Satisfy Next.js 15 routing transitions.
+ * @fileOverview Root Layout v74.0 [PRODUCTION LOCK].
+ * FIXED: Removed "node" from versioning registry tags.
  */
 
 export const metadata: Metadata = {
@@ -91,7 +90,7 @@ export default function RootLayout({
           <Toaster key="global-toaster" />
           <ServiceWorkerRegistration key="sw-reg" />
 
-          <div key="platform-version-node" className="hidden" data-node-version={registryVersion}></div>
+          <div key="platform-version-registry" className="hidden" data-app-version={registryVersion}></div>
         </FirebaseClientProvider>
       </body>
     </html>

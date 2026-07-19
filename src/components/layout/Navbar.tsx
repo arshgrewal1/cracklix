@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v86.0.
- * UPDATED: Increased logo size for better visibility while maintaining exact alignment.
+ * @fileOverview Cracklix Navigation Hub v87.0.
+ * UPDATED: Moved logo slightly more to the left via negative margin.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -125,7 +125,7 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-3 md:-ml-8"
+                className="flex-shrink-0 -ml-6 md:-ml-14"
                 imgClassName="h-32 md:h-48 w-auto"
                 align="left"
               />
