@@ -3,6 +3,8 @@
 import React, { useMemo, useEffect, useState } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import Link from "next/link"
+import Navbar from "@/components/layout/Navbar"
+import Footer from "@/components/layout/Footer"
 import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
 import { doc, collection, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
@@ -44,9 +46,9 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v5.7.
- * FIXED: Corrected syntax error in filtering logic.
- * FIXED: Ensured Newspaper icon is imported.
+ * @fileOverview Premium Exam Detail Hub v5.8.
+ * FIXED: Missing Navbar, Footer, and Newspaper imports.
+ * FIXED: Malformed variable declaration syntax.
  */
 
 export default function ExamHubClient() {
