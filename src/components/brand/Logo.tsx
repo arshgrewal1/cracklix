@@ -61,7 +61,7 @@ export default function Logo({
   );
 
   const baseClasses = cn(
-    "flex items-center select-none hover:opacity-95 transition-opacity flex-shrink-0",
+    "flex items-center select-none hover:opacity-95 transition-opacity flex-shrink-0 -ml-2",
     className
   );
 

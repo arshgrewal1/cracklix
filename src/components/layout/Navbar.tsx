@@ -104,7 +104,7 @@ export default function Navbar() {
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU TRIGGER + LOGO (TIGHT ALIGNMENT - ZERO GAP) */}
-            <div className="flex items-center z-10 shrink-0 h-full">
+            <div className="flex items-center gap-0 z-10 shrink-0 h-full">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
                   <button
@@ -125,7 +125,7 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 p-0 h-full -ml-2"
+                className="flex-shrink-0 p-0 h-full"
                 imgClassName="h-28 md:h-48 w-auto"
                 align="left"
               />
