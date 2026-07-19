@@ -26,7 +26,8 @@ import {
   History,
   TrendingUp,
   Target,
-  ArrowRight
+  ArrowRight,
+  ShieldCheck
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -39,8 +40,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Current Affairs Hub v5.0 (Testbook Standard).
- * FIXED: Removed oversized hero, implemented compact header and segmented controls.
+ * @fileOverview Premium Current Affairs Hub v5.4.
+ * FIXED: Added missing ShieldCheck import.
  */
 
 const CATEGORIES = [
@@ -48,9 +49,9 @@ const CATEGORIES = [
 ];
 
 const QUICK_ACTIONS = [
-  { label: "Daily Quiz", icon: Zap, href: "/mocks", color: "text-orange-500", bg: "bg-orange-50" },
-  { label: "PDF Notes", icon: FileText, href: "/notes", color: "text-blue-500", bg: "bg-blue-50" },
-  { label: "Old Papers", icon: History, href: "/pyqs", color: "text-purple-500", bg: "bg-purple-50" },
+  { label: "Daily quiz", icon: Zap, href: "/mocks", color: "text-orange-500", bg: "bg-orange-50" },
+  { label: "PDF notes", icon: FileText, href: "/notes", color: "text-blue-500", bg: "bg-blue-50" },
+  { label: "Old papers", icon: History, href: "/pyqs", color: "text-purple-500", bg: "bg-purple-50" },
   { label: "Bookmarks", icon: Bookmark, href: "/bookmarks", color: "text-rose-500", bg: "bg-rose-50" },
 ];
 
@@ -130,9 +131,9 @@ export default function CurrentAffairsCenter() {
         <section className="space-y-6 px-1">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1.5">
-              <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight uppercase">Current Affairs</h1>
+              <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Current Affairs</h1>
               <p className="text-slate-500 font-medium text-sm md:text-lg max-w-xl leading-snug">
-                Verified exam news, daily current affairs and bilingual preparation nodes.
+                Verified exam news, daily current affairs and bilingual preparation items.
               </p>
             </div>
             
@@ -216,7 +217,7 @@ export default function CurrentAffairsCenter() {
                                    <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2">
                                          <Badge className="bg-blue-50 text-primary border-none text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm">
-                                            {item.type} Hub
+                                            {item.type} hub
                                          </Badge>
                                          <span className="text-[9px] font-bold text-slate-300 tabular-nums uppercase">{item.month} {item.year}</span>
                                       </div>
@@ -232,12 +233,12 @@ export default function CurrentAffairsCenter() {
 
                                    <h3 className="text-base md:text-lg font-bold text-[#0F172A] leading-tight group-hover:text-primary transition-colors line-clamp-1">{item.title}</h3>
                                    <p className="text-[12px] md:text-sm text-slate-400 font-medium line-clamp-2 leading-relaxed">
-                                      Stay updated with verified {item.type.toLowerCase()} current affairs node for upcoming Punjab government exams and recruitments.
+                                      Stay updated with verified {item.type.toLowerCase()} current affairs items for upcoming Punjab government exams and recruitments.
                                    </p>
 
                                    <div className="flex items-center justify-between pt-2">
                                       <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                                         <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> 2m Read</span>
+                                         <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> 2m read</span>
                                          <span className="w-1 h-1 rounded-full bg-slate-200" />
                                          <span>{item.language || "Bilingual"}</span>
                                       </div>
@@ -257,7 +258,7 @@ export default function CurrentAffairsCenter() {
               ) : (
                  <div className="py-24 text-center bg-white rounded-[2rem] border-2 border-dashed border-slate-100 flex flex-col items-center gap-6 opacity-30">
                     <Newspaper className="h-16 w-16 text-slate-300" />
-                    <p className="text-xl font-bold uppercase tracking-widest text-slate-400">Archives Empty</p>
+                    <p className="text-xl font-bold uppercase tracking-widest text-slate-400">Archives empty</p>
                  </div>
               )}
            </div>
@@ -265,7 +266,7 @@ export default function CurrentAffairsCenter() {
            {/* 4. SIDEBAR - QUICK ACTIONS & TRENDING */}
            <div className="lg:col-span-4 space-y-8">
               <section className="space-y-4">
-                 <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-2">Quick Actions</h3>
+                 <h3 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-2">Quick actions</h3>
                  <div className="grid grid-cols-2 gap-3">
                     {QUICK_ACTIONS.map(action => (
                        <Link key={action.label} href={action.href}>
@@ -285,15 +286,15 @@ export default function CurrentAffairsCenter() {
                  <div className="relative z-10 space-y-6 text-left">
                     <div className="space-y-1">
                        <h3 className="text-xl font-black tracking-tight">Performance</h3>
-                       <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Mastery Index</p>
+                       <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Mastery index</p>
                     </div>
                     <div className="space-y-6">
-                       <MetricNode label="Quiz Score" val="82%" icon={<Target className="text-emerald-500" />} />
-                       <MetricNode label="Weekly Streak" val="12 Days" icon={<Zap className="text-orange-500" />} />
+                       <MetricNode label="Quiz score" val="82%" icon={<Target className="text-emerald-500" />} />
+                       <MetricNode label="Weekly streak" val="12 days" icon={<Zap className="text-orange-500" />} />
                     </div>
                     <div className="pt-4 border-t border-white/5">
                        <Button asChild variant="ghost" className="w-full text-primary hover:text-white hover:bg-white/5 font-black uppercase text-[10px] tracking-widest gap-2">
-                          <Link href="/leaderboard">View Rankings <ArrowRight className="h-3.5 w-3.5" /></Link>
+                          <Link href="/leaderboard">View rankings <ArrowRight className="h-3.5 w-3.5" /></Link>
                        </Button>
                     </div>
                  </div>
@@ -302,10 +303,10 @@ export default function CurrentAffairsCenter() {
               <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-md space-y-4 text-left group hover:translate-y-[-4px] transition-all duration-300">
                  <div className="flex items-center gap-3">
                     <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                    <h4 className="text-[11px] font-black uppercase text-[#0F172A]">Security Protocol</h4>
+                    <h4 className="text-[11px] font-black uppercase text-[#0F172A]">Security protocol</h4>
                  </div>
                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed uppercase tracking-tight">
-                    All current affairs nodes are verified against official gazettes before registry sync. 100% accuracy guaranteed.
+                    All current affairs items are verified against official gazettes before registry sync. 100% accuracy guaranteed.
                  </p>
               </div>
            </div>
