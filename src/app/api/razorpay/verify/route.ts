@@ -15,8 +15,8 @@ import {
 import { nanoid } from 'nanoid';
 
 /**
- * @fileOverview Hardened Razorpay Verification & Provisioning Node v3.1.
- * FIXED: Optimized atomicity with runTransaction to ensure registry integrity.
+ * @fileOverview Hardened Razorpay Verification & Provisioning Node v3.2.
+ * FIXED: Ensures data is synchronized with the admin ledger via payment_requests.
  */
 
 export async function POST(req: Request) {
@@ -68,6 +68,7 @@ async function provisionSubscription(userId: string, planId: string, orderId: st
         const planRef = doc(db, "passes", planId);
         const userRef = doc(db, "users", userId);
         const statsRef = doc(db, "settings", "stats");
+        const payRef = doc(collection(db, "payment_requests"), `pay_${paymentId}`);
 
         const planSnap = await transaction.get(planRef);
         const userSnap = await transaction.get(userRef);
@@ -110,7 +111,23 @@ async function provisionSubscription(userId: string, planId: string, orderId: st
            updatedAt: serverTimestamp(),
         });
 
-        // 2. Update User Profile
+        // 2. Create Payment Request Record (for Admin visibility)
+        transaction.set(payRef, {
+           id: `pay_${paymentId}`,
+           userId,
+           userEmail: userData.email || "",
+           userName: userData.name || "Aspirant",
+           planId,
+           planName: planData.name,
+           amount: planData.price,
+           transactionId: paymentId,
+           gateway: 'RAZORPAY',
+           status: 'APPROVED',
+           createdAt: serverTimestamp(),
+           updatedAt: serverTimestamp(),
+        });
+
+        // 3. Update User Profile
         transaction.update(userRef, {
            passStatus: 'active',
            passExpiresAt: expiryDate.toISOString(),
@@ -125,12 +142,15 @@ async function provisionSubscription(userId: string, planId: string, orderId: st
            updatedAt: serverTimestamp()
         });
 
-        // 3. Update Global Stats
-        transaction.update(statsRef, {
-           totalRevenue: increment(Number(planData.price) || 0),
-           activePasses: increment(1),
-           updatedAt: serverTimestamp()
-        });
+        // 4. Update Global Stats
+        const statsSnap = await transaction.get(statsRef);
+        if (statsSnap.exists()) {
+          transaction.update(statsRef, {
+            totalRevenue: increment(Number(planData.price) || 0),
+            activePasses: increment(1),
+            updatedAt: serverTimestamp()
+          });
+        }
      });
 
      return NextResponse.json({ success: true, subscriptionId: subId });

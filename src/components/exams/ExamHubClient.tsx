@@ -46,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v6.9.
- * UPDATED: Refined heading text for professional Title Case.
+ * @fileOverview Premium Exam Detail Hub v7.0.
+ * FIXED: Refined HeroStat colors for light background visibility.
  */
 
 export default function ExamHubClient() {
@@ -276,12 +276,12 @@ export default function ExamHubClient() {
 function HeroStat({ icon: Icon, label, val }: any) {
   return (
     <div className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-5 group">
-       <div className="h-10 w-10 rounded-xl bg-slate-50 md:bg-white/5 flex items-center justify-center text-primary shadow-inner group-hover:bg-primary group-hover:text-white transition-all">
+       <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary shadow-inner group-hover:bg-primary group-hover:text-white transition-all">
           <Icon className="h-5 w-5" />
        </div>
        <div className="text-center md:text-left space-y-0.5">
-          <p className="text-lg md:text-2xl font-black tabular-nums text-[#0F172A] md:text-white">{val}</p>
-          <p className="text-[9px] font-bold text-slate-400 md:text-slate-500 tracking-widest uppercase">{label}</p>
+          <p className="text-lg md:text-2xl font-black tabular-nums text-[#0F172A]">{val}</p>
+          <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">{label}</p>
        </div>
     </div>
   )
