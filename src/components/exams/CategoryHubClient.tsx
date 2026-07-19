@@ -8,6 +8,7 @@ import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { ChevronLeft, ChevronRight, Star, CheckCircle2, RefreshCw, Zap, Landmark, ArrowRight, Layers, ShieldCheck } from "lucide-react"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
@@ -19,8 +20,8 @@ interface CategoryHubClientProps {
 }
 
 /**
- * @fileOverview Premium Category Hub Portal v5.1.
- * FIXED: Removed mandatory user session check to allow guest browsing.
+ * @fileOverview Premium Category Hub Portal v5.2.
+ * FIXED: Imported missing Badge component to resolve ReferenceError.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
