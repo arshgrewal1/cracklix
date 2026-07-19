@@ -1,6 +1,6 @@
 'use client';
 
-import React;
+import React from 'react';
 import { cn } from "@/lib/utils";
 import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
