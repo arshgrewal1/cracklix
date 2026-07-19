@@ -314,7 +314,7 @@ function MockBuilderContent() {
 
       await addDoc(collection(db, "audit_logs"), {
         user: profile?.name || "Administrator",
-        action: "MOCK_UPDATE" : "MOCK_CREATE",
+        action: isEditing ? "MOCK_UPDATE" : "MOCK_CREATE",
         details: `Mock test "${payload.title}" synchronized. ${isDraft ? 'Saved as Draft' : 'Published & Questions Moved to Archive'}.`,
         timestamp: serverTimestamp()
       });
@@ -466,7 +466,7 @@ function MockBuilderContent() {
                             <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Series node</Label>
                             <select 
                               value={mockData.seriesId || ""} 
-                              onChange={e => setMockData({...mockData, seriesId: e.target.value})}
+                              onChange={e => setEvent({...mockData, seriesId: e.target.value})}
                               className="w-full h-11 bg-blue-50 border-none rounded-xl px-4 font-bold text-[11px] outline-none shadow-sm text-[#0F172A]"
                               disabled={!mockData.learningSubjectId}
                             >
