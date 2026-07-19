@@ -38,10 +38,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v109.0.
- * FIXED: Header logo anchored left with 0 space gap from menu.
- * FIXED: Navigation link visibility (changed slate-50 to slate-400).
- * FIXED: ProfileMenuItem syntax error.
+ * @fileOverview Cracklix Navigation Hub v110.0.
+ * FIXED: Logo size reduced and anchored left with 0 space gap from menu.
+ * FIXED: Link contrast improved for better visibility.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -96,13 +95,13 @@ export default function Navbar() {
   };
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-24 lg:h-32" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-20 md:h-24" />;
   }
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
-        <nav className="w-full h-24 lg:h-40 transition-all">
+        <nav className="w-full h-20 md:h-24 lg:h-32 transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU TRIGGER + LOGO (STRICT ZERO SPACE) */}
@@ -128,7 +127,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0 ml-0 p-0"
-                imgClassName="h-24 md:h-44 w-auto"
+                imgClassName="h-12 md:h-16 lg:h-20 w-auto"
                 align="left"
               />
             </div>
@@ -214,8 +213,8 @@ export default function Navbar() {
   function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {
     return (
       <Link href={href} className={cn(
-        "text-[14px] xl:text-[15px] font-semibold transition-all whitespace-nowrap border-b-2 py-1", 
-        active ? "text-primary border-primary" : "text-slate-400 border-transparent hover:text-primary hover:border-primary/20"
+        "text-[14px] xl:text-[15px] font-bold transition-all whitespace-nowrap border-b-2 py-1", 
+        active ? "text-primary border-primary" : "text-slate-600 border-transparent hover:text-primary hover:border-primary/20"
       )}>
         {label}
       </Link>

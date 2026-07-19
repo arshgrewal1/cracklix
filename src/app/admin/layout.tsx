@@ -15,8 +15,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v60.0.
- * UPDATED: Header logo positioned exactly to the right of the toggle with zero gap.
+ * @fileOverview Admin Layout v61.0.
+ * UPDATED: Logo size reduced and anchored left with 0 gap.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -117,7 +117,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
           isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
         )}>
-          <header className="h-[100px] md:h-[160px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
+          <header className="h-[80px] md:h-[100px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
             {/* LEFT BLOCK: TOGGLE + LOGO (STRICT ZERO GAP) */}
             <div className="flex items-center gap-0">
               <button 
@@ -131,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   variant="light" 
                   href="/admin"
                   className="flex-shrink-0 ml-0 p-0" 
-                  imgClassName="h-24 md:h-44 w-auto"
+                  imgClassName="h-12 md:h-16 w-auto"
                   align="left"
                 />
               </div>
