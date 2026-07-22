@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -26,7 +27,8 @@ import {
   Info,
   Smartphone,
   Calendar,
-  Loader2
+  Loader2,
+  RefreshCw
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -40,8 +42,9 @@ import { hasSeriesAccess } from "@/lib/access-control"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Premium Series Hub Portal v9.2 [Header Alignment & Contrast Fix].
- * FIXED: Resolved text contrast on badges and overlapping breadcrumbs.
+ * @fileOverview Premium Series Hub Portal v10.0 [Advanced Action Logic].
+ * FIXED: Implemented precise button labels (Start Test, Start Preview, Unlock, Continue, Review).
+ * FIXED: Paid users no longer see "Start Preview" for free items.
  */
 
 export default function SeriesDetailPortal() {
@@ -65,8 +68,8 @@ export default function SeriesDetailPortal() {
   const mocksQuery = useMemo(() => (db && seriesId ? query(collection(db, "mocks"), where("published", "==", true), where("seriesId", "==", seriesId)) : null), [db, seriesId]);
   const { data: mocks, loading: mocksLoading } = useCollection<MockTest>(mocksQuery as any);
 
-  const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid)) : null), [db, user]);
-  const { data: results } = useCollection<any>(resultsQuery);
+  const attemptsQuery = useMemo(() => (db && user && seriesId ? query(collection(db, "attempts"), where("userId", "==", user.uid)) : null), [db, user, seriesId]);
+  const { data: attempts } = useCollection<any>(attemptsQuery);
 
   const seriesAccess = useMemo(() => {
      if (!series) return { hasAccess: false, status: 'LOCKED' };
@@ -79,12 +82,11 @@ export default function SeriesDetailPortal() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left pb-safe overflow-x-hidden w-full relative">
       <Navbar />
       
-      {/* 1. HERO SECTION - REBALANCED */}
+      {/* 1. HERO SECTION */}
       <section className="bg-[#0F172A] text-white pt-10 pb-12 md:pt-16 md:pb-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
          <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
-            {/* Breadcrumbs with proper spacing */}
             <div className="flex items-center gap-3 text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
                <button onClick={() => router.back()} className="hover:text-white transition-colors flex items-center gap-2">
                  <ArrowLeft className="h-3.5 w-3.5" /> {subject?.name || "Subject"}
@@ -132,13 +134,13 @@ export default function SeriesDetailPortal() {
                         <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-widest">
                            <span>Preparation Mastery</span>
                            <span className="text-primary tabular-nums">
-                              {Math.round((results?.filter(r => mocks?.some(m => m.id === r.mockId)).length || 0) / (mocks?.length || 1) * 100)}%
+                              {Math.round((attempts?.filter(a => mocks?.some(m => m.id === a.mockId) && a.status === 'COMPLETED').length || 0) / (mocks?.length || 1) * 100)}%
                            </span>
                         </div>
                         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden shadow-inner">
                            <motion.div 
                              initial={{ width: 0 }}
-                             animate={{ width: `${(results?.filter(r => mocks?.some(m => m.id === r.mockId)).length || 0) / (mocks?.length || 1) * 100}%` }}
+                             animate={{ width: `${(attempts?.filter(a => mocks?.some(m => m.id === a.mockId) && a.status === 'COMPLETED').length || 0) / (mocks?.length || 1) * 100}%` }}
                              className="h-full bg-primary shadow-[0_0_15px_rgba(37,99,235,0.5)]" 
                            />
                         </div>
@@ -150,11 +152,10 @@ export default function SeriesDetailPortal() {
          </div>
       </section>
 
-      {/* 2. COMPACT TIMELINE SECTION */}
+      {/* 2. TIMELINE SECTION */}
       <main className="container mx-auto px-4 md:px-0 py-10 md:py-20 max-w-full flex flex-col items-center relative">
          
          <div className="relative w-full max-w-[720px] lg:ml-[120px]">
-            {/* THIN TIMELINE LINE */}
             <div className="absolute left-[23px] md:left-[29px] top-6 bottom-6 w-[2px] md:w-[3px] bg-slate-200 rounded-full z-0" />
 
             <div className="space-y-6 md:space-y-8">
@@ -168,14 +169,39 @@ export default function SeriesDetailPortal() {
                ) : mocks && mocks.length > 0 ? (
                   mocks.map((mock, idx) => {
                      const isFree = mock.accessLevel === 'FREE';
-                     const locked = !isFree && !seriesAccess.hasAccess;
+                     const hasPurchasedAccess = seriesAccess.hasAccess;
                      
-                     const result = results?.find((r: any) => r.mockId === mock.id);
-                     const isCompleted = !!result;
+                     const attempt = attempts?.find((a: any) => a.mockId === mock.id);
+                     const isCompleted = attempt?.status === 'COMPLETED';
+                     const isStarted = attempt?.status === 'IN_PROGRESS';
+                     
+                     const locked = !isFree && !hasPurchasedAccess;
+
+                     // Determine Action Button Properties
+                     let buttonLabel = "Start test";
+                     let buttonVariant = "bg-[#2563EB] hover:bg-blue-700";
+                     let targetHref = `/mocks/instructions?id=${mock.id}`;
+
+                     if (isCompleted) {
+                        buttonLabel = "View performance";
+                        buttonVariant = "bg-emerald-600 hover:bg-emerald-700";
+                        targetHref = `/results/view?id=${mock.id}`;
+                     } else if (isStarted) {
+                        buttonLabel = "Continue test";
+                        buttonVariant = "bg-primary hover:bg-blue-700";
+                        targetHref = `/mocks/attempt?id=${mock.id}`;
+                     } else if (locked) {
+                        buttonLabel = "Unlock with pass";
+                        buttonVariant = "bg-amber-500 hover:bg-amber-600";
+                        targetHref = "#";
+                     } else if (isFree && !hasPurchasedAccess) {
+                        buttonLabel = "Start preview";
+                        buttonVariant = "bg-emerald-600 hover:bg-emerald-700";
+                        targetHref = `/mocks/instructions?id=${mock.id}`;
+                     }
 
                      return (
                         <div key={mock.id} className="flex items-center gap-4 md:gap-6 relative z-10">
-                           {/* COMPACT NODE */}
                            <div className="shrink-0">
                               <div className={cn(
                                 "h-[48px] w-[48px] md:h-[60px] md:w-[60px] rounded-full flex items-center justify-center shadow-lg transition-all duration-300 border-[4px] border-[#F8FAFC]",
@@ -185,7 +211,6 @@ export default function SeriesDetailPortal() {
                               </div>
                            </div>
 
-                           {/* PREMIUM COMPACT CARD */}
                            <Card className={cn(
                              "flex-1 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] rounded-[22px] bg-white group overflow-hidden transition-all duration-300",
                              isCompleted && "bg-slate-50/50",
@@ -201,7 +226,7 @@ export default function SeriesDetailPortal() {
                                        ) : isFree ? (
                                           <Badge className="bg-blue-100 text-blue-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Free preview</Badge>
                                        ) : (
-                                          <Badge className="bg-blue-100 text-blue-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Active</Badge>
+                                          <Badge className="bg-blue-100 text-blue-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Unlocked</Badge>
                                        )}
                                        <span className="text-slate-400 font-bold text-[11px] tracking-tight">Attempt {idx + 1}</span>
                                     </div>
@@ -228,20 +253,19 @@ export default function SeriesDetailPortal() {
                                     <ResultStat 
                                        icon={<Trophy className="h-3.5 w-3.5" />} 
                                        label="Best score" 
-                                       val={isCompleted ? result.score : "---"} 
+                                       val={isCompleted ? attempt.score : "---"} 
                                        highlight={isCompleted}
                                     />
                                  </div>
 
                                  <div className="pt-2">
                                     <Button asChild className={cn(
-                                       "w-full h-[48px] md:h-[52px] rounded-xl text-[16px] font-bold shadow-sm transition-all active:scale-[0.98] border-none",
-                                       isCompleted ? "bg-emerald-600 hover:bg-emerald-700 text-white" : 
-                                       locked ? "bg-amber-500 hover:bg-amber-600 text-white" : 
-                                       "bg-[#2563EB] hover:bg-blue-700 text-white shadow-blue-200"
+                                       "w-full h-[48px] md:h-[52px] rounded-xl text-[16px] font-bold shadow-sm transition-all active:scale-[0.98] border-none text-white",
+                                       buttonVariant
                                     )} onClick={() => locked && setSelectedMockForPurchase(mock)}>
-                                       <Link href={locked ? '#' : isCompleted ? `/results/view?id=${mock.id}` : `/mocks/instructions?id=${mock.id}`}>
-                                          {isCompleted ? "View performance" : locked ? "Unlock premium test" : "Start preview"}
+                                       <Link href={targetHref}>
+                                          {isStarted ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : null}
+                                          {buttonLabel}
                                           <ChevronRight className="h-4 w-4 ml-2 opacity-60" />
                                        </Link>
                                     </Button>
@@ -278,7 +302,7 @@ export default function SeriesDetailPortal() {
 
                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <PurchaseStat icon={<Layers />} label="Tests" val={mocks?.length || 0} />
-                  <PurchaseStat icon={<Smartphone />} label="Android App" val="Active" />
+                  <PurchaseStat icon={<Smartphone />} label="Android PWA" val="Active" />
                   <PurchaseStat icon={<Calendar />} label="Validity" val="365 Days" />
                   <PurchaseStat icon={<ShieldCheck />} label="Official" val="Verified" />
                </div>
