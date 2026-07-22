@@ -17,6 +17,8 @@ import { doc } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { DistributionSettings } from "@/types";
+import { Share } from '@capacitor/share';
+import { Capacitor } from '@capacitor/core';
 import {
   Dialog,
   DialogContent,
@@ -27,8 +29,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Institutional Share Hub v6.2 [Resilient Fallbacks].
- * FIXED: Added fallback values so the button works even if Admin hasn't saved settings yet.
+ * @fileOverview Institutional Share Hub v7.0 [Native Direct Share].
+ * UPDATED: Uses Capacitor Share plugin to trigger direct Android/iOS sharing menu.
  */
 
 const DEFAULT_SHARE_MESSAGE = `🚀 Crack Punjab Government Exams with Cracklix!\n\n🎯 Prepare for:\n• PSSSB\n• PPSC\n• Punjab Police\n\n📚 Features\n✅ Unlimited Mock Tests\n✅ Previous Year Papers\n✅ Daily Current Affairs\n\n📲 Install App: {installUrl}\n🌐 Website: {websiteUrl}`;
@@ -46,9 +48,8 @@ export default function ShareButton({
   const [isSharing, setIsSharing] = useState(false);
   
   const distRef = useMemo(() => (db ? doc(db, 'settings', 'distribution') : null), [db]);
-  const { data: remoteSettings, loading } = useDoc<DistributionSettings>(distRef);
+  const { data: remoteSettings } = useDoc<DistributionSettings>(distRef);
 
-  // Determine active settings with fallbacks
   const activeSettings = useMemo(() => {
     const defaults = {
       primaryWebsiteUrl: "https://cracklix.vercel.app",
@@ -78,6 +79,21 @@ export default function ShareButton({
     setIsSharing(true);
 
     try {
+      // 1. Check for Native Capacitor Share (Best for Android App)
+      if (Capacitor.isNativePlatform()) {
+        const canShare = await Share.canShare();
+        if (canShare.value) {
+          await Share.share({
+            title: activeSettings.shareTitle,
+            text: finalShareMessage,
+            url: activeSettings.primaryWebsiteUrl,
+            dialogTitle: 'Share Cracklix Hub',
+          });
+          return;
+        }
+      }
+
+      // 2. Check for Browser Web Share API (Mobile Browsers)
       if (typeof navigator !== 'undefined' && navigator.share) {
         await navigator.share({
           title: activeSettings.shareTitle,
@@ -85,9 +101,11 @@ export default function ShareButton({
           url: activeSettings.primaryWebsiteUrl
         });
       } else {
+        // 3. Desktop Fallback Dialog
         setIsShareDialogOpen(true);
       }
     } catch (err: any) {
+      // Ignore user aborting the share
       if (err.name !== 'AbortError') {
         setIsShareDialogOpen(true);
       }
@@ -133,7 +151,7 @@ export default function ShareButton({
              <span className="text-xs md:text-base leading-none truncate w-full">Share Cracklix</span>
              {showLabel && (
                <span className="text-[9px] opacity-70 font-medium mt-1 leading-none truncate w-full">
-                 Invite friends to study
+                 Invite your fellow aspirants
                </span>
              )}
           </div>
@@ -149,12 +167,12 @@ export default function ShareButton({
                 <Share2 className="h-7 w-7" />
              </div>
              <DialogTitle className="text-xl font-black text-[#0F172A] tracking-tighter uppercase">Share Hub</DialogTitle>
-             <DialogDescription className="text-slate-400 font-bold text-[9px] mt-2 text-center uppercase tracking-widest">Invite your fellow aspirants</DialogDescription>
+             <DialogDescription className="text-slate-400 font-bold text-[9px] mt-2 text-center uppercase tracking-widest">Select an option to share</DialogDescription>
           </DialogHeader>
 
           <div className="px-8 pb-10 space-y-3">
              <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(finalShareMessage)}`, '_blank')} className="w-full h-14 bg-[#25D366] hover:bg-[#20bd5c] text-white rounded-2xl flex items-center px-6 gap-4 shadow-lg transition-all active:scale-95 border-none group">
-                <MessageSquare className="h-6 w-6" /> <span className="font-bold text-sm flex-1 text-left uppercase tracking-tight">WhatsApp Hub</span>
+                <MessageSquare className="h-6 w-6" /> <span className="font-bold text-sm flex-1 text-left uppercase tracking-tight">WhatsApp</span>
                 <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
              </button>
              <button onClick={() => copyToClipboard(finalShareMessage, "Message copied to registry")} className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-4 border border-slate-100 transition-all active:scale-95 group">
