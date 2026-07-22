@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -33,9 +32,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Series Hub Portal v7.0.
- * REDESIGNED: Timeline cards optimized for high-density Testbook/Adda247 style.
- * TYPOGRAPHY: Strict 24px/30px titles and 22px values.
+ * @fileOverview Premium Series Hub Portal v7.1.
+ * FIXED: Removed forced uppercase from series and test titles.
  */
 
 export default function SeriesDetailPortal() {
@@ -77,7 +75,7 @@ export default function SeriesDetailPortal() {
       <section className="bg-[#0F172A] text-white pt-8 pb-10 md:pt-14 md:pb-20 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
-         <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-8">
+         <div className="container mx-auto px-4 md:px-12 max-get-7xl relative z-10 space-y-8">
             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
                <button onClick={() => router.back()} className="hover:text-white transition-colors flex items-center gap-2">
                  <ArrowLeft className="h-3 w-3" /> {subject?.name || "Subject"}
@@ -95,7 +93,7 @@ export default function SeriesDetailPortal() {
                      </div>
                   </div>
                   <div className="space-y-2 text-center md:text-left flex-1 min-w-0">
-                     <h1 className="text-xl md:text-4xl font-black tracking-tight leading-tight uppercase antialiased">{series?.title}</h1>
+                     <h1 className="text-xl md:text-4xl font-black tracking-tight leading-tight antialiased">{series?.title}</h1>
                      <p className="text-slate-400 font-medium text-xs md:text-base max-w-xl line-clamp-2">{series?.description || "High-speed mock tests for competitive mastery."}</p>
                   </div>
                </div>
@@ -145,7 +143,7 @@ export default function SeriesDetailPortal() {
                            <div className="shrink-0">
                               <div className={cn(
                                 "h-[48px] w-[48px] md:h-[60px] md:w-[60px] rounded-full flex items-center justify-center shadow-lg transition-all duration-300 border-[4px] border-[#F8FAFC]",
-                                isCompleted ? "bg-emerald-500 text-white" : locked ? "bg-slate-200 text-slate-400" : "bg-[#0F172A] text-white"
+                                isCompleted ? "bg-emerald-50 text-white" : locked ? "bg-slate-200 text-slate-400" : "bg-[#0F172A] text-white"
                               )}>
                                  {isCompleted ? <Check className="h-6 w-6 stroke-[4px]" /> : locked ? <Lock className="h-5 w-5" /> : <span className="text-sm md:text-lg font-black tabular-nums">{idx + 1}</span>}
                               </div>

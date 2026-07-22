@@ -20,8 +20,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Level 2 CMS: Series Registry Hub v3.0 [Board Branding Fix].
- * UPDATED: Replaced custom image upload with official Board Logo selection for better standardization.
+ * @fileOverview Level 2 CMS: Series Registry Hub v3.1.
+ * FIXED: Removed forced uppercase from series title in registry.
  */
 
 export default function SeriesCMS() {
@@ -121,7 +121,7 @@ export default function SeriesCMS() {
                            <AuthorityLogo boardId={s.boardId} size="sm" className="bg-slate-50" />
                         </div>
                         <div className="min-w-0">
-                           <p className="font-black text-[#0F172A] text-lg leading-none uppercase">{s.title}</p>
+                           <p className="font-black text-[#0F172A] text-lg leading-none">{s.title}</p>
                            <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">Order: {s.displayOrder}</p>
                         </div>
                      </div>

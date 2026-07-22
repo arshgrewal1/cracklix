@@ -28,7 +28,8 @@ import {
   TrendingUp,
   Filter,
   Activity,
-  Timer
+  Timer,
+  BookMarked
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -42,9 +43,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Subject Selection Hub v5.0.
- * FIXED: Replaced hardcoded durations with real average time from Firestore.
- * FIXED: Optimized top metrics for PWA single-row presentation.
+ * @fileOverview Premium Subject Selection Hub v5.1.
+ * FIXED: Removed uppercase from series titles to respect admin input.
  */
 
 const QUICK_ACTIONS = [
@@ -183,7 +183,6 @@ export default function SubjectDetailPortal() {
                   <p className="text-slate-500 font-medium text-sm md:text-lg max-w-2xl leading-relaxed">{subject.description || "Master core concepts through verified mock tests."}</p>
                </div>
 
-               {/* PWA OPTIMIZED TOP STATS - SINGLE ROW RESPONSIVE */}
                <div className="flex flex-row items-center justify-center md:justify-end gap-1.5 md:gap-3 shrink-0 w-full md:w-auto">
                   <StatsChip label="Series" val={totalSubjectStats.totalSeries} />
                   <StatsChip label="Tests" val={totalSubjectStats.totalTests} />
@@ -277,7 +276,7 @@ export default function SubjectDetailPortal() {
                                  </div>
 
                                  <div className="space-y-4 flex-1">
-                                    <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase line-clamp-2">{item.title}</h3>
+                                    <h3 className="text-xl md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">{item.title}</h3>
                                     
                                     <div className="grid grid-cols-2 gap-4">
                                        <SeriesStat icon={Zap} label="Tests" val={stats.total} />

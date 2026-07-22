@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -34,7 +33,8 @@ import {
   MoreVertical,
   X,
   FileSearch,
-  List
+  List,
+  ArrowUpRight
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -49,8 +49,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Master Mock Test Manager v4.0.
- * UPDATED: Added "Manage Items" shortcut for direct question editing.
+ * @fileOverview Master Mock Test Manager v4.1.
+ * FIXED: Removed forced uppercase from mock test titles in registry.
  */
 
 export default function MockManagement() {
@@ -79,10 +79,10 @@ export default function MockManagement() {
   const filteredMocks = useMemo(() => {
     if (!rawMocks) return []
     return rawMocks.filter(m => {
-      const matchesSearch = !searchTerm || m.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      const search = !searchTerm || m.title?.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesSub = subFilter === "all" || m.learningSubjectId === subFilter
       const matchesSer = serFilter === "all" || m.seriesId === serFilter
-      return matchesSearch && matchesSub && matchesSer
+      return search && matchesSub && matchesSer
     })
   }, [rawMocks, searchTerm, subFilter, serFilter])
 

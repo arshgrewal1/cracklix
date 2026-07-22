@@ -57,8 +57,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Premium Institutional Score Report v4.3 [Title Case].
- * FIXED: Removed technical "node" terminology and uppercase styling.
+ * @fileOverview Premium Institutional Score Report v4.4 [Title Case].
+ * FIXED: Removed uppercase from report headers.
  */
 export default function ResultCard({
   studentName,
@@ -222,7 +222,7 @@ export default function ResultCard({
            <section className="space-y-6 text-left">
               <div className="flex items-center gap-3">
                  <Layers className="h-6 w-6 text-primary" />
-                 <h3 className="text-xl font-black tracking-widest text-[#0F172A] uppercase">Subject mastery matrix</h3>
+                 <h3 className="text-xl font-black tracking-widest text-[#0F172A]">Subject mastery matrix</h3>
               </div>
               <div className="rounded-[2rem] border-2 border-slate-100 overflow-hidden shadow-sm bg-white">
                  <table className="w-full text-left border-collapse">
@@ -239,8 +239,8 @@ export default function ResultCard({
                        {subjects.length > 0 ? subjects.map((s, idx) => (
                           <tr key={idx} className="h-16 hover:bg-slate-50/50 transition-colors">
                              <td className="px-8 font-bold text-lg text-[#0F172A]">{s.name}</td>
-                             <td className="px-4 text-center font-bold text-slate-400 tabular-nums">{s.total}</td>
-                             <td className="px-4 text-center font-black text-emerald-600 tabular-nums">{s.correct}</td>
+                             <td className="px-4 text-center font-bold text-slate-400 tabular-nums text-xs">{s.total}</td>
+                             <td className="px-4 text-center font-black text-emerald-600 tabular-nums text-xs">{s.correct}</td>
                              <td className="px-4 text-center">
                                 <Badge className={cn("border-none text-[11px] font-bold px-3 py-1 rounded-lg", s.accuracy > 70 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>{s.accuracy}%</Badge>
                              </td>
@@ -259,7 +259,7 @@ export default function ResultCard({
            <section className="space-y-6 text-left">
               <div className="flex items-center gap-3">
                  <BrainCircuit className="h-6 w-6 text-primary" />
-                 <h3 className="text-xl font-black tracking-widest text-[#0F172A] uppercase">Consolidated insights</h3>
+                 <h3 className="text-xl font-black tracking-widest text-[#0F172A]">Consolidated insights</h3>
               </div>
               <div className="bg-[#F8FAFC] p-10 rounded-[2.5rem] border border-slate-100 relative overflow-hidden">
                  <div className="absolute top-0 right-0 p-8 opacity-[0.02]"><ShieldCheck className="h-32 w-32" /></div>
@@ -275,7 +275,7 @@ export default function ResultCard({
               <section className="space-y-6 text-left">
                  <div className="flex items-center gap-3">
                     <TrendingUp className="h-6 w-6 text-primary" />
-                    <h3 className="text-lg font-black tracking-widest text-[#0F172A] uppercase">Complexity audit</h3>
+                    <h3 className="text-lg font-black tracking-widest text-[#0F172A]">Complexity audit</h3>
                  </div>
                  <div className="space-y-6 p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
                     <ComplexityRow label="Easy items" val={difficulty.easy} color="bg-emerald-500" />
@@ -287,7 +287,7 @@ export default function ResultCard({
               <section className="space-y-6 text-left">
                  <div className="flex items-center gap-3">
                     <Timer className="h-6 w-6 text-primary" />
-                    <h3 className="text-lg font-black tracking-widest text-[#0F172A] uppercase">Temporal analytics</h3>
+                    <h3 className="text-lg font-black tracking-widest text-[#0F172A]">Temporal analytics</h3>
                  </div>
                  <div className="space-y-6 p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
                     <MetricPill label="Avg ingestion speed" val={timeMetrics.avg} />
