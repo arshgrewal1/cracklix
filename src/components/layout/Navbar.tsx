@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -38,8 +39,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v122.0.
- * UPDATED: Synchronized logo size with sidebar (h-20 md:h-28) and adjusted header height.
+ * @fileOverview Cracklix Navigation Hub v123.0.
+ * FIXED: Prevented unmounted state access to avoid hydration mismatches.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -56,8 +57,12 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (!mounted) return;
     const expiryStr = profile?.passExpiresAt;
-    if (!expiryStr) return;
+    if (!expiryStr) {
+      setTimeLeft("");
+      return;
+    }
     
     const expiryDate = new Date(expiryStr);
     if (isNaN(expiryDate.getTime())) return;
@@ -82,19 +87,17 @@ export default function Navbar() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [profile?.passExpiresAt]);
+  }, [profile?.passExpiresAt, mounted]);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       router.push('/');
-    } catch (error) {
-      console.error('[NAVBAR_LOGOUT_FAILURE]:', error);
-    }
+    } catch (error) {}
   };
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-24 md:h-36" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-24 md:h-32" />;
   }
 
   return (
@@ -103,7 +106,6 @@ export default function Navbar() {
         <nav className="w-full h-24 md:h-32 transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
-            {/* LEFT BLOCK: MENU TRIGGER + LOGO (TIGHT ALIGNMENT - ZERO GAP) */}
             <div className="flex items-center gap-0 z-10 shrink-0 h-full">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
@@ -131,7 +133,6 @@ export default function Navbar() {
               />
             </div>
 
-            {/* CENTER BLOCK: NAVIGATION (ABSOLUTE CENTERING) */}
             <div className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-6 xl:gap-8 h-full">
               <NavLink href="/" label="Home" active={pathname === '/'} />
               <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
@@ -140,7 +141,6 @@ export default function Navbar() {
               <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
             </div>
 
-            {/* RIGHT BLOCK: SEARCH & PROFILE */}
             <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10 shrink-0">
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden lg:flex flex-col items-end shrink-0">

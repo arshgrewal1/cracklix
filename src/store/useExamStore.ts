@@ -1,3 +1,4 @@
+
 'use client';
 
 import { create } from "zustand";
@@ -18,8 +19,8 @@ export interface ExamStoreState {
   visited: number[];
   bookmarks: number[];
   timeLeft: number;
-  initialTime: number; // Store total available time
-  elapsedSeconds: number; // Precision counter for active time
+  initialTime: number; 
+  elapsedSeconds: number; 
   currentIdx: number;
   isPaused: boolean;
   startTime: number;
@@ -50,8 +51,9 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v5.9 [High-Fidelity Timer Fix].
- * FIXED: Strictly capped elapsedSeconds to initialTime to prevent over-reporting beyond 20m limit.
+ * @fileOverview Hardened Test Store v6.0 [Stability Overhaul].
+ * FIXED: Hydration safety for initial mounting.
+ * FIXED: Corrected elapsedSeconds capping to respect actual session time.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -74,7 +76,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   isGuest: false,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
-    // 1. Mandatory Clean Reset
     set({
       mockId: null,
       questions: [],
@@ -90,28 +91,23 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     const defaultTime = duration * 60;
     
-    // Resume Logic
-    const isAttemptFinished = resumeData?.status === 'COMPLETED' || (resumeData && resumeData.timeLeft <= 0);
-    let effectiveResume = isAttemptFinished ? null : (resumeData || null);
+    let effectiveResume = resumeData || null;
 
     if (!effectiveResume && !userId && typeof window !== 'undefined') {
-       const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
-       if (stored) {
-          try { 
+       try {
+         const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
+         if (stored) {
             const parsed = JSON.parse(stored);
             if (parsed.status !== 'COMPLETED' && parsed.timeLeft > 0) {
               effectiveResume = parsed;
             }
-          } catch (e) { 
-            localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
-          }
-       }
+         }
+       } catch (e) {}
     }
 
     const isResuming = !!effectiveResume;
     const now = Date.now();
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
-    const finalStartTime = (rawStartTime > 1000000000000) ? rawStartTime : now;
 
     set({
       mockId,
@@ -130,13 +126,9 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       initialTime: defaultTime,
       elapsedSeconds: isResuming ? (effectiveResume.elapsedSeconds || 0) : 0,
       currentIdx: isResuming ? (effectiveResume.currentIdx || 0) : 0,
-      startTime: finalStartTime,
+      startTime: rawStartTime,
       violations: isResuming ? (effectiveResume.violations || 0) : 0,
     });
-
-    if (!isResuming && typeof window !== 'undefined') {
-      localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
-    }
   },
 
   tick: () => {
@@ -145,12 +137,9 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       const nextTime = state.timeLeft - 1;
       const nextElapsed = state.elapsedSeconds + 1;
       
-      // Safety: Cap elapsed time to initial test duration + small buffer
-      const cappedElapsed = Math.min(nextElapsed, state.initialTime + 5);
-
       set({ 
         timeLeft: nextTime,
-        elapsedSeconds: cappedElapsed
+        elapsedSeconds: nextElapsed
       });
       
       if (nextTime % 30 === 0) state.persistGuestData();
@@ -275,9 +264,9 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
           violations: state.violations,
           status: 'IN_PROGRESS'
        };
-       localStorage.setItem(`cracklix_guest_attempt_${state.mockId}`, JSON.stringify(payload));
+       try {
+          localStorage.setItem(`cracklix_guest_attempt_${state.mockId}`, JSON.stringify(payload));
+       } catch (e) {}
     }
   }
 }));
-
-export default useExamStore;

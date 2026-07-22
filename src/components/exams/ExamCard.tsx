@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -41,8 +42,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v6.1.
- * FIXED: Added safety guards for null/undefined array props to prevent filter crashes.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v6.2.
+ * FIXED: Final validation for Play and icon definitions.
  * UI: High-fidelity layout with conditional visibility for all metrics.
  */
 export default function ExamCard({ 
@@ -57,16 +58,16 @@ export default function ExamCard({
   const { toast } = useToast();
   const [isPinning, setIsPinning] = useState(false);
 
-  const examId = exam.id;
+  const examId = exam?.id;
   const isPinned = profile?.pinnedExams?.includes(examId);
 
-  // 1. DYNAMIC CONTENT AUDIT
   const stats = useMemo(() => {
-    // Normalization safety check
     const safeMocks = Array.isArray(allMocks) ? allMocks : [];
     const safePyqs = Array.isArray(allPyqs) ? allPyqs : [];
     const safeNotes = Array.isArray(allNotes) ? allNotes : [];
     const safeResults = Array.isArray(userResults) ? userResults : [];
+
+    if (!examId) return { mocks: 0, subjects: 0, sectionals: 0, pyqs: 0, notes: 0, questions: 0, totalTests: 0, completed: 0, progress: 0, avgAcc: 0, hasContent: false };
 
     const relatedMocks = safeMocks.filter(m => m.examId === examId || m.examIds?.includes(examId));
     const relatedPyqs = safePyqs.filter(p => p.examId === examId);
@@ -82,7 +83,6 @@ export default function ExamCard({
       totalTests: relatedMocks.length
     };
 
-    // Attempt Analysis
     const attemptIds = new Set(safeResults.filter(r => relatedMocks.some(rm => rm.id === r.mockId)).map(r => r.mockId));
     const completed = attemptIds.size;
     
@@ -104,7 +104,7 @@ export default function ExamCard({
 
   const handleTogglePin = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
-    if (!db || !user || isPinning) return;
+    if (!db || !user || isPinning || !examId) return;
     setIsPinning(true);
     const userRef = doc(db, "users", user.uid);
     try {
@@ -118,12 +118,13 @@ export default function ExamCard({
     } finally { setIsPinning(false); }
   };
 
-  // Determine State-Aware Button
   const buttonConfig = useMemo(() => {
     if (stats.completed > 0 && stats.progress === 100) return { label: "View Analysis", icon: BarChart3, variant: "bg-emerald-600 hover:bg-emerald-700" };
     if (stats.completed > 0) return { label: "Continue Prep", icon: RefreshCw, variant: "bg-primary hover:bg-blue-700" };
     return { label: "Start Preparation", icon: Play, variant: "bg-[#0F172A] hover:bg-black" };
   }, [stats]);
+
+  if (!exam) return null;
 
   return (
     <motion.div 
@@ -135,7 +136,6 @@ export default function ExamCard({
       <Link href={`/exams/view?id=${exam.id}`} className="block h-full">
         <Card className="bg-white border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden group flex flex-col h-full relative">
           
-          {/* HEADER HUB */}
           <div className="p-6 md:p-10 pb-4 flex justify-between items-start w-full relative z-10">
             <div className="flex items-center gap-4 md:gap-6">
                <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-2xl border-4 border-white bg-slate-50 shrink-0" />
@@ -161,12 +161,11 @@ export default function ExamCard({
                     isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary"
                   )}
                >
-                  {isPinning ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4 md:h-5 md:w-5", isPinned && "fill-current")} />}
+                  {isPinning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4 md:h-5 md:w-5", isPinned && "fill-current")} />}
                </button>
             </div>
           </div>
 
-          {/* MAIN IDENTITY */}
           <CardContent className="px-6 md:px-10 pb-6 flex-1 flex flex-col text-left space-y-6 md:space-y-8">
             <div className="space-y-2">
                <h3 className="text-xl md:text-3xl font-[800] text-[#0F172A] leading-[1.1] tracking-tight group-hover:text-primary transition-colors line-clamp-2 break-words">
@@ -177,7 +176,6 @@ export default function ExamCard({
                </p>
             </div>
 
-            {/* DYNAMIC STATS GRID */}
             <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-6 border-t border-slate-50">
                {stats.mocks > 0 && <StatRow label="Mock Tests" val={stats.mocks} icon={Zap} />}
                {stats.subjects > 0 && <StatRow label="Subject Tests" val={stats.subjects} icon={BookOpen} />}
@@ -186,7 +184,6 @@ export default function ExamCard({
                {stats.questions > 0 && <StatRow label="Questions" val={stats.questions} icon={Target} color="text-primary" />}
             </div>
 
-            {/* PROGRESS HUB (If User Logged In) */}
             {user && stats.totalTests > 0 && (
                <div className="space-y-4 pt-6 border-t border-slate-50">
                   <div className="flex justify-between items-center text-[9px] font-black uppercase text-slate-400 tracking-widest">
@@ -204,7 +201,6 @@ export default function ExamCard({
                </div>
             )}
 
-            {/* ACTION TRIGGER */}
             <div className="pt-4 mt-auto">
                <Button className={cn(
                   "w-full h-14 md:h-16 rounded-[18px] md:rounded-[22px] text-white font-bold text-sm tracking-tight transition-all active:scale-95 border-none shadow-3xl flex items-center justify-between px-8",
@@ -219,7 +215,6 @@ export default function ExamCard({
             </div>
           </CardContent>
 
-          {/* DYNAMIC BOTTOM CHIPS STRIP */}
           <div className="px-6 md:px-10 py-4 bg-slate-50/50 border-t border-slate-50 flex items-center gap-2 overflow-x-auto no-scrollbar">
              {stats.mocks > 0 && <ContentChip label="Mocks" />}
              {stats.subjects > 0 && <ContentChip label="Topic Tests" />}
@@ -250,16 +245,4 @@ function ContentChip({ label }: { label: string }) {
        {label}
     </span>
   );
-}
-
-function ContentStat({ label, val, icon: Icon }: any) {
-   return (
-      <div className="flex flex-col items-start gap-1">
-         <div className="flex items-center gap-1.5 text-slate-400">
-            <Icon className="h-3.5 w-3.5" />
-            <span className="text-[8px] font-bold uppercase tracking-widest">{label}</span>
-         </div>
-         <p className="text-sm font-black text-[#0F172A] tabular-nums">{val}</p>
-      </div>
-   )
 }

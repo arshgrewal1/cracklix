@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -62,7 +63,7 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v45.5.
+ * @fileOverview Daily Challenge Builder v45.6.
  * FIXED: Variable name mismatch (setQuizData vs setMockData) in input handlers.
  */
 
@@ -358,8 +359,8 @@ function DailyQuizBuilderContent() {
 
                <div className="space-y-6 pt-6 border-t border-slate-50">
                   <ConfigSwitch label="Official challenge" checked={quizData.isTodayQuiz} onChange={v => setQuizData({...quizData, isTodayQuiz: v})} />
-                  <ConfigSwitch label="Review allowed" checked={quizData.reviewModeEnabled} onChange={v => setQuizData({...excerpt, reviewModeEnabled: v})} />
-                  <ConfigSwitch label="Show explanations" checked={quizData.explanationModeEnabled} onChange={v => setQuizData({...excerpt, explanationModeEnabled: v})} />
+                  <ConfigSwitch label="Review allowed" checked={quizData.reviewModeEnabled} onChange={v => setQuizData({...quizData, reviewModeEnabled: v})} />
+                  <ConfigSwitch label="Show explanations" checked={quizData.explanationModeEnabled} onChange={v => setQuizData({...quizData, explanationModeEnabled: v})} />
                </div>
             </Card>
          </div>

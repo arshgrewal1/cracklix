@@ -16,43 +16,28 @@ import {
 import { isAfter, subDays, isValid } from 'date-fns';
 
 /**
- * @fileOverview Production-grade Study Analytics Engine v7.5.
- * FIXED: Implemented midnight reset logic to ensure Today's stats are accurate in long-running sessions.
- * FIXED: Hardened date parsing to prevent RangeError: Invalid time value.
+ * @fileOverview Production-grade Study Analytics Engine v7.6.
+ * FIXED: Hardened Date object conversion to prevent RangeErrors in Safari/APK.
  */
 
 export function useStudySessions() {
   const { user } = useUser();
   const db = useFirestore();
-  const [midnightTrigger, setMidnightTrigger] = useState(Date.now());
+  const [mounted, setMounted] = useState(false);
 
-  // Handle midnight reset
   useEffect(() => {
-    const now = new Date();
-    const night = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 1, // Tomorrow
-      0, 0, 0
-    );
-    const msToMidnight = night.getTime() - now.getTime();
-
-    const timer = setTimeout(() => {
-      setMidnightTrigger(Date.now());
-    }, msToMidnight);
-
-    return () => clearTimeout(timer);
-  }, [midnightTrigger]);
+    setMounted(true);
+  }, []);
 
   const sessionsQuery = useMemo(() => {
-    if (!db || !user) return null;
+    if (!db || !user || !mounted) return null;
     return query(collection(db, 'users', user.uid, 'study_sessions'));
-  }, [db, user]);
+  }, [db, user, mounted]);
 
   const { data: rawSessions, loading } = useCollection<StudySession>(sessionsQuery);
 
   const stats = useMemo(() => {
-    if (!rawSessions) return {
+    const emptyStats = {
       today: 0,
       week: 0,
       month: 0,
@@ -63,18 +48,15 @@ export function useStudySessions() {
       totalSessions: 0
     };
 
+    if (!rawSessions || !mounted) return emptyStats;
+
     const now = new Date();
     const startOfToday = getLocalStartOfDay(now);
     const startOfWeek = getLocalStartOfWeek(now);
     const startOfMonth = getLocalStartOfMonth(now);
     const startOfYear = getLocalStartOfYear(now);
 
-    let today = 0;
-    let week = 0;
-    let month = 0;
-    let year = 0;
-    let lifetime = 0;
-
+    let today = 0, week = 0, month = 0, year = 0, lifetime = 0;
     const studyDates = new Set<string>();
 
     rawSessions.forEach((s) => {
@@ -95,8 +77,7 @@ export function useStudySessions() {
 
         if (!isValid(startTime)) return;
 
-        const duration = s.durationSeconds || 0;
-
+        const duration = Number(s.durationSeconds) || 0;
         lifetime += duration;
         studyDates.add(getLocalDateString(startTime));
 
@@ -104,16 +85,11 @@ export function useStudySessions() {
         if (isAfter(startTime, startOfWeek)) week += duration;
         if (isAfter(startTime, startOfMonth)) month += duration;
         if (isAfter(startTime, startOfYear)) year += duration;
-      } catch (e) {
-        console.warn("[Analytics] Invalid session date ignored", s.id);
-      }
+      } catch (e) {}
     });
 
-    // Calculate Streaks
     const sortedDates = Array.from(studyDates).sort((a, b) => b.localeCompare(a));
-    let currentStreak = 0;
-    let longestStreak = 0;
-    let tempStreak = 0;
+    let currentStreak = 0, longestStreak = 0, tempStreak = 0;
 
     if (sortedDates.length > 0) {
       const todayStr = getLocalDateString(now);
@@ -129,7 +105,6 @@ export function useStudySessions() {
         }
       }
 
-      // Longest streak
       let lastDate: Date | null = null;
       [...sortedDates].reverse().forEach((dateStr) => {
         const d = new Date(dateStr);
@@ -158,7 +133,7 @@ export function useStudySessions() {
       longestStreak,
       totalSessions: rawSessions.length
     };
-  }, [rawSessions, midnightTrigger]);
+  }, [rawSessions, mounted]);
 
   return { stats, loading, sessions: rawSessions };
 }
@@ -172,7 +147,7 @@ export function useActiveSession(activityType: StudySession['activityType'], act
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const startSession = useCallback(() => {
-    if (isActive) return;
+    if (isActive || typeof window === 'undefined') return;
     setIsActive(true);
     startTimeRef.current = Date.now();
     setSeconds(0);
@@ -191,6 +166,8 @@ export function useActiveSession(activityType: StudySession['activityType'], act
     const startTime = startTimeRef.current || endTime;
     const durationSeconds = Math.round((endTime - startTime) / 1000);
 
+    if (durationSeconds < 5) return null; // Ignore micro-sessions
+
     const session: Omit<StudySession, 'id'> = {
       userId: user.uid,
       startTime: new Date(startTime),
@@ -207,7 +184,6 @@ export function useActiveSession(activityType: StudySession['activityType'], act
       const docRef = await addDoc(collection(db, 'users', user.uid, 'study_sessions'), session);
       return { id: docRef.id, ...session };
     } catch (e) {
-      console.error("[StudyAnalytics] Failed to save session:", e);
       return null;
     } finally {
       startTimeRef.current = null;
