@@ -20,7 +20,9 @@ import {
   Users,
   ArrowRight,
   Sparkles,
-  X
+  X,
+  FileStack,
+  BookOpen
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -32,10 +34,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
+import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Exam Selection Hub v5.8.
- * UPDATED: Removed uppercase styling and fixed syntax error.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v6.0.
+ * UPDATED: 100% Dynamic Data Registry. Pulls real stats from every vertical.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -57,26 +60,28 @@ const POPULAR_CHIPS = [
 
 export default function ExamsEntryPage() {
   const db = useFirestore();
-  const { user, loading: authLoading } = useUser();
+  const { user, profile, loading: authLoading } = useUser();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [isListening, setIsListening] = useState(false);
 
+  // REAL DATA NODES
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: platformStats } = useDoc<any>(statsRef);
 
-  const { data: rawCategories, loading: catLoading } = useCollection<any>(useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]));
-  const { data: exams, loading: examsLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
-  const { data: allMocks } = useCollection<any>(useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]));
+  const categoriesQuery = useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]);
+  const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db]);
+  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]);
+  const pyqsQuery = useMemo(() => (db ? collection(db, "pyqs") : null), [db]);
+  const notesQuery = useMemo(() => (db ? collection(db, "notes") : null), [db]);
+  const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid)) : null), [db, user]);
 
-  const examStats = useMemo(() => {
-    const stats: Record<string, number> = {};
-    if (!exams || !allMocks) return stats;
-    exams.forEach(e => {
-       stats[e.id] = allMocks.filter((m: any) => m.examId === e.id || m.examIds?.includes(e.id)).length;
-    });
-    return stats;
-  }, [exams, allMocks]);
+  const { data: rawCategories, loading: catLoading } = useCollection<any>(categoriesQuery);
+  const { data: exams, loading: examsLoading } = useCollection<any>(examsQuery);
+  const { data: mocks } = useCollection<any>(mocksQuery);
+  const { data: pyqs } = useCollection<any>(pyqsQuery);
+  const { data: notes } = useCollection<any>(notesQuery);
+  const { data: results } = useCollection<any>(resultsQuery);
 
   const categories = useMemo(() => {
     if (!rawCategories) return [];
@@ -85,7 +90,7 @@ export default function ExamsEntryPage() {
 
   const featuredExams = useMemo(() => {
     if (!exams) return [];
-    return exams.filter((e: any) => e.isTrending).slice(0, 4);
+    return exams.filter((e: any) => e.isTrending).slice(0, 8);
   }, [exams]);
 
   const filteredExams = useMemo(() => {
@@ -99,21 +104,16 @@ export default function ExamsEntryPage() {
 
   const startListening = () => {
     if (typeof window === 'undefined') return;
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitRecognition;
     if (!SpeechRecognition) {
-      toast({ variant: "destructive", title: "Not Supported", description: "Voice search is not supported." });
+      toast({ variant: "destructive", title: "Voice Search Locked", description: "Unsupported in this browser." });
       return;
     }
-
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-IN';
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
-    recognition.onresult = (event: any) => {
-      setSearchTerm(event.results[0][0].transcript);
-    };
+    recognition.onresult = (e: any) => setSearchTerm(e.results[0][0].transcript);
     recognition.start();
   };
 
@@ -123,9 +123,9 @@ export default function ExamsEntryPage() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full">
       <Navbar />
       
-      <main className="w-full max-w-[1440px] auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-24 pb-[env(safe-area-inset-bottom,40px)]">
+      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-24">
         
-        {/* 1. PREMIUM HERO SECTION */}
+        {/* 1. ENTERPRISE HERO HUB */}
         <section className="relative px-1 overflow-hidden">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -135,27 +135,27 @@ export default function ExamsEntryPage() {
             <div className="space-y-6 max-w-4xl">
               <div className="flex items-center justify-center md:justify-start gap-3">
                  <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs tracking-tight flex items-center gap-2">
-                   <Landmark className="h-3.5 w-3.5" /> Exam list
+                   <Landmark className="h-3.5 w-3.5" /> Institutional Registry
                  </Badge>
               </div>
-              <h1 className="text-[32px] sm:text-6xl lg:text-[72px] font-black tracking-tighter leading-[1.05] text-[#0F172A] antialiased">
-                Find your <br className="hidden md:block"/>
-                <span className="text-primary italic">target exam.</span>
+              <h1 className="text-[32px] sm:text-6xl lg:text-[84px] font-[900] tracking-tighter leading-[1] text-[#0F172A] antialiased">
+                Target Your <br className="hidden md:block"/>
+                <span className="text-primary italic">Recruitment.</span>
               </h1>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl leading-relaxed tracking-tight">
-                Select your target board or exam vertical to begin practicing with Punjab's most accurate mock tests.
+                Access verified preparation verticals for PSSSB, PPSC, Punjab Police and Central exams. Every test series is audited by institutional mentors.
               </p>
             </div>
 
             <div className="relative w-full max-w-4xl group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-400 rounded-[28px] blur opacity-5 group-focus-within:opacity-10 transition duration-1000"></div>
-              <div className="relative min-h-[64px] md:min-h-[72px] bg-white border border-slate-200 rounded-[24px] shadow-xl flex items-center px-4 md:px-8 gap-4">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-400 rounded-[28px] blur opacity-5 group-focus-within:opacity-15 transition duration-1000"></div>
+              <div className="relative min-h-[64px] md:min-h-[76px] bg-white border border-slate-200 rounded-[24px] shadow-2xl flex items-center px-4 md:px-8 gap-4">
                 <Search className="h-6 w-6 text-slate-300 shrink-0" />
                 <input 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search exams like Patwari, Police, SSC..."
-                  className="flex-1 min-w-0 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-200 text-sm md:text-xl"
+                  placeholder="Search 12,000+ items across all verticals..."
+                  className="flex-1 min-w-0 bg-transparent border-none outline-none font-[700] text-slate-700 placeholder:text-slate-200 text-sm md:text-2xl"
                 />
                 <div className="flex items-center gap-2 shrink-0 border-l border-slate-100 pl-4">
                   {searchTerm && (
@@ -188,9 +188,9 @@ export default function ExamsEntryPage() {
                         <Link key={e.id} href={`/exams/view?id=${e.id}`} className="flex items-center justify-between p-4 md:p-6 hover:bg-slate-50 transition-all group">
                           <div className="flex items-center gap-4 min-w-0">
                             <AuthorityLogo boardId={e.boardId} size="sm" className="h-12 w-12 shrink-0" />
-                            <div className="min-w-0">
+                            <div className="min-w-0 text-left">
                               <span className="font-bold text-[#0F172A] text-sm md:text-lg block truncate">{e.name}</span>
-                              <span className="text-[10px] font-bold text-slate-400">{e.boardId} hub</span>
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{e.boardId} hub</span>
                             </div>
                           </div>
                           <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all" />
@@ -207,53 +207,85 @@ export default function ExamsEntryPage() {
                   <button 
                     key={chip.label}
                     onClick={() => setSearchTerm(chip.label)}
-                    className="h-10 px-6 rounded-full bg-white border border-slate-200 text-[#0F172A] font-bold text-xs tracking-tight shadow-sm hover:border-primary/40 hover:text-primary transition-all whitespace-nowrap active:scale-95 flex items-center gap-2"
+                    className="h-11 px-7 rounded-full bg-white border border-slate-100 text-[#0F172A] font-bold text-[11px] uppercase tracking-tight shadow-sm hover:shadow-lg hover:border-primary/20 transition-all whitespace-nowrap active:scale-95 flex items-center gap-2.5"
                   >
-                    <span>{chip.icon}</span> {chip.label}
+                    <span className="text-sm">{chip.icon}</span> {chip.label}
                   </button>
                ))}
             </div>
           </motion.div>
         </section>
 
-        {/* 2. RECRUITMENT BOARDS (PREMIUM HORIZONTAL) */}
-        <section className="space-y-8 md:space-y-12 w-full text-left">
-           <div className="flex items-center justify-between px-1">
+        {/* 2. TRENDING VERTICALS DASHBOARD */}
+        <section className="space-y-10 md:space-y-14 w-full text-left">
+           <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
               <div className="flex items-center gap-4">
                  <div className="h-12 w-12 rounded-2xl bg-[#0F172A] flex items-center justify-center text-primary shadow-2xl">
+                    <Star className="h-6 w-6 fill-current" />
+                 </div>
+                 <div className="text-left">
+                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter">Popular Verticals</h2>
+                    <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">High-Aspirant Traffic Nodes</p>
+                 </div>
+              </div>
+           </div>
+
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+              {examsLoading ? (
+                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[450px] w-full rounded-[3rem] bg-white border border-slate-100" />)
+              ) : featuredExams.map((exam: any) => (
+                 <ExamCard 
+                   key={exam.id} 
+                   exam={exam} 
+                   allMocks={mocks} 
+                   userResults={results} 
+                   allPyqs={pyqs} 
+                   allNotes={notes} 
+                 />
+              ))}
+           </div>
+        </section>
+
+        {/* 3. OFFICIAL AUTHORITY HUBS */}
+        <section className="space-y-10 md:space-y-14 w-full text-left">
+           <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
+              <div className="flex items-center gap-4">
+                 <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                     <Landmark className="h-6 w-6" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Exam boards</h2>
-                    <p className="text-[10px] md:text-sm font-bold text-slate-400 mt-1">Official authority hubs</p>
+                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter">Exam Boards</h2>
+                    <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">Official Selection Authorities</p>
                  </div>
               </div>
            </div>
            
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-10 w-full">
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10 w-full">
               {catLoading ? (
-                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-[24px]" />)
+                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-[3rem] bg-white border border-slate-100" />)
               ) : categories.map((cat: any, i: number) => (
                  <motion.div 
                     key={cat.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ y: -6 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
                  >
                     <Link href={`/exams/category/${cat.id}`}>
-                       <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[28px] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-8 relative text-left">
+                       <Card className="border border-slate-100 shadow-lg hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-8 relative text-left">
                           <div className="flex items-center gap-5 relative z-10">
-                             <div className="h-14 w-14 md:h-16 md:w-16 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner shrink-0 group-hover:scale-105 transition-transform">
+                             <div className="h-16 w-16 md:h-20 md:w-20 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner shrink-0 group-hover:scale-110 transition-transform">
                                 <AuthorityLogo category={cat} size="sm" className="p-0 shadow-none border-none bg-transparent" />
                              </div>
                              <div className="min-w-0 flex-1">
-                                <h3 className="text-sm md:text-lg font-bold text-[#0F172A] leading-tight group-hover:text-primary transition-colors truncate">{cat.title}</h3>
-                                <div className="mt-1 flex items-center justify-between">
-                                   <span className="text-[9px] font-bold text-slate-400">12+ Exams</span>
+                                <h3 className="text-base md:text-lg font-[800] text-[#0F172A] leading-tight group-hover:text-primary transition-colors truncate">{cat.title}</h3>
+                                <div className="mt-2 flex items-center justify-between">
+                                   <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-2 py-0.5">Live now</Badge>
                                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-all" />
                                 </div>
                              </div>
                           </div>
-                          <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none">
+                          <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none group-hover:scale-125 transition-transform duration-1000">
                              <Layers className="h-32 w-32" />
                           </div>
                        </Card>
@@ -263,105 +295,46 @@ export default function ExamsEntryPage() {
            </div>
         </section>
 
-        {/* 3. POPULAR EXAM VERTICALS */}
-        <section className="space-y-10 w-full text-left">
-           <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-4">
-                 <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                    <Star className="h-6 w-6 fill-current" />
-                 </div>
-                 <div className="text-left">
-                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Popular exams</h2>
-                    <p className="text-[10px] md:text-sm font-bold text-slate-400 mt-1">High aspirant traffic verticals</p>
-                 </div>
-              </div>
-           </div>
-
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10">
-              {examsLoading ? (
-                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[32px]" />)
-              ) : featuredExams.map((exam: any, i: number) => (
-                 <motion.div 
-                    key={exam.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                 >
-                    <Link href={`/exams/view?id=${exam.id}`}>
-                       <Card className="border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[32px] md:rounded-[40px] bg-white p-8 md:p-10 flex flex-col group h-full relative overflow-hidden text-left">
-                          <div className="flex justify-between items-start mb-10">
-                             <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-2xl border-4 border-white bg-slate-50" />
-                             <div className="flex flex-col items-end gap-2">
-                                <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold px-2.5 py-1 rounded-lg shadow-sm">Live patterns</Badge>
-                                <div className="flex items-center gap-1 text-amber-500">
-                                   <Star className="h-3 w-3 fill-current" />
-                                   <span className="text-[10px] font-black text-slate-400">4.9</span>
-                                </div>
-                             </div>
-                          </div>
-                          <div className="space-y-4 flex-1">
-                             <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-[1.1] tracking-tight group-hover:text-primary transition-colors">{exam.name}</h3>
-                             <div className="flex items-center gap-6 pt-4">
-                                <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px]">
-                                   <Zap className="h-4 w-4 text-primary" /> {examStats[exam.id] || 0} Mocks
-                                </div>
-                                <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px]">
-                                   <Users className="h-4 w-4 text-primary" /> Active
-                                </div>
-                             </div>
-                          </div>
-                          <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between group-hover:text-primary transition-all">
-                             <span className="text-[10px] font-bold">Start practice</span>
-                             <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                          </div>
-                       </Card>
-                    </Link>
-                 </motion.div>
-              ))}
-           </div>
-        </section>
-
-        {/* 4. WHY CRACKLIX SECTION */}
-        <section className="py-12 md:py-24 bg-white rounded-[40px] md:rounded-[80px] shadow-sm border border-slate-100 overflow-hidden relative text-center">
-           <div className="absolute top-0 right-0 p-16 opacity-[0.02] pointer-events-none"><ShieldCheck className="h-96 w-96" /></div>
-           <div className="container mx-auto px-8 md:px-20 space-y-16">
+        {/* 4. PERFORMANCE PROTOCOL */}
+        <section className="py-12 md:py-24 bg-white rounded-[40px] md:rounded-[80px] shadow-2xl border border-slate-100 overflow-hidden relative text-center mx-1">
+           <div className="absolute top-0 right-0 p-20 opacity-[0.03] pointer-events-none"><ShieldCheck className="h-[500px] w-[500px]" /></div>
+           <div className="container mx-auto px-6 md:px-20 space-y-16">
               <div className="space-y-4 max-w-3xl mx-auto">
-                 <h2 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">The Cracklix standard</h2>
-                 <p className="text-slate-400 font-bold text-[11px] md:text-sm uppercase tracking-widest">Verified institutional learning items</p>
+                 <h2 className="text-3xl md:text-7xl font-[900] text-[#0F172A] tracking-tighter leading-none">The Cracklix Standard</h2>
+                 <p className="text-slate-400 font-bold text-[11px] md:text-sm uppercase tracking-[0.4em]">Institutional-Grade Learning Registry</p>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-16">
-                 <ValueNode icon={ShieldCheck} title="Verified patterns" desc="Updated 24x7 as per official gazettes." />
-                 <ValueNode icon={Zap} title="Instant solutions" desc="Bilingual rationale for every MCQ item." />
-                 <ValueNode icon={GraduationCap} title="Merit ranking" desc="See your All Punjab Rank in real-time." />
-                 <ValueNode icon={Users} title="Student community" desc="Join 100K+ aspirants preparing smarter." />
+                 <ValueNode icon={ShieldCheck} title="Verified Patterns" desc="Updated 24x7 as per official gazettes." />
+                 <ValueNode icon={Zap} title="Instant Solutions" desc="Bilingual rationale for every MCQ item." />
+                 <ValueNode icon={GraduationCap} title="Merit Ranking" desc="Real-time All Punjab Rank calculation." />
+                 <ValueNode icon={Users} title="Active Hub" desc="Joined by 100K+ serious aspirants." />
               </div>
            </div>
         </section>
 
-        {/* 5. CTA HUB */}
+        {/* 5. CTA CONVERSION HUB */}
         <section className="px-1 text-center">
            <motion.div 
              initial={{ opacity: 0, scale: 0.98 }}
              whileInView={{ opacity: 1, scale: 1 }}
              viewport={{ once: true }}
-             className="bg-gradient-to-br from-[#0B1528] to-[#1E3A8A] rounded-[30px] md:rounded-[60px] p-10 md:p-32 space-y-10 md:space-y-16 text-white relative overflow-hidden shadow-5xl border border-white/5"
+             className="bg-[#0B1528] rounded-[40px] md:rounded-[80px] p-10 md:p-32 space-y-12 md:space-y-20 text-white relative overflow-hidden shadow-5xl border border-white/5"
            >
               <div className="absolute top-0 right-0 p-16 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000">
                  <Sparkles className="h-64 w-64 text-primary" />
               </div>
-              <div className="relative z-10 space-y-6">
-                 <h2 className="text-3xl md:text-7xl lg:text-9xl font-black text-white tracking-tighter leading-[0.9] antialiased">
-                   Ready to crack <br className="hidden md:block" /> your dream job?
+              <div className="relative z-10 space-y-8">
+                 <h2 className="text-3xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter leading-[0.9] antialiased">
+                   Prepare <br className="hidden md:block" /> <span className="text-primary">Smarter.</span>
                  </h2>
-                 <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-relaxed">
-                   Join Punjab's most trusted mock test platform. Official patterns, expert rationales, and verified success entries.
+                 <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-3xl mx-auto leading-relaxed">
+                   Join Punjab's highest performing aspirants. Access verified patterns, state rankings, and expert rationales.
                  </p>
               </div>
               <div className="relative z-10 pt-4 flex justify-center">
-                 <Button asChild className="h-16 md:h-24 px-12 md:px-24 bg-primary hover:bg-blue-700 text-white font-bold text-[10px] md:text-sm tracking-tight rounded-2xl md:rounded-[3rem] shadow-4xl border-none transition-all active:scale-95 group">
+                 <Button asChild className="h-16 md:h-24 px-12 md:px-24 bg-primary hover:bg-blue-700 text-white font-[800] text-[10px] md:text-sm tracking-[0.2em] uppercase rounded-full shadow-4xl border-none transition-all active:scale-95 group">
                     <Link href="/mocks" className="flex items-center justify-center gap-4">
-                       Start practicing <ArrowRight className="h-5 w-5 md:h-8 md:w-8 group-hover:translate-x-2 transition-transform" />
+                       Enter Practice Hub <ArrowRight className="h-5 w-5 md:h-8 md:w-8 group-hover:translate-x-2 transition-transform" />
                     </Link>
                  </Button>
               </div>
@@ -376,13 +349,13 @@ export default function ExamsEntryPage() {
 
 function ValueNode({ icon: Icon, title, desc }: any) {
    return (
-      <div className="flex flex-col items-center text-center space-y-6 group">
-         <div className="h-16 w-16 md:h-24 md:w-24 rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-50 flex items-center justify-center text-primary shadow-inner group-hover:scale-110 group-hover:bg-primary/5 transition-all">
-            <Icon className="h-8 w-8 md:h-12 md:w-12" />
+      <div className="flex flex-col items-center text-center space-y-8 group">
+         <div className="h-20 w-20 md:h-28 md:w-28 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-50 flex items-center justify-center text-primary shadow-inner group-hover:scale-110 group-hover:bg-primary/5 transition-all">
+            <Icon className="h-10 w-10 md:h-14 md:w-14" />
          </div>
-         <div className="space-y-2">
-            <h4 className="font-bold text-sm md:text-xl text-[#0F172A] leading-tight">{title}</h4>
-            <p className="text-[10px] md:text-xs font-medium text-slate-400 leading-snug">{desc}</p>
+         <div className="space-y-3">
+            <h4 className="font-[800] text-sm md:text-2xl text-[#0F172A] leading-tight uppercase tracking-tight">{title}</h4>
+            <p className="text-[10px] md:text-sm font-medium text-slate-400 leading-snug">{desc}</p>
          </div>
       </div>
    );
