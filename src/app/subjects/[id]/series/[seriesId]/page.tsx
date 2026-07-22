@@ -32,8 +32,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Series Hub Portal v7.1.
- * FIXED: Removed forced uppercase from series and test titles.
+ * @fileOverview Premium Series Hub Portal v7.2.
+ * FIXED: Removed title truncation and improved text alignment for long series names.
  */
 
 export default function SeriesDetailPortal() {
@@ -84,20 +84,24 @@ export default function SeriesDetailPortal() {
                <span className="text-primary">Test series</span>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-14">
-               <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 flex-1 min-w-0">
+            <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8 md:gap-14">
+               <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 flex-1 min-w-0">
                   <div className="shrink-0 relative">
                      <AuthorityLogo boardId={series?.boardId} size="lg" className="h-16 w-16 md:h-28 md:w-28 rounded-2xl md:rounded-[2.5rem] bg-white/5 border-[4px] border-white/5 shadow-2xl backdrop-blur-xl" />
                      <div className="absolute -bottom-1 -right-1 h-8 w-8 bg-primary rounded-lg flex items-center justify-center border-2 border-[#0F172A]">
                         <Layers className="h-4 w-4 text-white" />
                      </div>
                   </div>
-                  <div className="space-y-2 text-center md:text-left flex-1 min-w-0">
-                     <h1 className="text-xl md:text-4xl font-black tracking-tight leading-tight antialiased">{series?.title}</h1>
-                     <p className="text-slate-400 font-medium text-xs md:text-base max-w-xl line-clamp-2">{series?.description || "High-speed mock tests for competitive mastery."}</p>
+                  <div className="space-y-3 text-center md:text-left flex-1 min-w-0">
+                     <h1 className="text-xl md:text-4xl font-black tracking-tight leading-tight antialiased break-words">
+                        {series?.title}
+                     </h1>
+                     <p className="text-slate-400 font-medium text-xs md:text-base max-w-xl leading-relaxed">
+                        {series?.description || "High-speed mock tests for competitive mastery."}
+                     </p>
                   </div>
                </div>
-               <div className="shrink-0 w-full md:w-auto">
+               <div className="shrink-0 w-full md:w-auto mt-4 lg:mt-0">
                   <div className="bg-white/5 border border-white/10 p-4 md:p-6 rounded-[20px] backdrop-blur-md space-y-3 min-w-[200px]">
                      <div className="flex justify-between items-center text-[9px] font-black uppercase text-slate-400 tracking-widest">
                         <span>Progress</span>
