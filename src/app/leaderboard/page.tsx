@@ -18,8 +18,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Daily Challenge Merit Registry v1.1.
- * FIXED: Added missing Link import.
+ * @fileOverview Daily Challenge Merit Registry v1.2.
+ * FIXED: Mobile ordering for podium cards (1st always first).
  */
 
 const CATEGORY_CHIPS = [
@@ -158,9 +158,10 @@ export default function LeaderboardPage() {
 
          {!searchTerm && finalSortedList.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 pt-8">
-               <PodiumCard rank={2} data={podium[1]} order="md:order-1" />
-               <PodiumCard rank={1} data={podium[0]} order="md:order-2" isMain />
-               <PodiumCard rank={3} data={podium[2]} order="md:order-3" />
+               {/* DOM order changed to 1, 2, 3 for mobile, arranged via order classes for desktop */}
+               <PodiumCard rank={1} data={podium[0]} order="order-1 md:order-2" isMain />
+               <PodiumCard rank={2} data={podium[1]} order="order-2 md:order-1" />
+               <PodiumCard rank={3} data={podium[2]} order="order-3 md:order-3" />
             </div>
          )}
 
