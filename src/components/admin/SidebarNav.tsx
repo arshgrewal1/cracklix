@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -63,7 +64,7 @@ const NAV_GROUPS = [
   {
     label: "Portal Navigation",
     items: [
-      { label: "Student Portal", href: "/", icon: ExternalLink },
+      { label: "Student Portal", href: "/", icon: Home },
     ],
   },
   {

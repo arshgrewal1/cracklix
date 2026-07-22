@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -12,10 +13,6 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
-/**
- * @fileOverview Top Rankers Preview Hub v20.4 [Hardened Fidelity].
- * FIXED: Preserving decimal scores for institutional accuracy.
- */
 export default function MeritPreview() {
   const db = useFirestore();
   

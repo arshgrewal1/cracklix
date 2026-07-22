@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -48,12 +49,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import ResultCard from "./ResultCard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
-
-/**
- * @fileOverview Universal Result Hub Viewer v4.4 [Stability Hardened].
- * FIXED: Accurate state rank calculation with latest submission node injection.
- * FIXED: Corrected score to decimal 1 place.
- */
 
 export default function ResultClient() {
   const db = useFirestore()

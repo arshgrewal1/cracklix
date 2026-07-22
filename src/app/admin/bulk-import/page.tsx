@@ -59,10 +59,6 @@ const LANGUAGE_MODES = [
   { label: "Punjabi Only", value: "PUNJABI" }
 ];
 
-/**
- * @fileOverview Institutional Bulk Ingestion Hub v85.0.
- * UPDATED: Restored all 12 question formats with correct iconography.
- */
 export default function BulkIngestionPage() {
   const router = useRouter()
   const db = useFirestore()
@@ -90,11 +86,6 @@ export default function BulkIngestionPage() {
     if (!metadata.boardId || !metadata.subjectId) {
       toast({ variant: "destructive", title: "Audit Blocked", description: "Select Board and Subject first." })
       return
-    }
-
-    if (typeof parseBulkQuestions !== "function") {
-       toast({ variant: "destructive", title: "System Failure", description: "Parser modules not initialized." });
-       return;
     }
 
     setIsProcessing(true)
@@ -143,7 +134,7 @@ export default function BulkIngestionPage() {
         const { isValid, validationErrors, validationWarnings, ...finalData } = q;
         batch.set(qRef, { 
           ...finalData, 
-          status: 'PUBLISHED', 
+          status: 'UNUSED', 
           createdAt: serverTimestamp(), 
           updatedAt: serverTimestamp() 
         });

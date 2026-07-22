@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -15,11 +16,6 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
-
-/**
- * @fileOverview Official Top Rankers Center v3.4 [Fidelity Hardened].
- * FIXED: Preserving decimal scores for accuracy and Title Case names.
- */
 
 const CATEGORY_CHIPS = [
   { id: "all", label: "All Hubs" },
@@ -131,7 +127,7 @@ export default function LeaderboardPage() {
                   />
                   {searchTerm && (
                     <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all">
-                       <X className="h-6 w-6 text-slate-300" />
+                       <X className="h-4 w-4 text-slate-300" />
                     </button>
                   )}
                </div>

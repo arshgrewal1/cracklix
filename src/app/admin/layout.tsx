@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo } from "react";
@@ -5,7 +6,7 @@ import { useUser, useAuth } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { Menu, ShieldCheck, Loader2, ExternalLink, AlertCircle, Lock } from "lucide-react";
+import { Menu, ShieldCheck, Loader2, ExternalLink, AlertCircle, Lock, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import Link from "next/link";
@@ -13,10 +14,6 @@ import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { canAccessAdmin, checkPermission } from "@/lib/permissions";
 
-/**
- * @fileOverview Administrative Control Boundary v76.2.
- * UPDATED: Reduced header height to h-[84px] md:h-[116px] to decrease extra space.
- */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
   const auth = useAuth();
@@ -45,7 +42,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
      if (!profile) return false;
      if (profile.role === 'SUPER_ADMIN') return true;
 
-     // Specific Route Governance
      if (pathname.includes('/payments') || pathname.includes('/revenue')) return checkPermission(profile, 'managePayments', user?.email) || checkPermission(profile, 'viewRevenue', user?.email);
      if (pathname.includes('/roles') || pathname.includes('/users')) return checkPermission(profile, 'manageRoles', user?.email) || checkPermission(profile, 'manageUsers', user?.email);
      if (pathname.includes('/mcq-bank/add') || pathname.includes('/questions/add')) return checkPermission(profile, 'uploadQuestions', user?.email);
@@ -82,11 +78,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const isGlobalLoading = !mounted || loading || (user && !profile && profileLoading);
 
-  if (!mounted) return (
-    <div className="h-screen w-full bg-white flex items-center justify-center">
-       <Loader2 className="h-10 w-10 text-primary animate-spin" />
-    </div>
-  );
+  if (!mounted) return <div className="h-screen w-full bg-white flex items-center justify-center"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
 
   if (isGlobalLoading) return (
     <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6">
@@ -143,8 +135,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                      <AlertCircle className="h-4 w-4" /> Account Suspended
                   </Badge>
                )}
-               <Button asChild variant="outline" className="flex h-10 md:h-11 rounded-full text-[9px] md:text-[11px] font-bold tracking-tight px-4 md:px-6 gap-2">
-                  <Link href="/">Student Portal <ExternalLink className="h-3 w-3 md:h-3.5 md:w-3.5 opacity-40" /></Link>
+               <Button asChild variant="outline" className="flex h-10 md:h-11 rounded-full text-[9px] md:text-[11px] font-bold tracking-tight px-4 md:px-6 gap-2 border-slate-200">
+                  <Link href="/"><Home className="h-3.5 w-3.5" /> Student Portal</Link>
                </Button>
                <div className="h-9 w-9 md:h-12 md:w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black shadow-lg shrink-0">
                   {(profile?.name || user.displayName || 'A')[0]}

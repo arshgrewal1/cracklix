@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -50,11 +51,6 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { DistributionSettings, BrandingSettings } from "@/types";
 import FileUpload from "@/components/admin/FileUpload";
-
-/**
- * @fileOverview Institutional Administrative Portal v27.0 [Hardened].
- * FIXED: Resolved JSX tag mismatch and properly nested all setting nodes.
- */
 
 const DEFAULT_DISTRIBUTION: DistributionSettings = {
   primaryWebsiteUrl: "https://cracklix.vercel.app",
@@ -472,5 +468,5 @@ function TrendInput({ label, value, onChange }: { label: string, value: string, 
          <Label className="text-[8px] font-black uppercase text-slate-400 ml-1">{label}</Label>
          <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-10 bg-slate-50 border-none font-bold text-[11px]" />
       </div>
-)
+   )
 }
