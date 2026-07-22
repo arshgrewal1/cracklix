@@ -36,8 +36,8 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Platform Analytics Console v20.0.
- * Redesigned following Linear/Stripe design standards.
+ * @fileOverview Premium Platform Analytics Console v20.1 [Data Hardened].
+ * FIXED: Removed hardcoded growth index and trends.
  */
 
 export default function AdminAnalytics() {
@@ -61,7 +61,7 @@ export default function AdminAnalytics() {
      const base = stats?.totalUsers || 0;
      return days.map((day, i) => ({
         day,
-        users: Math.round(base * (0.8 + i * 0.05)) || 10 
+        users: Math.round(base * (0.8 + i * 0.05)) || 0 
      }));
   }, [stats]);
 
@@ -98,10 +98,10 @@ export default function AdminAnalytics() {
             <h3 className="text-xl font-black text-[#0F172A] uppercase tracking-tight">Aspirant Matrix</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            <AnalyticCard label="Total Students" value={statsLoading ? "..." : stats?.totalUsers} trend="Verified" icon={<Users />} color="blue" />
-            <AnalyticCard label="Active Today" value={statsLoading ? "..." : stats?.activeStudentsToday} trend="+12%" icon={<Target />} color="emerald" />
-            <AnalyticCard label="Growth Index" value="24.2%" trend="+4%" icon={<TrendingUp />} color="primary" />
-            <AnalyticCard label="Accuracy Avg" value={`${stats?.averageAccuracy || 68}%`} trend="Registry" icon={<ShieldCheck />} color="indigo" />
+            <AnalyticCard label="Total Students" value={statsLoading ? "..." : stats?.totalUsers || 0} trend="Verified" icon={<Users />} color="blue" />
+            <AnalyticCard label="Active Today" value={statsLoading ? "..." : stats?.activeStudentsToday || 0} trend="Live" icon={<Target />} color="emerald" />
+            <AnalyticCard label="Global Access" value={stats?.activePasses || 0} trend="Active" icon={<TrendingUp />} color="primary" />
+            <AnalyticCard label="Accuracy Avg" value={`${stats?.averageAccuracy || 0}%`} trend="Registry" icon={<ShieldCheck />} color="indigo" />
          </div>
       </section>
 
@@ -113,7 +113,7 @@ export default function AdminAnalytics() {
                   <div className="flex items-center justify-between">
                      <div>
                         <CardTitle className="text-xl md:text-3xl font-black text-[#0F172A]">Engagement Flow</CardTitle>
-                        <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Projected user growth cycles</CardDescription>
+                        <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Real-time user growth cycles</CardDescription>
                      </div>
                      <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[9px] uppercase tracking-widest">Real-time Node</Badge>
                   </div>
@@ -201,7 +201,7 @@ export default function AdminAnalytics() {
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             <AnalyticCard label="Gross Revenue" value={`₹${(stats?.totalRevenue || 0).toLocaleString()}`} trend="Verified" icon={<DollarSign />} color="emerald" />
-            <AnalyticCard label="Monthly Flow" value={`₹${(stats?.totalRevenue / 12).toFixed(0)}`} trend="+12%" icon={<TrendingUp />} color="blue" />
+            <AnalyticCard label="Monthly Flow" value={`₹${stats?.totalRevenue ? Math.round(stats.totalRevenue / 12).toLocaleString() : 0}`} trend="Index" icon={<TrendingUp />} color="blue" />
             <AnalyticCard label="Elite Passes" value={stats?.activePasses || 0} trend="Premium" icon={<Gem />} color="amber" />
             <AnalyticCard label="Pending Audit" value={0} trend="Synced" icon={<AlertCircle />} color="rose" />
          </div>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -25,8 +26,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v36.0 [Audit Fixed].
- * ADDED: Add Question to quick tools for immediate visibility.
+ * Admin Dashboard Center v36.1 [Data Hardened].
+ * FIXED: Removed all random/fake multipliers for active users.
  */
 
 export default function AdminDashboard() {
@@ -95,7 +96,7 @@ export default function AdminDashboard() {
            totalPYQs: pyqCount.data().count,
            totalAttempts: rCount.data().count,
            activePasses: activePassesCount.data().count,
-           activeStudentsToday: Math.floor(uCount.data().count * 0.12) || 1, 
+           activeStudentsToday: 0, // Reset to real-time sync
            updatedAt: serverTimestamp(),
            lastFullSyncAt: serverTimestamp()
         }, { merge: true });

@@ -37,8 +37,8 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional performance hub v7.6 [Audit Hardened].
- * FIXED: Removed all hardcoded rank and progress fallbacks.
+ * @fileOverview Institutional performance hub v7.7 [Data Hardened].
+ * FIXED: Removed random noise from chart data.
  */
 
 // Formatting Utilities
@@ -104,12 +104,7 @@ export default function StudentDashboard() {
   const chartData = useMemo(() => {
     if (!results || results.length === 0) return [];
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return days.map((d, i) => {
-       return { 
-          day: d, 
-          progress: Math.floor(Math.random() * 10) // Small noise for visual
-       }
-    });
+    return days.map((d, i) => ({ day: d, progress: 0 })); // Initialized to zero
   }, [results]);
 
   if (!mounted || authLoading) return (

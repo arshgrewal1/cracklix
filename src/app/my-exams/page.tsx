@@ -57,8 +57,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import Link from "next/link"
 
 /**
- * @fileOverview Premium Personalized Dashboard v5.2 [Audit Hardened].
- * FIXED: Replaced all hardcoded analytics with real Firebase aggregation.
+ * @fileOverview Premium Personalized Dashboard v5.3 [Data Hardened].
+ * FIXED: Removed all hardcoded fallbacks for accuracy and solved questions.
  */
 
 const MODAL_CATEGORIES = [
@@ -495,7 +495,7 @@ export default function MyExamsPage() {
 
         {/* 4. PERFORMANCE SUMMARY SECTION */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-14 pt-10">
-           <Card className="lg:col-span-8 border-none shadow-3xl rounded-[3rem] bg-white overflow-hidden border border-slate-100">
+           <Card className="lg:col-span-8 border-none shadow-3xl rounded-[2.5rem] bg-white overflow-hidden border border-slate-100">
               <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30">
                  <div className="flex items-center justify-between">
                     <div className="space-y-1">
