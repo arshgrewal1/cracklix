@@ -37,18 +37,18 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { UserProfile, UserRole, UserStatus, UserPermissions } from "@/types"
-import { INITIAL_PERMISSIONS, ADMIN_BASE_PERMISSIONS } from "@/lib/permissions"
+import { INITIAL_PERMISSIONS, ADMIN_BASE_PERMISSIONS, isSuperAdmin } from "@/lib/permissions"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Role & Permission Governance Console.
- * Access restricted to SUPER_ADMIN only.
+ * Access restricted to Super Admin authority nodes.
  */
 
 export default function RoleManagementPage() {
   const db = useFirestore()
-  const { profile: currentAdmin } = useUser()
+  const { profile: currentAdmin, user } = useUser()
   const { toast } = useToast()
   
   const [searchTerm, setSearchTerm] = useState("")
@@ -101,14 +101,16 @@ export default function RoleManagementPage() {
     toast({ title: "Authority Purged" })
   }
 
-  if (currentAdmin?.role !== 'SUPER_ADMIN') {
+  const userIsSuper = isSuperAdmin(currentAdmin, user?.email);
+
+  if (!userIsSuper) {
      return (
         <div className="h-[60vh] flex flex-col items-center justify-center space-y-6 text-center">
            <div className="h-20 w-20 bg-rose-50 rounded-[2.5rem] flex items-center justify-center text-rose-500 shadow-inner">
               <ShieldAlert className="h-10 w-10" />
            </div>
            <div className="space-y-2">
-              <h2 className="text-3xl font-black text-[#0F172A] uppercase tracking-tight">Access Blocked</h2>
+              <h2 className="text-3xl font-black text-[#0F172A] tracking-tight">Access Blocked</h2>
               <p className="text-slate-500 font-medium max-w-sm">Only the primary Super Admin can manage institutional roles and permissions.</p>
            </div>
         </div>
@@ -290,7 +292,7 @@ export default function RoleManagementPage() {
             <DialogFooter className="p-6 md:p-14 pt-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-4 items-center shrink-0">
                <Button variant="ghost" onClick={() => setSelectedUser(null)} className="h-12 md:h-14 px-8 font-black uppercase text-[10px] text-slate-400">Discard Changes</Button>
                <Button onClick={handleUpdateUser} disabled={isSaving} className="bg-[#0F172A] hover:bg-black text-white h-12 md:h-16 px-12 md:px-24 rounded-full font-black uppercase text-[10px] md:text-[11px] tracking-widest flex-1 shadow-3xl transition-all active:scale-95 gap-3 border-none">
-                  {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />} Commit Authority Update
+                  {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />} Commit Authority Update
                </Button>
             </DialogFooter>
          </DialogContent>
@@ -301,18 +303,4 @@ export default function RoleManagementPage() {
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn("animate-pulse bg-muted rounded", className)} />
-}
-
-function TrendInput({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) {
-   return (
-      <div className="space-y-1.5 text-left">
-         <Label className="text-[8px] font-black uppercase text-slate-400 ml-1">{label}</Label>
-         <Input 
-            value={value} 
-            onChange={(e) => onChange(e.target.value)} 
-            placeholder="e.g. +28 this week" 
-            className="h-10 bg-slate-50 border-none font-bold text-[11px]"
-         />
-      </div>
-   )
 }

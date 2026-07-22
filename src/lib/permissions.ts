@@ -1,7 +1,7 @@
 import { UserProfile, UserPermissions } from "@/types";
 
 /**
- * @fileOverview Institutional Authorization Engine v2.0.
+ * @fileOverview Institutional Authorization Engine v2.1.
  * UPDATED: Added hardcoded Founder Override to ensure the owner never loses access.
  */
 
@@ -57,6 +57,11 @@ export const ADMIN_BASE_PERMISSIONS: UserPermissions = {
   manageNotifications: true,
   manageAnnouncements: true
 };
+
+export function isSuperAdmin(profile: UserProfile | null, userEmail?: string | null): boolean {
+  if (userEmail && SUPER_ADMIN_EMAILS.includes(userEmail.toLowerCase())) return true;
+  return profile?.role === 'SUPER_ADMIN';
+}
 
 export function checkPermission(profile: UserProfile | null, permission: keyof UserPermissions, userEmail?: string | null): boolean {
   // 1. Founder Override
