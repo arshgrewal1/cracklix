@@ -90,7 +90,7 @@ export default function ExamHubClient() {
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
   const { data: rawQuizzes, loading: quizzesLoading } = useCollection<any>(quizzesQuery)
   const { data: results } = useCollection<any>(resultsQuery)
-  const { data: rawPyqs } = useCollection<any>(pyqQuery)
+  const { data: rawPyqs } = useCollection<any>(pyqsQuery)
   const { data: rawNotes } = useCollection<any>(notesQuery)
   
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
@@ -176,7 +176,96 @@ export default function ExamHubClient() {
     </div>
   );
 
-  const isFinished = activeAttempt?.status === 'COMPLETED';
+  function HeroStat({ icon: Icon, label, val }: any) {
+    return (
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-5 group">
+         <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary shadow-inner group-hover:bg-primary group-hover:text-white transition-all">
+            <Icon className="h-5 w-5" />
+         </div>
+         <div className="text-center md:text-left space-y-0.5">
+            <p className="text-lg md:text-2xl font-black tabular-nums text-[#0F172A]">{val}</p>
+            <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">{label}</p>
+         </div>
+      </div>
+    )
+  }
+
+  function HubTab({ value, icon, label }: { value: string, icon: React.ReactNode, label: string }) {
+    return (
+      <TabsTrigger 
+        value={value} 
+        className="px-5 md:px-8 h-full font-bold text-[11px] md:text-[13px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-lg rounded-[20px] transition-all whitespace-nowrap flex items-center gap-3 snap-start shrink-0"
+      >
+        <span className="shrink-0">{icon}</span>
+        {label}
+      </TabsTrigger>
+    );
+  }
+
+  function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
+     if (loading) return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+           {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-72 w-full rounded-[32px] bg-white border border-slate-200" />)}
+        </div>
+     );
+     
+     if (!data || data.length === 0) return (
+        <div className="py-40 text-center opacity-20 flex flex-col items-center gap-6">
+           <Zap className="h-20 w-20 text-slate-300" />
+           <p className="font-bold text-2xl md:text-4xl tracking-tight text-slate-400">Hub Standby</p>
+        </div>
+     );
+
+     return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+           {data.map((item: any, i: number) => (
+              <motion.div key={item.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                 <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2.5rem] bg-white group h-full flex flex-col p-8 md:p-10 relative overflow-hidden">
+                    <div className="flex justify-between items-start mb-8">
+                       <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-primary shadow-inner">
+                          {isNote ? <FileText className="h-7 w-7" /> : isPYQ ? <FileStack className="h-7 w-7" /> : <Zap className="h-7 w-7" />}
+                       </div>
+                       <Badge className={cn("border-none text-[8px] font-bold tracking-tight px-2.5 py-1 rounded-lg", item.accessLevel === 'PREMIUM' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600')}>
+                          {item.accessLevel === 'PREMIUM' ? 'Elite' : 'Free'}
+                       </Badge>
+                    </div>
+                    <div className="space-y-4 flex-1 space-y-4 text-left">
+                       <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-primary tracking-tight">{item.difficulty || 'Standard'} Pattern</p>
+                          <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight line-clamp-2">{item.title}</h3>
+                       </div>
+                       <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
+                          <MetricNode icon={BookOpen} label="Questions" val={item.totalQuestions || "Verified"} />
+                          <MetricNode icon={Timer} label="Time" val={item.duration ? `${item.duration}m` : "Self"} />
+                       </div>
+                    </div>
+                    <div className="mt-10">
+                       <Button asChild className="w-full h-14 md:h-16 rounded-2xl font-bold text-[10px] md:text-[11px] tracking-tight shadow-xl border-none active:scale-95 gap-3 bg-[#0F172A] hover:bg-black text-white">
+                          <Link href={isNote || isPYQ ? (item.pdfUrl || '#') : `/mocks/instructions?id=${item.id}`}>
+                             {isNote || isPYQ ? <Download className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
+                             {isNote || isPYQ ? "Download PDF" : "Start Preparation"}
+                             <ChevronRight className="h-4 w-4 ml-auto opacity-40" />
+                          </Link>
+                       </Button>
+                    </div>
+                 </Card>
+              </motion.div>
+           ))}
+        </div>
+     )
+  }
+
+  function MetricNode({ icon: Icon, label, val }: any) {
+     return (
+        <div className="flex items-center gap-2">
+           <Icon className="h-3.5 w-3.5 text-slate-300" />
+           <div className="text-left">
+              <p className={cn("text-[11px] font-bold text-[#0F172A] leading-none")}>{val}</p>
+              <p className="text-[8px] font-bold text-slate-400 tracking-tight mt-0.5">{label}</p>
+           </div>
+        </div>
+     )
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 overflow-x-hidden w-full">
@@ -302,95 +391,4 @@ export default function ExamHubClient() {
       <Footer />
     </div>
   )
-}
-
-function HubTab({ value, icon, label }: { value: string, icon: React.ReactNode, label: string }) {
-  return (
-    <TabsTrigger 
-      value={value} 
-      className="px-5 md:px-8 h-full font-bold text-[11px] md:text-[13px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-lg rounded-[20px] transition-all whitespace-nowrap flex items-center gap-3 snap-start shrink-0"
-    >
-      <span className="shrink-0">{icon}</span>
-      {label}
-    </TabsTrigger>
-  );
-}
-
-function HeroStat({ icon: Icon, label, val }: any) {
-  return (
-    <div className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-5 group">
-       <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary shadow-inner group-hover:bg-primary group-hover:text-white transition-all">
-          <Icon className="h-5 w-5" />
-       </div>
-       <div className="text-center md:text-left space-y-0.5">
-          <p className="text-lg md:text-2xl font-black tabular-nums text-[#0F172A]">{val}</p>
-          <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">{label}</p>
-       </div>
-    </div>
-  )
-}
-
-function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
-   if (loading) return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-         {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-72 w-full rounded-[32px] bg-white border border-slate-200" />)}
-      </div>
-   );
-   
-   if (!data || data.length === 0) return (
-      <div className="py-40 text-center opacity-20 flex flex-col items-center gap-6">
-         <Zap className="h-20 w-20 text-slate-300" />
-         <p className="font-bold text-2xl md:text-4xl tracking-tight text-slate-400">Hub Standby</p>
-      </div>
-   );
-
-   return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-         {data.map((item: any, i: number) => (
-            <motion.div key={item.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-               <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2.5rem] bg-white group h-full flex flex-col p-8 md:p-10 relative overflow-hidden">
-                  <div className="flex justify-between items-start mb-8">
-                     <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-primary shadow-inner">
-                        {isNote ? <FileText className="h-7 w-7" /> : isPYQ ? <FileStack className="h-7 w-7" /> : <Zap className="h-7 w-7" />}
-                     </div>
-                     <Badge className={cn("border-none text-[8px] font-bold tracking-tight px-2.5 py-1 rounded-lg", item.accessLevel === 'PREMIUM' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600')}>
-                        {item.accessLevel === 'PREMIUM' ? 'Elite' : 'Free'}
-                     </Badge>
-                  </div>
-                  <div className="space-y-4 flex-1 space-y-4 text-left">
-                     <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold text-primary tracking-tight">{item.difficulty || 'Standard'} Pattern</p>
-                        <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight line-clamp-2">{item.title}</h3>
-                     </div>
-                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
-                        <MetricNode icon={BookOpen} label="Questions" val={item.totalQuestions || "Verified"} />
-                        <MetricNode icon={Timer} label="Time" val={item.duration ? `${item.duration}m` : "Self"} />
-                     </div>
-                  </div>
-                  <div className="mt-10">
-                     <Button asChild className="w-full h-14 md:h-16 rounded-2xl font-bold text-[10px] md:text-[11px] tracking-tight shadow-xl border-none active:scale-95 gap-3 bg-[#0F172A] hover:bg-black text-white">
-                        <Link href={isNote || isPYQ ? (item.pdfUrl || '#') : `/mocks/instructions?id=${item.id}`}>
-                           {isNote || isPYQ ? <Download className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
-                           {isNote || isPYQ ? "Download PDF" : "Start Preparation"}
-                           <ChevronRight className="h-4 w-4 ml-auto opacity-40" />
-                        </Link>
-                     </Button>
-                  </div>
-               </Card>
-            </motion.div>
-         ))}
-      </div>
-   )
-}
-
-function MetricNode({ icon: Icon, label, val }: any) {
-   return (
-      <div className="flex items-center gap-2">
-         <Icon className="h-3.5 w-3.5 text-slate-300" />
-         <div className="text-left">
-            <p className={cn("text-[11px] font-bold text-[#0F172A] leading-none")}>{val}</p>
-            <p className="text-[8px] font-bold text-slate-400 tracking-tight mt-0.5">{label}</p>
-         </div>
-      </div>
-   )
 }
