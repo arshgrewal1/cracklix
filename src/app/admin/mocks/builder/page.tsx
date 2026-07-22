@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -70,8 +71,8 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v52.2 [PWA Visibility Fix].
- * FIXED: Removed truncation and reduced font size for questions in the staging and assembly areas.
+ * @fileOverview Master Mock Builder v52.3 [High-Density Content Fix].
+ * FIXED: Reduced font size and removed line-clamping in composition area to ensure full question visibility.
  */
 
 export default function MockBuilderPage() {
@@ -598,6 +599,7 @@ function MockBuilderContent() {
                     </div>
                  </div>
 
+                 {/* SYSTEM CONTROL */}
                  <div className="space-y-6 pt-6 border-t border-slate-100">
                     <div className="flex items-center gap-4">
                        <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100">
@@ -663,7 +665,7 @@ function MockBuilderContent() {
                   </div>
 
                   <div className="relative group w-full">
-                     <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-all duration-500" />
+                     <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-10 transition-all duration-500" />
                      <div className="relative flex items-center h-16 bg-white border border-slate-100 rounded-[18px] shadow-sm px-6 gap-4 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
                         <Search className="h-5 w-5 text-slate-400 group-focus-within:text-primary" />
                         <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-xl" placeholder="Search statements..." />
@@ -728,7 +730,7 @@ function MockBuilderContent() {
                                  <div className="min-w-0 text-left">
                                     <div className="flex flex-col md:flex-row md:items-center gap-3 mb-1">
                                        <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded w-fit">Node #{bIdx + 1}</span>
-                                       <p className="font-bold text-[#0F172A] text-sm md:text-base leading-tight break-words">{q.englishQuestion}</p>
+                                       <p className="font-bold text-[#0F172A] text-[13px] md:text-sm leading-tight break-words">{q.englishQuestion}</p>
                                     </div>
                                     <div className="flex items-center gap-4 mt-2">
                                        <Badge className="bg-slate-50 text-slate-500 border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-md shadow-sm">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'}</Badge>
@@ -798,7 +800,7 @@ function MockBuilderContent() {
                                  <div key={q.id} className="flex items-center justify-between p-4 md:px-8 bg-white border border-slate-100 rounded-xl md:rounded-2xl hover:shadow-lg transition-all group">
                                     <div className="flex items-center gap-4 md:gap-8 min-w-0">
                                        <span className="text-xs md:text-lg font-black text-primary tabular-nums">#{offset + qIdx + 1}</span>
-                                       <p className="text-[13px] md:text-base font-bold text-slate-600 break-words line-clamp-2">{q.englishQuestion}</p>
+                                       <p className="text-[12px] md:text-sm font-bold text-slate-600 break-words">{q.englishQuestion}</p>
                                     </div>
                                     <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
                                  </div>

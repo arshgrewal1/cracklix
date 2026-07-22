@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -62,8 +63,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v45.3 [PWA Visibility Fix].
- * FIXED: Removed truncation and reduced font size for question statements to ensure full visibility.
+ * @fileOverview Daily Challenge Builder v45.4 [High-Density Content Fix].
+ * FIXED: Reduced font size and removed line-clamping in composition area to ensure full question visibility.
  */
 
 export default function DailyQuizBuilder() {
@@ -315,8 +316,8 @@ function DailyQuizBuilderContent() {
         subtitle="Configure the official daily items for the selection bank."
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
-           <button onClick={() => setStagedQuestions([])} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all border-none cursor-pointer">Reset</button>
-           <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">Save draft</Button>
+           <button onClick={() => setStagedQuestions([])} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all border-none cursor-pointer text-slate-400">Reset</button>
+           <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200 text-[#0F172A]">Save draft</Button>
            <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] tracking-tight shadow-2xl gap-3 border-none transition-all active:scale-95">
               {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync live
            </Button>
@@ -328,13 +329,13 @@ function DailyQuizBuilderContent() {
             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50">
                <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Challenge title</Label>
-                  <Input value={quizData.title} onChange={e => setQuizData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-lg shadow-inner" placeholder="e.g. Daily Punjab GK #12" />
+                  <Input value={quizData.title} onChange={e => setQuizData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg shadow-inner text-[#0F172A]" placeholder="e.g. Daily Punjab GK #12" />
                </div>
 
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Duration (Min)</Label>
-                     <Input type="number" value={quizData.duration} onChange={e => setQuizData({...quizData, duration: parseInt(e.target.value) || 0})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center shadow-inner" />
+                     <Input type="number" value={quizData.duration} onChange={e => setQuizData({...quizData, duration: parseInt(e.target.value) || 0})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center shadow-inner text-[#0F172A]" />
                   </div>
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Points per item</Label>
@@ -345,7 +346,7 @@ function DailyQuizBuilderContent() {
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Difficulty</Label>
-                     <select value={quizData.difficulty} onChange={e => setQuizData({...quizData, difficulty: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none">
+                     <select value={quizData.difficulty} onChange={e => setQuizData({...quizData, difficulty: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]">
                         <option value="Easy">Easy</option>
                         <option value="Medium">Medium</option>
                         <option value="Hard">Hard</option>
@@ -408,7 +409,7 @@ function DailyQuizBuilderContent() {
                     </div>
 
                     <div className="relative group w-full">
-                       <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-all duration-500" />
+                       <div className="absolute -inset-1 bg-gradient-to-r from-primary/5 to-indigo-500/5 rounded-2xl blur-md opacity-0 group-focus-within:opacity-10 transition-all duration-500" />
                        <div className="relative flex items-center h-16 bg-white border border-slate-100 rounded-[18px] shadow-sm px-4 md:px-6 gap-2 md:gap-4 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
                           <Search className="h-5 w-5 text-slate-400 group-focus-within:text-primary" />
                           <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 font-bold text-base md:text-lg text-[#0F172A]" placeholder="Search database for items..." />
@@ -469,7 +470,7 @@ function DailyQuizBuilderContent() {
                                        {isSel && <Check className="h-4 w-4 text-white stroke-[4px]" />}
                                     </div>
                                     <div className="min-w-0 text-left">
-                                       <p className="font-bold text-[#0F172A] text-sm md:text-base leading-tight break-words">{q.englishQuestion}</p>
+                                       <p className="font-bold text-[#0F172A] text-[13px] md:text-sm leading-tight break-words">{q.englishQuestion}</p>
                                        <div className="flex items-center gap-4 mt-2">
                                           <Badge className="bg-slate-50 text-slate-500 border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-md shadow-sm">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'}</Badge>
                                           <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{q.difficulty}</span>
@@ -500,7 +501,7 @@ function DailyQuizBuilderContent() {
                               <div className="flex items-center gap-4 md:gap-8 min-w-0">
                                  <span className="text-xs md:text-lg font-black text-slate-200 tabular-nums">#{idx + 1}</span>
                                  <div className="min-w-0 text-left">
-                                    <p className="font-bold text-[#0F172A] text-[13px] md:text-base leading-tight break-words line-clamp-2">{q.englishQuestion}</p>
+                                    <p className="font-bold text-[#0F172A] text-[12px] md:text-sm leading-tight break-words">{q.englishQuestion}</p>
                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {q.id.slice(-8)}</p>
                                  </div>
                               </div>
