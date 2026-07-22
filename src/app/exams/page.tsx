@@ -35,8 +35,8 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v7.0.
- * UPDATED: Optimized grid layout for requested min-height and column specifications.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v8.0.
+ * FIXED: Optimized grid breakpoints to prevent narrow cards and text truncation on 1080p screens.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -121,7 +121,7 @@ export default function ExamsEntryPage() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full">
       <Navbar />
       
-      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-24">
+      <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-20">
         
         {/* ENTERPRISE HERO HUB */}
         <section className="relative px-1 overflow-hidden">
@@ -136,7 +136,7 @@ export default function ExamsEntryPage() {
                    <Landmark className="h-3.5 w-3.5" /> Institutional Registry
                  </Badge>
               </div>
-              <h1 className="text-[32px] sm:text-6xl lg:text-[84px] font-[900] tracking-tighter leading-[1] text-[#0F172A] antialiased">
+              <h1 className="text-[32px] sm:text-6xl lg:text-[80px] font-[900] tracking-tighter leading-[1] text-[#0F172A] antialiased">
                 Target Your <br className="hidden md:block"/>
                 <span className="text-primary italic">Recruitment.</span>
               </h1>
@@ -184,9 +184,9 @@ export default function ExamsEntryPage() {
                     <div className="divide-y divide-slate-50">
                       {filteredExams.map((e: any) => (
                         <Link key={e.id} href={`/exams/view?id=${e.id}`} className="flex items-center justify-between p-4 md:p-6 hover:bg-slate-50 transition-all group">
-                          <div className="flex items-center gap-4 min-w-0">
+                          <div className="flex items-center gap-4 min-w-0 text-left">
                             <AuthorityLogo boardId={e.boardId} size="sm" className="h-12 w-12 shrink-0" />
-                            <div className="min-w-0 text-left">
+                            <div className="min-w-0">
                               <span className="font-bold text-[#0F172A] text-sm md:text-lg block truncate">{e.name}</span>
                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{e.boardId} hub</span>
                             </div>
@@ -214,7 +214,7 @@ export default function ExamsEntryPage() {
           </motion.div>
         </section>
 
-        {/* PREMIUM ENTERPRISE GRID: 4 / 2 / 1 columns */}
+        {/* POPULAR VERTICALS GRID */}
         <section className="space-y-10 md:space-y-14 w-full text-left">
            <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
               <div className="flex items-center gap-4">
@@ -222,15 +222,15 @@ export default function ExamsEntryPage() {
                     <Star className="h-6 w-6 fill-current" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter">Popular Verticals</h2>
+                    <h2 className="text-2xl md:text-3xl font-[900] text-[#0F172A] tracking-tighter uppercase">Popular Verticals</h2>
                     <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">High-Aspirant Traffic Nodes</p>
                  </div>
               </div>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
               {examsLoading ? (
-                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[520px] w-full rounded-[3rem] bg-white border border-slate-100" />)
+                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[540px] w-full rounded-[3rem] bg-white border border-slate-100" />)
               ) : featuredExams.map((exam: any) => (
                  <ExamCard 
                    key={exam.id} 
@@ -245,14 +245,14 @@ export default function ExamsEntryPage() {
         </section>
 
         {/* OFFICIAL AUTHORITY HUBS */}
-        <section className="space-y-10 md:space-y-14 w-full text-left">
+        <section className="space-y-10 md:space-y-14 w-full text-left pt-10">
            <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
               <div className="flex items-center gap-4">
                  <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                     <Landmark className="h-6 w-6" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter">Exam Boards</h2>
+                    <h2 className="text-2xl md:text-3xl font-[900] text-[#0F172A] tracking-tighter uppercase">Exam Boards</h2>
                     <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">Official Selection Authorities</p>
                  </div>
               </div>
@@ -261,7 +261,7 @@ export default function ExamsEntryPage() {
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10 w-full">
               {catLoading ? (
                  Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-[3rem] bg-white border border-slate-100" />)
-              ) : categories.map((cat: any, i: number) => (
+              ) : categories.map((cat: any) => (
                  <motion.div 
                     key={cat.id}
                     whileHover={{ y: -6 }}
@@ -282,9 +282,6 @@ export default function ExamsEntryPage() {
                                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-all" />
                                 </div>
                              </div>
-                          </div>
-                          <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none group-hover:scale-125 transition-transform duration-1000">
-                             <Layers className="h-32 w-32" />
                           </div>
                        </Card>
                     </Link>

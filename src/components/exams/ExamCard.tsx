@@ -41,9 +41,9 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v9.0.
- * FIXED: Centered title and description alignment relative to the logo.
- * FIXED: Switched to object-contain for logos to prevent clipping.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v10.0.
+ * FIXED: Resolved text truncation in stats grid and button overflow.
+ * FIXED: Balanced font scaling for PWA/Mobile (320px-430px).
  */
 export default function ExamCard({ 
   exam, 
@@ -115,10 +115,8 @@ export default function ExamCard({
   };
 
   const buttonConfig = useMemo(() => {
-    // Logic: View Analysis if 100%, Continue if > 0, Start if 0. 
     if (stats.completed > 0 && stats.progress === 100) return { label: "View Analysis", icon: BarChart3, variant: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200" };
     if (stats.completed > 0) return { label: "Continue Prep", icon: RefreshCw, variant: "bg-primary hover:bg-blue-700 shadow-blue-200" };
-    
     return { label: "Start Preparation", icon: Play, variant: "bg-[#0F172A] hover:bg-black shadow-slate-200" };
   }, [stats]);
 
@@ -126,23 +124,23 @@ export default function ExamCard({
 
   return (
     <motion.div 
-      whileHover={{ y: -8 }} 
+      whileHover={{ y: -6 }} 
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       className="h-full w-full"
     >
       <Link href={`/exams/view?id=${exam.id}`} className="block h-full">
-        <Card className="h-full min-h-[520px] bg-white border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden flex flex-col group relative">
+        <Card className="h-full min-h-[540px] bg-white border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden flex flex-col group relative">
           
-          {/* HEADER SECTION: PADDING 32/24/20 */}
-          <div className="p-5 md:p-6 lg:p-8 flex justify-between items-center w-full relative z-10">
-            <div className="flex items-center gap-3">
-               <Badge className="bg-primary/10 text-primary border-none text-[10px] font-bold px-3 py-1 rounded-lg">
+          {/* HEADER SECTION */}
+          <div className="p-4 md:p-6 lg:p-7 flex justify-between items-center w-full relative z-10">
+            <div className="flex items-center gap-2">
+               <Badge className="bg-primary/10 text-primary border-none text-[9px] md:text-[10px] font-bold px-2.5 py-1 rounded-lg">
                  Official Prep
                </Badge>
                {exam.isTrending && (
-                  <Badge className="bg-emerald-50 text-emerald-600 border-none text-[10px] font-bold px-3 py-1 rounded-lg flex items-center gap-1">
-                    <ShieldCheck className="h-3 w-3" /> Verified
+                  <Badge className="bg-emerald-50 text-emerald-600 border-none text-[9px] md:text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                    <ShieldCheck className="h-2.5 w-2.5" /> Verified
                   </Badge>
                )}
             </div>
@@ -151,81 +149,80 @@ export default function ExamCard({
               onClick={handleTogglePin}
               disabled={isPinning}
               className={cn(
-                "h-10 w-10 md:h-11 md:w-11 rounded-xl border flex items-center justify-center transition-all active:scale-90 shadow-sm",
+                "h-9 w-9 md:h-10 md:w-10 rounded-xl border flex items-center justify-center transition-all active:scale-90 shadow-sm",
                 isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary"
               )}
             >
-              {isPinning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4", isPinned && "fill-current")} />}
+              {isPinning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Bookmark className={cn("h-3.5 w-3.5", isPinned && "fill-current")} />}
             </button>
           </div>
 
-          <CardContent className="px-5 md:px-6 lg:px-8 pb-8 flex-1 flex flex-col text-center">
+          <CardContent className="px-5 md:px-8 pb-8 flex-1 flex flex-col text-center">
             
-            {/* LOGO: 80x80 Desktop, 70x70 Mobile */}
+            {/* LOGO */}
             <div className="mb-6 lg:mb-8 flex justify-center">
-               <div className="w-[70px] h-[70px] lg:w-[80px] lg:h-[80px] rounded-2xl md:rounded-3xl shadow-2xl bg-white border-2 border-slate-50 flex items-center justify-center overflow-hidden shrink-0">
+               <div className="w-[64px] h-[64px] lg:w-[80px] lg:h-[80px] rounded-2xl md:rounded-3xl shadow-2xl bg-white border-2 border-slate-50 flex items-center justify-center overflow-hidden shrink-0">
                   <AuthorityLogo boardId={exam.boardId} size="md" className="p-0 border-none shadow-none bg-transparent" />
                </div>
             </div>
 
-            {/* TITLE & DESCRIPTION: Centered Alignment */}
+            {/* TITLE & DESCRIPTION */}
             <div className="space-y-2 mb-6">
-               <h3 className="text-[24px] md:text-[28px] lg:text-[34px] font-[800] text-[#0F172A] leading-[1.15] group-hover:text-primary transition-colors tracking-tighter line-clamp-2 min-h-[2.3em] overflow-hidden text-center">
+               <h3 className="text-[22px] md:text-[24px] lg:text-[28px] font-[800] text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tighter line-clamp-2 min-h-[2.3em] overflow-hidden text-center uppercase">
                  {exam.name}
                </h3>
-               <p className="text-slate-400 font-medium text-[14px] md:text-[15px] lg:text-[18px] line-clamp-2 leading-tight overflow-hidden text-center">
+               <p className="text-slate-400 font-medium text-[13px] md:text-[14px] lg:text-[15px] line-clamp-2 leading-snug overflow-hidden text-center">
                   {exam.description || "Official recruitment preparation with verified patterns."}
                </p>
             </div>
 
-            {/* STATISTICS: Compact Responsive Grid */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-6 border-t border-slate-100 text-left">
-               {stats.mocks > 0 && <StatRow label="Mock Tests" val={stats.mocks} icon={Zap} />}
-               {stats.subjects > 0 && <StatRow label="Subject Tests" val={stats.subjects} icon={BookOpen} />}
+            {/* STATISTICS GRID - REFACTORED FOR VISIBILITY */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 pt-6 border-t border-slate-50 text-left">
+               {stats.mocks > 0 && <StatRow label="Mocks" val={stats.mocks} icon={Zap} />}
+               {stats.subjects > 0 && <StatRow label="Subjects" val={stats.subjects} icon={BookOpen} />}
                {stats.pyqs > 0 && <StatRow label="PYQs" val={stats.pyqs} icon={FileStack} />}
                {stats.questions > 0 && <StatRow label="Questions" val={stats.questions} icon={Layers} />}
                {user && <StatRow label="Solved" val={stats.completed} icon={CheckCircle2} color="text-emerald-600" />}
             </div>
 
-            {/* PROGRESS: 6-8px high */}
+            {/* PROGRESS SECTION */}
             {user && stats.totalTests > 0 && (
-               <div className="space-y-3 mt-8 text-left">
-                  <div className="flex justify-between items-center text-[11px] lg:text-[13px] font-bold text-slate-500 uppercase tracking-widest">
-                     <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> Mastery</span>
+               <div className="space-y-2.5 mt-8 text-left">
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                     <span className="flex items-center gap-1.5"><Target className="h-3 w-3 text-primary" /> Mastery</span>
                      <span className="text-primary tabular-nums">{stats.progress}%</span>
                   </div>
-                  <div className="h-1.5 lg:h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-50">
+                  <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
                      <motion.div 
                        initial={{ width: 0 }}
                        animate={{ width: `${stats.progress}%` }}
                        transition={{ duration: 1.5, ease: "easeOut" }}
-                       className="h-full bg-gradient-to-r from-primary to-blue-400" 
+                       className="h-full bg-gradient-to-r from-primary to-blue-400 shadow-xl" 
                      />
                   </div>
                </div>
             )}
 
-            {/* BUTTON: Fixed at Bottom, 56px, 18px Radius */}
+            {/* ACTION BUTTON - REFINED SIZING */}
             <div className="mt-auto pt-8">
                <Button className={cn(
-                  "w-full h-[56px] rounded-[18px] text-white font-[800] uppercase tracking-widest text-[13px] lg:text-[15px] transition-all active:scale-95 border-none shadow-xl flex items-center justify-between px-8",
+                  "w-full h-[52px] rounded-xl text-white font-[800] uppercase tracking-widest text-[11px] md:text-[12px] transition-all active:scale-95 border-none shadow-xl flex items-center justify-between px-6",
                   buttonConfig.variant
                )}>
-                  <div className="flex items-center gap-3">
-                     <buttonConfig.icon className={cn("h-5 w-5", buttonConfig.icon === RefreshCw && "animate-spin")} />
+                  <div className="flex items-center gap-2.5">
+                     <buttonConfig.icon className={cn("h-4 w-4", buttonConfig.icon === RefreshCw && "animate-spin")} />
                      <span>{buttonConfig.label}</span>
                   </div>
-                  <ArrowRight className="h-5 w-5 opacity-40 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="h-4 w-4 opacity-40 group-hover:translate-x-1 transition-transform" />
                </Button>
             </div>
           </CardContent>
 
-          {/* BOTTOM STRIP: Dynamic Chips */}
-          <div className="px-5 md:px-6 lg:px-8 py-4 bg-slate-50/80 border-t border-slate-100 flex items-center gap-2 overflow-x-auto no-scrollbar">
+          {/* BOTTOM STRIP */}
+          <div className="px-5 py-3.5 bg-slate-50/50 border-t border-slate-50 flex items-center gap-2 overflow-x-auto no-scrollbar">
              {stats.mocks > 0 && <ContentChip label="Mocks" />}
              {stats.subjects > 0 && <ContentChip label="Subjects" />}
              {stats.pyqs > 0 && <ContentChip label="PYQs" />}
-             {stats.sectionals > 0 && <ContentChip label="Sectional" />}
              <ContentChip label="Bilingual" />
           </div>
         </Card>
@@ -236,19 +233,19 @@ export default function ExamCard({
 
 function StatRow({ label, val, icon: Icon, color }: any) {
   return (
-    <div className="flex items-center justify-between gap-2 min-w-0">
-       <div className="flex items-center gap-2 min-w-0">
-          <Icon className="h-4 w-4 text-slate-400 shrink-0" />
-          <span className="text-[13px] lg:text-[15px] font-bold text-slate-500 truncate leading-none">{label}</span>
+    <div className="flex items-center justify-between gap-1.5 min-w-0">
+       <div className="flex items-center gap-1.5 min-w-0">
+          <Icon className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+          <span className="text-[11px] lg:text-[12px] font-bold text-slate-500 truncate leading-none">{label}</span>
        </div>
-       <span className={cn("text-[14px] lg:text-[16px] font-[900] tabular-nums tracking-tighter leading-none", color || "text-[#0F172A]")}>{val}</span>
+       <span className={cn("text-[12px] lg:text-[14px] font-[900] tabular-nums tracking-tighter leading-none", color || "text-[#0F172A]")}>{val}</span>
     </div>
   );
 }
 
 function ContentChip({ label }: { label: string }) {
   return (
-    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-white border border-slate-200 px-3 py-1 rounded-lg shrink-0 shadow-sm">
+    <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 bg-white border border-slate-100 px-2.5 py-1 rounded-md shrink-0 shadow-sm">
        {label}
     </span>
   );
