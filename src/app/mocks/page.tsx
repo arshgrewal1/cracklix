@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -51,19 +52,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v3.0 [Dynamic Enterprise Overhaul].
- * FIXED: Replaced all placeholder stats with real-time database calculations.
- * UI: High-fidelity enterprise card redesign with conditional stat visibility.
+ * @fileOverview Institutional Practice Hub v4.0 [Compact Enterprise Redesign].
+ * FIXED: Implemented Testbook-style compact cards for PWA optimization.
+ * UI: Unified card dimensions with 2x3 stats grid and 48px CTAs.
  */
-
-const FILTER_CHIPS = [
-  { label: "All series", id: "all" },
-  { label: "Free", id: "FREE" },
-  { label: "Premium", id: "PREMIUM" },
-  { label: "Easy", id: "Easy" },
-  { label: "Medium", id: "Medium" },
-  { label: "Hard", id: "Hard" },
-];
 
 export default function PracticeHub() {
   const db = useFirestore()
@@ -159,53 +151,53 @@ export default function PracticeHub() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left flex flex-col overflow-x-hidden">
       <Navbar />
       
-      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-8 md:space-y-12">
+      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 space-y-6 md:space-y-10 pb-[calc(120px+env(safe-area-inset-bottom))]">
         
-        {/* INSTITUTIONAL DASHBOARD HEADER */}
-        <section className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 px-1">
-           <div className="space-y-2">
+        {/* COMPACT DASHBOARD HEADER */}
+        <section className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 px-1">
+           <div className="space-y-1">
               <div className="flex items-center gap-3">
-                 <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                    <Zap className="h-6 w-6 fill-current" />
+                 <div className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
+                    <Zap className="h-5 w-5 fill-current" />
                  </div>
-                 <h1 className="text-3xl md:text-[44px] font-[900] tracking-tighter text-[#0F172A] leading-none antialiased">Practice hub</h1>
+                 <h1 className="text-2xl md:text-4xl font-[900] tracking-tighter text-[#0F172A] antialiased">Practice hub</h1>
               </div>
-              <p className="text-slate-500 font-medium text-sm md:text-lg max-w-xl">Verified preparation series with institutional accuracy and real-time state ranking.</p>
+              <p className="text-slate-500 font-medium text-xs md:text-base max-w-xl">Verified series with real-time state ranking.</p>
            </div>
 
-           <Card className="w-full lg:w-auto bg-white border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[24px] p-5 md:p-8 flex items-center justify-between lg:justify-start gap-4 md:gap-12 border relative overflow-hidden">
+           <div className="w-full lg:w-auto bg-white border-slate-100 shadow-sm rounded-2xl p-3 md:p-6 flex items-center justify-between lg:justify-start gap-3 md:gap-10 border overflow-hidden">
               <HeaderStat label="Series" val={totalStats.totalSeries} />
-              <div className="w-px h-8 md:h-10 bg-slate-100" />
+              <div className="w-px h-6 md:h-8 bg-slate-100" />
               <HeaderStat label="Mocks" val={totalStats.totalTests} color="text-primary" />
-              <div className="w-px h-8 md:h-10 bg-slate-100" />
+              <div className="w-px h-6 md:h-8 bg-slate-100" />
               <HeaderStat label="Attempts" val={totalStats.solved} color="text-emerald-600" />
-           </Card>
+           </div>
         </section>
 
-        {/* COMPACT TOOLBAR HUB */}
-        <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-xl -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
-           <div className="max-w-6xl mx-auto space-y-6">
-              <div className="flex flex-col md:flex-row items-center gap-4">
+        {/* COMPACT TOOLBAR */}
+        <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-xl -mx-4 px-4 py-3 md:py-4 border-b border-slate-100">
+           <div className="max-w-6xl mx-auto space-y-4">
+              <div className="flex flex-col md:flex-row items-center gap-3">
                  <div className="relative group flex-1 w-full">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-300 group-focus-within:text-primary transition-colors" />
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                     <Input 
                       value={searchTerm}
                       onChange={e => setSearchTerm(e.target.value)}
-                      placeholder="Search series title..." 
-                      className="h-14 md:h-16 pl-14 rounded-2xl bg-white border-slate-200 shadow-xl text-lg font-bold"
+                      placeholder="Search series..." 
+                      className="h-12 md:h-13 pl-12 rounded-xl bg-white border-slate-200 shadow-sm text-base font-bold"
                     />
                  </div>
                  
-                 <div className="flex items-center gap-3 shrink-0">
+                 <div className="flex items-center gap-2 shrink-0">
                     <Select value={sortBy} onValueChange={setSortBy}>
-                       <SelectTrigger className="h-12 md:h-14 rounded-full border-slate-200 bg-white shadow-sm font-bold text-[11px] text-[#0F172A] w-[150px] md:w-[180px] px-6 gap-3 focus:ring-4 focus:ring-primary/5 transition-all border-none">
-                          <ArrowUpDown className="h-4 w-4 text-slate-400" />
+                       <SelectTrigger className="h-11 md:h-12 rounded-full border-slate-100 bg-white shadow-sm font-bold text-[11px] text-[#0F172A] w-[140px] md:w-[160px] px-5 gap-2 border-none">
+                          <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" />
                           <SelectValue placeholder="Sort" />
                        </SelectTrigger>
                        <SelectContent className="rounded-2xl border-slate-100 shadow-5xl z-[2000] bg-white p-1">
-                          <SelectItem value="newest" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3">Newest first</SelectItem>
-                          <SelectItem value="alphabetical" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3">Alphabetical</SelectItem>
-                          <SelectItem value="tests" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3">Most tests</SelectItem>
+                          <SelectItem value="newest" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-2.5">Newest</SelectItem>
+                          <SelectItem value="alphabetical" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-2.5">A-Z</SelectItem>
+                          <SelectItem value="tests" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-2.5">Content</SelectItem>
                        </SelectContent>
                     </Select>
                  </div>
@@ -217,9 +209,9 @@ export default function PracticeHub() {
                       key={chip.id} 
                       onClick={() => setActiveFilter(chip.id)}
                       className={cn(
-                         "h-10 px-6 rounded-full font-bold text-[10px] md:text-xs tracking-tight transition-all border active:scale-95 shadow-sm whitespace-nowrap",
+                         "h-9 px-5 rounded-full font-bold text-[10px] md:text-xs tracking-tight transition-all border active:scale-95 shadow-sm whitespace-nowrap",
                          activeFilter === chip.id 
-                            ? "bg-[#0F172A] border-[#0F172A] text-white shadow-xl" 
+                            ? "bg-[#0F172A] border-[#0F172A] text-white" 
                             : "bg-white border-slate-100 text-slate-400 hover:text-primary"
                       )}
                     >
@@ -230,90 +222,83 @@ export default function PracticeHub() {
            </div>
         </div>
 
-        {/* ENTERPRISE SERIES GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+        {/* COMPACT ENTERPRISE GRID */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
            {serLoading || mocksLoading ? (
-              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[400px] w-full rounded-[2.5rem] bg-white border border-slate-100" />)
+              Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-[380px] w-full rounded-[24px] bg-white border border-slate-100" />)
            ) : filteredSeries.length > 0 ? (
               filteredSeries.map((ser, i) => (
                  <motion.div 
                    key={ser.id} 
-                   whileHover={{ y: -8 }}
-                   initial={{ opacity: 0, y: 20 }}
+                   initial={{ opacity: 0, y: 15 }}
                    animate={{ opacity: 1, y: 0 }}
                    transition={{ delay: i * 0.05 }}
                    className="flex flex-col h-full"
                  >
                     <Link href={`/subjects/${ser.subjectId}/series/${ser.id}`} className="h-full">
-                       <Card className="border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] bg-white group flex flex-col h-full relative overflow-hidden text-left border-none">
-                          <CardContent className="p-8 md:p-10 space-y-8 flex-1 flex flex-col">
+                       <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[24px] bg-white group flex flex-col h-full relative overflow-hidden text-left border-none">
+                          <CardContent className="p-5 md:p-6 space-y-4 md:space-y-6 flex-1 flex flex-col">
                              
-                             {/* Header Node */}
-                             <div className="flex justify-between items-start w-full relative z-10">
-                                <AuthorityLogo boardId={ser.boardId} size="md" className="h-16 w-16 md:h-20 md:w-20 shadow-2xl bg-slate-50 border-4 border-white" />
-                                <div className="flex flex-col items-end gap-2">
-                                   {ser.hasPurchasedAccess ? (
-                                      <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1.5 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm flex items-center gap-1.5">
-                                         <CheckCircle2 className="h-3.5 w-3.5" /> Active Access
-                                      </Badge>
-                                   ) : (
-                                      <Badge className="bg-amber-50 text-amber-600 border-none px-4 py-1.5 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm flex items-center gap-1.5">
-                                         <Lock className="h-3 w-3" /> Premium Pass
-                                      </Badge>
-                                   )}
-                                </div>
+                             {/* Compact Header */}
+                             <div className="flex justify-between items-start w-full">
+                                <AuthorityLogo boardId={ser.boardId} size="sm" className="h-12 w-12 md:h-14 md:w-14 shadow-lg bg-slate-50 border-2 border-white" />
+                                {ser.hasPurchasedAccess ? (
+                                   <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-full font-black text-[8px] uppercase tracking-widest shadow-sm">
+                                      Purchased
+                                   </Badge>
+                                ) : (
+                                   <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-full font-black text-[8px] uppercase tracking-widest shadow-sm">
+                                      Premium
+                                   </Badge>
+                                )}
                              </div>
 
-                             {/* Identity Node */}
-                             <div className="space-y-4 flex-1 relative z-10">
-                                <div className="space-y-1.5">
-                                   <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">{ser.difficulty || 'Expert'} Level</p>
-                                   <h3 className="text-2xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                             {/* Compact Identity */}
+                             <div className="space-y-2 flex-1">
+                                <div className="space-y-1">
+                                   <p className="text-[9px] font-black text-primary uppercase tracking-widest">{ser.difficulty || 'Expert'}</p>
+                                   <h3 className="text-[17px] md:text-xl font-[800] text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
                                       {ser.title}
                                    </h3>
                                 </div>
-                                <p className="text-slate-400 font-medium text-xs md:text-sm line-clamp-2 leading-relaxed">
+                                <p className="text-slate-400 font-medium text-[11px] md:text-xs line-clamp-2 leading-relaxed opacity-80">
                                    {ser.description || "Official pattern test series verified by institutional mentors."}
                                 </p>
                              </div>
 
-                             {/* Dynamic Content Audit Matrix */}
-                             <div className="grid grid-cols-2 gap-x-6 gap-y-3 pt-6 border-t border-slate-50 relative z-10">
+                             {/* High-Density 2-Column Stats Grid */}
+                             <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pt-4 border-t border-slate-50">
+                                <StatItem label="Items" val={ser.counts.totalTests} icon={Layers} />
                                 <StatItem label="Questions" val={ser.counts.questions} icon={Target} />
-                                <StatItem label="Free preview" val={ser.counts.free} icon={Unlock} color="text-emerald-600" />
-                                {ser.counts.mock > 0 && <StatItem label="Mock tests" val={ser.counts.mock} icon={Zap} />}
-                                {ser.counts.subject > 0 && <StatItem label="Subject tests" val={ser.counts.subject} icon={BookMarked} />}
-                                {ser.counts.sectional > 0 && <StatItem label="Sectional tests" val={ser.counts.sectional} icon={Layers} />}
-                                {ser.counts.pyq > 0 && <StatItem label="Official PYQs" val={ser.counts.pyq} icon={FileStack} />}
-                                {ser.counts.ca > 0 && <StatItem label="Current affairs" val={ser.counts.ca} icon={Newspaper} />}
-                                {ser.counts.practice > 0 && <StatItem label="Practice sets" val={ser.counts.practice} icon={Layout} />}
-                                {ser.attemptedCount > 0 && <StatItem label="Completed" val={ser.attemptedCount} icon={CheckCircle2} color="text-emerald-500" />}
-                                {ser.avgAccuracy > 0 && <StatItem label="Avg mastery" val={`${ser.avgAccuracy}%`} icon={Award} color="text-amber-600" />}
+                                {ser.counts.free > 0 && <StatItem label="Preview" val={ser.counts.free} icon={Unlock} color="text-emerald-600" />}
+                                {ser.attemptedCount > 0 && <StatItem label="Solved" val={ser.attemptedCount} icon={CheckCircle2} color="text-emerald-500" />}
+                                {ser.counts.pyq > 0 && <StatItem label="PYQs" val={ser.counts.pyq} icon={FileStack} />}
+                                {ser.avgAccuracy > 0 && <StatItem label="Mastery" val={`${ser.avgAccuracy}%`} icon={Award} color="text-amber-600" />}
                              </div>
 
-                             {/* Progress Node */}
-                             <div className="space-y-2.5 pt-6 relative z-10">
-                                <div className="flex justify-between items-center text-[9px] font-black uppercase text-slate-400 tracking-widest">
-                                   <span>My progress</span>
-                                   <span className="text-primary tabular-nums font-black">{ser.progress}%</span>
+                             {/* Progress Line */}
+                             <div className="space-y-2 pt-2">
+                                <div className="flex justify-between items-center text-[8px] font-black uppercase text-slate-300 tracking-widest">
+                                   <span>My Progress</span>
+                                   <span className="text-primary tabular-nums">{ser.progress}%</span>
                                 </div>
-                                <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
+                                <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
                                    <motion.div 
                                      initial={{ width: 0 }}
                                      animate={{ width: `${ser.progress}%` }}
                                      transition={{ duration: 1.2 }}
-                                     className="h-full bg-primary shadow-lg shadow-primary/20" 
+                                     className="h-full bg-primary" 
                                    />
                                 </div>
                              </div>
 
-                             {/* Action Trigger */}
-                             <div className="pt-8 relative z-10">
-                                <Button className="w-full h-14 md:h-16 rounded-[20px] bg-[#0F172A] group-hover:bg-primary text-white font-black uppercase text-[10px] tracking-widest shadow-3xl transition-all active:scale-95 border-none flex items-center justify-between px-8">
+                             {/* Compact CTA */}
+                             <div className="pt-2">
+                                <Button className="w-full h-11 md:h-12 rounded-xl bg-[#0F172A] group-hover:bg-primary text-white font-bold uppercase text-[10px] tracking-widest shadow-md transition-all active:scale-95 border-none flex items-center justify-between px-6">
                                    <span>
-                                      {ser.progress === 0 ? "Start preparation" : ser.progress === 100 ? "Review performance" : "Continue preparation"}
+                                      {ser.progress === 0 ? "Start" : ser.progress === 100 ? "Analysis" : "Resume"}
                                    </span> 
-                                   <ChevronRight className="h-5 w-5 opacity-40 group-hover:translate-x-1 transition-transform" />
+                                   <ChevronRight className="h-4 w-4 opacity-40 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                              </div>
                           </CardContent>
@@ -322,16 +307,16 @@ export default function PracticeHub() {
                  </motion.div>
               ))
            ) : (
-              <div className="col-span-full py-40 flex flex-col items-center justify-center text-center opacity-30 italic font-black uppercase tracking-widest border-2 border-dashed border-slate-100 rounded-[3rem] bg-white">
-                 <Zap className="h-16 w-16 text-slate-300 mb-4" />
-                 <p className="text-xl">Registry standby</p>
+              <div className="col-span-full py-20 flex flex-col items-center justify-center text-center opacity-30 italic font-black uppercase tracking-widest border-2 border-dashed border-slate-100 rounded-[2rem] bg-white mx-1">
+                 <Zap className="h-12 w-12 text-slate-300 mb-4" />
+                 <p className="text-base">Registry standby</p>
               </div>
            )}
         </div>
 
-        <div className="flex items-center justify-center gap-4 text-slate-300 py-10 opacity-50">
-           <ShieldCheck className="h-5 w-5" />
-           <span className="text-[10px] font-bold uppercase tracking-widest">Institutional registry verified</span>
+        <div className="flex items-center justify-center gap-3 text-slate-300 py-6 opacity-40">
+           <ShieldCheck className="h-4 w-4" />
+           <span className="text-[9px] font-bold uppercase tracking-widest">Institutional registry sync</span>
         </div>
 
       </main>
@@ -342,21 +327,21 @@ export default function PracticeHub() {
 
 function HeaderStat({ label, val, color = "text-[#0F172A]" }: any) {
    return (
-      <div className="flex flex-col gap-0.5 min-w-[70px] md:min-w-[100px] text-left">
-         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-         <p className={cn("text-2xl md:text-4xl font-[900] tabular-nums tracking-tighter leading-none", color)}>{val}</p>
+      <div className="flex flex-col gap-0.5 text-left">
+         <p className="text-[9px] font-black text-slate-400 uppercase tracking-tight">{label}</p>
+         <p className={cn("text-xl md:text-2xl font-[900] tabular-nums tracking-tighter leading-none", color)}>{val}</p>
       </div>
    )
 }
 
 function StatItem({ label, val, icon: Icon, color }: any) {
   return (
-    <div className="flex items-center justify-between gap-3 group/stat">
-       <div className="flex items-center gap-2 min-w-0">
-          <Icon className="h-3.5 w-3.5 text-slate-300 shrink-0" />
-          <span className="text-[10px] font-bold text-slate-400 truncate uppercase tracking-tight">{label}</span>
+    <div className="flex items-center justify-between gap-2 min-w-0">
+       <div className="flex items-center gap-1.5 min-w-0">
+          <Icon className="h-3 w-3 text-slate-300 shrink-0" />
+          <span className="text-[9px] font-bold text-slate-400 truncate tracking-tight">{label}</span>
        </div>
-       <span className={cn("text-xs md:text-sm font-black tabular-nums tracking-tight", color || "text-[#0F172A]")}>{val}</span>
+       <span className={cn("text-[11px] font-black tabular-nums tracking-tight", color || "text-[#0F172A]")}>{val}</span>
     </div>
   )
 }
