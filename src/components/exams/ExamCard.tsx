@@ -19,7 +19,8 @@ import {
   Timer,
   BarChart3,
   RefreshCw,
-  Target
+  Target,
+  Play
 } from "lucide-react";
 import { AuthorityLogo } from "@/lib/exam-icons";
 import { Badge } from "@/components/ui/badge";
@@ -114,8 +115,6 @@ export default function ExamCard({
         await updateDoc(userRef, { pinnedExams: arrayUnion(examId), updatedAt: serverTimestamp() });
         toast({ title: "Added to dashboard" });
       }
-    } catch (e) {
-      toast({ variant: "destructive", title: "Sync failed" });
     } finally { setIsPinning(false); }
   };
 
