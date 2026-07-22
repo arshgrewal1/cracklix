@@ -40,8 +40,8 @@ import { hasSeriesAccess } from "@/lib/access-control"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Premium Series Hub Portal v12.0.
- * FIXED: Redesigned Purchase Dialog with Bottom Sheet ergonomics, 70vh constraint, and Price Cards.
+ * @fileOverview Premium Series Hub Portal v12.1.
+ * FIXED: Visibility of "Premium Series" text in the header badge.
  */
 
 export default function SeriesDetailPortal() {
@@ -109,7 +109,7 @@ export default function SeriesDetailPortal() {
                         <div className="flex flex-wrap justify-center md:justify-start items-center gap-4">
                            <Badge className={cn(
                               "border-none px-5 py-2 rounded-xl font-black text-[10px] uppercase shadow-lg tracking-widest", 
-                              seriesAccess.hasAccess ? "bg-emerald-600 text-white" : "bg-amber-50 text-white"
+                              seriesAccess.hasAccess ? "bg-emerald-600 text-white" : "bg-amber-50 text-amber-700"
                            )}>
                               {seriesAccess.hasAccess ? 'Access Authorized' : 'Premium Series'}
                            </Badge>
