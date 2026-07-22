@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -52,8 +51,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v4.1 [Terminology Refined].
- * UPDATED: Replaced "Items" label with "Tests" in the series matrix.
+ * @fileOverview Institutional Practice Hub v4.5 [STRICT REAL DATA].
+ * FIXED: Removed all hardcoded rank and accuracy fallbacks.
  */
 
 const FILTER_CHIPS = [
@@ -108,7 +107,7 @@ export default function PracticeHub() {
         practice: testsInSer.filter(m => m.mockType === 'PRACTICE_SET').length,
         mini: testsInSer.filter(m => m.mockType === 'MINI_TEST').length,
         revision: testsInSer.filter(m => m.mockType === 'REVISION_TEST').length,
-        questions: testsInSer.reduce((sum, m) => sum + (m.totalQuestions || 0), 0),
+        questions: testsInSer.reduce((sum, m) => sum + (Number(m.totalQuestions) || 0), 0),
         free: testsInSer.filter(m => m.accessLevel === 'FREE').length,
         premium: testsInSer.filter(m => m.accessLevel === 'PREMIUM').length,
       };
@@ -162,7 +161,6 @@ export default function PracticeHub() {
       
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 space-y-6 md:space-y-10 pb-[calc(120px+env(safe-area-inset-bottom))]">
         
-        {/* COMPACT DASHBOARD HEADER */}
         <section className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 px-1">
            <div className="space-y-1">
               <div className="flex items-center gap-3">
@@ -183,7 +181,6 @@ export default function PracticeHub() {
            </div>
         </section>
 
-        {/* COMPACT TOOLBAR */}
         <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-xl -mx-4 px-4 py-3 md:py-4 border-b border-slate-100">
            <div className="max-w-6xl mx-auto space-y-4">
               <div className="flex flex-col md:flex-row items-center gap-3">
@@ -231,7 +228,6 @@ export default function PracticeHub() {
            </div>
         </div>
 
-        {/* COMPACT ENTERPRISE GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
            {serLoading || mocksLoading ? (
               Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-[380px] w-full rounded-[24px] bg-white border border-slate-100" />)
@@ -248,7 +244,6 @@ export default function PracticeHub() {
                        <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[24px] bg-white group flex flex-col h-full relative overflow-hidden flex-1 border-none">
                           <CardContent className="p-5 md:p-6 space-y-4 md:space-y-6 flex-1 flex flex-col">
                              
-                             {/* Compact Header */}
                              <div className="flex justify-between items-start w-full">
                                 <AuthorityLogo boardId={ser.boardId} size="sm" className="h-12 w-12 md:h-14 md:w-14 shadow-lg bg-slate-50 border-2 border-white" />
                                 {ser.hasPurchasedAccess ? (
@@ -262,7 +257,6 @@ export default function PracticeHub() {
                                 )}
                              </div>
 
-                             {/* Compact Identity */}
                              <div className="space-y-2 flex-1">
                                 <div className="space-y-1">
                                    <p className="text-[9px] font-black text-primary uppercase tracking-widest">{ser.difficulty || 'Expert'}</p>
@@ -275,7 +269,6 @@ export default function PracticeHub() {
                                 </p>
                              </div>
 
-                             {/* High-Density 2-Column Stats Grid */}
                              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pt-4 border-t border-slate-50">
                                 <StatItem label="Tests" val={ser.counts.totalTests} icon={Layers} />
                                 <StatItem label="Questions" val={ser.counts.questions} icon={Target} />
@@ -285,7 +278,6 @@ export default function PracticeHub() {
                                 {ser.avgAccuracy > 0 && <StatItem label="Mastery" val={`${ser.avgAccuracy}%`} icon={Award} color="text-amber-600" />}
                              </div>
 
-                             {/* Progress Line */}
                              <div className="space-y-2 pt-2">
                                 <div className="flex justify-between items-center text-[8px] font-black uppercase text-slate-300 tracking-widest">
                                    <span>My Progress</span>
@@ -301,7 +293,6 @@ export default function PracticeHub() {
                                 </div>
                              </div>
 
-                             {/* Compact CTA */}
                              <div className="pt-2">
                                 <Button className="w-full h-11 md:h-12 rounded-xl bg-[#0F172A] group-hover:bg-primary text-white font-bold uppercase text-[10px] tracking-widest shadow-md transition-all active:scale-95 border-none flex items-center justify-between px-6">
                                    <span>
@@ -318,7 +309,7 @@ export default function PracticeHub() {
            ) : (
               <div className="col-span-full py-20 flex flex-col items-center justify-center text-center opacity-30 italic font-black uppercase tracking-widest border-2 border-dashed border-slate-100 rounded-[2rem] bg-white mx-1">
                  <Zap className="h-12 w-12 text-slate-300 mb-4" />
-                 <p className="text-base">Registry standby</p>
+                 <p className="text-base">No tests available</p>
               </div>
            )}
         </div>
@@ -345,10 +336,10 @@ function HeaderStat({ label, val, color = "text-[#0F172A]" }: any) {
 
 function StatItem({ label, val, icon: Icon, color }: any) {
   return (
-    <div className="flex items-center justify-between gap-2 min-w-0">
+    <div className="flex items-center justify-between gap-1.5 min-w-0">
        <div className="flex items-center gap-1.5 min-w-0">
-          <Icon className="h-3 w-3 text-slate-300 shrink-0" />
-          <span className="text-[9px] font-bold text-slate-400 truncate tracking-tight">{label}</span>
+          <Icon className="h-3.5 w-3.5 text-slate-300 shrink-0" />
+          <span className="text-[9px] font-bold text-slate-500 truncate tracking-tight">{label}</span>
        </div>
        <span className={cn("text-[11px] font-black tabular-nums tracking-tight", color || "text-[#0F172A]")}>{val}</span>
     </div>

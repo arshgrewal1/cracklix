@@ -46,8 +46,8 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 }
 
 /**
- * @fileOverview Institutional Stats Bar v1.2 [REAL DATA SYNC].
- * Pulls from settings/stats document for 100% accurate database numbers.
+ * @fileOverview Institutional Stats Bar v1.3 [STRICT REAL DATA].
+ * FIXED: Removed all random increments and hardcoded trend fallbacks.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -75,11 +75,11 @@ export default function StatsBar() {
     };
 
     const trends = settings?.statsTrends || {
-      questions: "+28 this week",
-      mocks: "+2 added today",
-      categories: "Updated daily",
-      students: "+84 this week",
-      support: "Live now"
+      questions: "",
+      mocks: "",
+      categories: "",
+      students: "",
+      support: ""
     };
 
     const totalUsers = stats?.totalUsers || 0;

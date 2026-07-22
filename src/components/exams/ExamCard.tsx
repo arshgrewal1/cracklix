@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -42,8 +41,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v10.2.
- * UPDATED: Removed all uppercase transforms from titles and labels.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v10.5 [STRICT REAL DATA].
+ * FIXED: Removed all fallback fake numbers and enforced zero-based statistics.
  */
 export default function ExamCard({ 
   exam, 
