@@ -24,7 +24,9 @@ import {
   MoreVertical,
   Gem,
   ArrowRight,
-  Info
+  Info,
+  Smartphone,
+  Calendar
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -81,7 +83,7 @@ export default function SeriesDetailPortal() {
       <section className="bg-[#0F172A] text-white pt-8 pb-10 md:pt-14 md:pb-20 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
-         <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-8">
+         <div className="container mx-auto px-4 md:px-12 max-get-7xl relative z-10 space-y-8">
             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
                <button onClick={() => router.back()} className="hover:text-white transition-colors flex items-center gap-2">
                  <ArrowLeft className="h-3 w-3" /> {subject?.name || "Subject"}
@@ -251,7 +253,7 @@ export default function SeriesDetailPortal() {
                   <AuthorityLogo boardId={series?.boardId} size="lg" className="h-24 w-24 md:h-32 md:w-32 bg-slate-50 border-4 border-white shadow-2xl" />
                   <div className="space-y-2">
                      <Badge className="bg-amber-50 text-amber-600 border-none text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full">Premium lock</Badge>
-                     <DialogTitle className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none">
+                     <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tighter leading-none">
                         {series?.title}
                      </DialogTitle>
                      <DialogDescription className="text-slate-400 font-bold text-[10px] uppercase">Registry authorization required</DialogDescription>
