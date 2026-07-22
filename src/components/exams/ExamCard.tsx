@@ -40,8 +40,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v6.0.
- * FIXED: 100% Dynamic Stats Hub. No hardcoded or placeholder values.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v6.1.
+ * FIXED: Added safety guards for null/undefined array props to prevent filter crashes.
  * UI: High-fidelity layout with conditional visibility for all metrics.
  */
 export default function ExamCard({ 
@@ -61,9 +61,15 @@ export default function ExamCard({
 
   // 1. DYNAMIC CONTENT AUDIT
   const stats = useMemo(() => {
-    const relatedMocks = allMocks.filter(m => m.examId === examId || m.examIds?.includes(examId));
-    const relatedPyqs = allPyqs.filter(p => p.examId === examId);
-    const relatedNotes = allNotes.filter(n => n.examId === examId);
+    // Normalization safety check
+    const safeMocks = Array.isArray(allMocks) ? allMocks : [];
+    const safePyqs = Array.isArray(allPyqs) ? allPyqs : [];
+    const safeNotes = Array.isArray(allNotes) ? allNotes : [];
+    const safeResults = Array.isArray(userResults) ? userResults : [];
+
+    const relatedMocks = safeMocks.filter(m => m.examId === examId || m.examIds?.includes(examId));
+    const relatedPyqs = safePyqs.filter(p => p.examId === examId);
+    const relatedNotes = safeNotes.filter(n => n.examId === examId);
 
     const counts = {
       mocks: relatedMocks.filter(m => m.mockType === 'FULL').length,
@@ -76,11 +82,11 @@ export default function ExamCard({
     };
 
     // Attempt Analysis
-    const attemptIds = new Set(userResults.filter(r => relatedMocks.some(rm => rm.id === r.mockId)).map(r => r.mockId));
+    const attemptIds = new Set(safeResults.filter(r => relatedMocks.some(rm => rm.id === r.mockId)).map(r => r.mockId));
     const completed = attemptIds.size;
     
     let avgAcc = 0;
-    const relatedResults = userResults.filter(r => relatedMocks.some(rm => rm.id === r.mockId));
+    const relatedResults = safeResults.filter(r => relatedMocks.some(rm => rm.id === r.mockId));
     if (relatedResults.length > 0) {
       avgAcc = Math.round(relatedResults.reduce((acc, r) => acc + (r.accuracy || 0), 0) / relatedResults.length);
     }
