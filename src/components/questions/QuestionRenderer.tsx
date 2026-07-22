@@ -4,7 +4,7 @@ import React from 'react';
 import { Question, LanguageDisplayMode } from '@/types';
 import { cn } from '@/lib/utils';
 import MathText from './MathText';
-import { Clock, AlertTriangle, Bookmark, ShieldCheck, Info, Zap, Link2 } from 'lucide-react';
+import { Clock, AlertTriangle, Bookmark, ShieldCheck, Info, Zap, Link2, LayoutGrid } from 'lucide-react';
 import { useExamStore } from '@/store/useExamStore';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -23,8 +23,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v74.2 [Title Case].
- * FIXED: Removed uppercase from Q-number and optimized mobile layout.
+ * @fileOverview Institutional Question Renderer v75.0 [Table Support].
+ * UPDATED: Integrated high-fidelity rendering for "tableContent" data extracted during ingestion.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -104,76 +104,69 @@ export default function QuestionRenderer({
 
       <div className={cn(
          "space-y-6 px-0 w-full", 
-         showSolution ? "mb-6" : "mb-10",
-         q.questionType === 'ASSERTION_REASON' && "p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner relative overflow-hidden"
+         showSolution ? "mb-6" : "mb-10"
       )}>
+         {/* STRUCTURED TABLE CONTENT RENDERING */}
+         {q.tableContent?.rows?.length > 0 && (
+            <div className="my-8 overflow-x-auto rounded-[1.5rem] border-2 border-slate-100 bg-white shadow-2xl relative group w-full">
+               <div className="absolute top-2 right-4 opacity-5 pointer-events-none text-[8px] font-black tracking-widest flex items-center gap-2">
+                  <LayoutGrid className="h-3 w-3" /> Data hub
+               </div>
+               <Table className="w-full border-collapse min-w-[300px]">
+                  <TableHeader className="bg-[#0F172A]">
+                     <TableRow className="border-none h-14 md:h-16">
+                        {q.tableContent.headers.map((h: string, hi: number) => (
+                           <TableHead key={hi} className="px-4 md:px-10 font-black text-[10px] md:text-sm text-white tracking-widest uppercase border-r border-white/10 last:border-r-0">
+                              {h}
+                           </TableHead>
+                        ))}
+                     </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                     {q.tableContent.rows.map((row: string[], ri: number) => (
+                        <TableRow key={ri} className="border-b border-slate-50 hover:bg-slate-50 transition-colors last:border-0 h-12 md:h-16">
+                           {row.map((cell, ci) => (
+                              <TableCell key={ci} className="px-4 md:px-10 font-bold text-xs md:text-lg text-[#0F172A] border-r border-slate-50 last:border-r-0">
+                                 {cell}
+                              </TableCell>
+                           ))}
+                        </TableRow>
+                     ))}
+                  </TableBody>
+               </Table>
+            </div>
+         )}
+
          {/* ASSERTION & REASON INTERLEAVED HUB */}
          {q.questionType === 'ASSERTION_REASON' && (
-            <div className="space-y-6 w-full">
+            <div className="space-y-6 w-full p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner relative overflow-hidden">
                <div className="absolute top-2 right-4 opacity-5 pointer-events-none text-[8px] font-black tracking-widest flex items-center gap-2">
                   <Zap className="h-3 w-3" /> Logic hub
                </div>
                
-               {/* 1. English Assertion */}
                {showEn && (q.englishAssertion || q.englishQuestion) && (
                   <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
                      <MathText text={`Assertion: ${q.englishAssertion || q.englishQuestion}`} />
                   </div>
                )}
 
-               {/* 2. Punjabi Assertion */}
                {showLocal && (q.punjabiAssertion || q.punjabiQuestion) && (
                   <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
                      <MathText text={`ਕਥਨ: ${q.punjabiAssertion || q.punjabiQuestion}`} />
                   </div>
                )}
 
-               {/* 3. English Reason */}
                {showEn && q.englishReason && (
                   <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed pt-2 border-t border-slate-200/50">
                      <MathText text={`Reason: ${q.englishReason}`} />
                   </div>
                )}
 
-               {/* 4. Punjabi Reason */}
                {showLocal && q.punjabiReason && (
                   <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
                      <MathText text={`ਕਾਰਨ: ${q.punjabiReason}`} />
                   </div>
                )}
-            </div>
-         )}
-
-         {/* STRUCTURED MATCHING GRID */}
-         {q.questionType === 'MATCH_FOLLOWING' && (q.matchingData?.rows?.length > 0 || q.tableContent?.rows?.length > 0) && (
-            <div className="my-8 overflow-x-auto rounded-[1.5rem] border-2 border-slate-100 bg-white shadow-2xl relative group w-full">
-               <div className="absolute top-2 right-4 opacity-5 pointer-events-none text-[8px] font-black tracking-widest flex items-center gap-2">
-                  <Link2 className="h-3 w-3" /> Relation hub
-               </div>
-               <Table className="w-full border-collapse min-w-[280px]">
-                  <TableHeader className="bg-slate-900">
-                     <TableRow className="border-none h-14 md:h-16">
-                        <TableHead className="px-4 md:px-10 font-black text-[10px] md:text-sm text-white tracking-widest border-r border-white/10 uppercase">
-                          {q.matchingData?.leftHeader || q.tableContent?.headers?.[0] || "List I"}
-                        </TableHead>
-                        <TableHead className="px-4 md:px-10 font-black text-[10px] md:text-sm text-white tracking-widest uppercase">
-                          {q.matchingData?.rightHeader || q.tableContent?.headers?.[1] || "List II"}
-                        </TableHead>
-                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                     {(q.matchingData?.rows || q.tableContent?.rows || []).map((row: any, ri: number) => (
-                        <TableRow key={ri} className="border-b border-slate-50 hover:bg-slate-50 transition-colors last:border-0 h-12 md:h-16">
-                           <TableCell className="px-4 md:px-10 font-bold text-xs md:text-lg text-[#0F172A] border-r border-slate-50">
-                              {Array.isArray(row) ? row[0] : row.left}
-                           </TableCell>
-                           <TableCell className="px-4 md:px-10 font-bold text-xs md:text-lg text-[#0F172A]">
-                              {Array.isArray(row) ? row[1] : row.right}
-                           </TableCell>
-                        </TableRow>
-                     ))}
-                  </TableBody>
-               </Table>
             </div>
          )}
 
@@ -202,7 +195,6 @@ export default function QuestionRenderer({
             const hi = q[`option${key}Hindi`];
             const localText = pa || hi;
             const isSelected = selectedAnswer === idx;
-            
             const hideLocal = localText?.trim() === en?.trim();
 
             return (

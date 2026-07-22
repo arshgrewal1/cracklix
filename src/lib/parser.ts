@@ -1,9 +1,9 @@
 'use client';
 /**
- * @fileOverview Institutional Ingestion Hub v88.0 [PRODUCTION LOCK].
+ * @fileOverview Institutional Ingestion Hub v92.0 [PRODUCTION LOCK].
  * - High-Fidelity State Machines for MCQ, Assertion/Reason, and Fill in the Blank.
+ * - NEW: Table Extraction Engine & Shared Context Injection.
  * - OCR Noise Normalization (Pipes, Page Numbers, Ads).
- * - Strict Punctuation Preservation Protocol.
  * - Bilingual Script Isolation (Unicode-driven).
  */
 
@@ -50,7 +50,6 @@ function detectScript(line: string): 'EN' | 'PA' {
 function isNoise(line: string): boolean {
   const trimmed = line.trim();
   if (!trimmed) return true;
-  if (/^[|¦│]$/.test(trimmed)) return true; // Standalone pipe noise
   return NOISE_PATTERNS.some(p => p.test(trimmed));
 }
 
@@ -59,19 +58,43 @@ function sanitizeLine(line: string): string {
   const trimmed = line.trim();
   if (!trimmed) return "";
   
-  // OCR Correction Logic
   let corrected = trimmed
     .replace(/Questlon/g, 'Question')
     .replace(/Optlon/g, 'Option')
     .replace(/Ansvver/g, 'Answer')
-    .replace(/ExpIanation/g, 'Explanation')
-    .replace(/FIII/g, 'Fill')
-    .replace(/BIank/g, 'Blank');
+    .replace(/ExpIanation/g, 'Explanation');
 
-  // Discard pure punctuation garbage lines
   if (/^[\s|¦│•.:;,_=\-(){}\[\]]+$/.test(corrected)) return "";
 
   return corrected;
+}
+
+/**
+ * Detects and extracts structured tables from raw text blocks.
+ * Supports Tab-separated, Pipe-separated, or Multi-space aligned text.
+ */
+function extractTable(lines: string[]): { headers: string[], rows: string[][], caption?: string } | null {
+  const tableLines = lines.filter(l => {
+     const cols = l.split(/\t|\s{2,}/).filter(c => c.trim().length > 0);
+     return cols.length >= 2;
+  });
+
+  if (tableLines.length < 2) return null;
+
+  try {
+     const headers = tableLines[0].split(/\t|\s{2,}/).map(h => h.trim()).filter(h => h.length > 0);
+     const rows = tableLines.slice(1).map(l => l.split(/\t|\s{2,}/).map(c => c.trim()).filter(c => c.length > 0));
+     
+     // Filter out rows that don't match header length roughly
+     const validRows = rows.filter(r => Math.abs(r.length - headers.length) <= 1);
+
+     if (headers.length >= 2 && validRows.length > 0) {
+        return { headers, rows: validRows };
+     }
+  } catch (e) {
+     return null;
+  }
+  return null;
 }
 
 export function preprocessText(text: string): string {
@@ -192,35 +215,35 @@ export function parseAssertionReason(rawText: string, metadata: any) {
 }
 
 /**
- * Specialized Parser: Fill in the Blank
+ * Specialized Parser: General MCQ with Shared Context Injection
+ * This parser detects Tables and Directions and attaches them to subsequent questions.
  */
-export function parseFillInTheBlank(rawText: string, metadata: any) {
+export function parseStructuredMCQ(rawText: string, metadata: any) {
   const questions: any[] = [];
   const lines = rawText.split(/\r?\n/);
   
+  let sharedContextEn = "";
+  let sharedContextPa = "";
+  let sharedTable: any = null;
+
   let currentNum = "";
   let enQuest = ""; let paQuest = "";
   let currentAns = "";
   let enExpl = ""; let paExpl = "";
   let opts: any = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
 
-  type FIBState = 'WAITING' | 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPL';
-  let state: FIBState = 'WAITING';
-
-  const resetBuffers = () => {
-    currentNum = ""; enQuest = ""; paQuest = ""; currentAns = ""; enExpl = ""; paExpl = "";
-    opts = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
-    state = 'WAITING';
-  };
+  type MCQState = 'CONTEXT' | 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPL';
+  let state: MCQState = 'CONTEXT';
 
   const finalize = () => {
     if (enQuest.trim() || paQuest.trim()) {
       questions.push({
         ...metadata,
-        id: currentNum || `fib-${Date.now()}`,
-        questionType: 'FILL_BLANK',
-        englishQuestion: enQuest.trim(),
-        punjabiQuestion: paQuest.trim(),
+        id: currentNum || `q-${Date.now()}-${Math.random()}`,
+        questionType: metadata.parserFormat || 'MCQ',
+        englishQuestion: (sharedContextEn ? sharedContextEn + "\n\n" : "") + enQuest.trim(),
+        punjabiQuestion: (sharedContextPa ? sharedContextPa + "\n\n" : "") + paQuest.trim(),
+        tableContent: sharedTable,
         optionAEnglish: opts.A.en.trim(), optionAPunjabi: opts.A.pa.trim(),
         optionBEnglish: opts.B.en.trim(), optionBPunjabi: opts.B.pa.trim(),
         optionCEnglish: opts.C.en.trim(), optionCPunjabi: opts.C.pa.trim(),
@@ -231,109 +254,23 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
         status: 'PUBLISHED'
       });
     }
-    resetBuffers();
+    currentNum = ""; enQuest = ""; paQuest = ""; currentAns = ""; enExpl = ""; paExpl = "";
+    opts = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
   };
 
-  for (let line of lines) {
-    const cleaned = sanitizeLine(line);
-    if (!cleaned) continue;
-
-    if (QUESTION_SENTINEL_REGEX.test(cleaned)) {
-      if (state !== 'WAITING') finalize();
-      currentNum = cleaned.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
-      state = 'QUESTION';
-      const body = cleaned.replace(QUESTION_SENTINEL_REGEX, '').trim();
-      if (body) {
-        if (detectScript(body) === 'PA') paQuest = body;
-        else enQuest = body;
-      }
-      continue;
-    }
-
-    const optMatch = cleaned.match(OPTION_MARKER_REGEX);
-    const ansMatch = cleaned.match(ANSWER_SENTINEL_REGEX);
-    const explMatch = cleaned.match(EXPL_SENTINEL_REGEX);
-
-    if (optMatch) {
-      state = 'OPTIONS';
-      const key = optMatch[1].toUpperCase().replace(/[①Ⓐ]/,'A').replace(/[②Ⓑ]/,'B').replace(/[③Ⓒ]/,'C').replace(/[④Ⓓ]/,'D');
-      const text = optMatch[2].trim();
-      if (detectScript(text) === 'PA') opts[key].pa = text;
-      else opts[key].en = text;
-      continue;
-    }
-
-    if (ansMatch) {
-      state = 'ANSWER';
-      currentAns = ansMatch[1].toUpperCase().replace('①','A').replace('②','B').replace('③','C').replace('④','D');
-      continue;
-    }
-
-    if (explMatch) {
-      state = 'EXPL';
-      const text = explMatch[1].trim();
-      if (detectScript(text) === 'PA') paExpl = text;
-      else enExpl = text;
-      continue;
-    }
-
-    if (state === 'QUESTION') {
-      if (detectScript(cleaned) === 'PA') paQuest += (paQuest ? ' ' : '') + cleaned;
-      else enQuest += (enQuest ? ' ' : '') + cleaned;
-    } else if (state === 'EXPL') {
-      if (detectScript(cleaned) === 'PA') paExpl += (paExpl ? ' ' : '') + cleaned;
-      else enExpl += (enExpl ? ' ' : '') + cleaned;
-    }
+  // Pre-scan for a shared table in the context block
+  const firstQuestionIdx = lines.findIndex(l => QUESTION_SENTINEL_REGEX.test(l));
+  if (firstQuestionIdx > 0) {
+     const contextLines = lines.slice(0, firstQuestionIdx);
+     sharedTable = extractTable(contextLines);
   }
 
-  finalize();
-  return { questions };
-}
-
-/**
- * Specialized Parser: General MCQ (Bilingual/Standard)
- */
-export function parseGeneralMCQ(rawText: string, metadata: any) {
-  const questions: any[] = [];
-  const lines = rawText.split(/\r?\n/);
-  
-  let currentNum = "";
-  let enQuest = ""; let paQuest = "";
-  let currentAns = "";
-  let enExpl = ""; let paExpl = "";
-  let opts: any = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
-
-  type MCQState = 'WAITING' | 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPL';
-  let state: MCQState = 'WAITING';
-
-  const finalize = () => {
-    if (enQuest.trim() || paQuest.trim()) {
-      questions.push({
-        ...metadata,
-        id: currentNum || `q-${Date.now()}`,
-        questionType: 'MCQ',
-        englishQuestion: enQuest.trim(),
-        punjabiQuestion: paQuest.trim(),
-        optionAEnglish: opts.A.en.trim(), optionAPunjabi: opts.A.pa.trim(),
-        optionBEnglish: opts.B.en.trim(), optionBPunjabi: opts.B.pa.trim(),
-        optionCEnglish: opts.C.en.trim(), optionCPunjabi: opts.C.pa.trim(),
-        optionDEnglish: opts.D.en.trim(), optionDPunjabi: opts.D.pa.trim(),
-        correctAnswer: currentAns || "A",
-        englishExplanation: enExpl.trim(),
-        punjabiExplanation: paExpl.trim(),
-        status: 'PUBLISHED'
-      });
-    }
-    currentNum = ""; enQuest = ""; paQuest = ""; currentAns = ""; enExpl = ""; paExpl = "";
-    opts = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
-  };
-
   for (let line of lines) {
     const cleaned = sanitizeLine(line);
     if (!cleaned) continue;
 
     if (QUESTION_SENTINEL_REGEX.test(cleaned)) {
-      if (state !== 'WAITING') finalize();
+      if (state !== 'CONTEXT') finalize();
       currentNum = cleaned.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
       state = 'QUESTION';
       const body = cleaned.replace(QUESTION_SENTINEL_REGEX, '').trim();
@@ -359,7 +296,8 @@ export function parseGeneralMCQ(rawText: string, metadata: any) {
 
     if (ansMatch) {
       state = 'ANSWER';
-      currentAns = ansMatch[1].toUpperCase().replace('①','A').replace('②','B').replace('③','C').replace('④','D');
+      const val = ansMatch[1].toUpperCase().replace('①','A').replace('②','B').replace('③','C').replace('④','D');
+      currentAns = val;
       continue;
     }
 
@@ -371,7 +309,10 @@ export function parseGeneralMCQ(rawText: string, metadata: any) {
       continue;
     }
 
-    if (state === 'QUESTION') {
+    if (state === 'CONTEXT') {
+      if (detectScript(cleaned) === 'PA') sharedContextPa += (sharedContextPa ? ' ' : '') + cleaned;
+      else sharedContextEn += (sharedContextEn ? ' ' : '') + cleaned;
+    } else if (state === 'QUESTION') {
       if (detectScript(cleaned) === 'PA') paQuest += (paQuest ? ' ' : '') + cleaned;
       else enQuest += (enQuest ? ' ' : '') + cleaned;
     } else if (state === 'EXPL') {
@@ -394,9 +335,10 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   const format = metadata.parserFormat || "BILINGUAL_MCQ";
 
   if (format === 'ASSERTION') return parseAssertionReason(cleanText, metadata);
-  if (format === 'FILL_BLANK') return parseFillInTheBlank(cleanText, metadata);
   
-  return parseGeneralMCQ(cleanText, metadata);
+  // All other formats (Table, Graph, Diagram, Standard MCQ) now use the Structured Parser
+  // which supports Directions and Table extraction.
+  return parseStructuredMCQ(cleanText, metadata);
 }
 
 export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
