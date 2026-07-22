@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -16,10 +15,8 @@ import {
   QrCode, 
   Share2, 
   Smartphone, 
-  Play, 
   Info, 
   Megaphone, 
-  Target, 
   Zap, 
   Gift, 
   Clock, 
@@ -28,8 +25,6 @@ import {
   User,
   LayoutGrid,
   BarChart3,
-  Eye, 
-  EyeOff,
   TrendingUp,
   Users,
   CheckCircle2,
@@ -43,25 +38,22 @@ import {
   Briefcase,
   Heart,
   Loader2,
-  FileSearch,
   ExternalLink,
-  Twitter,
   Image as ImageIcon,
   Stamp,
   FileBadge,
   ClipboardList
 } from "lucide-react"
 import { useDoc, useFirestore, useUser } from '@/firebase';
-import { doc, setDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { DistributionSettings, BrandingSettings } from "@/types";
 import FileUpload from "@/components/admin/FileUpload";
 
 /**
- * @fileOverview Institutional Administrative Portal v26.0.
- * FIXED: Resolved JSX tag mismatch (TabsList vs Tabs) causing build failure.
- * UPDATED: Fully implemented Branding & Distribution hubs.
+ * @fileOverview Institutional Administrative Portal v27.0 [Hardened].
+ * FIXED: Resolved JSX tag mismatch and properly nested all setting nodes.
  */
 
 const DEFAULT_DISTRIBUTION: DistributionSettings = {
@@ -71,12 +63,12 @@ const DEFAULT_DISTRIBUTION: DistributionSettings = {
   appStoreUrl: "",
   shareTitle: "Cracklix – Punjab Government Exam Preparation Platform",
   shareDescription: "Prepare for Punjab Government Exams with Cracklix. Mock Tests, PYQs, and daily current affairs.",
-  shareMessage: `🚀 Crack Punjab Government Exams with Cracklix!\n\n🎯 Prepare for:\n\n• PSSSB\n• PPSC\n• Punjab Police\n• PSPCL\n• PSTET\n• CTET\n• ETT\n• Master Cadre\n• Lecturer Cadre\n• School Lecturer\n• Punjab Government Recruitment\n\n📚 Features\n\n✅ Unlimited Mock Tests\n✅ Previous Year Papers\n✅ Daily Quiz\n✅ Daily Current Affairs\n✅ Topic-wise MCQs\n✅ Fast Performance\n✅ Mobile Friendly\n✅ PWA Support\n\n📲 Install App\n{installUrl}\n\n🌐 Website\n{websiteUrl}`,
+  shareMessage: `🚀 Crack Punjab Government Exams with Cracklix!\n\n🎯 Prepare for:\n\n• PSSSB\n• PPSC\n• Punjab Police\n\n📲 Install App\n{installUrl}\n\n🌐 Website\n{websiteUrl}`,
   seoTitle: "Cracklix – Punjab Government Exam Preparation Platform",
-  seoDescription: "Prepare for Punjab Government Exams with Cracklix. Practice Unlimited Mock Tests, Previous Year Papers, Daily Quiz, Current Affairs and Topic-wise MCQs for PSSSB, PPSC, Punjab Police, PSPCL, PSTET, CTET, ETT, Master Cadre, Lecturer Cadre, School Lecturer and all Punjab competitive exams.",
+  seoDescription: "Prepare for Punjab Government Exams with Cracklix. Practice Unlimited Mock Tests, Previous Year Papers, Daily Quiz, Current Affairs and Topic-wise MCQs.",
   ogImageUrl: "",
   twitterImageUrl: "",
-  keywords: "Punjab Government Exams, PSSSB, PPSC, Punjab Police, PSPCL, PSTET, CTET, ETT, Master Cadre, Lecturer Cadre, School Lecturer, Mock Test, Previous Year Papers, Current Affairs, Quiz, MCQ, Cracklix",
+  keywords: "Punjab Government Exams, PSSSB, PPSC, Punjab Police, Mock Test, Cracklix",
   canonicalUrl: "https://cracklix.com",
   updatedAt: null
 };
@@ -139,10 +131,10 @@ export default function AdminSettings() {
     studentCounterThreshold: 1000,
     founderName: "Arsh Grewal",
     founderRole: "Founder & Lead Developer",
-    founderBio: "Hi, I'm Arsh Grewal. As a student from Punjab, I personally experienced the struggle of finding a single, reliable platform dedicated to Punjab Government Exam preparation.",
-    founderQuote: "Empowering every aspirant in Punjab with institutional-grade preparation technology.",
-    founderMission: "To build Punjab's smartest, most trusted and student-first exam preparation platform.",
-    founderCommitment: "I am committed to continuously evolving this platform into Punjab's most trusted learning node.",
+    founderBio: "I'm Arsh Grewal, dedicated to building Punjab's smartest exam platform.",
+    founderQuote: "Empowering every aspirant with institutional-grade technology.",
+    founderMission: "To build Punjab's most trusted exam preparation platform.",
+    founderCommitment: "Committed to continuously evolving this platform.",
     founderBuildingSince: "19 July 2026",
     founderEmail: "cracklixhelp@gmail.com"
   });
@@ -189,7 +181,11 @@ export default function AdminSettings() {
     }
   };
 
-  if (loading || distLoading || brandLoading) return <div className="h-screen flex items-center justify-center bg-white"><RefreshCw className="h-10 w-10 text-primary animate-spin" /></div>
+  if (loading || distLoading || brandLoading) return (
+    <div className="h-screen flex items-center justify-center bg-white">
+      <Loader2 className="h-10 w-10 text-primary animate-spin" />
+    </div>
+  );
 
   return (
     <div className="space-y-6 md:space-y-10 text-[#0F172A] text-left animate-in fade-in duration-700">
@@ -477,16 +473,4 @@ function TrendInput({ label, value, onChange }: { label: string, value: string, 
          <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-10 bg-slate-50 border-none font-bold text-[11px]" />
       </div>
 )
-}
-
-function LiveMetric({ label, value, icon }: any) {
-   return (
-      <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-         <div className="flex items-center gap-3 text-left">
-            {icon}
-            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
-         </div>
-         <span className="text-xl font-black tabular-nums">{value}</span>
-      </div>
-   )
 }

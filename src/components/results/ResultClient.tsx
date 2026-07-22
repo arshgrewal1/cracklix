@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -51,7 +50,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 
 /**
- * @fileOverview Universal Result Hub Viewer v4.3 [Ranker Fixed].
+ * @fileOverview Universal Result Hub Viewer v4.4 [Stability Hardened].
  * FIXED: Accurate state rank calculation with latest submission node injection.
  * FIXED: Corrected score to decimal 1 place.
  */
@@ -120,7 +119,6 @@ export default function ResultClient() {
      
      const uniqueMap = new Map<string, any>();
      
-     // 1. Audit latest global results
      if (rawGlobalResults) {
        [...rawGlobalResults].forEach((r: any) => {
           if (!uniqueMap.has(r.userId) || uniqueMap.get(r.userId).score < r.score) {
@@ -129,8 +127,6 @@ export default function ResultClient() {
        });
      }
 
-     // 2. CRITICAL: Inject current session into map to ensure immediate rank update
-     // This handles the gap between write and indexing.
      if (user?.uid) {
        const existing = uniqueMap.get(user.uid);
        if (!existing || existing.score <= sessionData.score) {

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -18,7 +17,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Top Rankers Center v3.3 [Fidelity Fix].
+ * @fileOverview Official Top Rankers Center v3.4 [Fidelity Hardened].
  * FIXED: Preserving decimal scores for accuracy and Title Case names.
  */
 

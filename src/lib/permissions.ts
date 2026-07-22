@@ -64,7 +64,6 @@ export function isSuperAdmin(profile: UserProfile | null, userEmail?: string | n
 }
 
 export function checkPermission(profile: UserProfile | null, permission: keyof UserPermissions, userEmail?: string | null): boolean {
-  // 1. Founder Override
   if (userEmail && SUPER_ADMIN_EMAILS.includes(userEmail.toLowerCase())) return true;
   
   if (!profile) return false;
@@ -75,7 +74,6 @@ export function checkPermission(profile: UserProfile | null, permission: keyof U
 }
 
 export function canAccessAdmin(profile: UserProfile | null, userEmail?: string | null): boolean {
-  // 1. Founder Override
   if (userEmail && SUPER_ADMIN_EMAILS.includes(userEmail.toLowerCase())) return true;
 
   if (!profile) return false;

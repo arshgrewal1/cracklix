@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Top Rankers Preview Hub v20.3 [Fidelity Sync].
+ * @fileOverview Top Rankers Preview Hub v20.4 [Hardened Fidelity].
  * FIXED: Preserving decimal scores for institutional accuracy.
  */
 export default function MeritPreview() {
@@ -67,7 +66,7 @@ export default function MeritPreview() {
 
               return (
                  <div key={res.id} className="flex-shrink-0 w-[45%] md:w-full snap-start h-full">
-                    <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 group overflow-hidden bg-white p-4 md:p-10 flex flex-col justify-center rounded-2xl md:rounded-[4rem] h-full min-h-[160px] md:min-h-[340px]">
+                    <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 group overflow-hidden bg-white p-4 md:p-10 flex flex-col justify-center rounded-2xl md:rounded-[4rem] h-full min-h-[160px] md:min-h-[340px]">
                        <div className="flex flex-col items-center text-center space-y-3 md:space-y-6">
                           <div className="relative shrink-0">
                              <StudentAvatar profile={{ name: cleanName, gender: res.gender }} className="h-12 w-12 md:h-24 md:w-24 rounded-xl md:rounded-[2rem] border border-slate-50 shadow-inner group-hover:scale-105 transition-transform" />
