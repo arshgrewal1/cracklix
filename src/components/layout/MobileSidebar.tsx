@@ -29,12 +29,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ShareButton from "@/components/navigation/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
-const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
+import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Mobile Sidebar v88.0.
- * FIXED: Optimized share section padding to prevent text clipping on small mobile screens.
+ * @fileOverview Mobile Sidebar v89.0.
+ * UPDATED: Uses unified canAccessAdmin helper for consistent role checks.
  */
 export default function MobileSidebar({
   onClose,
@@ -64,10 +63,7 @@ export default function MobileSidebar({
   };
 
   const isAdmin = React.useMemo(() => {
-    if (!user || !profile) return false;
-    const userEmail = user?.email?.toLowerCase();
-    const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
-    return profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
+    return canAccessAdmin(profile, user?.email);
   }, [user, profile]);
 
   const mainItems = [

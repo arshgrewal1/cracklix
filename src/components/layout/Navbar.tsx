@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -35,12 +34,11 @@ import { cn } from "@/lib/utils";
 import Logo from "@/components/brand/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-
-const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
+import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Cracklix Navigation Hub v124.0.
- * UPDATED: Removed all uppercase transforms from navigation items.
+ * @fileOverview Cracklix Navigation Hub v125.0.
+ * UPDATED: Uses unified canAccessAdmin helper for consistent role checks.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -95,6 +93,10 @@ export default function Navbar() {
       router.push('/');
     } catch (error) {}
   };
+
+  const isAdmin = React.useMemo(() => {
+     return canAccessAdmin(profile, user?.email);
+  }, [user, profile]);
 
   if (!mounted) {
     return <nav className="w-full border-b border-slate-100 bg-white h-24 md:h-32" />;
@@ -191,6 +193,7 @@ export default function Navbar() {
                       <div className="w-full space-y-1 text-left">
                          <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My Progress" />
                          <ProfileMenuItem href="/pass" icon={Gem} label="Elite Pass Hub" />
+                         {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Console" />}
                          <ProfileMenuItem href="/profile" icon={Settings} label="Portal Settings" />
                       </div>
                       <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>

@@ -5,7 +5,7 @@ import { useUser, useAuth } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { Menu, ShieldCheck, Loader2, ExternalLink, AlertCircle } from "lucide-react";
+import { Menu, ShieldCheck, Loader2, ExternalLink, AlertCircle, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import Link from "next/link";
@@ -13,10 +13,8 @@ import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { canAccessAdmin, checkPermission } from "@/lib/permissions";
 
-const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
-
 /**
- * @fileOverview Administrative Control Boundary v75.0.
+ * @fileOverview Administrative Control Boundary v76.0.
  * Governance: Verifies role-based access and granular permissions for all admin routes.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -40,21 +38,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  const isAccessBlocked = mounted && !loading && !profileLoading && !canAccessAdmin(profile);
+  const isAccessBlocked = mounted && !loading && !profileLoading && !canAccessAdmin(profile, user?.email);
   
   const hasSpecificPermission = useMemo(() => {
+     if (user?.email && canAccessAdmin(profile, user.email)) return true;
      if (!profile) return false;
      if (profile.role === 'SUPER_ADMIN') return true;
 
      // Specific Route Governance
-     if (pathname.includes('/payments') || pathname.includes('/revenue')) return checkPermission(profile, 'managePayments') || checkPermission(profile, 'viewRevenue');
-     if (pathname.includes('/roles') || pathname.includes('/users')) return checkPermission(profile, 'manageRoles') || checkPermission(profile, 'manageUsers');
-     if (pathname.includes('/mcq-bank/add') || pathname.includes('/questions/add')) return checkPermission(profile, 'uploadQuestions');
-     if (pathname.includes('/mocks/builder')) return checkPermission(profile, 'createMock');
-     if (pathname.includes('/settings')) return checkPermission(profile, 'websiteSettings');
+     if (pathname.includes('/payments') || pathname.includes('/revenue')) return checkPermission(profile, 'managePayments', user?.email) || checkPermission(profile, 'viewRevenue', user?.email);
+     if (pathname.includes('/roles') || pathname.includes('/users')) return checkPermission(profile, 'manageRoles', user?.email) || checkPermission(profile, 'manageUsers', user?.email);
+     if (pathname.includes('/mcq-bank/add') || pathname.includes('/questions/add')) return checkPermission(profile, 'uploadQuestions', user?.email);
+     if (pathname.includes('/mocks/builder')) return checkPermission(profile, 'createMock', user?.email);
+     if (pathname.includes('/settings')) return checkPermission(profile, 'websiteSettings', user?.email);
      
-     return true; // Default admin dashboard access
-  }, [profile, pathname]);
+     return true; 
+  }, [profile, user, pathname]);
 
   useEffect(() => {
     if (isAccessBlocked) {
@@ -64,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         router.replace('/dashboard');
       }
     } else if (mounted && !profileLoading && !hasSpecificPermission) {
-       router.replace('/admin'); // Redirect to main admin dashboard if missing specific page perm
+       router.replace('/admin'); 
     }
   }, [isAccessBlocked, hasSpecificPermission, user, profileLoading, router, pathname, mounted]);
 
@@ -112,7 +111,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           isOpen={isSidebarOpen} 
           onToggle={toggleSidebar} 
           onCloseMobile={() => setIsSidebarOpen(false)}
-          profile={profile}
+          profile={profile || { name: user.displayName, email: user.email, role: 'SUPER_ADMIN' }}
           handleLogout={handleLogout}
           pathname={pathname}
         />
@@ -148,7 +147,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Link href="/">Student View <ExternalLink className="h-3.5 w-3.5 opacity-40" /></Link>
                </Button>
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">
-                  {profile?.name?.[0] || 'A'}
+                  {(profile?.name || user.displayName || 'A')[0]}
                </div>
             </div>
           </header>
