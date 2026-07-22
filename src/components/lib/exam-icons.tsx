@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v34.0 (Maximization Overhaul).
- * FIXED: Removed aggressive rounded-full clipping and switched to object-contain for full logo visibility.
+ * @fileOverview Institutional Branding Engine v35.0 (Spatial Fix).
+ * FIXED: Reduced logo sizes and switched to object-contain to prevent clipping.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -64,10 +64,10 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     category?.logoUrl;
   
   const sizeClasses = {
-    sm: "h-12 w-12 md:h-14 md:w-14",
-    md: "h-16 w-16 md:h-24 md:w-24",
-    lg: "h-24 w-24 md:h-32 md:w-32",
-    xl: "h-32 w-32 md:h-48 md:w-48"
+    sm: "h-11 w-11 md:h-12 md:w-12",
+    md: "h-14 w-14 md:h-20 md:w-20",
+    lg: "h-20 w-20 md:h-28 md:w-28",
+    xl: "h-28 w-28 md:h-40 md:w-40"
   };
 
   const containerSize = sizeClasses[size];
@@ -84,7 +84,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           alt="Authority" 
           fill
           sizes="256px"
-          className="object-contain p-1"
+          className="object-contain p-1.5"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -110,7 +110,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
       containerSize, 
       className
     )}>
-      <div className="h-full w-full p-2">
+      <div className="h-full w-full p-2.5">
         {getFallbackIcon()}
       </div>
     </div>

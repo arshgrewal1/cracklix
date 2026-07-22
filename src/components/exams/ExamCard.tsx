@@ -42,8 +42,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v11.0.
- * UPDATED: Standardized font size to match trending hub and resolved text clipping.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v12.0.
+ * FIXED: Optimized logo container to prevent clipping and reduced size.
  */
 export default function ExamCard({ 
   exam, 
@@ -159,9 +159,11 @@ export default function ExamCard({
           <CardContent className="px-6 md:px-10 pb-8 flex-1 flex flex-col text-center">
             
             <div className="mb-6 flex justify-center">
-               <div className="w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-2xl md:rounded-3xl shadow-2xl bg-white border-2 border-slate-50 flex items-center justify-center overflow-hidden shrink-0">
-                  <AuthorityLogo boardId={exam.boardId} size="md" className="p-0 border-none shadow-none bg-transparent" />
-               </div>
+               <AuthorityLogo 
+                  boardId={exam.boardId} 
+                  size="md" 
+                  className="bg-white border-2 border-slate-50 shadow-2xl rounded-2xl md:rounded-3xl" 
+               />
             </div>
 
             <div className="space-y-2 mb-6">
