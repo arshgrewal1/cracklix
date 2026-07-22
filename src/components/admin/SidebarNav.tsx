@@ -44,7 +44,8 @@ import {
   Archive,
   FileStack,
   KeyRound,
-  ShieldAlert
+  ShieldAlert,
+  FileText
 } from "lucide-react";
 
 import {
@@ -66,6 +67,15 @@ const NAV_GROUPS = [
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Bulk Upload", href: "/admin/bulk-import", icon: UploadCloud, perm: 'uploadQuestions' },
       { label: "Review Center", href: "/admin/qa", icon: Activity, perm: 'reviewContent' },
+    ],
+  },
+  {
+    label: "Content Hub",
+    items: [
+      { label: "PYQ Archive", href: "/admin/pyqs", icon: FileStack, perm: 'uploadPYQs' },
+      { label: "Study Notes", href: "/admin/notes", icon: FileText, perm: 'publishContent' },
+      { label: "CA Hub", href: "/admin/current-affairs", icon: Newspaper, perm: 'publishContent' },
+      { label: "Daily Quiz", href: "/admin/daily-quiz", icon: Flame, perm: 'createMock' },
     ],
   },
   {
@@ -118,7 +128,7 @@ interface SidebarNavProps {
 }
 
 export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
-  const { profile } = useUser();
+  const { user, profile } = useUser();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -132,10 +142,10 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
   return (
     <nav className="flex-1 overflow-y-auto px-3 py-6 no-scrollbar space-y-8">
       {NAV_GROUPS.map((group) => {
-        // Filter items based on specific permissions
+        // Filter items based on specific permissions + Founder email override
         const authorizedItems = group.items.filter(item => {
            if (!item.perm) return true;
-           return checkPermission(profile, item.perm as any);
+           return checkPermission(profile, item.perm as any, user?.email);
         });
 
         if (authorizedItems.length === 0) return null;
@@ -143,7 +153,7 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
         return (
           <div key={group.label} className="space-y-2">
             {isOpen ? (
-              <p className="px-4 text-[10px] font-black text-slate-400 tracking-widest">
+              <p className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 {group.label}
               </p>
             ) : (
