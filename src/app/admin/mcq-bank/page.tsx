@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback } from "react"
@@ -54,8 +55,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Master MCQ Bank Hub v3.1 [Duplicate Detection + Counters].
- * ADDED: Enhanced duplicate counter and direct access to sanitization.
+ * @fileOverview Master MCQ Bank Hub v3.2 [Terminology Cleaned].
+ * UPDATED: Replaced "items" with "questions" for precise bank management.
  */
 
 export default function MCQBankPage() {
@@ -155,7 +156,7 @@ export default function MCQBankPage() {
 
     try {
       await batch.commit();
-      toast({ title: "Database Updated", description: `${selectedIds.length} items synced.` });
+      toast({ title: "Database Updated", description: `${selectedIds.length} questions synced.` });
       fetchQuestions(false);
       setSelectedIds([]);
     } finally { setIsBulkProcessing(false); }
@@ -190,7 +191,7 @@ export default function MCQBankPage() {
       {/* METRIC COUNTERS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-1">
          <MetricCard label="Total in bank" value={questions.length} icon={<Database className="text-primary" />} />
-         <MetricCard label="Unused items" value={questions.filter(q => q.status === 'UNUSED').length} icon={<Zap className="text-orange-500" />} />
+         <MetricCard label="Unused questions" value={questions.filter(q => q.status === 'UNUSED').length} icon={<Zap className="text-orange-500" />} />
          <MetricCard label="Used pool" value={questions.filter(q => q.status === 'USED').length} icon={<CheckCircle2 className="text-emerald-500" />} />
          <MetricCard label="Duplicates" value={duplicateAnalysis.count} icon={<Copy className="text-rose-500" />} highlight={duplicateAnalysis.count > 0} />
       </div>
@@ -312,7 +313,7 @@ export default function MCQBankPage() {
                    <TableCell colSpan={5} className="h-96 text-center">
                       <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
                          <Layers className="h-20 w-20 text-slate-400" />
-                         <p className="font-black text-2xl uppercase tracking-[0.4em]">No matching nodes</p>
+                         <p className="font-black text-2xl uppercase tracking-[0.4em]">No matching questions</p>
                       </div>
                    </TableCell>
                 </TableRow>
@@ -325,7 +326,7 @@ export default function MCQBankPage() {
       {hasMore && questions.length > 0 && (
         <div className="flex justify-center mt-10">
            <Button variant="outline" onClick={() => fetchQuestions(true)} disabled={loading} className="rounded-full px-12 h-14 font-black uppercase text-[10px] tracking-widest border-slate-200 gap-3">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Load More Items
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Load More Questions
            </Button>
         </div>
       )}
@@ -336,7 +337,7 @@ export default function MCQBankPage() {
                <div className="flex items-center gap-5">
                   <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black text-lg">{selectedIds.length}</div>
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-widest leading-none">Items Selected</p>
+                    <p className="text-[11px] font-black uppercase tracking-widest leading-none">Questions Selected</p>
                     <p className="text-[8px] font-bold text-slate-500 uppercase mt-1.5 tracking-widest">Database Sync Active</p>
                   </div>
                </div>

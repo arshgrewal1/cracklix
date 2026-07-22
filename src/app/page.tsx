@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from "react";
@@ -22,8 +23,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v501.6.
- * UPDATED: Refined heading text to remove uppercase and use professional Title Case.
+ * @fileOverview Institutional Premium Hub v501.7.
+ * UPDATED: Replaced "items" label with "questions" for precise challenge feedback.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -75,7 +76,7 @@ export default function HomePage() {
                     <>
                       <div className="mt-[18px] flex flex-row flex-wrap items-center justify-center gap-[10px]">
                          <ChallengeChip icon={<Clock className="h-3.5 w-3.5" />} label={`${activeQuiz.duration} min`} />
-                         <ChallengeChip icon={<ShieldCheck className="h-3.5 w-3.5" />} label={`${activeQuiz.totalQuestions} items`} />
+                         <ChallengeChip icon={<ShieldCheck className="h-3.5 w-3.5" />} label={`${activeQuiz.totalQuestions} questions`} />
                          <ChallengeChip icon={<Trophy className="h-3.5 w-3.5" />} label={`${activeQuiz.rewardXP} XP`} />
                       </div>
 

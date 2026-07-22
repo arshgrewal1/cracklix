@@ -52,8 +52,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v4.0 [Compact Enterprise Redesign].
- * FIXED: Defined missing FILTER_CHIPS constant to resolve build failure.
+ * @fileOverview Institutional Practice Hub v4.1 [Terminology Refined].
+ * UPDATED: Replaced "Items" label with "Tests" in the series matrix.
  */
 
 const FILTER_CHIPS = [
@@ -177,7 +177,7 @@ export default function PracticeHub() {
            <div className="w-full lg:w-auto bg-white border-slate-100 shadow-sm rounded-2xl p-3 md:p-6 flex items-center justify-between lg:justify-start gap-3 md:gap-10 border overflow-hidden">
               <HeaderStat label="Series" val={totalStats.totalSeries} />
               <div className="w-px h-6 md:h-8 bg-slate-100" />
-              <HeaderStat label="Mocks" val={totalStats.totalTests} color="text-primary" />
+              <HeaderStat label="Tests" val={totalStats.totalTests} color="text-primary" />
               <div className="w-px h-6 md:h-8 bg-slate-100" />
               <HeaderStat label="Attempts" val={totalStats.solved} color="text-emerald-600" />
            </div>
@@ -245,7 +245,7 @@ export default function PracticeHub() {
                    className="flex flex-col h-full"
                  >
                     <Link href={`/subjects/${ser.subjectId}/series/${ser.id}`} className="h-full">
-                       <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[24px] bg-white group flex flex-col h-full relative overflow-hidden text-left border-none">
+                       <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[24px] bg-white group flex flex-col h-full relative overflow-hidden flex-1 border-none">
                           <CardContent className="p-5 md:p-6 space-y-4 md:space-y-6 flex-1 flex flex-col">
                              
                              {/* Compact Header */}
@@ -277,7 +277,7 @@ export default function PracticeHub() {
 
                              {/* High-Density 2-Column Stats Grid */}
                              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pt-4 border-t border-slate-50">
-                                <StatItem label="Items" val={ser.counts.totalTests} icon={Layers} />
+                                <StatItem label="Tests" val={ser.counts.totalTests} icon={Layers} />
                                 <StatItem label="Questions" val={ser.counts.questions} icon={Target} />
                                 {ser.counts.free > 0 && <StatItem label="Preview" val={ser.counts.free} icon={Unlock} color="text-emerald-600" />}
                                 {ser.attemptedCount > 0 && <StatItem label="Solved" val={ser.attemptedCount} icon={CheckCircle2} color="text-emerald-500" />}
