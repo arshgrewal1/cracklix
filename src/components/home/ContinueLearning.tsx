@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -27,8 +28,8 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview Institutional Performance Hub v6.4.
- * FIXED: Removed uppercase from header and replaced "node" terminology.
+ * @fileOverview Institutional Performance Hub v6.5.
+ * UPDATED: Action label synchronized to "View Analysis".
  */
 
 // Formatting Utilities
@@ -118,7 +119,7 @@ export default function ContinueLearning() {
 
   return (
     <section className="py-8 md:py-16 bg-white">
-      <div className="max-w-7xl auto px-4 sm:px-6 lg:px-8 space-y-8 md:space-y-12 text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 md:space-y-12 text-left">
         <div className="flex items-center justify-between px-1">
            <div className="flex items-center gap-3">
               <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-50 flex items-center justify-center text-primary shadow-sm shrink-0">
@@ -126,7 +127,7 @@ export default function ContinueLearning() {
               </div>
               <h2 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight leading-none">My Progress</h2>
            </div>
-           <Button asChild variant="ghost" className="text-primary font-bold text-[9px] md:text-xs tracking-widest gap-2">
+           <Button asChild variant="ghost" className="text-primary font-bold text-[9px] md:text-xs tracking-widest gap-2 border-none bg-transparent cursor-pointer">
               <Link href="/my-exams">View All <ChevronRight className="h-4 w-4" /></Link>
            </Button>
         </div>
@@ -195,7 +196,7 @@ export default function ContinueLearning() {
                                          onClick={() => handleReviewAction(res.mockId)} 
                                          className="h-12 px-7 md:px-8 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] hover:brightness-110 text-white font-black text-[11px] md:text-xs tracking-widest rounded-full shadow-[0_10px_24px_rgba(37,99,235,0.30)] transition-all hover:scale-[1.04] active:scale-[0.98] border-none flex items-center gap-2 group/btn"
                                        >
-                                         Review Test
+                                         View Analysis
                                          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
                                        </Button>
                                     </div>

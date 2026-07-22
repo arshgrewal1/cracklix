@@ -42,9 +42,8 @@ import { hasSeriesAccess } from "@/lib/access-control"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Premium Series Hub Portal v10.0 [Advanced Action Logic].
- * FIXED: Implemented precise button labels (Start Test, Start Preview, Unlock, Continue, Review).
- * FIXED: Paid users no longer see "Start Preview" for free items.
+ * @fileOverview Premium Series Hub Portal v11.0 [View Analysis Sync].
+ * UPDATED: Refined action labels for completed tests.
  */
 
 export default function SeriesDetailPortal() {
@@ -88,7 +87,7 @@ export default function SeriesDetailPortal() {
          
          <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
             <div className="flex items-center gap-3 text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
-               <button onClick={() => router.back()} className="hover:text-white transition-colors flex items-center gap-2">
+               <button onClick={() => router.back()} className="hover:text-white transition-colors flex items-center gap-2 border-none bg-transparent cursor-pointer">
                  <ArrowLeft className="h-3.5 w-3.5" /> {subject?.name || "Subject"}
                </button>
                <ChevronRight className="h-3 w-3 opacity-30" />
@@ -106,7 +105,7 @@ export default function SeriesDetailPortal() {
                   
                   <div className="space-y-5 text-center md:text-left flex-1 min-w-0">
                      <div className="space-y-4">
-                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] antialiased break-words text-white">
+                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight antialiased">
                            {series?.title}
                         </h1>
                         <div className="flex flex-wrap justify-center md:justify-start items-center gap-4">
@@ -116,13 +115,13 @@ export default function SeriesDetailPortal() {
                            )}>
                               {seriesAccess.hasAccess ? 'Access Authorized' : 'Premium Series'}
                            </Badge>
-                           <span className="text-slate-400 font-bold text-[12px] md:text-base tracking-tight">
+                           <span className="text-slate-200 font-bold text-[12px] md:text-base tracking-tight">
                               {mocks?.length || 0} Professional Mocks
                            </span>
                         </div>
                      </div>
                      
-                     <p className="text-slate-400 font-medium text-sm md:text-xl leading-relaxed max-w-2xl">
+                     <p className="text-slate-200 font-medium text-sm md:text-xl leading-relaxed max-w-2xl">
                         {series?.description || "Master official patterns with verified rationales and state ranking analytics."}
                      </p>
                   </div>
@@ -183,19 +182,24 @@ export default function SeriesDetailPortal() {
                      let targetHref = `/mocks/instructions?id=${mock.id}`;
 
                      if (isCompleted) {
-                        buttonLabel = "View performance";
+                        buttonLabel = "View Analysis";
                         buttonVariant = "bg-emerald-600 hover:bg-emerald-700";
                         targetHref = `/results/view?id=${mock.id}`;
                      } else if (isStarted) {
-                        buttonLabel = "Continue test";
+                        buttonLabel = "Continue Test";
                         buttonVariant = "bg-primary hover:bg-blue-700";
                         targetHref = `/mocks/attempt?id=${mock.id}`;
                      } else if (locked) {
-                        buttonLabel = "Unlock with pass";
+                        buttonLabel = "Unlock with Pass";
                         buttonVariant = "bg-amber-500 hover:bg-amber-600";
                         targetHref = "#";
-                     } else if (isFree && !hasPurchasedAccess) {
-                        buttonLabel = "Start preview";
+                     } else if (hasPurchasedAccess) {
+                        // User has access (either through pass or is admin)
+                        buttonLabel = "Start Test";
+                        buttonVariant = "bg-[#2563EB] hover:bg-blue-700";
+                        targetHref = `/mocks/instructions?id=${mock.id}`;
+                     } else if (isFree) {
+                        buttonLabel = "Start Preview";
                         buttonVariant = "bg-emerald-600 hover:bg-emerald-700";
                         targetHref = `/mocks/instructions?id=${mock.id}`;
                      }
@@ -230,7 +234,7 @@ export default function SeriesDetailPortal() {
                                        )}
                                        <span className="text-slate-400 font-bold text-[11px] tracking-tight">Attempt {idx + 1}</span>
                                     </div>
-                                    <button className="p-1 text-slate-300 hover:text-slate-600 transition-colors">
+                                    <button className="p-1 text-slate-300 hover:text-slate-600 transition-colors bg-transparent border-none cursor-pointer">
                                        <MoreVertical className="h-4 w-4" />
                                     </button>
                                  </div>
@@ -301,10 +305,10 @@ export default function SeriesDetailPortal() {
                </div>
 
                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <PurchaseStat icon={<Layers />} label="Tests" val={mocks?.length || 0} />
-                  <PurchaseStat icon={<Smartphone />} label="Android PWA" val="Active" />
-                  <PurchaseStat icon={<Calendar />} label="Validity" val="365 Days" />
-                  <PurchaseStat icon={<ShieldCheck />} label="Official" val="Verified" />
+                  <PurchaseStat icon={Layers} label="Tests" val={mocks?.length || 0} />
+                  <PurchaseStat icon={Smartphone} label="Android PWA" val="Active" />
+                  <PurchaseStat icon={Calendar} label="Validity" val="365 Days" />
+                  <PurchaseStat icon={ShieldCheck} label="Official" val="Verified" />
                </div>
 
                <div className="space-y-4">
@@ -350,10 +354,10 @@ function ResultStat({ icon, label, val, highlight }: { icon: React.ReactNode, la
    )
 }
 
-function PurchaseStat({ icon, label, val }: any) {
+function PurchaseStat({ icon: Icon, label, val }: any) {
    return (
       <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col items-center text-center gap-2">
-         {icon && React.cloneElement(icon as React.ReactElement, { className: "h-4 w-4 text-amber-500" })}
+         {Icon && <Icon className="h-4 w-4 text-amber-500" />}
          <div>
             <p className="text-sm font-black text-[#0F172A] leading-none tabular-nums">{val}</p>
             <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-1">{label}</p>
