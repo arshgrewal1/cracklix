@@ -45,7 +45,9 @@ import {
   FileStack,
   KeyRound,
   ShieldAlert,
-  FileText
+  FileText,
+  ExternalLink,
+  Home
 } from "lucide-react";
 
 import {
@@ -58,6 +60,12 @@ import { useUser } from '@/firebase';
 import { checkPermission } from '@/lib/permissions';
 
 const NAV_GROUPS = [
+  {
+    label: "Portal Navigation",
+    items: [
+      { label: "Student Portal", href: "/", icon: ExternalLink },
+    ],
+  },
   {
     label: "Main Hub",
     items: [

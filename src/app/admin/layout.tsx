@@ -14,8 +14,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { canAccessAdmin, checkPermission } from "@/lib/permissions";
 
 /**
- * @fileOverview Administrative Control Boundary v76.0.
- * Governance: Verifies role-based access and granular permissions for all admin routes.
+ * @fileOverview Administrative Control Boundary v76.1.
+ * UPDATED: Restored Student View button for all screen sizes.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -137,16 +137,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               />
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
                {profile?.status === 'SUSPENDED' && (
                   <Badge className="bg-rose-500 text-white animate-pulse gap-2 px-4 py-2 border-none">
                      <AlertCircle className="h-4 w-4" /> Account Suspended
                   </Badge>
                )}
-               <Button asChild variant="outline" className="hidden sm:flex h-11 rounded-full text-[11px] font-bold tracking-tight px-6 gap-2">
-                  <Link href="/">Student View <ExternalLink className="h-3.5 w-3.5 opacity-40" /></Link>
+               <Button asChild variant="outline" className="flex h-10 md:h-11 rounded-full text-[9px] md:text-[11px] font-bold tracking-tight px-4 md:px-6 gap-2">
+                  <Link href="/">Student Portal <ExternalLink className="h-3 w-3 md:h-3.5 md:w-3.5 opacity-40" /></Link>
                </Button>
-               <div className="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">
+               <div className="h-9 w-9 md:h-12 md:w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black shadow-lg shrink-0">
                   {(profile?.name || user.displayName || 'A')[0]}
                </div>
             </div>
