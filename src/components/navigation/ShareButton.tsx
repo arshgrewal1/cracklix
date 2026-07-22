@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { 
   Share2, 
   Loader2, 
@@ -12,9 +13,11 @@ import {
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useFirestore } from '@/firebase';
+import { useFirestore, useDoc } from '@/firebase';
+import { doc } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { DistributionSettings } from "@/types";
 import {
   Dialog,
   DialogContent,
@@ -25,8 +28,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Premium Social Share Hub v5.1 [PWA Text Fix].
- * FIXED: Optimized internal padding and flex-shrinking to prevent text clipping on mobile.
+ * @fileOverview Premium Social Share Hub v6.0 [Dynamic Registry].
+ * FIXED: All share content is now pulled from Firestore Admin settings.
  */
 export default function ShareButton({ 
   className = "", 
@@ -36,34 +39,32 @@ export default function ShareButton({
   showLabel?: boolean;
 }) {
   const { toast } = useToast();
+  const db = useFirestore();
   const [isDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   
-  const installUrl = "https://cracklix.com/install";
-  const websiteUrl = "https://cracklix.com";
-  
-  const shareMessage = `🚀 Crack Punjab Government Exams with Cracklix!
+  const distRef = useMemo(() => (db ? doc(db, 'settings', 'distribution') : null), [db]);
+  const { data: settings } = useDoc<DistributionSettings>(distRef);
 
-🎯 Prepare smarter for:
-• PSSSB, PPSC, Punjab Police, and more.
-
-📚 Features:
-• Unlimited Mock Tests
-• Previous Year Papers
-• Daily Quiz & Current Affairs
-
-📲 Install the Official App: ${installUrl}
-🌐 Website: ${websiteUrl}`;
+  const finalShareMessage = useMemo(() => {
+    if (!settings) return "";
+    
+    // Replace placeholders with actual URLs from the registry
+    return (settings.shareMessage || "")
+      .replace(/{websiteUrl}/g, settings.primaryWebsiteUrl || "https://cracklix.com")
+      .replace(/{installUrl}/g, settings.installUrl || "https://cracklix.com/install");
+  }, [settings]);
 
   const handleShare = async () => {
-    if (isSharing) return;
+    if (isSharing || !settings) return;
     setIsSharing(true);
 
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'Cracklix | Punjab Exam Prep',
-          text: shareMessage,
+          title: settings.shareTitle || 'Cracklix | Punjab Exam Prep',
+          text: finalShareMessage,
+          url: settings.primaryWebsiteUrl || "https://cracklix.com"
         });
       } else {
         setIsShareDialogOpen(true);
@@ -98,7 +99,7 @@ export default function ShareButton({
       <div className="w-full">
         <Button
           onClick={handleShare}
-          disabled={isSharing}
+          disabled={isSharing || !settings}
           className={cn(
             "w-full h-auto min-h-[54px] py-2.5 px-4 rounded-[18px] bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold shadow-lg transition-all active:scale-95 group relative overflow-hidden border-none flex items-center justify-start gap-3",
             className
@@ -131,18 +132,18 @@ export default function ShareButton({
                 <Share2 className="h-7 w-7" />
              </div>
              <DialogTitle className="text-xl font-black text-[#0F172A] tracking-tighter uppercase">Share Hub</DialogTitle>
-             <DialogDescription className="text-slate-400 font-bold text-[9px] mt-2">Invite your fellow aspirants</DialogDescription>
+             <DialogDescription className="text-slate-400 font-bold text-[9px] mt-2 text-center">Invite your fellow aspirants</DialogDescription>
           </DialogHeader>
 
           <div className="px-8 pb-10 space-y-3">
-             <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(shareMessage)}`, '_blank')} className="w-full h-14 bg-[#25D366] hover:bg-[#20bd5c] text-white rounded-2xl flex items-center px-6 gap-4 shadow-lg transition-all active:scale-95 border-none group">
+             <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(finalShareMessage)}`, '_blank')} className="w-full h-14 bg-[#25D366] hover:bg-[#20bd5c] text-white rounded-2xl flex items-center px-6 gap-4 shadow-lg transition-all active:scale-95 border-none group">
                 <MessageSquare className="h-6 w-6" /> <span className="font-bold text-sm flex-1 text-left">WhatsApp Hub</span>
                 <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
              </button>
-             <button onClick={() => copyToClipboard(shareMessage, "Message copied to registry")} className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-4 border border-slate-100 transition-all active:scale-95 group">
+             <button onClick={() => copyToClipboard(finalShareMessage, "Message copied to registry")} className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-4 border border-slate-100 transition-all active:scale-95 group">
                 <Send className="h-6 w-6 text-slate-400" /> <span className="font-bold text-sm flex-1 text-left">Copy message</span>
              </button>
-             <button onClick={() => copyToClipboard(installUrl, "Link copied to registry")} className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-4 border border-slate-100 transition-all active:scale-95 group">
+             <button onClick={() => copyToClipboard(settings?.installUrl || "https://cracklix.com/install", "Link copied to registry")} className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-4 border border-slate-100 transition-all active:scale-95 group">
                 <Copy className="h-6 w-6 text-slate-400" /> <span className="font-bold text-sm flex-1 text-left">Copy app link</span>
              </button>
           </div>

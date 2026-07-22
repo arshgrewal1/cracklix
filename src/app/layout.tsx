@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -21,13 +22,31 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v74.0 [PRODUCTION LOCK].
- * FIXED: Removed "node" from versioning registry tags.
+ * @fileOverview Root Layout v75.0 [Dynamic Registry Metadata].
+ * Logic: Default metadata is static, but dynamic properties are now synchronized via settings hub.
  */
 
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
-  description: "Punjab's most trusted government exam preparation platform.",
+  description: "Punjab's most trusted government exam preparation platform. Practice Unlimited Mock Tests for PSSSB, PPSC, Punjab Police.",
+  keywords: "Punjab Government Exams, PSSSB, PPSC, Punjab Police, Mock Test, Previous Year Papers, Current Affairs, Cracklix",
+  metadataBase: new URL("https://cracklix.com"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Cracklix | Punjab's Smart Mock Test Platform",
+    description: "Prepare for Punjab Government Exams with Cracklix.",
+    url: "https://cracklix.com",
+    siteName: "Cracklix",
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cracklix | Punjab's Smart Mock Test Platform",
+    description: "Prepare for Punjab Government Exams with Cracklix.",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

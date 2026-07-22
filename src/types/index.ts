@@ -88,6 +88,23 @@ export interface UserProfile {
   };
 }
 
+export interface DistributionSettings {
+  primaryWebsiteUrl: string;
+  installUrl: string;
+  playStoreUrl: string;
+  appStoreUrl: string;
+  shareTitle: string;
+  shareDescription: string;
+  shareMessage: string;
+  seoTitle: string;
+  seoDescription: string;
+  ogImageUrl: string;
+  twitterImageUrl: string;
+  keywords: string;
+  canonicalUrl: string;
+  updatedAt: any;
+}
+
 export interface Category {
   id: string;
   title: string;
