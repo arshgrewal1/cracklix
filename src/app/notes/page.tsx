@@ -19,7 +19,7 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useActiveSession } from "@/hooks/useStudyAnalytics";
 
 /**
- * @fileOverview Official Download Center v2.8 (Fixed ShieldCheck import).
+ * @fileOverview Official Download Center v2.9 [Refined Tabs].
  */
 
 export default function NotesLibrary() {
@@ -91,17 +91,13 @@ export default function NotesLibrary() {
 
           <Tabs defaultValue="notes" className="space-y-10">
              <div className="flex justify-start">
-               <TabsList className="bg-white border border-slate-100 p-1.5 h-16 rounded-2xl shadow-sm flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2">
-                  <TabsTrigger value="notes" className="rounded-xl px-6 md:px-8 font-black uppercase text-[10px] gap-2 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
-                    <FileText className="h-4 w-4" /> Study Notes
-                  </TabsTrigger>
-                  <TabsTrigger value="syllabus" className="rounded-xl px-6 md:px-8 font-black uppercase text-[10px] gap-2 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
-                    <Info className="h-4 w-4" /> Exam Syllabus
-                  </TabsTrigger>
-                  <TabsTrigger value="archives" className="rounded-xl px-6 md:px-8 font-black uppercase text-[10px] gap-2 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
-                    <FileArchive className="h-4 w-4" /> E-Book Hub
-                  </TabsTrigger>
-               </TabsList>
+               <div className="bg-white border border-slate-200 p-1.5 rounded-[24px] shadow-xl flex items-center h-14 md:h-16 w-full md:w-auto">
+                 <TabsList className="bg-transparent border-none p-0 flex h-full gap-1 overflow-x-auto no-scrollbar justify-start">
+                    <HubTab value="notes" icon={<FileText className="h-4 w-4" />} label="Study Notes" />
+                    <HubTab value="syllabus" icon={<Info className="h-4 w-4" />} label="Exam Syllabus" />
+                    <HubTab value="archives" icon={<FileArchive className="h-4 w-4" />} label="E-Book Hub" />
+                 </TabsList>
+               </div>
              </div>
 
              <TabsContent value="notes">
@@ -136,6 +132,18 @@ export default function NotesLibrary() {
       <Footer />
     </div>
   )
+}
+
+function HubTab({ value, icon, label }: { value: string, icon: React.ReactNode, label: string }) {
+  return (
+    <TabsTrigger 
+      value={value} 
+      className="px-6 md:px-8 h-full font-bold text-[11px] md:text-[13px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-lg rounded-[20px] transition-all whitespace-nowrap flex items-center gap-3 shrink-0"
+    >
+      <span className="shrink-0">{icon}</span>
+      {label}
+    </TabsTrigger>
+  );
 }
 
 function NotesGrid({ data, loading, profile }: any) {
@@ -174,7 +182,7 @@ function DownloadCard({ asset, profile }: { asset: any, profile: any }) {
       <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden group hover:translate-y-[-8px] transition-all duration-500 text-left h-full flex flex-col border border-slate-100">
          <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 md:gap-10 flex-1">
             <div className={cn(
-               "h-20 w-20 md:h-24 md:w-24 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
+               "h-10 w-10 md:h-24 md:w-24 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
                asset.isFree ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
             )}>
                {isLocked ? <Lock className="h-8 w-8 md:h-10 md:w-10" /> : <FileText className="h-8 w-8 md:h-10 md:w-10" />}
@@ -216,8 +224,4 @@ function DownloadCard({ asset, profile }: { asset: any, profile: any }) {
          </CardContent>
       </Card>
    )
-}
-
-function Skeleton({ className }: { className?: string }) {
-   return <div className={cn("animate-pulse bg-muted rounded", className)} />;
 }

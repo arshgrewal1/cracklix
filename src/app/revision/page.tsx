@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -6,7 +5,7 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, doc, getDoc } from "firebase/firestore"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { 
   Bookmark, 
   Search, 
@@ -21,7 +20,8 @@ import {
   ShieldAlert,
   GraduationCap,
   BookOpen,
-  Loader2
+  Loader2,
+  X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,8 +34,7 @@ import { useRouter, usePathname } from "next/navigation"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Official Revision & Study Hub v5.0.
- * FIXED: Unified solution preview modal for consistency with Saved page.
+ * @fileOverview Official Revision & Study Hub v5.1 [Refined Tabs].
  */
 
 export default function RevisionHub() {
@@ -147,17 +146,15 @@ export default function RevisionHub() {
           </div>
 
           <Tabs defaultValue="bookmarks" className="space-y-10">
-             <TabsList className="bg-white border border-slate-100 p-1.5 h-16 rounded-2xl shadow-sm inline-flex">
-                <TabsTrigger value="bookmarks" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">
-                   <Bookmark className="h-4 w-4" /> Bookmarks
-                </TabsTrigger>
-                <TabsTrigger value="wrong" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">
-                   <AlertCircle className="h-4 w-4" /> Wrong Answers
-                </TabsTrigger>
-                <TabsTrigger value="starred" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">
-                   <Star className="h-4 w-4" /> Important
-                </TabsTrigger>
-             </TabsList>
+             <div className="flex justify-start">
+                <div className="bg-white border border-slate-200 p-1.5 rounded-[24px] shadow-xl flex items-center h-14 md:h-16 w-full md:w-auto">
+                   <TabsList className="bg-transparent border-none p-0 flex h-full gap-1 overflow-x-auto no-scrollbar justify-start">
+                      <HubTab value="bookmarks" icon={<Bookmark className="h-4 w-4" />} label="Bookmarks" />
+                      <HubTab value="wrong" icon={<AlertCircle className="h-4 w-4" />} label="Wrong Answers" />
+                      <HubTab value="starred" icon={<Star className="h-4 w-4" />} label="Important" />
+                   </TabsList>
+                </div>
+             </div>
 
              <TabsContent value="bookmarks" className="space-y-6">
                 {bLoading ? (
@@ -273,6 +270,18 @@ export default function RevisionHub() {
       </Dialog>
     </div>
   )
+}
+
+function HubTab({ value, icon, label }: { value: string, icon: React.ReactNode, label: string }) {
+  return (
+    <TabsTrigger 
+      value={value} 
+      className="px-8 md:px-12 h-full font-bold text-[11px] md:text-[14px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-lg rounded-[20px] transition-all whitespace-nowrap flex items-center gap-3 shrink-0"
+    >
+      <span className="shrink-0">{icon}</span>
+      {label}
+    </TabsTrigger>
+  );
 }
 
 function EmptyRevision({ icon, title, desc }: any) {

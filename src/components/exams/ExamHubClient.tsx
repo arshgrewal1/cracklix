@@ -37,7 +37,8 @@ import {
   Loader2,
   Users,
   Timer,
-  Landmark
+  Landmark,
+  AlertCircle
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -47,9 +48,7 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v7.4 [Strict Filtering].
- * FIXED: Removed board-level fallback matching for mocks to prevent "fake" statistics.
- * UPDATED: Dynamic Rank Status based on actual attempt history.
+ * @fileOverview Premium Exam Detail Hub v7.5 [Refined Tabs].
  */
 
 export default function ExamHubClient() {
@@ -101,7 +100,6 @@ export default function ExamHubClient() {
     
     const allMocks = [...(rawMocks || []), ...(rawQuizzes || [])];
     
-    // STRICT AUDIT: Only show mocks explicitly linked to this examId
     const mocks = allMocks.filter(m => {
        const isDirectMatch = m.examId === examId || (m.examIds && m.examIds.includes(examId));
        return isDirectMatch;
@@ -127,9 +125,8 @@ export default function ExamHubClient() {
      
      const totalTests = currentMocks.length;
      const attempted = results?.filter(r => mockIdsSet.has(r.mockId)).length || 0;
-     const avgAccuracy = results?.length ? Math.round(results.reduce((acc, r) => acc + (r.accuracy || 0), 0) / results.length) : 0;
      
-     return { totalTests, attempted, avgAccuracy };
+     return { totalTests, attempted };
   }, [groupedContent, results]);
 
   const isPinned = useMemo(() => (examId && profile?.pinnedExams?.includes(examId)) || false, [profile, examId]);
@@ -248,27 +245,15 @@ export default function ExamHubClient() {
 
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-w-7xl pb-40 space-y-12">
          <Tabs defaultValue="MOCK" className="space-y-10">
-            <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
-               <div className="bg-white border border-slate-200 shadow-sm rounded-[20px] p-1 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">
-                  <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-between gap-1 overflow-x-auto no-scrollbar snap-x">
-                     <TabsTrigger value="MOCK" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
-                        <Zap className="h-4 w-4 shrink-0" /> Mock Series
-                     </TabsTrigger>
-                     <TabsTrigger value="SUBJECT" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
-                        <BookOpen className="h-4 w-4 shrink-0" /> Subject Tests
-                     </TabsTrigger>
-                     <TabsTrigger value="SECTIONAL" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
-                        <Layers className="h-4 w-4 shrink-0" /> Sectional Tests
-                     </TabsTrigger>
-                     <TabsTrigger value="PYQ" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
-                        <FileStack className="h-4 w-4 shrink-0" /> Old Papers
-                     </TabsTrigger>
-                     <TabsTrigger value="NOTES" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
-                        <FileText className="h-4 w-4 shrink-0" /> Study Notes
-                     </TabsTrigger>
-                     <TabsTrigger value="CA" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
-                        <Newspaper className="h-4 w-4 shrink-0" /> Current Affairs
-                     </TabsTrigger>
+            <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 border-b border-slate-100">
+               <div className="bg-white border border-slate-200 shadow-xl rounded-[24px] p-1.5 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">
+                  <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-start gap-1.5 overflow-x-auto no-scrollbar snap-x">
+                     <HubTab value="MOCK" icon={<Zap className="h-4 w-4" />} label="Mock Series" />
+                     <HubTab value="SUBJECT" icon={<BookOpen className="h-4 w-4" />} label="Subject Tests" />
+                     <HubTab value="SECTIONAL" icon={<Layers className="h-4 w-4" />} label="Sectional Tests" />
+                     <HubTab value="PYQ" icon={<FileStack className="h-4 w-4" />} label="Old Papers" />
+                     <HubTab value="NOTES" icon={<FileText className="h-4 w-4" />} label="Study Notes" />
+                     <HubTab value="CA" icon={<Newspaper className="h-4 w-4" />} label="Current Affairs" />
                   </TabsList>
                </div>
             </div>
@@ -314,6 +299,18 @@ export default function ExamHubClient() {
       <Footer />
     </div>
   )
+}
+
+function HubTab({ value, icon, label }: { value: string, icon: React.ReactNode, label: string }) {
+  return (
+    <TabsTrigger 
+      value={value} 
+      className="px-5 md:px-8 h-full font-bold text-[11px] md:text-[13px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-lg rounded-[20px] transition-all whitespace-nowrap flex items-center gap-3 snap-start shrink-0"
+    >
+      <span className="shrink-0">{icon}</span>
+      {label}
+    </TabsTrigger>
+  );
 }
 
 function HeroStat({ icon: Icon, label, val }: any) {
