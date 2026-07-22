@@ -23,8 +23,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v74.1.
- * FIXED: Optimized padding for mobile viewports to prevent overflow.
+ * @fileOverview Institutional Question Renderer v74.2 [Title Case].
+ * FIXED: Removed uppercase from Q-number and optimized mobile layout.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -79,7 +79,7 @@ export default function QuestionRenderer({
       {!showSolution && (
         <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-5 w-full">
            <div className="flex items-center gap-2 md:gap-3 shrink-0">
-              <span className="font-black text-[10px] md:text-sm text-white bg-[#0F172A] px-3 md:px-4 py-1.5 rounded-full shadow-lg shrink-0">Q {q.displayId || '1'}</span>
+              <span className="font-bold text-[11px] md:text-base text-white bg-[#0F172A] px-3 md:px-5 py-2 rounded-full shadow-lg shrink-0">Question {q.displayId || '1'}</span>
               <div className="flex items-center gap-1.5 text-[#0F172A] font-bold text-[9px] md:xs tabular-nums bg-slate-50 px-2 md:px-3 py-1.5 rounded-lg border border-slate-100">
                  <Clock className="h-3 md:h-3.5 w-3 md:w-3.5 text-primary" />
                  <span>{formatTime(timeLeft)}</span>
@@ -110,8 +110,8 @@ export default function QuestionRenderer({
          {/* ASSERTION & REASON INTERLEAVED HUB */}
          {q.questionType === 'ASSERTION_REASON' && (
             <div className="space-y-6 w-full">
-               <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
-                  <Zap className="h-3 w-3" /> Logic Hub
+               <div className="absolute top-2 right-4 opacity-5 pointer-events-none text-[8px] font-black tracking-widest flex items-center gap-2">
+                  <Zap className="h-3 w-3" /> Logic hub
                </div>
                
                {/* 1. English Assertion */}
@@ -147,16 +147,16 @@ export default function QuestionRenderer({
          {/* STRUCTURED MATCHING GRID */}
          {q.questionType === 'MATCH_FOLLOWING' && (q.matchingData?.rows?.length > 0 || q.tableContent?.rows?.length > 0) && (
             <div className="my-8 overflow-x-auto rounded-[1.5rem] border-2 border-slate-100 bg-white shadow-2xl relative group w-full">
-               <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
-                  <Link2 className="h-3 w-3" /> Relation Hub
+               <div className="absolute top-2 right-4 opacity-5 pointer-events-none text-[8px] font-black tracking-widest flex items-center gap-2">
+                  <Link2 className="h-3 w-3" /> Relation hub
                </div>
                <Table className="w-full border-collapse min-w-[280px]">
                   <TableHeader className="bg-slate-900">
                      <TableRow className="border-none h-14 md:h-16">
-                        <TableHead className="px-4 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest border-r border-white/10">
+                        <TableHead className="px-4 md:px-10 font-black text-[10px] md:text-sm text-white tracking-widest border-r border-white/10 uppercase">
                           {q.matchingData?.leftHeader || q.tableContent?.headers?.[0] || "List I"}
                         </TableHead>
-                        <TableHead className="px-4 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest">
+                        <TableHead className="px-4 md:px-10 font-black text-[10px] md:text-sm text-white tracking-widest uppercase">
                           {q.matchingData?.rightHeader || q.tableContent?.headers?.[1] || "List II"}
                         </TableHead>
                      </TableRow>
@@ -246,8 +246,8 @@ export default function QuestionRenderer({
            
            <div className="p-8 md:p-14 space-y-10">
               <div className="space-y-4">
-                 <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-emerald-600 tracking-[0.1em]">
-                    <ShieldCheck className="h-5 w-5" /> Verified Answer
+                 <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-emerald-600 tracking-tight">
+                    <ShieldCheck className="h-5 w-5" /> Verified answer
                  </div>
                  <div className="pl-0 md:pl-8 space-y-2">
                     <p className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight">
@@ -259,14 +259,14 @@ export default function QuestionRenderer({
               <div className="h-px w-full bg-slate-200/50" />
 
               <div className="space-y-6">
-                 <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-slate-400 tracking-[0.1em]">
+                 <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-slate-400 tracking-tight">
                     <Info className="h-5 w-5" /> Explanation
                  </div>
                  
                  <div className="pl-0 md:pl-8 space-y-8">
                     {q.englishExplanation && (
                        <div className="space-y-2">
-                          <p className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest">English Rationale</p>
+                          <p className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest">English rationale</p>
                           <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.englishExplanation} className="text-inherit" />
                           </div>

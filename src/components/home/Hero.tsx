@@ -8,7 +8,7 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v61.5.
+ * @fileOverview Premium Mobile-First PWA Hero v61.6 [Title Case].
  * UPDATED: Responsive scaling for PWA and reduced visual clutter.
  */
 export default function Hero() {
@@ -34,7 +34,7 @@ export default function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-white pt-6 pb-5 md:pt-16 md:pb-20 w-full">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg aspect-square bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-full max-w-lg aspect-square bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col items-center text-center space-y-4 md:space-y-8 w-full">
@@ -93,7 +93,7 @@ export default function Hero() {
              <AnimatePresence mode="wait">
                {(!isInstalled && canInstall) ? (
                  <motion.div 
-                   key="install-node" 
+                   key="install-entry" 
                    initial={{ opacity: 0, scale: 0.95 }} 
                    animate={{ opacity: 1, scale: 1 }} 
                    exit={{ opacity: 0, scale: 0.95 }}
@@ -116,7 +116,7 @@ export default function Hero() {
                  </motion.div>
                ) : (
                  <motion.div 
-                   key="browse-node" 
+                   key="browse-entry" 
                    initial={{ opacity: 0, scale: 0.95 }} 
                    animate={{ opacity: 1, scale: 1 }} 
                    exit={{ opacity: 0, scale: 0.95 }}

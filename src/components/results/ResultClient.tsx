@@ -60,10 +60,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Hub Client v9.0 [PWA Optimized].
- * FIXED: Syntax errors in ReviewTab handlers.
- * FIXED: TabsTrigger context by inlining them in TabsList.
- * FIXED: Navbar and Footer visibility.
+ * @fileOverview Premium Assessment Hub Client v9.1 [Terminology Refined].
+ * UPDATED: Removed uppercase and "node" terminology.
  */
 
 export default function ResultClient() {
@@ -309,7 +307,7 @@ export default function ResultClient() {
       const p2 = document.getElementById('cracklix-result-page-2');
       
       if (!p1 || !p2) {
-         throw new Error("Report rendering failed. Target nodes not found.");
+         throw new Error("Report rendering failed. Target items not found.");
       }
 
       const captureOptions = {
@@ -361,7 +359,7 @@ export default function ResultClient() {
   if (!mounted || (resultLoading && user) || (loadingQuestions && questions.length === 0)) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
         <Loader2 className="h-10 w-10 text-primary animate-spin" />
-        <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Preparing Analysis...</p>
+        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Preparing analysis...</p>
      </div>
   );
 
@@ -380,13 +378,13 @@ export default function ResultClient() {
            <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
               <div className="bg-white border border-slate-100 p-1 rounded-xl flex items-center h-12 md:h-14 shadow-sm w-full lg:w-auto overflow-hidden">
                  <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-between gap-0.5">
-                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-3 md:px-6 font-bold text-[9px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
+                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-3 md:px-6 font-bold text-[9px] md:text-xs tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
                        <BarChart3 className="h-3.5 w-3.5" /> Performance
                     </TabsTrigger>
-                    <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-3 md:px-6 font-bold text-[9px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
+                    <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-3 md:px-6 font-bold text-[9px] md:text-xs tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
                        <List className="h-3.5 w-3.5" /> Review test
                     </TabsTrigger>
-                    <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-3 md:px-6 font-bold text-[9px] md:text-xs uppercase tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
+                    <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-3 md:px-6 font-bold text-[9px] md:text-xs tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all h-full whitespace-nowrap">
                        <ShieldCheck className="h-3.5 w-3.5" /> Report
                     </TabsTrigger>
                  </TabsList>
@@ -396,7 +394,7 @@ export default function ResultClient() {
                  <Button 
                    onClick={handleSharePdf} 
                    disabled={isGeneratingPdf} 
-                   className="flex-1 lg:flex-none h-12 md:h-14 px-5 md:px-8 bg-[#2563EB] hover:bg-blue-700 text-white font-bold uppercase text-[9px] md:text-[11px] tracking-widest rounded-xl shadow-lg border-none gap-2 transition-all active:scale-95"
+                   className="flex-1 lg:flex-none h-12 md:h-14 px-5 md:px-8 bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-[9px] md:text-[11px] tracking-tight rounded-xl shadow-lg border-none gap-2 transition-all active:scale-95"
                  >
                     {isGeneratingPdf ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} 
                     PDF
@@ -404,7 +402,7 @@ export default function ResultClient() {
                  <Button 
                    onClick={() => router.push(`/mocks/instructions?id=${mockId}`)} 
                    variant="outline" 
-                   className="flex-1 lg:flex-none h-12 md:h-14 px-5 md:px-8 border-2 border-slate-200 rounded-xl font-bold uppercase text-[9px] md:text-[11px] tracking-widest bg-white hover:bg-slate-50 text-[#0F172A] gap-2 transition-all active:scale-95"
+                   className="flex-1 lg:flex-none h-12 md:h-14 px-5 md:px-8 border-2 border-slate-200 rounded-xl font-bold text-[9px] md:text-[11px] tracking-tight bg-white hover:bg-slate-50 text-[#0F172A] gap-2 transition-all active:scale-95"
                  >
                     <RotateCcw className="h-3.5 w-3.5" /> Retake
                  </Button>
@@ -434,7 +432,7 @@ export default function ResultClient() {
                                 <span className={cn("text-5xl md:text-8xl font-[900] tracking-tighter tabular-nums", performanceStatus.color)}>
                                    {performanceStatus.grade}
                                 </span>
-                                <p className="text-[9px] font-black text-slate-400 tracking-widest mt-0.5 uppercase">Grade</p>
+                                <p className="text-[9px] font-black text-slate-400 tracking-widest mt-0.5">Grade</p>
                              </div>
                           </div>
                           <Badge className={cn("border-none font-bold text-[10px] md:text-[11px] px-5 py-1.5 rounded-full shadow-sm", performanceStatus.bg, performanceStatus.color)}>
@@ -451,7 +449,7 @@ export default function ResultClient() {
                                 </span>
                              </div>
                              <div className="space-y-1">
-                                <p className="text-[9px] font-black text-primary tracking-[0.2em] uppercase">{profile?.name || "Aspirant"}</p>
+                                <p className="text-[9px] font-black text-primary tracking-[0.2em]">{profile?.name || "Aspirant"}</p>
                                 <h1 className="text-2xl md:text-5xl font-black tracking-tight text-[#0F172A] leading-tight">{mockData?.title}</h1>
                              </div>
                           </div>
@@ -483,11 +481,11 @@ export default function ResultClient() {
                           <table className="w-full text-left border-collapse min-w-[500px]">
                              <thead className="bg-[#0F172A] text-white">
                                 <tr className="h-12">
-                                   <th className="px-6 text-[10px] font-black uppercase tracking-widest">Subject</th>
-                                   <th className="px-3 text-[10px] font-black uppercase tracking-widest text-center">Items</th>
-                                   <th className="px-3 text-[10px] font-black uppercase tracking-widest text-center">Accuracy</th>
-                                   <th className="px-3 text-[10px] font-black uppercase tracking-widest text-center">Score</th>
-                                   <th className="px-6 text-[10px] font-black uppercase tracking-widest text-right">Mastery</th>
+                                   <th className="px-6 text-[10px] font-black tracking-widest">Subject</th>
+                                   <th className="px-3 text-[10px] font-black tracking-widest text-center">Items</th>
+                                   <th className="px-3 text-[10px] font-black tracking-widest text-center">Accuracy</th>
+                                   <th className="px-3 text-[10px] font-black tracking-widest text-center">Score</th>
+                                   <th className="px-6 text-[10px] font-black tracking-widest text-right">Mastery</th>
                                 </tr>
                              </thead>
                              <tbody className="divide-y divide-slate-50">
@@ -527,7 +525,7 @@ export default function ResultClient() {
                        <div className="space-y-3.5">
                           <TimeAuditNode label="Avg ingestion speed" val={`${Math.round((sessionData?.timeTaken || 0) / (questions.length || 1))}s`} />
                           <TimeAuditNode label="Decision speed" val="High" />
-                          <TimeAuditNode label="Efficiency node" val="Active" />
+                          <TimeAuditNode label="Efficiency hub" val="Active" />
                        </div>
                     </Card>
                  </div>
@@ -558,7 +556,7 @@ export default function ResultClient() {
                                    <div className="flex justify-between items-center">
                                       <div className="flex items-center gap-3">
                                          <div className="h-8 w-8 rounded-lg bg-[#0F172A] text-white flex items-center justify-center font-black text-[10px]">{q.originalIndex + 1}</div>
-                                         <Badge variant="outline" className="text-[9px] font-bold border-slate-100 text-slate-400 uppercase">Registry node</Badge>
+                                         <Badge variant="outline" className="text-[9px] font-bold border-slate-100 text-slate-400">Registry entry</Badge>
                                       </div>
                                       <ReviewStatusPill userAns={sessionData.answers?.[q.originalIndex]} correctAns={q.correctAnswer} />
                                    </div>
@@ -593,7 +591,7 @@ export default function ResultClient() {
                           wrong={categorizedNodes.wrong.length} 
                           total={questions.length} 
                           date={new Date(sessionData?.timestamp).toLocaleDateString('en-GB')} 
-                          resultId={sessionData?.id || "REG_NODE"} 
+                          resultId={sessionData?.id || "REG_ENTRY"} 
                           percentile={merit.percentile} 
                           subjects={analysis.subjects}
                           difficulty={analysis.difficulty}
@@ -621,7 +619,7 @@ function StatCard({ label, val, icon }: any) {
     <Card className="border-none shadow-sm bg-white p-4 md:p-8 rounded-[18px] transition-all hover:shadow-xl hover:translate-y-[-2px] border border-slate-100 text-left relative overflow-hidden">
        <div className="absolute top-0 right-0 p-3 opacity-5">{icon}</div>
        <div className="space-y-0.5 relative z-10">
-          <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
+          <p className="text-[8px] md:text-[9px] font-black text-slate-400 tracking-widest leading-none">{label}</p>
           <p className="text-lg md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none">{val}</p>
        </div>
     </Card>
@@ -656,7 +654,7 @@ function ReviewTab({ active, onClick, label, count, color = "text-[#0F172A]" }: 
       <button 
         onClick={() => onClick()}
         className={cn(
-          "flex-1 h-full rounded-xl flex items-center justify-center gap-1.5 transition-all font-[800] text-[9px] md:text-[11px] uppercase tracking-tight px-1",
+          "flex-1 h-full rounded-xl flex items-center justify-center gap-1.5 transition-all font-[800] text-[9px] md:text-[11px] tracking-tight px-1",
           active ? "bg-[#0F172A] text-white shadow-xl scale-[1.03] z-10" : "bg-transparent text-slate-400 hover:text-slate-600"
         )}
       >
@@ -674,4 +672,3 @@ function ReviewStatusPill({ userAns, correctAns }: any) {
      ? <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-full font-black text-[8px] tracking-widest uppercase">Correct</Badge>
      : <Badge className="bg-rose-50 text-rose-600 border-none px-3 py-1 rounded-full font-black text-[8px] tracking-widest uppercase">Incorrect</Badge>;
 }
-

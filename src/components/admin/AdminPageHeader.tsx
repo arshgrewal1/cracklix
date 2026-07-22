@@ -1,4 +1,3 @@
-
 "use client";
 
 import { LucideIcon } from "lucide-react";
@@ -22,7 +21,7 @@ interface AdminPageHeaderProps {
 /**
  * Shared admin page header with consistent layout:
  * icon label, title, subtitle, and an action button.
- * v1.3 [Simplified Language].
+ * v1.4 [Title Case & Terminology Refined].
  */
 export function AdminPageHeader({
   icon: Icon,
@@ -48,7 +47,7 @@ export function AdminPageHeader({
       <div className="space-y-1">
         <div className="flex items-center gap-2 mb-1">
           <Icon className={`h-4 w-4 ${iconClassName}`} />
-          <span className="text-[9px] font-semibold text-slate-400">
+          <span className="text-[9px] font-semibold text-slate-400 tracking-widest">
             {label}
           </span>
         </div>

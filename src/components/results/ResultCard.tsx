@@ -57,8 +57,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Premium Institutional Score Report v4.2.
- * FIXED: Missing Check icon import.
+ * @fileOverview Premium Institutional Score Report v4.3 [Title Case].
+ * FIXED: Removed technical "node" terminology and uppercase styling.
  */
 export default function ResultCard({
   studentName,
@@ -182,7 +182,7 @@ export default function ResultCard({
                  <p className="text-2xl font-black tracking-tight">Cracklix Assessment</p>
               </div>
               <div className="flex flex-col gap-1">
-                 <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Registry Id: {resultId}</p>
+                 <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Registry ID: {resultId}</p>
                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Verification: WWW.CRACKLIX.COM</p>
               </div>
            </div>
@@ -248,7 +248,7 @@ export default function ResultCard({
                           </tr>
                        )) : (
                           <tr className="h-32">
-                             <td colSpan={5} className="text-center italic text-slate-300">Synchronizing registry nodes...</td>
+                             <td colSpan={5} className="text-center italic text-slate-300">Synchronizing registry...</td>
                           </tr>
                        )}
                     </tbody>
@@ -291,7 +291,7 @@ export default function ResultCard({
                  </div>
                  <div className="space-y-6 p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
                     <MetricPill label="Avg ingestion speed" val={timeMetrics.avg} />
-                    <MetricPill label="Fastest decision node" val={timeMetrics.fastest} />
+                    <MetricPill label="Fastest decision hub" val={timeMetrics.fastest} />
                     <MetricPill label="Complex reasoning time" val={timeMetrics.slowest} />
                  </div>
               </section>

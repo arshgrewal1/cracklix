@@ -54,7 +54,7 @@ import {
 
 const NAV_GROUPS = [
   {
-    label: "Main",
+    label: "Main Hub",
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { label: "Student Portal", href: "/", icon: GraduationCap },
@@ -81,7 +81,7 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "Today's Challenge",
+    label: "Daily Challenge",
     items: [
       { label: "Quiz List", href: "/admin/daily-quiz", icon: Flame },
       { label: "Leaderboard", href: "/admin/daily-quiz/leaderboard", icon: Trophy },
@@ -156,7 +156,7 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
       {NAV_GROUPS.map((group) => (
         <div key={group.label} className="space-y-2">
           {isOpen ? (
-            <p className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <p className="px-4 text-[10px] font-black text-slate-400 tracking-widest">
               {group.label}
             </p>
           ) : (
