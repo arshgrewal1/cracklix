@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -12,6 +11,7 @@ import {
   Zap, 
   ChevronRight, 
   ShieldCheck, 
+  CheckCircle2,
   Layers, 
   ArrowLeft,
   Trophy,
@@ -42,8 +42,8 @@ import { hasSeriesAccess } from "@/lib/access-control"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Premium Series Hub Portal v11.0 [View Analysis Sync].
- * UPDATED: Refined action labels for completed tests.
+ * @fileOverview Premium Series Hub Portal v11.1.
+ * FIXED: Added missing CheckCircle2 import to resolve runtime ReferenceError.
  */
 
 export default function SeriesDetailPortal() {
@@ -111,7 +111,7 @@ export default function SeriesDetailPortal() {
                         <div className="flex flex-wrap justify-center md:justify-start items-center gap-4">
                            <Badge className={cn(
                               "border-none px-5 py-2 rounded-xl font-black text-[10px] uppercase shadow-lg tracking-widest", 
-                              seriesAccess.hasAccess ? "bg-emerald-600 text-white" : "bg-amber-500 text-white"
+                              seriesAccess.hasAccess ? "bg-emerald-600 text-white" : "bg-amber-50 text-white"
                            )}>
                               {seriesAccess.hasAccess ? 'Access Authorized' : 'Premium Series'}
                            </Badge>
