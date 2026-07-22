@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -57,8 +58,8 @@ import { DistributionSettings, BrandingSettings } from "@/types";
 import FileUpload from "@/components/admin/FileUpload";
 
 /**
- * @fileOverview Institutional Administrative Portal v24.0.
- * UPDATED: Added comprehensive "Branding & Report" hub for dynamic PDF/Certificate control.
+ * @fileOverview Institutional Administrative Portal v25.0.
+ * FIXED: Resolved JSX tag mismatch (TabsList vs Tabs) causing build failure.
  */
 
 const DEFAULT_DISTRIBUTION: DistributionSettings = {
@@ -97,7 +98,7 @@ const DEFAULT_BRANDING: BrandingSettings = {
 export default function AdminSettings() {
   const db = useFirestore();
   const { toast } = useToast();
-  const { profile } = useUser();
+  const { profile, user } = useUser();
   
   const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
@@ -222,7 +223,7 @@ export default function AdminSettings() {
               <ShieldCheck className="h-4 w-4 text-primary" />
               <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">System Configuration</span>
            </div>
-          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight">System Portal</h1>
+          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight uppercase">System Portal</h1>
         </div>
         <Button onClick={handleSaveGlobal} disabled={isSaving} className="w-full md:w-auto h-11 md:h-12 px-10 rounded-full font-bold shadow-xl gap-2 transition-all active:scale-95 border-none">
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit Global Hub
@@ -374,7 +375,104 @@ export default function AdminSettings() {
            </div>
         </TabsContent>
 
-        {/* Existing Tabs Continue (Homepage, Visibility, Founder, Social) */}
+        <TabsContent value="homepage" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white p-5 md:p-12 space-y-6 md:space-y-10 border border-slate-50 text-left">
+              <div className="flex items-center justify-between border-b border-slate-50 pb-6">
+                 <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                       <Megaphone className="h-5 w-5 md:h-6 md:w-6" />
+                    </div>
+                    <h3 className="text-lg md:text-2xl font-black text-[#0F172A]">Alerts Hub</h3>
+                 </div>
+                 <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Show Announcement</span>
+                    <Switch checked={formData.showAnnouncement} onCheckedChange={v => setFormData({...formData, showAnnouncement: v})} />
+                 </div>
+              </div>
+              <div className="space-y-3">
+                 <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Global Broadcast Text</Label>
+                 <Input value={formData.announcement} onChange={e => setFormData({...formData, announcement: e.target.value})} className="h-14 bg-slate-50 border-none rounded-2xl font-bold text-sm md:text-lg shadow-inner" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-50">
+                 <FormNode label="Telegram Hub URL" value={formData.telegramUrl} onChange={v => setFormData({...formData, telegramUrl: v})} />
+                 <FormNode label="Instagram Portal URL" value={formData.instagramUrl} onChange={v => setFormData({...formData, instagramUrl: v})} />
+              </div>
+           </Card>
+        </TabsContent>
+
+        <TabsContent value="visibility" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+              <Card className="lg:col-span-8 border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white p-5 md:p-12 space-y-10 border border-slate-50 text-left">
+                 <div className="space-y-1">
+                    <h3 className="text-xl md:text-3xl font-black text-[#0F172A]">Display Metrics</h3>
+                    <p className="text-slate-400 font-medium text-xs md:text-base">Toggle visibility and set custom growth trends for landing page stats.</p>
+                 </div>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <VisibilityToggle label="MCQ Bank Density" icon={<Zap className="h-4 w-4 text-blue-500" />} checked={formData.statsVisibility.showQuestions} onChange={(v: boolean) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showQuestions: v}})} />
+                    <VisibilityToggle label="Mock Test Archive" icon={<ClipboardList className="h-4 w-4 text-purple-500" />} checked={formData.statsVisibility.showMocks} onChange={(v: boolean) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showMocks: v}})} />
+                    <VisibilityToggle label="Exam Categories" icon={<ShieldCheck className="h-4 w-4 text-emerald-500" />} checked={formData.statsVisibility.showCategories} onChange={(v: boolean) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showCategories: v}})} />
+                    <VisibilityToggle label="Support Status" icon={<Users className="h-4 w-4 text-orange-500" />} checked={formData.statsVisibility.showSupport} onChange={(v: boolean) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showSupport: v}})} />
+                 </div>
+
+                 <div className="pt-8 border-t border-slate-50 space-y-6">
+                    <p className="text-[10px] font-black uppercase text-primary tracking-widest">Growth Trends (Sub-labels)</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                       <TrendInput label="MCQ Trend" value={formData.statsTrends.questions} onChange={v => setFormData({...formData, statsTrends: {...formData.statsTrends, questions: v}})} />
+                       <TrendInput label="Mock Trend" value={formData.statsTrends.mocks} onChange={v => setFormData({...formData, statsTrends: {...formData.statsTrends, mocks: v}})} />
+                       <TrendInput label="Support Status" value={formData.statsTrends.support} onChange={v => setFormData({...formData, statsTrends: {...formData.statsTrends, support: v}})} />
+                    </div>
+                 </div>
+              </Card>
+
+              <Card className="lg:col-span-4 border-none shadow-5xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-10 relative overflow-hidden h-full">
+                 <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><BarChart3 className="h-64 w-64 text-primary" /></div>
+                 <div className="relative z-10 space-y-2">
+                    <h3 className="text-2xl font-black tracking-tight">Live Registry</h3>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Real-time database sync</p>
+                 </div>
+                 <div className="relative z-10 space-y-6">
+                    <LiveMetric label="Bank Density" value={stats?.totalQuestions || 0} icon={<Zap className="h-4 w-4 text-primary" />} />
+                    <LiveMetric label="Mock Registry" value={stats?.totalMocks || 0} icon={<ClipboardList className="h-4 w-4 text-purple-400" />} />
+                    <LiveMetric label="Category Nodes" value={stats?.totalCategories || 0} icon={<ShieldCheck className="h-4 w-4 text-emerald-400" />} />
+                 </div>
+              </Card>
+           </div>
+        </TabsContent>
+
+        <TabsContent value="founder" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-5 md:p-12 space-y-10 border border-slate-50 text-left">
+              <div className="space-y-1">
+                 <h3 className="text-xl md:text-3xl font-black text-[#0F172A]">Founder Identity</h3>
+                 <p className="text-slate-400 font-medium text-xs md:text-base">Manage the visionary profile nodes for the "Meet Founder" hub.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="space-y-6">
+                    <FormNode label="Founder Name" value={formData.founderName} onChange={v => setFormData({...formData, founderName: v})} />
+                    <FormNode label="Institutional Role" value={formData.founderRole} onChange={v => setFormData({...formData, founderRole: v})} />
+                    <FormNode label="Official Email" value={formData.founderEmail} onChange={v => setFormData({...formData, founderEmail: v})} />
+                    <FormNode label="Registry Date" value={formData.founderBuildingSince} onChange={v => setFormData({...formData, founderBuildingSince: v})} />
+                 </div>
+                 <div className="space-y-6">
+                    <div className="space-y-2">
+                       <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Core Mission Hub</Label>
+                       <Textarea value={formData.founderMission} onChange={e => setFormData({...formData, founderMission: e.target.value})} className="min-h-[120px] bg-slate-50 border-none rounded-2xl p-5" />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Personal Quote node</Label>
+                       <Input value={formData.founderQuote} onChange={e => setFormData({...formData, founderQuote: e.target.value})} className="h-12 bg-slate-50 border-none rounded-xl font-bold italic" />
+                    </div>
+                 </div>
+              </div>
+
+              <div className="space-y-2 pt-6 border-t border-slate-50">
+                 <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Identity Narrative (Full Bio)</Label>
+                 <Textarea value={formData.founderBio} onChange={e => setFormData({...formData, founderBio: e.target.value})} className="min-h-[200px] bg-slate-50 border-none rounded-3xl p-8 text-lg font-medium leading-relaxed shadow-inner" />
+              </div>
+           </Card>
+        </TabsContent>
       </Tabs>
     </div>
   )
@@ -426,15 +524,6 @@ function LiveMetric({ label, value, icon }: any) {
             <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
          </div>
          <span className="text-xl font-black tabular-nums">{value}</span>
-      </div>
-   )
-}
-
-function PreviewLogicStep({ label, active, value }: any) {
-   return (
-      <div className="flex items-center justify-between text-[10px] font-bold">
-         <span className="text-slate-500">{label} {value && <span className="text-white ml-1">{value}</span>}</span>
-         {active ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : <X className="h-3 w-3 text-slate-600" />}
       </div>
    )
 }
