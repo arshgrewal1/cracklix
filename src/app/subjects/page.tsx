@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -42,8 +41,8 @@ import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
- * @fileOverview Premium Subject Selection Hub v8.0.
- * REBUILT FROM SCRATCH: High-density institutional layout with 100% real data.
+ * @fileOverview Premium Subject Selection Hub v8.1.
+ * UPDATED: Recalculated sticky offset to top-[84px] md:top-[116px] for reduced header height.
  */
 
 export default function SubjectsPage() {
@@ -143,7 +142,7 @@ export default function SubjectsPage() {
         </header>
 
         {/* PREMIUM TOOLBAR */}
-        <div className="bg-white border border-slate-100 rounded-2xl md:rounded-[1.5rem] p-2 md:p-3 shadow-sm sticky top-24 z-[45] flex flex-col md:flex-row items-center gap-3">
+        <div className="bg-white border border-slate-100 rounded-2xl md:rounded-[1.5rem] p-2 md:p-3 shadow-sm sticky top-[84px] md:top-[116px] z-[45] flex flex-col md:flex-row items-center gap-3">
            <div className="relative group flex-1 w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-primary transition-colors" />
               <Input 

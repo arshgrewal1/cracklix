@@ -37,8 +37,8 @@ import { Button } from "@/components/ui/button";
 import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Cracklix Navigation Hub v125.0.
- * UPDATED: Uses unified canAccessAdmin helper for consistent role checks.
+ * @fileOverview Cracklix Navigation Hub v126.0.
+ * UPDATED: Reduced header height to h-[84px] md:h-[116px] to decrease extra space.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -99,13 +99,13 @@ export default function Navbar() {
   }, [user, profile]);
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-24 md:h-32" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-[84px] md:h-[116px]" />;
   }
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
-        <nav className="w-full h-24 md:h-32 transition-all">
+        <nav className="w-full h-[84px] md:h-[116px] transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             <div className="flex items-center gap-0 z-10 shrink-0 h-full">

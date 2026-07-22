@@ -48,7 +48,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v7.5 [Refined Tabs].
+ * @fileOverview Premium Exam Detail Hub v7.6.
+ * UPDATED: Reduced sticky top offset to top-[84px] md:top-[116px] for tighter navigation.
  */
 
 export default function ExamHubClient() {
@@ -89,7 +90,7 @@ export default function ExamHubClient() {
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
   const { data: rawQuizzes, loading: quizzesLoading } = useCollection<any>(quizzesQuery)
   const { data: results } = useCollection<any>(resultsQuery)
-  const { data: rawPyqs } = useCollection<any>(pyqsQuery)
+  const { data: rawPyqs } = useCollection<any>(pyqQuery)
   const { data: rawNotes } = useCollection<any>(notesQuery)
   
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
@@ -175,6 +176,8 @@ export default function ExamHubClient() {
     </div>
   );
 
+  const isFinished = activeAttempt?.status === 'COMPLETED';
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 overflow-x-hidden w-full">
       <Navbar />
@@ -245,7 +248,7 @@ export default function ExamHubClient() {
 
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-w-7xl pb-40 space-y-12">
          <Tabs defaultValue="MOCK" className="space-y-10">
-            <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 border-b border-slate-100">
+            <div className="sticky top-[84px] md:top-[116px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 border-b border-slate-100">
                <div className="bg-white border border-slate-200 shadow-xl rounded-[24px] p-1.5 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">
                   <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-start gap-1.5 overflow-x-auto no-scrollbar snap-x">
                      <HubTab value="MOCK" icon={<Zap className="h-4 w-4" />} label="Mock Series" />

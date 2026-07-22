@@ -41,8 +41,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Current Affairs Hub v5.8.
- * FIXED: Added missing Skeleton import.
+ * @fileOverview Premium Current Affairs Hub v5.9.
+ * UPDATED: Reduced header height offset to top-[84px] md:top-[116px].
  */
 
 const CATEGORIES = [
@@ -146,7 +146,7 @@ export default function CurrentAffairsCenter() {
           </div>
         </section>
 
-        <div className="sticky top-[80px] z-40 bg-[#F8FAFC]/95 backdrop-blur-md -mx-4 px-4 py-4 border-b border-slate-100">
+        <div className="sticky top-[84px] md:top-[116px] z-40 bg-[#F8FAFC]/95 backdrop-blur-md -mx-4 px-4 py-4 border-b border-slate-100">
            <div className="max-w-5xl mx-auto space-y-6">
               <div className="flex flex-col md:flex-row items-center gap-4">
                  <div className="relative group flex-1 w-full">

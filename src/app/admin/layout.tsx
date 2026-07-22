@@ -14,8 +14,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { canAccessAdmin, checkPermission } from "@/lib/permissions";
 
 /**
- * @fileOverview Administrative Control Boundary v76.1.
- * UPDATED: Restored Student View button for all screen sizes.
+ * @fileOverview Administrative Control Boundary v76.2.
+ * UPDATED: Reduced header height to h-[84px] md:h-[116px] to decrease extra space.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -120,7 +120,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
           isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
         )}>
-          <header className="h-24 md:h-32 border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
+          <header className="h-[84px] md:h-[116px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
             <div className="flex items-center shrink-0 h-full">
               <button 
                 onClick={toggleSidebar}

@@ -32,8 +32,8 @@ import { Badge } from "@/components/ui/badge";
 import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Mobile Sidebar v89.0.
- * UPDATED: Uses unified canAccessAdmin helper for consistent role checks.
+ * @fileOverview Mobile Sidebar v89.1.
+ * UPDATED: Reduced header height to h-[84px] md:h-[116px] to match global navbar.
  */
 export default function MobileSidebar({
   onClose,
@@ -82,8 +82,8 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
-      {/* HEADER: Centered Logo + Absolute Close Button */}
-      <div className="h-[120px] md:h-[140px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-center relative">
+      {/* HEADER: Reduced Height to match navbar */}
+      <div className="h-[84px] md:h-[116px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-center relative">
          <Logo
            variant="light"
            align="center"

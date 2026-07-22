@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -36,8 +35,8 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v9.0.
- * UPDATED: Switched to 3-column grid for maximized text visibility.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v9.1.
+ * UPDATED: Optimized sticky top offset to top-[84px] md:top-[116px] for reduced header height.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -231,7 +230,7 @@ export default function ExamsEntryPage() {
 
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
               {examsLoading ? (
-                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[540px] w-full rounded-[2.5rem] md:rounded-[3rem] bg-white border border-slate-100" />)
+                 Array.from({ length: 4 }).map((_, i) => <Skeleton className="h-[540px] w-full rounded-[2.5rem] md:rounded-[3rem] bg-white border border-slate-100" />)
               ) : featuredExams.map((exam: any) => (
                  <ExamCard 
                    key={exam.id} 

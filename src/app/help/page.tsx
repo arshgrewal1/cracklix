@@ -32,9 +32,8 @@ import { HelpArticle } from "@/types"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Official Institutional Help Hub v6.0 (High-Fidelity Update).
- * FIXED: Applied global responsive scaling text-3xl sm:text-5xl lg:text-8xl with leading-[0.9].
- * ADDED: Enhanced category selector nodes and refined search layout.
+ * @fileOverview Official Institutional Help Hub v6.1.
+ * UPDATED: Reduced header height offset to top-[84px] md:top-[116px].
  */
 
 const HELP_CATEGORIES = [
@@ -101,16 +100,18 @@ export default function HelpCenterPage() {
               </p>
            </div>
 
-           <div className="relative max-w-2xl group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-400 rounded-2xl blur opacity-5 group-focus-within:opacity-20 transition duration-1000"></div>
-              <div className="relative">
-                 <Search className={cn("absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 transition-colors", searchTerm ? "text-primary" : "text-slate-400")} />
-                 <Input 
-                   className="h-16 md:h-20 pl-16 rounded-2xl md:rounded-[2rem] bg-white border-none shadow-2xl text-lg md:text-xl font-bold text-[#0F172A]" 
-                   placeholder="Search common issues..." 
-                   value={searchTerm}
-                   onChange={e => setSearchTerm(e.target.value)}
-                 />
+           <div className="sticky top-[84px] md:top-[116px] z-40 bg-[#F8FAFC]/80 backdrop-blur-xl -mx-4 px-4 py-2 border-b border-slate-100">
+              <div className="relative max-w-2xl group">
+                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-400 rounded-2xl blur opacity-5 group-focus-within:opacity-20 transition duration-1000"></div>
+                 <div className="relative">
+                    <Search className={cn("absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 transition-colors", searchTerm ? "text-primary" : "text-slate-400")} />
+                    <Input 
+                      className="h-14 md:h-16 pl-16 rounded-2xl md:rounded-[2rem] bg-white border-none shadow-2xl text-lg md:text-xl font-bold text-[#0F172A]" 
+                      placeholder="Search common issues..." 
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                    />
+                 </div>
               </div>
            </div>
         </div>
@@ -199,7 +200,7 @@ export default function HelpCenterPage() {
                       <MessageCircle className="h-8 w-8 fill-current" />
                     </div>
                     <div className="space-y-6">
-                       <h3 className="text-3xl md:text-5xl font-black leading-[1] text-white tracking-tight uppercase">Audit <br/> Support</h3>
+                       <h3 className="text-3xl md:text-5xl font-black leading-none text-white tracking-tight uppercase">Audit <br/> Support</h3>
                        <p className="text-slate-400 text-sm md:text-xl font-medium leading-snug">Raise a support ticket and our management node will audit your issue within 24 hours.</p>
                     </div>
                     <Button asChild className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-2xl md:rounded-3xl shadow-4xl gap-3 border-none transition-all active:scale-95">

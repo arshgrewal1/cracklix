@@ -34,7 +34,8 @@ import { useRouter, usePathname } from "next/navigation"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Official Revision & Study Hub v5.1 [Refined Tabs].
+ * @fileOverview Official Revision & Study Hub v5.2.
+ * UPDATED: Optimized sticky top offset to top-[84px] md:top-[116px] for reduced header height.
  */
 
 export default function RevisionHub() {
@@ -146,7 +147,7 @@ export default function RevisionHub() {
           </div>
 
           <Tabs defaultValue="bookmarks" className="space-y-10">
-             <div className="flex justify-start">
+             <div className="sticky top-[84px] md:top-[116px] z-40 -mx-4 px-4 py-2 bg-[#F8FAFC]/80 backdrop-blur-md">
                 <div className="bg-white border border-slate-200 p-1.5 rounded-[24px] shadow-xl flex items-center h-14 md:h-16 w-full md:w-auto">
                    <TabsList className="bg-transparent border-none p-0 flex h-full gap-1 overflow-x-auto no-scrollbar justify-start">
                       <HubTab value="bookmarks" icon={<Bookmark className="h-4 w-4" />} label="Bookmarks" />

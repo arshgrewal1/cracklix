@@ -51,8 +51,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v4.5 [STRICT REAL DATA].
- * FIXED: Removed all hardcoded rank and accuracy fallbacks.
+ * @fileOverview Institutional Practice Hub v4.6.
+ * UPDATED: Reduced header height offset to top-[84px] md:top-[116px] for tighter navigation.
  */
 
 const FILTER_CHIPS = [
@@ -181,7 +181,7 @@ export default function PracticeHub() {
            </div>
         </section>
 
-        <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-xl -mx-4 px-4 py-3 md:py-4 border-b border-slate-100">
+        <div className="sticky top-[84px] md:top-[116px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-xl -mx-4 px-4 py-3 md:py-4 border-b border-slate-100">
            <div className="max-w-6xl mx-auto space-y-4">
               <div className="flex flex-col md:flex-row items-center gap-3">
                  <div className="relative group flex-1 w-full">
@@ -257,7 +257,7 @@ export default function PracticeHub() {
                                 )}
                              </div>
 
-                             <div className="space-y-2 flex-1">
+                             <div className="space-y-2 mb-2 flex-1">
                                 <div className="space-y-1">
                                    <p className="text-[9px] font-black text-primary uppercase tracking-widest">{ser.difficulty || 'Expert'}</p>
                                    <h3 className="text-[17px] md:text-xl font-[800] text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">

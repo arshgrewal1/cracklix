@@ -19,8 +19,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Bookmarks Hub v7.0.
- * UPDATED: Renamed Computer to ICT and expanded filtering logic.
+ * @fileOverview Official Bookmarks Hub v7.1.
+ * UPDATED: Reduced header height offset to top-[84px] md:top-[116px].
  */
 
 const FILTER_CHIPS = [
@@ -138,7 +138,7 @@ export default function BookmarksPage() {
           </motion.div>
         </section>
 
-        <div className="sticky top-[80px] z-[45] bg-white/90 backdrop-blur-xl -mx-4 px-4 py-4 md:py-6 border-b border-slate-50">
+        <div className="sticky top-[84px] md:top-[116px] z-[45] bg-white/90 backdrop-blur-xl -mx-4 px-4 py-4 md:py-6 border-b border-slate-50">
            <div className="max-w-4xl mx-auto space-y-6">
               <div className="relative group">
                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors">
