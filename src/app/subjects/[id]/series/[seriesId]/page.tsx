@@ -42,8 +42,8 @@ import { hasSeriesAccess } from "@/lib/access-control"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Premium Series Hub Portal v11.1.
- * FIXED: Added missing CheckCircle2 import to resolve runtime ReferenceError.
+ * @fileOverview Premium Series Hub Portal v11.2.
+ * FIXED: Optimized purchase dialog for PWA/Mobile fit.
  */
 
 export default function SeriesDetailPortal() {
@@ -290,30 +290,30 @@ export default function SeriesDetailPortal() {
 
       {/* 3. PREMIUM LOCK PURCHASE DIALOG */}
       <Dialog open={!!selectedMockForPurchase} onOpenChange={() => setSelectedMockForPurchase(null)}>
-         <DialogContent className="sm:max-w-xl w-[95vw] rounded-[2.5rem] md:rounded-[3.5rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
+         <DialogContent className="sm:max-w-xl w-[95vw] rounded-[2rem] md:rounded-[3.5rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
             <div className="h-2 w-full bg-amber-500 shrink-0" />
-            <div className="p-8 md:p-14 space-y-10 overflow-y-auto custom-scrollbar flex-1">
-               <div className="flex items-center gap-8 border-b border-slate-50 pb-10">
-                  <AuthorityLogo boardId={series?.boardId} size="lg" className="h-24 w-24 md:h-32 md:w-32 bg-slate-50 border-4 border-white shadow-2xl" />
-                  <div className="space-y-2">
-                     <Badge className="bg-amber-50 text-amber-600 border-none text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full">Premium Access</Badge>
-                     <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tighter leading-none">
+            <div className="p-5 md:p-14 space-y-6 md:space-y-10 overflow-y-auto custom-scrollbar flex-1 pb-10">
+               <div className="flex items-center gap-6 md:gap-8 border-b border-slate-50 pb-6 md:pb-10">
+                  <AuthorityLogo boardId={series?.boardId} size="md" className="h-16 w-16 md:h-32 md:w-32 bg-slate-50 border-2 md:border-4 border-white shadow-2xl" />
+                  <div className="space-y-1.5">
+                     <Badge className="bg-amber-50 text-amber-600 border-none text-[8px] md:text-[10px] font-black uppercase tracking-widest px-3 py-0.5 rounded-full">Premium Access</Badge>
+                     <DialogTitle className="text-xl md:text-2xl font-black text-[#0F172A] tracking-tighter leading-tight">
                         {series?.title}
                      </DialogTitle>
-                     <DialogDescription className="text-slate-400 font-bold text-[10px] uppercase">Registry authorization required</DialogDescription>
+                     <DialogDescription className="text-slate-400 font-bold text-[8px] md:text-[10px] uppercase">Registry authorization required</DialogDescription>
                   </div>
                </div>
 
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                   <PurchaseStat icon={Layers} label="Tests" val={mocks?.length || 0} />
                   <PurchaseStat icon={Smartphone} label="Android PWA" val="Active" />
                   <PurchaseStat icon={Calendar} label="Validity" val="365 Days" />
                   <PurchaseStat icon={ShieldCheck} label="Official" val="Verified" />
                </div>
 
-               <div className="space-y-4">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Series Benefits</p>
-                  <div className="grid grid-cols-1 gap-3">
+               <div className="space-y-3">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Series Benefits</p>
+                  <div className="grid grid-cols-1 gap-2.5">
                      <BenefitNode text="Unlock all tests in this specific series." />
                      <BenefitNode text="Access detailed bilingual explanations." />
                      <BenefitNode text="Real-time All Punjab Rank calculation." />
@@ -321,14 +321,14 @@ export default function SeriesDetailPortal() {
                   </div>
                </div>
 
-               <div className="pt-6">
-                  <Button asChild className="w-full h-16 md:h-20 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-[0.2em] text-xs md:text-sm rounded-2xl md:rounded-[2.5rem] shadow-4xl border-none transition-all active:scale-95 flex items-center justify-between px-10">
+               <div className="pt-4">
+                  <Button asChild className="w-full h-14 md:h-20 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-sm rounded-xl md:rounded-[2.5rem] shadow-4xl border-none transition-all active:scale-95 flex items-center justify-between px-6 md:px-10">
                      <Link href="/pass">
                         <span>Buy Elite Pass</span>
-                        <span className="text-2xl font-black">₹{series?.price || 299}</span>
+                        <span className="text-xl md:text-2xl font-black">₹{series?.price || 299}</span>
                      </Link>
                   </Button>
-                  <p className="text-center text-[9px] font-bold text-slate-300 mt-6 uppercase tracking-widest">Secure institutional payment portal</p>
+                  <p className="text-center text-[8px] font-bold text-slate-300 mt-4 uppercase tracking-widest">Secure institutional payment portal</p>
                </div>
             </div>
          </DialogContent>
@@ -356,11 +356,11 @@ function ResultStat({ icon, label, val, highlight }: { icon: React.ReactNode, la
 
 function PurchaseStat({ icon: Icon, label, val }: any) {
    return (
-      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col items-center text-center gap-2">
+      <div className="bg-slate-50 p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-100 flex flex-col items-center text-center gap-1.5">
          {Icon && <Icon className="h-4 w-4 text-amber-500" />}
          <div>
-            <p className="text-sm font-black text-[#0F172A] leading-none tabular-nums">{val}</p>
-            <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-1">{label}</p>
+            <p className="text-[12px] md:text-sm font-black text-[#0F172A] leading-none tabular-nums">{val}</p>
+            <p className="text-[6px] md:text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-1">{label}</p>
          </div>
       </div>
    )
@@ -368,9 +368,10 @@ function PurchaseStat({ icon: Icon, label, val }: any) {
 
 function BenefitNode({ text }: { text: string }) {
    return (
-      <div className="flex items-center gap-4 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50">
-         <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
-         <p className="text-[11px] md:text-sm font-bold text-emerald-900 leading-tight">{text}</p>
+      <div className="flex items-center gap-3 p-3 md:p-4 bg-emerald-50/50 rounded-xl md:rounded-2xl border border-emerald-100/50">
+         <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 text-emerald-500 shrink-0" />
+         <p className="text-[10px] md:text-sm font-bold text-emerald-900 leading-tight">{text}</p>
       </div>
    )
 }
+
