@@ -20,9 +20,7 @@ import {
   Users,
   ArrowRight,
   Sparkles,
-  X,
-  FileStack,
-  BookOpen
+  X
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -37,8 +35,8 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v6.0.
- * UPDATED: 100% Dynamic Data Registry. Pulls real stats from every vertical.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v7.0.
+ * UPDATED: Optimized grid layout for requested min-height and column specifications.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -65,7 +63,7 @@ export default function ExamsEntryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isListening, setIsListening] = useState(false);
 
-  // REAL DATA NODES
+  // DATA FETCHING
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: platformStats } = useDoc<any>(statsRef);
 
@@ -90,7 +88,7 @@ export default function ExamsEntryPage() {
 
   const featuredExams = useMemo(() => {
     if (!exams) return [];
-    return exams.filter((e: any) => e.isTrending).slice(0, 8);
+    return exams.filter((e: any) => e.isTrending).slice(0, 12);
   }, [exams]);
 
   const filteredExams = useMemo(() => {
@@ -125,7 +123,7 @@ export default function ExamsEntryPage() {
       
       <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-24">
         
-        {/* 1. ENTERPRISE HERO HUB */}
+        {/* ENTERPRISE HERO HUB */}
         <section className="relative px-1 overflow-hidden">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -216,7 +214,7 @@ export default function ExamsEntryPage() {
           </motion.div>
         </section>
 
-        {/* 2. TRENDING VERTICALS DASHBOARD */}
+        {/* PREMIUM ENTERPRISE GRID: 4 / 2 / 1 columns */}
         <section className="space-y-10 md:space-y-14 w-full text-left">
            <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
               <div className="flex items-center gap-4">
@@ -230,9 +228,9 @@ export default function ExamsEntryPage() {
               </div>
            </div>
 
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
               {examsLoading ? (
-                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[450px] w-full rounded-[3rem] bg-white border border-slate-100" />)
+                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[520px] w-full rounded-[3rem] bg-white border border-slate-100" />)
               ) : featuredExams.map((exam: any) => (
                  <ExamCard 
                    key={exam.id} 
@@ -246,7 +244,7 @@ export default function ExamsEntryPage() {
            </div>
         </section>
 
-        {/* 3. OFFICIAL AUTHORITY HUBS */}
+        {/* OFFICIAL AUTHORITY HUBS */}
         <section className="space-y-10 md:space-y-14 w-full text-left">
            <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
               <div className="flex items-center gap-4">
@@ -295,68 +293,8 @@ export default function ExamsEntryPage() {
            </div>
         </section>
 
-        {/* 4. PERFORMANCE PROTOCOL */}
-        <section className="py-12 md:py-24 bg-white rounded-[40px] md:rounded-[80px] shadow-2xl border border-slate-100 overflow-hidden relative text-center mx-1">
-           <div className="absolute top-0 right-0 p-20 opacity-[0.03] pointer-events-none"><ShieldCheck className="h-[500px] w-[500px]" /></div>
-           <div className="container mx-auto px-6 md:px-20 space-y-16">
-              <div className="space-y-4 max-w-3xl mx-auto">
-                 <h2 className="text-3xl md:text-7xl font-[900] text-[#0F172A] tracking-tighter leading-none">The Cracklix Standard</h2>
-                 <p className="text-slate-400 font-bold text-[11px] md:text-sm uppercase tracking-[0.4em]">Institutional-Grade Learning Registry</p>
-              </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-16">
-                 <ValueNode icon={ShieldCheck} title="Verified Patterns" desc="Updated 24x7 as per official gazettes." />
-                 <ValueNode icon={Zap} title="Instant Solutions" desc="Bilingual rationale for every MCQ item." />
-                 <ValueNode icon={GraduationCap} title="Merit Ranking" desc="Real-time All Punjab Rank calculation." />
-                 <ValueNode icon={Users} title="Active Hub" desc="Joined by 100K+ serious aspirants." />
-              </div>
-           </div>
-        </section>
-
-        {/* 5. CTA CONVERSION HUB */}
-        <section className="px-1 text-center">
-           <motion.div 
-             initial={{ opacity: 0, scale: 0.98 }}
-             whileInView={{ opacity: 1, scale: 1 }}
-             viewport={{ once: true }}
-             className="bg-[#0B1528] rounded-[40px] md:rounded-[80px] p-10 md:p-32 space-y-12 md:space-y-20 text-white relative overflow-hidden shadow-5xl border border-white/5"
-           >
-              <div className="absolute top-0 right-0 p-16 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000">
-                 <Sparkles className="h-64 w-64 text-primary" />
-              </div>
-              <div className="relative z-10 space-y-8">
-                 <h2 className="text-3xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter leading-[0.9] antialiased">
-                   Prepare <br className="hidden md:block" /> <span className="text-primary">Smarter.</span>
-                 </h2>
-                 <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-3xl mx-auto leading-relaxed">
-                   Join Punjab's highest performing aspirants. Access verified patterns, state rankings, and expert rationales.
-                 </p>
-              </div>
-              <div className="relative z-10 pt-4 flex justify-center">
-                 <Button asChild className="h-16 md:h-24 px-12 md:px-24 bg-primary hover:bg-blue-700 text-white font-[800] text-[10px] md:text-sm tracking-[0.2em] uppercase rounded-full shadow-4xl border-none transition-all active:scale-95 group">
-                    <Link href="/mocks" className="flex items-center justify-center gap-4">
-                       Enter Practice Hub <ArrowRight className="h-5 w-5 md:h-8 md:w-8 group-hover:translate-x-2 transition-transform" />
-                    </Link>
-                 </Button>
-              </div>
-           </motion.div>
-        </section>
-
       </main>
       <Footer />
     </div>
   )
-}
-
-function ValueNode({ icon: Icon, title, desc }: any) {
-   return (
-      <div className="flex flex-col items-center text-center space-y-8 group">
-         <div className="h-20 w-20 md:h-28 md:w-28 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-50 flex items-center justify-center text-primary shadow-inner group-hover:scale-110 group-hover:bg-primary/5 transition-all">
-            <Icon className="h-10 w-10 md:h-14 md:w-14" />
-         </div>
-         <div className="space-y-3">
-            <h4 className="font-[800] text-sm md:text-2xl text-[#0F172A] leading-tight uppercase tracking-tight">{title}</h4>
-            <p className="text-[10px] md:text-sm font-medium text-slate-400 leading-snug">{desc}</p>
-         </div>
-      </div>
-   );
 }

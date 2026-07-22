@@ -10,20 +10,21 @@ import { collection, query, where, doc, updateDoc, arrayUnion, arrayRemove, serv
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Star, CheckCircle2, RefreshCw, BookOpen, Clock, Zap, Landmark, ArrowRight, FileStack, ShieldCheck } from "lucide-react"
+import { ChevronLeft, ChevronRight, Star, CheckCircle2, RefreshCw, BookOpen, Clock, Zap, Landmark, ArrowRight, FileStack, ShieldCheck, Layers } from "lucide-react"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { motion } from "framer-motion"
 import ExamCard from "@/components/exams/ExamCard"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface BoardHubClientProps {
   hubId: string;
 }
 
 /**
- * @fileOverview Premium Enterprise Board Hub v6.0.
- * UPDATED: Replaced individual card logic with unified ExamCard system.
+ * @fileOverview Premium Enterprise Board Hub v7.0.
+ * UPDATED: Integrated high-fidelity ExamCard for unified dashboard presentation with 4-column grid.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
@@ -89,8 +90,8 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
 
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-24 max-w-7xl flex-1">
          {examsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-               {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[500px] w-full rounded-[3rem] bg-white" />) }
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+               {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[520px] w-full rounded-[3rem] bg-white border border-slate-100" />) }
             </div>
          ) : exams && exams.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">

@@ -16,14 +16,15 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { motion } from "framer-motion"
 import ExamCard from "@/components/exams/ExamCard"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface CategoryHubClientProps {
   catId: string;
 }
 
 /**
- * @fileOverview Premium Enterprise Category Hub v6.0.
- * UPDATED: Integrated high-fidelity ExamCard for standardized dashboard experience.
+ * @fileOverview Premium Enterprise Category Hub v7.0.
+ * UPDATED: Integrated high-fidelity ExamCard for standardized dashboard experience with 4-column desktop grid.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {

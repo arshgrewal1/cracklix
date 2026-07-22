@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -20,7 +19,8 @@ import {
   BarChart3,
   RefreshCw,
   Target,
-  Play
+  Play,
+  Loader2
 } from "lucide-react";
 import { AuthorityLogo } from "@/lib/exam-icons";
 import { Badge } from "@/components/ui/badge";
@@ -41,9 +41,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v7.0 [Visibility Fix].
- * FIXED: Increased contrast for all labels and icons.
- * FIXED: Optimized spacing to prevent element collision on mobile.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v8.0.
+ * FIXED: Equal height enforcement, title clamping, and dynamic stat mapping.
  */
 export default function ExamCard({ 
   exam, 
@@ -63,21 +62,18 @@ export default function ExamCard({
   const stats = useMemo(() => {
     const safeMocks = Array.isArray(allMocks) ? allMocks : [];
     const safePyqs = Array.isArray(allPyqs) ? allPyqs : [];
-    const safeNotes = Array.isArray(allNotes) ? allNotes : [];
     const safeResults = Array.isArray(userResults) ? userResults : [];
 
     if (!examId) return { mocks: 0, subjects: 0, sectionals: 0, pyqs: 0, notes: 0, questions: 0, totalTests: 0, completed: 0, progress: 0, avgAcc: 0, hasContent: false };
 
     const relatedMocks = safeMocks.filter(m => m.examId === examId || m.examIds?.includes(examId));
     const relatedPyqs = safePyqs.filter(p => p.examId === examId);
-    const relatedNotes = safeNotes.filter(n => n.examId === examId);
 
     const counts = {
       mocks: relatedMocks.filter(m => m.mockType === 'FULL').length,
       subjects: relatedMocks.filter(m => m.mockType === 'SUBJECT').length,
       sectionals: relatedMocks.filter(m => m.mockType === 'SECTIONAL').length,
       pyqs: relatedPyqs.length,
-      notes: relatedNotes.length,
       questions: relatedMocks.reduce((acc, m) => acc + (Number(m.totalQuestions) || 0), 0),
       totalTests: relatedMocks.length
     };
@@ -97,9 +93,9 @@ export default function ExamCard({
       remaining: Math.max(0, counts.totalTests - completed),
       progress: counts.totalTests > 0 ? Math.round((completed / counts.totalTests) * 100) : 0,
       avgAcc,
-      hasContent: counts.totalTests > 0 || counts.pyqs > 0 || counts.notes > 0
+      hasContent: counts.totalTests > 0 || counts.pyqs > 0
     };
-  }, [examId, allMocks, userResults, allPyqs, allNotes]);
+  }, [examId, allMocks, userResults, allPyqs]);
 
   const handleTogglePin = async (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -118,10 +114,17 @@ export default function ExamCard({
   };
 
   const buttonConfig = useMemo(() => {
-    if (stats.completed > 0 && stats.progress === 100) return { label: "View Analysis", icon: BarChart3, variant: "bg-emerald-600 hover:bg-emerald-700" };
-    if (stats.completed > 0) return { label: "Continue Prep", icon: RefreshCw, variant: "bg-primary hover:bg-blue-700" };
-    return { label: "Start Preparation", icon: Play, variant: "bg-[#0F172A] hover:bg-black" };
-  }, [stats]);
+    const isPremium = profile?.passStatus === 'active';
+    // Logic: View Analysis if 100%, Continue if > 0, Start if 0. 
+    // This is a simplified check for the series/vertical as a whole.
+    if (stats.completed > 0 && stats.progress === 100) return { label: "View Analysis", icon: BarChart3, variant: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200" };
+    if (stats.completed > 0) return { label: "Continue Prep", icon: RefreshCw, variant: "bg-primary hover:bg-blue-700 shadow-blue-200" };
+    
+    // If premium is required but not active (Example logic)
+    // if (exam.isPremium && !isPremium) return { label: "Unlock Series", icon: Lock, variant: "bg-amber-500 hover:bg-amber-600 shadow-amber-200" };
+    
+    return { label: "Start Preparation", icon: Play, variant: "bg-[#0F172A] hover:bg-black shadow-slate-200" };
+  }, [stats, profile]);
 
   if (!exam) return null;
 
@@ -130,95 +133,104 @@ export default function ExamCard({
       whileHover={{ y: -8 }} 
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      className="h-full"
+      className="h-full w-full"
     >
       <Link href={`/exams/view?id=${exam.id}`} className="block h-full">
-        <Card className="bg-white border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden group flex flex-col h-full relative">
+        <Card className="h-full min-h-[520px] bg-white border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden flex flex-col group relative">
           
-          <div className="p-6 md:p-10 pb-4 flex justify-between items-start w-full relative z-10">
-            <div className="flex items-center gap-4 md:gap-6">
-               <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-2xl border-4 border-white bg-slate-50 shrink-0" />
-               <div className="text-left space-y-1">
-                  <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm w-fit">
-                    {exam.boardId} Registry
+          {/* HEADER SECTION: PADDING 32/24/20 */}
+          <div className="p-5 md:p-6 lg:p-8 flex justify-between items-center w-full relative z-10">
+            <div className="flex items-center gap-3">
+               <Badge className="bg-primary/10 text-primary border-none text-[10px] font-bold px-3 py-1 rounded-lg">
+                 Official Prep
+               </Badge>
+               {exam.isTrending && (
+                  <Badge className="bg-emerald-50 text-emerald-600 border-none text-[10px] font-bold px-3 py-1 rounded-lg flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3" /> Verified
                   </Badge>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Official Prep</p>
-               </div>
+               )}
             </div>
             
-            <div className="flex items-center gap-2">
-               {exam.isTrending && (
-                  <div className="h-8 w-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shadow-sm border border-amber-100/50">
-                    <Star className="h-4 w-4 fill-current" />
-                  </div>
-               )}
-               <button 
-                  onClick={handleTogglePin}
-                  disabled={isPinning}
-                  className={cn(
-                    "h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all active:scale-90 shadow-sm",
-                    isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-200 text-slate-400 hover:text-primary"
-                  )}
-               >
-                  {isPinning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4 md:h-5 md:w-5", isPinned && "fill-current")} />}
-               </button>
-            </div>
+            <button 
+              onClick={handleTogglePin}
+              disabled={isPinning}
+              className={cn(
+                "h-10 w-10 md:h-11 md:w-11 rounded-xl border flex items-center justify-center transition-all active:scale-90 shadow-sm",
+                isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary"
+              )}
+            >
+              {isPinning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4", isPinned && "fill-current")} />}
+            </button>
           </div>
 
-          <CardContent className="px-6 md:px-10 pb-8 flex-1 flex flex-col text-left space-y-6 md:space-y-10">
-            <div className="space-y-3">
-               <h3 className="text-xl md:text-[32px] font-[900] text-[#0F172A] leading-[1.1] group-hover:text-primary transition-colors tracking-tight line-clamp-2 break-words">
+          <CardContent className="px-5 md:px-6 lg:px-8 pb-8 flex-1 flex flex-col text-left">
+            
+            {/* LOGO: 80x80 Desktop, 70x70 Mobile */}
+            <div className="mb-6 lg:mb-8 flex justify-center">
+               <div className="w-[70px] h-[70px] lg:w-[80px] lg:h-[80px] rounded-2xl md:rounded-3xl shadow-2xl bg-white border-2 border-slate-50 flex items-center justify-center overflow-hidden shrink-0">
+                  <AuthorityLogo boardId={exam.boardId} size="md" className="p-0 border-none shadow-none" />
+               </div>
+            </div>
+
+            {/* TITLE: Clamped 2 Lines, Fixed sizes */}
+            <div className="space-y-2 mb-6">
+               <h3 className="text-[24px] md:text-[28px] lg:text-[34px] font-[800] text-[#0F172A] leading-[1.15] group-hover:text-primary transition-colors tracking-tighter line-clamp-2 min-h-[2.3em] overflow-hidden">
                  {exam.name}
                </h3>
-               <p className="text-slate-500 font-bold text-[13px] md:text-base line-clamp-1 opacity-80 uppercase tracking-tight">
-                  {exam.description || "Punjab Government Recruitment"}
+               <p className="text-slate-400 font-medium text-[14px] md:text-[15px] lg:text-[18px] line-clamp-2 leading-tight overflow-hidden">
+                  {exam.description || "Official recruitment preparation with verified patterns."}
                </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-8 gap-y-6 pt-8 border-t border-slate-100">
+            {/* STATISTICS: Compact Responsive Grid */}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-6 border-t border-slate-100">
                {stats.mocks > 0 && <StatRow label="Mock Tests" val={stats.mocks} icon={Zap} />}
                {stats.subjects > 0 && <StatRow label="Subject Tests" val={stats.subjects} icon={BookOpen} />}
-               {stats.pyqs > 0 && <StatRow label="PYQ Archives" val={stats.pyqs} icon={FileStack} />}
-               {stats.sectionals > 0 && <StatRow label="Sectionals" val={stats.sectionals} icon={Layers} />}
-               {stats.questions > 0 && <StatRow label="Questions" val={stats.questions} icon={Target} color="text-primary" />}
+               {stats.pyqs > 0 && <StatRow label="PYQs" val={stats.pyqs} icon={FileStack} />}
+               {stats.questions > 0 && <StatRow label="Questions" val={stats.questions} icon={Layers} />}
+               {user && <StatRow label="Solved" val={stats.completed} icon={CheckCircle2} color="text-emerald-600" />}
             </div>
 
+            {/* PROGRESS: 6-8px high */}
             {user && stats.totalTests > 0 && (
-               <div className="space-y-5 pt-8 border-t border-slate-100">
-                  <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-500 tracking-widest">
-                     <span className="flex items-center gap-2.5"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Mastery {stats.progress}%</span>
-                     <span className="text-[#0F172A] font-black tabular-nums">{stats.completed}/{stats.totalTests} Solved</span>
+               <div className="space-y-3 mt-8">
+                  <div className="flex justify-between items-center text-[11px] lg:text-[13px] font-bold text-slate-500 uppercase tracking-widest">
+                     <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> Mastery</span>
+                     <span className="text-primary tabular-nums">{stats.progress}%</span>
                   </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-100">
+                  <div className="h-1.5 lg:h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-50">
                      <motion.div 
                        initial={{ width: 0 }}
                        animate={{ width: `${stats.progress}%` }}
                        transition={{ duration: 1.5, ease: "easeOut" }}
-                       className="h-full bg-primary shadow-lg shadow-primary/20" 
+                       className="h-full bg-gradient-to-r from-primary to-blue-400" 
                      />
                   </div>
                </div>
             )}
 
-            <div className="pt-4 mt-auto">
+            {/* BUTTON: Fixed at Bottom, 56px, 18px Radius */}
+            <div className="mt-auto pt-8">
                <Button className={cn(
-                  "w-full h-14 md:h-18 rounded-[20px] md:rounded-[24px] text-white font-black uppercase tracking-widest text-[10px] md:text-xs transition-all active:scale-95 border-none shadow-3xl flex items-center justify-between px-8",
+                  "w-full h-[56px] rounded-[18px] text-white font-[800] uppercase tracking-widest text-[13px] lg:text-[15px] transition-all active:scale-95 border-none shadow-xl flex items-center justify-between px-8",
                   buttonConfig.variant
                )}>
-                  <div className="flex items-center gap-4">
-                     <buttonConfig.icon className={cn("h-5 w-5 md:h-6 md:w-6", buttonConfig.icon === RefreshCw && "animate-spin")} />
+                  <div className="flex items-center gap-3">
+                     <buttonConfig.icon className={cn("h-5 w-5", buttonConfig.icon === RefreshCw && "animate-spin")} />
                      <span>{buttonConfig.label}</span>
                   </div>
-                  <ArrowRight className="h-4 w-4 opacity-40 group-hover:translate-x-2 transition-transform" />
+                  <ArrowRight className="h-5 w-5 opacity-40 group-hover:translate-x-1 transition-transform" />
                </Button>
             </div>
           </CardContent>
 
-          <div className="px-6 md:px-10 py-5 bg-slate-50 border-t border-slate-100 flex items-center gap-3 overflow-x-auto no-scrollbar">
-             {stats.mocks > 0 && <ContentChip label="Full Mocks" />}
-             {stats.subjects > 0 && <ContentChip label="Topic Tests" />}
-             {stats.pyqs > 0 && <ContentChip label="Solved Papers" />}
-             {stats.notes > 0 && <ContentChip label="Study Notes" />}
+          {/* BOTTOM STRIP: Dynamic Chips */}
+          <div className="px-5 md:px-6 lg:px-8 py-4 bg-slate-50/80 border-t border-slate-100 flex items-center gap-2 overflow-x-auto no-scrollbar">
+             {stats.mocks > 0 && <ContentChip label="Mocks" />}
+             {stats.subjects > 0 && <ContentChip label="Subjects" />}
+             {stats.pyqs > 0 && <ContentChip label="PYQs" />}
+             {stats.sectionals > 0 && <ContentChip label="Sectional" />}
+             <ContentChip label="Bilingual" />
           </div>
         </Card>
       </Link>
@@ -228,19 +240,19 @@ export default function ExamCard({
 
 function StatRow({ label, val, icon: Icon, color }: any) {
   return (
-    <div className="flex items-center justify-between gap-3 group/stat">
-       <div className="flex items-center gap-2.5 min-w-0">
-          <Icon className="h-4 w-4 text-slate-500 shrink-0" />
-          <span className="text-[10px] font-black text-slate-500 truncate uppercase tracking-widest leading-none">{label}</span>
+    <div className="flex items-center justify-between gap-2 min-w-0">
+       <div className="flex items-center gap-2 min-w-0">
+          <Icon className="h-4 w-4 text-slate-400 shrink-0" />
+          <span className="text-[13px] lg:text-[15px] font-bold text-slate-500 truncate leading-none">{label}</span>
        </div>
-       <span className={cn("text-xs md:text-lg font-black tabular-nums tracking-tighter leading-none", color || "text-[#0F172A]")}>{val}</span>
+       <span className={cn("text-[14px] lg:text-[16px] font-[900] tabular-nums tracking-tighter leading-none", color || "text-[#0F172A]")}>{val}</span>
     </div>
   );
 }
 
 function ContentChip({ label }: { label: string }) {
   return (
-    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shrink-0 shadow-sm">
+    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-white border border-slate-200 px-3 py-1 rounded-lg shrink-0 shadow-sm">
        {label}
     </span>
   );
