@@ -6,9 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Trash2, Edit, Save, Gem, Zap, Lock, X, ChevronRight, Loader2, CheckCircle2, Search, Landmark, Clock } from "lucide-react"
+import { Plus, Trash2, Edit, Save, Gem, Zap, Lock, X, ChevronRight, Loader2, CheckCircle2, Search, Landmark, Clock, Layers } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, doc, setDoc, deleteDoc, serverTimestamp, addDoc } from "firebase/firestore"
+import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, addDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -18,9 +18,8 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
 
 /**
- * @fileOverview Institutional Pass Architect v6.0 (High-Fidelity).
- * FIXED: Visibility issues in dropdowns and rebalanced header spacing.
- * UPDATED: Integrated live auditing for pass modifications.
+ * @fileOverview Institutional Pass Architect v7.0.
+ * UPDATED: Added Series Mapping selection to the Tier Architect dialog.
  */
 export default function PassManagement() {
   const db = useFirestore()
@@ -30,6 +29,7 @@ export default function PassManagement() {
   const { data: rawPasses, loading } = useCollection<any>(useMemo(() => (db ? collection(db, "passes") : null), [db]))
   const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
+  const { data: testSeries } = useCollection<any>(useMemo(() => (db ? collection(db, "test_series") : null), [db]))
 
   const passes = useMemo(() => {
     if (!rawPasses) return []
@@ -39,6 +39,7 @@ export default function PassManagement() {
   const [editingPass, setEditingPass] = useState<any>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [mockSearch, setMockSearch] = useState("")
+  const [seriesSearch, setSeriesSearch] = useState("")
 
   const handleSave = async () => {
     if (!db || !editingPass || isSaving) return
@@ -54,7 +55,8 @@ export default function PassManagement() {
       durationDays: parseInt(editingPass.durationDays) || 30,
       displayOrder: parseInt(editingPass.displayOrder) || 1,
       allowedMocks: editingPass.allowedMocks || [],
-      allowedCategories: editingPass.allowedCategories || []
+      allowedCategories: editingPass.allowedCategories || [],
+      allowedSeries: editingPass.allowedSeries || []
     }
 
     try {
@@ -68,7 +70,7 @@ export default function PassManagement() {
         timestamp: serverTimestamp()
       });
 
-      toast({ title: "Registry Synced", description: `${payload.name} node updated.` })
+      toast({ title: "Registry Synced", description: `${payload.name} updated.` })
       setEditingPass(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sync Failed" })
@@ -109,10 +111,19 @@ export default function PassManagement() {
     })
   }
 
+  const toggleSeries = (sId: string) => {
+    if (!editingPass) return;
+    const current = editingPass.allowedSeries || []
+    setEditingPass({
+      ...editingPass,
+      allowedSeries: current.includes(sId) ? current.filter((id: string) => id !== sId) : [...current, sId]
+    })
+  }
+
   return (
     <div className="space-y-10 md:space-y-16 text-[#0F172A] text-left animate-in fade-in duration-700 pb-32 pt-2">
       
-      {/* 1. HEADER HUB - REBALANCED */}
+      {/* 1. HEADER HUB */}
       <AdminPageHeader
         icon={Gem}
         label="Security Access Governance"
@@ -120,7 +131,7 @@ export default function PassManagement() {
         subtitle="Configure tiered preparation nodes and mock access rules."
         actionLabel="Create New Tier"
         actionIcon={Plus}
-        onAction={() => setEditingPass({ name: "", price: 299, durationDays: 30, features: [], allowedMocks: [], allowedCategories: [], active: true, displayOrder: (passes?.length || 0) + 1, tier: 1 })}
+        onAction={() => setEditingPass({ name: "", price: 299, durationDays: 30, features: [], allowedMocks: [], allowedCategories: [], allowedSeries: [], active: true, displayOrder: (passes?.length || 0) + 1, tier: 1 })}
       />
 
       {/* 2. DATA CARDS GRID */}
@@ -150,6 +161,7 @@ export default function PassManagement() {
                    <p className="text-[9px] font-black uppercase text-slate-300 tracking-widest">Authorized Access</p>
                    <div className="flex flex-wrap gap-1.5">
                       <Badge variant="outline" className="text-[8px] font-bold border-slate-100 text-slate-400">{p.allowedMocks?.length || 0} Mock Nodes</Badge>
+                      <Badge variant="outline" className="text-[8px] font-bold border-slate-100 text-slate-400">{p.allowedSeries?.length || 0} Series Nodes</Badge>
                       <Badge variant="outline" className="text-[8px] font-bold border-slate-100 text-slate-400">{p.allowedCategories?.length || 0} Hub Nodes</Badge>
                    </div>
                 </div>
@@ -167,15 +179,15 @@ export default function PassManagement() {
         open={!!editingPass}
         onOpenChange={(o) => !o && !isSaving && setEditingPass(null)}
         title="Tier Architect"
-        description="Map preparation verticals and mock tests to this subscription node."
+        description="Map preparation verticals, series and mock tests to this subscription node."
         isSaving={isSaving}
         onSave={handleSave}
         onDiscard={() => setEditingPass(null)}
         saveLabel="Commit Tier"
-        maxWidth="sm:max-w-4xl"
+        maxWidth="sm:max-w-5xl"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-          <div className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+          <div className="lg:col-span-4 space-y-8">
              <div className="space-y-4">
                 <div className="space-y-1.5 text-left">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Plan Headline</Label>
@@ -193,49 +205,13 @@ export default function PassManagement() {
                 </div>
              </div>
 
-             <div className="space-y-4 text-left">
-                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Zap className="h-3 w-3" /> Map Specific Mocks</Label>
-                <div className="relative group">
-                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                   <Input value={mockSearch} onChange={e => setMockSearch(e.target.value)} className="pl-10 h-11 rounded-xl bg-slate-50 border-none text-[11px] font-bold shadow-inner" placeholder="Search test bank..." />
-                </div>
-                <div className="max-h-52 overflow-y-auto pr-2 custom-scrollbar space-y-1.5">
-                   {mocks?.filter(m => m.title.toLowerCase().includes(mockSearch.toLowerCase())).map((m: any) => {
-                      const isAllowed = editingPass?.allowedMocks?.includes(m.id)
-                      return (
-                         <button key={m.id} onClick={() => toggleMock(m.id)} className={cn("w-full p-3 rounded-xl flex items-center justify-between text-left transition-all", isAllowed ? "bg-[#0F172A] text-white shadow-lg" : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-transparent hover:border-slate-200")}>
-                            <span className="text-[10px] font-bold uppercase truncate pr-4">{m.title}</span>
-                            {isAllowed ? <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" /> : <div className="h-4 w-4 rounded-full border border-slate-200 shrink-0" />}
-                         </button>
-                      )
-                   })}
-                </div>
-             </div>
-          </div>
-
-          <div className="space-y-8">
-             <div className="space-y-4 text-left">
-                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Landmark className="h-3 w-3" /> Grant Authority Hubs</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                   {boards?.map((b: any) => {
-                      const isAllowed = editingPass?.allowedCategories?.includes(b.id)
-                      return (
-                         <button key={b.id} onClick={() => toggleCategory(b.id)} className={cn("p-4 rounded-2xl flex items-center justify-between text-left border-2 transition-all", isAllowed ? "border-primary bg-primary/5 text-primary shadow-sm" : "border-slate-50 bg-slate-50/50 text-slate-400 hover:border-slate-200")}>
-                            <span className="text-[10px] font-black uppercase tracking-tight">{b.abbreviation} Hub</span>
-                            {isAllowed && <CheckCircle2 className="h-4 w-4" />}
-                         </button>
-                      )
-                   })}
-                </div>
-             </div>
-
              <div className="space-y-4 pt-6 border-t border-slate-100 text-left">
                 <p className="text-[9px] font-black uppercase text-slate-300 tracking-[0.3em] mb-4">Institutional Registry Config</p>
                 <div className="space-y-3">
                    <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
                       <div className="space-y-1">
                          <p className="text-[11px] font-black text-[#0F172A] uppercase">System Activation</p>
-                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Enable purchase node for aspirants</p>
+                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Enable purchase node</p>
                       </div>
                       <Switch checked={editingPass?.active || false} onCheckedChange={v => setEditingPass({...editingPass, active: v})} />
                    </div>
@@ -244,6 +220,66 @@ export default function PassManagement() {
                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Tier Priority (Registry sorting)</Label>
                       <Input type="number" value={editingPass?.displayOrder || ""} onChange={e => setEditingPass({...editingPass, displayOrder: e.target.value})} className="h-12 bg-slate-50 border-none rounded-xl font-black text-center" />
                    </div>
+                </div>
+             </div>
+          </div>
+
+          <div className="lg:col-span-8 space-y-10">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                {/* SERIES MAPPING */}
+                <div className="space-y-4 text-left">
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Map Test Series</Label>
+                   <div className="relative group">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                      <Input value={seriesSearch} onChange={e => setSeriesSearch(e.target.value)} className="pl-10 h-11 rounded-xl bg-slate-50 border-none text-[11px] font-bold shadow-inner" placeholder="Search series hub..." />
+                   </div>
+                   <div className="max-h-52 overflow-y-auto pr-2 custom-scrollbar space-y-1.5">
+                      {testSeries?.filter(s => s.title.toLowerCase().includes(seriesSearch.toLowerCase())).map((s: any) => {
+                         const isAllowed = editingPass?.allowedSeries?.includes(s.id)
+                         return (
+                            <button key={s.id} onClick={() => toggleSeries(s.id)} className={cn("w-full p-3 rounded-xl flex items-center justify-between text-left transition-all border", isAllowed ? "bg-primary text-white border-primary shadow-lg" : "bg-white hover:bg-slate-50 text-slate-600 border-slate-100")}>
+                               <span className="text-[10px] font-bold uppercase truncate pr-4">{s.title}</span>
+                               {isAllowed ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <div className="h-4 w-4 rounded-full border border-slate-200 shrink-0" />}
+                            </button>
+                         )
+                      })}
+                   </div>
+                </div>
+
+                {/* BOARD MAPPING */}
+                <div className="space-y-4 text-left">
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Landmark className="h-3 w-3" /> Grant Authority Hubs</Label>
+                   <div className="grid grid-cols-1 gap-3 max-h-52 overflow-y-auto pr-2 custom-scrollbar">
+                      {boards?.map((b: any) => {
+                         const isAllowed = editingPass?.allowedCategories?.includes(b.id)
+                         return (
+                            <button key={b.id} onClick={() => toggleCategory(b.id)} className={cn("p-4 rounded-2xl flex items-center justify-between text-left border-2 transition-all", isAllowed ? "border-primary bg-primary/5 text-primary shadow-sm" : "border-slate-50 bg-slate-50/50 text-slate-400 hover:border-slate-200")}>
+                               <span className="text-[10px] font-black uppercase tracking-tight">{b.abbreviation} Hub</span>
+                               {isAllowed && <CheckCircle2 className="h-4 w-4" />}
+                            </button>
+                         )
+                      })}
+                   </div>
+                </div>
+             </div>
+
+             {/* MOCKS MAPPING */}
+             <div className="space-y-4 text-left border-t border-slate-100 pt-8">
+                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Zap className="h-3 w-3" /> Map Specific Mocks (Individual Override)</Label>
+                <div className="relative group">
+                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                   <Input value={mockSearch} onChange={e => setMockSearch(e.target.value)} className="pl-10 h-11 rounded-xl bg-slate-50 border-none text-[11px] font-bold shadow-inner" placeholder="Search test bank..." />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-52 overflow-y-auto pr-2 custom-scrollbar">
+                   {mocks?.filter(m => m.title.toLowerCase().includes(mockSearch.toLowerCase())).map((m: any) => {
+                      const isAllowed = editingPass?.allowedMocks?.includes(m.id)
+                      return (
+                         <button key={m.id} onClick={() => toggleMock(m.id)} className={cn("p-3 rounded-xl flex items-center justify-between text-left transition-all border", isAllowed ? "bg-[#0F172A] text-white border-[#0F172A] shadow-lg" : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-transparent")}>
+                            <span className="text-[10px] font-bold uppercase truncate pr-4">{m.title}</span>
+                            {isAllowed ? <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" /> : <div className="h-4 w-4 rounded-full border border-slate-200 shrink-0" />}
+                         </button>
+                      )
+                   })}
                 </div>
              </div>
           </div>
