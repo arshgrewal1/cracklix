@@ -1,12 +1,11 @@
-
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Home, Zap, AlertCircle } from "lucide-react";
 
 /**
- * @fileOverview Institutional 'Coming Soon' / Not Found Hub v2.0.
- * Replaced generic 404 with a preparation-focused 'Coming Soon' notice.
+ * @fileOverview Institutional 'Coming Soon' Hub v2.1.
+ * UPDATED: Removed 'node' terminology and uppercase styling.
  */
 export default function NotFound() {
   return (
@@ -23,16 +22,16 @@ export default function NotFound() {
         </div>
 
         <div className="space-y-3">
-          <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter uppercase leading-none">Coming Soon</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">Coming Soon</h1>
           <p className="text-primary font-black text-[10px] md:text-xs uppercase tracking-[0.3em]">Mock available nahi hai</p>
           <p className="text-slate-500 font-medium leading-relaxed pt-4">
-            This preparation node is currently being updated with the latest official patterns. Please check back later.
+            This preparation hub is currently being updated with the latest official patterns. Please check back later.
           </p>
         </div>
 
         <div className="pt-4">
-           <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-3xl border-none transition-all active:scale-95">
-              <Link href="/"><Home className="h-4 w-4" /> Return to Hub</Link>
+           <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-bold text-sm tracking-tight gap-3 shadow-3xl border-none transition-all active:scale-95">
+              <Link href="/"><Home className="h-4 w-4 text-primary" /> Return to Hub</Link>
            </Button>
         </div>
         

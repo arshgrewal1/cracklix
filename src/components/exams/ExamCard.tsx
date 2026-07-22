@@ -12,8 +12,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Institutional Exam Vertical Card v4.4.
- * UPDATED: Removed uppercase styling.
+ * @fileOverview Premium Institutional Exam Vertical Card v4.5.
+ * UPDATED: Removed uppercase styling and refined terminology.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"
@@ -32,17 +32,17 @@ export default function ExamCard({ exam }: ExamCardProps) {
                   <Star className="h-3 w-3 text-amber-400 fill-current" />
                   <span className="text-[10px] font-black text-[#0F172A]">4.9</span>
                </div>
-               <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-sm">
+               <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
                  Verified hub
                </Badge>
             </div>
           </div>
 
-          {/* CONTENT NODE */}
+          {/* CONTENT HUB */}
           <div className="flex-1 space-y-6 text-left relative z-10">
             <div className="space-y-2">
-               <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">{exam.boardId} registry</p>
-               <h3 className="text-xl md:text-2xl font-black text-[#0F172A] leading-tight tracking-tight group-hover:text-primary transition-colors line-clamp-2 break-words">
+               <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">{exam.boardId} Registry</p>
+               <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight tracking-tight group-hover:text-primary transition-colors line-clamp-2 break-words">
                  {examName}
                </h3>
             </div>
@@ -51,14 +51,14 @@ export default function ExamCard({ exam }: ExamCardProps) {
               <div className="flex flex-col gap-1">
                  <div className="flex items-center gap-2 text-slate-300">
                     <Zap className="h-4 w-4 text-primary shrink-0" />
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Tests</span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Tests</span>
                  </div>
                  <p className="text-sm md:text-xl font-black text-[#0F172A] tabular-nums">{totalMocksCount}</p>
               </div>
               <div className="flex flex-col gap-1">
                  <div className="flex items-center gap-2 text-slate-300">
                     <Users className="h-4 w-4 text-primary shrink-0" />
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Students</span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Students</span>
                  </div>
                  <p className="text-sm md:text-xl font-black text-[#0F172A] tabular-nums">Active</p>
               </div>
@@ -67,7 +67,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
 
           {/* ACTION HUB */}
           <div className="mt-12 relative z-10">
-             <Button className="w-full h-16 md:h-20 rounded-[20px] md:rounded-[2rem] bg-[#0F172A] group-hover:bg-primary text-white font-black uppercase text-[10px] md:text-xs tracking-[0.2em] transition-all active:scale-95 border-none shadow-4xl flex items-center justify-between px-8">
+             <Button className="w-full h-16 md:h-20 rounded-[20px] md:rounded-[2rem] bg-[#0F172A] group-hover:bg-primary text-white font-bold text-sm tracking-tight transition-all active:scale-95 border-none shadow-4xl flex items-center justify-between px-8">
                <span>Start preparation</span>
                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
              </Button>

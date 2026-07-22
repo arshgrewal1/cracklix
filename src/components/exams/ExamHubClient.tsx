@@ -36,7 +36,8 @@ import {
   Newspaper,
   Loader2,
   Users,
-  Timer
+  Timer,
+  Landmark
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -46,8 +47,9 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v7.0.
- * FIXED: Refined HeroStat colors for light background visibility.
+ * @fileOverview Premium Exam Detail Hub v7.2.
+ * FIXED: Added missing Landmark icon and inlined HubTab for Radix context stability.
+ * UPDATED: Removed uppercase and 'node' terminology.
  */
 
 export default function ExamHubClient() {
@@ -145,7 +147,32 @@ export default function ExamHubClient() {
   };
 
   if (!mounted || examLoading || userLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
-  if (!exam) return <div className="p-20 text-center font-bold text-slate-300">Exam hub not registered</div>
+  if (!exam) return (
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center font-body">
+      <div className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-16 shadow-5xl border border-slate-100 space-y-10">
+        <div className="relative mx-auto w-24 h-24">
+           <div className="h-24 w-24 bg-blue-50 rounded-[2rem] flex items-center justify-center text-primary shadow-inner border border-blue-100">
+              <Zap className="h-10 w-10 animate-pulse" />
+           </div>
+           <div className="absolute -bottom-2 -right-2 h-10 w-10 bg-[#0F172A] rounded-xl flex items-center justify-center text-white shadow-2xl border-4 border-white">
+              <AlertCircle className="h-5 w-5 text-primary" />
+           </div>
+        </div>
+        <div className="space-y-3">
+          <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">Coming Soon</h1>
+          <p className="text-primary font-black text-[10px] md:text-xs tracking-[0.3em]">Mock available nahi hai</p>
+          <p className="text-slate-500 font-medium leading-relaxed pt-4">
+            This preparation hub is currently being updated with the latest official patterns. Please check back later.
+          </p>
+        </div>
+        <div className="pt-4">
+           <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-bold text-sm shadow-3xl border-none transition-all active:scale-95">
+              <Link href="/exams"><ChevronRight className="h-4 w-4 mr-2" /> Back to Hub</Link>
+           </Button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 overflow-x-hidden w-full">
@@ -155,7 +182,7 @@ export default function ExamHubClient() {
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
          <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
-            <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs tracking-widest">
                <Link href="/exams" className="hover:text-[#0F172A] transition-colors">Exams</Link>
                <ChevronRight className="h-3 w-3" />
                <span className="text-primary">{exam.name}</span>
@@ -220,12 +247,24 @@ export default function ExamHubClient() {
             <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
                <div className="bg-white border border-slate-200 shadow-sm rounded-[20px] p-1 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">
                   <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-between gap-1 overflow-x-auto no-scrollbar snap-x">
-                     <HubTab value="MOCK" label="Mock Series" icon={Zap} />
-                     <HubTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
-                     <HubTab value="SECTIONAL" label="Sectional Tests" icon={Layers} />
-                     <HubTab value="PYQ" label="Old Papers" icon={FileStack} />
-                     <HubTab value="NOTES" label="Study Notes" icon={FileText} />
-                     <HubTab value="CA" label="Current Affairs" icon={Newspaper} />
+                     <TabsTrigger value="MOCK" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
+                        <Zap className="h-4 w-4 shrink-0" /> Mock Series
+                     </TabsTrigger>
+                     <TabsTrigger value="SUBJECT" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
+                        <BookOpen className="h-4 w-4 shrink-0" /> Subject Tests
+                     </TabsTrigger>
+                     <TabsTrigger value="SECTIONAL" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
+                        <Layers className="h-4 w-4 shrink-0" /> Sectional Tests
+                     </TabsTrigger>
+                     <TabsTrigger value="PYQ" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
+                        <FileStack className="h-4 w-4 shrink-0" /> Old Papers
+                     </TabsTrigger>
+                     <TabsTrigger value="NOTES" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
+                        <FileText className="h-4 w-4 shrink-0" /> Study Notes
+                     </TabsTrigger>
+                     <TabsTrigger value="CA" className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
+                        <Newspaper className="h-4 w-4 shrink-0" /> Current Affairs
+                     </TabsTrigger>
                   </TabsList>
                </div>
             </div>
@@ -287,14 +326,6 @@ function HeroStat({ icon: Icon, label, val }: any) {
   )
 }
 
-function HubTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
-   return (
-      <TabsTrigger value={value} className="px-6 h-full font-bold text-[10px] md:text-[11px] tracking-tight text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[16px] transition-all whitespace-nowrap flex items-center gap-3 snap-start">
-         <Icon className="h-4 w-4 shrink-0" /> {label}
-      </TabsTrigger>
-   )
-}
-
 function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
    if (loading) return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
@@ -322,7 +353,7 @@ function TestGrid({ data, loading, isPYQ = false, isNote = false }: any) {
                         {item.accessLevel === 'PREMIUM' ? 'Elite' : 'Free'}
                      </Badge>
                   </div>
-                  <div className="space-y-4 flex-1 text-left">
+                  <div className="space-y-4 flex-1 space-y-4 text-left">
                      <div className="space-y-1.5">
                         <p className="text-[10px] font-bold text-primary tracking-tight">{item.difficulty || 'Standard'} Pattern</p>
                         <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight line-clamp-2">{item.title}</h3>
