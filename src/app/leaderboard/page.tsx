@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useMemo, useState, useEffect } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -14,8 +13,14 @@ import { Input } from "@/components/ui/input"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
+
+/**
+ * @fileOverview Daily Challenge Merit Registry v1.1.
+ * FIXED: Added missing Link import.
+ */
 
 const CATEGORY_CHIPS = [
   { id: "all", label: "All Hubs" },
