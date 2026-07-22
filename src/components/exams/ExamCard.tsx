@@ -7,7 +7,6 @@ import Link from "next/link";
 import { 
   ChevronRight, 
   Zap, 
-  Users, 
   Star, 
   ArrowRight, 
   ShieldCheck, 
@@ -42,9 +41,9 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v6.2.
- * FIXED: Final validation for Play and icon definitions.
- * UI: High-fidelity layout with conditional visibility for all metrics.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v7.0 [Visibility Fix].
+ * FIXED: Increased contrast for all labels and icons.
+ * FIXED: Optimized spacing to prevent element collision on mobile.
  */
 export default function ExamCard({ 
   exam, 
@@ -140,10 +139,10 @@ export default function ExamCard({
             <div className="flex items-center gap-4 md:gap-6">
                <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-2xl border-4 border-white bg-slate-50 shrink-0" />
                <div className="text-left space-y-1">
-                  <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm w-fit">
+                  <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm w-fit">
                     {exam.boardId} Registry
                   </Badge>
-                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest leading-none">Official Prep</p>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Official Prep</p>
                </div>
             </div>
             
@@ -158,7 +157,7 @@ export default function ExamCard({
                   disabled={isPinning}
                   className={cn(
                     "h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all active:scale-90 shadow-sm",
-                    isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary"
+                    isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-200 text-slate-400 hover:text-primary"
                   )}
                >
                   {isPinning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4 md:h-5 md:w-5", isPinned && "fill-current")} />}
@@ -166,17 +165,17 @@ export default function ExamCard({
             </div>
           </div>
 
-          <CardContent className="px-6 md:px-10 pb-6 flex-1 flex flex-col text-left space-y-6 md:space-y-8">
-            <div className="space-y-2">
-               <h3 className="text-xl md:text-3xl font-[800] text-[#0F172A] leading-[1.1] tracking-tight group-hover:text-primary transition-colors line-clamp-2 break-words">
+          <CardContent className="px-6 md:px-10 pb-8 flex-1 flex flex-col text-left space-y-6 md:space-y-10">
+            <div className="space-y-3">
+               <h3 className="text-xl md:text-[32px] font-[900] text-[#0F172A] leading-[1.1] group-hover:text-primary transition-colors tracking-tight line-clamp-2 break-words">
                  {exam.name}
                </h3>
-               <p className="text-slate-400 font-medium text-xs md:text-sm line-clamp-1">
-                  {exam.description || "Punjab Government Recruitment Preparation"}
+               <p className="text-slate-500 font-bold text-[13px] md:text-base line-clamp-1 opacity-80 uppercase tracking-tight">
+                  {exam.description || "Punjab Government Recruitment"}
                </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-6 border-t border-slate-50">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-6 pt-8 border-t border-slate-100">
                {stats.mocks > 0 && <StatRow label="Mock Tests" val={stats.mocks} icon={Zap} />}
                {stats.subjects > 0 && <StatRow label="Subject Tests" val={stats.subjects} icon={BookOpen} />}
                {stats.pyqs > 0 && <StatRow label="PYQ Archives" val={stats.pyqs} icon={FileStack} />}
@@ -185,12 +184,12 @@ export default function ExamCard({
             </div>
 
             {user && stats.totalTests > 0 && (
-               <div className="space-y-4 pt-6 border-t border-slate-50">
-                  <div className="flex justify-between items-center text-[9px] font-black uppercase text-slate-400 tracking-widest">
-                     <span className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 text-emerald-500" /> Mastery {stats.progress}%</span>
-                     <span className="text-primary tabular-nums">{stats.completed}/{stats.totalTests} Solved</span>
+               <div className="space-y-5 pt-8 border-t border-slate-100">
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-500 tracking-widest">
+                     <span className="flex items-center gap-2.5"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Mastery {stats.progress}%</span>
+                     <span className="text-[#0F172A] font-black tabular-nums">{stats.completed}/{stats.totalTests} Solved</span>
                   </div>
-                  <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner border border-slate-100">
                      <motion.div 
                        initial={{ width: 0 }}
                        animate={{ width: `${stats.progress}%` }}
@@ -203,11 +202,11 @@ export default function ExamCard({
 
             <div className="pt-4 mt-auto">
                <Button className={cn(
-                  "w-full h-14 md:h-16 rounded-[18px] md:rounded-[22px] text-white font-bold text-sm tracking-tight transition-all active:scale-95 border-none shadow-3xl flex items-center justify-between px-8",
+                  "w-full h-14 md:h-18 rounded-[20px] md:rounded-[24px] text-white font-black uppercase tracking-widest text-[10px] md:text-xs transition-all active:scale-95 border-none shadow-3xl flex items-center justify-between px-8",
                   buttonConfig.variant
                )}>
-                  <div className="flex items-center gap-3">
-                     <buttonConfig.icon className={cn("h-4 w-4", buttonConfig.icon === RefreshCw && "animate-spin-slow")} />
+                  <div className="flex items-center gap-4">
+                     <buttonConfig.icon className={cn("h-5 w-5 md:h-6 md:w-6", buttonConfig.icon === RefreshCw && "animate-spin")} />
                      <span>{buttonConfig.label}</span>
                   </div>
                   <ArrowRight className="h-4 w-4 opacity-40 group-hover:translate-x-2 transition-transform" />
@@ -215,11 +214,11 @@ export default function ExamCard({
             </div>
           </CardContent>
 
-          <div className="px-6 md:px-10 py-4 bg-slate-50/50 border-t border-slate-50 flex items-center gap-2 overflow-x-auto no-scrollbar">
-             {stats.mocks > 0 && <ContentChip label="Mocks" />}
+          <div className="px-6 md:px-10 py-5 bg-slate-50 border-t border-slate-100 flex items-center gap-3 overflow-x-auto no-scrollbar">
+             {stats.mocks > 0 && <ContentChip label="Full Mocks" />}
              {stats.subjects > 0 && <ContentChip label="Topic Tests" />}
-             {stats.pyqs > 0 && <ContentChip label="Old Papers" />}
-             {stats.notes > 0 && <ContentChip label="PDF Notes" />}
+             {stats.pyqs > 0 && <ContentChip label="Solved Papers" />}
+             {stats.notes > 0 && <ContentChip label="Study Notes" />}
           </div>
         </Card>
       </Link>
@@ -230,18 +229,18 @@ export default function ExamCard({
 function StatRow({ label, val, icon: Icon, color }: any) {
   return (
     <div className="flex items-center justify-between gap-3 group/stat">
-       <div className="flex items-center gap-2 min-w-0">
-          <Icon className="h-3.5 w-3.5 text-slate-300 shrink-0" />
-          <span className="text-[10px] font-bold text-slate-400 truncate uppercase tracking-tight">{label}</span>
+       <div className="flex items-center gap-2.5 min-w-0">
+          <Icon className="h-4 w-4 text-slate-500 shrink-0" />
+          <span className="text-[10px] font-black text-slate-500 truncate uppercase tracking-widest leading-none">{label}</span>
        </div>
-       <span className={cn("text-xs md:text-sm font-black tabular-nums tracking-tight", color || "text-[#0F172A]")}>{val}</span>
+       <span className={cn("text-xs md:text-lg font-black tabular-nums tracking-tighter leading-none", color || "text-[#0F172A]")}>{val}</span>
     </div>
   );
 }
 
 function ContentChip({ label }: { label: string }) {
   return (
-    <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 bg-white border border-slate-100 px-2.5 py-1 rounded-md shrink-0 shadow-sm">
+    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shrink-0 shadow-sm">
        {label}
     </span>
   );
