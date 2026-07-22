@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -17,8 +16,8 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Top Rankers Center v3.1.
- * UPDATED: Removed uppercase transforms for a cleaner look.
+ * @fileOverview Official Top Rankers Center v3.2.
+ * FIXED: Preserving decimal scores for accuracy.
  */
 
 const CATEGORY_CHIPS = [
@@ -82,7 +81,7 @@ export default function LeaderboardPage() {
             id: r.userId,
             name,
             profile: userProfile,
-            score: r.score || 0,
+            score: Number(r.score) || 0,
             accuracy: r.accuracy || 0,
             mockTitle: r.mockTitle || "Practice Mock",
             timestamp: r.timestamp,
@@ -101,7 +100,7 @@ export default function LeaderboardPage() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col">
+    <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden">
       <Navbar />
       
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-8 md:space-y-12 pb-32">
@@ -133,7 +132,7 @@ export default function LeaderboardPage() {
                   />
                   {searchTerm && (
                     <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all">
-                       <X className="h-4 w-4 text-slate-400" />
+                       <X className="h-6 w-6 text-slate-300" />
                     </button>
                   )}
                </div>
@@ -189,7 +188,7 @@ export default function LeaderboardPage() {
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ delay: idx * 0.02 }}
                      >
-                        <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-white group overflow-hidden">
+                        <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-300 rounded-2xl bg-white group overflow-hidden">
                            <CardContent className="p-0 flex items-center h-[72px] md:h-[80px]">
                               {/* RANK NODE */}
                               <div className="w-12 md:w-16 flex items-center justify-center shrink-0">
@@ -230,7 +229,7 @@ export default function LeaderboardPage() {
                                  <div className="text-right">
                                     <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Total score</p>
                                     <p className="text-base md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter">
-                                       {Math.round(entry.score)}
+                                       {entry.score.toFixed(1)}
                                     </p>
                                  </div>
                                  <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
@@ -326,7 +325,7 @@ function PodiumCard({ rank, data, order, isMain }: any) {
                   <div className="text-center">
                      <p className={cn("text-[8px] font-bold uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Score</p>
                      <p className={cn("text-lg md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-white" : "text-primary")}>
-                        {Math.round(data.score)}
+                        {data.score.toFixed(1)}
                      </p>
                   </div>
                   <div className="text-center">

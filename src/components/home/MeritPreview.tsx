@@ -13,8 +13,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Top Rankers Preview Hub v20.1.
- * UPDATED: Standardized heading size to text-2xl md:text-4xl.
+ * @fileOverview Top Rankers Preview Hub v20.2.
+ * FIXED: Preserving decimal scores for institutional accuracy.
  */
 export default function MeritPreview() {
   const db = useFirestore();
@@ -59,7 +59,7 @@ export default function MeritPreview() {
 
         <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 gap-3 md:grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 md:gap-8 lg:gap-10">
            {resultsLoading ? (
-              Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="flex-shrink-0 w-[45%] h-48 md:h-72 md:w-full rounded-2xl md:rounded-[3rem] bg-white" />)
+              Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="flex-shrink-0 w-[45%] h-48 md:h-72 md:w-full rounded-2xl md:rounded-[4rem] bg-white" />)
            ) : topRankers.map((res, i) => {
               const name = (res.userName && res.userName !== 'Aspirant' && !res.userName.includes('@')) ? res.userName : (res.userEmail || "Student");
               const cleanName = name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
@@ -80,7 +80,7 @@ export default function MeritPreview() {
                           <div className="min-w-0 w-full space-y-1 md:space-y-2">
                              <p className="font-bold text-[13px] md:text-xl text-[#0F172A] leading-tight tracking-tight break-words">{cleanName}</p>
                              <div className="flex flex-col items-center">
-                                <p className="text-[10px] md:text-sm font-bold text-slate-400 tracking-tight tabular-nums">Score: {Math.round(res.score)}</p>
+                                <p className="text-[10px] md:text-sm font-bold text-slate-400 tracking-tight tabular-nums">Score: {(Number(res.score) || 0).toFixed(1)}</p>
                              </div>
                           </div>
                        </div>

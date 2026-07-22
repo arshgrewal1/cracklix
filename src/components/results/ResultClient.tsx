@@ -49,6 +49,11 @@ import ResultCard from "./ResultCard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 
+/**
+ * @fileOverview Universal Result Hub Viewer v4.2.
+ * FIXED: Accurate state rank calculation with latest submission node inclusion.
+ */
+
 export default function ResultClient() {
   const db = useFirestore()
   const { user, profile } = useUser()
@@ -109,18 +114,29 @@ export default function ResultClient() {
   const { data: rawGlobalResults } = useCollection<any>(globalResultsQuery)
 
   const merit = useMemo(() => {
-     if (!rawGlobalResults || !sessionData || !user) return { rank: '?', total: 0, percentile: 0 };
+     if (!sessionData) return { rank: '?', total: 0, percentile: 0 };
+     
      const uniqueMap = new Map<string, any>();
-     [...rawGlobalResults].forEach((r: any) => {
-        if (!uniqueMap.has(r.userId) || uniqueMap.get(r.userId).score < r.score) {
-           uniqueMap.set(r.userId, r);
-        }
-     });
+     
+     // CRITICAL: Inject current session into map to ensure immediate rank update
+     if (user?.uid) {
+       uniqueMap.set(user.uid, { ...sessionData, userId: user.uid });
+     }
+
+     if (rawGlobalResults) {
+       [...rawGlobalResults].forEach((r: any) => {
+          if (!uniqueMap.has(r.userId) || uniqueMap.get(r.userId).score < r.score) {
+             uniqueMap.set(r.userId, r);
+          }
+       });
+     }
+
      const meritList = Array.from(uniqueMap.values()).sort((a: any, b: any) => (b.score || 0) - (a.score || 0));
      const myRank = meritList.findIndex((r: any) => r.userId === user?.uid) + 1;
      const actualRank = myRank > 0 ? myRank : 1;
      const total = meritList.length;
      const percentile = total > 1 ? Math.round(((total - actualRank) / (total - 1)) * 100) : 100;
+     
      return { rank: actualRank, total, percentile };
   }, [rawGlobalResults, sessionData, user]);
 
@@ -484,7 +500,7 @@ export default function ResultClient() {
                                       <td className="px-3 text-center">
                                          <Badge className={cn("border-none px-2 py-0.5 font-bold text-[9px]", sub.accuracy > 70 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>{sub.accuracy}%</Badge>
                                       </td>
-                                      <td className="px-3 text-center font-black tabular-nums text-xs">{sub.score}</td>
+                                      <td className="px-3 text-center font-black tabular-nums text-xs">{sub.score.toFixed(1)}</td>
                                       <td className="px-6 text-right">
                                          <div className="w-24 ml-auto h-1 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                                             <div className={cn("h-full transition-all duration-1000", sub.accuracy > 70 ? "bg-emerald-500" : "bg-amber-500")} style={{ width: `${sub.accuracy}%` }} />
