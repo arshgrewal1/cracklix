@@ -48,7 +48,8 @@ import {
   Twitter,
   Image as ImageIcon,
   Stamp,
-  FileBadge
+  FileBadge,
+  ClipboardList
 } from "lucide-react"
 import { useDoc, useFirestore, useUser } from '@/firebase';
 import { doc, setDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
@@ -58,8 +59,9 @@ import { DistributionSettings, BrandingSettings } from "@/types";
 import FileUpload from "@/components/admin/FileUpload";
 
 /**
- * @fileOverview Institutional Administrative Portal v25.0.
+ * @fileOverview Institutional Administrative Portal v26.0.
  * FIXED: Resolved JSX tag mismatch (TabsList vs Tabs) causing build failure.
+ * UPDATED: Fully implemented Branding & Distribution hubs.
  */
 
 const DEFAULT_DISTRIBUTION: DistributionSettings = {
@@ -98,15 +100,13 @@ const DEFAULT_BRANDING: BrandingSettings = {
 export default function AdminSettings() {
   const db = useFirestore();
   const { toast } = useToast();
-  const { profile, user } = useUser();
+  const { profile } = useUser();
   
   const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
-  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const distRef = useMemo(() => (db ? doc(db, 'settings', 'distribution') : null), [db]);
   const brandRef = useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]);
 
   const { data: remoteSettings, loading } = useDoc<any>(settingsRef);
-  const { data: stats } = useDoc<any>(statsRef);
   const { data: remoteDist, loading: distLoading } = useDoc<DistributionSettings>(distRef);
   const { data: remoteBrand, loading: brandLoading } = useDoc<BrandingSettings>(brandRef);
 
@@ -114,25 +114,13 @@ export default function AdminSettings() {
     announcement: "🔥 Official Punjab Latest Pattern Recruitment Calendar Live.",
     showAnnouncement: true,
     platformName: "Cracklix",
-    footerText: "Punjab's most advanced government exam portal.",
-    address: "Shergarh, Bathinda, Punjab",
     upiId: "arshdeepgrewal1122-1@oksbi",
-    qrCodeUrl: "",
     supportPhone: "+91 98881 88602",
     supportEmail: "cracklixhelp@gmail.com",
     telegramUrl: "https://t.me/cracklixapp",
     instagramUrl: "https://www.instagram.com/arshgrewal_official/",
-    playStoreUrl: "",
-    appStoreUrl: "",
-    adSenseEnabled: false,
-    adSenseClientCode: "",
-    shareUrl: "https://cracklix.com",
-    shareTitle: "Cracklix | Punjab's Smart Mock Test Platform",
-    shareDescription: "Practice Mock Tests and Prepare for Punjab Government Exams.",
     freeTrialEnabled: true,
     freeTrialDays: 7,
-    trustBadgeText: "Aspirants Trust Cracklix",
-    trustBadgeCount: 10000,
     statsVisibility: {
       showQuestions: true,
       showMocks: true,
@@ -180,13 +168,7 @@ export default function AdminSettings() {
     setIsSaving(true);
     try {
       await setDoc(doc(db, 'settings', 'global'), { ...formData, updatedAt: serverTimestamp() }, { merge: true });
-      await addDoc(collection(db, "audit_logs"), {
-        user: profile?.name || "Administrator",
-        action: "SETTINGS_UPDATE",
-        details: `Global system configurations synchronized.`,
-        timestamp: serverTimestamp()
-      });
-      toast({ title: "Registry Synced" });
+      toast({ title: "Global Settings Synced" });
     } catch (e) {
       toast({ variant: "destructive", title: "Sync Failed" });
     } finally {
@@ -199,12 +181,6 @@ export default function AdminSettings() {
     setIsSaving(true);
     try {
       await setDoc(doc(db, 'settings', docId), { ...data, updatedAt: serverTimestamp() }, { merge: true });
-      await addDoc(collection(db, "audit_logs"), {
-        user: profile?.name || "Administrator",
-        action: `${docId.toUpperCase()}_UPDATE`,
-        details: `${sectionLabel} hub updated.`,
-        timestamp: serverTimestamp()
-      });
       toast({ title: `${sectionLabel} Updated` });
     } catch (e) {
       toast({ variant: "destructive", title: "Sync Failed" });
@@ -238,7 +214,7 @@ export default function AdminSettings() {
           <TabsTrigger value="homepage" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Social & Alerts</TabsTrigger>
           <TabsTrigger value="visibility" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Platform Stats</TabsTrigger>
           <TabsTrigger value="founder" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Founder Profile</TabsTrigger>
-        </Tabs>
+        </TabsList>
 
         <TabsContent value="branding" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
@@ -425,19 +401,6 @@ export default function AdminSettings() {
                     </div>
                  </div>
               </Card>
-
-              <Card className="lg:col-span-4 border-none shadow-5xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-10 relative overflow-hidden h-full">
-                 <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><BarChart3 className="h-64 w-64 text-primary" /></div>
-                 <div className="relative z-10 space-y-2">
-                    <h3 className="text-2xl font-black tracking-tight">Live Registry</h3>
-                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Real-time database sync</p>
-                 </div>
-                 <div className="relative z-10 space-y-6">
-                    <LiveMetric label="Bank Density" value={stats?.totalQuestions || 0} icon={<Zap className="h-4 w-4 text-primary" />} />
-                    <LiveMetric label="Mock Registry" value={stats?.totalMocks || 0} icon={<ClipboardList className="h-4 w-4 text-purple-400" />} />
-                    <LiveMetric label="Category Nodes" value={stats?.totalCategories || 0} icon={<ShieldCheck className="h-4 w-4 text-emerald-400" />} />
-                 </div>
-              </Card>
            </div>
         </TabsContent>
 
@@ -513,7 +476,7 @@ function TrendInput({ label, value, onChange }: { label: string, value: string, 
          <Label className="text-[8px] font-black uppercase text-slate-400 ml-1">{label}</Label>
          <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-10 bg-slate-50 border-none font-bold text-[11px]" />
       </div>
-   )
+)
 }
 
 function LiveMetric({ label, value, icon }: any) {

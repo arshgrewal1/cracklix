@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -14,10 +15,11 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
+import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Top Rankers Center v3.2.
- * FIXED: Preserving decimal scores for accuracy.
+ * @fileOverview Official Top Rankers Center v3.3 [Fidelity Fix].
+ * FIXED: Preserving decimal scores for accuracy and Title Case names.
  */
 
 const CATEGORY_CHIPS = [
@@ -33,7 +35,7 @@ const CATEGORY_CHIPS = [
 
 export default function LeaderboardPage() {
   const db = useFirestore()
-  const { user, loading: authLoading } = useUser()
+  const { user } = useUser()
   const router = useRouter()
   
   const [searchTerm, setSearchTerm] = useState("")
@@ -105,7 +107,6 @@ export default function LeaderboardPage() {
       
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-8 md:space-y-12 pb-32">
          
-         {/* 1. COMPACT HEADER */}
          <section className="space-y-4 px-1">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                <div className="space-y-1">
@@ -119,7 +120,6 @@ export default function LeaderboardPage() {
             </div>
          </section>
 
-         {/* 2. STICKY INTELLIGENCE HUB */}
          <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/95 backdrop-blur-xl -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
             <div className="max-w-4xl mx-auto space-y-6">
                <div className="relative group">
@@ -128,7 +128,7 @@ export default function LeaderboardPage() {
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                     placeholder="Search student or exam vertical..." 
-                    className="h-14 md:h-16 pl-14 pr-12 rounded-2xl bg-white border-slate-200 shadow-xl text-base font-bold placeholder:text-slate-200 focus-visible:ring-4 focus-visible:ring-primary/5 transition-all"
+                    className="h-14 md:h-16 pl-14 pr-12 rounded-2xl bg-white border-slate-200 shadow-xl text-base md:text-lg font-bold placeholder:text-slate-200 focus-visible:ring-4 focus-visible:ring-primary/5 transition-all"
                   />
                   {searchTerm && (
                     <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all">
@@ -152,26 +152,18 @@ export default function LeaderboardPage() {
                         {chip.label}
                      </button>
                   ))}
-                  <button className="h-9 w-9 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-400 shrink-0">
-                     <Filter className="h-4 w-4" />
-                  </button>
                </div>
             </div>
          </div>
 
-         {/* 3. PODIUM SECTION */}
          {!searchTerm && finalSortedList.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 pt-8">
-               {/* 2nd Place */}
                <PodiumCard rank={2} data={podium[1]} order="md:order-1" />
-               {/* 1st Place */}
                <PodiumCard rank={1} data={podium[0]} order="md:order-2" isMain />
-               {/* 3rd Place */}
                <PodiumCard rank={3} data={podium[2]} order="md:order-3" />
             </div>
          )}
 
-         {/* 4. LEADERBOARD LIST */}
          <div className="max-w-4xl mx-auto space-y-3">
             <AnimatePresence mode="popLayout">
                {resultsLoading || usersLoading ? (
@@ -190,14 +182,12 @@ export default function LeaderboardPage() {
                      >
                         <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-300 rounded-2xl bg-white group overflow-hidden">
                            <CardContent className="p-0 flex items-center h-[72px] md:h-[80px]">
-                              {/* RANK NODE */}
                               <div className="w-12 md:w-16 flex items-center justify-center shrink-0">
                                  <span className="text-lg md:text-2xl font-black text-slate-200 group-hover:text-primary transition-colors tabular-nums">
                                     #{searchTerm ? idx + 1 : idx + 4}
                                  </span>
                               </div>
 
-                              {/* IDENTITY HUB */}
                               <div className="flex-1 flex items-center gap-4 min-w-0 pr-4">
                                  <StudentAvatar 
                                     profile={entry.profile || entry} 
@@ -218,7 +208,6 @@ export default function LeaderboardPage() {
                                  </div>
                               </div>
 
-                              {/* METRICS GRID */}
                               <div className="flex items-center gap-4 md:gap-10 px-4 md:px-8 shrink-0">
                                  <div className="text-right hidden sm:block">
                                     <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Accuracy</p>
@@ -258,9 +247,7 @@ export default function LeaderboardPage() {
                )}
             </AnimatePresence>
          </div>
-
       </main>
-
       <Footer />
     </div>
   )
@@ -284,7 +271,6 @@ function PodiumCard({ rank, data, order, isMain }: any) {
             "border-none shadow-xl transition-all duration-500 rounded-[2.5rem] p-8 md:p-10 flex flex-col items-center text-center group hover:-translate-y-2 relative overflow-hidden w-full",
             isMain ? "bg-[#0F172A] text-white ring-4 ring-primary/20 scale-[1.05] z-10" : "bg-white text-[#0F172A]"
          )}>
-            {/* Rank Badge */}
             <div className={cn(
                "absolute top-6 left-6 h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center text-white font-black text-xs md:text-sm shadow-xl transition-transform group-hover:rotate-12",
                rank === 1 ? "bg-amber-400" : rank === 2 ? "bg-slate-300" : "bg-orange-400"

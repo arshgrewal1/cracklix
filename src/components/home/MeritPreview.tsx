@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -13,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Top Rankers Preview Hub v20.2.
+ * @fileOverview Top Rankers Preview Hub v20.3 [Fidelity Sync].
  * FIXED: Preserving decimal scores for institutional accuracy.
  */
 export default function MeritPreview() {
