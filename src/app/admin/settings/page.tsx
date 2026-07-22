@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -261,7 +260,7 @@ export default function AdminSettings() {
                        <h3 className="text-xl font-bold text-[#0F172A] flex items-center gap-3"><Globe className="h-5 w-5 text-blue-500" /> Website Hub</h3>
                        <Button onClick={() => handleSaveDoc("distribution", distData, "Distribution")} size="sm" className="h-9 px-6 rounded-lg bg-[#0F172A] font-bold text-[10px] uppercase">Save Hub</Button>
                     </div>
-                    <Card className="border-none shadow-xl bg-white p-6 md:p-8 space-y-6 rounded-[2rem] border border-slate-50">
+                    <Card className="border-none shadow-xl bg-white p-6 md:p-8 space-y-6 rounded-[2rem] border border-slate-100">
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <FormNode label="Primary Website URL" value={distData.primaryWebsiteUrl} onChange={v => setDistData({...distData, primaryWebsiteUrl: v})} placeholder="https://cracklix.com" />
                           <FormNode label="Install Landing URL" value={distData.installUrl} onChange={v => setDistData({...distData, installUrl: v})} placeholder="https://cracklix.com/install" />
@@ -274,7 +273,7 @@ export default function AdminSettings() {
                        <h3 className="text-xl font-bold text-[#0F172A] flex items-center gap-3"><Share2 className="h-5 w-5 text-emerald-500" /> Share Settings</h3>
                        <Button onClick={() => handleSaveDoc("distribution", distData, "Share")} size="sm" className="h-9 px-6 rounded-lg bg-[#0F172A] font-bold text-[10px] uppercase">Save Registry</Button>
                     </div>
-                    <Card className="border-none shadow-xl bg-white p-6 md:p-8 space-y-6 rounded-[2rem] border border-slate-50">
+                    <Card className="border-none shadow-xl bg-white p-6 md:p-8 space-y-6 rounded-[2rem] border border-slate-100">
                        <FormNode label="Universal Share Title" value={distData.shareTitle} onChange={v => setDistData({...distData, shareTitle: v})} />
                        <div className="space-y-2">
                           <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Social Message Template</Label>
@@ -291,7 +290,7 @@ export default function AdminSettings() {
               <div className="lg:col-span-4">
                  <Card className="border-none shadow-5xl rounded-[2.5rem] bg-white overflow-hidden border border-slate-100 sticky top-24">
                     <div className="relative aspect-video bg-slate-100 flex items-center justify-center overflow-hidden">
-                       {distData.ogImageUrl ? <img src={distData.ogImageUrl} className="h-full w-full object-cover" /> : <ImageIcon className="h-10 w-10 opacity-20" />}
+                       {distData.ogImageUrl ? <img src={distData.ogImageUrl} alt="OG Preview" className="h-full w-full object-cover" /> : <ImageIcon className="h-10 w-10 opacity-20" />}
                     </div>
                     <div className="p-8 space-y-3 text-left">
                        <h4 className="text-lg font-bold text-[#0F172A] line-clamp-2">{distData.seoTitle}</h4>
@@ -466,6 +465,11 @@ function TrendInput({ label, value, onChange }: { label: string, value: string, 
    return (
       <div className="space-y-1.5 text-left">
          <Label className="text-[8px] font-black uppercase text-slate-400 ml-1">{label}</Label>
-         <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-10 bg-slate-50 border-none font-bold text-[11px]" />
+         <Input 
+            value={value} 
+            onChange={(e) => onChange(e.target.value)} 
+            className="h-10 bg-slate-50 border-none font-bold text-[11px]" 
+         />
       </div>
+   );
 }
