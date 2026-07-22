@@ -42,7 +42,8 @@ import {
   Image as ImageIcon,
   Stamp,
   FileBadge,
-  ClipboardList
+  ClipboardList,
+  Layers
 } from "lucide-react"
 import { useDoc, useFirestore, useUser } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
