@@ -1,84 +1,113 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // --- 1. CORE HELPER FUNCTIONS ---
+    
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    function isAdmin() {
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isSuspended() {
+      return getUserData().status == 'SUSPENDED';
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && getUserData().role == 'SUPER_ADMIN';
+    }
+
+    function hasPermission(perm) {
       return isAuthenticated() && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['ADMIN', 'SUPER_ADMIN'];
+             !isSuspended() && 
+             (getUserData().role == 'SUPER_ADMIN' || getUserData().permissions[perm] == true);
     }
 
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // --- 1. Content Registry ---
-    match /categories/{catId} { allow read: if true; allow write: if isAdmin(); }
-    match /boards/{boardId} { allow read: if true; allow write: if isAdmin(); }
-    match /exams/{examId} { allow read: if true; allow write: if isAdmin(); }
-    match /questions/{qId} { allow read: if true; allow write: if isAdmin(); }
-    match /mcqBank/{qId} { allow read: if true; allow write: if isAdmin(); }
-    match /mocks/{mockId} { allow read: if true; allow write: if isAdmin(); }
-    match /daily_quizzes/{quizId} { allow read: if true; allow write: if isAdmin(); }
-    match /notes/{noteId} { allow read: if true; allow write: if isAdmin(); }
-    match /pyqs/{pyqId} { allow read: if true; allow write: if isAdmin(); }
-    match /help_articles/{articleId} { allow read: if true; allow write: if isAdmin(); }
-    match /exam_calendar/{eventId} { allow read: if true; allow write: if isAdmin(); }
-    match /success_stories/{storyId} { allow read: if true; allow write: if isAdmin(); }
-    match /settings/{sId} { allow read: if true; allow write: if isAdmin(); }
-    match /passes/{pId} { allow read: if true; allow write: if isAdmin(); }
-    match /vacancies/{vId} { allow read: if true; allow write: if isAdmin(); }
-    match /vacancy_categories/{vId} { allow read: if true; allow write: if isAdmin(); }
+    // --- 2. USER REGISTRY ---
 
-    // --- 2. Aspirant Profiles ---
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow create: if isOwner(userId);
-      allow update: if isAdmin() || (isOwner(userId) && (
-        !request.resource.data.diff(request.resource.data).affectedKeys().hasAny(['role', 'passStatus', 'planTier', 'passExpiresAt', 'status'])
-      ));
-      
-      match /study_sessions/{sessionId} {
-        allow read, write: if isOwner(userId);
-      }
+      // Only Super Admin can change roles or permissions
+      allow create: if isAuthenticated() && (isSuperAdmin() || isOwner(userId));
+      allow update: if isSuperAdmin() || (isOwner(userId) && 
+                      !request.resource.data.diff(resource.data).affectedKeys()
+                        .hasAny(['role', 'permissions', 'status']));
     }
 
-    // --- 3. Monetization Ledger ---
-    match /payment_requests/{reqId} {
-      allow create: if isAuthenticated();
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow update: if isAdmin(); 
-    }
+    // --- 3. CONTENT PERMISSIONS ---
+
+    match /categories/{id} { allow read: if true; allow write: if hasPermission('manageCategories'); }
+    match /boards/{id} { allow read: if true; allow write: if hasPermission('manageCategories'); }
+    match /exams/{id} { allow read: if true; allow write: if hasPermission('manageCategories'); }
     
-    match /subscriptions/{sId} {
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow write: if isAdmin();
+    match /subjects/{id} { 
+      allow read: if true; 
+      allow create: if hasPermission('createSubject');
+      allow update: if hasPermission('editSubject');
+      allow delete: if hasPermission('deleteSubject');
     }
 
-    // --- 4. Performance Nodes ---
-    match /results/{resultId} {
+    match /test_series/{id} {
+      allow read: if true;
+      allow write: if hasPermission('manageSeries');
+    }
+
+    match /mocks/{id} {
+      allow read: if true;
+      allow create: if hasPermission('createMock');
+      allow update: if hasPermission('editMock');
+      allow delete: if hasPermission('deleteMock');
+    }
+
+    match /mcqBank/{id} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && resultId.split('_')[0] == request.auth.uid;
-    }
-    
-    match /attempts/{attemptId} {
-      allow read, write: if isAuthenticated() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
+      allow create: if hasPermission('uploadQuestions');
+      allow update: if hasPermission('editQuestions');
+      allow delete: if hasPermission('deleteQuestions');
     }
 
-    match /support_tickets/{ticketId} {
+    match /questions/{id} {
+      allow read: if true;
+      allow create: if hasPermission('uploadQuestions');
+      allow update: if hasPermission('editQuestions');
+      allow delete: if hasPermission('deleteQuestions');
+    }
+
+    match /pyqs/{id} {
+      allow read: if true;
+      allow create: if hasPermission('uploadPYQs');
+      allow update: if hasPermission('editPYQs');
+      allow delete: if hasPermission('deletePYQs');
+    }
+
+    // --- 4. SYSTEM & FINANCIALS ---
+
+    match /payment_requests/{id} {
       allow create: if isAuthenticated();
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow update: if isAdmin();
+      allow read: if hasPermission('managePayments') || resource.data.userId == request.auth.uid;
+      allow update: if hasPermission('managePayments');
     }
-    
-    match /audit_logs/{logId} {
-      allow read, write: if isAdmin();
+
+    match /subscriptions/{id} {
+      allow read: if hasPermission('viewRevenue') || resource.data.userId == request.auth.uid;
+      allow write: if hasPermission('managePayments');
     }
-    
-    match /vacancy_analytics/{id} {
-      allow read, create, update: if true;
+
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if hasPermission('websiteSettings');
+    }
+
+    match /audit_logs/{id} {
+      allow read: if hasPermission('manageRoles');
+      allow create: if isAuthenticated();
     }
   }
 }
