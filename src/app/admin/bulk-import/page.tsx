@@ -23,7 +23,10 @@ import {
   FileBarChart,
   Target,
   PenLine,
-  Languages
+  Languages,
+  LayoutGrid,
+  BarChart3,
+  Image as ImageIcon
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy, updateDoc, increment } from "firebase/firestore"
@@ -43,7 +46,10 @@ const FORMATS: { label: string, value: ParserFormat, icon: any }[] = [
   { label: "Reasoning", value: "REASONING", icon: ClipboardList },
   { label: "Match following", value: "MATCHING", icon: CheckCircle2 },
   { label: "Assertion & Reason", value: "ASSERTION", icon: AlertTriangle },
-  { label: "Fill in the Blank", value: "FILL_BLANK", icon: PenLine }
+  { label: "Fill in the Blank", value: "FILL_BLANK", icon: PenLine },
+  { label: "Table Based", value: "TABLE", icon: LayoutGrid },
+  { label: "Graph/Chart", value: "GRAPH", icon: BarChart3 },
+  { label: "Diagram Based", value: "DIAGRAM", icon: ImageIcon }
 ];
 
 const LANGUAGE_MODES = [
@@ -54,9 +60,8 @@ const LANGUAGE_MODES = [
 ];
 
 /**
- * @fileOverview Institutional Bulk Ingestion Hub v84.2.
- * FIXED: Resolved JSX tag mismatch (Button/button) causing build failure.
- * UPDATED: Removed all remaining uppercase styling for PWA optimization.
+ * @fileOverview Institutional Bulk Ingestion Hub v85.0.
+ * UPDATED: Restored all 12 question formats with correct iconography.
  */
 export default function BulkIngestionPage() {
   const router = useRouter()
