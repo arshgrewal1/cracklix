@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v33.0 (Maximization Overhaul).
- * FIXED: Removed all internal padding and radius overrides to allow edge-to-edge icon fill.
+ * @fileOverview Institutional Branding Engine v34.0 (Maximization Overhaul).
+ * FIXED: Removed aggressive rounded-full clipping and switched to object-contain for full logo visibility.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -71,12 +71,11 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   };
 
   const containerSize = sizeClasses[size];
-  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10');
 
   if (logoUrl) {
     return (
       <div className={cn(
-        "relative shrink-0 overflow-hidden transition-all bg-white rounded-full border border-slate-100 shadow-xl",
+        "relative shrink-0 overflow-hidden transition-all bg-white rounded-2xl border border-slate-100 shadow-xl",
         containerSize, 
         className
       )}>
@@ -85,7 +84,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           alt="Authority" 
           fill
           sizes="256px"
-          className="object-cover"
+          className="object-contain p-1"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -107,7 +106,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "flex items-center justify-center transition-all bg-white rounded-full border border-slate-100 shadow-xl",
+      "flex items-center justify-center transition-all bg-white rounded-2xl border border-slate-100 shadow-xl",
       containerSize, 
       className
     )}>

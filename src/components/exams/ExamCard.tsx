@@ -41,8 +41,9 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v8.0.
- * FIXED: Equal height enforcement, title clamping, and dynamic stat mapping.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v9.0.
+ * FIXED: Centered title and description alignment relative to the logo.
+ * FIXED: Switched to object-contain for logos to prevent clipping.
  */
 export default function ExamCard({ 
   exam, 
@@ -114,17 +115,12 @@ export default function ExamCard({
   };
 
   const buttonConfig = useMemo(() => {
-    const isPremium = profile?.passStatus === 'active';
     // Logic: View Analysis if 100%, Continue if > 0, Start if 0. 
-    // This is a simplified check for the series/vertical as a whole.
     if (stats.completed > 0 && stats.progress === 100) return { label: "View Analysis", icon: BarChart3, variant: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200" };
     if (stats.completed > 0) return { label: "Continue Prep", icon: RefreshCw, variant: "bg-primary hover:bg-blue-700 shadow-blue-200" };
     
-    // If premium is required but not active (Example logic)
-    // if (exam.isPremium && !isPremium) return { label: "Unlock Series", icon: Lock, variant: "bg-amber-500 hover:bg-amber-600 shadow-amber-200" };
-    
     return { label: "Start Preparation", icon: Play, variant: "bg-[#0F172A] hover:bg-black shadow-slate-200" };
-  }, [stats, profile]);
+  }, [stats]);
 
   if (!exam) return null;
 
@@ -163,27 +159,27 @@ export default function ExamCard({
             </button>
           </div>
 
-          <CardContent className="px-5 md:px-6 lg:px-8 pb-8 flex-1 flex flex-col text-left">
+          <CardContent className="px-5 md:px-6 lg:px-8 pb-8 flex-1 flex flex-col text-center">
             
             {/* LOGO: 80x80 Desktop, 70x70 Mobile */}
             <div className="mb-6 lg:mb-8 flex justify-center">
                <div className="w-[70px] h-[70px] lg:w-[80px] lg:h-[80px] rounded-2xl md:rounded-3xl shadow-2xl bg-white border-2 border-slate-50 flex items-center justify-center overflow-hidden shrink-0">
-                  <AuthorityLogo boardId={exam.boardId} size="md" className="p-0 border-none shadow-none" />
+                  <AuthorityLogo boardId={exam.boardId} size="md" className="p-0 border-none shadow-none bg-transparent" />
                </div>
             </div>
 
-            {/* TITLE: Clamped 2 Lines, Fixed sizes */}
+            {/* TITLE & DESCRIPTION: Centered Alignment */}
             <div className="space-y-2 mb-6">
-               <h3 className="text-[24px] md:text-[28px] lg:text-[34px] font-[800] text-[#0F172A] leading-[1.15] group-hover:text-primary transition-colors tracking-tighter line-clamp-2 min-h-[2.3em] overflow-hidden">
+               <h3 className="text-[24px] md:text-[28px] lg:text-[34px] font-[800] text-[#0F172A] leading-[1.15] group-hover:text-primary transition-colors tracking-tighter line-clamp-2 min-h-[2.3em] overflow-hidden text-center">
                  {exam.name}
                </h3>
-               <p className="text-slate-400 font-medium text-[14px] md:text-[15px] lg:text-[18px] line-clamp-2 leading-tight overflow-hidden">
+               <p className="text-slate-400 font-medium text-[14px] md:text-[15px] lg:text-[18px] line-clamp-2 leading-tight overflow-hidden text-center">
                   {exam.description || "Official recruitment preparation with verified patterns."}
                </p>
             </div>
 
             {/* STATISTICS: Compact Responsive Grid */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-6 border-t border-slate-100">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-6 border-t border-slate-100 text-left">
                {stats.mocks > 0 && <StatRow label="Mock Tests" val={stats.mocks} icon={Zap} />}
                {stats.subjects > 0 && <StatRow label="Subject Tests" val={stats.subjects} icon={BookOpen} />}
                {stats.pyqs > 0 && <StatRow label="PYQs" val={stats.pyqs} icon={FileStack} />}
@@ -193,7 +189,7 @@ export default function ExamCard({
 
             {/* PROGRESS: 6-8px high */}
             {user && stats.totalTests > 0 && (
-               <div className="space-y-3 mt-8">
+               <div className="space-y-3 mt-8 text-left">
                   <div className="flex justify-between items-center text-[11px] lg:text-[13px] font-bold text-slate-500 uppercase tracking-widest">
                      <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> Mastery</span>
                      <span className="text-primary tabular-nums">{stats.progress}%</span>
