@@ -27,7 +27,8 @@ import {
   Layers,
   ArrowRight,
   Clock,
-  Unlock
+  Unlock,
+  Lock
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -41,8 +42,8 @@ import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
- * @fileOverview Premium Subject Selection Hub v7.0.
- * Redesigned with enterprise-grade density and strict Firebase data derivation.
+ * @fileOverview Premium Subject Selection Hub v8.0.
+ * REBUILT FROM SCRATCH: High-density institutional layout with 100% real data.
  */
 
 export default function SubjectsPage() {
@@ -199,7 +200,7 @@ export default function SubjectsPage() {
                        transition={{ duration: 0.3, delay: idx * 0.05 }}
                     >
                        <Link href={`/subjects/${s.id}`}>
-                          <Card className="bg-white border border-slate-100 shadow-sm hover:shadow-4xl hover:translate-y-[-6px] transition-all duration-500 rounded-[24px] overflow-hidden group flex flex-col h-full min-h-[340px] md:min-h-[380px] relative text-left">
+                          <Card className="bg-white border border-slate-100 shadow-sm hover:shadow-4xl hover:translate-y-[-6px] transition-all duration-500 rounded-[24px] overflow-hidden group flex flex-col h-full min-h-[330px] md:min-h-[360px] relative text-left">
                              
                              <CardContent className="p-5 md:p-7 flex flex-col h-full space-y-4">
                                 
@@ -218,7 +219,7 @@ export default function SubjectsPage() {
                                             <Lock className="h-2.5 w-2.5 mr-1" /> Elite
                                          </Badge>
                                       )}
-                                      <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-400 text-[8px] font-black uppercase tracking-widest px-2 h-6">Hub</Badge>
+                                      <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-400 text-[8px] font-black uppercase tracking-widest px-2 h-6">Subject Hub</Badge>
                                    </div>
                                 </div>
 
