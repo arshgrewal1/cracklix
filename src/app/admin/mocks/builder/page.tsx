@@ -70,8 +70,8 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v52.1 [Audit Fixed].
- * FIXED: Resilient hydration now searches mcqBank, questions, and usedQuestions archive.
+ * @fileOverview Master Mock Builder v52.2 [PWA Visibility Fix].
+ * FIXED: Removed truncation and reduced font size for questions in the staging and assembly areas.
  */
 
 export default function MockBuilderPage() {
@@ -726,9 +726,9 @@ function MockBuilderContent() {
                                     {isSelected && <Check className="h-4 w-4 text-white stroke-[4px]" />}
                                  </div>
                                  <div className="min-w-0 text-left">
-                                    <div className="flex items-center gap-3 mb-1">
-                                       <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded">Node #{bIdx + 1}</span>
-                                       <p className="font-bold text-[#0F172A] truncate text-base md:text-lg leading-tight">{q.englishQuestion}</p>
+                                    <div className="flex flex-col md:flex-row md:items-center gap-3 mb-1">
+                                       <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded w-fit">Node #{bIdx + 1}</span>
+                                       <p className="font-bold text-[#0F172A] text-sm md:text-base leading-tight break-words">{q.englishQuestion}</p>
                                     </div>
                                     <div className="flex items-center gap-4 mt-2">
                                        <Badge className="bg-slate-50 text-slate-500 border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-md shadow-sm">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'}</Badge>
@@ -798,7 +798,7 @@ function MockBuilderContent() {
                                  <div key={q.id} className="flex items-center justify-between p-4 md:px-8 bg-white border border-slate-100 rounded-xl md:rounded-2xl hover:shadow-lg transition-all group">
                                     <div className="flex items-center gap-4 md:gap-8 min-w-0">
                                        <span className="text-xs md:text-lg font-black text-primary tabular-nums">#{offset + qIdx + 1}</span>
-                                       <p className="text-sm font-bold text-slate-600 truncate">{q.englishQuestion}</p>
+                                       <p className="text-[13px] md:text-base font-bold text-slate-600 break-words line-clamp-2">{q.englishQuestion}</p>
                                     </div>
                                     <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
                                  </div>

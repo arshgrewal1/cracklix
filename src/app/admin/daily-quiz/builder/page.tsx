@@ -62,8 +62,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v45.2 [Audit Fixed].
- * FIXED: Resilient hydration now searches mcqBank, questions, and usedQuestions archive.
+ * @fileOverview Daily Challenge Builder v45.3 [PWA Visibility Fix].
+ * FIXED: Removed truncation and reduced font size for question statements to ensure full visibility.
  */
 
 export default function DailyQuizBuilder() {
@@ -464,12 +464,12 @@ function DailyQuizBuilderContent() {
                         return (
                            <motion.div key={q.id} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
                               <div onClick={() => setBankSelection(prev => isSel ? prev.filter(id => id !== q.id) : [...prev, q.id])} className={cn("p-6 md:px-10 rounded-[1.5rem] md:rounded-[2rem] border-2 transition-all cursor-pointer flex items-center justify-between group", isSel ? "bg-primary/5 border-primary shadow-lg" : "bg-white border-slate-50 hover:border-slate-100 shadow-sm")}>
-                                 <div className="flex items-center gap-6 min-w-0">
+                                 <div className="flex items-center gap-6 md:gap-10 min-w-0">
                                     <div className={cn("h-7 w-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all", isSel ? "bg-primary border-primary shadow-xl" : "bg-white border-slate-200")}>
                                        {isSel && <Check className="h-4 w-4 text-white stroke-[4px]" />}
                                     </div>
                                     <div className="min-w-0 text-left">
-                                       <p className="font-bold text-[#0F172A] truncate text-base md:text-lg leading-tight">{q.englishQuestion}</p>
+                                       <p className="font-bold text-[#0F172A] text-sm md:text-base leading-tight break-words">{q.englishQuestion}</p>
                                        <div className="flex items-center gap-4 mt-2">
                                           <Badge className="bg-slate-50 text-slate-500 border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-md shadow-sm">{subjects?.find((s:any) => s.id === q.subjectId)?.name || 'General'}</Badge>
                                           <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{q.difficulty}</span>
@@ -500,7 +500,7 @@ function DailyQuizBuilderContent() {
                               <div className="flex items-center gap-4 md:gap-8 min-w-0">
                                  <span className="text-xs md:text-lg font-black text-slate-200 tabular-nums">#{idx + 1}</span>
                                  <div className="min-w-0 text-left">
-                                    <p className="font-bold text-[#0F172A] text-sm md:text-lg truncate">{q.englishQuestion}</p>
+                                    <p className="font-bold text-[#0F172A] text-[13px] md:text-base leading-tight break-words line-clamp-2">{q.englishQuestion}</p>
                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {q.id.slice(-8)}</p>
                                  </div>
                               </div>
