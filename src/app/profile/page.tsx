@@ -51,6 +51,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
+/**
+ * @fileOverview Institutional Profile Hub v28.0 [Join Date Fixed].
+ */
+
 export default function ProfilePage() {
   const { user, profile, loading, profileLoading } = useUser()
   const db = useFirestore()
@@ -125,6 +129,26 @@ export default function ProfilePage() {
         color: active ? '#2563EB' : '#ef4444'
      }
   }, [profile]);
+
+  // Robust Date Parser for Join Date
+  const joinDate = useMemo(() => {
+    if (!profile?.createdAt) return "---";
+    try {
+      const dateNode = profile.createdAt;
+      const date = dateNode?.seconds 
+        ? new Date(dateNode.seconds * 1000) 
+        : new Date(dateNode);
+      
+      if (isNaN(date.getTime())) return "---";
+      
+      return date.toLocaleDateString('en-GB', { 
+        month: 'short', 
+        year: 'numeric' 
+      });
+    } catch (e) {
+      return "---";
+    }
+  }, [profile?.createdAt]);
 
   const handleUpdateProfile = async () => {
     if (!db || !user || !editForm) return
@@ -230,11 +254,11 @@ export default function ProfilePage() {
                              <div className="grid grid-cols-2 gap-4 md:gap-8">
                                 <div className="space-y-0.5">
                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">EXPIRES ON</p>
-                                   <p className="text-xs md:text-lg font-bold text-[#0F172A]">{passInfo.expiryDate}</p>
+                                   <p className="text-xs md:lg font-bold text-[#0F172A]">{passInfo.expiryDate}</p>
                                 </div>
                                 <div className="space-y-0.5 text-left">
                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">TIME LEFT</p>
-                                   <p className="text-xs md:text-lg font-bold text-[#0F172A]">{passInfo.active ? `${passInfo.daysLeft} Days` : 'N/A'}</p>
+                                   <p className="text-xs md:lg font-bold text-[#0F172A]">{passInfo.active ? `${passInfo.daysLeft} Days` : 'N/A'}</p>
                                 </div>
                              </div>
                           </div>
@@ -260,7 +284,7 @@ export default function ProfilePage() {
                       <ProfileDataNode icon={Phone} label="Mobile Number" value={profile?.phone || "Not Added"} />
                       <ProfileDataNode icon={MapPin} label="Home Address" value={profile?.address || "Not Added"} colSpan={2} />
                       <ProfileDataNode icon={ShieldCheck} label="Account Type" value={`${profile?.role || 'Student'}`} />
-                      <ProfileDataNode icon={Activity} label="Joined On" value={profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : "---"} />
+                      <ProfileDataNode icon={Activity} label="Joined On" value={joinDate} />
                     </div>
                  </Card>
               </div>
@@ -284,14 +308,14 @@ export default function ProfilePage() {
       <Footer />
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-         <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[90vh] bg-white rounded-3xl md:rounded-[3rem] border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
+         <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[95vh] bg-white rounded-3xl md:rounded-[3rem] border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
             <div className="h-2 w-full bg-[#0B1528] shrink-0" />
             <DialogHeader className="p-6 md:p-14 pb-3 md:pb-6 shrink-0">
                <div className="flex justify-between items-center">
                   <DialogTitle className="text-xl md:text-4xl font-black font-headline uppercase text-[#0F172A] flex items-center gap-3 md:gap-6">
                      <ShieldCheck className="h-6 w-6 md:h-10 md:w-10 text-primary" /> Edit Profile
                   </DialogTitle>
-                  <button onClick={() => setIsEditing(false)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"><X className="h-5 w-5 text-slate-400" /></button>
+                  <button onClick={() => setIsEditing(false)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"><X className="h-6 w-6 text-slate-400" /></button>
                </div>
             </DialogHeader>
             <div className="px-6 md:px-14 pb-6 md:pb-14 space-y-4 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
