@@ -25,9 +25,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Premium Social Share Hub v5.0 [Alignment Fix].
- * FIXED: Resolved text overlapping and icon collision.
- * UPDATED: Standardized typography to Title Case.
+ * @fileOverview Premium Social Share Hub v5.1 [PWA Text Fix].
+ * FIXED: Optimized internal padding and flex-shrinking to prevent text clipping on mobile.
  */
 export default function ShareButton({ 
   className = "", 
@@ -101,38 +100,38 @@ export default function ShareButton({
           onClick={handleShare}
           disabled={isSharing}
           className={cn(
-            "w-full h-auto min-h-[58px] py-3 px-5 rounded-[20px] bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold shadow-lg transition-all active:scale-95 group relative overflow-hidden border-none flex items-center justify-start gap-4",
+            "w-full h-auto min-h-[54px] py-2.5 px-4 rounded-[18px] bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold shadow-lg transition-all active:scale-95 group relative overflow-hidden border-none flex items-center justify-start gap-3",
             className
           )}
         >
-          <div className="shrink-0 flex items-center justify-center h-10 w-10 bg-white/10 rounded-xl">
+          <div className="shrink-0 flex items-center justify-center h-9 w-9 bg-white/10 rounded-xl">
              {isSharing ? (
-               <Loader2 className="h-5 w-5 animate-spin" />
+               <Loader2 className="h-4.5 w-4.5 animate-spin" />
              ) : (
-               <Share2 className="h-5 w-5 transition-transform group-hover:rotate-12" />
+               <Share2 className="h-4.5 w-4.5 transition-transform group-hover:rotate-12" />
              )}
           </div>
-          <div className="flex flex-col items-start text-left min-w-0 flex-1">
-             <span className="text-sm md:text-base leading-tight">Share Cracklix</span>
+          <div className="flex flex-col items-start text-left min-w-0 flex-1 overflow-hidden">
+             <span className="text-xs md:text-base leading-none truncate w-full">Share Cracklix</span>
              {showLabel && (
-               <span className="text-[10px] opacity-70 font-medium mt-0.5 leading-tight line-clamp-1">
-                 Invite friends to prepare smarter
+               <span className="text-[9px] opacity-70 font-medium mt-1 leading-none truncate w-full">
+                 Invite friends to study
                </span>
              )}
           </div>
-          <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform ml-auto shrink-0" />
+          <ChevronRight className="h-3.5 w-3.5 opacity-30 group-hover:translate-x-1 transition-transform ml-auto shrink-0" />
         </Button>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsShareDialogOpen}>
-        <DialogContent className="w-[94vw] max-w-[480px] rounded-[2.5rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left z-[2100]">
+        <DialogContent className="w-[94vw] max-w-[480px] rounded-[2rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left z-[2100]">
           <div className="h-2 w-full bg-blue-600" />
           <DialogHeader className="p-8 pb-4 text-center">
-             <div className="h-16 w-16 bg-blue-50 rounded-[2rem] flex items-center justify-center mx-auto text-blue-600 shadow-xl mb-6 border border-blue-100">
-                <Share2 className="h-8 w-8" />
+             <div className="h-14 w-14 bg-blue-50 rounded-[1.5rem] flex items-center justify-center mx-auto text-blue-600 shadow-xl mb-6 border border-blue-100">
+                <Share2 className="h-7 w-7" />
              </div>
-             <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tighter uppercase">Share Hub</DialogTitle>
-             <DialogDescription className="text-slate-400 font-bold text-[10px] mt-2">Premium invitation portal</DialogDescription>
+             <DialogTitle className="text-xl font-black text-[#0F172A] tracking-tighter uppercase">Share Hub</DialogTitle>
+             <DialogDescription className="text-slate-400 font-bold text-[9px] mt-2">Invite your fellow aspirants</DialogDescription>
           </DialogHeader>
 
           <div className="px-8 pb-10 space-y-3">
@@ -141,7 +140,7 @@ export default function ShareButton({
                 <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
              </button>
              <button onClick={() => copyToClipboard(shareMessage, "Message copied to registry")} className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-4 border border-slate-100 transition-all active:scale-95 group">
-                <Send className="h-6 w-6 text-slate-400" /> <span className="font-bold text-sm flex-1 text-left">Copy full message</span>
+                <Send className="h-6 w-6 text-slate-400" /> <span className="font-bold text-sm flex-1 text-left">Copy message</span>
              </button>
              <button onClick={() => copyToClipboard(installUrl, "Link copied to registry")} className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-4 border border-slate-100 transition-all active:scale-95 group">
                 <Copy className="h-6 w-6 text-slate-400" /> <span className="font-bold text-sm flex-1 text-left">Copy app link</span>
@@ -150,7 +149,7 @@ export default function ShareButton({
           
           <DialogFooter className="bg-slate-50 p-6 border-t border-slate-100 flex items-center justify-center gap-4 text-slate-300">
              <ShieldCheck className="h-4 w-4" />
-             <p className="text-[9px] font-black uppercase tracking-[0.3em]">Verified distribution node</p>
+             <p className="text-[9px] font-black uppercase tracking-[0.3em]">Institutional verified portal</p>
           </DialogFooter>
         </DialogContent>
       </Dialog>

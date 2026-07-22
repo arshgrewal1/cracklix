@@ -33,8 +33,8 @@ import { Badge } from "@/components/ui/badge";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Mobile Sidebar v87.0.
- * FIXED: Redesigned the share promo card to prevent component overlapping.
+ * @fileOverview Mobile Sidebar v88.0.
+ * FIXED: Optimized share section padding to prevent text clipping on small mobile screens.
  */
 export default function MobileSidebar({
   onClose,
@@ -196,7 +196,7 @@ export default function MobileSidebar({
 
         {/* SHARE APP PROMO */}
         <div className="px-3 py-6">
-           <div className="bg-[#0B1528] rounded-[2rem] p-6 space-y-6 border border-white/5 shadow-xl relative overflow-hidden group">
+           <div className="bg-[#0B1528] rounded-[2rem] p-4 md:p-6 space-y-6 border border-white/5 shadow-xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-16 w-16" /></div>
               <div className="relative z-10 text-left space-y-1">
                 <h4 className="text-[10px] font-black text-primary tracking-[0.3em] uppercase">Community</h4>
