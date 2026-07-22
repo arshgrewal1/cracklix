@@ -47,8 +47,9 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v7.3.
- * FIXED: Standardized text visibility and corrected typos in max-width utility classes.
+ * @fileOverview Premium Exam Detail Hub v7.4 [Strict Filtering].
+ * FIXED: Removed board-level fallback matching for mocks to prevent "fake" statistics.
+ * UPDATED: Dynamic Rank Status based on actual attempt history.
  */
 
 export default function ExamHubClient() {
@@ -99,11 +100,11 @@ export default function ExamHubClient() {
     if (!examId || !exam) return { FULL: [], SUBJECT: [], SECTIONAL: [], CA: [], PYQ: [], NOTES: [], SUBJECTS_WITH_CONTENT: [] };
     
     const allMocks = [...(rawMocks || []), ...(rawQuizzes || [])];
+    
+    // STRICT AUDIT: Only show mocks explicitly linked to this examId
     const mocks = allMocks.filter(m => {
        const isDirectMatch = m.examId === examId || (m.examIds && m.examIds.includes(examId));
-       const boardMatch = m.boardId === exam.boardId || (m.boardIds && m.boardIds.includes(exam.boardId));
-       const isGenericBoardTest = boardMatch && (!m.examIds || m.examIds.length === 0 || (m.examIds.length === 1 && m.examIds[0] === 'GENERAL'));
-       return isDirectMatch || isGenericBoardTest;
+       return isDirectMatch;
     });
 
     const subjectIdsWithTests = new Set(mocks.map(m => m.learningSubjectId).filter(Boolean));
@@ -121,9 +122,13 @@ export default function ExamHubClient() {
   }, [rawMocks, rawQuizzes, rawPyqs, rawNotes, examId, exam, subjects]);
 
   const stats = useMemo(() => {
-     const totalTests = (groupedContent.FULL.length + groupedContent.SUBJECT.length + groupedContent.SECTIONAL.length);
-     const attempted = results?.filter(r => (groupedContent.FULL.some(m => m.id === r.mockId) || groupedContent.SUBJECT.some(m => m.id === r.mockId) || groupedContent.SECTIONAL.some(m => m.id === r.mockId))).length || 0;
+     const currentMocks = [...groupedContent.FULL, ...groupedContent.SUBJECT, ...groupedContent.SECTIONAL];
+     const mockIdsSet = new Set(currentMocks.map(m => m.id));
+     
+     const totalTests = currentMocks.length;
+     const attempted = results?.filter(r => mockIdsSet.has(r.mockId)).length || 0;
      const avgAccuracy = results?.length ? Math.round(results.reduce((acc, r) => acc + (r.accuracy || 0), 0) / results.length) : 0;
+     
      return { totalTests, attempted, avgAccuracy };
   }, [groupedContent, results]);
 
@@ -236,7 +241,7 @@ export default function ExamHubClient() {
                <HeroStat icon={Zap} label="Tests Available" val={stats.totalTests} />
                <HeroStat icon={FileStack} label="Old Papers" val={groupedContent.PYQ.length} />
                <HeroStat icon={Target} label="My Progress" val={user ? `${stats.attempted}` : 'Login'} />
-               <HeroStat icon={Trophy} label="Rank Status" val="Active" />
+               <HeroStat icon={Trophy} label="Rank Status" val={stats.attempted > 0 ? "Active" : "Not Active"} />
             </div>
          </div>
       </section>

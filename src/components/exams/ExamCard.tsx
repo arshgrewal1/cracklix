@@ -41,9 +41,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v10.0.
- * FIXED: Resolved text truncation in stats grid and button overflow.
- * FIXED: Balanced font scaling for PWA/Mobile (320px-430px).
+ * @fileOverview Premium Enterprise Exam Dashboard Card v10.1 [Strict Stats].
+ * FIXED: Re-hardened statistics to only count mocks strictly belonging to the exam ID.
  */
 export default function ExamCard({ 
   exam, 
@@ -67,7 +66,8 @@ export default function ExamCard({
 
     if (!examId) return { mocks: 0, subjects: 0, sectionals: 0, pyqs: 0, notes: 0, questions: 0, totalTests: 0, completed: 0, progress: 0, avgAcc: 0, hasContent: false };
 
-    const relatedMocks = safeMocks.filter(m => m.examId === examId || m.examIds?.includes(examId));
+    // STRICT FILTER: Match explicitly linked mocks only
+    const relatedMocks = safeMocks.filter(m => m.examId === examId || (m.examIds && m.examIds.includes(examId)));
     const relatedPyqs = safePyqs.filter(p => p.examId === examId);
 
     const counts = {
@@ -132,7 +132,6 @@ export default function ExamCard({
       <Link href={`/exams/view?id=${exam.id}`} className="block h-full">
         <Card className="h-full min-h-[540px] bg-white border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden flex flex-col group relative">
           
-          {/* HEADER SECTION */}
           <div className="p-4 md:p-6 lg:p-7 flex justify-between items-center w-full relative z-10">
             <div className="flex items-center gap-2">
                <Badge className="bg-primary/10 text-primary border-none text-[9px] md:text-[10px] font-bold px-2.5 py-1 rounded-lg">
@@ -159,14 +158,12 @@ export default function ExamCard({
 
           <CardContent className="px-5 md:px-8 pb-8 flex-1 flex flex-col text-center">
             
-            {/* LOGO */}
             <div className="mb-6 lg:mb-8 flex justify-center">
                <div className="w-[64px] h-[64px] lg:w-[80px] lg:h-[80px] rounded-2xl md:rounded-3xl shadow-2xl bg-white border-2 border-slate-50 flex items-center justify-center overflow-hidden shrink-0">
                   <AuthorityLogo boardId={exam.boardId} size="md" className="p-0 border-none shadow-none bg-transparent" />
                </div>
             </div>
 
-            {/* TITLE & DESCRIPTION */}
             <div className="space-y-2 mb-6">
                <h3 className="text-[22px] md:text-[24px] lg:text-[28px] font-[800] text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tighter line-clamp-2 min-h-[2.3em] overflow-hidden text-center uppercase">
                  {exam.name}
@@ -176,16 +173,14 @@ export default function ExamCard({
                </p>
             </div>
 
-            {/* STATISTICS GRID - REFACTORED FOR VISIBILITY */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 pt-6 border-t border-slate-50 text-left">
                {stats.mocks > 0 && <StatRow label="Mocks" val={stats.mocks} icon={Zap} />}
                {stats.subjects > 0 && <StatRow label="Subjects" val={stats.subjects} icon={BookOpen} />}
                {stats.pyqs > 0 && <StatRow label="PYQs" val={stats.pyqs} icon={FileStack} />}
                {stats.questions > 0 && <StatRow label="Questions" val={stats.questions} icon={Layers} />}
-               {user && <StatRow label="Solved" val={stats.completed} icon={CheckCircle2} color="text-emerald-600" />}
+               {user && stats.completed > 0 && <StatRow label="Solved" val={stats.completed} icon={CheckCircle2} color="text-emerald-600" />}
             </div>
 
-            {/* PROGRESS SECTION */}
             {user && stats.totalTests > 0 && (
                <div className="space-y-2.5 mt-8 text-left">
                   <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-widest">
@@ -203,7 +198,6 @@ export default function ExamCard({
                </div>
             )}
 
-            {/* ACTION BUTTON - REFINED SIZING */}
             <div className="mt-auto pt-8">
                <Button className={cn(
                   "w-full h-[52px] rounded-xl text-white font-[800] uppercase tracking-widest text-[11px] md:text-[12px] transition-all active:scale-95 border-none shadow-xl flex items-center justify-between px-6",
@@ -218,7 +212,6 @@ export default function ExamCard({
             </div>
           </CardContent>
 
-          {/* BOTTOM STRIP */}
           <div className="px-5 py-3.5 bg-slate-50/50 border-t border-slate-50 flex items-center gap-2 overflow-x-auto no-scrollbar">
              {stats.mocks > 0 && <ContentChip label="Mocks" />}
              {stats.subjects > 0 && <ContentChip label="Subjects" />}
