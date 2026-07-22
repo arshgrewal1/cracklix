@@ -32,7 +32,9 @@ import {
   AlertTriangle,
   FolderTree,
   MoreVertical,
-  X
+  X,
+  FileSearch,
+  List
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -47,8 +49,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Master Mock Test Manager v3.3 [Linguistic Update].
- * SIMPLIFIED: Replaced "Node" and "Hierarchy" with "Test" and "Folder".
+ * @fileOverview Master Mock Test Manager v4.0.
+ * UPDATED: Added "Manage Items" shortcut for direct question editing.
  */
 
 export default function MockManagement() {
@@ -142,7 +144,7 @@ export default function MockManagement() {
     <div className="space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2">
       <AdminPageHeader
         icon={Layers}
-        label="Test Management Hub"
+        label="Test management hub"
         title="Mock tests"
         subtitle="Manage the Subject -> Series -> Test structure."
         actionLabel="Create new test"
@@ -153,21 +155,21 @@ export default function MockManagement() {
       <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-6 border border-slate-50">
          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-               <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Filter Subject</Label>
+               <Label className="text-[10px] font-bold text-slate-400 ml-1">Filter Subject</Label>
                <select value={subFilter} onChange={e => { setSubFilter(e.target.value); setSerFilter('all'); }} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]">
                   <option value="all">All Subjects</option>
                   {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                </select>
             </div>
             <div className="space-y-1.5">
-               <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Filter Series</Label>
+               <Label className="text-[10px] font-bold text-slate-400 ml-1">Filter Series</Label>
                <select value={serFilter} onChange={e => setSerFilter(e.target.value)} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]" disabled={subFilter === 'all'}>
                   <option value="all">All Series</option>
                   {allSeries?.filter((s: any) => s.subjectId === subFilter).map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
                </select>
             </div>
             <div className="space-y-1.5">
-               <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Search List</Label>
+               <Label className="text-[10px] font-bold text-slate-400 ml-1">Search List</Label>
                <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="h-12 bg-slate-50 border-none rounded-xl font-bold" placeholder="Search by title..." />
             </div>
          </div>
@@ -184,10 +186,10 @@ export default function MockManagement() {
                     onCheckedChange={(c) => setSelectedIds(c ? filteredMocks.map(m => m.id) : [])} 
                   />
                 </TableHead>
-                <TableHead className="px-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Test Title</TableHead>
-                <TableHead className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Category Folder</TableHead>
-                <TableHead className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Status</TableHead>
-                <TableHead className="text-right px-10 text-[9px] font-black text-slate-400 uppercase tracking-widest">Actions</TableHead>
+                <TableHead className="px-6 text-[9px] font-bold text-slate-400 tracking-tight uppercase">Test Title</TableHead>
+                <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight uppercase">Category Folder</TableHead>
+                <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight text-center uppercase">Status</TableHead>
+                <TableHead className="text-right px-10 text-[9px] font-bold text-slate-400 tracking-tight uppercase">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -206,8 +208,8 @@ export default function MockManagement() {
                        <div className="space-y-1">
                           <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-1">{mock.title}</p>
                           <div className="flex items-center gap-2">
-                             <Badge variant="outline" className="text-[7px] border-slate-200 text-slate-400 uppercase font-black">{mock.mockType}</Badge>
-                             <span className="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">ID: {mock.id.slice(-6)}</span>
+                             <Badge variant="outline" className="text-[7px] border-slate-200 text-slate-400 font-bold">{mock.mockType}</Badge>
+                             <span className="text-[9px] font-bold text-slate-300 tracking-tighter">ID: {mock.id.slice(-6)}</span>
                           </div>
                        </div>
                     </TableCell>
@@ -215,26 +217,29 @@ export default function MockManagement() {
                        <div className="flex flex-col gap-1 text-left">
                           <div className="flex items-center gap-2">
                              <Landmark className="h-3 w-3 text-primary" />
-                             <span className="text-[10px] font-bold text-[#0F172A] uppercase">{sub?.name || 'Unassigned'}</span>
+                             <span className="text-[10px] font-bold text-[#0F172A]">{sub?.name || 'Unassigned'}</span>
                           </div>
                           <div className="flex items-center gap-2">
                              <Layers className="h-3 w-3 text-slate-300" />
-                             <span className="text-[10px] font-medium text-slate-400 uppercase">{ser?.title || 'No Series'}</span>
+                             <span className="text-[10px] font-medium text-slate-400">{ser?.title || 'No Series'}</span>
                           </div>
                        </div>
                     </TableCell>
                     <TableCell className="text-center">
-                       <Badge className={cn("border-none text-[8px] font-black uppercase px-2 py-0.5", mock.published ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400")}>
+                       <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5", mock.published ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400")}>
                           {mock.published ? 'Live' : 'Draft'}
                        </Badge>
                     </TableCell>
                     <TableCell className="text-right px-10">
                        <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-white shadow-sm" asChild>
+                          <Button variant="ghost" size="icon" title="Manage Items" className="h-9 w-9 rounded-xl hover:bg-emerald-50 text-emerald-600" asChild>
+                             <Link href={`/admin/mocks/manual-edit?id=${mock.id}`}><List className="h-4 w-4" /></Link>
+                          </Button>
+                          <Button variant="ghost" size="icon" title="Edit Structure" className="h-9 w-9 rounded-xl hover:bg-white shadow-sm" asChild>
                              <Link href={`/admin/mocks/builder?id=${mock.id}`}><Edit className="h-4 w-4" /></Link>
                           </Button>
-                          <button onClick={() => handleDuplicate(mock)} className="h-9 w-9 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-blue-600 active:scale-90 transition-all"><Copy className="h-4 w-4" /></button>
-                          <button onClick={() => handleDelete(mock.id)} className="h-9 w-9 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-4 w-4" /></button>
+                          <button onClick={() => handleDuplicate(mock)} title="Duplicate" className="h-9 w-9 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-blue-600 active:scale-90 transition-all"><Copy className="h-4 w-4" /></button>
+                          <button onClick={() => handleDelete(mock.id)} title="Delete" className="h-9 w-9 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-4 w-4" /></button>
                        </div>
                     </TableCell>
                   </TableRow>
@@ -244,7 +249,7 @@ export default function MockManagement() {
                     <TableCell colSpan={5} className="h-96 text-center">
                        <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
                           <Layers className="h-20 w-20 text-slate-400" />
-                          <p className="font-black text-2xl uppercase tracking-[0.4em]">Empty list</p>
+                          <p className="font-bold text-2xl">Empty list</p>
                        </div>
                     </TableCell>
                  </TableRow>
@@ -263,8 +268,8 @@ export default function MockManagement() {
             >
                <div className="bg-[#0F172A] text-white p-5 rounded-[2.5rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl">
                   <div className="flex items-center gap-4 ml-2">
-                     <div className="h-10 w-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black">{selectedIds.length}</div>
-                     <p className="text-[11px] font-black uppercase tracking-widest">Selected tests</p>
+                     <div className="h-10 w-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-bold">{selectedIds.length}</div>
+                     <p className="text-[11px] font-bold uppercase tracking-widest">Selected tests</p>
                   </div>
                   <div className="flex items-center gap-2">
                      <Button onClick={() => setIsBulkMoveOpen(true)} className="h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-[10px] uppercase gap-2 border border-white/5"><MoveHorizontal className="h-4 w-4" /> Move hub</Button>
@@ -280,19 +285,19 @@ export default function MockManagement() {
       <Dialog open={isBulkMoveOpen} onOpenChange={setIsBulkMoveOpen}>
          <DialogContent className="sm:max-w-md rounded-[3rem] bg-white border-none shadow-5xl p-10 text-left">
             <DialogHeader className="space-y-2">
-               <DialogTitle className="text-2xl font-black uppercase text-[#0F172A]">Move tests</DialogTitle>
+               <DialogTitle className="text-2xl font-bold text-[#0F172A]">Move tests</DialogTitle>
                <DialogDescription className="text-slate-400 font-medium">Re-map {selectedIds.length} items to a different subject or series.</DialogDescription>
             </DialogHeader>
             <div className="py-8 space-y-6">
                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Subject</Label>
+                  <Label className="text-[10px] font-bold text-slate-500 ml-1">Target Subject</Label>
                   <select value={moveTarget.subjectId} onChange={e => setMoveTarget({...moveTarget, subjectId: e.target.value, seriesId: ""})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner text-[#0F172A]">
                      <option value="">Select target</option>
                      {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                </div>
                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Series</Label>
+                  <Label className="text-[10px] font-bold text-slate-500 ml-1">Target Series</Label>
                   <select value={moveTarget.seriesId} onChange={e => setMoveTarget({...moveTarget, seriesId: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner text-[#0F172A]" disabled={!moveTarget.subjectId}>
                      <option value="">Uncategorized</option>
                      {filteredSeriesOptions.map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
@@ -300,7 +305,7 @@ export default function MockManagement() {
                </div>
             </div>
             <DialogFooter>
-               <Button onClick={handleBulkMove} disabled={isProcessing || !moveTarget.subjectId} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl">
+               <Button onClick={handleBulkMove} disabled={isProcessing || !moveTarget.subjectId} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] tracking-widest rounded-2xl shadow-xl">
                   {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />} Confirm move
                </Button>
             </DialogFooter>
