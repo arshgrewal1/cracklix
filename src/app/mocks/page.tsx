@@ -32,7 +32,8 @@ import {
   X,
   Smartphone,
   Calendar,
-  Award
+  Award,
+  ArrowUpDown
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -43,9 +44,10 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { TestSeries, MockTest } from "@/types"
 import { hasSeriesAccess } from "@/lib/access-control"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
- * @fileOverview Premium Practice Hub v2.0 [Series-Based Locking].
+ * @fileOverview Premium Practice Hub v2.1 [Redesigned Selects].
  */
 
 const FILTER_CHIPS = [
@@ -112,7 +114,7 @@ export default function PracticeHub() {
 
     if (sortBy === 'newest') base.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
     if (sortBy === 'alphabetical') base.sort((a, b) => a.title.localeCompare(b.title))
-    if (sortBy === 'tests') base.sort((a, b) => b.testCount - a.testCount)
+    if (sortBy === 'tests') base.sort((a, b) => (b.testCount || 0) - (a.testCount || 0))
 
     return base
   }, [processedSeries, searchTerm, activeFilter, sortBy])
@@ -163,7 +165,7 @@ export default function PracticeHub() {
 
         {/* TOOLBAR */}
         <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-xl -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
-           <div className="max-w-5xl mx-auto space-y-6">
+           <div className="max-w-6xl mx-auto space-y-6">
               <div className="flex flex-col md:flex-row items-center gap-4">
                  <div className="relative group flex-1 w-full">
                     <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-300 group-focus-within:text-primary transition-colors" />
@@ -171,8 +173,22 @@ export default function PracticeHub() {
                       value={searchTerm}
                       onChange={e => setSearchTerm(e.target.value)}
                       placeholder="Search for series (e.g. Punjab History, Reasoning)..." 
-                      className="h-16 md:h-18 pl-16 rounded-[22px] bg-white border-slate-200 shadow-xl text-lg font-bold"
+                      className="h-14 md:h-16 pl-14 rounded-2xl bg-white border-slate-200 shadow-xl text-lg font-bold"
                     />
+                 </div>
+                 
+                 <div className="flex items-center gap-3 shrink-0">
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                       <SelectTrigger className="h-12 md:h-14 rounded-full border-slate-200 bg-white shadow-sm font-bold text-[11px] text-[#0F172A] w-[150px] md:w-[180px] px-6 gap-3 focus:ring-4 focus:ring-primary/5 transition-all">
+                          <ArrowUpDown className="h-4 w-4 text-slate-400" />
+                          <SelectValue placeholder="Sort by" />
+                       </SelectTrigger>
+                       <SelectContent className="rounded-2xl border-slate-100 shadow-5xl z-[2000] bg-white p-1">
+                          <SelectItem value="newest" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3">Newest first</SelectItem>
+                          <SelectItem value="alphabetical" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3">Alphabetical</SelectItem>
+                          <SelectItem value="tests" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3">Most tests</SelectItem>
+                       </SelectContent>
+                    </Select>
                  </div>
               </div>
 

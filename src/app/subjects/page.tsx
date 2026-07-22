@@ -33,11 +33,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 import { Subject } from "@/types"
 import { cn } from "@/lib/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
- * @fileOverview Premium Subject Selection Hub v6.0.
- * Design: Linear / Stripe / Vercel Minimal Aesthetic.
- * Data: 100% Real-time Registry Sync.
+ * @fileOverview Premium Subject Selection Hub v6.1 [Redesigned Selects].
  */
 
 export default function SubjectsPage() {
@@ -47,7 +46,7 @@ export default function SubjectsPage() {
   
   // UI States
   const [searchTerm, setSearchTerm] = useState("")
-  const [sortBy, setSortBy] = useState<"name" | "popular" | "progress">("name")
+  const [sortBy, setSortBy] = useState("name")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [boardFilter, setBoardFilter] = useState("all")
 
@@ -136,30 +135,30 @@ export default function SubjectsPage() {
            </div>
 
            <div className="flex items-center gap-2 w-full md:w-auto">
-              <div className="h-11 md:h-12 bg-slate-50 rounded-xl px-4 flex items-center gap-3 shadow-inner">
-                 <Filter className="h-4 w-4 text-slate-400" />
-                 <select 
-                   value={boardFilter}
-                   onChange={e => setBoardFilter(e.target.value)}
-                   className="bg-transparent border-none outline-none font-bold text-xs uppercase tracking-tight text-slate-600 cursor-pointer appearance-none min-w-[100px]"
-                 >
-                    <option value="all">All Boards</option>
-                    {boards?.map(b => <option key={b.id} value={b.id}>{b.abbreviation}</option>)}
-                 </select>
-              </div>
+              <Select value={boardFilter} onValueChange={setBoardFilter}>
+                 <SelectTrigger className="h-11 md:h-12 bg-slate-50 border-none rounded-xl px-5 font-bold text-xs shadow-inner w-[140px] md:w-[160px] gap-3">
+                    <Filter className="h-4 w-4 text-slate-400" />
+                    <SelectValue placeholder="All Boards" />
+                 </SelectTrigger>
+                 <SelectContent className="rounded-2xl border-slate-100 shadow-5xl z-[2000] bg-white p-1">
+                    <SelectItem value="all" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3 uppercase tracking-tight">All Boards</SelectItem>
+                    {boards?.map(b => (
+                       <SelectItem key={b.id} value={b.id} className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3 uppercase tracking-tight">{b.abbreviation}</SelectItem>
+                    ))}
+                 </SelectContent>
+              </Select>
 
-              <div className="h-11 md:h-12 bg-slate-50 rounded-xl px-4 flex items-center gap-3 shadow-inner">
-                 <ArrowUpDown className="h-4 w-4 text-slate-400" />
-                 <select 
-                   value={sortBy}
-                   onChange={e => setSortBy(e.target.value as any)}
-                   className="bg-transparent border-none outline-none font-bold text-xs uppercase tracking-tight text-slate-600 cursor-pointer appearance-none min-w-[100px]"
-                 >
-                    <option value="name">Sort A-Z</option>
-                    <option value="popular">Popularity</option>
-                    <option value="progress">Mastery</option>
-                 </select>
-              </div>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                 <SelectTrigger className="h-11 md:h-12 bg-slate-50 border-none rounded-xl px-5 font-bold text-xs shadow-inner w-[140px] md:w-[160px] gap-3">
+                    <ArrowUpDown className="h-4 w-4 text-slate-400" />
+                    <SelectValue placeholder="Sort" />
+                 </SelectTrigger>
+                 <SelectContent className="rounded-2xl border-slate-100 shadow-5xl z-[2000] bg-white p-1">
+                    <SelectItem value="name" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3 uppercase tracking-tight">Sort A-Z</SelectItem>
+                    <SelectItem value="popular" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3 uppercase tracking-tight">Popularity</SelectItem>
+                    <SelectItem value="progress" className="font-bold text-[11px] rounded-xl focus:bg-primary/5 py-3 uppercase tracking-tight">Mastery</SelectItem>
+                 </SelectContent>
+              </Select>
 
               <div className="hidden sm:flex h-11 md:h-12 bg-slate-100 p-1 rounded-xl items-center gap-1 shadow-inner">
                  <button onClick={() => setViewMode('grid')} className={cn("h-full px-3 rounded-lg transition-all", viewMode === 'grid' ? "bg-white text-primary shadow-sm" : "text-slate-400 hover:text-slate-600")}>
