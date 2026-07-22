@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -36,7 +37,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional performance hub v7.5 [STRICT REAL DATA].
+ * @fileOverview Institutional performance hub v7.6 [Audit Hardened].
  * FIXED: Removed all hardcoded rank and progress fallbacks.
  */
 
@@ -185,8 +186,8 @@ export default function StudentDashboard() {
             bg="bg-emerald-50" 
           />
           <MetricPill 
-            label="Solved items" 
-            val={results?.length || 0} 
+            label="Solved questions" 
+            val={performance.totalCorrect.toLocaleString()} 
             icon={<Trophy />} 
             color="text-amber-500" 
             bg="bg-amber-50" 
@@ -255,7 +256,7 @@ export default function StudentDashboard() {
               </div>
             </Card>
 
-            <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-100 shadow-xl space-y-6 text-left group hover:translate-y-[-4px] transition-all duration-500">
+            <div className="p-8 md:p-10 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl space-y-6 text-left group hover:translate-y-[-4px] transition-all duration-500">
               <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em]">Certificates</h4>
               <div className="h-40 flex flex-col items-center justify-center text-center opacity-30 italic">
                 <Award className="h-10 w-10 mb-4" />

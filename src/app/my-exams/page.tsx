@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -56,10 +57,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import Link from "next/link"
 
 /**
- * @fileOverview Premium Personalized Dashboard v5.0 [PWA Optimized].
- * FIXED: Metrics aligned in a single row for PWA.
- * FIXED: Settings button functional.
- * UPDATED: Removed all uppercase styling.
+ * @fileOverview Premium Personalized Dashboard v5.2 [Audit Hardened].
+ * FIXED: Replaced all hardcoded analytics with real Firebase aggregation.
  */
 
 const MODAL_CATEGORIES = [
@@ -97,12 +96,14 @@ export default function MyExamsPage() {
   const pyqsQuery = useMemo(() => (db && mounted ? collection(db, "pyqs") : null), [db, mounted]);
   const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid)) : null), [db, user]);
   const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
+  const subjectsQuery = useMemo(() => (db ? collection(db, "subjects") : null), [db]);
 
   const { data: allExams, loading: examsLoading } = useCollection<any>(examsQuery)
   const { data: mocks } = useCollection<any>(mocksQuery)
   const { data: pyqs } = useCollection<any>(pyqsQuery)
   const { data: boards } = useCollection<any>(boardsQuery)
   const { data: results } = useCollection<any>(resultsQuery)
+  const { data: subjects } = useCollection<any>(subjectsQuery)
 
   const statsMap = useMemo(() => {
     const map: Record<string, { mocks: number, total: number, attempted: number, pyq: number }> = {};
@@ -153,6 +154,55 @@ export default function MyExamsPage() {
     ];
   }, [pinnedExams, statsMap, results]);
 
+  const meritAnalytics = useMemo(() => {
+    if (!results || results.length === 0) return { accuracy: 0, solved: 0, attemptRate: 0 };
+    
+    const totalAccuracy = results.reduce((acc, r) => acc + (r.accuracy || 0), 0);
+    const totalSolved = results.reduce((acc, r) => acc + (r.correctCount || 0), 0);
+    
+    const pinnedExamIds = new Set(profile?.pinnedExams || []);
+    const availableMocks = (mocks || []).filter(m => {
+       const eids = m.examIds || (m.examId ? [m.examId] : []);
+       return eids.some(eid => pinnedExamIds.has(eid));
+    });
+    
+    const attemptRate = availableMocks.length > 0 
+      ? Math.round((results.length / availableMocks.length) * 100) 
+      : 0;
+
+    return { 
+      accuracy: Math.round(totalAccuracy / results.length), 
+      solved: totalSolved, 
+      attemptRate 
+    };
+  }, [results, mocks, profile]);
+
+  const subjectWeightage = useMemo(() => {
+    if (!results || results.length === 0 || !mocks) return [];
+    
+    const subMap: Record<string, { total: number, correct: number }> = {};
+    
+    results.forEach(res => {
+      const mock = mocks.find(m => m.id === res.mockId);
+      if (mock && mock.learningSubjectId) {
+        const sId = mock.learningSubjectId;
+        const sub = (subjects || []).find((s: any) => s.id === sId);
+        const name = sub?.name || sId;
+        if (!subMap[name]) subMap[name] = { total: 0, correct: 0 };
+        subMap[name].total += res.totalQuestions;
+        subMap[name].correct += res.correctCount;
+      }
+    });
+    
+    return Object.entries(subMap)
+      .map(([name, data]) => ({
+        name,
+        val: Math.round((data.correct / data.total) * 100)
+      }))
+      .sort((a, b) => b.val - a.val)
+      .slice(0, 3);
+  }, [results, mocks, subjects]);
+
   const handleUnpin = async (examId: string) => {
     if (!db || !user || unpinningId) return;
     setUnpinningId(examId);
@@ -184,7 +234,7 @@ export default function MyExamsPage() {
     });
   }, [allExams, modalSearch, modalCategory]);
 
-  if (userLoading || !mounted) return <div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
+  if (userLoading || !mounted) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10">
@@ -459,53 +509,49 @@ export default function MyExamsPage() {
               </CardHeader>
               <CardContent className="p-8 md:p-12 space-y-12">
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    <ProgressNode label="Avg accuracy" val="74.2%" color="text-emerald-500" />
-                    <ProgressNode label="Attempt rate" val="88.0%" color="text-blue-500" />
-                    <ProgressNode label="Solved items" val="1.2K+" color="text-orange-500" />
+                    <ProgressNode label="Avg accuracy" val={`${meritAnalytics.accuracy}%`} color="text-emerald-500" />
+                    <ProgressNode label="Attempt rate" val={`${meritAnalytics.attemptRate}%`} color="text-blue-500" />
+                    <ProgressNode label="Solved questions" val={meritAnalytics.solved.toLocaleString()} color="text-orange-500" />
                  </div>
-                 <div className="pt-10 border-t border-slate-50">
-                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8">Subject weightage index</h4>
-                    <div className="space-y-6">
-                       <SubjectProg label="Punjab General Knowledge" val={82} color="bg-primary" />
-                       <SubjectProg label="Quantitative Aptitude" val={64} color="bg-orange-500" />
-                       <SubjectProg label="ICT" val={91} color="bg-emerald-500" />
+                 {subjectWeightage.length > 0 && (
+                    <div className="pt-10 border-t border-slate-50">
+                       <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8">Top subject mastery</h4>
+                       <div className="space-y-6">
+                          {subjectWeightage.map((sw, i) => (
+                             <SubjectProg key={i} label={sw.name} val={sw.val} color={i === 0 ? "bg-primary" : i === 1 ? "bg-orange-500" : "bg-emerald-500"} />
+                          ))}
+                       </div>
                     </div>
-                 </div>
+                 )}
               </CardContent>
            </Card>
 
            <div className="lg:col-span-4 space-y-8">
-              <Card className="border-none shadow-3xl bg-[#0F172A] text-white rounded-[3rem] p-8 md:p-12 space-y-10 relative overflow-hidden group">
+              <div className="p-8 md:p-10 bg-[#0F172A] text-white rounded-[3rem] shadow-xl space-y-6 text-left group hover:translate-y-[-4px] transition-all duration-500 relative overflow-hidden">
                  <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000">
                     <ShieldCheck className="h-64 w-64 text-primary" />
                  </div>
-                 <div className="relative z-10 space-y-10 text-left">
-                    <div className="space-y-2">
-                       <h3 className="text-3xl font-black tracking-tight leading-none uppercase">Recommendations</h3>
-                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Based on your activity</p>
+                 <div className="relative z-10 space-y-6">
+                    <div className="flex items-center gap-4">
+                       <div className="h-10 w-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary shadow-inner">
+                          <ShieldCheck className="h-6 w-6" />
+                       </div>
+                       <h4 className="text-[11px] font-black uppercase tracking-widest text-white">Security protocol</h4>
                     </div>
-                    <div className="space-y-4">
-                       <RecNode label="Continue Punjab Police" time="2h ago" />
-                       <RecNode label="Revise Current Affairs" time="New hub" />
-                       <RecNode label="Attempt Full Mock 12" time="Recommended" />
-                    </div>
-                    <div className="pt-6 border-t border-white/5">
-                       <Button variant="ghost" className="w-full text-slate-400 hover:text-white group font-bold text-xs tracking-tight gap-2">
-                          View deep insights <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-all" />
-                       </Button>
-                    </div>
+                    <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-medium">Your preparation verticals and attempt results are synchronized with the master registry for state ranking calculations.</p>
                  </div>
-              </Card>
-
-              <div className="p-8 md:p-10 bg-white rounded-[3rem] border border-slate-100 shadow-xl space-y-6 text-left group hover:translate-y-[-4px] transition-all duration-500">
-                 <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500 shadow-inner group-hover:scale-110 transition-transform">
-                       <ShieldCheck className="h-6 w-6" />
-                    </div>
-                    <h4 className="text-[11px] font-black uppercase tracking-widest text-[#0F172A]">Security protocol</h4>
-                 </div>
-                 <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">Your preparation verticals and attempt results are synchronized with the master registry for state ranking calculations.</p>
               </div>
+
+              <Card className="border-none shadow-3xl bg-white rounded-[3rem] p-8 md:p-10 space-y-8 text-left relative overflow-hidden border border-slate-100">
+                 <div className="space-y-2">
+                    <h3 className="text-xl font-black tracking-tight text-[#0F172A]">Registry help</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Support hub</p>
+                 </div>
+                 <p className="text-xs text-slate-500 leading-relaxed">Need assistance with your exam selection or premium pass activation?</p>
+                 <Button asChild variant="outline" className="w-full h-12 rounded-xl border-slate-200 text-[#0F172A] font-bold text-xs">
+                    <Link href="/support">Open support center</Link>
+                 </Button>
+              </Card>
            </div>
         </section>
 
@@ -602,18 +648,6 @@ function SubjectProg({ label, val, color }: any) {
          <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner">
             <motion.div initial={{ width: 0 }} whileInView={{ width: `${val}%` }} transition={{ duration: 1.2 }} className={cn("h-full", color)} />
          </div>
-      </div>
-   )
-}
-
-function RecNode({ label, time }: any) {
-   return (
-      <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all active:scale-[0.98] cursor-pointer group">
-         <div className="min-w-0">
-            <p className="text-[11px] font-bold text-white truncate pr-4">{label}</p>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">{time}</p>
-         </div>
-         <ChevronRight className="h-4 w-4 text-slate-600 group-hover:text-primary transition-all" />
       </div>
    )
 }
