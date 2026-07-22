@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -60,6 +59,7 @@ const NAV_GROUPS = [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { label: "Student Portal", href: "/", icon: GraduationCap },
       { label: "Question Bank", href: "/admin/mcq-bank", icon: Database },
+      { label: "Add Question", href: "/admin/mcq-bank/add", icon: Plus },
       { label: "Used Questions", href: "/admin/used-questions", icon: History },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Bulk Upload", href: "/admin/bulk-import", icon: UploadCloud },

@@ -14,6 +14,7 @@ import {
   AlertCircle,
   ChevronRight,
   Gem,
+  Plus
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
@@ -24,8 +25,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v35.0 [SSR Hardened].
- * FIXED: Implemented strict mounted guard to prevent ChunkLoadError and hydration mismatch.
+ * Admin Dashboard Center v36.0 [Audit Fixed].
+ * ADDED: Add Question to quick tools for immediate visibility.
  */
 
 export default function AdminDashboard() {
@@ -195,9 +196,9 @@ export default function AdminDashboard() {
                      <p className="text-[8px] md:text-[9px] font-black text-slate-500 tracking-widest uppercase">Shortcuts</p>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:gap-3">
-                     <AdminQuickLink label="Add vacancy" href="/admin/vacancies/add" highlight />
+                     <AdminQuickLink label="Add question" href="/admin/mcq-bank/add" highlight />
+                     <AdminQuickLink label="Add vacancy" href="/admin/vacancies/add" />
                      <AdminQuickLink label="Build test" href="/admin/mocks/builder" />
-                     <AdminQuickLink label="View stats" href="/admin/analytics" />
                      <QuickActionCard label="Verify payments" href="/admin/payments/verify" highlight={hasPending} />
                      <AdminQuickLink label="Admin settings" href="/admin/settings" />
                   </div>
