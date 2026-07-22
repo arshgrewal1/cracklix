@@ -41,9 +41,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Current Affairs Hub v5.7.
- * FIXED: Missing Skeleton import causing build failure.
- * UPDATED: Removed all uppercase styling from headings and labels.
+ * @fileOverview Premium Current Affairs Hub v5.8.
+ * FIXED: Added missing Skeleton import.
  */
 
 const CATEGORIES = [

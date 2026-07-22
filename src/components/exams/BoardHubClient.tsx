@@ -21,8 +21,8 @@ interface BoardHubClientProps {
 }
 
 /**
- * @fileOverview Premium Board Hub Portal v5.7.
- * FIXED: Removed uppercase styling and refined title scaling.
+ * @fileOverview Premium Board Hub Portal v5.8.
+ * FIXED: Typo in max-width utility class.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
@@ -84,9 +84,9 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
       <section className="bg-white border-b border-slate-100 pt-10 pb-12 md:pt-16 md:pb-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
-         <div className="container mx-auto px-4 md:px-12 max-get-7xl relative z-10 space-y-10">
+         <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
             <div className="flex items-center gap-4">
-               <button onClick={() => router.back()} className="h-10 w-10 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
+               <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
                   <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
                </button>
                <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[9px] md:text-[11px] tracking-tight shadow-sm">Official board hub</Badge>

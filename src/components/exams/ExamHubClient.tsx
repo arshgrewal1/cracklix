@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -48,9 +47,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v7.2.
- * FIXED: Standardized text visibility for hero metrics (removed conflicting text-white).
- * FIXED: Added missing Landmark icon and inlined HubTab for Radix context stability.
+ * @fileOverview Premium Exam Detail Hub v7.3.
+ * FIXED: Standardized text visibility and corrected typos in max-width utility classes.
  */
 
 export default function ExamHubClient() {
@@ -161,7 +159,7 @@ export default function ExamHubClient() {
         </div>
         <div className="space-y-3">
           <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">Coming Soon</h1>
-          <p className="text-primary font-black text-[10px] md:text-xs tracking-[0.3em]">Mock available nahi hai</p>
+          <p className="text-primary font-black text-[10px] md:text-xs uppercase tracking-[0.3em]">Mock available nahi hai</p>
           <p className="text-slate-500 font-medium leading-relaxed pt-4">
             This preparation hub is currently being updated with the latest official patterns. Please check back later.
           </p>
@@ -243,7 +241,7 @@ export default function ExamHubClient() {
          </div>
       </section>
 
-      <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-get-7xl pb-40 space-y-12">
+      <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-w-7xl pb-40 space-y-12">
          <Tabs defaultValue="MOCK" className="space-y-10">
             <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
                <div className="bg-white border border-slate-200 shadow-sm rounded-[20px] p-1 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">

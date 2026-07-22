@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -63,9 +62,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v45.4 [High-Density Content Fix].
- * FIXED: Reduced font size and removed line-clamping in composition area to ensure full question visibility.
- * UPDATED: Changed default section name to "General".
+ * @fileOverview Daily Challenge Builder v45.5.
+ * FIXED: Variable name mismatch (setQuizData vs setMockData) in input handlers.
  */
 
 export default function DailyQuizBuilder() {
@@ -102,7 +100,7 @@ function DailyQuizBuilderContent() {
   const [filterBoard, setFilterBoard] = useState("all")
   const [filterSubject, setSubjectFilter] = useState("all")
   const [filterDifficulty, setDifficultyFilter] = useState("all")
-  const [filterStatus, setFilterStatus] = useState("UNUSED") // Default to fresh items
+  const [filterStatus, setFilterStatus] = useState("UNUSED")
   const [searchTerm, setSearchTerm] = useState("")
   const [bankSelection, setBankSelection] = useState<string[]>([])
   
@@ -246,7 +244,6 @@ function DailyQuizBuilderContent() {
 
        batch.set(quizRef, payload, { merge: true });
 
-       // MOVE QUESTIONS TO USED POOL AND DELETE FROM BANK
        if (!isDraft) {
          stagedQuestions.forEach(q => {
             const usedRef = doc(db, "usedQuestions", q.id);
@@ -330,24 +327,24 @@ function DailyQuizBuilderContent() {
             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50">
                <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Challenge title</Label>
-                  <Input value={quizData.title} onChange={e => setMockData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg shadow-inner text-[#0F172A]" placeholder="e.g. Daily Punjab GK #12" />
+                  <Input value={quizData.title} onChange={e => setQuizData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg shadow-inner text-[#0F172A]" placeholder="e.g. Daily Punjab GK #12" />
                </div>
 
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Duration (Min)</Label>
-                     <Input type="number" value={quizData.duration} onChange={e => setMockData({...quizData, duration: parseInt(e.target.value) || 0})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center shadow-inner text-[#0F172A]" />
+                     <Input type="number" value={quizData.duration} onChange={e => setQuizData({...quizData, duration: parseInt(e.target.value) || 0})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center shadow-inner text-[#0F172A]" />
                   </div>
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Points per item</Label>
-                     <Input type="number" value={quizData.positiveMarks} onChange={e => setMockData({...quizData, positiveMarks: parseFloat(e.target.value) || 1})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center text-emerald-600 shadow-inner" />
+                     <Input type="number" value={quizData.positiveMarks} onChange={e => setQuizData({...quizData, positiveMarks: parseFloat(e.target.value) || 1})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center text-emerald-600 shadow-inner" />
                   </div>
                </div>
 
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Difficulty</Label>
-                     <select value={quizData.difficulty} onChange={e => setMockData({...quizData, difficulty: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]">
+                     <select value={quizData.difficulty} onChange={e => setQuizData({...quizData, difficulty: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]">
                         <option value="Easy">Easy</option>
                         <option value="Medium">Medium</option>
                         <option value="Hard">Hard</option>
@@ -355,14 +352,14 @@ function DailyQuizBuilderContent() {
                   </div>
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Reward XP</Label>
-                     <Input type="number" value={quizData.rewardXP} onChange={e => setMockData({...quizData, rewardXP: parseInt(e.target.value) || 0})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center text-primary shadow-inner" />
+                     <Input type="number" value={quizData.rewardXP} onChange={e => setQuizData({...quizData, rewardXP: parseInt(e.target.value) || 0})} className="h-12 rounded-xl bg-slate-50 border-none font-black text-center text-primary shadow-inner" />
                   </div>
                </div>
 
                <div className="space-y-6 pt-6 border-t border-slate-50">
-                  <ConfigSwitch label="Official challenge" checked={quizData.isTodayQuiz} onChange={v => setMockData({...quizData, isTodayQuiz: v})} />
-                  <ConfigSwitch label="Review allowed" checked={quizData.reviewModeEnabled} onChange={v => setMockData({...quizData, reviewModeEnabled: v})} />
-                  <ConfigSwitch label="Show explanations" checked={quizData.explanationModeEnabled} onChange={v => setMockData({...quizData, explanationModeEnabled: v})} />
+                  <ConfigSwitch label="Official challenge" checked={quizData.isTodayQuiz} onChange={v => setQuizData({...quizData, isTodayQuiz: v})} />
+                  <ConfigSwitch label="Review allowed" checked={quizData.reviewModeEnabled} onChange={v => setQuizData({...excerpt, reviewModeEnabled: v})} />
+                  <ConfigSwitch label="Show explanations" checked={quizData.explanationModeEnabled} onChange={v => setQuizData({...excerpt, explanationModeEnabled: v})} />
                </div>
             </Card>
          </div>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -40,8 +39,8 @@ import { hasSeriesAccess } from "@/lib/access-control"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Premium Series Hub Portal v9.0 [Granular Preview Gating].
- * UPDATED: Implemented test-level gating logic. Free previews are open; premium tests trigger purchase.
+ * @fileOverview Premium Series Hub Portal v9.1 [Granular Preview Gating].
+ * FIXED: Typo in max-width utility class.
  */
 
 export default function SeriesDetailPortal() {
@@ -83,7 +82,7 @@ export default function SeriesDetailPortal() {
       <section className="bg-[#0F172A] text-white pt-8 pb-10 md:pt-14 md:pb-20 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
-         <div className="container mx-auto px-4 md:px-12 max-get-7xl relative z-10 space-y-8">
+         <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-8">
             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
                <button onClick={() => router.back()} className="hover:text-white transition-colors flex items-center gap-2">
                  <ArrowLeft className="h-3 w-3" /> {subject?.name || "Subject"}
@@ -105,7 +104,7 @@ export default function SeriesDetailPortal() {
                         {series?.title}
                      </h1>
                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                        <Badge className={cn("border-none px-4 py-1 rounded-lg font-black text-[10px] uppercase shadow-lg", seriesAccess.hasAccess ? "bg-emerald-500 text-white" : "bg-amber-500 text-white")}>
+                        <Badge className={cn("border-none px-4 py-1 rounded-lg font-black text-[10px] uppercase shadow-lg", seriesAccess.hasAccess ? "bg-emerald-50 text-white" : "bg-amber-50 text-white")}>
                            {seriesAccess.hasAccess ? 'Access Authorized' : 'Premium Series'}
                         </Badge>
                         <span className="text-slate-400 font-bold text-[11px] uppercase tracking-widest">{mocks?.length || 0} Professional Mocks</span>
