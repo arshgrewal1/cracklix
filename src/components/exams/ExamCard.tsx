@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -41,8 +42,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v10.5 [STRICT REAL DATA].
- * FIXED: Removed all fallback fake numbers and enforced zero-based statistics.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v11.0.
+ * UPDATED: Standardized font size to match trending hub and resolved text clipping.
  */
 export default function ExamCard({ 
   exam, 
@@ -129,15 +130,15 @@ export default function ExamCard({
       className="h-full w-full"
     >
       <Link href={`/exams/view?id=${exam.id}`} className="block h-full">
-        <Card className="h-full min-h-[540px] bg-white border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden flex flex-col group relative">
+        <Card className="h-full min-h-[520px] bg-white border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden flex flex-col group relative">
           
-          <div className="p-4 md:p-6 lg:p-7 flex justify-between items-center w-full relative z-10">
+          <div className="p-5 md:p-7 flex justify-between items-center w-full relative z-10">
             <div className="flex items-center gap-2">
-               <Badge className="bg-primary/10 text-primary border-none text-[9px] md:text-[10px] font-bold px-2.5 py-1 rounded-lg">
+               <Badge className="bg-primary/10 text-primary border-none text-[9px] font-bold px-2.5 py-1 rounded-lg">
                  Official Prep
                </Badge>
                {exam.isTrending && (
-                  <Badge className="bg-emerald-50 text-emerald-600 border-none text-[9px] md:text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                  <Badge className="bg-emerald-50 text-emerald-600 border-none text-[9px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
                     <ShieldCheck className="h-2.5 w-2.5" /> Verified
                   </Badge>
                )}
@@ -147,7 +148,7 @@ export default function ExamCard({
               onClick={handleTogglePin}
               disabled={isPinning}
               className={cn(
-                "h-9 w-9 md:h-10 md:w-10 rounded-xl border flex items-center justify-center transition-all active:scale-90 shadow-sm",
+                "h-9 w-9 rounded-xl border flex items-center justify-center transition-all active:scale-90 shadow-sm",
                 isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary"
               )}
             >
@@ -155,24 +156,24 @@ export default function ExamCard({
             </button>
           </div>
 
-          <CardContent className="px-5 md:px-8 pb-8 flex-1 flex flex-col text-center">
+          <CardContent className="px-6 md:px-10 pb-8 flex-1 flex flex-col text-center">
             
-            <div className="mb-6 lg:mb-8 flex justify-center">
-               <div className="w-[64px] h-[64px] lg:w-[80px] lg:h-[80px] rounded-2xl md:rounded-3xl shadow-2xl bg-white border-2 border-slate-50 flex items-center justify-center overflow-hidden shrink-0">
+            <div className="mb-6 flex justify-center">
+               <div className="w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-2xl md:rounded-3xl shadow-2xl bg-white border-2 border-slate-50 flex items-center justify-center overflow-hidden shrink-0">
                   <AuthorityLogo boardId={exam.boardId} size="md" className="p-0 border-none shadow-none bg-transparent" />
                </div>
             </div>
 
             <div className="space-y-2 mb-6">
-               <h3 className="text-[22px] md:text-[24px] lg:text-[28px] font-[800] text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tighter line-clamp-2 min-h-[2.3em] overflow-hidden text-center">
+               <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tight line-clamp-2 min-h-[2.4em] overflow-hidden text-center">
                  {exam.name}
                </h3>
-               <p className="text-slate-400 font-medium text-[13px] md:text-[14px] lg:text-[15px] line-clamp-2 leading-snug overflow-hidden text-center">
+               <p className="text-slate-400 font-medium text-[13px] md:text-[15px] line-clamp-2 leading-snug overflow-hidden text-center">
                   {exam.description || "Official recruitment preparation with verified patterns."}
                </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 pt-6 border-t border-slate-50 text-left">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3 pt-6 border-t border-slate-50 text-left">
                {stats.mocks > 0 && <StatRow label="Mocks" val={stats.mocks} icon={Zap} />}
                {stats.subjects > 0 && <StatRow label="Subjects" val={stats.subjects} icon={BookOpen} />}
                {stats.pyqs > 0 && <StatRow label="PYQs" val={stats.pyqs} icon={FileStack} />}
@@ -181,7 +182,7 @@ export default function ExamCard({
             </div>
 
             {user && stats.totalTests > 0 && (
-               <div className="space-y-2.5 mt-8 text-left">
+               <div className="space-y-2 mt-8 text-left">
                   <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-widest">
                      <span className="flex items-center gap-1.5"><Target className="h-3 w-3 text-primary" /> Mastery</span>
                      <span className="text-primary tabular-nums">{stats.progress}%</span>
@@ -199,7 +200,7 @@ export default function ExamCard({
 
             <div className="mt-auto pt-8">
                <Button className={cn(
-                  "w-full h-[52px] rounded-xl text-white font-[800] tracking-tight text-[11px] md:text-[12px] transition-all active:scale-95 border-none shadow-xl flex items-center justify-between px-6",
+                  "w-full h-[56px] rounded-xl text-white font-bold tracking-tight text-[11px] md:text-[13px] transition-all active:scale-95 border-none shadow-xl flex items-center justify-between px-6",
                   buttonConfig.variant
                )}>
                   <div className="flex items-center gap-2.5">
@@ -210,13 +211,6 @@ export default function ExamCard({
                </Button>
             </div>
           </CardContent>
-
-          <div className="px-5 py-3.5 bg-slate-50/50 border-t border-slate-50 flex items-center gap-2 overflow-x-auto no-scrollbar">
-             {stats.mocks > 0 && <ContentChip label="Mocks" />}
-             {stats.subjects > 0 && <ContentChip label="Subjects" />}
-             {stats.pyqs > 0 && <ContentChip label="PYQs" />}
-             <ContentChip label="Bilingual" />
-          </div>
         </Card>
       </Link>
     </motion.div>
@@ -228,17 +222,9 @@ function StatRow({ label, val, icon: Icon, color }: any) {
     <div className="flex items-center justify-between gap-1.5 min-w-0">
        <div className="flex items-center gap-1.5 min-w-0">
           <Icon className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-          <span className="text-[11px] lg:text-[12px] font-bold text-slate-500 truncate leading-none">{label}</span>
+          <span className="text-[12px] md:text-[13px] font-bold text-slate-500 truncate leading-none">{label}</span>
        </div>
-       <span className={cn("text-[12px] lg:text-[14px] font-[900] tabular-nums tracking-tighter leading-none", color || "text-[#0F172A]")}>{val}</span>
+       <span className={cn("text-[12px] md:text-[14px] font-black tabular-nums tracking-tighter leading-none", color || "text-[#0F172A]")}>{val}</span>
     </div>
-  );
-}
-
-function ContentChip({ label }: { label: string }) {
-  return (
-    <span className="text-[8px] font-black tracking-widest text-slate-400 bg-white border border-slate-100 px-2.5 py-1 rounded-md shrink-0 shadow-sm">
-       {label}
-    </span>
   );
 }

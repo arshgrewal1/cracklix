@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -23,8 +24,8 @@ interface CategoryHubClientProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Category Hub v7.0.
- * UPDATED: Integrated high-fidelity ExamCard for standardized dashboard experience with 4-column desktop grid.
+ * @fileOverview Premium Enterprise Category Hub v8.0.
+ * UPDATED: Switched to 3-column grid for optimized text space.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -74,14 +75,14 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90">
                   <ChevronLeft className="h-5 w-5" />
                </button>
-               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[9px] md:text-[11px] tracking-widest shadow-sm">Official category</Badge>
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[9px] md:text-[11px] tracking-tight shadow-sm">Official Category</Badge>
             </div>
 
             <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-14">
                <AuthorityLogo category={category} size="lg" className="h-24 w-24 md:h-36 md:w-36 rounded-[2rem] md:rounded-[3rem] bg-slate-50 border-[6px] border-slate-100 shadow-5xl group-hover:scale-105 transition-transform shrink-0" />
                <div className="space-y-4 text-center lg:text-left flex-1 min-w-0">
                   <h1 className="text-2xl sm:text-4xl md:text-7xl font-[900] text-[#0F172A] leading-[1.05] tracking-tight antialiased">
-                     {category?.title || "Exam selection"}
+                     {category?.title || "Exam Selection"}
                   </h1>
                   <p className="text-sm md:text-xl text-slate-500 font-medium leading-relaxed max-w-3xl">
                      {category?.description || "Select a verified authority hub or exam vertical to start your journey."}
@@ -130,7 +131,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                   <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner"><Zap className="h-5 w-5" /></div>
                   <h2 className="text-xl md:text-3xl font-[800] tracking-tighter text-[#0F172A]">Exam Verticals</h2>
                </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                   {activeExams.map((exam) => (
                      <ExamCard 
                        key={exam.id} 
@@ -148,7 +149,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
          {!boardsLoading && !examsLoading && recruitmentBoards?.length === 0 && activeExams.length === 0 && (
             <div className="py-40 text-center opacity-30 italic font-black uppercase tracking-[0.4em] flex flex-col items-center gap-10">
                <Layers className="h-24 w-24 text-slate-200" />
-               <p className="text-xl md:text-4xl">Registry standby</p>
+               <p className="text-xl md:text-4xl">Registry Standby</p>
             </div>
          )}
       </main>

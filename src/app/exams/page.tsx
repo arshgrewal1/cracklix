@@ -36,8 +36,8 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v8.1.
- * FIXED: Removed truncate and uppercase for full text visibility.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v9.0.
+ * UPDATED: Switched to 3-column grid for maximized text visibility.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -148,7 +148,7 @@ export default function ExamsEntryPage() {
 
             <div className="relative w-full max-w-4xl group">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-400 rounded-[28px] blur opacity-5 group-focus-within:opacity-15 transition duration-1000"></div>
-              <div className="relative min-h-[64px] md:min-h-[76px] bg-white border border-slate-200 rounded-[24px] shadow-2xl flex items-center px-4 md:px-8 gap-4">
+              <div className="relative min-h-[54px] md:min-h-[76px] bg-white border border-slate-200 rounded-[24px] shadow-2xl flex items-center px-4 md:px-8 gap-4">
                 <Search className="h-6 w-6 text-slate-300 shrink-0" />
                 <input 
                   value={searchTerm}
@@ -188,7 +188,7 @@ export default function ExamsEntryPage() {
                           <div className="flex items-center gap-4 min-w-0 text-left">
                             <AuthorityLogo boardId={e.boardId} size="sm" className="h-12 w-12 shrink-0" />
                             <div className="min-w-0">
-                              <span className="font-bold text-[#0F172A] text-sm md:text-lg block truncate">{e.name}</span>
+                              <span className="font-bold text-[#0F172A] text-sm md:text-lg block">{e.name}</span>
                               <span className="text-[10px] font-bold text-slate-400 tracking-widest">{e.boardId} hub</span>
                             </div>
                           </div>
@@ -215,7 +215,7 @@ export default function ExamsEntryPage() {
           </motion.div>
         </section>
 
-        {/* POPULAR VERTICALS GRID */}
+        {/* POPULAR VERTICALS GRID - UPDATED TO 3 COLS FOR WIDTH */}
         <section className="space-y-10 md:space-y-14 w-full text-left">
            <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
               <div className="flex items-center gap-4">
@@ -229,7 +229,7 @@ export default function ExamsEntryPage() {
               </div>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
               {examsLoading ? (
                  Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[540px] w-full rounded-[2.5rem] md:rounded-[3rem] bg-white border border-slate-100" />)
               ) : featuredExams.map((exam: any) => (
@@ -253,7 +253,7 @@ export default function ExamsEntryPage() {
                     <Landmark className="h-6 w-6" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-3xl font-[900] text-[#0F172A] tracking-tighter">Exam boards</h2>
+                    <h2 className="text-2xl md:text-3xl font-[900] text-[#0F172A] tracking-tighter">Exam Boards</h2>
                     <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest mt-1">Official Selection Authorities</p>
                  </div>
               </div>

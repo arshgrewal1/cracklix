@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -23,8 +24,8 @@ interface BoardHubClientProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Board Hub v7.0.
- * UPDATED: Integrated high-fidelity ExamCard for unified dashboard presentation with 4-column grid.
+ * @fileOverview Premium Enterprise Board Hub v8.0.
+ * UPDATED: Optimized grid for 3 columns on desktop.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
@@ -65,21 +66,21 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
                <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
                   <ChevronLeft className="h-5 w-5" />
                </button>
-               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[9px] md:text-[11px] tracking-tight shadow-sm">Official board hub</Badge>
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[9px] md:text-[11px] tracking-tight shadow-sm">Official Board Hub</Badge>
             </div>
 
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-14">
                <AuthorityLogo board={hub} boardId={hubId} size="lg" className="h-24 w-24 md:h-44 md:w-44 rounded-[2rem] md:rounded-[4rem] bg-slate-50 border-[8px] border-slate-100 shadow-5xl group-hover:scale-105 transition-transform" />
                <div className="space-y-4 text-center md:text-left flex-1 min-w-0">
                   <h1 className="text-2xl sm:text-4xl md:text-7xl font-[900] text-[#0F172A] tracking-tighter leading-none antialiased">
-                     {hub?.abbreviation || "Board hub"}
+                     {hub?.abbreviation || "Board Hub"}
                   </h1>
                   <p className="text-sm md:text-xl text-slate-500 font-bold leading-tight tracking-tight max-w-3xl">
                      {hub?.name || "Official recruitment board portal."}
                   </p>
                   <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 pt-4">
                      <div className="flex items-center gap-2 text-emerald-600 font-black text-[10px] md:text-sm uppercase tracking-widest bg-emerald-50 px-5 py-2 rounded-full border border-emerald-100 shadow-sm">
-                        <ShieldCheck className="h-4 w-4" /> Official patterns
+                        <ShieldCheck className="h-4 w-4" /> Official Patterns
                      </div>
                      <span className="text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-widest">{exams?.length || 0} Verticals active</span>
                   </div>
@@ -90,11 +91,11 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
 
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-24 max-w-7xl flex-1">
          {examsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[520px] w-full rounded-[3rem] bg-white border border-slate-100" />) }
             </div>
          ) : exams && exams.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                {exams.map((exam) => (
                   <ExamCard 
                     key={exam.id} 
@@ -103,13 +104,13 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
                     userResults={results} 
                     allPyqs={pyqs} 
                     allNotes={notes} 
-                  />
+                 />
                ))}
             </div>
          ) : (
             <div className="py-40 text-center opacity-30 flex flex-col items-center gap-10">
                <div className="h-24 w-24 bg-slate-100 rounded-[3rem] flex items-center justify-center text-slate-300"><Layers className="h-12 w-12" /></div>
-               <p className="font-black text-2xl md:text-5xl tracking-tight uppercase">Registry standby</p>
+               <p className="font-black text-2xl md:text-5xl tracking-tight uppercase">Registry Standby</p>
             </div>
          )}
       </main>
