@@ -53,9 +53,17 @@ import { useRouter } from "next/navigation"
 
 /**
  * @fileOverview Institutional Practice Hub v4.0 [Compact Enterprise Redesign].
- * FIXED: Implemented Testbook-style compact cards for PWA optimization.
- * UI: Unified card dimensions with 2x3 stats grid and 48px CTAs.
+ * FIXED: Defined missing FILTER_CHIPS constant to resolve build failure.
  */
+
+const FILTER_CHIPS = [
+  { id: "all", label: "All items" },
+  { id: "FREE", label: "Free preview" },
+  { id: "PREMIUM", label: "Premium tests" },
+  { id: "Easy", label: "Easy" },
+  { id: "Medium", label: "Medium" },
+  { id: "Hard", label: "Hard" },
+];
 
 export default function PracticeHub() {
   const db = useFirestore()
@@ -91,6 +99,7 @@ export default function PracticeHub() {
       
       // Dynamic Content Analysis
       const counts = {
+        totalTests: testsInSer.length,
         mock: testsInSer.filter(m => m.mockType === 'FULL').length,
         subject: testsInSer.filter(m => m.mockType === 'SUBJECT').length,
         sectional: testsInSer.filter(m => m.mockType === 'SECTIONAL').length,
@@ -236,7 +245,7 @@ export default function PracticeHub() {
                    className="flex flex-col h-full"
                  >
                     <Link href={`/subjects/${ser.subjectId}/series/${ser.id}`} className="h-full">
-                       <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[24px] bg-white group flex flex-col h-full relative overflow-hidden text-left border-none">
+                       <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[24px] bg-white group flex flex-col h-full relative overflow-hidden text-left border-none">
                           <CardContent className="p-5 md:p-6 space-y-4 md:space-y-6 flex-1 flex flex-col">
                              
                              {/* Compact Header */}
