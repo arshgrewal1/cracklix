@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -48,8 +49,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v7.6.
- * UPDATED: Reduced sticky top offset to top-[84px] md:top-[116px] for tighter navigation.
+ * @fileOverview Premium Exam Detail Hub v7.7.
+ * FIXED: ReferenceError by correcting pyqQuery to pyqsQuery.
  */
 
 export default function ExamHubClient() {

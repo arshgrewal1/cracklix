@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -51,8 +52,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v4.6.
- * UPDATED: Reduced header height offset to top-[84px] md:top-[116px] for tighter navigation.
+ * @fileOverview Institutional Practice Hub v4.7.
+ * FIXED: Refined filtering logic for 'Free preview' to include series with preview tests.
  */
 
 const FILTER_CHIPS = [
@@ -132,12 +133,18 @@ export default function PracticeHub() {
   const filteredSeries = useMemo(() => {
     let base = processedSeries.filter(s => {
       const search = !searchTerm || s.title?.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesAccess = activeFilter === 'all' || 
-                           (activeFilter === 'FREE' && s.accessLevel === 'FREE') || 
-                           (activeFilter === 'PREMIUM' && s.accessLevel === 'PREMIUM')
-      const matchesDifficulty = activeFilter === 'all' || s.difficulty === activeFilter
       
-      return search && (activeFilter === 'all' || matchesAccess || matchesDifficulty)
+      // Split the filters into categories
+      const isAccessFilter = ['FREE', 'PREMIUM'].includes(activeFilter);
+      const isDifficultyFilter = ['Easy', 'Medium', 'Hard'].includes(activeFilter);
+
+      const matchesAccess = !isAccessFilter || 
+                           (activeFilter === 'FREE' && (s.accessLevel === 'FREE' || s.counts.free > 0)) || 
+                           (activeFilter === 'PREMIUM' && s.accessLevel === 'PREMIUM')
+      
+      const matchesDifficulty = !isDifficultyFilter || s.difficulty === activeFilter
+      
+      return search && matchesAccess && matchesDifficulty
     })
 
     if (sortBy === 'newest') base.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))

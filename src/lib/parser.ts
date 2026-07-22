@@ -1,10 +1,10 @@
+
 'use client';
 /**
- * @fileOverview Institutional Ingestion Hub v92.0 [PRODUCTION LOCK].
+ * @fileOverview Institutional Ingestion Hub v93.0 [PRODUCTION LOCK].
  * - High-Fidelity State Machines for MCQ, Assertion/Reason, and Fill in the Blank.
- * - NEW: Table Extraction Engine & Shared Context Injection.
- * - OCR Noise Normalization (Pipes, Page Numbers, Ads).
- * - Bilingual Script Isolation (Unicode-driven).
+ * - UPGRADED: Enhanced Table Detection and Multi-Question Directions Context.
+ * - FIXED: Directional context now properly attaches to subsequent questions in a batch.
  */
 
 const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
@@ -24,7 +24,7 @@ const NOISE_PATTERNS = [
   /^\s*[\.·,]{2,}\s*$/
 ];
 
-const QUESTION_SENTINEL_REGEX = /^\s*(?:(?:Q|Question|QUESTION|QUESTION\s*NO\.?|Q\.)[\s\.\-:]*)?(\d+|[IVXlI]+)(?:[\.\s:)\-]|(?=\r?\n)|$)/i;
+const QUESTION_SENTINEL_REGEX = /^\s*(?:(?:Q|Question|QUESTION|QUESTION\s*NO\.?|Q\.)[\s\.\-:]*)?(\d+)(?:[\.\s:)\-]|(?=\r?\n)|$)/i;
 const OPTION_MARKER_REGEX = /^\s*(?:[\(]?([A-E]|[1-5]|①|②|③|④|⑤|I{1,3}V?|i{1,3}v?|Ⓐ|Ⓑ|Ⓒ|Ⓓ|Ⓔ|[a-e])[\)\.\s:]\s*)(.*)/i;
 const ANSWER_SENTINEL_REGEX = /^\s*(?:Answer|Correct Answer|Correct Ans|Official Key|Verified Answer|Key|Ans|ਸਹੀ ਉੱਤਰ|ਉੱਤਰ)\s*[:\-]?\s*([A-E1-5①-⑤])/i;
 const EXPL_SENTINEL_REGEX = /^\s*(?:Explanation|Rationale|Solution|ਵਿਆਖਿਆ|English Explanation|Punjabi Explanation|English Rationale|Punjabi Rationale|Reason)\s*[:\-]?\s*(.*)/i;
@@ -258,17 +258,13 @@ export function parseStructuredMCQ(rawText: string, metadata: any) {
     opts = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
   };
 
-  // Pre-scan for a shared table in the context block
-  const firstQuestionIdx = lines.findIndex(l => QUESTION_SENTINEL_REGEX.test(l));
-  if (firstQuestionIdx > 0) {
-     const contextLines = lines.slice(0, firstQuestionIdx);
-     sharedTable = extractTable(contextLines);
-  }
+  const directionPattern = /^(?:Directions|ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼)/i;
 
   for (let line of lines) {
     const cleaned = sanitizeLine(line);
     if (!cleaned) continue;
 
+    // Detect new question node
     if (QUESTION_SENTINEL_REGEX.test(cleaned)) {
       if (state !== 'CONTEXT') finalize();
       currentNum = cleaned.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
@@ -287,7 +283,9 @@ export function parseStructuredMCQ(rawText: string, metadata: any) {
 
     if (optMatch) {
       state = 'OPTIONS';
-      const key = optMatch[1].toUpperCase().replace(/[①Ⓐ]/,'A').replace(/[②Ⓑ]/,'B').replace(/[③Ⓒ]/,'C').replace(/[④Ⓓ]/,'D');
+      const rawKey = optMatch[1].toUpperCase();
+      const map: any = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '①': 'A', '②': 'B', '③': 'C', '④': 'D', 'Ⓐ': 'A', 'Ⓑ': 'B', 'Ⓒ': 'C', 'Ⓓ': 'D' };
+      const key = map[rawKey] || rawKey;
       const text = optMatch[2].trim();
       if (detectScript(text) === 'PA') opts[key].pa = text;
       else opts[key].en = text;
@@ -296,8 +294,9 @@ export function parseStructuredMCQ(rawText: string, metadata: any) {
 
     if (ansMatch) {
       state = 'ANSWER';
-      const val = ansMatch[1].toUpperCase().replace('①','A').replace('②','B').replace('③','C').replace('④','D');
-      currentAns = val;
+      const val = ansMatch[1].toUpperCase();
+      const map: any = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '①': 'A', '②': 'B', '③': 'C', '④': 'D' };
+      currentAns = map[val] || val;
       continue;
     }
 
@@ -309,9 +308,15 @@ export function parseStructuredMCQ(rawText: string, metadata: any) {
       continue;
     }
 
+    // Capture context or accumulate question text
     if (state === 'CONTEXT') {
-      if (detectScript(cleaned) === 'PA') sharedContextPa += (sharedContextPa ? ' ' : '') + cleaned;
-      else sharedContextEn += (sharedContextEn ? ' ' : '') + cleaned;
+      if (!sharedTable && cleaned.includes('\t') || cleaned.split(/\s{2,}/).length >= 2) {
+         sharedTable = extractTable(lines.filter(l => !QUESTION_SENTINEL_REGEX.test(l) && !directionPattern.test(l)));
+      }
+      if (!cleaned.includes('\t')) {
+         if (detectScript(cleaned) === 'PA') sharedContextPa += (sharedContextPa ? ' ' : '') + cleaned;
+         else sharedContextEn += (sharedContextEn ? ' ' : '') + cleaned;
+      }
     } else if (state === 'QUESTION') {
       if (detectScript(cleaned) === 'PA') paQuest += (paQuest ? ' ' : '') + cleaned;
       else enQuest += (enQuest ? ' ' : '') + cleaned;
@@ -336,8 +341,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 
   if (format === 'ASSERTION') return parseAssertionReason(cleanText, metadata);
   
-  // All other formats (Table, Graph, Diagram, Standard MCQ) now use the Structured Parser
-  // which supports Directions and Table extraction.
   return parseStructuredMCQ(cleanText, metadata);
 }
 

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -40,8 +41,8 @@ import { hasSeriesAccess } from "@/lib/access-control"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Premium Series Hub Portal v12.1.
- * FIXED: Visibility of "Premium Series" text in the header badge.
+ * @fileOverview Premium Series Hub Portal v12.2.
+ * FIXED: Imported missing CheckCircle2 for BenefitNode.
  */
 
 export default function SeriesDetailPortal() {
@@ -79,7 +80,6 @@ export default function SeriesDetailPortal() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left pb-safe overflow-x-hidden w-full relative">
       <Navbar />
       
-      {/* 1. HERO SECTION */}
       <section className="bg-[#0F172A] text-white pt-10 pb-12 md:pt-16 md:pb-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
@@ -287,10 +287,10 @@ export default function SeriesDetailPortal() {
 
       {/* PREMIUM LOCK PURCHASE DIALOG - REDESIGNED FOR PWA/MOBILE */}
       <Dialog open={!!selectedMockForPurchase} onOpenChange={() => setSelectedMockForPurchase(null)}>
-         <DialogContent className="sm:max-w-[480px] w-[calc(100%-24px)] max-h-[70vh] rounded-[24px] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
+         <DialogContent className="sm:max-w-[480px] w-[calc(100%-24px)] max-h-[70vh] rounded-[24px] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col z-[1101]">
             <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 to-blue-400 shrink-0" />
             
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6">
                <div className="flex items-center gap-4 border-b border-slate-50 pb-5">
                   <div className="h-12 w-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 shadow-inner">
                      <Lock className="h-6 w-6" />
@@ -304,11 +304,11 @@ export default function SeriesDetailPortal() {
                <div className="space-y-3">
                   <p className="text-[10px] font-black uppercase text-primary tracking-widest ml-1">Series Benefits</p>
                   <div className="grid grid-cols-1 gap-2">
-                     <BenefitItem text="Access all professional tests" />
-                     <BenefitItem text="Detailed bilingual explanations" />
-                     <BenefitItem text="Real-time performance analytics" />
-                     <BenefitItem text="State-wide merit rankings" />
-                     <BenefitItem text="Unlimited attempt capability" />
+                     <BenefitNode text="Access all professional tests" />
+                     <BenefitNode text="Detailed bilingual explanations" />
+                     <BenefitNode text="Real-time performance analytics" />
+                     <BenefitNode text="State-wide merit rankings" />
+                     <BenefitNode text="Unlimited attempt capability" />
                   </div>
                </div>
 
@@ -334,13 +334,14 @@ export default function SeriesDetailPortal() {
                      </div>
                   </div>
                </div>
+               <div className="pb-6" />
             </div>
 
-            <DialogFooter className="p-6 bg-slate-50 border-t border-slate-100 flex flex-col gap-2 shrink-0 pb-[calc(env(safe-area-inset-bottom)+24px)]">
+            <DialogFooter className="p-5 bg-slate-50 border-t border-slate-100 flex flex-col gap-2 shrink-0 pb-[calc(env(safe-area-inset-bottom)+20px)]">
                <Button asChild className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-blue-500 hover:brightness-110 text-white font-[800] uppercase tracking-widest text-[11px] rounded-xl shadow-xl border-none active:scale-[0.98] transition-all">
                   <Link href="/pass">Buy Elite Pass Now <ArrowRight className="ml-2 h-4 w-4" /></Link>
                </Button>
-               <Button variant="ghost" onClick={() => setSelectedMockForPurchase(null)} className="w-full h-10 text-slate-400 hover:text-slate-600 font-bold text-[10px] uppercase tracking-widest">
+               <Button variant="ghost" onClick={() => setSelectedMockForPurchase(null)} className="w-full h-10 text-slate-400 hover:text-slate-600 font-bold text-[10px] uppercase tracking-widest border-none bg-transparent">
                   Cancel
                </Button>
             </DialogFooter>
@@ -350,11 +351,11 @@ export default function SeriesDetailPortal() {
   )
 }
 
-function BenefitItem({ text }: { text: string }) {
+function BenefitNode({ text }: { text: string }) {
    return (
       <div className="flex items-center gap-3 py-1">
          <div className="h-4.5 w-4.5 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-            <Check className="h-3 w-3 text-emerald-500 stroke-[4px]" />
+            <CheckCircle2 className="h-3 w-3 text-emerald-500 stroke-[4px]" />
          </div>
          <p className="text-[12px] font-bold text-slate-600">{text}</p>
       </div>
