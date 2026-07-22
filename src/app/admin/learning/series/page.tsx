@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from "react"
@@ -83,7 +84,7 @@ export default function SeriesCMS() {
         onAction={() => setEditingSeries({ title: "", subjectId: subjectFilter !== 'all' ? subjectFilter : "", boardId: "psssb", description: "", difficulty: "Medium", isActive: true, displayOrder: (rawSeries?.length || 0) + 1 })}
       />
 
-      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white mx-1 border border-slate-50 p-6 md:p-10">
+      <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white mx-1 border border-slate-50 p-6 md:p-10">
          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="md:col-span-3">
                <AdminSearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search series title..." />
