@@ -1,20 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useUser, useStudySessions } from '@/hooks/useStudyAnalytics';
 import { Clock, Zap } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Fidelity Study Timer v3.1.
- * FIXED: Hardened duration formatter to prevent unrealistic time values.
+ * @fileOverview High-Fidelity Study Timer v4.0.
+ * UPDATED: Uses the unified useStudySessions hook for true real-time synchronization.
  */
 
 const formatFullDuration = (seconds: number) => {
   if (isNaN(seconds) || seconds < 0) return "00h 00m 00s";
-  
-  // Sanity check: if seconds are > 24 hours, it's bad data
   if (seconds > 86400) return "00h 00m 00s";
 
   const h = Math.floor(seconds / 3600);
@@ -27,20 +24,6 @@ const formatFullDuration = (seconds: number) => {
 export default function LiveStudyTimer() {
     const { user } = useUser();
     const { stats, loading } = useStudySessions();
-    const [liveSeconds, setLiveSeconds] = useState(0);
-
-    // Local tick to provide instant feedback between Firestore syncs
-    useEffect(() => {
-       if (loading) return;
-       // Only set if data is reasonable
-       setLiveSeconds(stats.today > 86400 ? 0 : stats.today);
-
-       const interval = setInterval(() => {
-          setLiveSeconds(prev => (prev < 86400 ? prev + 1 : 0));
-       }, 1000);
-
-       return () => clearInterval(interval);
-    }, [stats.today, loading]);
 
     if (!user) return null;
 
@@ -68,7 +51,7 @@ export default function LiveStudyTimer() {
                         <Skeleton className="h-12 w-48 bg-slate-50 rounded-xl" />
                     ) : (
                         <h2 className="text-4xl md:text-5xl font-black text-[#0F172A] dark:text-white tracking-tighter tabular-nums antialiased leading-none">
-                            {formatFullDuration(liveSeconds)}
+                            {formatFullDuration(stats.today)}
                         </h2>
                     )}
                 </div>

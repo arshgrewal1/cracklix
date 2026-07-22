@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
@@ -14,15 +13,29 @@ import {
   getTimezone 
 } from '@/lib/date-utils';
 import { isAfter, subDays, isValid } from 'date-fns';
+import { create } from 'zustand';
 
 /**
- * @fileOverview Production-grade Study Analytics Engine v7.6.
- * FIXED: Hardened Date object conversion to prevent RangeErrors in Safari/APK.
+ * @fileOverview Production-grade Study Analytics Engine v8.0 [Live Counting].
+ * FIXED: Implemented shared state to allow real-time counting across all UI nodes.
  */
+
+interface StudyStore {
+  activeSeconds: number;
+  incrementActive: () => void;
+  resetActive: () => void;
+}
+
+const useStudyStore = create<StudyStore>((set) => ({
+  activeSeconds: 0,
+  incrementActive: () => set((state) => ({ activeSeconds: state.activeSeconds + 1 })),
+  resetActive: () => set({ activeSeconds: 0 }),
+}));
 
 export function useStudySessions() {
   const { user } = useUser();
   const db = useFirestore();
+  const activeSeconds = useStudyStore(s => s.activeSeconds);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -56,7 +69,7 @@ export function useStudySessions() {
     const startOfMonth = getLocalStartOfMonth(now);
     const startOfYear = getLocalStartOfYear(now);
 
-    let today = 0, week = 0, month = 0, year = 0, lifetime = 0;
+    let dbToday = 0, week = 0, month = 0, year = 0, lifetime = 0;
     const studyDates = new Set<string>();
 
     rawSessions.forEach((s) => {
@@ -81,12 +94,15 @@ export function useStudySessions() {
         lifetime += duration;
         studyDates.add(getLocalDateString(startTime));
 
-        if (isAfter(startTime, startOfToday)) today += duration;
+        if (isAfter(startTime, startOfToday)) dbToday += duration;
         if (isAfter(startTime, startOfWeek)) week += duration;
         if (isAfter(startTime, startOfMonth)) month += duration;
         if (isAfter(startTime, startOfYear)) year += duration;
       } catch (e) {}
     });
+
+    // Add current live seconds to stats
+    const liveToday = dbToday + activeSeconds;
 
     const sortedDates = Array.from(studyDates).sort((a, b) => b.localeCompare(a));
     let currentStreak = 0, longestStreak = 0, tempStreak = 0;
@@ -124,16 +140,16 @@ export function useStudySessions() {
     }
 
     return {
-      today,
-      week,
-      month,
-      year,
-      lifetime,
+      today: liveToday,
+      week: week + activeSeconds,
+      month: month + activeSeconds,
+      year: year + activeSeconds,
+      lifetime: lifetime + activeSeconds,
       currentStreak,
       longestStreak,
       totalSessions: rawSessions.length
     };
-  }, [rawSessions, mounted]);
+  }, [rawSessions, mounted, activeSeconds]);
 
   return { stats, loading, sessions: rawSessions };
 }
@@ -141,8 +157,8 @@ export function useStudySessions() {
 export function useActiveSession(activityType: StudySession['activityType'], activityId?: string) {
   const { user } = useUser();
   const db = useFirestore();
+  const { incrementActive, resetActive, activeSeconds } = useStudyStore();
   const [isActive, setIsActive] = useState(false);
-  const [seconds, setSeconds] = useState(0);
   const startTimeRef = useRef<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -150,11 +166,10 @@ export function useActiveSession(activityType: StudySession['activityType'], act
     if (isActive || typeof window === 'undefined') return;
     setIsActive(true);
     startTimeRef.current = Date.now();
-    setSeconds(0);
     intervalRef.current = setInterval(() => {
-      setSeconds(prev => prev + 1);
+      incrementActive();
     }, 1000);
-  }, [isActive]);
+  }, [isActive, incrementActive]);
 
   const stopSession = useCallback(async (meta?: Partial<StudySession>) => {
     if (!isActive || !user || !db) return null;
@@ -166,30 +181,32 @@ export function useActiveSession(activityType: StudySession['activityType'], act
     const startTime = startTimeRef.current || endTime;
     const durationSeconds = Math.round((endTime - startTime) / 1000);
 
-    if (durationSeconds < 5) return null; // Ignore micro-sessions
+    // Save actual duration to DB
+    if (durationSeconds >= 5) {
+      const session: Omit<StudySession, 'id'> = {
+        userId: user.uid,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        durationSeconds,
+        activityType,
+        activityId,
+        timezone: getTimezone(),
+        createdAt: serverTimestamp(),
+        ...meta
+      };
 
-    const session: Omit<StudySession, 'id'> = {
-      userId: user.uid,
-      startTime: new Date(startTime),
-      endTime: new Date(endTime),
-      durationSeconds,
-      activityType,
-      activityId,
-      timezone: getTimezone(),
-      createdAt: serverTimestamp(),
-      ...meta
-    };
-
-    try {
-      const docRef = await addDoc(collection(db, 'users', user.uid, 'study_sessions'), session);
-      return { id: docRef.id, ...session };
-    } catch (e) {
-      return null;
-    } finally {
-      startTimeRef.current = null;
-      setSeconds(0);
+      try {
+        await addDoc(collection(db, 'users', user.uid, 'study_sessions'), session);
+      } catch (e) {
+        console.error("[Session_Save_Error]:", e);
+      }
     }
-  }, [isActive, user, db, activityType, activityId]);
+
+    // Clean up local ticking state
+    resetActive();
+    startTimeRef.current = null;
+    return null;
+  }, [isActive, user, db, activityType, activityId, resetActive]);
 
   useEffect(() => {
     return () => {
@@ -197,5 +214,5 @@ export function useActiveSession(activityType: StudySession['activityType'], act
     };
   }, []);
 
-  return { isActive, seconds, startSession, stopSession };
+  return { isActive, seconds: activeSeconds, startSession, stopSession };
 }
