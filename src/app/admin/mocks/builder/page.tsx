@@ -40,7 +40,9 @@ import {
   ShieldCheck,
   Timer,
   BookMarked,
-  Settings
+  Settings,
+  Lock,
+  Unlock
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -71,9 +73,8 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v52.3 [High-Density Content Fix].
- * FIXED: Reduced font size and removed line-clamping in composition area to ensure full question visibility.
- * UPDATED: Changed default section name to "General".
+ * @fileOverview Master Mock Builder v53.0 [Free Preview Logic].
+ * UPDATED: Added Access Tier selection (Free Preview vs Premium) for granular gating.
  */
 
 export default function MockBuilderPage() {
@@ -126,7 +127,7 @@ function MockBuilderContent() {
     mockType: "FULL" as MockType, 
     duration: 120, 
     difficulty: "Medium" as Difficulty, 
-    accessLevel: "FREE" as AccessLevel,
+    accessLevel: "FREE" as AccessLevel, // This now means 'FREE PREVIEW'
     published: true,
     languageMode: "ENGLISH_PUNJABI" as LanguageDisplayMode,
     positiveMarks: 1,
@@ -181,6 +182,7 @@ function MockBuilderContent() {
       assignmentMode: existingMock.assignmentMode || "MULTIPLE",
       boardIds: existingMock.boardIds || (existingMock.boardId ? [existingMock.boardId] : []),
       examIds: existingMock.examIds || (existingMock.examId ? [existingMock.examId] : []),
+      accessLevel: existingMock.accessLevel || "FREE"
     });
 
     const hydrateExisting = async () => {
@@ -433,10 +435,10 @@ function MockBuilderContent() {
                     </select>
                  </div>
                  <div className="space-y-2 text-left">
-                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Access level</Label>
+                    <Label className="text-[10px] font-bold text-slate-400 ml-1 uppercase">Test access tier</Label>
                     <select value={mockData.accessLevel} onChange={e => setMockData((p: any) => ({...p, accessLevel: e.target.value}))} className="w-full h-11 md:h-12 bg-slate-50 border-none rounded-xl px-4 outline-none font-bold text-xs shadow-inner text-[#0F172A]">
-                       <option value="FREE">Free Area</option>
-                       <option value="PREMIUM">Elite Area</option>
+                       <option value="FREE">Free Preview</option>
+                       <option value="PREMIUM">Premium Lock</option>
                     </select>
                  </div>
               </div>

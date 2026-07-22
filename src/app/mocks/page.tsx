@@ -33,7 +33,8 @@ import {
   Smartphone,
   Calendar,
   Award,
-  ArrowUpDown
+  ArrowUpDown,
+  Unlock
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -45,9 +46,11 @@ import { TestSeries, MockTest } from "@/types"
 import { hasSeriesAccess } from "@/lib/access-control"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Premium Practice Hub v2.1 [Redesigned Selects].
+ * @fileOverview Premium Practice Hub v2.2 [Preview Stats Enabled].
+ * UPDATED: Series cards are now always openable, displaying free/premium counts.
  */
 
 const FILTER_CHIPS = [
@@ -62,11 +65,11 @@ const FILTER_CHIPS = [
 export default function PracticeHub() {
   const db = useFirestore()
   const { user, profile, loading: userLoading } = useUser()
+  const router = useRouter()
   
   const [searchTerm, setSearchTerm] = useState("")
   const [activeFilter, setActiveFilter] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
-  const [selectedSeriesForPurchase, setSelectedSeriesForPurchase] = useState<any>(null)
 
   // Data Engine
   const seriesQuery = useMemo(() => (db ? query(collection(db, "test_series"), where("isActive", "==", true)) : null), [db])
@@ -90,12 +93,17 @@ export default function PracticeHub() {
       // Access Audit
       const accessNode = hasSeriesAccess(profile, ser);
       
+      const freeCount = testsInSer.filter(m => m.accessLevel === 'FREE').length;
+      const premiumCount = testsInSer.length - freeCount;
+      
       return {
         ...ser,
         testCount: testsInSer.length,
+        freeCount,
+        premiumCount,
         attemptedCount: attempted,
         progress,
-        isLocked: !accessNode.hasAccess,
+        hasPurchasedAccess: accessNode.hasAccess,
         accessStatus: accessNode.status
       }
     })
@@ -219,31 +227,25 @@ export default function PracticeHub() {
               filteredSeries.map((ser, i) => (
                  <motion.div 
                    key={ser.id} 
-                   whileHover={{ y: ser.isLocked ? 0 : -8 }}
+                   whileHover={{ y: -8 }}
                    initial={{ opacity: 0, y: 20 }}
                    animate={{ opacity: 1, y: 0 }}
                    transition={{ delay: i * 0.05 }}
                    className="flex flex-col h-full"
                  >
-                    <div 
-                      onClick={() => ser.isLocked ? setSelectedSeriesForPurchase(ser) : router.push(`/subjects/${ser.subjectId}/series/${ser.id}`)}
-                      className="cursor-pointer h-full"
-                    >
-                       <Card className={cn(
-                         "border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] bg-white group flex flex-col h-full relative overflow-hidden",
-                         ser.isLocked && "opacity-80"
-                       )}>
-                          <CardContent className="p-8 md:p-10 space-y-8 flex-1 flex flex-col text-left">
+                    <Link href={`/subjects/${ser.subjectId}/series/${ser.id}`} className="h-full">
+                       <Card className="border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] bg-white group flex flex-col h-full relative overflow-hidden text-left">
+                          <CardContent className="p-8 md:p-10 space-y-8 flex-1 flex flex-col">
                              <div className="flex justify-between items-start w-full relative z-10">
                                 <AuthorityLogo boardId={ser.boardId} size="md" className="h-16 w-16 md:h-20 md:w-20 shadow-2xl bg-slate-50 border-4 border-white" />
                                 <div className="flex flex-col items-end gap-2">
-                                   {ser.isLocked ? (
-                                      <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm flex items-center gap-1.5">
-                                         <Lock className="h-3 w-3" /> Premium
+                                   {ser.hasPurchasedAccess ? (
+                                      <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm flex items-center gap-1.5">
+                                         <CheckCircle2 className="h-3 w-3" /> Active
                                       </Badge>
                                    ) : (
-                                      <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm flex items-center gap-1.5">
-                                         <CheckCircle2 className="h-3 w-3" /> Purchased
+                                      <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm flex items-center gap-1.5">
+                                         <Lock className="h-3 w-3" /> Premium
                                       </Badge>
                                    )}
                                 </div>
@@ -258,47 +260,35 @@ export default function PracticeHub() {
                                 </p>
                              </div>
 
-                             <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-50 relative z-10">
+                             <div className="grid grid-cols-3 gap-3 pt-6 border-t border-slate-50 relative z-10">
                                 <SeriesStat icon={Layers} label="Tests" val={ser.testCount} />
-                                <SeriesStat icon={CheckCircle2} label="Solved" val={ser.attemptedCount} highlight={ser.attemptedCount > 0} />
+                                <SeriesStat icon={Zap} label="Free" val={ser.freeCount} color="text-blue-500" />
+                                <SeriesStat icon={Lock} label="Premium" val={ser.premiumCount} color="text-amber-600" />
                              </div>
 
-                             {!ser.isLocked && (
-                                <div className="space-y-2.5 pt-6 relative z-10">
-                                   <div className="flex justify-between items-center text-[9px] font-black uppercase text-slate-400 tracking-widest">
-                                      <span>Preparation</span>
-                                      <span className="text-primary tabular-nums">{ser.progress}%</span>
-                                   </div>
-                                   <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner">
-                                      <motion.div 
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${ser.progress}%` }}
-                                        className="h-full bg-primary" 
-                                      />
-                                   </div>
+                             <div className="space-y-2.5 pt-6 relative z-10">
+                                <div className="flex justify-between items-center text-[9px] font-black uppercase text-slate-400 tracking-widest">
+                                   <span>My progress</span>
+                                   <span className="text-primary tabular-nums">{ser.progress}%</span>
                                 </div>
-                             )}
+                                <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner">
+                                   <motion.div 
+                                     initial={{ width: 0 }}
+                                     animate={{ width: `${ser.progress}%` }}
+                                     className="h-full bg-primary" 
+                                   />
+                                </div>
+                             </div>
 
                              <div className="pt-8 relative z-10">
-                                <Button className={cn(
-                                   "w-full h-14 rounded-2xl font-bold text-xs tracking-tight shadow-3xl transition-all active:scale-95 border-none",
-                                   ser.isLocked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] group-hover:bg-primary text-white"
-                                )}>
-                                   {ser.isLocked ? "Unlock series" : "Continue prep"} 
-                                   {ser.isLocked ? <Lock className="h-4 w-4 ml-auto" /> : <ChevronRight className="h-4 w-4 ml-auto opacity-30" />}
+                                <Button className="w-full h-14 rounded-2xl bg-[#0F172A] group-hover:bg-primary text-white font-bold text-xs tracking-tight shadow-3xl transition-all active:scale-95 border-none flex items-center justify-between px-8">
+                                   <span>Continue learning</span> 
+                                   <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                              </div>
-                             
-                             {ser.isLocked && (
-                                <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                                   <div className="h-16 w-16 rounded-full bg-white shadow-2xl flex items-center justify-center text-amber-500 scale-0 group-hover:scale-100 transition-transform duration-500">
-                                      <Lock className="h-8 w-8" />
-                                   </div>
-                                </div>
-                             )}
                           </CardContent>
                        </Card>
-                    </div>
+                    </Link>
                  </motion.div>
               ))
            ) : (
@@ -308,51 +298,6 @@ export default function PracticeHub() {
               </div>
            )}
         </div>
-
-        {/* PURCHASE DIALOG */}
-        <Dialog open={!!selectedSeriesForPurchase} onOpenChange={() => setSelectedSeriesForPurchase(null)}>
-           <DialogContent className="sm:max-w-xl w-[95vw] rounded-[2.5rem] md:rounded-[3.5rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
-              <div className="h-2 w-full bg-amber-500 shrink-0" />
-              <div className="p-8 md:p-14 space-y-10 overflow-y-auto custom-scrollbar flex-1">
-                 <div className="flex items-center gap-8 border-b border-slate-50 pb-10">
-                    <AuthorityLogo boardId={selectedSeriesForPurchase?.boardId} size="lg" className="h-24 w-24 md:h-32 md:w-32 bg-slate-50 border-4 border-white shadow-2xl" />
-                    <div className="space-y-2">
-                       <Badge className="bg-amber-50 text-amber-600 border-none text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full">Premium pass</Badge>
-                       <DialogTitle className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none">
-                          {selectedSeriesForPurchase?.title}
-                       </DialogTitle>
-                    </div>
-                 </div>
-
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <PurchaseStat icon={Layers} label="Tests" val={selectedSeriesForPurchase?.testCount} />
-                    <PurchaseStat icon={Smartphone} label="Android PWA" val="Active" />
-                    <PurchaseStat icon={Calendar} label="Validity" val="365 Days" />
-                    <PurchaseStat icon={ShieldCheck} label="Official" val="Verified" />
-                 </div>
-
-                 <div className="space-y-4">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Series Benefits</p>
-                    <div className="grid grid-cols-1 gap-3">
-                       <BenefitNode text="Unlock all tests in this specific series." />
-                       <BenefitNode text="Access detailed bilingual explanations." />
-                       <BenefitNode text="Real-time All Punjab Rank calculation." />
-                       <BenefitNode text="One year of premium access to this hub." />
-                    </div>
-                 </div>
-
-                 <div className="pt-6">
-                    <Button asChild className="w-full h-16 md:h-20 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-[0.2em] text-xs md:text-sm rounded-2xl md:rounded-[2.5rem] shadow-4xl border-none transition-all active:scale-95 flex items-center justify-between px-10">
-                       <Link href="/pass">
-                          <span>Buy Elite Pass</span>
-                          <span className="text-2xl font-black">₹{selectedSeriesForPurchase?.price || 299}</span>
-                       </Link>
-                    </Button>
-                    <p className="text-center text-[9px] font-bold text-slate-300 mt-6 uppercase tracking-widest">Secure institutional payment portal</p>
-                 </div>
-              </div>
-           </DialogContent>
-        </Dialog>
 
         <div className="flex items-center justify-center gap-4 text-slate-300 py-10 opacity-50">
            <ShieldCheck className="h-5 w-5" />
@@ -365,35 +310,14 @@ export default function PracticeHub() {
   )
 }
 
-function SeriesStat({ icon: Icon, label, val, highlight }: any) {
+function SeriesStat({ icon: Icon, label, val, color }: any) {
   return (
-    <div className="flex flex-col gap-1 text-left">
-       <div className="flex items-center gap-2 opacity-40">
-          <Icon className="h-3.5 w-3.5 text-[#0F172A]" />
-          <span className="text-[8px] font-black uppercase tracking-tight">{label}</span>
+    <div className="flex flex-col gap-1 text-left min-w-0">
+       <div className="flex items-center gap-1.5 opacity-40">
+          <Icon className="h-3 w-3 text-[#0F172A]" />
+          <span className="text-[7px] font-black uppercase tracking-tight truncate">{label}</span>
        </div>
-       <p className={cn("text-base md:text-xl font-black tabular-nums tracking-tighter", highlight ? "text-emerald-600" : "text-[#0F172A]")}>{val}</p>
+       <p className={cn("text-sm md:text-lg font-black tabular-nums tracking-tighter", color || "text-[#0F172A]")}>{val}</p>
     </div>
   )
-}
-
-function PurchaseStat({ icon: Icon, label, val }: any) {
-   return (
-      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col items-center text-center gap-2">
-         <Icon className="h-4 w-4 text-amber-500" />
-         <div>
-            <p className="text-sm font-black text-[#0F172A] leading-none tabular-nums">{val}</p>
-            <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-1">{label}</p>
-         </div>
-      </div>
-   )
-}
-
-function BenefitNode({ text }: { text: string }) {
-   return (
-      <div className="flex items-center gap-4 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50">
-         <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
-         <p className="text-[11px] md:text-sm font-bold text-emerald-900 leading-tight">{text}</p>
-      </div>
-   )
 }

@@ -1,9 +1,9 @@
 import { doc, getDoc } from "firebase/firestore";
 import { firestore } from "@/firebase/app";
-import { UserProfile, TestSeries } from "@/types";
+import { UserProfile, TestSeries, MockTest } from "@/types";
 
 /**
- * @fileOverview Institutional Access Guard Node v3.0 [Series Aware].
+ * @fileOverview Institutional Access Guard Node v4.0 [Granular Preview Enabled].
  */
 
 /**
@@ -74,6 +74,20 @@ export function hasSeriesAccess(profile: UserProfile | null, series: TestSeries)
   if (series.boardId && allowedCategories.includes(series.boardId)) return { hasAccess: true, status: 'PURCHASED' };
 
   return { hasAccess: false, status: 'LOCKED' };
+}
+
+/**
+ * Checks if a user can attempt a specific test.
+ * Logic: Access granted if test is FREE PREVIEW OR user has purchased parent series.
+ */
+export function hasMockAccess(profile: UserProfile | null, mock: MockTest, series: TestSeries | null): boolean {
+  // 1. If test is free preview, allow
+  if (mock.accessLevel === 'FREE') return true;
+
+  // 2. If test is premium, check if series access exists
+  if (!series) return false;
+  const seriesAuth = hasSeriesAccess(profile, series);
+  return seriesAuth.hasAccess;
 }
 
 /**

@@ -23,7 +23,8 @@ import {
   Check,
   MoreVertical,
   Gem,
-  ArrowRight
+  ArrowRight,
+  Info
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -34,9 +35,11 @@ import { TestSeries, Subject, MockTest } from "@/types"
 import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { hasSeriesAccess } from "@/lib/access-control"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Premium Series Hub Portal v8.0 [Lock Enabled].
+ * @fileOverview Premium Series Hub Portal v9.0 [Granular Preview Gating].
+ * UPDATED: Implemented test-level gating logic. Free previews are open; premium tests trigger purchase.
  */
 
 export default function SeriesDetailPortal() {
@@ -48,6 +51,7 @@ export default function SeriesDetailPortal() {
   const router = useRouter()
   const { user, profile, loading: authLoading } = useUser()
   const [mounted, setMounted] = useState(false)
+  const [selectedMockForPurchase, setSelectedMockForPurchase] = useState<any>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -145,9 +149,8 @@ export default function SeriesDetailPortal() {
                   ))
                ) : mocks && mocks.length > 0 ? (
                   mocks.map((mock, idx) => {
-                     // First test is always a Free Preview Node
-                     const isFreePreview = idx === 0;
-                     const locked = !isFreePreview && !seriesAccess.hasAccess;
+                     const isFree = mock.accessLevel === 'FREE';
+                     const locked = !isFree && !seriesAccess.hasAccess;
                      
                      const result = results?.find((r: any) => r.mockId === mock.id);
                      const isCompleted = !!result;
@@ -158,7 +161,7 @@ export default function SeriesDetailPortal() {
                            <div className="shrink-0">
                               <div className={cn(
                                 "h-[48px] w-[48px] md:h-[60px] md:w-[60px] rounded-full flex items-center justify-center shadow-lg transition-all duration-300 border-[4px] border-[#F8FAFC]",
-                                isCompleted ? "bg-emerald-50 text-white" : locked ? "bg-slate-200 text-slate-400" : "bg-[#0F172A] text-white"
+                                isCompleted ? "bg-emerald-50 text-emerald-500" : locked ? "bg-slate-200 text-slate-400" : "bg-[#0F172A] text-white"
                               )}>
                                  {isCompleted ? <Check className="h-6 w-6 stroke-[4px]" /> : locked ? <Lock className="h-5 w-5" /> : <span className="text-sm md:text-lg font-black tabular-nums">{idx + 1}</span>}
                               </div>
@@ -176,9 +179,9 @@ export default function SeriesDetailPortal() {
                                        {isCompleted ? (
                                           <Badge className="bg-emerald-100 text-emerald-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Completed</Badge>
                                        ) : locked ? (
-                                          <Badge className="bg-slate-100 text-slate-500 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Locked</Badge>
-                                       ) : isFreePreview && !seriesAccess.hasAccess ? (
-                                          <Badge className="bg-blue-100 text-blue-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Free Preview</Badge>
+                                          <Badge className="bg-amber-50 text-amber-600 border-none text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1"><Lock className="h-2 w-2" /> Premium</Badge>
+                                       ) : isFree ? (
+                                          <Badge className="bg-blue-100 text-blue-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Free preview</Badge>
                                        ) : (
                                           <Badge className="bg-blue-100 text-blue-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Active</Badge>
                                        )}
@@ -189,7 +192,7 @@ export default function SeriesDetailPortal() {
                                     </button>
                                  </div>
 
-                                 <h3 className="text-[20px] md:text-[28px] font-[800] text-[#0F172A] leading-[1.2] tracking-tight">
+                                 <h3 className="text-[20px] md:text-[28px] font-[800] text-[#0F172A] leading-[1.2] tracking-tight text-left">
                                     {mock.title}
                                  </h3>
 
@@ -216,11 +219,11 @@ export default function SeriesDetailPortal() {
                                     <Button asChild className={cn(
                                        "w-full h-[48px] md:h-[52px] rounded-xl text-[16px] font-bold shadow-sm transition-all active:scale-[0.98] border-none",
                                        isCompleted ? "bg-emerald-600 hover:bg-emerald-700 text-white" : 
-                                       locked ? "bg-slate-100 text-slate-400 cursor-not-allowed" : 
+                                       locked ? "bg-amber-500 hover:bg-amber-600 text-white" : 
                                        "bg-[#2563EB] hover:bg-blue-700 text-white shadow-blue-200"
-                                    )}>
-                                       <Link href={locked ? '/pass' : isCompleted ? `/results/view?id=${mock.id}` : `/mocks/instructions?id=${mock.id}`}>
-                                          {isCompleted ? "View performance" : locked ? "Premium access required" : "Initialize test"}
+                                    )} onClick={() => locked && setSelectedMockForPurchase(mock)}>
+                                       <Link href={locked ? '#' : isCompleted ? `/results/view?id=${mock.id}` : `/mocks/instructions?id=${mock.id}`}>
+                                          {isCompleted ? "View performance" : locked ? "Unlock premium test" : "Start preview"}
                                           <ChevronRight className="h-4 w-4 ml-2 opacity-60" />
                                        </Link>
                                     </Button>
@@ -235,27 +238,56 @@ export default function SeriesDetailPortal() {
                )}
             </div>
          </div>
-
-         {/* 3. PERSISTENT PURCHASE OVERLAY IF LOCKED */}
-         {!seriesAccess.hasAccess && !serLoading && (
-            <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] w-[95vw] max-w-2xl animate-in slide-in-from-bottom-12 duration-700">
-               <Card className="bg-[#0B1528] text-white p-6 md:p-10 rounded-[2.5rem] shadow-5xl border border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10 overflow-hidden relative">
-                  <div className="absolute top-0 right-0 p-10 opacity-5 rotate-12"><Gem className="h-48 w-48 text-primary" /></div>
-                  <div className="relative z-10 flex-1 space-y-2 text-center md:text-left">
-                     <h4 className="text-xl md:text-2xl font-black uppercase tracking-tight">Unlock full series</h4>
-                     <p className="text-slate-400 text-xs md:text-sm font-medium leading-snug">Gain authorized access to all {mocks?.length || 0} mocks and official rationales.</p>
-                  </div>
-                  <Button asChild className="relative z-10 h-14 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl border-none active:scale-95 transition-all group w-full md:w-auto">
-                     <Link href="/pass" className="flex items-center justify-center gap-3">
-                        Upgrade now <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                     </Link>
-                  </Button>
-               </Card>
-            </div>
-         )}
       </main>
 
       <Footer />
+
+      {/* 3. PREMIUM LOCK PURCHASE DIALOG */}
+      <Dialog open={!!selectedMockForPurchase} onOpenChange={() => setSelectedMockForPurchase(null)}>
+         <DialogContent className="sm:max-w-xl w-[95vw] rounded-[2.5rem] md:rounded-[3.5rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
+            <div className="h-2 w-full bg-amber-500 shrink-0" />
+            <div className="p-8 md:p-14 space-y-10 overflow-y-auto custom-scrollbar flex-1">
+               <div className="flex items-center gap-8 border-b border-slate-50 pb-10">
+                  <AuthorityLogo boardId={series?.boardId} size="lg" className="h-24 w-24 md:h-32 md:w-32 bg-slate-50 border-4 border-white shadow-2xl" />
+                  <div className="space-y-2">
+                     <Badge className="bg-amber-50 text-amber-600 border-none text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full">Premium lock</Badge>
+                     <DialogTitle className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none">
+                        {series?.title}
+                     </DialogTitle>
+                     <DialogDescription className="text-slate-400 font-bold text-[10px] uppercase">Registry authorization required</DialogDescription>
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <PurchaseStat icon={Layers} label="Tests" val={mocks?.length || 0} />
+                  <PurchaseStat icon={Smartphone} label="Android PWA" val="Active" />
+                  <PurchaseStat icon={Calendar} label="Validity" val="365 Days" />
+                  <PurchaseStat icon={ShieldCheck} label="Official" val="Verified" />
+               </div>
+
+               <div className="space-y-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Series Benefits</p>
+                  <div className="grid grid-cols-1 gap-3">
+                     <BenefitNode text="Unlock all tests in this specific series." />
+                     <BenefitNode text="Access detailed bilingual explanations." />
+                     <BenefitNode text="Real-time All Punjab Rank calculation." />
+                     <BenefitNode text="Institutional grade performance analytics." />
+                  </div>
+               </div>
+
+               <div className="pt-6">
+                  <Button asChild className="w-full h-16 md:h-20 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-[0.2em] text-xs md:text-sm rounded-2xl md:rounded-[2.5rem] shadow-4xl border-none transition-all active:scale-95 flex items-center justify-between px-10">
+                     <Link href="/pass">
+                        <span>Buy Elite Pass</span>
+                        <span className="text-2xl font-black">₹{series?.price || 299}</span>
+                     </Link>
+                  </Button>
+                  <p className="text-center text-[9px] font-bold text-slate-300 mt-6 uppercase tracking-widest">Secure institutional payment portal</p>
+               </div>
+            </div>
+         </DialogContent>
+      </Dialog>
+
       <div className="h-20 md:h-0" />
     </div>
   )
@@ -272,6 +304,27 @@ function ResultStat({ icon, label, val, highlight }: { icon: React.ReactNode, la
             "text-[18px] md:text-[22px] font-black leading-none tabular-nums tracking-tighter truncate w-full",
             highlight ? "text-[#2563EB]" : "text-[#0F172A]"
          )}>{val}</p>
+      </div>
+   )
+}
+
+function PurchaseStat({ icon: Icon, label, val }: any) {
+   return (
+      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col items-center text-center gap-2">
+         <Icon className="h-4 w-4 text-amber-500" />
+         <div>
+            <p className="text-sm font-black text-[#0F172A] leading-none tabular-nums">{val}</p>
+            <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-1">{label}</p>
+         </div>
+      </div>
+   )
+}
+
+function BenefitNode({ text }: { text: string }) {
+   return (
+      <div className="flex items-center gap-4 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50">
+         <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+         <p className="text-[11px] md:text-sm font-bold text-emerald-900 leading-tight">{text}</p>
       </div>
    )
 }
