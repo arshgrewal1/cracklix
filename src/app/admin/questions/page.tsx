@@ -58,7 +58,7 @@ import { AdminTableSkeleton, AdminPageHeader, AdminSearchInput } from "@/compone
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Legacy Questions Hub v5.0.
+ * @fileOverview Legacy Questions Hub v5.1 [Row Selection Enabled].
  * Refactored to share the High-Fidelity MCQ Engine for deterministic results.
  */
 
@@ -136,6 +136,12 @@ function QuestionBankContent() {
     fetchQuestions(false) 
   }, [filters, searchTerm]);
 
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
   const handleBulkAction = async (action: string) => {
     if (!db || selectedIds.length === 0) return;
     setIsBulkProcessing(true);
@@ -167,7 +173,7 @@ function QuestionBankContent() {
   }, [exams, filters.boardId]);
 
   return (
-    <div className="space-y-6 md:space-y-10 text-left pb-32 animate-in fade-in duration-500 pt-2 px-1">
+    <div className="space-y-6 md:space-y-10 text-left pb-32 animate-in fade-in duration-700 pt-2 px-1">
       <AdminPageHeader
         icon={Database}
         label="Legacy Ingestion Bank"
@@ -265,9 +271,13 @@ function QuestionBankContent() {
               {loading && questions.length === 0 ? (
                 <AdminTableSkeleton rows={8} columns={5} />
               ) : questions.length > 0 ? questions.map((q: any) => (
-                <TableRow key={q.id} className={cn("hover:bg-slate-50 transition-all group border-slate-50", selectedIds.includes(q.id) && "bg-primary/5")}>
-                  <TableCell className="px-6 text-center">
-                    <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={(checked) => setSelectedIds(prev => checked ? [...prev, q.id] : prev.filter(id => id !== q.id))} />
+                <TableRow 
+                  key={q.id} 
+                  onClick={() => toggleSelection(q.id)}
+                  className={cn("hover:bg-slate-50 transition-all group border-slate-50 cursor-pointer", selectedIds.includes(q.id) && "bg-primary/5")}
+                >
+                  <TableCell className="px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={() => toggleSelection(q.id)} />
                   </TableCell>
                   <TableCell className="px-6 py-6 text-left max-w-[140px]">
                      <div className="space-y-2">
@@ -287,12 +297,12 @@ function QuestionBankContent() {
                   <TableCell className="text-center">
                      <Badge variant="outline" className="border-slate-100 text-slate-400 text-[8px] font-black uppercase px-2 shadow-sm">{q.questionType || 'MCQ'}</Badge>
                   </TableCell>
-                  <TableCell className="text-right px-10">
+                  <TableCell className="text-right px-10" onClick={(e) => e.stopPropagation()}>
                      <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
                         <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white shadow-sm" asChild>
                            <Link href={`/admin/questions/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link>
                         </Button>
-                        <button className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={async () => { if(confirm("Purge asset from registry?")) { await deleteDoc(doc(db!, "questions", q.id)); fetchQuestions(false); } }}>
+                        <button className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all border-none cursor-pointer" onClick={async () => { if(confirm("Purge asset from registry?")) { await deleteDoc(doc(db!, "questions", q.id)); fetchQuestions(false); } }}>
                            <Trash2 className="h-4 w-4" />
                         </button>
                      </div>
@@ -332,10 +342,10 @@ function QuestionBankContent() {
                   </div>
                </div>
                <div className="flex items-center gap-3">
-                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-all font-black text-[10px] uppercase shadow-lg"><CheckCircle2 className="h-4 w-4" /> Publish</button>
-                  <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90 shadow-sm"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-all font-black text-[10px] uppercase shadow-lg border-none cursor-pointer"><CheckCircle2 className="h-4 w-4" /> Publish</button>
+                  <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90 shadow-sm border-none cursor-pointer"><Trash2 className="h-4 w-4" /></button>
                   <div className="w-px h-10 bg-white/10 mx-2" />
-                  <button onClick={() => setSelectedIds([])} className="p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-90 text-slate-400 hover:text-white" title="Clear Registry Selection">
+                  <button onClick={() => setSelectedIds([])} className="p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-90 text-slate-400 hover:text-white bg-transparent border-none cursor-pointer" title="Clear Registry Selection">
                      <X className="h-5 w-5" />
                   </button>
                </div>
@@ -360,7 +370,7 @@ function FilterNode({ label, value, onChange, options }: any) {
           onChange={e => onChange(e.target.value)} 
           className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none shadow-inner appearance-none cursor-pointer hover:bg-slate-100 transition-colors"
        >
-          <option value="all">All {label}s</option>
+          <option value="all">All {label.split(' ')[1]}s</option>
           {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
        </select>
     </div>

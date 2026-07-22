@@ -55,8 +55,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
 /**
- * @fileOverview Master MCQ Bank Hub v3.2 [Terminology Cleaned].
- * UPDATED: Replaced "items" with "questions" for precise bank management.
+ * @fileOverview Master MCQ Bank Hub v3.3 [Row Selection Enabled].
+ * UPDATED: Implemented row-click selection for improved administrative efficiency.
  */
 
 export default function MCQBankPage() {
@@ -141,6 +141,12 @@ export default function MCQBankPage() {
   useEffect(() => {
     fetchQuestions(false)
   }, [filters, searchTerm])
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   const handleBulkAction = async (action: string) => {
     if (!db || selectedIds.length === 0) return;
@@ -246,12 +252,12 @@ export default function MCQBankPage() {
                  <p className="text-xs font-bold text-rose-400">Found {duplicateAnalysis.count} questions with identical statements.</p>
               </div>
            </div>
-           <Button 
+           <button 
              onClick={() => setFilters({...filters, status: 'DUPLICATE'})}
-             className="h-10 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-[10px] uppercase border-none"
+             className="h-10 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-[10px] uppercase border-none cursor-pointer"
            >
               Filter Duplicates
-           </Button>
+           </button>
         </Card>
       )}
 
@@ -276,9 +282,13 @@ export default function MCQBankPage() {
               {loading && questions.length === 0 ? (
                 <AdminTableSkeleton rows={8} columns={5} />
               ) : displayedQuestions.length > 0 ? displayedQuestions.map((q) => (
-                <TableRow key={q.id} className={cn("hover:bg-slate-50 transition-all border-slate-50 group", selectedIds.includes(q.id) && "bg-primary/5")}>
-                  <TableCell className="px-6 text-center">
-                    <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={(checked) => setSelectedIds(prev => checked ? [...prev, q.id] : prev.filter(id => id !== q.id))} />
+                <TableRow 
+                  key={q.id} 
+                  onClick={() => toggleSelection(q.id)}
+                  className={cn("hover:bg-slate-50 transition-all border-slate-50 group cursor-pointer", selectedIds.includes(q.id) && "bg-primary/5")}
+                >
+                  <TableCell className="px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={() => toggleSelection(q.id)} />
                   </TableCell>
                   <TableCell className="px-6 py-6 text-left max-w-[140px]">
                      <div className="space-y-1.5">
@@ -297,7 +307,7 @@ export default function MCQBankPage() {
                   <TableCell className="text-center">
                      <Badge className={cn("border-none text-[8px] font-black uppercase px-2 py-0.5 shadow-sm", q.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}>{q.status}</Badge>
                   </TableCell>
-                  <TableCell className="text-right px-10">
+                  <TableCell className="text-right px-10" onClick={(e) => e.stopPropagation()}>
                      <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
                         <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white shadow-sm" asChild>
                            <Link href={`/admin/mcq-bank/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link>
@@ -342,10 +352,10 @@ export default function MCQBankPage() {
                   </div>
                </div>
                <div className="flex items-center gap-3">
-                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-all font-black text-[10px] uppercase shadow-lg"><CheckCircle2 className="h-4 w-4" /> Publish</button>
-                  <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90 shadow-sm"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-all font-black text-[10px] uppercase shadow-lg border-none cursor-pointer"><CheckCircle2 className="h-4 w-4" /> Publish</button>
+                  <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90 shadow-sm border-none cursor-pointer"><Trash2 className="h-4 w-4" /></button>
                   <div className="w-px h-10 bg-white/10 mx-2" />
-                  <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-white p-1"><X className="h-6 w-6" /></button>
+                  <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-white p-1 bg-transparent border-none cursor-pointer"><X className="h-6 w-6" /></button>
                </div>
             </div>
          </div>
