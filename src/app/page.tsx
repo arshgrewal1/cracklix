@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v501.5.
- * UPDATED: Refined heading text for professional Title Case.
+ * @fileOverview Institutional Premium Hub v501.6.
+ * UPDATED: Refined heading text to remove uppercase and use professional Title Case.
  */
 export default function HomePage() {
   const { user } = useUser();

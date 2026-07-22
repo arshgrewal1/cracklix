@@ -1,17 +1,16 @@
-
 "use client"
 
 import React, { Suspense, useMemo, useEffect, useState } from "react"
 import ResultClient from "@/components/results/ResultClient"
 import { Loader2, Zap } from "lucide-react"
 import { useDoc, useFirestore, useUser } from "@/firebase"
-import { doc, deleteDoc, getDoc } from "firebase/firestore"
+import { doc, getDoc } from "firebase/firestore"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Universal Result Hub Viewer v4.0.
- * Redesigned for Premium Institutional Experience.
+ * @fileOverview Universal Result Hub Viewer v4.1.
+ * UPDATED: Refined terminology and removed technical uppercase.
  */
 
 export default function ResultViewPage() {
@@ -74,14 +73,12 @@ function ResultGuard() {
 
   useEffect(() => {
      if (!mockLoading && mockId && !mock && user && db) {
-        console.warn("[AUDIT] Orphan result link detected. Validating registry node...");
-        const resultId = `${user.uid}_${mockId}`;
+        console.warn("[AUDIT] Orphan result link detected. Validating registry entry...");
         
-        // Safety: If no mock metadata exists, return to dashboard
         toast({
            variant: "destructive",
-           title: "Registry Standby",
-           description: "Verification node pending. Returning to portal."
+           title: "Registry standby",
+           description: "Verification entry pending. Returning to portal."
         });
 
         router.replace("/dashboard");
@@ -92,7 +89,7 @@ function ResultGuard() {
      return (
         <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
            <Zap className="h-10 w-10 text-primary animate-pulse" />
-           <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Auditing Registry...</p>
+           <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Auditing registry...</p>
         </div>
      );
   }

@@ -14,8 +14,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Vacancy Node v2.8.
- * FIXED: Removed large background watermark to prevent visual overlap.
+ * @fileOverview Institutional Vacancy Registry v2.9.
+ * FIXED: Removed uppercase from headers and refined "entry" terminology.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
@@ -100,7 +100,7 @@ export default function LatestVacancy() {
            ) : (
               <div className="col-span-full py-20 text-center opacity-30 italic font-semibold text-xl md:text-3xl tracking-tighter flex flex-col items-center gap-6">
                  <ShieldCheck className="h-16 w-16 text-slate-200" />
-                 Registry normalized
+                 Registry synchronized
               </div>
            )}
         </div>

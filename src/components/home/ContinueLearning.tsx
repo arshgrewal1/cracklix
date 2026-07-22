@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview Institutional Performance Hub v6.3.
- * FIXED: Applied duration sanity checks to exclude corrupted test results.
+ * @fileOverview Institutional Performance Hub v6.4.
+ * FIXED: Removed uppercase from header and replaced "node" terminology.
  */
 
 // Formatting Utilities
@@ -105,7 +105,7 @@ export default function ContinueLearning() {
   const handleReviewAction = (mockId: string) => {
      const isValid = combinedMocks?.some(m => m.id === mockId);
      if (!isValid) {
-        toast({ variant: "destructive", title: "Record Audit", description: "Node archived silently." });
+        toast({ variant: "destructive", title: "Record Audit", description: "Test archived silently." });
         return;
      }
      router.push(`/results/view?id=${mockId}`);
@@ -126,7 +126,7 @@ export default function ContinueLearning() {
               </div>
               <h2 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight leading-none">My Progress</h2>
            </div>
-           <Button asChild variant="ghost" className="text-primary font-black text-[9px] md:text-xs tracking-widest gap-2">
+           <Button asChild variant="ghost" className="text-primary font-bold text-[9px] md:text-xs tracking-widest gap-2">
               <Link href="/my-exams">View All <ChevronRight className="h-4 w-4" /></Link>
            </Button>
         </div>
@@ -135,7 +135,7 @@ export default function ContinueLearning() {
            <div className="lg:col-span-7 space-y-6">
               <div className="flex items-center gap-2 px-1">
                  <Zap className="h-3.5 w-3.5 text-primary" />
-                 <p className="text-[10px] md:text-xs font-black tracking-widest text-slate-400">Continue Learning</p>
+                 <p className="text-[10px] md:text-xs font-black tracking-widest text-slate-400">Continue learning</p>
               </div>
               <div className="grid grid-cols-1 gap-4 md:gap-6">
                  {resultsLoading || mocksLoading || quizLoading ? (
@@ -159,7 +159,7 @@ export default function ContinueLearning() {
                             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
 
                             <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8">
-                                {/* Left Icon Node - Now Dynamic Board Logo */}
+                                {/* Left Icon Hub - Dynamic Board Logo */}
                                 <div className="relative shrink-0">
                                     <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
                                     <AuthorityLogo 

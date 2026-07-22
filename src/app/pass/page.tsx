@@ -39,9 +39,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Elite Pass Portal v450.2.
- * FIXED: Hydration stability for pass status checks.
- * UPDATED: Normalized casing for headings and labels.
+ * @fileOverview Institutional Elite Pass Portal v450.3.
+ * FIXED: Removed forced uppercase from headers and replaced "node" terminology.
  */
 
 const BENEFITS = [
