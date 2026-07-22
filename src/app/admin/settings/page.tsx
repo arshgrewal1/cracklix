@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -24,7 +25,7 @@ import {
   Star, 
   User,
   LayoutGrid,
-  BarChart3,
+  BarChart3, 
   TrendingUp,
   Users,
   CheckCircle2,
@@ -107,6 +108,7 @@ export default function AdminSettings() {
     supportEmail: "cracklixhelp@gmail.com",
     telegramUrl: "https://t.me/cracklixapp",
     instagramUrl: "https://www.instagram.com/arshgrewal_official/",
+    whatsappPhone: "+91 98881 88602",
     freeTrialEnabled: true,
     freeTrialDays: 7,
     statsVisibility: {
@@ -321,7 +323,7 @@ export default function AdminSettings() {
                     </div>
                     <div className="space-y-2 text-left">
                        <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Trial Duration (Days)</Label>
-                       <Input type="number" value={formData.freeTrialDays} onChange={e => setFormData({...formData, freeTrialDays: parseInt(e.target.value) || 0})} className="h-12 bg-slate-50 border-none font-black text-emerald-600" />
+                       <Input type="number" value={formData.freeTrialEnabled ? formData.freeTrialDays : 0} onChange={e => setFormData({...formData, freeTrialDays: parseInt(e.target.value) || 0})} className="h-12 bg-slate-50 border-none font-black text-emerald-600" />
                     </div>
                  </div>
               </Card>
@@ -362,9 +364,10 @@ export default function AdminSettings() {
                  <Input value={formData.announcement} onChange={e => setFormData({...formData, announcement: e.target.value})} className="h-14 bg-slate-50 border-none rounded-2xl font-bold text-sm md:text-lg shadow-inner" />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-50">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-50">
                  <FormNode label="Telegram Hub URL" value={formData.telegramUrl} onChange={v => setFormData({...formData, telegramUrl: v})} />
                  <FormNode label="Instagram Portal URL" value={formData.instagramUrl} onChange={v => setFormData({...formData, instagramUrl: v})} />
+                 <FormNode label="WhatsApp Official No" value={formData.whatsappPhone} onChange={v => setFormData({...formData, whatsappPhone: v})} placeholder="+91 ..." />
               </div>
            </Card>
         </TabsContent>
