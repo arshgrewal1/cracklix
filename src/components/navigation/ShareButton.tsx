@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo } from "react";
@@ -28,9 +27,12 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Premium Social Share Hub v6.0 [Dynamic Registry].
- * FIXED: All share content is now pulled from Firestore Admin settings.
+ * @fileOverview Institutional Share Hub v6.2 [Resilient Fallbacks].
+ * FIXED: Added fallback values so the button works even if Admin hasn't saved settings yet.
  */
+
+const DEFAULT_SHARE_MESSAGE = `🚀 Crack Punjab Government Exams with Cracklix!\n\n🎯 Prepare for:\n• PSSSB\n• PPSC\n• Punjab Police\n\n📚 Features\n✅ Unlimited Mock Tests\n✅ Previous Year Papers\n✅ Daily Current Affairs\n\n📲 Install App: {installUrl}\n🌐 Website: {websiteUrl}`;
+
 export default function ShareButton({ 
   className = "", 
   showLabel = true 
@@ -44,27 +46,43 @@ export default function ShareButton({
   const [isSharing, setIsSharing] = useState(false);
   
   const distRef = useMemo(() => (db ? doc(db, 'settings', 'distribution') : null), [db]);
-  const { data: settings } = useDoc<DistributionSettings>(distRef);
+  const { data: remoteSettings, loading } = useDoc<DistributionSettings>(distRef);
+
+  // Determine active settings with fallbacks
+  const activeSettings = useMemo(() => {
+    const defaults = {
+      primaryWebsiteUrl: "https://cracklix.vercel.app",
+      installUrl: "https://cracklix.vercel.app/install",
+      shareTitle: "Cracklix – Punjab Government Exam Prep",
+      shareMessage: DEFAULT_SHARE_MESSAGE
+    };
+
+    if (!remoteSettings) return defaults;
+
+    return {
+      primaryWebsiteUrl: remoteSettings.primaryWebsiteUrl || defaults.primaryWebsiteUrl,
+      installUrl: remoteSettings.installUrl || defaults.installUrl,
+      shareTitle: remoteSettings.shareTitle || defaults.shareTitle,
+      shareMessage: remoteSettings.shareMessage || defaults.shareMessage
+    };
+  }, [remoteSettings]);
 
   const finalShareMessage = useMemo(() => {
-    if (!settings) return "";
-    
-    // Replace placeholders with actual URLs from the registry
-    return (settings.shareMessage || "")
-      .replace(/{websiteUrl}/g, settings.primaryWebsiteUrl || "https://cracklix.com")
-      .replace(/{installUrl}/g, settings.installUrl || "https://cracklix.com/install");
-  }, [settings]);
+    return activeSettings.shareMessage
+      .replace(/{websiteUrl}/g, activeSettings.primaryWebsiteUrl)
+      .replace(/{installUrl}/g, activeSettings.installUrl);
+  }, [activeSettings]);
 
   const handleShare = async () => {
-    if (isSharing || !settings) return;
+    if (isSharing) return;
     setIsSharing(true);
 
     try {
-      if (navigator.share) {
+      if (typeof navigator !== 'undefined' && navigator.share) {
         await navigator.share({
-          title: settings.shareTitle || 'Cracklix | Punjab Exam Prep',
+          title: activeSettings.shareTitle,
           text: finalShareMessage,
-          url: settings.primaryWebsiteUrl || "https://cracklix.com"
+          url: activeSettings.primaryWebsiteUrl
         });
       } else {
         setIsShareDialogOpen(true);
@@ -83,7 +101,6 @@ export default function ShareButton({
       await navigator.clipboard.writeText(text);
       toast({ title: msg });
     } catch (e) {
-      // Fallback for restricted environments
       const textArea = document.createElement("textarea");
       textArea.value = text;
       document.body.appendChild(textArea);
@@ -99,7 +116,7 @@ export default function ShareButton({
       <div className="w-full">
         <Button
           onClick={handleShare}
-          disabled={isSharing || !settings}
+          disabled={isSharing}
           className={cn(
             "w-full h-auto min-h-[54px] py-2.5 px-4 rounded-[18px] bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold shadow-lg transition-all active:scale-95 group relative overflow-hidden border-none flex items-center justify-start gap-3",
             className
@@ -132,19 +149,19 @@ export default function ShareButton({
                 <Share2 className="h-7 w-7" />
              </div>
              <DialogTitle className="text-xl font-black text-[#0F172A] tracking-tighter uppercase">Share Hub</DialogTitle>
-             <DialogDescription className="text-slate-400 font-bold text-[9px] mt-2 text-center">Invite your fellow aspirants</DialogDescription>
+             <DialogDescription className="text-slate-400 font-bold text-[9px] mt-2 text-center uppercase tracking-widest">Invite your fellow aspirants</DialogDescription>
           </DialogHeader>
 
           <div className="px-8 pb-10 space-y-3">
              <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(finalShareMessage)}`, '_blank')} className="w-full h-14 bg-[#25D366] hover:bg-[#20bd5c] text-white rounded-2xl flex items-center px-6 gap-4 shadow-lg transition-all active:scale-95 border-none group">
-                <MessageSquare className="h-6 w-6" /> <span className="font-bold text-sm flex-1 text-left">WhatsApp Hub</span>
+                <MessageSquare className="h-6 w-6" /> <span className="font-bold text-sm flex-1 text-left uppercase tracking-tight">WhatsApp Hub</span>
                 <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
              </button>
              <button onClick={() => copyToClipboard(finalShareMessage, "Message copied to registry")} className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-4 border border-slate-100 transition-all active:scale-95 group">
-                <Send className="h-6 w-6 text-slate-400" /> <span className="font-bold text-sm flex-1 text-left">Copy message</span>
+                <Send className="h-6 w-6 text-slate-400" /> <span className="font-bold text-sm flex-1 text-left uppercase tracking-tight">Copy message</span>
              </button>
-             <button onClick={() => copyToClipboard(settings?.installUrl || "https://cracklix.com/install", "Link copied to registry")} className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-4 border border-slate-100 transition-all active:scale-95 group">
-                <Copy className="h-6 w-6 text-slate-400" /> <span className="font-bold text-sm flex-1 text-left">Copy app link</span>
+             <button onClick={() => copyToClipboard(activeSettings.installUrl, "Link copied to registry")} className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-4 border border-slate-100 transition-all active:scale-95 group">
+                <Copy className="h-6 w-6 text-slate-400" /> <span className="font-bold text-sm flex-1 text-left uppercase tracking-tight">Copy app link</span>
              </button>
           </div>
           
