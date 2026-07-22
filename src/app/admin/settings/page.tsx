@@ -468,5 +468,4 @@ function TrendInput({ label, value, onChange }: { label: string, value: string, 
          <Label className="text-[8px] font-black uppercase text-slate-400 ml-1">{label}</Label>
          <Input value={value} onChange={(e) => onChange(e.target.value)} className="h-10 bg-slate-50 border-none font-bold text-[11px]" />
       </div>
-   )
 }
