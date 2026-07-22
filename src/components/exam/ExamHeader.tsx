@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useExamStore } from '@/store/useExamStore';
@@ -70,7 +71,7 @@ export default function ExamHeader({
               <span className="text-[11px] md:text-xl font-black text-primary tabular-nums">
                  {currentIdx + 1}
               </span>
-              <span className="text-[8px] md:text-xs font-bold text-slate-500">
+              <span className="text-[8px] md:text-xs font-bold text-slate-200">
                  /{questionsCount}
               </span>
            </div>

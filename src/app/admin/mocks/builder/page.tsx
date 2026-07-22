@@ -73,6 +73,7 @@ import Link from "next/link"
 /**
  * @fileOverview Master Mock Builder v52.3 [High-Density Content Fix].
  * FIXED: Reduced font size and removed line-clamping in composition area to ensure full question visibility.
+ * UPDATED: Changed default section name to "General".
  */
 
 export default function MockBuilderPage() {
@@ -134,7 +135,7 @@ function MockBuilderContent() {
   })
 
   const [sections, setSections] = useState<any[]>([
-    { id: 'sec-1', name: 'General area', questions: [] as any[] }
+    { id: 'sec-1', name: 'General', questions: [] as any[] }
   ])
   const [activeSectionId, setActiveSectionId] = useState('sec-1')
 
@@ -206,7 +207,7 @@ function MockBuilderContent() {
         }
 
         let currentIndex = 0;
-        const hydratedSections = (existingMock.sections || [{ name: 'General area', count: existingMock.questionIds.length }]).map((s: ExamSection, idx: number) => {
+        const hydratedSections = (existingMock.sections || [{ name: 'General', count: existingMock.questionIds.length }]).map((s: ExamSection, idx: number) => {
           const count = Number(s.count) || 0;
           const sectionQIds: string[] = (existingMock.questionIds as string[]).slice(currentIndex, currentIndex + count);
           currentIndex += count;
@@ -216,7 +217,7 @@ function MockBuilderContent() {
             questions: sectionQIds.map((id: string) => fetched.find((q: any) => q.id === id)).filter(Boolean)
           };
         });
-        setSections(hydratedSections.length > 0 ? hydratedSections : [{ id: 'sec-1', name: 'General area', questions: [] }]);
+        setSections(hydratedSections.length > 0 ? hydratedSections : [{ id: 'sec-1', name: 'General', questions: [] }]);
       }
       setIsInitializing(false);
     };

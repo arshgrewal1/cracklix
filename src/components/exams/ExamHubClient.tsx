@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -48,8 +49,8 @@ import { motion, AnimatePresence } from "framer-motion"
 
 /**
  * @fileOverview Premium Exam Detail Hub v7.2.
+ * FIXED: Standardized text visibility for hero metrics (removed conflicting text-white).
  * FIXED: Added missing Landmark icon and inlined HubTab for Radix context stability.
- * UPDATED: Removed uppercase and 'node' terminology.
  */
 
 export default function ExamHubClient() {
@@ -242,7 +243,7 @@ export default function ExamHubClient() {
          </div>
       </section>
 
-      <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-w-7xl pb-40 space-y-12">
+      <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-get-7xl pb-40 space-y-12">
          <Tabs defaultValue="MOCK" className="space-y-10">
             <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
                <div className="bg-white border border-slate-200 shadow-sm rounded-[20px] p-1 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">
@@ -384,7 +385,7 @@ function MetricNode({ icon: Icon, label, val }: any) {
       <div className="flex items-center gap-2">
          <Icon className="h-3.5 w-3.5 text-slate-300" />
          <div className="text-left">
-            <p className="text-[11px] font-bold text-[#0F172A] leading-none">{val}</p>
+            <p className={cn("text-[11px] font-bold text-[#0F172A] leading-none")}>{val}</p>
             <p className="text-[8px] font-bold text-slate-400 tracking-tight mt-0.5">{label}</p>
          </div>
       </div>

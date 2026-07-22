@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -32,8 +33,9 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Series Hub Portal v7.2.
- * FIXED: Removed title truncation and improved text alignment for long series names.
+ * @fileOverview Premium Series Hub Portal v7.3.
+ * FIXED: Enhanced text visibility for dark hero section (text-white / text-slate-200).
+ * FIXED: Removed title truncation for long series names.
  */
 
 export default function SeriesDetailPortal() {
@@ -75,7 +77,7 @@ export default function SeriesDetailPortal() {
       <section className="bg-[#0F172A] text-white pt-8 pb-10 md:pt-14 md:pb-20 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
-         <div className="container mx-auto px-4 md:px-12 max-get-7xl relative z-10 space-y-8">
+         <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-8">
             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
                <button onClick={() => router.back()} className="hover:text-white transition-colors flex items-center gap-2">
                  <ArrowLeft className="h-3 w-3" /> {subject?.name || "Subject"}
@@ -93,10 +95,10 @@ export default function SeriesDetailPortal() {
                      </div>
                   </div>
                   <div className="space-y-3 text-center md:text-left flex-1 min-w-0">
-                     <h1 className="text-xl md:text-4xl font-black tracking-tight leading-tight antialiased break-words">
+                     <h1 className="text-2xl md:text-5xl font-black tracking-tight leading-tight antialiased break-words text-white">
                         {series?.title}
                      </h1>
-                     <p className="text-slate-400 font-medium text-xs md:text-base max-w-xl leading-relaxed">
+                     <p className="text-slate-200 font-medium text-xs md:text-lg max-w-xl leading-relaxed">
                         {series?.description || "High-speed mock tests for competitive mastery."}
                      </p>
                   </div>
@@ -177,7 +179,7 @@ export default function SeriesDetailPortal() {
                                  </div>
 
                                  {/* SECOND ROW: Title */}
-                                 <h3 className="text-[24px] md:text-[30px] font-[800] text-[#0F172A] leading-[1.1] line-clamp-2 tracking-tight">
+                                 <h3 className="text-[20px] md:text-[28px] font-[800] text-[#0F172A] leading-[1.2] tracking-tight">
                                     {mock.title}
                                  </h3>
 
@@ -238,10 +240,10 @@ function ResultStat({ icon, label, val, highlight }: { icon: React.ReactNode, la
       <div className="flex flex-col items-start gap-1 flex-1 min-w-0">
          <div className="flex items-center gap-1.5 text-slate-400">
             <span className="shrink-0">{icon}</span>
-            <span className="text-[13px] font-medium tracking-tight truncate">{label}</span>
+            <span className="text-[12px] font-medium tracking-tight truncate">{label}</span>
          </div>
          <p className={cn(
-            "text-[22px] font-black leading-none tabular-nums tracking-tighter truncate w-full",
+            "text-[18px] md:text-[22px] font-black leading-none tabular-nums tracking-tighter truncate w-full",
             highlight ? "text-[#2563EB]" : "text-[#0F172A]"
          )}>{val}</p>
       </div>
