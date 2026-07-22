@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from "react";
@@ -24,8 +25,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Footer Hub v24.0.
- * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
+ * @fileOverview Institutional Footer Hub v24.1.
+ * UPDATED: Standardized casing for headings and labels.
  */
 export default function Footer() {
   const db = useFirestore();
@@ -47,7 +48,7 @@ export default function Footer() {
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-0 pb-12 md:pb-24">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 md:gap-20 items-start text-left">
 
-          {/* Brand Section - ZERO TOP SPACE */}
+          {/* Brand Section */}
           <div className="col-span-2 lg:col-span-1 space-y-4">
             <Logo
               variant="dark"

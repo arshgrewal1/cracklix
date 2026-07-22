@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -41,8 +42,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v10.1 [Strict Stats].
- * FIXED: Re-hardened statistics to only count mocks strictly belonging to the exam ID.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v10.2.
+ * UPDATED: Removed all uppercase transforms from titles and labels.
  */
 export default function ExamCard({ 
   exam, 
@@ -66,7 +67,6 @@ export default function ExamCard({
 
     if (!examId) return { mocks: 0, subjects: 0, sectionals: 0, pyqs: 0, notes: 0, questions: 0, totalTests: 0, completed: 0, progress: 0, avgAcc: 0, hasContent: false };
 
-    // STRICT FILTER: Match explicitly linked mocks only
     const relatedMocks = safeMocks.filter(m => m.examId === examId || (m.examIds && m.examIds.includes(examId)));
     const relatedPyqs = safePyqs.filter(p => p.examId === examId);
 
@@ -165,7 +165,7 @@ export default function ExamCard({
             </div>
 
             <div className="space-y-2 mb-6">
-               <h3 className="text-[22px] md:text-[24px] lg:text-[28px] font-[800] text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tighter line-clamp-2 min-h-[2.3em] overflow-hidden text-center uppercase">
+               <h3 className="text-[22px] md:text-[24px] lg:text-[28px] font-[800] text-[#0F172A] leading-tight group-hover:text-primary transition-colors tracking-tighter line-clamp-2 min-h-[2.3em] overflow-hidden text-center">
                  {exam.name}
                </h3>
                <p className="text-slate-400 font-medium text-[13px] md:text-[14px] lg:text-[15px] line-clamp-2 leading-snug overflow-hidden text-center">
@@ -200,7 +200,7 @@ export default function ExamCard({
 
             <div className="mt-auto pt-8">
                <Button className={cn(
-                  "w-full h-[52px] rounded-xl text-white font-[800] uppercase tracking-widest text-[11px] md:text-[12px] transition-all active:scale-95 border-none shadow-xl flex items-center justify-between px-6",
+                  "w-full h-[52px] rounded-xl text-white font-[800] tracking-tight text-[11px] md:text-[12px] transition-all active:scale-95 border-none shadow-xl flex items-center justify-between px-6",
                   buttonConfig.variant
                )}>
                   <div className="flex items-center gap-2.5">
@@ -238,7 +238,7 @@ function StatRow({ label, val, icon: Icon, color }: any) {
 
 function ContentChip({ label }: { label: string }) {
   return (
-    <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 bg-white border border-slate-100 px-2.5 py-1 rounded-md shrink-0 shadow-sm">
+    <span className="text-[8px] font-black tracking-widest text-slate-400 bg-white border border-slate-100 px-2.5 py-1 rounded-md shrink-0 shadow-sm">
        {label}
     </span>
   );

@@ -23,8 +23,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v501.7.
- * UPDATED: Replaced "items" label with "questions" for precise challenge feedback.
+ * @fileOverview Institutional Premium Hub v501.8.
+ * UPDATED: Removed all remaining uppercase styling for unified Title Case design.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -68,7 +68,7 @@ export default function HomePage() {
                         </h2>
                      </div>
                      <p className="text-[16px] text-slate-300 font-medium mt-[6px] max-w-lg mx-auto">
-                        {activeQuiz?.title || "Computer Master"}
+                        {activeQuiz?.title || "Practice Mode"}
                      </p>
                   </div>
 

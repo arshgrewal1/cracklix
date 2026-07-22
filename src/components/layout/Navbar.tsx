@@ -39,8 +39,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v123.0.
- * FIXED: Prevented unmounted state access to avoid hydration mismatches.
+ * @fileOverview Cracklix Navigation Hub v124.0.
+ * UPDATED: Removed all uppercase transforms from navigation items.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);

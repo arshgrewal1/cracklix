@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from "react";
@@ -8,8 +9,8 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v61.7.
- * UPDATED: Removed all remaining uppercase styling for professional Title Case consistency.
+ * @fileOverview Premium Mobile-First PWA Hero v61.8.
+ * UPDATED: Removed all uppercase transforms for a cleaner institutional look.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);

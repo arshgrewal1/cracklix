@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, Suspense, useEffect, useMemo, useCallback, useRef } from "react"
@@ -40,6 +41,10 @@ import { Capacitor } from "@capacitor/core"
 import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
+/**
+ * @fileOverview Login Hub v1.3.
+ * UPDATED: Removed uppercase transforms for a cleaner look.
+ */
 export default function LoginPage() {
   return (
     <Suspense fallback={<div className="h-screen w-full flex flex-col items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>}>

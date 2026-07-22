@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -16,9 +17,8 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Top Rankers Center v3.0 (Premium Redesign).
- * FIXED: Deduplicates by best score and implements sticky intelligence hub.
- * PWA: Standardized safe-area hardiness and 44px touch targets.
+ * @fileOverview Official Top Rankers Center v3.1.
+ * UPDATED: Removed uppercase transforms for a cleaner look.
  */
 
 const CATEGORY_CHIPS = [
@@ -57,20 +57,17 @@ export default function LeaderboardPage() {
     
     const uniqueRankers = new Map<string, any>();
     
-    // 1. DEDUPLICATION LOGIC: Keep Best Score per Aspirant
     [...results].forEach((r: any) => {
       const existing = uniqueRankers.get(r.userId);
       if (!existing || existing.score < r.score) {
         const userProfile = users?.find((u: any) => u.id === r.userId);
         
-        // Resolve canonical name
         const rawName = userProfile?.name || 
                      (r.userName && r.userName !== 'Aspirant' && r.userName !== 'Student' && !r.userName.includes('@') ? r.userName : null) || 
                      userProfile?.email || 
                      r.userEmail || 
                      "Aspirant";
         
-        // Normalize to Title Case
         const name = rawName.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
         const matchesSearch = !term || 
@@ -113,12 +110,12 @@ export default function LeaderboardPage() {
          <section className="space-y-4 px-1">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                <div className="space-y-1">
-                  <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight uppercase">Top Rankers</h1>
+                  <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Top Rankers</h1>
                   <p className="text-slate-500 font-medium text-sm md:text-lg">Highest performing students across all Punjab Government exams.</p>
                </div>
                <div className="flex items-center gap-3 shrink-0">
                   <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Registry Sync Live</span>
+                  <span className="text-[10px] font-bold text-slate-400 tracking-tight">Registry Sync Live</span>
                </div>
             </div>
          </section>
@@ -147,7 +144,7 @@ export default function LeaderboardPage() {
                        key={chip.id} 
                        onClick={() => setActiveBoard(chip.id)}
                        className={cn(
-                          "h-9 px-6 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-tight whitespace-nowrap transition-all border active:scale-95 shadow-sm",
+                          "h-9 px-6 rounded-full font-bold text-[10px] md:text-xs tracking-tight whitespace-nowrap transition-all border active:scale-95 shadow-sm",
                           activeBoard === chip.id 
                              ? "bg-primary border-primary text-white shadow-lg" 
                              : "bg-white border-slate-100 text-slate-400 hover:border-slate-300"
@@ -212,7 +209,7 @@ export default function LeaderboardPage() {
                                        {entry.name}
                                     </h4>
                                     <div className="flex items-center gap-2 mt-0.5">
-                                       <Badge variant="outline" className="text-[7px] md:text-[8px] font-black border-slate-100 text-slate-400 uppercase tracking-widest px-1.5 h-4">
+                                       <Badge variant="outline" className="text-[7px] md:text-[8px] font-bold border-slate-100 text-slate-400 uppercase tracking-widest px-1.5 h-4">
                                           {entry.mockTitle?.split(' ')[0] || 'State'} Hub
                                        </Badge>
                                        <span className="text-[9px] md:text-[10px] font-bold text-slate-300 uppercase truncate max-w-[120px]">
@@ -225,13 +222,13 @@ export default function LeaderboardPage() {
                               {/* METRICS GRID */}
                               <div className="flex items-center gap-4 md:gap-10 px-4 md:px-8 shrink-0">
                                  <div className="text-right hidden sm:block">
-                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Accuracy</p>
+                                    <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Accuracy</p>
                                     <p className={cn("text-xs md:text-sm font-black tabular-nums", entry.accuracy > 70 ? "text-emerald-500" : "text-amber-500")}>
                                        {entry.accuracy}%
                                     </p>
                                  </div>
                                  <div className="text-right">
-                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Total score</p>
+                                    <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Total score</p>
                                     <p className="text-base md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter">
                                        {Math.round(entry.score)}
                                     </p>
@@ -252,7 +249,7 @@ export default function LeaderboardPage() {
                         <Trophy className="h-10 w-10" />
                      </div>
                      <div className="space-y-1">
-                        <h2 className="text-xl font-bold text-[#0F172A] uppercase">No rankings available yet</h2>
+                        <h2 className="text-xl font-bold text-[#0F172A]">No rankings available yet</h2>
                         <p className="text-slate-400 font-medium text-sm">Complete mock tests to appear on the merit list.</p>
                      </div>
                      <Button asChild className="rounded-full bg-primary hover:bg-blue-700 px-8 shadow-xl border-none font-bold text-xs uppercase tracking-widest h-12">
@@ -317,7 +314,7 @@ function PodiumCard({ rank, data, order, isMain }: any) {
                </div>
 
                <div className="space-y-1">
-                  <h3 className="text-base md:text-xl font-black truncate max-w-[160px] md:max-w-[200px] leading-tight uppercase tracking-tight">{data.name}</h3>
+                  <h3 className="text-base md:text-xl font-black truncate max-w-[160px] md:max-w-[200px] leading-tight tracking-tight">{data.name}</h3>
                   <p className={cn("text-[9px] font-bold uppercase tracking-widest", isMain ? "text-primary" : "text-slate-400")}>
                     {data.mockTitle?.split(' ')[0] || 'Top'} Hub
                   </p>
@@ -327,13 +324,13 @@ function PodiumCard({ rank, data, order, isMain }: any) {
 
                <div className="grid grid-cols-2 gap-6">
                   <div className="text-center">
-                     <p className={cn("text-[8px] font-black uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Score</p>
+                     <p className={cn("text-[8px] font-bold uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Score</p>
                      <p className={cn("text-lg md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-white" : "text-primary")}>
                         {Math.round(data.score)}
                      </p>
                   </div>
                   <div className="text-center">
-                     <p className={cn("text-[8px] font-black uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Accuracy</p>
+                     <p className={cn("text-[8px] font-bold uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Accuracy</p>
                      <p className={cn("text-lg md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-emerald-400" : "text-emerald-600")}>
                         {data.accuracy}%
                      </p>
