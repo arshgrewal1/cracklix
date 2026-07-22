@@ -21,7 +21,9 @@ import {
   BarChart3,
   Timer,
   Check,
-  MoreVertical
+  MoreVertical,
+  Gem,
+  ArrowRight
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -31,11 +33,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { TestSeries, Subject, MockTest } from "@/types"
 import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
+import { hasSeriesAccess } from "@/lib/access-control"
 
 /**
- * @fileOverview Premium Series Hub Portal v7.3.
- * FIXED: Enhanced text visibility for dark hero section (text-white / text-slate-200).
- * FIXED: Removed title truncation for long series names.
+ * @fileOverview Premium Series Hub Portal v8.0 [Lock Enabled].
  */
 
 export default function SeriesDetailPortal() {
@@ -61,16 +62,15 @@ export default function SeriesDetailPortal() {
   const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid)) : null), [db, user]);
   const { data: results } = useCollection<any>(resultsQuery);
 
-  const isPassActive = useMemo(() => {
-     if (!profile) return false;
-     if (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN') return true;
-     return profile.passStatus === 'active';
-  }, [profile]);
+  const seriesAccess = useMemo(() => {
+     if (!series) return { hasAccess: false, status: 'LOCKED' };
+     return hasSeriesAccess(profile, series);
+  }, [profile, series]);
 
   if (!mounted || serLoading || authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="animate-spin text-primary h-10 w-10" /></div>
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-body text-left pb-safe overflow-x-hidden w-full">
+    <div className="min-h-screen bg-[#F8FAFC] font-body text-left pb-safe overflow-x-hidden w-full relative">
       <Navbar />
       
       {/* 1. HERO SECTION */}
@@ -98,32 +98,39 @@ export default function SeriesDetailPortal() {
                      <h1 className="text-2xl md:text-5xl font-black tracking-tight leading-tight antialiased break-words text-white">
                         {series?.title}
                      </h1>
-                     <p className="text-slate-200 font-medium text-xs md:text-lg max-w-xl leading-relaxed">
-                        {series?.description || "High-speed mock tests for competitive mastery."}
-                     </p>
-                  </div>
-               </div>
-               <div className="shrink-0 w-full md:w-auto mt-4 lg:mt-0">
-                  <div className="bg-white/5 border border-white/10 p-4 md:p-6 rounded-[20px] backdrop-blur-md space-y-3 min-w-[200px]">
-                     <div className="flex justify-between items-center text-[9px] font-black uppercase text-slate-400 tracking-widest">
-                        <span>Progress</span>
-                        <span className="text-primary">{Math.round((results?.filter(r => mocks?.some(m => m.id === r.mockId)).length || 0) / (mocks?.length || 1) * 100)}%</span>
-                     </div>
-                     <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(results?.filter(r => mocks?.some(m => m.id === r.mockId)).length || 0) / (mocks?.length || 1) * 100}%` }}
-                          className="h-full bg-primary" 
-                        />
+                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                        <Badge className={cn("border-none px-4 py-1 rounded-lg font-black text-[10px] uppercase shadow-lg", seriesAccess.hasAccess ? "bg-emerald-500 text-white" : "bg-amber-500 text-white")}>
+                           {seriesAccess.hasAccess ? 'Access Authorized' : 'Premium Series'}
+                        </Badge>
+                        <span className="text-slate-400 font-bold text-[11px] uppercase tracking-widest">{mocks?.length || 0} Professional Mocks</span>
                      </div>
                   </div>
                </div>
+               
+               {seriesAccess.hasAccess && (
+                  <div className="shrink-0 w-full md:w-auto mt-4 lg:mt-0">
+                     <div className="bg-white/5 border border-white/10 p-4 md:p-6 rounded-[20px] backdrop-blur-md space-y-3 min-w-[200px]">
+                        <div className="flex justify-between items-center text-[9px] font-black uppercase text-slate-400 tracking-widest">
+                           <span>Series Mastery</span>
+                           <span className="text-primary">{Math.round((results?.filter(r => mocks?.some(m => m.id === r.mockId)).length || 0) / (mocks?.length || 1) * 100)}%</span>
+                        </div>
+                        <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                           <motion.div 
+                             initial={{ width: 0 }}
+                             animate={{ width: `${(results?.filter(r => mocks?.some(m => m.id === r.mockId)).length || 0) / (mocks?.length || 1) * 100}%` }}
+                             className="h-full bg-primary" 
+                           />
+                        </div>
+                     </div>
+                  </div>
+               )}
             </div>
          </div>
       </section>
 
       {/* 2. COMPACT TIMELINE SECTION */}
-      <main className="container mx-auto px-4 md:px-0 py-8 md:py-14 max-w-full flex flex-col items-center">
+      <main className="container mx-auto px-4 md:px-0 py-8 md:py-14 max-w-full flex flex-col items-center relative">
+         
          <div className="relative w-full max-w-[720px] lg:ml-[120px]">
             {/* THIN TIMELINE LINE */}
             <div className="absolute left-[23px] md:left-[29px] top-6 bottom-6 w-[2px] md:w-[3px] bg-slate-200 rounded-full z-0" />
@@ -138,8 +145,10 @@ export default function SeriesDetailPortal() {
                   ))
                ) : mocks && mocks.length > 0 ? (
                   mocks.map((mock, idx) => {
-                     const isPremium = mock.accessLevel?.toUpperCase() === 'PREMIUM';
-                     const locked = isPremium && !isPassActive;
+                     // First test is always a Free Preview Node
+                     const isFreePreview = idx === 0;
+                     const locked = !isFreePreview && !seriesAccess.hasAccess;
+                     
                      const result = results?.find((r: any) => r.mockId === mock.id);
                      const isCompleted = !!result;
 
@@ -158,32 +167,32 @@ export default function SeriesDetailPortal() {
                            {/* PREMIUM COMPACT CARD */}
                            <Card className={cn(
                              "flex-1 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] rounded-[22px] bg-white group overflow-hidden transition-all duration-300",
-                             isCompleted && "bg-slate-50/50"
+                             isCompleted && "bg-slate-50/50",
+                             locked && "opacity-80"
                            )} style={{ width: 'calc(100% - 64px)' }}>
                               <CardContent className="p-4 md:p-6 space-y-4">
-                                 {/* TOP ROW: Badge + No + Menu */}
                                  <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                        {isCompleted ? (
                                           <Badge className="bg-emerald-100 text-emerald-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Completed</Badge>
                                        ) : locked ? (
                                           <Badge className="bg-slate-100 text-slate-500 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Locked</Badge>
+                                       ) : isFreePreview && !seriesAccess.hasAccess ? (
+                                          <Badge className="bg-blue-100 text-blue-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Free Preview</Badge>
                                        ) : (
-                                          <Badge className="bg-blue-100 text-blue-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Unlocked</Badge>
+                                          <Badge className="bg-blue-100 text-blue-700 border-none text-[10px] font-bold px-2 py-0.5 rounded-md">Active</Badge>
                                        )}
-                                       <span className="text-slate-400 font-bold text-[11px] tracking-tight">Test {idx + 1}</span>
+                                       <span className="text-slate-400 font-bold text-[11px] tracking-tight">Attempt {idx + 1}</span>
                                     </div>
                                     <button className="p-1 text-slate-300 hover:text-slate-600 transition-colors">
                                        <MoreVertical className="h-4 w-4" />
                                     </button>
                                  </div>
 
-                                 {/* SECOND ROW: Title */}
                                  <h3 className="text-[20px] md:text-[28px] font-[800] text-[#0F172A] leading-[1.2] tracking-tight">
                                     {mock.title}
                                  </h3>
 
-                                 {/* THIRD ROW: Horizontal Stats */}
                                  <div className="flex items-center justify-between gap-2 md:gap-4 pt-1">
                                     <ResultStat 
                                        icon={<BookOpen className="h-3.5 w-3.5" />} 
@@ -203,7 +212,6 @@ export default function SeriesDetailPortal() {
                                     />
                                  </div>
 
-                                 {/* BOTTOM ROW: CTA */}
                                  <div className="pt-2">
                                     <Button asChild className={cn(
                                        "w-full h-[48px] md:h-[52px] rounded-xl text-[16px] font-bold shadow-sm transition-all active:scale-[0.98] border-none",
@@ -212,7 +220,7 @@ export default function SeriesDetailPortal() {
                                        "bg-[#2563EB] hover:bg-blue-700 text-white shadow-blue-200"
                                     )}>
                                        <Link href={locked ? '/pass' : isCompleted ? `/results/view?id=${mock.id}` : `/mocks/instructions?id=${mock.id}`}>
-                                          {isCompleted ? "View analysis" : locked ? "Locked" : "Start test"}
+                                          {isCompleted ? "View performance" : locked ? "Premium access required" : "Initialize test"}
                                           <ChevronRight className="h-4 w-4 ml-2 opacity-60" />
                                        </Link>
                                     </Button>
@@ -227,6 +235,24 @@ export default function SeriesDetailPortal() {
                )}
             </div>
          </div>
+
+         {/* 3. PERSISTENT PURCHASE OVERLAY IF LOCKED */}
+         {!seriesAccess.hasAccess && !serLoading && (
+            <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] w-[95vw] max-w-2xl animate-in slide-in-from-bottom-12 duration-700">
+               <Card className="bg-[#0B1528] text-white p-6 md:p-10 rounded-[2.5rem] shadow-5xl border border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10 overflow-hidden relative">
+                  <div className="absolute top-0 right-0 p-10 opacity-5 rotate-12"><Gem className="h-48 w-48 text-primary" /></div>
+                  <div className="relative z-10 flex-1 space-y-2 text-center md:text-left">
+                     <h4 className="text-xl md:text-2xl font-black uppercase tracking-tight">Unlock full series</h4>
+                     <p className="text-slate-400 text-xs md:text-sm font-medium leading-snug">Gain authorized access to all {mocks?.length || 0} mocks and official rationales.</p>
+                  </div>
+                  <Button asChild className="relative z-10 h-14 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl border-none active:scale-95 transition-all group w-full md:w-auto">
+                     <Link href="/pass" className="flex items-center justify-center gap-3">
+                        Upgrade now <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                     </Link>
+                  </Button>
+               </Card>
+            </div>
+         )}
       </main>
 
       <Footer />

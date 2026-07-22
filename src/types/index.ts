@@ -148,6 +148,9 @@ export interface UserProfile {
     purchaseDate: string;
     expiryDate: string;
     freePassClaimed: boolean;
+    allowedMocks?: string[];
+    allowedCategories?: string[];
+    allowedSeries?: string[];
   };
 }
 
@@ -203,6 +206,8 @@ export interface TestSeries {
   displayOrder: number;
   isActive: boolean;
   testCount?: number;
+  accessLevel: AccessLevel;
+  price?: number;
   updatedAt?: any;
   createdAt?: any;
 }
@@ -268,7 +273,7 @@ export interface Question {
   examId?: string;
   boardId?: string;
   subjectId: string;
-  sectionId?: string; // Metadata for CBT grouping
+  sectionId?: string; 
   chapterId?: string;
   topicId?: string;
   subtopicId?: string;

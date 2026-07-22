@@ -1,8 +1,7 @@
 import { Firestore, doc, serverTimestamp, writeBatch, collection, getDocs } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Institutional Registry Blueprint v84.1.
- * UPDATED: Fixed 'current-affairs' abbreviation to avoid 'Hub Hub' double-labeling.
+ * @fileOverview Official Institutional Registry Blueprint v85.0 [Pass Tiers Updated].
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -35,11 +34,11 @@ export async function seedInitialData(db: Firestore) {
     { id: "constable", name: "Constable", boardId: "punjab-police", categoryId: "punjab-government-exams" }
   ];
 
-  // 4. CANONICAL PASSES (DYNAMIC ACCESS)
+  // 4. CANONICAL PASSES (REFINED ACCESS CONTROL)
   const passes = [
-    { id: "free-pass", name: "Aspirant Free", price: 0, durationDays: 365, tier: 0, active: true, displayOrder: 1, features: ["10 Free Mocks", "Basic Analytics"], allowedMocks: [], allowedCategories: [] },
-    { id: "monthly-pass", name: "Premium Monthly", price: 299, durationDays: 30, tier: 1, active: true, displayOrder: 2, features: ["All Mock Tests", "Bilingual Support", "AIR Rankings"], allowedMocks: [], allowedCategories: ["ppsc", "psssb", "punjab-police"] },
-    { id: "elite-pass", name: "Elite Yearly", price: 999, durationDays: 365, tier: 2, active: true, displayOrder: 3, features: ["Everything in Premium", "Expert Mentorship"], allowedMocks: [], allowedCategories: ["ppsc", "psssb", "punjab-police", "teaching-hub"] }
+    { id: "free-pass", name: "Aspirant Free", price: 0, durationDays: 365, tier: 0, active: true, displayOrder: 1, features: ["10 Free Mocks", "Basic Analytics"], allowedMocks: [], allowedCategories: [], allowedSeries: [] },
+    { id: "monthly-pass", name: "Premium Monthly", price: 299, durationDays: 30, tier: 1, active: true, displayOrder: 2, features: ["All Mock Tests", "Bilingual Support", "AIR Rankings"], allowedMocks: [], allowedCategories: ["ppsc", "psssb", "punjab-police", "current-affairs"], allowedSeries: [] },
+    { id: "elite-pass", name: "Elite Yearly", price: 999, durationDays: 365, tier: 2, active: true, displayOrder: 3, features: ["Everything in Premium", "Expert Mentorship"], allowedMocks: [], allowedCategories: ["all"], allowedSeries: [] }
   ];
 
   // 5. SAMPLE QUESTIONS ACROSS ALL SUBJECTS
@@ -89,101 +88,6 @@ export async function seedInitialData(db: Firestore) {
       usedCount: 0,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
-    },
-    {
-      id: "q3",
-      englishQuestion: "Who is known as the 'Sher-e-Punjab'?",
-      punjabiQuestion: "ਕਿਸਨੂੰ 'ਸ਼ੇਰ-ਏ-ਪੰਜਾਬ' ਵਜੋਂ ਜਾਣਿਆ ਜਾਂਦਾ ਹੈ?",
-      optionAEnglish: "Lala Lajpat Rai",
-      optionAPunjabi: "ਲਾਲਾ ਲਾਜਪਤ ਰਾਏ",
-      optionBEnglish: "Maharaja Ranjit Singh",
-      optionBPunjabi: "ਮਹਾਰਾਜਾ ਰਣਜੀਤ ਸਿੰਘ",
-      optionCEnglish: "Bhagat Singh",
-      optionCPunjabi: "ਭਗਤ ਸਿੰਘ",
-      optionDEnglish: "Kartar Singh Sarabha",
-      optionDPunjabi: "ਕਰਤਾਰ ਸਿੰਘ ਸਰਾਭਾ",
-      correctAnswer: 'B',
-      difficulty: "Easy",
-      englishExplanation: "Maharaja Ranjit Singh is famously known as Sher-e-Punjab.",
-      subjectId: "history",
-      boardId: "ppsc",
-      status: "UNUSED",
-      usedCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    },
-    {
-      id: "q4",
-      englishQuestion: "What is the shortcut key to copy text in Windows?",
-      punjabiQuestion: "ਵਿੰਡੋਜ਼ ਵਿੱਚ ਟੈਕਸਟ ਕਾਪੀ ਕਰਨ ਲਈ ਸ਼ਾਰਟਕੱਟ ਕੁੰਜੀ ਕੀ ਹੈ?",
-      optionAEnglish: "Ctrl + V",
-      optionAPunjabi: "Ctrl + V",
-      optionBEnglish: "Ctrl + C",
-      optionBPunjabi: "Ctrl + C",
-      optionCEnglish: "Ctrl + X",
-      optionCPunjabi: "Ctrl + X",
-      optionDEnglish: "Ctrl + Z",
-      optionDPunjabi: "Ctrl + Z",
-      correctAnswer: 'B',
-      difficulty: "Easy",
-      englishExplanation: "Ctrl + C is used to copy selected content.",
-      subjectId: "computer",
-      boardId: "psssb",
-      status: "UNUSED",
-      usedCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    },
-    {
-      id: "q5",
-      englishQuestion: "If 5 + 3 = 28, 9 + 1 = 810, then 8 + 6 = ?",
-      optionAEnglish: "214",
-      optionBEnglish: "2414",
-      optionCEnglish: "142",
-      optionDEnglish: "1421",
-      correctAnswer: 'B',
-      difficulty: "Medium",
-      englishExplanation: "Logic: (5-3=2, 5+3=8) -> 28. So (8-6=2, 8+6=14) -> 2414.",
-      subjectId: "reasoning",
-      boardId: "psssb",
-      status: "UNUSED",
-      usedCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    },
-    {
-      id: "q6",
-      englishQuestion: "The average of first five prime numbers is:",
-      optionAEnglish: "5.6",
-      optionBEnglish: "5.8",
-      optionCEnglish: "6.0",
-      optionDEnglish: "6.2",
-      correctAnswer: 'A',
-      difficulty: "Medium",
-      englishExplanation: "Prime numbers: 2, 3, 5, 7, 11. Sum = 28. Average = 28/5 = 5.6.",
-      subjectId: "math",
-      boardId: "psssb",
-      status: "UNUSED",
-      usedCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    },
-    {
-      id: "q7",
-      englishQuestion: "Which state topped the NITI Aayog Export Preparedness Index 2024?",
-      optionAEnglish: "Gujarat",
-      optionBEnglish: "Tamil Nadu",
-      optionCEnglish: "Maharashtra",
-      optionDEnglish: "Punjab",
-      correctAnswer: 'B',
-      difficulty: "Hard",
-      englishExplanation: "Tamil Nadu retained its top position in the latest index.",
-      subjectId: "current-affairs",
-      boardId: "current-affairs",
-      status: "UNUSED",
-      usedCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
     }
   ];
 
@@ -193,7 +97,6 @@ export async function seedInitialData(db: Firestore) {
   for (const e of exams) batch.set(doc(db, 'exams', e.id), { ...e, displayOrder: 1, updatedAt: serverTimestamp() }, { merge: true });
   for (const p of passes) batch.set(doc(db, 'passes', p.id), { ...p, updatedAt: serverTimestamp() }, { merge: true });
   
-  // Write to both mcqBank (new) and questions (legacy) for full compatibility
   for (const q of questions) {
     batch.set(doc(db, 'mcqBank', q.id), q, { merge: true });
     batch.set(doc(db, 'questions', q.id), q, { merge: true });
