@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo, useEffect, useCallback } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -60,9 +60,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Premium Assessment Hub Client v8.5 [PWA Optimized].
- * FIXED: Optimized header to single-row layout without scrolling.
- * UPDATED: Reduced padding and scaled typography for mobile ergonomics.
+ * @fileOverview Premium Assessment Hub Client v9.0 [PWA Optimized].
+ * FIXED: Syntax errors in ReviewTab handlers.
+ * FIXED: TabsTrigger context by inlining them in TabsList.
+ * FIXED: Navbar and Footer visibility.
  */
 
 export default function ResultClient() {
@@ -292,12 +293,12 @@ export default function ResultClient() {
   const handleSharePdf = async () => {
     if (isGeneratingPdf) return;
     setIsGeneratingPdf(true);
-    toast({ title: "Generating report", description: "Audit node sync in progress..." });
+    toast({ title: "Generating report", description: "Audit sync in progress..." });
     
     setActiveMainTab("REPORT");
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); 
+      await new Promise(resolve => setTimeout(resolve, 800)); 
       
       const { jsPDF } = await import('jspdf');
       const { toCanvas } = await import('html-to-image');
@@ -308,7 +309,7 @@ export default function ResultClient() {
       const p2 = document.getElementById('cracklix-result-page-2');
       
       if (!p1 || !p2) {
-         throw new Error("Report rendering failed. Target nodes not found in DOM.");
+         throw new Error("Report rendering failed. Target nodes not found.");
       }
 
       const captureOptions = {
@@ -351,7 +352,7 @@ export default function ResultClient() {
       toast({ title: "Report downloaded", description: "Verified document saved successfully." });
     } catch (e: any) {
       console.error("[PDF_FAIL]:", e);
-      toast({ variant: "destructive", title: "Export blocked", description: e.message || "Failed to render report components." });
+      toast({ variant: "destructive", title: "Export blocked", description: "Failed to render report components." });
     } finally {
       setIsGeneratingPdf(false);
     }

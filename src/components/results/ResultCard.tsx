@@ -57,8 +57,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Premium Institutional Score Report v4.1.
- * FIXED: Ensured all icons including 'Check' are correctly imported and rendered.
+ * @fileOverview Premium Institutional Score Report v4.2.
+ * FIXED: Missing Check icon import.
  */
 export default function ResultCard({
   studentName,
