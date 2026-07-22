@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState } from "react"
@@ -34,13 +35,13 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { UserProfile, UserRole, UserStatus, UserPermissions } from "@/types"
-import { INITIAL_PERMISSIONS, ADMIN_BASE_PERMISSIONS, isSuperAdmin } from "@/lib/permissions"
+import { INITIAL_PERMISSIONS, ADMIN_BASE_PERMISSIONS, isSuperAdmin, SUPER_ADMIN_EMAILS } from "@/lib/permissions"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Role & Permission Governance Console v2.3.
- * REDESIGNED: Premium Authority Update Button with Blue Gradient and refined typography.
+ * @fileOverview Institutional Role & Permission Governance Console v2.4.
+ * HARDENED: Restricted Super Admin role to Founder Email Only.
  */
 
 export default function RoleManagementPage() {
@@ -52,7 +53,7 @@ export default function RoleManagementPage() {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
-  // 1. Fetch Users Registry (Showing all to allow promotion)
+  // 1. Fetch Users Registry
   const usersQuery = useMemo(() => {
     if (!db) return null
     return query(
@@ -73,11 +74,18 @@ export default function RoleManagementPage() {
 
   const handleUpdateUser = async () => {
     if (!db || !selectedUser || isSaving) return
+    
+    // Safety check: Prevent modifying Super Admins
+    if (SUPER_ADMIN_EMAILS.includes(selectedUser.email.toLowerCase())) {
+       toast({ variant: "destructive", title: "Action Blocked", description: "Founder account cannot be modified via UI." });
+       setSelectedUser(null);
+       return;
+    }
+
     setIsSaving(true)
     try {
       const userRef = doc(db, "users", selectedUser.id)
       
-      // Ensure permissions object exists
       const finalPermissions = selectedUser.permissions || INITIAL_PERMISSIONS;
       
       await updateDoc(userRef, {
@@ -95,7 +103,11 @@ export default function RoleManagementPage() {
     }
   }
 
-  const handleDeleteUser = async (id: string, name: string) => {
+  const handleDeleteUser = async (id: string, name: string, email: string) => {
+    if (SUPER_ADMIN_EMAILS.includes(email.toLowerCase())) {
+       toast({ variant: "destructive", title: "Action Blocked", description: "Founder account cannot be deleted." });
+       return;
+    }
     if (!db || !confirm(`Permanently purge ${name} and all associated authority?`)) return
     await deleteDoc(doc(db, "users", id))
     toast({ title: "Authority Purged" })
@@ -160,56 +172,59 @@ export default function RoleManagementPage() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}><TableCell colSpan={4} className="px-12 py-8"><Skeleton className="h-12 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
                 ))
-              ) : filteredUsers.length > 0 ? filteredUsers.map((u) => (
-                <TableRow key={u.id} className="hover:bg-slate-50 border-slate-100 transition-all group">
-                  <TableCell className="px-8 md:px-12 py-6 md:py-10">
-                     <div className="flex items-center gap-4 md:gap-6">
-                        <StudentAvatar profile={u} className="h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl shadow-xl bg-slate-50 border-none" />
-                        <div className="min-w-0">
-                           <p className="font-bold text-[#0F172A] text-sm md:text-xl leading-tight truncate">{u.name}</p>
-                           <p className="text-[9px] md:text-[11px] font-bold text-slate-400 mt-1.5 truncate">{u.email}</p>
-                        </div>
-                     </div>
-                  </TableCell>
-                  <TableCell>
-                     <div className="flex flex-col gap-2">
-                        <Badge className={cn(
-                           "w-fit border-none text-[8px] font-black tracking-widest px-3 py-1 uppercase",
-                           u.role === 'SUPER_ADMIN' ? "bg-rose-500 text-white" : 
-                           u.role === 'STUDENT' ? "bg-slate-100 text-slate-500" : "bg-[#0F172A] text-white"
-                        )}>{u.role}</Badge>
-                        <div className="flex items-center gap-1.5">
-                           <div className={cn("h-2 w-2 rounded-full", u.status === 'ACTIVE' ? "bg-emerald-500" : "bg-rose-500")} />
-                           <span className="text-[9px] font-bold text-slate-500 uppercase">{u.status || 'ACTIVE'}</span>
-                        </div>
-                     </div>
-                  </TableCell>
-                  <TableCell>
-                     <div className="flex flex-wrap gap-1.5 max-w-[300px]">
-                        {u.role === 'STUDENT' ? (
-                           <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest italic">Standard access</span>
-                        ) : (
-                           <>
-                              {Object.entries(u.permissions || {}).filter(([_, v]) => v).slice(0, 4).map(([k]) => (
-                                 <Badge key={k} variant="outline" className="text-[7px] font-bold border-slate-200 text-slate-400 uppercase">{k.replace(/([A-Z])/g, ' $1')}</Badge>
-                              ))}
-                              {Object.values(u.permissions || {}).filter(v => v).length > 4 && (
-                                 <span className="text-[9px] font-bold text-primary">+{Object.values(u.permissions || {}).filter(v => v).length - 4} more</span>
-                              )}
-                           </>
-                        )}
-                     </div>
-                  </TableCell>
-                  <TableCell className="text-right px-8 md:px-12">
-                     <div className="flex justify-end gap-2 md:gap-4 opacity-20 group-hover:opacity-100 transition-all">
-                        <button onClick={() => setSelectedUser({...u, permissions: u.permissions || INITIAL_PERMISSIONS})} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Settings2 className="h-5 w-5" /></button>
-                        {u.role !== 'SUPER_ADMIN' && user?.email?.toLowerCase() === u.email?.toLowerCase() ? null : u.role !== 'SUPER_ADMIN' && (
-                           <button onClick={() => handleDeleteUser(u.id, u.name)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
-                        )}
-                     </div>
-                  </TableCell>
-                </TableRow>
-              )) : (
+              ) : filteredUsers.length > 0 ? filteredUsers.map((u) => {
+                const isTargetSuper = SUPER_ADMIN_EMAILS.includes(u.email.toLowerCase()) || u.role === 'SUPER_ADMIN';
+                return (
+                  <TableRow key={u.id} className="hover:bg-slate-50 border-slate-100 transition-all group">
+                    <TableCell className="px-8 md:px-12 py-6 md:py-10">
+                       <div className="flex items-center gap-4 md:gap-6">
+                          <StudentAvatar profile={u} className="h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl shadow-xl bg-slate-50 border-none" />
+                          <div className="min-w-0">
+                             <p className="font-bold text-[#0F172A] text-sm md:text-xl leading-tight truncate">{u.name}</p>
+                             <p className="text-[9px] md:text-[11px] font-bold text-slate-400 mt-1.5 truncate">{u.email}</p>
+                          </div>
+                       </div>
+                    </TableCell>
+                    <TableCell>
+                       <div className="flex flex-col gap-2">
+                          <Badge className={cn(
+                             "w-fit border-none text-[8px] font-black tracking-widest px-3 py-1 uppercase",
+                             isTargetSuper ? "bg-rose-500 text-white" : 
+                             u.role === 'STUDENT' ? "bg-slate-100 text-slate-500" : "bg-[#0F172A] text-white"
+                          )}>{u.role}</Badge>
+                          <div className="flex items-center gap-1.5">
+                             <div className={cn("h-2 w-2 rounded-full", u.status === 'ACTIVE' ? "bg-emerald-500" : "bg-rose-500")} />
+                             <span className="text-[9px] font-bold text-slate-500 uppercase">{u.status || 'ACTIVE'}</span>
+                          </div>
+                       </div>
+                    </TableCell>
+                    <TableCell>
+                       <div className="flex flex-wrap gap-1.5 max-w-[300px]">
+                          {u.role === 'STUDENT' ? (
+                             <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest italic">Standard access</span>
+                          ) : (
+                             <>
+                                {Object.entries(u.permissions || {}).filter(([_, v]) => v).slice(0, 4).map(([k]) => (
+                                   <Badge key={k} variant="outline" className="text-[7px] font-bold border-slate-200 text-slate-400 uppercase">{k.replace(/([A-Z])/g, ' $1')}</Badge>
+                                ))}
+                                {Object.values(u.permissions || {}).filter(v => v).length > 4 && (
+                                   <span className="text-[9px] font-bold text-primary">+{Object.values(u.permissions || {}).filter(v => v).length - 4} more</span>
+                                )}
+                             </>
+                          )}
+                       </div>
+                    </TableCell>
+                    <TableCell className="text-right px-8 md:px-12">
+                       <div className="flex justify-end gap-2 md:gap-4 opacity-20 group-hover:opacity-100 transition-all">
+                          <button onClick={() => setSelectedUser({...u, permissions: u.permissions || INITIAL_PERMISSIONS})} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Settings2 className="h-5 w-5" /></button>
+                          {!isTargetSuper && (
+                             <button onClick={() => handleDeleteUser(u.id, u.name, u.email)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
+                          )}
+                       </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              }) : (
                 <TableRow>
                    <TableCell colSpan={4} className="h-80 text-center">
                       <div className="flex flex-col items-center justify-center opacity-10 space-y-4">
@@ -246,7 +261,7 @@ export default function RoleManagementPage() {
                   <div className="space-y-2">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Assigned Role</Label>
                      <select 
-                        disabled={selectedUser?.role === 'SUPER_ADMIN'}
+                        disabled={selectedUser?.email && SUPER_ADMIN_EMAILS.includes(selectedUser.email.toLowerCase())}
                         value={selectedUser?.role} 
                         onChange={e => setSelectedUser({...selectedUser!, role: e.target.value as UserRole})}
                         className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-5 font-black text-sm outline-none shadow-inner cursor-pointer"
@@ -257,13 +272,13 @@ export default function RoleManagementPage() {
                         <option value="EDITOR">Editor Hub</option>
                         <option value="REVIEWER">Internal Reviewer</option>
                         <option value="MODERATOR">Platform Moderator</option>
-                        <option value="SUPER_ADMIN">Super Admin</option>
+                        {/* SUPER_ADMIN option hidden to prevent unauthorized assignment */}
                      </select>
                   </div>
                   <div className="space-y-2">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Account Lifecycle</Label>
                      <select 
-                        disabled={selectedUser?.role === 'SUPER_ADMIN'}
+                        disabled={selectedUser?.email && SUPER_ADMIN_EMAILS.includes(selectedUser.email.toLowerCase())}
                         value={selectedUser?.status} 
                         onChange={e => setSelectedUser({...selectedUser!, status: e.target.value as UserStatus})}
                         className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-5 font-black text-sm outline-none shadow-inner cursor-pointer"
@@ -280,18 +295,20 @@ export default function RoleManagementPage() {
                      <h4 className="text-[11px] md:text-sm font-black text-primary uppercase tracking-[0.2em] flex items-center gap-3">
                         <Lock className="h-4 w-4" /> Granular Permission Matrix
                      </h4>
-                     <div className="flex gap-2">
-                        <Button 
-                          variant="ghost" 
-                          onClick={() => setSelectedUser({...selectedUser!, permissions: INITIAL_PERMISSIONS})}
-                          className="text-[9px] font-black uppercase text-slate-400 hover:text-primary"
-                        >Clear All</Button>
-                        <Button 
-                          variant="ghost" 
-                          onClick={() => setSelectedUser({...selectedUser!, permissions: ADMIN_BASE_PERMISSIONS})}
-                          className="text-[9px] font-black uppercase text-slate-400 hover:text-primary"
-                        >Base Admin</Button>
-                     </div>
+                     {!(selectedUser?.email && SUPER_ADMIN_EMAILS.includes(selectedUser.email.toLowerCase())) && (
+                        <div className="flex gap-2">
+                           <Button 
+                             variant="ghost" 
+                             onClick={() => setSelectedUser({...selectedUser!, permissions: INITIAL_PERMISSIONS})}
+                             className="text-[9px] font-black uppercase text-slate-400 hover:text-primary"
+                           >Clear All</Button>
+                           <Button 
+                             variant="ghost" 
+                             onClick={() => setSelectedUser({...selectedUser!, permissions: ADMIN_BASE_PERMISSIONS})}
+                             className="text-[9px] font-black uppercase text-slate-400 hover:text-primary"
+                           >Base Admin</Button>
+                        </div>
+                     )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
@@ -304,6 +321,7 @@ export default function RoleManagementPage() {
                               {permKey.replace(/([A-Z])/g, ' $1')}
                            </Label>
                            <Switch 
+                              disabled={selectedUser?.email && SUPER_ADMIN_EMAILS.includes(selectedUser.email.toLowerCase())}
                               checked={selectedUser?.permissions?.[permKey as keyof UserPermissions] || false} 
                               onCheckedChange={val => setSelectedUser({
                                  ...selectedUser!,
@@ -319,8 +337,8 @@ export default function RoleManagementPage() {
             <DialogFooter className="p-6 md:p-14 pt-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-4 items-center shrink-0">
                <Button variant="ghost" onClick={() => setSelectedUser(null)} className="h-12 md:h-14 px-8 font-bold text-slate-400 hover:text-slate-600 transition-colors border-none bg-transparent">Discard Changes</Button>
                <Button 
+                 disabled={isSaving || (selectedUser?.email && SUPER_ADMIN_EMAILS.includes(selectedUser.email.toLowerCase()))}
                  onClick={handleUpdateUser} 
-                 disabled={isSaving} 
                  className="flex-1 h-14 md:h-18 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold text-sm md:text-base shadow-lg shadow-blue-500/20 transition-all active:scale-95 border-none gap-3 rounded-full"
                >
                   {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />} 
@@ -336,3 +354,4 @@ export default function RoleManagementPage() {
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn("animate-pulse bg-muted rounded", className)} />
 }
+
