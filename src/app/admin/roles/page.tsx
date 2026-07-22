@@ -39,8 +39,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Role & Permission Governance Console v2.2.
- * FIXED: Resolved JSX syntax error (missing TableCell closing tag).
+ * @fileOverview Institutional Role & Permission Governance Console v2.3.
+ * REDESIGNED: Premium Authority Update Button with Blue Gradient and refined typography.
  */
 
 export default function RoleManagementPage() {
@@ -317,9 +317,14 @@ export default function RoleManagementPage() {
             </div>
 
             <DialogFooter className="p-6 md:p-14 pt-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-4 items-center shrink-0">
-               <Button variant="ghost" onClick={() => setSelectedUser(null)} className="h-12 md:h-14 px-8 font-black uppercase text-[10px] text-slate-400">Discard Changes</Button>
-               <Button onClick={handleUpdateUser} disabled={isSaving} className="bg-[#0F172A] hover:bg-black text-white h-12 md:h-16 px-12 md:px-24 rounded-full font-black uppercase text-[10px] md:text-[11px] tracking-widest flex-1 shadow-3xl transition-all active:scale-95 gap-3 border-none">
-                  {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />} Commit Authority Update
+               <Button variant="ghost" onClick={() => setSelectedUser(null)} className="h-12 md:h-14 px-8 font-bold text-slate-400 hover:text-slate-600 transition-colors border-none bg-transparent">Discard Changes</Button>
+               <Button 
+                 onClick={handleUpdateUser} 
+                 disabled={isSaving} 
+                 className="flex-1 h-14 md:h-18 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold text-sm md:text-base shadow-lg shadow-blue-500/20 transition-all active:scale-95 border-none gap-3 rounded-full"
+               >
+                  {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />} 
+                  Save Authority Update
                </Button>
             </DialogFooter>
          </DialogContent>
