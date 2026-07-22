@@ -9,8 +9,8 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v61.8.
- * UPDATED: Removed all uppercase transforms for a cleaner institutional look.
+ * @fileOverview Premium Mobile-First PWA Hero v61.9.
+ * FIXED: Removed uppercase transforms for a cleaner look.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);

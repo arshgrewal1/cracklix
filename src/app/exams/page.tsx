@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -35,8 +36,8 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v8.0.
- * FIXED: Optimized grid breakpoints to prevent narrow cards and text truncation on 1080p screens.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v8.1.
+ * FIXED: Removed truncate and uppercase for full text visibility.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -188,7 +189,7 @@ export default function ExamsEntryPage() {
                             <AuthorityLogo boardId={e.boardId} size="sm" className="h-12 w-12 shrink-0" />
                             <div className="min-w-0">
                               <span className="font-bold text-[#0F172A] text-sm md:text-lg block truncate">{e.name}</span>
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{e.boardId} hub</span>
+                              <span className="text-[10px] font-bold text-slate-400 tracking-widest">{e.boardId} hub</span>
                             </div>
                           </div>
                           <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all" />
@@ -205,7 +206,7 @@ export default function ExamsEntryPage() {
                   <button 
                     key={chip.label}
                     onClick={() => setSearchTerm(chip.label)}
-                    className="h-11 px-7 rounded-full bg-white border border-slate-100 text-[#0F172A] font-bold text-[11px] uppercase tracking-tight shadow-sm hover:shadow-lg hover:border-primary/20 transition-all whitespace-nowrap active:scale-95 flex items-center gap-2.5"
+                    className="h-11 px-7 rounded-full bg-white border border-slate-100 text-[#0F172A] font-bold text-[11px] tracking-tight shadow-sm hover:shadow-lg hover:border-primary/20 transition-all whitespace-nowrap active:scale-95 flex items-center gap-2.5"
                   >
                     <span className="text-sm">{chip.icon}</span> {chip.label}
                   </button>
@@ -222,15 +223,15 @@ export default function ExamsEntryPage() {
                     <Star className="h-6 w-6 fill-current" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-3xl font-[900] text-[#0F172A] tracking-tighter uppercase">Popular Verticals</h2>
-                    <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">High-Aspirant Traffic Nodes</p>
+                    <h2 className="text-2xl md:text-3xl font-[900] text-[#0F172A] tracking-tighter">Popular Verticals</h2>
+                    <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest mt-1">High-Aspirant Traffic Nodes</p>
                  </div>
               </div>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
               {examsLoading ? (
-                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[540px] w-full rounded-[3rem] bg-white border border-slate-100" />)
+                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[540px] w-full rounded-[2.5rem] md:rounded-[3rem] bg-white border border-slate-100" />)
               ) : featuredExams.map((exam: any) => (
                  <ExamCard 
                    key={exam.id} 
@@ -252,8 +253,8 @@ export default function ExamsEntryPage() {
                     <Landmark className="h-6 w-6" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-3xl font-[900] text-[#0F172A] tracking-tighter uppercase">Exam Boards</h2>
-                    <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mt-1">Official Selection Authorities</p>
+                    <h2 className="text-2xl md:text-3xl font-[900] text-[#0F172A] tracking-tighter">Exam boards</h2>
+                    <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest mt-1">Official Selection Authorities</p>
                  </div>
               </div>
            </div>
@@ -276,9 +277,9 @@ export default function ExamsEntryPage() {
                                 <AuthorityLogo category={cat} size="sm" className="p-0 shadow-none border-none bg-transparent" />
                              </div>
                              <div className="min-w-0 flex-1">
-                                <h3 className="text-base md:text-lg font-[800] text-[#0F172A] leading-tight group-hover:text-primary transition-colors truncate">{cat.title}</h3>
+                                <h3 className="text-base md:text-lg font-[800] text-[#0F172A] leading-tight group-hover:text-primary transition-colors line-clamp-2">{cat.title}</h3>
                                 <div className="mt-2 flex items-center justify-between">
-                                   <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-2 py-0.5">Live now</Badge>
+                                   <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black tracking-widest px-2 py-0.5">Live now</Badge>
                                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-all" />
                                 </div>
                              </div>

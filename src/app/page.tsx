@@ -23,8 +23,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v501.8.
- * UPDATED: Removed all remaining uppercase styling for unified Title Case design.
+ * @fileOverview Institutional Premium Hub v501.9.
+ * UPDATED: Removed uppercase transforms for clean Title Case design.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -82,7 +82,7 @@ export default function HomePage() {
 
                       <div className="mt-[20px] pb-[18px]">
                          <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="inline-block w-full max-w-[320px] mx-auto">
-                            <button className="relative overflow-hidden w-full h-[52px] bg-gradient-to-r from-blue-600 to-blue-400 hover:brightness-110 text-white font-bold text-base tracking-tight rounded-[18px] shadow-[0_12px_24px_rgba(37,99,235,0.3)] transition-all duration-300 active:scale-95 border-none group/btn cursor-pointer">
+                            <button className="relative overflow-hidden w-full h-[52px] bg-gradient-to-r from-blue-600 to-blue-400 hover:brightness-110 text-white font-bold text-base tracking-tight rounded-[18px] shadow-[0_12px_24px_rgba(37,99,235,0.3)] transition-all duration-300 active:scale-95 border-none group/btn cursor-pointer text-center">
                                <div className="flex items-center justify-center gap-2 relative z-10">
                                   <Zap className="h-4 w-4 fill-white text-white" />
                                   <span>Start Challenge</span>
