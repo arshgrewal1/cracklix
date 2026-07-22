@@ -1,7 +1,7 @@
-
 "use client"
 
 import React, { useMemo, useState } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -11,19 +11,15 @@ import {
   Search, 
   Settings2, 
   Trash2, 
-  UserPlus, 
-  MoreVertical,
   X,
   CheckCircle2,
-  AlertCircle,
   Loader2,
-  ChevronRight,
   ShieldAlert,
   Save,
   Lock
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, doc, updateDoc, serverTimestamp, orderBy, where, deleteDoc, limit } from "firebase/firestore"
+import { collection, query, doc, updateDoc, serverTimestamp, orderBy, deleteDoc, limit } from "firebase/firestore"
 import { 
   Dialog, 
   DialogContent, 
@@ -43,8 +39,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Role & Permission Governance Console v2.0.
- * UPDATED: Fetches all users to allow Super Admin to promote students to staff roles.
+ * @fileOverview Institutional Role & Permission Governance Console v2.2.
+ * FIXED: Resolved JSX syntax error (missing TableCell closing tag).
  */
 
 export default function RoleManagementPage() {
@@ -61,7 +57,6 @@ export default function RoleManagementPage() {
     if (!db) return null
     return query(
       collection(db, "users"), 
-      orderBy("createdAt", "desc"),
       limit(100)
     )
   }, [db])
