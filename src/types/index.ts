@@ -13,6 +13,22 @@ export type ExamLanguage = 'en' | 'pa' | 'hi' | 'bilingual';
 
 export type LanguageDisplayMode = 'ENGLISH' | 'PUNJABI' | 'HINDI' | 'ENGLISH_PUNJABI' | 'ENGLISH_HINDI';
 
+export interface BrandingSettings {
+  websiteUrl: string;
+  logoUrl: string;
+  faviconUrl: string;
+  footerText: string;
+  verificationUrl: string;
+  qrCodeUrl: string;
+  certificateBgUrl: string;
+  digitalStampUrl: string;
+  organizationName: string;
+  supportEmail: string;
+  supportPhone: string;
+  copyrightText: string;
+  updatedAt: any;
+}
+
 export interface UserPermissions {
   // Subjects
   createSubject: boolean;

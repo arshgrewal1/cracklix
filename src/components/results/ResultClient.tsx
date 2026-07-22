@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
@@ -26,21 +25,14 @@ import {
   ShieldCheck,
   RefreshCw,
   Clock,
-  ChevronRight,
   BarChart3,
-  CheckCircle2,
-  ArrowRight,
-  RotateCcw,
-  Layers,
-  X,
-  Timer,
+  List,
   Award,
-  Sparkles,
-  Check,
+  Timer,
   FileText,
-  TrendingUp,
   AlertCircle,
-  List
+  ChevronRight,
+  RotateCcw
 } from "lucide-react"
 import { 
   Card, 
@@ -50,19 +42,12 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
 import ResultCard from "./ResultCard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
-
-/**
- * @fileOverview Premium Assessment Hub Client v9.1 [Terminology Refined].
- * UPDATED: Removed uppercase and "node" terminology.
- */
+import { BrandingSettings } from "@/types"
 
 export default function ResultClient() {
   const db = useFirestore()
@@ -96,7 +81,10 @@ export default function ResultClient() {
   const isGuestMode = !user || searchParams?.get('guest') === 'true';
 
   const resultRef = useMemo(() => (db && user && mockId ? doc(db, "results", `${user.uid}_${mockId}`) : null), [db, user, mockId]);
+  const brandRef = useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]);
+
   const { data: cloudSession, loading: resultLoading } = useDoc<any>(resultRef);
+  const { data: branding } = useDoc<BrandingSettings>(brandRef);
 
   useEffect(() => {
      if (isGuestMode && mockId) {
@@ -344,7 +332,7 @@ export default function ResultClient() {
       pdf.addPage();
       pdf.addImage(img2, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
       
-      const fileName = `Cracklix_Report_${mockData?.title?.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
+      const fileName = `Report_${mockData?.title?.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
       pdf.save(fileName);
       
       toast({ title: "Report downloaded", description: "Verified document saved successfully." });
@@ -593,6 +581,7 @@ export default function ResultClient() {
                           date={new Date(sessionData?.timestamp).toLocaleDateString('en-GB')} 
                           resultId={sessionData?.id || "REG_ENTRY"} 
                           percentile={merit.percentile} 
+                          branding={branding}
                           subjects={analysis.subjects}
                           difficulty={analysis.difficulty}
                           timeMetrics={{

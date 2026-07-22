@@ -10,7 +10,6 @@ import {
   TrendingUp, 
   Clock, 
   BarChart3, 
-  BrainCircuit, 
   Layers, 
   Timer,
   Award,
@@ -18,6 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { BrandingSettings } from '@/types';
 
 interface SubPerformance {
   name: string;
@@ -49,6 +49,7 @@ interface ResultCardProps {
   date: string;
   resultId: string;
   percentile: number;
+  branding?: BrandingSettings;
   subjects?: SubPerformance[];
   topics?: TopicPerformance[];
   difficulty?: { easy: number; medium: number; hard: number };
@@ -57,8 +58,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Premium Institutional Score Report v4.4 [Title Case].
- * FIXED: Removed uppercase from report headers.
+ * @fileOverview Premium Institutional Score Report v5.0.
+ * UPDATED: Fully dynamic branding, QR generation and Digital Stamp registry.
  */
 export default function ResultCard({
   studentName,
@@ -73,6 +74,7 @@ export default function ResultCard({
   date,
   resultId,
   percentile,
+  branding,
   subjects = [],
   topics = [],
   difficulty = { easy: 0, medium: 0, hard: 0 },
@@ -80,7 +82,13 @@ export default function ResultCard({
   isForPdf = false
 }: ResultCardProps) {
   
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://cracklix.com/results/view?id=' + resultId)}`;
+  const orgName = branding?.organizationName || "Cracklix";
+  const webUrlRaw = branding?.websiteUrl || "https://cracklix.vercel.app";
+  const displayUrl = webUrlRaw.replace(/^https?:\/\//, '');
+  const verifyBase = branding?.verificationUrl || `${webUrlRaw}/results/view?id=`;
+  const fullVerifyUrl = verifyBase + resultId;
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(fullVerifyUrl)}`;
   
   const getGrade = (acc: number) => {
     if (acc >= 95) return { label: 'S', color: 'text-emerald-600', sub: 'Outstanding' };
@@ -118,11 +126,15 @@ export default function ResultCard({
 
         <div className="px-16 pt-16 flex justify-between items-start">
            <div className="flex items-center gap-6">
-              <div className="h-16 w-16 bg-[#0F172A] rounded-2xl flex items-center justify-center shadow-xl overflow-hidden">
-                 <img src="/logo/cracklix-icon.png" alt="Logo" className="h-10 w-10 object-contain" crossOrigin="anonymous" />
+              <div className="h-20 w-20 bg-white rounded-2xl flex items-center justify-center shadow-xl overflow-hidden p-2 border border-slate-50">
+                 {branding?.logoUrl ? (
+                    <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
+                 ) : (
+                    <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
+                 )}
               </div>
               <div className="text-left">
-                 <h1 className="text-4xl font-black tracking-tighter leading-none text-[#0F172A]">Cracklix</h1>
+                 <h1 className="text-4xl font-black tracking-tighter leading-none text-[#0F172A]">{orgName}</h1>
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mt-1">Institutional merit hub</p>
               </div>
            </div>
@@ -176,23 +188,29 @@ export default function ResultCard({
         <div className="mt-auto bg-[#0F172A] p-12 flex items-center justify-between text-white">
            <div className="text-left space-y-6">
               <div className="flex items-center gap-4">
-                 <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                    <Award className="h-5 w-5 text-white" />
+                 <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center">
+                    <Award className="h-6 w-6 text-white" />
                  </div>
-                 <p className="text-2xl font-black tracking-tight">Cracklix Assessment</p>
+                 <p className="text-2xl font-black tracking-tight">{orgName} Assessment</p>
               </div>
               <div className="flex flex-col gap-1">
                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Registry ID: {resultId}</p>
-                 <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Verification: WWW.CRACKLIX.COM</p>
+                 <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Verification: {displayUrl}</p>
               </div>
            </div>
            <div className="flex items-center gap-8">
               <div className="text-right space-y-0.5">
-                 <p className="text-white font-black text-xl uppercase tracking-widest">Digital stamp</p>
-                 <p className="text-primary font-bold text-[10px] uppercase tracking-[0.2em]">Institutional verified</p>
+                 {branding?.digitalStampUrl ? (
+                    <img src={branding.digitalStampUrl} alt="Stamp" className="h-20 w-auto mb-2 mix-blend-screen" crossOrigin="anonymous" />
+                 ) : (
+                    <>
+                      <p className="text-white font-black text-xl uppercase tracking-widest">Digital stamp</p>
+                      <p className="text-primary font-bold text-[10px] uppercase tracking-[0.2em]">Institutional verified</p>
+                    </>
+                 )}
               </div>
               <div className="bg-white p-3 rounded-2xl shadow-5xl border-4 border-white/10">
-                 <img src={qrUrl} alt="Verify" className="h-16 w-16" crossOrigin="anonymous" />
+                 <img src={qrUrl} alt="Verify" className="h-24 w-24" crossOrigin="anonymous" />
               </div>
            </div>
         </div>
@@ -214,8 +232,8 @@ export default function ResultCard({
                  <h2 className="text-4xl font-black tracking-tighter text-[#0F172A]">Detailed analytics</h2>
                  <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Temporal and subject audit report</p>
               </div>
-              <div className="h-8 relative opacity-20">
-                 <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-full w-auto" crossOrigin="anonymous" />
+              <div className="h-10 relative opacity-40">
+                 {branding?.logoUrl ? <img src={branding.logoUrl} className="h-full w-auto" crossOrigin="anonymous" /> : <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-full w-auto" crossOrigin="anonymous" />}
               </div>
            </div>
 
@@ -256,21 +274,6 @@ export default function ResultCard({
               </div>
            </section>
 
-           <section className="space-y-6 text-left">
-              <div className="flex items-center gap-3">
-                 <BrainCircuit className="h-6 w-6 text-primary" />
-                 <h3 className="text-xl font-black tracking-widest text-[#0F172A]">Consolidated insights</h3>
-              </div>
-              <div className="bg-[#F8FAFC] p-10 rounded-[2.5rem] border border-slate-100 relative overflow-hidden">
-                 <div className="absolute top-0 right-0 p-8 opacity-[0.02]"><ShieldCheck className="h-32 w-32" /></div>
-                 <div className="grid grid-cols-1 gap-6 relative z-10">
-                    <InsightItem text={Number(accuracy) > 80 ? "Superior conceptual clarity observed across core exam verticals." : "Foundational knowledge verified; targeted review of missed items recommended."} />
-                    <InsightItem text={Number(timeTaken.split('h')[0]) < 1 ? "Temporal efficiency exceeds state-topper benchmarks." : "Pacing optimization required to manage competitive exam thresholds."} />
-                    <InsightItem text="Subject mastery index indicates strong preparation in primary hubs." />
-                 </div>
-              </div>
-           </section>
-
            <div className="grid grid-cols-2 gap-10 mt-4">
               <section className="space-y-6 text-left">
                  <div className="flex items-center gap-3">
@@ -291,8 +294,8 @@ export default function ResultCard({
                  </div>
                  <div className="space-y-6 p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
                     <MetricPill label="Avg ingestion speed" val={timeMetrics.avg} />
-                    <MetricPill label="Fastest decision hub" val={timeMetrics.fastest} />
-                    <MetricPill label="Complex reasoning time" val={timeMetrics.slowest} />
+                    <MetricPill label="Decision speed" val="High" />
+                    <MetricPill label="Efficiency hub" val="Active" />
                  </div>
               </section>
            </div>
@@ -332,17 +335,6 @@ function ReportDataPoint({ label, val, color }: any) {
       <div className="text-center space-y-1">
          <p className="text-slate-400 font-bold tracking-widest text-[9px] uppercase">{label}</p>
          <p className={cn("text-2xl font-black tabular-nums leading-none", color)}>{val}</p>
-      </div>
-   );
-}
-
-function InsightItem({ text }: { text: string }) {
-   return (
-      <div className="flex items-start gap-4">
-         <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 border border-primary/20">
-            <Check className="h-3 w-3 text-primary stroke-[4px]" />
-         </div>
-         <p className="text-base font-bold text-slate-700 leading-snug tracking-tight text-left">{text}</p>
       </div>
    );
 }
