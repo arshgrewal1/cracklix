@@ -15,10 +15,8 @@ import {
   Layers, 
   ArrowLeft,
   Trophy,
-  Play,
   Lock,
   BookOpen,
-  BarChart3,
   Timer,
   Check,
   MoreVertical,
@@ -42,8 +40,8 @@ import { hasSeriesAccess } from "@/lib/access-control"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Premium Series Hub Portal v11.2.
- * FIXED: Optimized purchase dialog for PWA/Mobile fit.
+ * @fileOverview Premium Series Hub Portal v12.0.
+ * FIXED: Redesigned Purchase Dialog with Bottom Sheet ergonomics, 70vh constraint, and Price Cards.
  */
 
 export default function SeriesDetailPortal() {
@@ -194,7 +192,6 @@ export default function SeriesDetailPortal() {
                         buttonVariant = "bg-amber-500 hover:bg-amber-600";
                         targetHref = "#";
                      } else if (hasPurchasedAccess) {
-                        // User has access (either through pass or is admin)
                         buttonLabel = "Start Test";
                         buttonVariant = "bg-[#2563EB] hover:bg-blue-700";
                         targetHref = `/mocks/instructions?id=${mock.id}`;
@@ -288,55 +285,80 @@ export default function SeriesDetailPortal() {
 
       <Footer />
 
-      {/* 3. PREMIUM LOCK PURCHASE DIALOG */}
+      {/* PREMIUM LOCK PURCHASE DIALOG - REDESIGNED FOR PWA/MOBILE */}
       <Dialog open={!!selectedMockForPurchase} onOpenChange={() => setSelectedMockForPurchase(null)}>
-         <DialogContent className="sm:max-w-xl w-[95vw] rounded-[2rem] md:rounded-[3.5rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
-            <div className="h-2 w-full bg-amber-500 shrink-0" />
-            <div className="p-5 md:p-14 space-y-6 md:space-y-10 overflow-y-auto custom-scrollbar flex-1 pb-10">
-               <div className="flex items-center gap-6 md:gap-8 border-b border-slate-50 pb-6 md:pb-10">
-                  <AuthorityLogo boardId={series?.boardId} size="md" className="h-16 w-16 md:h-32 md:w-32 bg-slate-50 border-2 md:border-4 border-white shadow-2xl" />
-                  <div className="space-y-1.5">
-                     <Badge className="bg-amber-50 text-amber-600 border-none text-[8px] md:text-[10px] font-black uppercase tracking-widest px-3 py-0.5 rounded-full">Premium Access</Badge>
-                     <DialogTitle className="text-xl md:text-2xl font-black text-[#0F172A] tracking-tighter leading-tight">
-                        {series?.title}
-                     </DialogTitle>
-                     <DialogDescription className="text-slate-400 font-bold text-[8px] md:text-[10px] uppercase">Registry authorization required</DialogDescription>
+         <DialogContent className="sm:max-w-[480px] w-[calc(100%-24px)] max-h-[70vh] rounded-[24px] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
+            <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 to-blue-400 shrink-0" />
+            
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+               <div className="flex items-center gap-4 border-b border-slate-50 pb-5">
+                  <div className="h-12 w-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 shadow-inner">
+                     <Lock className="h-6 w-6" />
                   </div>
-               </div>
-
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                  <PurchaseStat icon={Layers} label="Tests" val={mocks?.length || 0} />
-                  <PurchaseStat icon={Smartphone} label="Android PWA" val="Active" />
-                  <PurchaseStat icon={Calendar} label="Validity" val="365 Days" />
-                  <PurchaseStat icon={ShieldCheck} label="Official" val="Verified" />
+                  <div className="min-w-0">
+                     <DialogTitle className="text-xl font-[800] text-[#0F172A] tracking-tight">Premium Series</DialogTitle>
+                     <DialogDescription className="text-slate-400 font-bold text-[9px] uppercase tracking-widest mt-1">Unlock all tests in this vertical</DialogDescription>
+                  </div>
                </div>
 
                <div className="space-y-3">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Series Benefits</p>
-                  <div className="grid grid-cols-1 gap-2.5">
-                     <BenefitNode text="Unlock all tests in this specific series." />
-                     <BenefitNode text="Access detailed bilingual explanations." />
-                     <BenefitNode text="Real-time All Punjab Rank calculation." />
-                     <BenefitNode text="Institutional grade performance analytics." />
+                  <p className="text-[10px] font-black uppercase text-primary tracking-widest ml-1">Series Benefits</p>
+                  <div className="grid grid-cols-1 gap-2">
+                     <BenefitItem text="Access all professional tests" />
+                     <BenefitItem text="Detailed bilingual explanations" />
+                     <BenefitItem text="Real-time performance analytics" />
+                     <BenefitItem text="State-wide merit rankings" />
+                     <BenefitItem text="Unlimited attempt capability" />
                   </div>
                </div>
 
-               <div className="pt-4">
-                  <Button asChild className="w-full h-14 md:h-20 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-sm rounded-xl md:rounded-[2.5rem] shadow-4xl border-none transition-all active:scale-95 flex items-center justify-between px-6 md:px-10">
-                     <Link href="/pass">
-                        <span>Buy Elite Pass</span>
-                        <span className="text-xl md:text-2xl font-black">₹{series?.price || 299}</span>
-                     </Link>
-                  </Button>
-                  <p className="text-center text-[8px] font-bold text-slate-300 mt-4 uppercase tracking-widest">Secure institutional payment portal</p>
+               <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-[0.03] rotate-12"><Gem className="h-20 w-20" /></div>
+                  <div className="relative z-10 space-y-4">
+                     <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                           <p className="text-[9px] font-black uppercase text-slate-400">Selected Hub</p>
+                           <p className="text-lg font-black text-[#0F172A] uppercase leading-tight">Elite Pass</p>
+                        </div>
+                        <Badge className="bg-emerald-500 text-white border-none px-3 py-1 font-black text-[9px] uppercase">Best Value</Badge>
+                     </div>
+                     <div className="flex items-center justify-between pt-4 border-t border-slate-100/50">
+                        <div className="space-y-0.5">
+                           <p className="text-[9px] font-bold text-slate-400 uppercase">Validity</p>
+                           <p className="text-sm font-bold text-[#0F172A]">365 Days Access</p>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-[9px] font-bold text-slate-400 uppercase line-through">₹1499</p>
+                           <p className="text-2xl font-black text-primary tabular-nums tracking-tighter">₹999</p>
+                        </div>
+                     </div>
+                  </div>
                </div>
             </div>
+
+            <DialogFooter className="p-6 bg-slate-50 border-t border-slate-100 flex flex-col gap-2 shrink-0 pb-[calc(env(safe-area-inset-bottom)+24px)]">
+               <Button asChild className="w-full h-[52px] bg-gradient-to-r from-blue-600 to-blue-500 hover:brightness-110 text-white font-[800] uppercase tracking-widest text-[11px] rounded-xl shadow-xl border-none active:scale-[0.98] transition-all">
+                  <Link href="/pass">Buy Elite Pass Now <ArrowRight className="ml-2 h-4 w-4" /></Link>
+               </Button>
+               <Button variant="ghost" onClick={() => setSelectedMockForPurchase(null)} className="w-full h-10 text-slate-400 hover:text-slate-600 font-bold text-[10px] uppercase tracking-widest">
+                  Cancel
+               </Button>
+            </DialogFooter>
          </DialogContent>
       </Dialog>
-
-      <div className="h-20 md:h-0" />
     </div>
   )
+}
+
+function BenefitItem({ text }: { text: string }) {
+   return (
+      <div className="flex items-center gap-3 py-1">
+         <div className="h-4.5 w-4.5 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+            <Check className="h-3 w-3 text-emerald-500 stroke-[4px]" />
+         </div>
+         <p className="text-[12px] font-bold text-slate-600">{text}</p>
+      </div>
+   )
 }
 
 function ResultStat({ icon, label, val, highlight }: { icon: React.ReactNode, label: string, val: string | number, highlight?: boolean }) {
@@ -353,25 +375,3 @@ function ResultStat({ icon, label, val, highlight }: { icon: React.ReactNode, la
       </div>
    )
 }
-
-function PurchaseStat({ icon: Icon, label, val }: any) {
-   return (
-      <div className="bg-slate-50 p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-100 flex flex-col items-center text-center gap-1.5">
-         {Icon && <Icon className="h-4 w-4 text-amber-500" />}
-         <div>
-            <p className="text-[12px] md:text-sm font-black text-[#0F172A] leading-none tabular-nums">{val}</p>
-            <p className="text-[6px] md:text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-1">{label}</p>
-         </div>
-      </div>
-   )
-}
-
-function BenefitNode({ text }: { text: string }) {
-   return (
-      <div className="flex items-center gap-3 p-3 md:p-4 bg-emerald-50/50 rounded-xl md:rounded-2xl border border-emerald-100/50">
-         <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 text-emerald-500 shrink-0" />
-         <p className="text-[10px] md:text-sm font-bold text-emerald-900 leading-tight">{text}</p>
-      </div>
-   )
-}
-
