@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -72,10 +71,12 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
-    padding-top: env(safe-area-inset-top);
+    /* 
+       FIX: Removed global padding-top/left/right which caused gaps in Android WebViews. 
+       Safe area padding is now handled internally by components and scoped to iOS via utilities.
+    */
+    padding: 0;
     padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
   }
 
   input, textarea, [contenteditable="true"] {
@@ -84,6 +85,41 @@
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  /* 
+     High-Fidelity Safe Area Utilities 
+     Logic: Default to 0 to prevent gaps on Android/Desktop. 
+     Override with env() ONLY on iOS (detected via Webkit mobile check).
+  */
+  .pt-safe {
+    padding-top: 0;
+  }
+  .pb-safe {
+    padding-bottom: 0;
+  }
+  .pl-safe {
+    padding-left: 0;
+  }
+  .pr-safe {
+    padding-right: 0;
+  }
+
+  @supports (-webkit-touch-callout: none) {
+    .pt-safe {
+      padding-top: env(safe-area-inset-top);
+    }
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .pl-safe {
+      padding-left: env(safe-area-inset-left);
+    }
+    .pr-safe {
+      padding-right: env(safe-area-inset-right);
+    }
   }
 }
 
@@ -106,12 +142,8 @@
   border-radius: 10px;
 }
 
-.pb-safe {
+.pb-safe-area {
   padding-bottom: env(safe-area-inset-bottom);
-}
-
-.pt-safe {
-  padding-top: env(safe-area-inset-top);
 }
 
 .shadow-4xl {
