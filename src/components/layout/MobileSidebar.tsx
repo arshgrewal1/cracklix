@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -14,7 +15,8 @@ import {
   X,
   Award,
   CreditCard,
-  ShieldCheck
+  ShieldCheck,
+  Palette
 } from "lucide-react";
 
 import Link from "next/link";
@@ -30,10 +32,10 @@ import ShareButton from "@/components/navigation/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { canAccessAdmin } from "@/lib/permissions";
+import { ThemeToggle } from "./ThemeToggle";
 
 /**
- * @fileOverview Mobile Sidebar v89.1.
- * UPDATED: Reduced header height to h-[84px] md:h-[116px] to match global navbar.
+ * @fileOverview Mobile Sidebar v90.0 [Theme Toggle Integrated].
  */
 export default function MobileSidebar({
   onClose,
@@ -80,20 +82,20 @@ export default function MobileSidebar({
   if (!mounted) return null;
 
   return (
-    <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
+    <div className="flex h-full flex-col bg-background font-body overflow-hidden text-left">
 
-      {/* HEADER: Reduced Height to match navbar */}
-      <div className="h-[84px] md:h-[116px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-center relative">
+      {/* HEADER */}
+      <div className="h-[84px] md:h-[116px] px-6 shrink-0 bg-background border-b border-slate-100 dark:border-white/5 flex items-center justify-center relative">
          <Logo
            variant="light"
            align="center"
            className="flex-shrink-0"
-           imgClassName="h-20 md:h-28 w-auto"
+           imgClassName="h-20 md:h-28 w-auto dark:invert"
            onClick={onClose}
          />
          <button
             onClick={onClose}
-            className="absolute right-6 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all border border-slate-100 cursor-pointer z-20"
+            className="absolute right-6 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-white/5 text-slate-500 active:scale-95 transition-all border border-slate-100 dark:border-white/5 cursor-pointer z-20"
           >
             <X className="h-6 w-6" />
           </button>
@@ -109,8 +111,8 @@ export default function MobileSidebar({
             onClick={onClose}
             className="block active:scale-[0.98] transition-all cursor-pointer"
           >
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm hover:border-primary/20 transition-all">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50">
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-card p-4 shadow-sm hover:border-primary/20 transition-all">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 dark:bg-white/5">
                 {profileLoading ? (
                   <Skeleton className="h-full w-full rounded-xl" />
                 ) : (
@@ -123,7 +125,7 @@ export default function MobileSidebar({
               </div>
 
               <div className="min-w-0 flex-1 text-left">
-                <h3 className="text-base font-black text-slate-900 tracking-tight truncate leading-none">
+                <h3 className="text-base font-black text-foreground tracking-tight truncate leading-none">
                   {profile?.name || user?.displayName || "Aspirant"}
                 </h3>
                 <p className="mt-1.5 text-[9px] text-slate-400 font-bold tracking-widest uppercase">
@@ -166,8 +168,8 @@ export default function MobileSidebar({
                   className={cn(
                     "flex h-14 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] cursor-pointer border border-transparent",
                     isActive
-                      ? "bg-blue-50 text-primary border-blue-100 shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50"
+                      ? "bg-primary/5 text-primary border-primary/10 shadow-sm"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                   )}
                 >
                   <item.icon
@@ -190,6 +192,16 @@ export default function MobileSidebar({
           </div>
         </div>
 
+        {/* THEME TOGGLE HUB */}
+        <div className="px-3 py-4">
+           <p className="mb-2 px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase text-left">
+             Appearance
+           </p>
+           <div className="px-1">
+              <ThemeToggle />
+           </div>
+        </div>
+
         {/* SHARE APP PROMO */}
         <div className="px-3 py-6">
            <div className="bg-[#0B1528] rounded-[2rem] p-4 md:p-6 space-y-6 border border-white/5 shadow-xl relative overflow-hidden group">
@@ -205,12 +217,12 @@ export default function MobileSidebar({
         </div>
       </div>
 
-      {/* FOOTER: SIGNOUT */}
-      <div className="border-t border-slate-100 bg-white p-4 pb-[calc(env(safe-area-inset-bottom)+16px)] shrink-0">
+      {/* FOOTER */}
+      <div className="border-t border-slate-100 dark:border-white/5 bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+16px)] shrink-0">
         <Button
           variant="ghost"
           onClick={handleLogout}
-          className="w-full h-14 justify-start text-red-500 text-sm font-black rounded-2xl hover:bg-red-50 transition-all active:scale-95 cursor-pointer border-none"
+          className="w-full h-14 justify-start text-red-500 text-sm font-black rounded-2xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-all active:scale-95 cursor-pointer border-none"
         >
           <LogOut className="h-5 w-5 mr-4" />
           Sign Out

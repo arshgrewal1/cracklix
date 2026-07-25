@@ -48,7 +48,9 @@ import {
   ShieldAlert,
   FileText,
   ExternalLink,
-  Home
+  Home,
+  Network,
+  Sparkles
 } from "lucide-react";
 
 import {
@@ -72,10 +74,30 @@ const NAV_GROUPS = [
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { label: "Question Bank", href: "/admin/mcq-bank", icon: Database },
-      { label: "Add Question", href: "/admin/mcq-bank/add", icon: Plus, perm: 'uploadQuestions' },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
-      { label: "Bulk Upload", href: "/admin/bulk-import", icon: UploadCloud, perm: 'uploadQuestions' },
       { label: "Review Center", href: "/admin/qa", icon: Activity, perm: 'reviewContent' },
+    ],
+  },
+  {
+    label: "Hierarchy & Registry",
+    items: [
+      { label: "Folders", href: "/admin/categories", icon: FolderTree, perm: 'manageCategories' },
+      { label: "Boards", href: "/admin/exams", icon: Building2, perm: 'manageCategories' },
+      { label: "Exams", href: "/admin/exam-registry", icon: GraduationCap, perm: 'manageCategories' },
+      { label: "Subjects", href: "/admin/learning/subjects", icon: BookMarked, perm: 'manageCategories' },
+      { label: "Series", href: "/admin/learning/series", icon: Layers, perm: 'manageSeries' },
+      { label: "Chapters", href: "/admin/chapters", icon: NotebookTabs, perm: 'manageSeries' },
+      { label: "Topics", href: "/admin/topics", icon: Library, perm: 'manageSeries' },
+      { label: "Subtopics", href: "/admin/subtopics", icon: Network, perm: 'manageSeries' },
+    ],
+  },
+  {
+    label: "Test Center",
+    items: [
+      { label: "Build Test", href: "/admin/mocks/builder", icon: PenSquare, perm: 'createMock' },
+      { label: "Manage Tests", href: "/admin/mocks", icon: ClipboardList },
+      { label: "Daily Quiz", href: "/admin/daily-quiz", icon: Flame, perm: 'createMock' },
+      { label: "Used Items", href: "/admin/used-questions", icon: History },
     ],
   },
   {
@@ -84,32 +106,24 @@ const NAV_GROUPS = [
       { label: "PYQ Archive", href: "/admin/pyqs", icon: FileStack, perm: 'uploadPYQs' },
       { label: "Study Notes", href: "/admin/notes", icon: FileText, perm: 'publishContent' },
       { label: "CA Hub", href: "/admin/current-affairs", icon: Newspaper, perm: 'publishContent' },
-      { label: "Daily Quiz", href: "/admin/daily-quiz", icon: Flame, perm: 'createMock' },
+      { label: "Free Hub", href: "/admin/free-content", icon: Sparkles, perm: 'publishContent' },
+      { label: "Exam Calendar", href: "/admin/calendar", icon: Calendar, perm: 'publishContent' },
     ],
   },
   {
-    label: "Governance",
+    label: "Community",
     items: [
       { label: "Role Manager", href: "/admin/roles", icon: KeyRound, perm: 'manageRoles' },
       { label: "Students", href: "/admin/users", icon: Users, perm: 'manageUsers' },
+      { label: "Success Stories", href: "/admin/success-stories", icon: Trophy, perm: 'publishContent' },
+      { label: "Help Articles", href: "/admin/help-center", icon: HelpCircle, perm: 'publishContent' },
       { label: "Support Desk", href: "/admin/support", icon: MessageCircle, perm: 'manageNotifications' },
-      { label: "Audit Logs", href: "/admin/audit-logs", icon: History, perm: 'manageRoles' },
     ],
   },
   {
     label: "Job Portal",
     items: [
       { label: "Vacancy Hub", href: "/admin/vacancies", icon: Megaphone },
-      { label: "Add Vacancy", href: "/admin/vacancies/add", icon: Plus, perm: 'publishContent' },
-    ],
-  },
-  {
-    label: "Tests & Folders",
-    items: [
-      { label: "Build Test", href: "/admin/mocks/builder", icon: PenSquare, perm: 'createMock' },
-      { label: "Manage Tests", href: "/admin/mocks", icon: ClipboardList },
-      { label: "Exam Center", href: "/admin/exam-registry", icon: GraduationCap, perm: 'manageCategories' },
-      { label: "Folders", href: "/admin/categories", icon: FolderTree, perm: 'manageCategories' },
     ],
   },
   {
@@ -127,6 +141,7 @@ const NAV_GROUPS = [
     items: [
       { label: "Health", href: "/admin/health", icon: HeartPulse, perm: 'websiteSettings' },
       { label: "Settings", href: "/admin/settings", icon: Settings, perm: 'websiteSettings' },
+      { label: "Audit Logs", href: "/admin/audit-logs", icon: History, perm: 'manageRoles' },
     ],
   },
 ];
@@ -151,7 +166,6 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
   return (
     <nav className="flex-1 overflow-y-auto px-3 py-6 no-scrollbar space-y-8">
       {NAV_GROUPS.map((group) => {
-        // Filter items based on specific permissions + Founder email override
         const authorizedItems = group.items.filter(item => {
            if (!item.perm) return true;
            return checkPermission(profile, item.perm as any, user?.email);

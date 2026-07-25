@@ -14,17 +14,13 @@ import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import GlobalStudyTracker from "@/components/analytics/GlobalStudyTracker";
 import AnnouncementBar from "@/components/layout/AnnouncementBar";
 import SplashScreen from "@/components/pwa/SplashScreen";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
 });
-
-/**
- * @fileOverview Root Layout v75.0 [Dynamic Registry Metadata].
- * Logic: Default metadata is static, but dynamic properties are now synchronized via settings hub.
- */
 
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -77,7 +73,7 @@ export default function RootLayout({
     <html 
       lang="en" 
       suppressHydrationWarning 
-      className="bg-white scroll-smooth"
+      className="scroll-smooth"
       data-scroll-behavior="smooth"
     >
       <body
@@ -85,32 +81,39 @@ export default function RootLayout({
           ${poppins.variable}
           font-body
           antialiased
-          bg-white
-          text-[#0F172A]
+          bg-background
+          text-foreground
           w-full
         `}
       >
-        <FirebaseClientProvider>
-          <SplashScreen key="app-splash-screen" />
-          
-          <div key="main-app-container" className="min-h-screen flex flex-col relative">
-            <AnnouncementBar />
-            <div className="flex-1">
-              {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <FirebaseClientProvider>
+            <SplashScreen key="app-splash-screen" />
+            
+            <div key="main-app-container" className="min-h-screen flex flex-col relative">
+              <AnnouncementBar />
+              <div className="flex-1">
+                {children}
+              </div>
             </div>
-          </div>
 
-          <GlobalStudyTracker key="global-tracker" />
-          <PWAInstallHandler key="pwa-handler" />
-          <MobileNav key="mobile-navigation" />
-          <CapacitorManager key="native-manager" />
-          <PWAManager key="pwa-manager-ui" />
-          <NetworkStatus key="connectivity-status" />
-          <Toaster key="global-toaster" />
-          <ServiceWorkerRegistration key="sw-reg" />
+            <GlobalStudyTracker key="global-tracker" />
+            <PWAInstallHandler key="pwa-handler" />
+            <MobileNav key="mobile-navigation" />
+            <CapacitorManager key="native-manager" />
+            <PWAManager key="pwa-manager-ui" />
+            <NetworkStatus key="connectivity-status" />
+            <Toaster key="global-toaster" />
+            <ServiceWorkerRegistration key="sw-reg" />
 
-          <div key="platform-version-registry" className="hidden" data-app-version={registryVersion}></div>
-        </FirebaseClientProvider>
+            <div key="platform-version-registry" className="hidden" data-app-version={registryVersion}></div>
+          </FirebaseClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
