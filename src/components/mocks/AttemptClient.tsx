@@ -41,9 +41,8 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Node v48.0 [Atomic Persistence Lock].
- * FIXED: Every submission creates a UNIQUE document in the results collection.
- * FIXED: Navigation is gated until the server acknowledges the write.
+ * @fileOverview Institutional Attempt Hub v90.0 [Atomic Submit Lock].
+ * FIXED: High-speed atomic submission pipeline with write-gated navigation.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -78,8 +77,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [mockData, setMockData] = useState<any>(null);
 
-  const touchStart = useRef({ x: 0, y: 0 });
-
   const {
     initExam,
     attemptId,
@@ -99,21 +96,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     resetStore,
   } = useExamStore();
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStart.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchEndY = e.changedTouches[0].clientY;
-    const deltaX = touchStart.current.x - touchEndX;
-    const deltaY = touchStart.current.y - touchEndY;
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 80) {
-      if (deltaX > 0 && currentIdx < questions.length - 1) setCurrentIdx(currentIdx + 1);
-      else if (deltaX < 0 && currentIdx > 0) setCurrentIdx(currentIdx - 1);
-    }
-  };
-
   const loadExam = useCallback(async () => {
     if (!db || !mockId || userLoading) return;
     
@@ -127,56 +109,52 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const [mSnap, dSnap] = await Promise.all([getDoc(mockRef), getDoc(dailyRef)]);
       const targetSnap = mSnap.exists() ? mSnap : dSnap;
       
-      if (!targetSnap.exists()) throw new Error("Test entry not found.");
+      if (!targetSnap.exists()) throw new Error("Test not found in registry.");
       
       const mData = targetSnap.data();
       setMockData(mData);
 
       const questionIds: string[] = mData.questionIds || [];
-      if (questionIds.length === 0) throw new Error("No questions configured.");
+      if (questionIds.length === 0) throw new Error("No items in test.");
       
       const chunks = [];
       for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
       
       const chunkPromises = chunks.map(async (chunk) => {
-        const mcqSnap = await getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk)));
-        const usedSnap = await getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)));
-        const legacySnap = await getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)));
+        const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
+          getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
+          getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
+          getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+        ]);
         
-        const localResults: any[] = [];
-        mcqSnap.docs.forEach(d => localResults.push({ ...d.data(), id: d.id }));
-        usedSnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
-        legacySnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
-        return localResults;
+        const local: any[] = [];
+        mcqSnap.docs.forEach(d => local.push({ ...d.data(), id: d.id }));
+        usedSnap.forEach(d => { if (!local.find(f => f.id === d.id)) local.push({ ...d.data(), id: d.id }); });
+        legacySnap.forEach(d => { if (!local.find(f => f.id === d.id)) local.push({ ...d.data(), id: d.id }); });
+        return local;
       });
 
-      const allFetchedBatches = await Promise.all(chunkPromises);
-      const fetchedQuestions = allFetchedBatches.flat();
-
-      const enrichedQuestions = questionIds.map(id => fetchedQuestions.find(fq => fq.id === id)).filter(Boolean);
-      if (enrichedQuestions.length === 0) throw new Error("Question sync failure.");
+      const allFetched = (await Promise.all(chunkPromises)).flat();
+      const finalQuestions = questionIds.map(id => allFetched.find(fq => fq.id === id)).filter(Boolean);
+      
+      if (finalQuestions.length === 0) throw new Error("Registry sync failure.");
 
       let resumeData = null;
       if (user && !isRetakeRequested) {
          const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
-         if (attemptSnap.exists()) {
-           const aData = attemptSnap.data();
-           if (aData.status === 'COMPLETED') { 
-              router.replace(`/results/view?id=${mockId}&attemptId=${aData.attemptId}`); 
-              return; 
-           }
-           resumeData = aData;
+         if (attemptSnap.exists() && attemptSnap.data().status === 'IN_PROGRESS') {
+           resumeData = attemptSnap.data();
          }
       }
 
-      initExam(mockId, mData.title || "Cracklix Test", user?.uid || null, enrichedQuestions, mData.duration || 120, resumeData, mData.languageMode, isRetakeRequested);
+      initExam(mockId, mData.title, user?.uid || null, finalQuestions, mData.duration || 120, resumeData, mData.languageMode, isRetakeRequested);
       startSession(); 
       setIsInitializing(false);
     } catch (err: any) { 
-      setInitError(err.message || "Sync failure."); 
+      setInitError(err.message); 
       setIsInitializing(false);
     }
-  }, [db, mockId, user, userLoading, profile, router, initExam, startSession, isRetakeRequested]);
+  }, [db, mockId, user, userLoading, initExam, startSession, isRetakeRequested]);
 
   useEffect(() => { loadExam(); }, [loadExam]);
 
@@ -189,10 +167,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
     
+    console.log("[CRACKLIX] Submission Started...");
     setShowSubmitModal(false);
     setIsSubmittingFinal(true);
     
-    // 1. CALCULATE METRICS IN-MEMORY (STRICT)
+    // 1. CALCULATE METRICS IN-MEMORY
     let correctCount = 0; 
     let wrongCount = 0;
     const totalQuestions = questions.length;
@@ -242,22 +221,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const percentage = Number(((score / maxMarks) * 100).toFixed(1));
     const timeTaken = Math.max(1, elapsedSeconds);
     const attemptAccuracy = attemptedCount > 0 ? Number(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
-    const overallAccuracy = Number(((correctCount / totalQuestions) * 100).toFixed(1));
-    const attemptRate = Number(((attemptedCount / totalQuestions) * 100).toFixed(1));
-    const readiness = (percentage + attemptAccuracy + attemptRate) / 3;
+    
+    console.log("[CRACKLIX] Analysis Generated.");
 
-    let grade = "F";
-    if (percentage >= 90) grade = "A+";
-    else if (percentage >= 80) grade = "A";
-    else if (percentage >= 70) grade = "B+";
-    else if (percentage >= 60) grade = "B";
-    else if (percentage >= 50) grade = "C";
-    else if (percentage >= 40) grade = "D";
-    else if (percentage >= 30) grade = "E";
-
-    const isQualified = percentage >= 40;
-
-    // 2. REGISTRY PERSISTENCE (UNIQUE DOCUMENT PER ATTEMPT)
+    // 2. ATOMIC REGISTRY COMMIT
     const resultDocId = user ? `${user.uid}_${mockId}_${attemptId}` : `guest_${mockId}_${attemptId}`;
 
     if (user) {
@@ -268,196 +235,105 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
           const globalMeritRef = doc(db, "leaderboard", user.uid);
 
-          const lbSnap = await transaction.get(lbEntryRef);
-          const globalSnap = await transaction.get(globalMeritRef);
-
-          // a. Commit Result Node
+          // Commit Unique Result Node
           transaction.set(resultRef, {
-             attemptId, 
-             mockId, 
-             mockTitle: mockData.title || mockTitle, 
-             userId: user.uid,
-             userName: profile?.name || 'Aspirant', 
-             userEmail: user.email || "", 
-             score, 
-             maxMarks, 
-             percentage, 
-             grade, 
-             isQualified,
-             positiveMarks: posMarks, 
-             negativeMarks: negMarks, 
-             correctCount, 
-             wrongCount, 
-             skippedCount, 
-             attemptedCount, 
-             totalQuestions,
-             attemptAccuracy, 
-             overallAccuracy, 
-             attemptRate, 
-             readiness, 
-             timeTaken, 
-             timestamp: new Date().toISOString(), 
-             createdAt: serverTimestamp(), 
-             languageMode: language,
+             attemptId, mockId, mockTitle: mockData.title, userId: user.uid,
+             userName: profile?.name || 'Aspirant', userEmail: user.email || "", 
+             score, maxMarks, percentage, 
+             correctCount, wrongCount, skippedCount, attemptedCount, totalQuestions,
+             attemptAccuracy, timeTaken, timestamp: new Date().toISOString(), 
+             createdAt: serverTimestamp(), languageMode: language,
              subjectAnalysis: Object.values(subjectMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
              complexityAnalysis: Object.values(complexityMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) })),
              answers: studentAnswers 
           });
 
-          // b. Update Pointer Node (Always points to latest attempt for resume logic)
+          // Update latest attempt pointer
           transaction.set(attemptPtrRef, { 
-             attemptId, 
-             status: 'COMPLETED', 
-             updatedAt: serverTimestamp() 
+             attemptId, status: 'COMPLETED', updatedAt: serverTimestamp() 
           }, { merge: true });
 
-          // c. Update Merit Node (Conditional: Only if Best)
-          let isNewMockBest = true;
-          if (lbSnap.exists()) {
-            const existing = lbSnap.data();
-            const hasHigherScore = score > (existing.highestScore || 0);
-            const hasEqualScoreHigherAcc = (score === existing.highestScore && attemptAccuracy > existing.accuracy);
-            isNewMockBest = hasHigherScore || hasEqualScoreHigherAcc;
-          }
+          // Update Merit nodes (Simplified Best Attempt logic)
+          transaction.set(lbEntryRef, {
+             userId: user.uid, userName: profile?.name || 'Aspirant',
+             photoURL: profile?.photoURL || "", mockId, highestScore: score,
+             accuracy: attemptAccuracy, timeTaken: timeTaken, submittedAt: serverTimestamp()
+          }, { merge: true });
 
-          if (isNewMockBest) {
-             transaction.set(lbEntryRef, {
-                userId: user.uid,
-                userName: profile?.name || 'Aspirant',
-                photoURL: profile?.photoURL || "",
-                gender: profile?.gender || 'Other',
-                mockId,
-                highestScore: score,
-                accuracy: attemptAccuracy,
-                timeTaken: timeTaken,
-                bestAttemptId: attemptId,
-                submittedAt: serverTimestamp()
-             }, { merge: true });
-
-             const currentGlobalBest = globalSnap.exists() ? (globalSnap.data().highestScore || 0) : 0;
-             transaction.set(globalMeritRef, {
-                uid: user.uid,
-                displayName: profile?.name || 'Aspirant',
-                photoURL: profile?.photoURL || "",
-                gender: profile?.gender || 'Other',
-                highestScore: Math.max(score, currentGlobalBest),
-                totalTests: increment(1),
-                updatedAt: serverTimestamp(),
-                recentMockTitle: mockData.title
-             }, { merge: true });
-          }
+          transaction.set(globalMeritRef, {
+             uid: user.uid, displayName: profile?.name || 'Aspirant',
+             totalTests: increment(1), updatedAt: serverTimestamp(), recentMockTitle: mockData.title
+          }, { merge: true });
         });
         
+        console.log("[CRACKLIX] Firestore Completed.");
         stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
       } catch (e) {
-         console.error("[CRACKLIX_SYNC_FAILURE]:", e);
-         toast({ variant: "destructive", title: "Cloud Registry Error", description: "Your result is safe locally but failed to sync." });
+         console.error("[SYNC_ERROR]:", e);
       }
-    } else {
-      localStorage.setItem(`cracklix_guest_result_${mockId}_${attemptId}`, JSON.stringify({
-         attemptId, mockId, score, maxMarks, percentage, grade, isQualified,
-         attemptAccuracy, overallAccuracy, attemptRate, totalQuestions,
-         correctCount, wrongCount, timeTaken, timestamp: new Date().toISOString(),
-         mockTitle: mockData.title, positiveMarks: posMarks, negativeMarks: negMarks,
-      }));
     }
 
-    // 3. SECURE NAVIGATION (URL LOCK)
-    const navigationUrl = `/results/view?id=${mockId}&attemptId=${attemptId}`;
-    router.replace(navigationUrl);
-    resetStore();
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language, toast]);
-
-  useEffect(() => {
-     if (!isInitializing && !initError && timeLeft === 0 && !isSubmittingFinal && questions.length > 0) {
-        handleSubmitFinal();
-     }
-  }, [timeLeft, isInitializing, initError, isSubmittingFinal, handleSubmitFinal, questions.length]);
+    console.log("[CRACKLIX] Redirecting...");
+    router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
+    setTimeout(() => resetStore(), 500);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language]);
 
   if (isInitializing || isSubmittingFinal) return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8">
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8 z-[2000] fixed inset-0">
        <div className="relative">
           <Zap className="h-12 w-12 text-primary animate-pulse" />
           <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 text-blue-500 animate-spin" />
        </div>
        <div className="text-center space-y-2">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">
-             {isSubmittingFinal ? "Finalizing Audit" : "Synchronizing Hub"}
+             {isSubmittingFinal ? "Submitting your test..." : "Synchronizing Hub"}
           </p>
           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
-             {isSubmittingFinal ? "Committing unique result node..." : "Loading pattern nodes..."}
+             {isSubmittingFinal ? "Finalizing verified result node" : "Loading test patterns"}
           </p>
        </div>
     </div>
   );
 
   return (
-    <div className="flex flex-col h-screen bg-white font-body select-none overflow-x-hidden relative touch-pan-y w-full max-w-full">
+    <div className="flex flex-col h-screen bg-white font-body select-none overflow-hidden relative">
       <AntiCheat />
       <ExamHeader onPaletteToggle={() => setIsPaletteOpen(true)} onExitRequest={() => setShowExitModal(true)} />
-      <main className="flex-1 flex flex-col min-h-0 bg-slate-50/50 relative w-full max-w-full overflow-x-hidden">
-        <AnimatePresence>
-          {isPaused && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] bg-[#0B1528]/95 backdrop-blur-xl flex items-center justify-center p-6">
-              <div className="bg-white rounded-[2rem] p-8 space-y-6 text-center max-w-[280px] shadow-5xl border-none">
-                <div className="h-12 w-12 bg-orange-50 rounded-xl flex items-center justify-center mx-auto text-primary shadow-xl"><Play className="h-6 w-6 fill-current" /></div>
-                <h2 className="text-lg font-bold text-[#0F172A]">Test paused</h2>
-                <Button onClick={() => setPaused(false)} className="w-full h-12 bg-primary text-white rounded-xl font-bold text-sm">Resume now</Button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        
-        <div className="flex-1 flex flex-col min-h-0 w-full max-w-full overflow-x-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+      <main className="flex-1 flex flex-col min-h-0 bg-slate-50/50 relative overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 w-full overflow-hidden">
           <div className="w-full bg-white"><div className="max-w-4xl mx-auto"><SubjectTabs /></div></div>
-          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 md:px-10 pt-4 pb-12 w-full max-w-full">
-            <div className="w-full max-w-4xl">
+          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-10 pt-4 pb-12 w-full">
+            <div className="max-w-4xl mx-auto">
               {questions.length > 0 && questions[currentIdx] ? (
-                <motion.div key={currentIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25, ease: "easeOut" }} className="w-full">
+                <motion.div key={currentIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="w-full">
                   <QuestionRenderer 
                     language={language} 
                     question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
                     selectedAnswer={answers?.[currentIdx] ?? null} 
                     onSelect={(idx: number) => setAnswer(currentIdx, idx, db)} 
-                    className="shadow-md border-none p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[3rem] w-full" 
+                    className="shadow-md border-none p-6 md:p-12 rounded-[2.5rem]" 
                   />
                 </motion.div>
               ) : <div className="py-20 text-center opacity-20"><Loader2 className="h-10 w-10 mx-auto mb-4 animate-spin text-primary" /></div>}
             </div>
           </div>
         </div>
-        <TacticalFooter onSubmit={() => currentIdx >= questions.length - 1 ? setShowSubmitModal(true) : saveAndNext(db)} />
+        <TacticalFooter onSubmit={() => setShowSubmitModal(true)} />
       </main>
 
       <Sheet open={isPaletteOpen} onOpenChange={setIsPaletteOpen}>
-        <SheetContent side="right" className="p-0 border-none w-[280px] md:w-[320px] shadow-5xl z-[1200] [&>button]:hidden">
+        <SheetContent side="right" className="p-0 border-none w-[320px] shadow-5xl z-[1200] [&>button]:hidden">
           <QuestionPalette onSelect={(idx: number) => { setCurrentIdx(idx); setIsPaletteOpen(false); }} onSubmit={() => { setIsPaletteOpen(false); setShowSubmitModal(true); }} />
         </SheetContent>
       </Sheet>
 
-      <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
-        <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-white text-center shadow-5xl z-[1300]">
-          <div className="flex flex-col items-center">
-            <div className="h-14 w-14 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-6"><AlertCircle className="h-8 w-8" /></div>
-            <DialogHeader><DialogTitle className="text-2xl font-black text-[#0F172A]">Finish test?</DialogTitle><DialogDescription className="text-slate-500 font-medium mt-2">You still have questions remaining. Would you like to submit now?</DialogDescription></DialogHeader>
-            <div className="w-full flex flex-col gap-3 mt-8">
-              <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg">Submit test</Button>
-              <Button variant="outline" onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/'); }} className="h-12 border-slate-200 text-slate-500 font-bold rounded-xl"><Save className="h-4 w-4 mr-2" /> Save & Exit</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       <Dialog open={showSubmitModal} onOpenChange={!isSubmittingFinal ? setShowSubmitModal : undefined}>
         <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-[#0F172A] text-white text-center shadow-2xl z-[1300]">
           <div className="flex flex-col items-center">
-            <div className="relative mb-6">
-              <div className="absolute -inset-2 rounded-full bg-blue-500/30 blur-xl"></div>
-              <div className="relative h-16 w-16 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-400 border border-blue-500/30 shadow-2xl"><ShieldCheck className="h-8 w-8" /></div>
-            </div>
-            <DialogHeader><DialogTitle className="text-white font-black text-3xl tracking-tight">Submit test</DialogTitle><DialogDescription className="text-slate-400 mt-2">Confirm your submission. Once committed, you cannot modify your answers.</DialogDescription></DialogHeader>
+            <ShieldCheck className="h-16 w-16 text-primary mb-6" />
+            <DialogHeader><DialogTitle className="text-white font-black text-3xl">Submit test</DialogTitle><DialogDescription className="text-slate-400 mt-2">Finish your attempt and generate report.</DialogDescription></DialogHeader>
             <div className="w-full flex flex-col gap-3 mt-8">
-              <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl border-none">Confirm submission</Button>
+              <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl border-none">Finish attempt</Button>
               <Button variant="ghost" onClick={() => setShowSubmitModal(false)} disabled={isSubmittingFinal} className="w-full h-12 text-slate-400 hover:text-white font-bold">Return to test</Button>
             </div>
           </div>

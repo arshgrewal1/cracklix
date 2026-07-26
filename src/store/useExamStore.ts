@@ -54,8 +54,7 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v12.0 [Atomic Attempt Redesign].
- * FIXED: Retake now generates a fresh attemptId and purges all previous state nodes.
+ * @fileOverview Hardened Test Store v15.0 [Atomic Rebuild].
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -102,15 +101,12 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const defaultTime = duration * 60;
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
 
-    // 1. Logic: Strict Cache Liquidation for Retakes
     if (forceNew && typeof window !== 'undefined') {
        localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
-       sessionStorage.removeItem(`cracklix_active_attempt_${mockId}`);
     }
 
     let effectiveResume = !forceNew ? (resumeData || null) : null;
 
-    // 2. Guest Persistence Recovery
     if (!effectiveResume && !userId && typeof window !== 'undefined') {
        try {
          const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
@@ -127,7 +123,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const now = Date.now();
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
     
-    // 3. ATOMIC Attempt ID: Retake ALWAYS generates a fresh identifier
+    // ATOMIC attemptId logic: Always unique if new
     const attemptId = (isResuming && !forceNew) ? (effectiveResume.attemptId || nanoid(12)) : nanoid(12);
 
     set({
@@ -160,8 +156,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         timeLeft: s.timeLeft - 1,
         elapsedSeconds: s.elapsedSeconds + 1
       }));
-      
-      if (get().timeLeft % 30 === 0) state.persistGuestData();
     }
   },
 
@@ -173,7 +167,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       currentIdx,
       visited: visited.includes(currentIdx) ? visited : [...visited, currentIdx]
     });
-    get().persistGuestData(true);
   },
 
   setLanguage: (language) => set({ language }),
@@ -182,9 +175,8 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const state = get();
     const newAnswers = { ...state.answers, [idx]: optIdx };
     const newStatus = { ...state.status, [idx]: 'answered' as QuestionStatus };
-    
     set({ answers: newAnswers, status: newStatus });
-    state.persistGuestData(true);
+    state.persistGuestData();
   },
 
   clearAnswer: (idx, db) => {
@@ -192,18 +184,16 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const newAnswers = { ...state.answers };
     delete newAnswers[idx];
     const newStatus = { ...state.status, [idx]: 'not-answered' as QuestionStatus };
-    
     set({ answers: newAnswers, status: newStatus });
-    state.persistGuestData(true);
+    state.persistGuestData();
   },
 
   markForReview: (idx, db) => {
     const state = get();
     const hasAnswer = state.answers[idx] !== undefined && state.answers[idx] !== null;
     const newStatus = { ...state.status, [idx]: (hasAnswer ? 'answered-marked' : 'marked') as QuestionStatus };
-    
     set({ status: newStatus });
-    state.persistGuestData(true);
+    state.persistGuestData();
   },
 
   saveAndNext: (db) => {
@@ -217,10 +207,9 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const state = get();
     const nextVal = (state.violations || 0) + 1;
     set({ violations: nextVal });
-    state.persistGuestData(true);
   },
 
-  persistGuestData: (force = false) => {
+  persistGuestData: () => {
     if (typeof window === 'undefined') return;
     const state = get();
     if (!state.userId && state.mockId) {
@@ -237,9 +226,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
           violations: state.violations,
           status: 'IN_PROGRESS'
        };
-       try {
-          localStorage.setItem(`cracklix_guest_attempt_${state.mockId}`, JSON.stringify(payload));
-       } catch (e) {}
+       localStorage.setItem(`cracklix_guest_attempt_${state.mockId}`, JSON.stringify(payload));
     }
   }
 }));
