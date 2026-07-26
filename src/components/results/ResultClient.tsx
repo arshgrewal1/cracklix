@@ -18,7 +18,8 @@ import {
   limit, 
   serverTimestamp,
   increment,
-  runTransaction
+  runTransaction,
+  deleteDoc
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -44,7 +45,8 @@ import {
   ArrowRight,
   BookOpen,
   Search,
-  Download
+  Download,
+  X
 } from "lucide-react"
 import { 
   Card, 
@@ -62,7 +64,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 
 /**
- * @fileOverview Official Result Hub 2.1 [Redesigned Logo Focus].
+ * @fileOverview Official Result Hub 2.2 [Retake & PDF Restored].
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -79,6 +81,7 @@ export default function ResultClient() {
   const [guestResult, setGuestResult] = useState<any>(null)
   const [activeMainTab, setActiveMainTab] = useState<string>("OVERVIEW")
   const [resolvedResultId, setResolvedResultId] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -155,6 +158,29 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
+  const handleRetake = async () => {
+    if (!db || isSyncing || !mockId || !user) return;
+    if (!confirm("Are you sure you want to retake? Current progress will be archived.")) return;
+    
+    setIsSyncing(true);
+    try {
+      await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
+      toast({ title: "Test reset successful" });
+      router.push(`/mocks/instructions?id=${mockId}&retake=true`);
+    } catch (e) {
+      toast({ variant: "destructive", title: "Reset failed" });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleDownloadPDF = () => {
+     setActiveMainTab("REPORT");
+     setTimeout(() => {
+        window.print();
+     }, 500);
+  };
+
   const reviewNodes = useMemo(() => {
     if (!activeSession || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
     const all = questions.map((q, i) => ({ ...q, originalIndex: i }));
@@ -214,7 +240,7 @@ export default function ResultClient() {
       <Navbar />
       <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-16 pb-40">
         
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8 px-1">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 px-1 print:hidden">
            <div className="flex items-center gap-6 md:gap-10 text-left w-full md:w-auto">
               <div className="h-20 w-20 md:h-32 md:w-32 rounded-3xl bg-white border border-slate-100 shadow-2xl flex items-center justify-center p-1 shrink-0 overflow-hidden">
                  {branding?.logoUrl ? (
@@ -239,14 +265,24 @@ export default function ResultClient() {
               </div>
            </div>
            
-           <div className="flex bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm w-full md:w-auto shrink-0 overflow-hidden">
-              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                 <TabsList className="bg-transparent border-none p-0 flex h-12 w-full gap-1">
-                    <HubTab value="OVERVIEW" label="Summary" />
-                    <HubTab value="REVIEW" label="Review" />
-                    <HubTab value="REPORT" label="Report" />
-                 </TabsList>
-              </Tabs>
+           <div className="flex flex-col gap-4 w-full md:w-auto shrink-0">
+              <div className="flex bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm w-full md:w-auto overflow-hidden">
+                 <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
+                    <TabsList className="bg-transparent border-none p-0 flex h-12 w-full gap-1">
+                       <HubTab value="OVERVIEW" label="Summary" />
+                       <HubTab value="REVIEW" label="Review" />
+                       <HubTab value="REPORT" label="Report" />
+                    </TabsList>
+                 </Tabs>
+              </div>
+              <div className="flex gap-3">
+                 <Button onClick={handleRetake} disabled={isSyncing} variant="outline" className="flex-1 h-12 rounded-xl font-bold uppercase text-[10px] tracking-tight border-slate-200 bg-white gap-2">
+                    {isSyncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />} Retake test
+                 </Button>
+                 <Button onClick={handleDownloadPDF} className="flex-1 h-12 rounded-xl font-bold uppercase text-[10px] tracking-tight bg-[#0F172A] text-white gap-2">
+                    <Download className="h-3.5 w-3.5" /> Download PDF
+                 </Button>
+              </div>
            </div>
         </div>
 
@@ -347,7 +383,7 @@ export default function ResultClient() {
                        <div className="relative z-10 space-y-6">
                           <div className="space-y-1">
                              <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight uppercase text-white">Merit Status</h3>
-                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global Ranking Node</p>
+                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Ranking Node</p>
                           </div>
                           <div className="space-y-4">
                              <div className="p-6 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-2">
@@ -435,9 +471,9 @@ export default function ResultClient() {
                        grade={activeSession.grade}
                     />
                  </div>
-                 <div className="mt-12 text-center space-y-4">
-                    <p className="text-slate-400 font-bold text-sm tracking-tight">Print or share your verified report card.</p>
-                    <Button onClick={() => window.print()} className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl shadow-xl border-none">Print Official Report</Button>
+                 <div className="mt-12 text-center space-y-4 print:hidden">
+                    <p className="text-slate-400 font-bold text-sm tracking-tight">Print or share your verified report card (PDF).</p>
+                    <Button onClick={() => window.print()} className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl shadow-xl border-none">Print / Download PDF</Button>
                  </div>
               </div>
            </TabsContent>
