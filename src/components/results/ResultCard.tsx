@@ -44,9 +44,9 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v23.2 [Alignment Fixed].
- * FIXED: Alignment of Registry ID and verification text to match professional margins.
- * UPDATED: Reduced padding and font scales for optimized PWA footprint.
+ * @fileOverview Official Institutional Report Card v23.3 [PWA Scaling].
+ * FIXED: Removed uppercase and tracking from sub-labels for cleaner Title Case look.
+ * UPDATED: Optimized scaling for mobile responsive views.
  */
 export default function ResultCard({
   studentName,
@@ -92,11 +92,11 @@ export default function ResultCard({
             </div>
             <div className="space-y-0.5 text-left min-w-0">
               <h2 className="text-lg md:text-3xl font-black text-[#0F172A] tracking-tighter leading-none">{orgName}</h2>
-              <p className="text-[7px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">Official Merit Portal</p>
+              <p className="text-[7px] md:text-[10px] font-bold text-slate-400 truncate">Official Merit Portal</p>
             </div>
           </div>
           <div className="text-right space-y-1.5 md:space-y-2 shrink-0">
-            <Badge className="bg-[#0F172A] text-white border-none font-bold text-[7px] md:text-[9px] px-2 md:px-5 py-1 rounded-full tracking-widest uppercase">Verified Attempt</Badge>
+            <Badge className="bg-[#0F172A] text-white border-none font-bold text-[7px] md:text-[9px] px-2 md:px-5 py-1 rounded-full uppercase">Verified Attempt</Badge>
             <p className="text-[9px] md:text-[12px] font-black text-[#0F172A] tabular-nums tracking-widest">{date}</p>
           </div>
         </div>
@@ -109,10 +109,10 @@ export default function ResultCard({
                  <p className="text-primary font-bold text-sm md:text-xl tracking-tight">{examTitle}</p>
               </div>
               <div className="flex flex-wrap items-center justify-start gap-4 pt-1">
-                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[8px] md:text-[10px] uppercase tracking-widest">
+                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[8px] md:text-[10px]">
                     <ShieldCheck className="h-3 w-3 md:h-4 md:w-4 text-emerald-500" /> Identity Verified
                  </div>
-                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[8px] md:text-[10px] uppercase tracking-widest">
+                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[8px] md:text-[10px]">
                     <Target className="h-3 w-3 md:h-4 md:w-4 text-primary" /> Punjab Rank: #{rank}
                  </div>
               </div>
@@ -120,7 +120,7 @@ export default function ResultCard({
 
            <div className="md:col-span-4 flex justify-center md:justify-end">
               <div className="h-24 w-24 md:h-32 md:w-32 bg-[#0F172A] rounded-2xl md:rounded-[2rem] shadow-xl flex flex-col items-center justify-center relative border-[3px] md:border-[5px] border-slate-50">
-                 <span className="text-[7px] md:text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Grade</span>
+                 <span className="text-[7px] md:text-[9px] font-bold text-slate-500 mb-1">Grade</span>
                  <span className="text-3xl md:text-[60px] font-black text-white tabular-nums leading-none tracking-tighter">{grade}</span>
                  <div className="absolute -bottom-2 -right-2 md:-bottom-2.5 md:-right-2.5 h-7 w-7 md:h-10 md:w-10 bg-amber-400 rounded-lg flex items-center justify-center text-white shadow-lg border-2 border-white">
                     <Award className="h-3.5 w-3.5 md:h-5 md:w-5" />
@@ -151,7 +151,7 @@ export default function ResultCard({
         {/* SUBJECT AUDIT */}
         {subjects.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-[9px] font-bold text-slate-400 tracking-[0.3em] ml-2 text-left uppercase">Subject Performance Audit</h3>
+            <h3 className="text-[9px] font-bold text-slate-400 ml-2 text-left uppercase">Subject Performance Audit</h3>
             <div className="border border-slate-100 rounded-xl md:rounded-[2rem] overflow-hidden shadow-xl bg-white">
               <table className="w-full text-sm">
                 <thead>
@@ -196,7 +196,7 @@ export default function ResultCard({
                   <p className="text-base md:text-xl font-black text-[#0F172A] tracking-tighter leading-none">Institutional Precision Verified</p>
                </div>
                <div className="pl-0 md:pl-7 min-w-0">
-                  <p className="text-[7px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest">Registry ID:</p>
+                  <p className="text-[7px] md:text-[8px] font-bold text-slate-400">Registry ID:</p>
                   <p className="text-[8px] md:text-[9px] font-mono font-black text-primary break-all leading-tight mt-0.5">{resultId}</p>
                </div>
             </div>
@@ -220,7 +220,7 @@ function AnalyticNode({ label, val, icon, highlight }: any) {
         {icon}
       </div>
       <div className="space-y-0.5 w-full min-w-0">
-        <p className="text-[7px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1 truncate">{label}</p>
+        <p className="text-[7px] md:text-[9px] font-bold text-slate-400 leading-none mb-1 truncate">{label}</p>
         <p className={cn("text-sm md:text-xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none truncate")}>{val}</p>
       </div>
     </div>
@@ -230,7 +230,7 @@ function AnalyticNode({ label, val, icon, highlight }: any) {
 function MetricNode({ label, val, color }: any) {
   return (
     <div className="text-center space-y-1">
-       <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</p>
+       <p className="text-[8px] md:text-[10px] font-bold text-slate-400 leading-none">{label}</p>
        <p className={cn("text-xl md:text-4xl font-black tabular-nums tracking-tighter", color)}>{val}</p>
     </div>
   );

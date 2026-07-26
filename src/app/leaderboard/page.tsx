@@ -19,8 +19,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Punjab Merit Registry v4.4 [Minimum PWA Scale].
- * FIXED: Reduced card sizes and refined centered alignment for high-fidelity mobile view.
+ * @fileOverview Official Punjab Merit Registry v4.5 [PWA Scale].
+ * FIXED: Removed uppercase and tracking from sub-labels.
+ * UPDATED: Centered student name and badge in PodiumCard.
  */
 
 export default function LeaderboardPage() {
@@ -119,7 +120,7 @@ function LeaderboardContent() {
                <div className="space-y-2">
                   <div className="flex items-center gap-3">
                      <Trophy className="h-6 w-6 text-amber-500" />
-                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Official Merit Registry</span>
+                     <span className="text-[10px] font-bold text-slate-400">Official Merit Registry</span>
                   </div>
                   <h1 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter antialiased">
                     {mockData?.title || "Merit Registry"}
@@ -130,7 +131,7 @@ function LeaderboardContent() {
                <div className="flex items-center gap-4 bg-white border border-slate-100 p-4 rounded-2xl shadow-xl shrink-0">
                   <Users className="h-6 w-6 text-primary" />
                   <div className="text-left">
-                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Candidates</p>
+                     <p className="text-[9px] font-bold text-slate-400 leading-none">Total Candidates</p>
                      <p className="text-2xl font-black text-[#0F172A] tabular-nums leading-none mt-1">{manualList.length}</p>
                   </div>
                </div>
@@ -154,7 +155,7 @@ function LeaderboardContent() {
                   )}
                </div>
                <Link href="/mocks" className="w-full md:w-auto">
-                  <Button variant="outline" className="w-full md:w-auto h-14 md:h-16 rounded-2xl px-8 font-black uppercase text-[10px] tracking-widest border-2">
+                  <Button variant="outline" className="w-full md:w-auto h-14 md:h-16 rounded-2xl px-8 font-bold text-[10px] tracking-tight border-2">
                      All Tests
                   </Button>
                </Link>
@@ -207,7 +208,7 @@ function LeaderboardContent() {
                                        <h4 className="font-bold text-sm md:text-xl text-[#0F172A] truncate leading-tight group-hover:text-primary transition-colors">
                                           {entry.userName || entry.displayName}
                                        </h4>
-                                       {isCurrent && <Badge className="bg-primary text-white border-none text-[8px] font-black uppercase px-2 py-0 h-4 mt-1">You</Badge>}
+                                       {isCurrent && <Badge className="bg-primary text-white border-none text-[8px] font-bold px-2 py-0 h-4 mt-1">You</Badge>}
                                     </div>
                                  </div>
 
@@ -239,7 +240,7 @@ function LeaderboardContent() {
 function Metric({ label, val, color, className }: any) {
    return (
       <div className={cn("text-right min-w-[60px] md:min-w-[80px]", className)}>
-         <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">{label}</p>
+         <p className="text-[8px] font-bold text-slate-300">{label}</p>
          <p className={cn("text-sm md:text-2xl font-black tabular-nums tracking-tighter leading-none mt-1", color)}>{val}</p>
       </div>
    )
@@ -262,7 +263,7 @@ function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any)
          className={cn("flex", order)}
       >
          <Card className={cn(
-            "border-none shadow-xl transition-all duration-500 rounded-[2rem] p-4 md:p-6 flex flex-col items-center text-center group hover:-translate-y-1 relative overflow-hidden w-full",
+            "border-none shadow-xl transition-all duration-500 rounded-[2rem] p-5 md:p-8 flex flex-col items-center text-center group hover:-translate-y-1 relative overflow-hidden w-full",
             isMain ? "bg-[#0F172A] text-white ring-8 ring-primary/10 scale-[1.02] z-10" : "bg-white text-[#0F172A]",
             isCurrent && !isMain && "ring-4 ring-primary/20"
          )}>
@@ -294,19 +295,19 @@ function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any)
                </div>
 
                <div className="space-y-1.5 flex flex-col items-center">
-                  <h3 className="text-base md:text-xl font-black truncate max-w-[180px] leading-tight tracking-tight">{data.userName || data.displayName}</h3>
-                  {isCurrent && <Badge className="bg-primary text-white border-none text-[7px] font-black uppercase px-2 shadow-lg">Candidate Account</Badge>}
+                  <h3 className="text-base md:text-xl font-bold truncate max-w-[180px] leading-tight tracking-tight">{data.userName || data.displayName}</h3>
+                  {isCurrent && <Badge className="bg-primary text-white border-none text-[7px] font-bold px-2 shadow-lg">Candidate Account</Badge>}
                </div>
 
                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-500/10 w-full">
                   <div className="text-center space-y-1">
-                     <p className="text-[7px] font-bold uppercase tracking-tight text-slate-400">Score</p>
+                     <p className="text-[7px] font-bold text-slate-400">Score</p>
                      <p className={cn("text-base md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-white" : "text-primary")}>
                         {(data.highestScore || 0).toFixed(1)}
                      </p>
                   </div>
                   <div className="text-center space-y-1">
-                     <p className="text-[7px] font-bold uppercase tracking-tight text-slate-400">Accuracy</p>
+                     <p className="text-[7px] font-bold text-slate-400">Accuracy</p>
                      <p className={cn("text-base md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-emerald-400" : "text-[#0F172A]")}>
                         {data.accuracy || 0}%
                      </p>
@@ -314,7 +315,7 @@ function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any)
                </div>
 
                <div className="pt-1">
-                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                  <p className="text-[8px] font-bold text-slate-400 flex items-center justify-center gap-2">
                      <Timer className="h-2.5 w-2.5" /> {formatTime(data.timeTaken || 0)}
                   </p>
                </div>

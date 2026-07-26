@@ -38,7 +38,8 @@ import {
   ArrowRight,
   BookOpen,
   X,
-  TrendingUp
+  TrendingUp,
+  AlertCircle
 } from "lucide-react"
 import { 
   Card, 
@@ -60,8 +61,9 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v18.0.
- * FIXED: Rebuilt ID resolution for one-click speed. Removed blocking checks.
+ * @fileOverview Premium Result Analysis Hub v19.0.
+ * FIXED: Added missing AlertCircle icon import.
+ * FIXED: Normalized typography to Title Case for PWA optimization.
  */
 
 export default function ResultClient() {
@@ -95,7 +97,6 @@ export default function ResultClient() {
     if (userLoading || !db || !mockId) return;
     
     async function resolveId() {
-       // Check local storage first for guest speed
        if (!user) {
           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
           if (guestRes) {
@@ -126,7 +127,6 @@ export default function ResultClient() {
   const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
-  // Efficient Ranking Hub
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
      
@@ -202,19 +202,14 @@ export default function ResultClient() {
 
   const handleRetake = () => {
     if (!db || isSyncing || !mockId) return;
-    
-    // Optimistic Reset & Redirect
     if (user) {
       deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {});
     }
-    
     resetStore();
-    
     if (typeof window !== 'undefined') {
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
       localStorage.removeItem(`cracklix_guest_result_${mockId}`);
     }
-
     router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
   };
 
@@ -223,7 +218,7 @@ export default function ResultClient() {
     setIsExporting(true);
     try {
       setActiveMainTab("REPORT"); 
-      toast({ title: "Generating Report", description: "Capturing institutional node..." });
+      toast({ title: "Generating Report", description: "Capturing institutional document..." });
       await new Promise(r => setTimeout(r, 1000));
       const element = document.getElementById('cracklix-result-card');
       if (!element) throw new Error("Capture node not found.");
@@ -271,13 +266,12 @@ export default function ResultClient() {
      return <div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
   }
 
-  // Fallback UI for missing data
   if (!activeSession) {
     return (
       <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
         <AlertCircle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-bold">Entry not found</h2>
-        <Button onClick={() => router.push('/dashboard')}>Back to portal</Button>
+        <h2 className="text-xl font-bold text-[#0F172A]">Entry not found</h2>
+        <Button onClick={() => router.push('/dashboard')} className="rounded-xl">Back to dashboard</Button>
       </div>
     );
   }
@@ -297,7 +291,7 @@ export default function ResultClient() {
               <div className="space-y-1 flex-1 min-w-0">
                  <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Analysis hub</span>
+                    <span className="text-[9px] font-bold text-slate-400 tracking-widest">Analysis hub</span>
                  </div>
                  <h1 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A] leading-tight truncate">
                    {activeSession.mockTitle}
@@ -476,7 +470,7 @@ function StatCard({ label, val, icon, highlight }: any) {
     )}>
        <div className="absolute top-0 right-0 p-3 opacity-5">{icon}</div>
        <div className="space-y-0.5 relative z-10">
-          <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{label}</p>
+          <p className="text-[8px] md:text-[10px] font-bold text-slate-400 truncate">{label}</p>
           <p className={cn("text-lg md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
        </div>
     </Card>
