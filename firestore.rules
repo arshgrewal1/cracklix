@@ -17,13 +17,13 @@ service cloud.firestore {
     }
 
     function isSuperAdmin() {
-      return isAuthenticated() && getUserData().role == 'SUPER_ADMIN';
+      return isAuthenticated() && (getUserData().role == 'SUPER_ADMIN' || request.auth.token.email == 'arshdeepgrewal1122@gmail.com');
     }
 
     function hasPermission(perm) {
       return isAuthenticated() && 
              !isSuspended() && 
-             (getUserData().role == 'SUPER_ADMIN' || getUserData().permissions[perm] == true);
+             (isSuperAdmin() || getUserData().permissions[perm] == true);
     }
 
     function isOwner(userId) {
@@ -89,15 +89,20 @@ service cloud.firestore {
 
     // --- 4. SYSTEM & FINANCIALS ---
 
+    match /passes/{id} {
+      allow read: if true;
+      allow write: if isSuperAdmin() || hasPermission('managePasses');
+    }
+
+    match /subscriptions/{id} {
+      allow read: if isSuperAdmin() || hasPermission('viewRevenue') || resource.data.userId == request.auth.uid;
+      allow write: if isSuperAdmin() || hasPermission('managePayments');
+    }
+
     match /payment_requests/{id} {
       allow create: if isAuthenticated();
       allow read: if hasPermission('managePayments') || resource.data.userId == request.auth.uid;
       allow update: if hasPermission('managePayments');
-    }
-
-    match /subscriptions/{id} {
-      allow read: if hasPermission('viewRevenue') || resource.data.userId == request.auth.uid;
-      allow write: if hasPermission('managePayments');
     }
 
     match /settings/{id} {

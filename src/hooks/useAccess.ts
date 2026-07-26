@@ -1,27 +1,29 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { hasActivePass } from "@/lib/access-control";
+import { useUser } from "@/firebase";
+import { hasSeriesAccess } from "@/lib/access-control";
+import { TestSeries } from "@/types";
 
 /**
- * @fileOverview Preparation Node Protection Hook.
- * Dynamically gates UI components based on real-time pass status.
+ * @fileOverview Production Access Protection Hook.
+ * Dynamically gates UI components based on real-time pass status and granular permissions.
  */
-export function useAccess(userId?: string) {
-  const [access, setAccess] = useState(false);
-  const [checking, setChecking] = useState(true);
+export function useAccess() {
+  const { profile, loading } = useUser();
 
-  useEffect(() => {
-    if (!userId) {
-       setChecking(false);
-       return;
-    }
+  const checkAccess = (series: TestSeries | null) => {
+    if (!series) return { hasAccess: false, status: 'LOCKED' as const };
+    return hasSeriesAccess(profile, series);
+  };
 
-    setChecking(true);
-    hasActivePass(userId)
-      .then(setAccess)
-      .finally(() => setChecking(false));
-  }, [userId]);
+  const isElite = profile?.passStatus === 'active';
+  const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
 
-  return { hasAccess: access, checking };
+  return { 
+    hasAccess: checkAccess, 
+    isElite, 
+    isAdmin,
+    loading 
+  };
 }

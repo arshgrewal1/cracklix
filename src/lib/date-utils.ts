@@ -1,10 +1,8 @@
-
-import { startOfDay, startOfWeek, startOfMonth, startOfYear, isAfter, isBefore, subDays, format, isValid } from 'date-fns';
+import { startOfDay, startOfWeek, startOfMonth, startOfYear, isAfter, isBefore, subDays, format, isValid, addDays } from 'date-fns';
 
 /**
  * @fileOverview High-fidelity local date boundary helpers for study analytics.
  * Uses system local time to align with user expectations of day/week/month boundaries.
- * FIXED: Added isValid guard to format helper.
  */
 
 export const getLocalStartOfDay = (date: Date = new Date()) => startOfDay(date);
@@ -22,3 +20,7 @@ export const getLocalDateString = (date: Date = new Date()) => {
 };
 
 export const getTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+export const calculateExpiryDate = (days: number) => {
+  return addDays(new Date(), days).toISOString();
+};

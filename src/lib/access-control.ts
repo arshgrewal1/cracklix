@@ -3,7 +3,7 @@ import { firestore } from "@/firebase/app";
 import { UserProfile, TestSeries, MockTest } from "@/types";
 
 /**
- * @fileOverview Institutional Access Guard Node v4.0 [Granular Preview Enabled].
+ * @fileOverview Institutional Access Guard Node v5.0 [Hardened].
  */
 
 /**
@@ -97,7 +97,7 @@ export async function isPaymentValid(paymentId: string) {
   const db = firestore;
   try {
     const snap = await getDoc(doc(db, "payment_requests", paymentId));
-    return snap.exists() && snap.data()?.status === "captured" && snap.data()?.verified === true;
+    return snap.exists() && snap.data()?.status === "APPROVED";
   } catch (e) {
     return false;
   }

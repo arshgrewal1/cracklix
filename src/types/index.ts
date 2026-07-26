@@ -91,6 +91,7 @@ export interface UserProfile {
   lastLoginAt?: any;
   activeDeviceId?: string;
   passStatus: 'active' | 'expired' | 'none';
+  passType: 'FREE' | 'SILVER' | 'GOLD' | 'PREMIUM';
   passExpiresAt?: string;
   photoURL?: string;
   gender?: Gender;
@@ -101,6 +102,8 @@ export interface UserProfile {
     plan: string;
     purchaseDate: string;
     expiryDate: string;
+    allowedSeries?: string[];
+    allowedCategories?: string[];
   };
 }
 

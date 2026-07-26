@@ -1,11 +1,12 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Official Robots.txt Node.
+ * @fileOverview Official Platform Robots Registry Node.
+ * Controls search crawler behavior for the institutional hub.
  */
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://cracklix.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cracklix.com';
 
   return {
     rules: [
@@ -16,8 +17,8 @@ export default function robots(): MetadataRoute.Robots {
           '/admin/',
           '/profile/',
           '/checkout/',
-          '/attempt/',
           '/api/',
+          '/attempt/',
         ],
       },
     ],
