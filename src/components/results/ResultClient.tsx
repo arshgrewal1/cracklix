@@ -41,7 +41,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v12.1 [Fixed Card Tags & Icons].
+ * @fileOverview Universal Result Hub Viewer v12.5.
+ * FIXED: Header height offset handling and spacing gaps as per institutional rules.
  */
 
 export default function ResultClient() {
@@ -178,10 +179,8 @@ export default function ResultClient() {
     toast({ title: "Syncing report registry" });
     
     try {
-      // 1. Generate QR Code
       const qrData = await QRCode.toDataURL(`https://cracklix.in/results/view?id=${sessionData.mockId}&attemptId=${sessionData.attemptId}`);
       
-      // 2. Prepare Data
       const pdfData = {
         studentName: sessionData.userName || profile?.name || "Aspirant",
         examTitle: sessionData.mockTitle,
@@ -204,12 +203,8 @@ export default function ResultClient() {
         duration: `${mockData?.duration || 120}m`
       };
 
-      // 3. Generate Blob using template
       const blob = await pdf(<PerformancePDF data={pdfData} qrData={qrData} />).toBlob();
-      
-      // 4. Trigger Download
       saveAs(blob, `Report_${pdfData.studentName.replace(/\s+/g, '_')}.pdf`);
-      
       toast({ title: "Report downloaded" });
     } catch (e) { 
        console.error(e);
@@ -241,10 +236,19 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
-      <main className="container mx-auto max-w-[1400px] px-4 md:px-12 py-6 md:py-12 space-y-8 pb-40">
+      
+      {/* 
+        MAIN CONTENT: Offset by header height variable.
+        Padding: Mobile 16px extra, Desktop 24px extra.
+      */}
+      <main 
+        className="container mx-auto max-w-[1400px] px-4 md:px-12 pb-40 space-y-6 md:space-y-10"
+        style={{ paddingTop: 'calc(var(--header-height, 104px) + 16px)' }}
+      >
         
         {sessionData && (
-           <div className="space-y-10">
+           <div className="space-y-6 md:space-y-10">
+              {/* SECTION 1: TEST HEADER CARD */}
               <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-6 md:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                  <div className="flex items-center gap-6 md:gap-10">
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-20 md:w-20 bg-white shadow-xl border border-slate-100" />
@@ -271,11 +275,12 @@ export default function ResultClient() {
                  </div>
               </Card>
 
-              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-12">
+              {/* SECTION 2: TABS & CONTENT */}
+              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-10">
                   <div className="flex justify-center">
-                     <TabsList className="bg-white p-1 rounded-3xl border border-[#E5EAF2] shadow-sm flex w-fit gap-1 mx-auto lg:mx-0 h-auto">
-                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-10 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Analysis hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-10 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review portal</TabsTrigger>
+                     <TabsList className="bg-slate-100 p-1 rounded-3xl border border-[#E5EAF2] shadow-inner flex w-fit gap-1 mx-auto lg:mx-0 h-auto">
+                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis Hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review Portal</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -292,7 +297,7 @@ export default function ResultClient() {
                       />
                   </TabsContent>
 
-                  <TabsContent value="REVIEW" className="m-0 max-w-5xl mx-auto space-y-8">
+                  <TabsContent value="REVIEW" className="m-0 max-w-5xl mx-auto space-y-6 md:space-y-10">
                       <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 flex items-center justify-between gap-6 shadow-sm">
                           <div className="flex items-center gap-2 md:gap-4 overflow-x-auto no-scrollbar">
                              <FilterButton active={activeReviewFilter === 'ALL'} label="All questions" count={reviewNodes.all.length} onClick={() => setActiveReviewFilter('ALL')} />
@@ -350,4 +355,3 @@ function FilterButton({ active, label, count, onClick, color = "primary" }: any)
     </button>
   )
 }
-

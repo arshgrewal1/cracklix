@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import {
   Search,
@@ -35,15 +35,17 @@ import Logo from "@/components/brand/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { canAccessAdmin } from "@/lib/permissions";
+import AnnouncementBar from "./AnnouncementBar";
 
 /**
- * @fileOverview Cracklix Navigation Hub v131.0.
- * FIXED: Sticky header protocol enabled for persistent portal access.
+ * @fileOverview Unified Fixed Navigation Hub v135.0.
+ * FIXED: position: fixed z-9999 logic with dynamic height measurement for content sync.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
+  const headerRef = useRef<HTMLDivElement>(null);
 
   const { user, profile, loading } = useUser();
   const auth = useAuth();
@@ -53,6 +55,23 @@ export default function Navbar() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Dynamic Height Measurement Node
+  useEffect(() => {
+    if (!mounted) return;
+    const updateHeight = () => {
+      if (headerRef.current) {
+        const height = headerRef.current.offsetHeight;
+        document.documentElement.style.setProperty('--header-height', `${height}px`);
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(updateHeight);
+    if (headerRef.current) resizeObserver.observe(headerRef.current);
+    
+    updateHeight();
+    return () => resizeObserver.disconnect();
+  }, [mounted, pathname]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -103,8 +122,9 @@ export default function Navbar() {
   }
 
   return (
-    <>
-      <header className="sticky top-0 z-[1000] w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
+    <div ref={headerRef} className="fixed top-0 left-0 right-0 z-[9999] flex flex-col w-full">
+      <AnnouncementBar />
+      <header className="w-full bg-white/95 backdrop-blur-md border-b border-slate-100 pt-safe shadow-sm">
         <nav className="w-full h-[84px] md:h-[116px] transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
@@ -209,7 +229,7 @@ export default function Navbar() {
           </div>
         </nav>
       </header>
-    </>
+    </div>
   );
 
   function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {

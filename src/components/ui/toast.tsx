@@ -8,8 +8,8 @@ import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Notification Node v4.0.
- * UPDATED: Re-positioned ToastViewport to top-center for maximum visibility in the PWA.
+ * @fileOverview Hardened Notification Node v4.5.
+ * FIXED: Re-positioned ToastViewport to top-center with extreme z-index for visibility over fixed headers.
  */
 
 const ToastProvider = ToastPrimitives.Provider
@@ -21,7 +21,7 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      "fixed top-4 left-1/2 -translate-x-1/2 z-[3001] flex max-h-screen w-full flex-col p-4 md:max-w-[420px] gap-3",
+      "fixed top-4 left-1/2 -translate-x-1/2 z-[10001] flex max-h-screen w-full flex-col p-4 md:max-w-[420px] gap-3",
       className
     )}
     {...props}
@@ -89,6 +89,7 @@ const ToastClose = React.forwardRef<
     {...props}
   >
     <X className="h-4 w-4" />
+    <span className="sr-only">Close</span>
   </ToastPrimitives.Close>
 ))
 ToastClose.displayName = ToastPrimitives.Close.displayName

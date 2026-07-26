@@ -11,7 +11,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import GlobalStudyTracker from "@/components/analytics/GlobalStudyTracker";
-import AnnouncementBar from "@/components/layout/AnnouncementBar";
 import SplashScreen from "@/components/pwa/SplashScreen";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -24,8 +23,9 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v10.0 [PWA Screening Enabled].
- * UPDATED: Enforced black-translucent status bar and viewport-fit cover for immersive PWA performance.
+ * @fileOverview Global Layout Registry v10.5 [PWA Screening Enabled].
+ * UPDATED: Removed separate AnnouncementBar to prevent fixed header conflict.
+ * UPDATED: Enforced black-translucent status bar and viewport-fit cover.
  */
 
 export const metadata: Metadata = {
@@ -105,7 +105,6 @@ export default function RootLayout({
             <SplashScreen key="app-splash-screen" />
             
             <div key="main-app-container" className="min-h-screen flex flex-col relative bg-background">
-              <AnnouncementBar />
               <div className="flex-1">
                 {children}
               </div>
