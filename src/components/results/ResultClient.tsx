@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useMemo, useEffect, useRef } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useFirestore } from "@/firebase"
@@ -13,7 +13,9 @@ import {
   getDocs, 
   where,
   limit,
-  orderBy
+  orderBy,
+  getDoc,
+  documentId
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -46,15 +48,15 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v108.0.
- * FIXED: High-speed real-time listener for instant report generation.
- * FIXED: Reduced button padding and text for PWA mode alignment.
+ * @fileOverview Universal Result Hub Engine v109.0 [Review Portal Fix].
+ * FIXED: Replaced "__name__" with documentId() and handled string-key answer mapping.
  */
 
 export default function ResultClient() {
   const db = useFirestore()
   const { user, profile, loading: userLoading } = useUser()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const router = useRouter()
   const { toast } = useToast()
   
@@ -74,7 +76,7 @@ export default function ResultClient() {
 
   const shareRef = useRef<HTMLDivElement>(null);
 
-  const mockId = searchParams.get('id')
+  const mockIdFromUrl = searchParams.get('id')
   const attemptIdFromUrl = searchParams.get('attemptId')
 
   const formatTimeTaken = (totalSeconds: number) => {
@@ -91,7 +93,6 @@ export default function ResultClient() {
     let unsubscribe: () => void = () => {};
 
     const initialize = async () => {
-      // 1. GUEST PRIORITY CHECK
       if (attemptIdFromUrl) {
         const guestKey = `cracklix_guest_result_${attemptIdFromUrl}`;
         const local = localStorage.getItem(guestKey);
@@ -101,7 +102,6 @@ export default function ResultClient() {
           return;
         }
 
-        // 2. REAL-TIME CLOUD LISTENER
         unsubscribe = onSnapshot(doc(db, "results", attemptIdFromUrl), (snap) => {
           if (snap.exists()) {
             setSessionData({ ...snap.data(), id: snap.id });
@@ -111,27 +111,15 @@ export default function ResultClient() {
            setIsSearching(false);
         });
         
-        // Timeout for finding record
-        const timer = setTimeout(() => {
-           setIsSearching(prev => {
-              if (prev) {
-                 // Try finding latest for this user/mock as fallback
-                 return false;
-              }
-              return prev;
-           });
-        }, 5000);
-        return () => {
-           clearTimeout(timer);
-           unsubscribe();
-        };
+        const timer = setTimeout(() => setIsSearching(false), 5000);
+        return () => { clearTimeout(timer); unsubscribe(); };
       }
 
-      if (user && mockId) {
+      if (user && mockIdFromUrl) {
         const q = query(
           collection(db, "results"), 
           where("userId", "==", user.uid), 
-          where("mockId", "==", mockId),
+          where("mockId", "==", mockIdFromUrl),
           limit(5)
         );
         const snap = await getDocs(q);
@@ -141,22 +129,23 @@ export default function ResultClient() {
           setSessionData(latest);
         }
         setIsSearching(false);
-      } else if (!user) {
-         // Final guest fallback
-         const guestKey = `cracklix_guest_result_${mockId}`;
+      } else if (!user && mockIdFromUrl) {
+         const guestKey = `cracklix_guest_result_${mockIdFromUrl}`;
          const local = localStorage.getItem(guestKey);
          if (local) setSessionData({ ...JSON.parse(local), isGuestNode: true });
+         setIsSearching(false);
+      } else {
          setIsSearching(false);
       }
     };
 
     initialize();
     return () => unsubscribe();
-  }, [db, user, userLoading, mockId, attemptIdFromUrl]);
+  }, [db, user, userLoading, mockIdFromUrl, attemptIdFromUrl]);
 
   useEffect(() => {
      if (!db || !sessionData) return;
-     const mId = mockId || sessionData.mockId;
+     const mId = mockIdFromUrl || sessionData.mockId;
      if (!mId) return;
      
      const loadMetrics = async () => {
@@ -164,12 +153,12 @@ export default function ResultClient() {
         try {
            const lbRef = collection(db, "leaderboards", mId, "entries");
            const lbSnap = await getDocs(query(lbRef, orderBy("highestScore", "desc")));
-           const entries = lbSnap.docs.map(d => d.data());
+           const entries = lbSnap.docs.map(d => ({...d.data(), userId: d.id}));
            const myRank = entries.findIndex(e => e.userId === sessionData.userId) + 1;
            setLiveRank(myRank || "---");
            setTotalCandidates(lbSnap.size);
            setTopScore(entries[0]?.highestScore || 0);
-           setAvgScore(entries.length ? entries.reduce((a,e) => a+(e.highestScore||0),0)/entries.length : 0);
+           setAvgScore(entries.length ? entries.reduce((a,e: any) => a+(e.highestScore||0),0)/entries.length : 0);
         } catch (e) {}
      };
 
@@ -192,30 +181,34 @@ export default function ResultClient() {
               
               for (const c of chunks) {
                 const [qSnap, uSnap, lSnap] = await Promise.all([
-                   getDocs(query(collection(db, "mcqBank"), where("__name__", "in", c))),
-                   getDocs(query(collection(db, "usedQuestions"), where("__name__", "in", c))),
-                   getDocs(query(collection(db, "questions"), where("__name__", "in", c)))
+                   getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", c))),
+                   getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", c))),
+                   getDocs(query(collection(db, "questions"), where(documentId(), "in", c)))
                 ]);
                 qSnap.docs.forEach(d => fetched.push({...d.data(), id: d.id}));
                 uSnap.forEach(d => { if(!fetched.find(f => f.id === d.id)) fetched.push({...d.data(), id: d.id})});
                 lSnap.forEach(d => { if(!fetched.find(f => f.id === d.id)) fetched.push({...d.data(), id: d.id})});
               }
-              setQuestions(qIds.map(id => fetched.find((q:any) => q.id === id)).filter(Boolean));
+              const finalSorted = qIds.map(id => fetched.find((q:any) => q.id === id)).filter(Boolean);
+              setQuestions(finalSorted);
            }
         } catch (e) {}
      };
 
      loadMetrics(); loadQuestions();
-  }, [db, mockId, sessionData]);
+  }, [db, mockIdFromUrl, sessionData]);
 
   const reviewNodes = useMemo(() => {
     if (!sessionData || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
     const all = questions.map((q, i) => ({ ...q, originalIndex: i }));
     const correct: any[] = [], wrong: any[] = [], skipped: any[] = [];
+    
     all.forEach((q) => {
-      const ans = sessionData.answers?.[q.originalIndex];
-      if (ans === undefined || ans === null) skipped.push(q);
-      else {
+      // Handle string vs number keys for answers
+      const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[q.originalIndex.toString()];
+      if (ans === undefined || ans === null) {
+         skipped.push(q);
+      } else {
         const label = ['A', 'B', 'C', 'D'][Number(ans)];
         if (label === q.correctAnswer) correct.push(q); else wrong.push(q);
       }
@@ -288,7 +281,7 @@ export default function ResultClient() {
                        <RefreshCw className="h-3.5 w-3.5" /> Refresh
                     </Button>
                     <Button asChild variant="outline" className="flex-1 lg:flex-none h-11 px-4 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[10px] md:text-[11px] shadow-sm">
-                       <Link href={`/mocks/instructions?id=${mockId || sessionData.mockId}&retake=true`}>Retake</Link>
+                       <Link href={`/mocks/instructions?id=${mockIdFromUrl || sessionData.mockId}&retake=true`}>Retake</Link>
                     </Button>
                  </div>
               </Card>
@@ -296,8 +289,8 @@ export default function ResultClient() {
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8">
                   <div className="flex justify-center">
                      <TabsList className="bg-slate-100 p-1 rounded-full border border-slate-200 flex w-fit h-auto shadow-inner">
-                        <TabsTrigger value="OVERVIEW" className="rounded-full px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-10 md:h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm">Analysis hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-full px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-10 md:h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm">Review portal</TabsTrigger>
+                        <TabsTrigger value="OVERVIEW" className="rounded-full px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-10 md:h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm uppercase tracking-tight">Analysis hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-full px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-10 md:h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm uppercase tracking-tight">Review portal</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -331,7 +324,7 @@ export default function ResultClient() {
                                     question={q} 
                                     language={sessionData.languageMode || 'ENGLISH_PUNJABI'} 
                                     showSolution={true} 
-                                    selectedAnswer={sessionData.answers?.[q.originalIndex]} 
+                                    selectedAnswer={sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[q.originalIndex.toString()]} 
                                     className="p-0 shadow-none border-none bg-transparent" 
                                   />
                               </Card>
@@ -376,7 +369,7 @@ export default function ResultClient() {
 function FilterNode({ active, label, count, onClick, color }: any) {
   return (
     <button onClick={onClick} className={cn("flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 h-12 md:h-14 rounded-xl transition-all border group cursor-pointer", active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-transparent text-slate-400 hover:bg-slate-50")}>
-       <span className="text-[9px] md:text-[10px] font-bold tracking-tight">{label}</span>
+       <span className="text-[9px] md:text-[10px] font-bold tracking-tight uppercase">{label}</span>
        <span className={cn("text-[9px] md:text-xs font-bold opacity-40 tabular-nums", active && "opacity-60")}>{count}</span>
     </button>
   )
