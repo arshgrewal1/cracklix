@@ -13,7 +13,7 @@ interface BackButtonProps {
 }
 
 /**
- * @fileOverview Universal Institutional Navigation Node v2.0.
+ * @fileOverview Universal Institutional Navigation Node v2.1.
  * FIXED: Hidden in standalone PWA mode to match native app standards.
  */
 export default function BackButton({ 

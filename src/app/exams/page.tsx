@@ -20,7 +20,8 @@ import {
   Users,
   ArrowRight,
   Sparkles,
-  X
+  X,
+  ArrowLeft
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -35,8 +36,8 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v10.0.
- * UPDATED: Removed all sticky positioning. Search bar now scrolls with content.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v10.1.
+ * FIXED: UI Back button hidden in standalone PWA mode.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -58,10 +59,20 @@ const POPULAR_CHIPS = [
 
 export default function ExamsEntryPage() {
   const db = useFirestore();
+  const router = useRouter();
   const { user, profile, loading: authLoading } = useUser();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+       setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true);
+    }
+  }, []);
 
   // DATA FETCHING
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
@@ -115,7 +126,7 @@ export default function ExamsEntryPage() {
     recognition.start();
   };
 
-  if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+  if (!mounted || authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full">
@@ -132,11 +143,16 @@ export default function ExamsEntryPage() {
           >
             <div className="space-y-6 max-w-4xl">
               <div className="flex items-center justify-center md:justify-start gap-3">
+                 {!isStandalone && (
+                    <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
+                       <ArrowLeft className="h-5 w-5" />
+                    </button>
+                 )}
                  <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs tracking-tight flex items-center gap-2">
                    <Landmark className="h-3.5 w-3.5" /> Institutional Registry
                  </Badge>
               </div>
-              <h1 className="text-[32px] sm:text-6xl lg:text-[80px] font-[900] tracking-tighter leading-[1] text-[#0F172A] antialiased">
+              <h1 className="text-[32px] sm:text-7xl lg:text-[100px] font-[900] tracking-tighter leading-[1] text-[#0F172A] antialiased">
                 Target Your <br className="hidden md:block"/>
                 <span className="text-primary italic">Recruitment.</span>
               </h1>

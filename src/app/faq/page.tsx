@@ -17,7 +17,7 @@ import { HelpArticle } from "@/types"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Official Institutional FAQ Hub v6.2.
+ * @fileOverview Official Institutional FAQ Hub v6.3.
  * FIXED: UI Back button hidden in standalone PWA mode.
  */
 
@@ -86,7 +86,7 @@ export default function FAQPage() {
         <div className="text-left space-y-6 md:space-y-10 max-w-4xl">
            <div className="flex items-center gap-4">
               {!isStandalone && (
-                 <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0">
+                 <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0 cursor-pointer">
                     <ArrowLeft className="h-5 w-5" />
                  </button>
               )}
@@ -95,10 +95,10 @@ export default function FAQPage() {
               </div>
               <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-slate-400">Institutional Knowledge Base</span>
            </div>
-           <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased">
-              F.A.Q<span className="text-primary italic">. Hub</span>
+           <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased italic">
+              F.A.Q<span className="text-primary">. Hub</span>
            </h1>
-           <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-xl leading-tight tracking-tight">
+           <p className="text-slate-500 font-medium text-sm md:text-2xl max-xl leading-tight tracking-tight">
               Verified answers to common queries about preparing for Punjab recruitment verticals.
            </p>
         </div>

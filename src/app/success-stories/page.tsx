@@ -14,9 +14,10 @@ import { doc, collection, query, orderBy } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SuccessStory } from "@/types"
 import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Hall of Rankers v10.2.
+ * @fileOverview Official Hall of Rankers v10.3.
  * FIXED: UI Back button hidden in standalone PWA mode.
  */
 
@@ -57,7 +58,7 @@ export default function SuccessStoriesPage() {
            <div className="space-y-6 md:space-y-10">
               <div className="flex items-center gap-4">
                  {!isStandalone && (
-                    <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0">
+                    <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0 cursor-pointer">
                        <ArrowLeft className="h-5 w-5" />
                     </button>
                  )}
@@ -66,8 +67,8 @@ export default function SuccessStoriesPage() {
                  </div>
                  <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-slate-400">Official Hall of Rankers</span>
               </div>
-              <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased">
-                 Punjab&apos;s <span className="text-primary italic">Pride.</span>
+              <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased italic">
+                 Punjab's <span className="text-primary">Pride.</span>
               </h1>
               <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl leading-tight tracking-tight">
                  Verified success stories from aspirants who cracked official recruitments using the Cracklix preparation portal.
@@ -143,7 +144,7 @@ export default function SuccessStoriesPage() {
                  Your Name <br/> <span className="text-primary">is next.</span>
               </h2>
               <p className="text-slate-400 text-sm md:text-2xl max-w-2xl mx-auto font-medium leading-tight">
-                 Join {liveAspirantCount} aspirants already preparing with the state&apos;s most advanced portal.
+                 Join {liveAspirantCount} aspirants already preparing with the state's most advanced portal.
               </p>
            </div>
 

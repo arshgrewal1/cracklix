@@ -37,8 +37,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Professional Vacancy Detail Hub v4.2.
+ * @fileOverview Professional Vacancy Detail Hub v4.3.
  * FIXED: Back button hidden in standalone PWA mode.
+ * FIXED: Aligned bullet points with hanging indent for high-fidelity list look.
  */
 
 export default function VacancyDetailPage() {
@@ -90,7 +91,9 @@ export default function VacancyDetailPage() {
          
          {!isStandalone && (
             <div className="flex items-center justify-start">
-               <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90"><ArrowLeft className="h-5 w-5 md:h-6 md:w-6" /></button>
+               <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 cursor-pointer">
+                  <ArrowLeft className="h-5 w-5 md:h-6 md:w-6" />
+               </button>
             </div>
          )}
 
@@ -246,9 +249,11 @@ function HubBullet({ text }: { text: string }) {
          <div className="h-6 w-6 md:h-8 md:w-8 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm mt-1">
             <CheckCircle2 className="h-3.5 w-3.5 md:h-5 md:w-5 text-emerald-500" />
          </div>
-         <p className="text-base md:text-2xl font-[700] text-[#0F172A] leading-relaxed antialiased">
-            {text}
-         </p>
+         <div className="flex-1 min-w-0">
+            <p className="text-base md:text-2xl font-[700] text-[#0F172A] leading-relaxed antialiased">
+               {text}
+            </p>
+         </div>
       </div>
    )
 }

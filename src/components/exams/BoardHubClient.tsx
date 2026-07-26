@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -11,7 +10,7 @@ import { collection, query, where, doc, updateDoc, arrayUnion, arrayRemove, serv
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Star, CheckCircle2, RefreshCw, BookOpen, Clock, Zap, Landmark, ArrowRight, FileStack, ShieldCheck, Layers } from "lucide-react"
+import { ChevronLeft, ChevronRight, Star, CheckCircle2, RefreshCw, BookOpen, Clock, Zap, Landmark, ArrowRight, FileStack, ShieldCheck, Layers, ArrowLeft } from "lucide-react"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -24,8 +23,8 @@ interface BoardHubClientProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Board Hub v8.0.
- * UPDATED: Optimized grid for 3 columns on desktop.
+ * @fileOverview Premium Enterprise Board Hub v8.1.
+ * FIXED: UI Back button hidden in standalone PWA mode.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
@@ -33,6 +32,16 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
   const db = useFirestore();
   const { user, profile, loading: authLoading } = useUser();
   const { toast } = useToast();
+
+  const [mounted, setMounted] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+       setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true);
+    }
+  }, []);
 
   const { data: hub, loading: hubLoading } = useDoc<any>(useMemo(() => (db && hubId ? doc(db, "boards", hubId) : null), [db, hubId]));
   
@@ -52,7 +61,7 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
     return [...rawExams].sort((a: any, b: any) => (a.displayOrder || 0) - (b.displayOrder || 0));
   }, [rawExams]);
 
-  if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+  if (!mounted || authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10 flex flex-col overflow-x-hidden w-full">
@@ -63,9 +72,11 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
          
          <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
             <div className="flex items-center gap-4">
-               <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
-                  <ChevronLeft className="h-5 w-5" />
-               </button>
+               {!isStandalone && (
+                  <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0 cursor-pointer">
+                     <ArrowLeft className="h-5 w-5" />
+                  </button>
+               )}
                <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[9px] md:text-[11px] tracking-tight shadow-sm">Official Board Hub</Badge>
             </div>
 

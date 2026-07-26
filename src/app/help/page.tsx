@@ -32,7 +32,7 @@ import { HelpArticle } from "@/types"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Official Institutional Help Hub v6.2.
+ * @fileOverview Official Institutional Help Hub v6.3.
  * FIXED: UI Back button hidden in standalone PWA mode.
  */
 
@@ -96,7 +96,7 @@ export default function HelpCenterPage() {
            <div className="space-y-6 md:space-y-10">
               <div className="flex items-center gap-4">
                  {!isStandalone && (
-                    <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0">
+                    <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0 cursor-pointer">
                        <ArrowLeft className="h-5 w-5" />
                     </button>
                  )}
@@ -105,21 +105,21 @@ export default function HelpCenterPage() {
                  </div>
                  <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-slate-400">Institutional Help Hub</span>
               </div>
-              <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased">
-                 Help <span className="text-primary italic">Center.</span>
+              <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased italic">
+                 Help <span className="text-primary">Center.</span>
               </h1>
               <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl leading-tight tracking-tight">
                  Access our verified preparation nodes and solve institutional queries instantly.
               </p>
            </div>
 
-           <div className="sticky top-[84px] md:top-[116px] z-40 bg-[#F8FAFC]/80 backdrop-blur-xl -mx-4 px-4 py-2 border-b border-slate-100">
+           <div className="bg-[#F8FAFC]/80 backdrop-blur-xl -mx-4 px-4 py-2 border-b border-slate-100">
               <div className="relative max-w-2xl group">
                  <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-400 rounded-2xl blur opacity-5 group-focus-within:opacity-20 transition duration-1000"></div>
                  <div className="relative">
                     <Search className={cn("absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 transition-colors", searchTerm ? "text-primary" : "text-slate-400")} />
                     <Input 
-                      className="h-14 md:h-16 pl-16 rounded-2xl md:rounded-[2rem] bg-white border-none shadow-2xl text-lg md:text-xl font-bold text-[#0F172A]" 
+                      className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-[2rem] bg-white border-none shadow-2xl text-lg md:text-xl font-bold text-[#0F172A]" 
                       placeholder="Search common issues..." 
                       value={searchTerm}
                       onChange={e => setSearchTerm(e.target.value)}
@@ -169,7 +169,7 @@ export default function HelpCenterPage() {
                     {selectedCategory ? `${selectedCategory.toLowerCase()} Guides` : "Common Guides"}
                  </h3>
                  {selectedCategory && (
-                    <button onClick={() => setSelectedCategory(null)} className="text-[9px] md:text-[11px] font-black uppercase text-slate-400 flex items-center gap-2 hover:text-primary transition-all bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100">
+                    <button onClick={() => setSelectedCategory(null)} className="text-[9px] md:text-[11px] font-black uppercase text-slate-400 flex items-center gap-2 hover:text-primary transition-all bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100 cursor-pointer">
                        <X className="h-3.5 w-3.5" /> Clear Filter
                     </button>
                  )}
