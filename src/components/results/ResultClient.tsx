@@ -48,10 +48,9 @@ import { toJpeg } from 'html-to-image'
 import jsPDF from 'jspdf'
 
 /**
- * @fileOverview Universal Result Hub Viewer v75.0.
- * FIXED: Button overflow in PWA mode using content-weighted flex.
- * FIXED: ReferenceErrors for results and Calendar icon.
- * UPDATED: Removed uppercase across all UI nodes.
+ * @fileOverview Universal Result Hub Viewer v76.0.
+ * FIXED: Actual test duration and real-time competition stats (Top/Avg).
+ * FIXED: Bottom clipping in share image by re-balancing vertical spacing.
  */
 
 export default function ResultClient() {
@@ -85,6 +84,7 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
+  // Real data listeners for the user's specific attempts
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mockId) return null;
     return query(collection(db, "results"), where("mockId", "==", mockId), where("userId", "==", user.uid));
@@ -131,6 +131,8 @@ export default function ResultClient() {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
            const snap = await getDocs(entriesRef);
            
+           if (snap.empty) return;
+
            const entries = snap.docs.map(d => d.data());
            const sorted = [...entries].sort((a: any, b: any) => {
               if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
@@ -302,13 +304,12 @@ export default function ResultClient() {
                        </div>
                        <h1 className="text-lg md:text-4xl font-bold text-[#0F172A] tracking-tight leading-tight truncate">{sessionData.mockTitle}</h1>
                        <div className="flex flex-wrap items-center gap-4 text-[10px] md:text-base font-semibold text-slate-400">
-                          <div className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span></div>
+                          <div className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span></div>
                           <div className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4 text-slate-300" /> <span>{mockData?.duration || 120}:00</span></div>
                        </div>
                     </div>
                  </div>
 
-                 {/* ACTION BAR: PWA FIXED */}
                  <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto mt-2">
                     <Button onClick={handleShareOfficialReport} disabled={isGenerating} className="flex-[2] lg:flex-none h-12 px-4 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[11px] md:text-sm shadow-lg active:scale-95 border-none">
                        {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
@@ -383,7 +384,11 @@ export default function ResultClient() {
                    ref={reportRef}
                    data={sessionData} 
                    rank={liveRank} 
-                   totalCandidates={totalCandidates} 
+                   totalCandidates={totalCandidates}
+                   topScore={topScore}
+                   avgScore={avgScore}
+                   avgAccuracy={avgAccuracy}
+                   duration={mockData?.duration || 120}
                  />
               </div>
            </>
