@@ -13,7 +13,6 @@ import {
   documentId, 
   getDocs, 
   where,
-  getCountFromServer,
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -41,9 +40,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v6.0 [Testbook Redesign].
- * FIXED: Implemented 794px fixed-width PDF buffer.
- * TERMINOLOGY: All questions / Wrong (Title Case).
+ * @fileOverview Institutional Result Hub v6.1 [Syntax Fixed].
+ * FIXED: Closing tag mismatch (Card vs div) resolved.
  */
 
 export default function ResultClient() {
@@ -120,7 +118,14 @@ export default function ResultClient() {
              }
           }
 
-          setSessionData(resultsList[resultsList.length - 1]);
+          // Force client-side sort for stability
+          const sortedResults = resultsList.sort((a, b) => {
+             const tA = a.createdAt?.seconds || new Date(a.timestamp || 0).getTime() / 1000;
+             const tB = b.createdAt?.seconds || new Date(b.timestamp || 0).getTime() / 1000;
+             return tB - tA;
+          });
+
+          setSessionData(sortedResults[0]);
           setIsSearching(false);
 
        } catch (e) { 
@@ -313,7 +318,7 @@ export default function ResultClient() {
                     <div className="text-center space-y-1.5">
                        <h1 className="text-xl font-[800] text-[#071B4D] leading-tight">{activeSession.mockTitle}</h1>
                        <div className="flex flex-wrap justify-center items-center gap-2">
-                          <Badge className="bg-primary/5 text-primary border-none text-[9px] font-bold px-3 py-1 rounded-full uppercase">Verified Attempt #{profile?.totalTests || 1}</Badge>
+                          <Badge className="bg-primary/5 text-primary border-none text-[9px] font-bold px-3 py-1 rounded-full">Verified Attempt #{profile?.totalTests || 1}</Badge>
                        </div>
                     </div>
                  </div>
@@ -323,7 +328,7 @@ export default function ResultClient() {
                     <HeaderMiniNode label="Duration" val={`${mockData?.duration || 120}m`} />
                     <HeaderMiniNode label="Candidates" val={totalCandidates.toLocaleString()} />
                  </div>
-              </div>
+              </Card>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
                   <div className="flex justify-center mb-6">
@@ -468,3 +473,4 @@ function formatTimeStr(seconds: number) {
   const s = Math.floor(seconds % 60);
   return `${m}m ${s}s`;
 }
+

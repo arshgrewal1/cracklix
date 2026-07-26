@@ -28,7 +28,7 @@ interface ReportPDFProps {
 /**
  * @fileOverview Hardened Portrait PDF Hub v40.0.
  * FIXED: Strictly defined width of 794px for A4 scaling.
- * FIXED: Removed position absolute to prevent overlap.
+ * FIXED: Removed position absolute and implemented explicit vertical buffers to prevent overlap.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
@@ -47,7 +47,7 @@ export default function ReportPDF(props: ReportPDFProps) {
       {/* 1. CORPORATE HEADER */}
       <div className="w-full flex items-center justify-between px-16 py-10 bg-slate-50/40 border-b border-slate-100 shrink-0">
          <div className="flex items-center gap-8">
-            <img src="/logo.png" alt="Logo" className="h-16 w-auto object-contain" />
+            <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-16 w-auto object-contain" />
             <div className="h-px w-8 bg-slate-200 rotate-90" />
             <div className="text-left space-y-1">
                <h2 className="text-2xl font-[900] text-[#071B4D] tracking-tighter leading-none">Cracklix</h2>
@@ -60,10 +60,10 @@ export default function ReportPDF(props: ReportPDFProps) {
          </div>
       </div>
 
-      <div className="w-full flex-1 p-16 space-y-12 flex flex-col items-center">
+      <div className="w-full flex-1 p-16 flex flex-col items-center">
          
          {/* 2. IDENTITY CENTER */}
-         <div className="space-y-6 w-full text-center">
+         <div className="space-y-6 w-full text-center mb-12">
             <div className="space-y-3">
                <p className="text-xs font-bold text-primary uppercase tracking-[0.5em]">Verified Candidate</p>
                <h1 className="text-[56px] font-[900] text-[#071B4D] tracking-tight leading-none antialiased">
@@ -82,20 +82,22 @@ export default function ReportPDF(props: ReportPDFProps) {
          </div>
 
          {/* 3. MERIT SECTION */}
-         <div className="w-full bg-[#071B4D] rounded-[48px] p-16 text-white text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[360px]">
+         <div className="w-full bg-[#071B4D] rounded-[48px] p-16 text-white text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[360px] mb-12">
             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-64 w-64" /></div>
             
-            <div className="relative z-10 space-y-6">
-               <p className="text-[14px] font-bold text-primary uppercase tracking-[0.6em]">Punjab Merit Rank</p>
-               <div className="space-y-3">
+            <div className="relative z-10">
+               <p className="text-[14px] font-bold text-primary uppercase tracking-[0.6em] mb-10">Punjab Merit Rank</p>
+               <div className="flex flex-col items-center">
                   <span className="text-[160px] font-[900] tabular-nums tracking-tighter leading-none block drop-shadow-2xl">
                      #{rank}
                   </span>
-                  <p className="text-2xl font-black text-slate-500 tabular-nums uppercase tracking-widest">
-                     / {totalCandidates.toLocaleString()} Total Candidates
-                  </p>
+                  <div className="mt-8">
+                    <p className="text-2xl font-black text-slate-500 tabular-nums uppercase tracking-widest">
+                       / {totalCandidates.toLocaleString()} Total Candidates
+                    </p>
+                  </div>
                </div>
-               <div className="pt-8 flex justify-center">
+               <div className="pt-10 flex justify-center">
                   <Badge className="bg-emerald-500 text-white border-none font-bold text-[12px] px-12 py-3 rounded-full shadow-2xl uppercase tracking-widest">
                      Verified Standing
                   </Badge>
@@ -104,7 +106,7 @@ export default function ReportPDF(props: ReportPDFProps) {
          </div>
 
          {/* 4. KPIS 2x2 */}
-         <div className="grid grid-cols-2 gap-8 w-full">
+         <div className="grid grid-cols-2 gap-8 w-full mb-12">
             <KPIBox label="Net score" val={score} color="text-[#071B4D]" />
             <KPIBox label="Accuracy index" val={`${attemptAccuracy}%`} color="text-emerald-600" />
             <KPIBox label="Percentile" val={`${percentile}%`} color="text-[#0A84FF]" />
@@ -112,7 +114,7 @@ export default function ReportPDF(props: ReportPDFProps) {
          </div>
 
          {/* 5. SUMMARY ROW */}
-         <div className="grid grid-cols-4 gap-6 w-full">
+         <div className="grid grid-cols-4 gap-6 w-full mb-12">
             <CountPill label="Correct" val={correct} color="bg-emerald-50 text-emerald-600" />
             <CountPill label="Wrong" val={wrong} color="bg-rose-50 text-rose-600" />
             <CountPill label="Skipped" val={skipped} color="bg-slate-50 text-slate-400" />
@@ -164,7 +166,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                </div>
             </div>
             <div className="text-right space-y-3">
-               <img src="/logo.png" alt="Cracklix" className="h-10 w-auto opacity-20 grayscale ml-auto" />
+               <img src="/logo/cracklix-logo-dark.png" alt="Cracklix" className="h-10 w-auto opacity-20 grayscale ml-auto" />
                <p className="text-[12px] font-black tracking-[0.6em] text-slate-300 uppercase">www.cracklix.in</p>
             </div>
          </div>
@@ -199,3 +201,4 @@ function CountPill({ label, val, color }: any) {
       </div>
    )
 }
+
