@@ -44,12 +44,13 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import ShareableResultCard from "./ShareableResultCard"
-import { toBlob } from 'html-to-image'
+import { toJpeg } from 'html-to-image'
 import jsPDF from 'jspdf'
 
 /**
- * @fileOverview Universal Result Hub Viewer v71.0.
- * UPDATED: Integrated high-fidelity "Official Report" PNG and PDF engine.
+ * @fileOverview Universal Result Hub Viewer v72.0.
+ * UPDATED: Optimized for ~200KB export size using JPEG compression and 1.5x pixel ratio.
+ * FIXED: Removed uppercase from buttons and UI labels.
  */
 
 export default function ResultClient() {
@@ -161,18 +162,21 @@ export default function ResultClient() {
       const node = reportRef.current;
       if (!node) throw new Error("Report node not ready.");
 
-      const blob = await toBlob(node, {
-        pixelRatio: 2,
+      // Use JPEG with 0.75 quality and 1.5x pixel ratio for ~200KB target
+      const dataUrl = await toJpeg(node, {
+        quality: 0.75,
+        pixelRatio: 1.5,
         cacheBust: true,
         backgroundColor: '#ffffff'
       });
 
-      if (!blob) throw new Error("Blob generation failed.");
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
 
       const file = new File(
         [blob],
-        `Cracklix_Official_Report_${sessionData.userId}_${Date.now()}.png`,
-        { type: "image/png" }
+        `Cracklix_Report_${sessionData.userId}_${Date.now()}.jpg`,
+        { type: "image/jpeg" }
       );
 
       if (navigator.share) {
@@ -182,20 +186,18 @@ export default function ResultClient() {
           files: [file]
         });
       } else {
-        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.download = file.name;
-        link.href = url;
+        link.href = dataUrl;
         link.click();
-        URL.revokeObjectURL(url);
         toast({ title: "Report saved to device" });
       }
     } catch (e: any) {
       if (e.name !== 'AbortError') {
         toast({ 
           variant: "destructive", 
-          title: "Generation Failure", 
-          description: "Registry error during report synthesis." 
+          title: "Audit Error", 
+          description: "Could not broadcast scorecard." 
         });
       }
     } finally {
@@ -211,13 +213,11 @@ export default function ResultClient() {
       const node = reportRef.current;
       if (!node) throw new Error("Node missing.");
 
-      const blob = await toBlob(node, { pixelRatio: 3, backgroundColor: '#ffffff' });
-      if (!blob) throw new Error("Capture failure.");
-
-      const imgData = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
+      // Optimized for A4 size and KV size targets
+      const imgData = await toJpeg(node, { 
+        quality: 0.7, 
+        pixelRatio: 1.5, 
+        backgroundColor: '#ffffff' 
       });
 
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -225,9 +225,9 @@ export default function ResultClient() {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Cracklix_Official_Report_${sessionData.attemptId}.pdf`);
-      toast({ title: "PDF Synced", description: "Official report saved successfully." });
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+      pdf.save(`Cracklix_Report_${sessionData.attemptId}.pdf`);
+      toast({ title: "PDF Synced", description: "Report saved (approx 200KB)." });
     } catch (e) {
       toast({ variant: "destructive", title: "PDF Failure" });
     } finally {
@@ -306,10 +306,10 @@ export default function ResultClient() {
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-20 w-20 md:h-28 md:w-28 bg-white shadow-xl border border-slate-100 rounded-3xl" />
                     <div className="text-left space-y-3">
                        <div className="flex flex-wrap items-center gap-3">
-                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-4 py-1 font-bold text-[10px] rounded-lg uppercase tracking-widest">Verified Report</Badge>
-                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-4 py-1 font-bold text-[10px] rounded-lg uppercase">Attempt #{userResults?.length || 1}</Badge>
+                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-4 py-1 font-bold text-[10px] rounded-lg">Verified report</Badge>
+                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-4 py-1 font-bold text-[10px] rounded-lg">Attempt #{userResults?.length || 1}</Badge>
                        </div>
-                       <h1 className="text-2xl md:text-5xl font-bold text-[#0F172A] tracking-tight leading-none uppercase">{sessionData.mockTitle}</h1>
+                       <h1 className="text-2xl md:text-5xl font-bold text-[#0F172A] tracking-tight leading-none">{sessionData.mockTitle}</h1>
                        <div className="flex flex-wrap items-center gap-6 text-[12px] md:text-lg font-semibold text-slate-400">
                           <div className="flex items-center gap-2"><Calendar className="h-5 w-5 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</span></div>
                           <div className="flex items-center gap-2"><TimerIcon className="h-5 w-5 text-slate-300" /> <span>Duration: {mockData?.duration || 120}:00</span></div>
@@ -318,7 +318,7 @@ export default function ResultClient() {
                  </div>
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
                     <Button onClick={handleShareOfficialReport} disabled={isGenerating} className="flex-1 lg:flex-none h-14 px-8 md:px-12 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 text-sm shadow-lg active:scale-95 transition-all border-none">
-                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-5 w-5" />} Share Report
+                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-5 w-5" />} Share report
                     </Button>
                     <Button onClick={handleDownloadPDF} disabled={isGenerating} variant="outline" className="flex-1 lg:flex-none h-14 px-8 border-2 border-slate-100 rounded-2xl gap-2 font-bold text-slate-500 hover:text-primary active:scale-95 transition-all">
                        {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} PDF
@@ -332,8 +332,8 @@ export default function ResultClient() {
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-10">
                   <div className="flex justify-center">
                      <TabsList className="bg-slate-100 p-1 rounded-3xl border border-[#E5EAF2] shadow-inner flex w-fit gap-1 h-auto">
-                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-12 font-bold text-[12px] h-12 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis Hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-2xl px-12 font-bold text-[12px] h-12 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review Portal</TabsTrigger>
+                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-12 font-bold text-[12px] h-12 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-2xl px-12 font-bold text-[12px] h-12 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review portal</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -364,7 +364,7 @@ export default function ResultClient() {
                                   <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                                      <div className="flex items-center gap-3">
                                         <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-[#0F172A] shadow-inner">#{q.originalIndex + 1}</div>
-                                        <Badge variant="outline" className="border-slate-100 text-slate-400 font-bold text-[9px] uppercase">{q.subjectId || 'General'}</Badge>
+                                        <Badge variant="outline" className="border-slate-100 text-slate-400 font-bold text-[9px]">Subject: {q.subjectId || 'General'}</Badge>
                                      </div>
                                   </div>
                                   <QuestionRenderer 
@@ -421,8 +421,9 @@ function FilterButton({ active, label, count, onClick }: any) {
       "flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 px-1 md:px-6 h-12 md:h-12 rounded-xl transition-all active:scale-95 border",
       active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-slate-50 border-transparent text-slate-400 hover:bg-slate-100"
     )}>
-       <span className="text-[9px] md:text-[11px] font-black uppercase tracking-tight">{label}</span>
+       <span className="text-[9px] md:text-[11px] font-bold tracking-tight">{label}</span>
        <span className={cn("text-[10px] md:text-xs font-bold opacity-40 tabular-nums")}>{count}</span>
     </button>
   )
 }
+
