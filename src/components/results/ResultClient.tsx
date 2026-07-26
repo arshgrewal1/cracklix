@@ -65,7 +65,8 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Institutional Result Engine v48.0 [Analytics V2 Display].
+ * @fileOverview Institutional Result Engine v49.0 [UI Cleaned].
+ * FIXED: Removed decorative blobs and ribbons for a data-focused layout.
  */
 
 export default function ResultClient() {
@@ -123,7 +124,6 @@ export default function ResultClient() {
           return;
        }
 
-       // Suffix priority for exact lookup
        const targetId = attemptIdFromUrl 
           ? `${user.uid}_${mockId}_${attemptIdFromUrl}` 
           : `${user.uid}_${mockId}`;
@@ -140,7 +140,6 @@ export default function ResultClient() {
                 return;
              }
 
-             // Fallback search in collection
              const resQuery = query(
                 collection(db, "results"),
                 where("userId", "==", user.uid),
@@ -205,8 +204,6 @@ export default function ResultClient() {
 
   const finalMetrics = useMemo(() => {
     if (!activeSession) return null;
-    
-    // V2 Logic: Favor pre-calculated Firestore nodes over client-side fallbacks
     const score = Number(activeSession.score) || 0;
     const totalQ = Number(activeSession.totalQuestions) || 0;
     const maxMarks = Number(activeSession.maxMarks) || totalQ;
@@ -343,14 +340,14 @@ export default function ResultClient() {
         
         <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1 print:hidden">
            <div className="flex items-center gap-4 md:gap-8 text-left w-full lg:w-auto">
-              <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-12 w-12 md:h-20 md:w-20 rounded-xl shadow-lg" />
+              <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-12 w-12 md:h-14 md:w-14 rounded-xl shadow-lg" />
               <div className="space-y-1 flex-1 min-w-0">
                  <div className="flex items-center gap-2">
                     <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm", finalMetrics?.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
                        {finalMetrics?.isQualified ? "Qualified" : "Not Qualified"}
                     </Badge>
                  </div>
-                 <h1 className="text-lg md:text-2xl font-bold tracking-tight text-[#0F172A] leading-tight truncate">
+                 <h1 className="text-base md:text-xl font-bold tracking-tight text-[#0F172A] leading-tight truncate">
                    {activeSession?.mockTitle}
                  </h1>
                  <div className="flex flex-wrap items-center justify-start gap-2 md:gap-3 font-bold text-[9px] text-slate-400">
@@ -381,11 +378,11 @@ export default function ResultClient() {
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-10">
             <TabsContent value="OVERVIEW" className="space-y-10 animate-in fade-in duration-500">
                 <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-                  <StatCard label="Net score" val={`${finalMetrics?.score} / ${finalMetrics?.maxMarks}`} sub={`${finalMetrics?.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
-                  <StatCard label="Punjab rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
+                  <StatCard label="Net Score" val={`${finalMetrics?.score} / ${finalMetrics?.maxMarks}`} sub={`${finalMetrics?.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
+                  <StatCard label="Punjab Rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
                   <StatCard label="Percentile" val={`${finalMetrics?.percentile}%`} sub="Verified" icon={<TrendingUp className="text-blue-500" />} />
-                  <StatCard label="Attempt accuracy" val={`${finalMetrics?.attemptAccuracy.toFixed(1)}%`} sub="Precision" icon={<Target className="text-emerald-500" />} />
-                  <StatCard label="Overall accuracy" val={`${finalMetrics?.overallAccuracy.toFixed(1)}%`} sub="Efficiency" icon={<ShieldCheck className="text-indigo-500" />} />
+                  <StatCard label="Accuracy" val={`${finalMetrics?.attemptAccuracy.toFixed(1)}%`} sub="Precision" icon={<Target className="text-emerald-500" />} />
+                  <StatCard label="Attempt Rate" val={`${finalMetrics?.attemptRate.toFixed(1)}%`} sub="Efficiency" icon={<Activity className="text-indigo-500" />} />
                   <StatCard label="Grade" val={finalMetrics?.grade} sub="Category" icon={<Award className="text-purple-500" />} />
                 </section>
 
@@ -393,18 +390,18 @@ export default function ResultClient() {
                   <div className="lg:col-span-8 space-y-6 md:space-y-10">
                       <Card className="border border-slate-50 shadow-xl rounded-[2rem] bg-white p-6 md:p-10 text-left">
                           <h3 className="text-sm md:text-xl font-bold text-[#0F172A] mb-8 flex items-center gap-3">
-                             <TrendingUp className="h-4 w-4 text-primary" /> Topper comparison
+                             <TrendingUp className="h-4 w-4 text-primary" /> Topper Comparison
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                              <div className="space-y-6">
-                                <ComparisonPill label="Your score" val={finalMetrics?.score || 0} max={finalMetrics?.maxMarks || 1} color="bg-primary" />
-                                <ComparisonPill label="Avg score" val={Number(avgScore.toFixed(1))} max={finalMetrics?.maxMarks || 1} color="bg-slate-200" />
-                                <ComparisonPill label="Topper score" val={topperScore} max={finalMetrics?.maxMarks || 1} color="bg-amber-400" />
+                                <ComparisonPill label="Your Score" val={finalMetrics?.score || 0} max={finalMetrics?.maxMarks || 1} color="bg-primary" />
+                                <ComparisonPill label="Avg Score" val={Number(avgScore.toFixed(1))} max={finalMetrics?.maxMarks || 1} color="bg-slate-200" />
+                                <ComparisonPill label="Topper Score" val={topperScore} max={finalMetrics?.maxMarks || 1} color="bg-amber-400" />
                              </div>
                              <div className="bg-slate-50 rounded-[1.5rem] p-6 flex flex-col items-center justify-center text-center space-y-3 border border-slate-100">
                                 <Target className="h-6 w-6 text-rose-500" />
                                 <div>
-                                   <p className="text-[9px] font-bold text-slate-400">Gap from topper</p>
+                                   <p className="text-[9px] font-bold text-slate-400">Gap From Topper</p>
                                    <p className="text-2xl font-black text-[#0F172A] tabular-nums mt-1">-{finalMetrics?.topperGap.toFixed(1)}</p>
                                 </div>
                                 <p className="text-[10px] font-medium text-slate-500 max-w-[160px] leading-relaxed">Focus on weak subjects to close this gap.</p>
@@ -415,7 +412,7 @@ export default function ResultClient() {
                       <Card className="border border-slate-50 shadow-xl rounded-[2rem] bg-white p-6 md:p-10 text-left">
                           <div className="flex justify-between items-center mb-8">
                              <h3 className="text-sm md:text-xl font-bold text-[#0F172A] flex items-center gap-3">
-                                <ShieldCheck className="h-4 w-4 text-emerald-500" /> Readiness score
+                                <ShieldCheck className="h-4 w-4 text-emerald-500" /> Readiness Score
                              </h3>
                              <Badge className={cn(
                                 "border-none text-[8px] font-black px-3 py-1 rounded-full shadow-lg",
@@ -452,8 +449,8 @@ export default function ResultClient() {
                           <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-48 w-48 text-primary" /></div>
                           <div className="relative z-10 space-y-8 text-left">
                              <div className="space-y-1">
-                                <h3 className="text-xl font-bold tracking-tight leading-tight">Smart insights</h3>
-                                <p className="text-[9px] font-bold text-slate-500">AI audit hub</p>
+                                <h3 className="text-xl font-bold tracking-tight leading-tight">Smart Insights</h3>
+                                <p className="text-[9px] font-bold text-slate-500">AI Audit Hub</p>
                              </div>
                              <div className="space-y-5">
                                 <InsightItem text={`Attempt rate is ${finalMetrics?.attemptRate.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptRate < 50 ? 'Lower than standard.' : 'Good volume.'}`} />
@@ -462,7 +459,7 @@ export default function ResultClient() {
                              </div>
                              <div className="pt-6 border-t border-white/5">
                                 <Button asChild variant="ghost" className="w-full text-primary hover:text-white hover:bg-white/5 font-bold text-[10px] tracking-tight gap-2">
-                                   <Link href={`/leaderboard?id=${mockId}`}>Full rankings <ArrowRight className="h-3" /></Link>
+                                   <Link href={`/leaderboard?id=${mockId}`}>Full Rankings <ArrowRight className="h-3" /></Link>
                                 </Button>
                              </div>
                           </div>
@@ -472,7 +469,7 @@ export default function ResultClient() {
 
                 <section className="space-y-6 md:space-y-8">
                    <h3 className="text-sm md:text-xl font-bold text-[#0F172A] px-1 flex items-center gap-3">
-                      <Layers className="h-5 w-5 text-blue-500" /> Subject level audit
+                      <Layers className="h-5 w-5 text-blue-500" /> Subject Level Audit
                    </h3>
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {activeSession.subjectAnalysis?.map((sub: any, i: number) => (
@@ -509,7 +506,7 @@ export default function ResultClient() {
                            const rawAns = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
                            const isAttempted = rawAns !== null && rawAns !== undefined && String(rawAns) !== "";
                            return (
-                               <Card key={q.id} className="border border-slate-50 shadow-lg rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-white text-left">
+                               <Card key={q.id} className="border border-slate-50 shadow-lg rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white text-left">
                                <div className="p-6 md:p-10 space-y-6">
                                    <Badge variant="outline" className="px-3 py-0.5 rounded-lg border-slate-100 text-slate-400 font-bold text-[8px]">
                                        Question #{q.originalIndex + 1}
@@ -538,7 +535,10 @@ export default function ResultClient() {
                               examTitle={activeSession.mockTitle || "Mock Test"} 
                               score={finalMetrics.score.toFixed(2)} 
                               rank={liveRank} 
+                              totalCandidates={totalCandidates}
                               accuracy={finalMetrics.overallAccuracy.toFixed(1)} 
+                              attemptAccuracy={finalMetrics.attemptAccuracy.toFixed(1)}
+                              attemptRate={finalMetrics.attemptRate.toFixed(1)}
                               timeTaken={formatTimeStr(activeSession.timeTaken)} 
                               correct={activeSession.correctCount} 
                               wrong={activeSession.wrongCount} 
@@ -549,6 +549,7 @@ export default function ResultClient() {
                               branding={branding}
                               subjects={activeSession.subjectAnalysis}
                               grade={finalMetrics.grade}
+                              duration={activeSession.duration || mock?.duration}
                           />
                        )}
                    </div>
