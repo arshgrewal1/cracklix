@@ -16,7 +16,9 @@ import {
   Users,
   Timer,
   Star,
-  BookOpen
+  BookOpen,
+  Globe,
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +32,7 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Scorecard v6.0 [Hierarchy Hardened].
+ * @fileOverview Official Institutional Scorecard v7.0 [Hierarchy Hardened].
  * 1. Score (Massive - 180px)
  * 2. Accuracy (Secondary)
  * 3. Percentile (Tertiary)
@@ -93,6 +95,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             </div>
             <div className="flex gap-10">
                <DetailNode icon={<Zap />} label="Attempt No" val={data.attemptCount || "01"} />
+               <div className="w-px h-8 bg-slate-200" />
                <DetailNode icon={<Calendar />} label="Cycle" val="Feb 2026" />
             </div>
          </div>

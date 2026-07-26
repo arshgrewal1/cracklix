@@ -43,8 +43,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toBlob } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v53.0 [Direct Share Prioritized].
- * FIXED: Optimized handleShareResult to prioritize Native Share Sheet for all platforms.
+ * @fileOverview Universal Result Hub Viewer v54.0 [Native Direct Share Hardened].
+ * FIXED: Implemented a robust background caching engine to ensure instant direct sharing.
  */
 
 export default function ResultClient() {
@@ -70,7 +70,10 @@ export default function ResultClient() {
   const [avgScore, setAvgScore] = useState<number>(0)
   const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
 
+  // Share Caching Store
   const [isSharing, setIsSharing] = useState(false);
+  const [cachedResultBlob, setCachedResultBlob] = useState<Blob | null>(null);
+  const generationAttempted = useRef(false);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -140,6 +143,88 @@ export default function ResultClient() {
      fetchRankingMetrics();
   }, [db, mockId, sessionData]);
 
+  /**
+   * @description Background Caching Engine.
+   * Silently prepares the 1080x1350 result card immediately after rank audit.
+   */
+  const prepareShareCard = useCallback(async () => {
+    if (!sessionData || generationAttempted.current || cachedResultBlob) return;
+    generationAttempted.current = true;
+
+    // Safety Delay: Ensure all fonts and official logos are painted
+    await new Promise(r => setTimeout(r, 3000));
+
+    try {
+      const node = document.getElementById('cracklix-result-card-canvas');
+      if (!node) return;
+
+      const blob = await toBlob(node, {
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      if (blob) {
+         setCachedResultBlob(blob);
+         console.log('[SHARE_HUB] Professional scorecard synchronized.');
+      }
+    } catch (e) {
+      generationAttempted.current = false;
+    }
+  }, [sessionData, cachedResultBlob]);
+
+  useEffect(() => {
+     if (sessionData && liveRank !== "---") {
+        prepareShareCard();
+     }
+  }, [sessionData, liveRank, prepareShareCard]);
+
+  /**
+   * @description Direct Share Protocol:
+   * Prioritizes Native Share Sheet for all platforms (WhatsApp, Instagram, Telegram).
+   */
+  const handleShareResult = async () => {
+    if (!sessionData || isSharing) return;
+    
+    if (!cachedResultBlob) {
+       toast({ title: "Registry Audit", description: "Finalizing scorecard. Please wait 2 seconds." });
+       await prepareShareCard();
+       return;
+    }
+
+    setIsSharing(true);
+
+    try {
+      const fileName = `Cracklix_Report_${sessionData.mockTitle.replace(/\s+/g, '_')}.png`;
+      const file = new File([cachedResultBlob], fileName, { type: 'image/png' });
+
+      // LOGIC: Direct Native Share (Sidebar Style)
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+         await navigator.share({
+            title: `My Cracklix Result`,
+            text: `🎯 Check my official scorecard for ${sessionData.mockTitle}. Verified standing on Cracklix!`,
+            files: [file]
+         });
+      } else {
+         // Fallback: HD Download
+         const url = URL.createObjectURL(cachedResultBlob);
+         const link = document.createElement('a');
+         link.download = fileName;
+         link.href = url;
+         link.click();
+         URL.revokeObjectURL(url);
+         toast({ title: "Report Ready", description: "Scorecard downloaded to device." });
+      }
+    } catch (e: any) {
+       if (e.name !== 'AbortError') {
+          toast({ variant: "destructive", title: "Transmission Error", description: "Try again in a moment." });
+       }
+    } finally {
+       setIsSharing(true); // Persist state briefly
+       setTimeout(() => setIsSharing(false), 2000);
+    }
+  };
+
   useEffect(() => {
     async function loadQuestions() {
       if (!db || !mockId) return;
@@ -175,59 +260,6 @@ export default function ResultClient() {
     }
     loadQuestions()
   }, [db, mockId]);
-
-  /**
-   * @description Direct Share Protocol:
-   * Prioritizes Native Share Sheet for all platforms (WhatsApp, Instagram, Telegram).
-   * Falls back to HD Download only if sharing is blocked by the browser.
-   */
-  const handleShareResult = async () => {
-    if (!sessionData || isSharing) return;
-    
-    setIsSharing(true);
-    toast({ title: "Registry Audit", description: "Preparing official scorecard..." });
-
-    try {
-      const node = document.getElementById('cracklix-result-card-canvas');
-      if (!node) throw new Error("Registry node missing.");
-
-      const blob = await toBlob(node, {
-         pixelRatio: 2,
-         cacheBust: true,
-         backgroundColor: '#ffffff'
-      });
-
-      if (!blob) throw new Error("Image rasterization failed.");
-
-      const fileName = `Cracklix_Report_${sessionData.mockTitle.replace(/\s+/g, '_')}.png`;
-      const file = new File([blob], fileName, { type: 'image/png' });
-
-      // Logic: Favor Direct Share across all devices (Native Share Sheet)
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-         await navigator.share({
-            title: `My Cracklix Result`,
-            text: `🎯 Check my official scorecard for ${sessionData.mockTitle}. Verified standing on Cracklix!`,
-            files: [file]
-         });
-      } else {
-         // Fallback: Direct Download only if sharing is unavailable
-         const url = URL.createObjectURL(blob);
-         const link = document.createElement('a');
-         link.download = fileName;
-         link.href = url;
-         link.click();
-         URL.revokeObjectURL(url);
-         toast({ title: "Report Ready", description: "Scorecard downloaded to device." });
-      }
-    } catch (e: any) {
-       console.error("[SHARE_ERROR]:", e);
-       if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Audit Error", description: "Could not broadcast scorecard." });
-       }
-    } finally {
-       setIsSharing(false);
-    }
-  };
 
   const reviewNodes = useMemo(() => {
     if (!sessionData || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
@@ -274,7 +306,7 @@ export default function ResultClient() {
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
                     <Button onClick={handleShareResult} disabled={isSharing} className="flex-1 lg:flex-none h-12 px-8 bg-[#0B57D0] hover:bg-blue-700 text-white font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
                        {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
-                       Share Official Result
+                       {cachedResultBlob ? 'Direct Share Card' : 'Preparing Card...'}
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
@@ -363,7 +395,7 @@ export default function ResultClient() {
   )
 }
 
-function FilterButton({ active, label, count, onClick }: any) {
+function FilterButton({ active, label, count, onClick, color }: any) {
   return (
     <button onClick={onClick} className={cn(
       "flex items-center gap-3 px-6 h-10 rounded-xl text-[10px] font-bold transition-all active:scale-95 border whitespace-nowrap",
