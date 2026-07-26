@@ -33,9 +33,9 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Result Report v1.2
- * FIXED: Removed all uppercase styling from labels and headers.
- * OPTIMIZED: Layout scaled for high-fidelity JPEG compression targeting ~200KB.
+ * @fileOverview Official Institutional Result Report v1.3.
+ * FIXED: Missing Activity and Card imports.
+ * UPDATED: System-wide Title Case for professional look.
  */
 const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>(({ data, rank, totalCandidates }, ref) => {
   if (!data) return null;

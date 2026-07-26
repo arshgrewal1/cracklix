@@ -48,9 +48,10 @@ import { toJpeg } from 'html-to-image'
 import jsPDF from 'jspdf'
 
 /**
- * @fileOverview Universal Result Hub Viewer v72.0.
- * UPDATED: Optimized for ~200KB export size using JPEG compression and 1.5x pixel ratio.
- * FIXED: Removed uppercase from buttons and UI labels.
+ * @fileOverview Universal Result Hub Viewer v75.0.
+ * FIXED: Button overflow in PWA mode using content-weighted flex.
+ * FIXED: ReferenceErrors for results and Calendar icon.
+ * UPDATED: Removed uppercase across all UI nodes.
  */
 
 export default function ResultClient() {
@@ -162,7 +163,6 @@ export default function ResultClient() {
       const node = reportRef.current;
       if (!node) throw new Error("Report node not ready.");
 
-      // Use JPEG with 0.75 quality and 1.5x pixel ratio for ~200KB target
       const dataUrl = await toJpeg(node, {
         quality: 0.75,
         pixelRatio: 1.5,
@@ -182,7 +182,7 @@ export default function ResultClient() {
       if (navigator.share) {
         await navigator.share({
           title: "Official Cracklix Report",
-          text: `My verified exam report for ${sessionData.mockTitle}. Grade: ${sessionData.grade || 'Verified'}.`,
+          text: `My verified exam report for ${sessionData.mockTitle}.`,
           files: [file]
         });
       } else {
@@ -194,11 +194,7 @@ export default function ResultClient() {
       }
     } catch (e: any) {
       if (e.name !== 'AbortError') {
-        toast({ 
-          variant: "destructive", 
-          title: "Audit Error", 
-          description: "Could not broadcast scorecard." 
-        });
+        toast({ variant: "destructive", title: "Share failed" });
       }
     } finally {
       setIsGenerating(false);
@@ -213,12 +209,7 @@ export default function ResultClient() {
       const node = reportRef.current;
       if (!node) throw new Error("Node missing.");
 
-      // Optimized for A4 size and KV size targets
-      const imgData = await toJpeg(node, { 
-        quality: 0.7, 
-        pixelRatio: 1.5, 
-        backgroundColor: '#ffffff' 
-      });
+      const imgData = await toJpeg(node, { quality: 0.7, pixelRatio: 1.5, backgroundColor: '#ffffff' });
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgProps = pdf.getImageProperties(imgData);
@@ -227,7 +218,7 @@ export default function ResultClient() {
       
       pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
       pdf.save(`Cracklix_Report_${sessionData.attemptId}.pdf`);
-      toast({ title: "PDF Synced", description: "Report saved (approx 200KB)." });
+      toast({ title: "PDF Synced" });
     } catch (e) {
       toast({ variant: "destructive", title: "PDF Failure" });
     } finally {
@@ -294,37 +285,44 @@ export default function ResultClient() {
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left relative">
       <Navbar />
       
-      <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-8 md:py-16 space-y-6 md:space-y-10">
+      <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-6 md:py-16 space-y-6 md:space-y-10">
         
         {sessionData ? (
            <>
-              <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-6 md:p-12 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                 <div className="flex items-center gap-6 md:gap-10">
-                    <button onClick={() => router.back()} className="h-10 w-10 md:h-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
+              <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-5 md:p-12 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                 <div className="flex items-center gap-4 md:gap-10 w-full min-w-0">
+                    <button onClick={() => router.back()} className="h-10 w-10 md:h-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-90 shrink-0">
                        <ArrowLeft className="h-5 w-5" />
                     </button>
-                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-20 w-20 md:h-28 md:w-28 bg-white shadow-xl border border-slate-100 rounded-3xl" />
-                    <div className="text-left space-y-3">
-                       <div className="flex flex-wrap items-center gap-3">
-                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-4 py-1 font-bold text-[10px] rounded-lg">Verified report</Badge>
-                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-4 py-1 font-bold text-[10px] rounded-lg">Attempt #{userResults?.length || 1}</Badge>
+                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-24 md:w-24 bg-white shadow-xl border border-slate-100 rounded-2xl md:rounded-3xl" />
+                    <div className="text-left space-y-2 flex-1 min-w-0">
+                       <div className="flex flex-wrap items-center gap-2">
+                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 py-0.5 font-bold text-[9px] rounded-lg">Verified report</Badge>
+                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-3 py-0.5 font-bold text-[9px] rounded-lg">Attempt #{userResults?.length || 1}</Badge>
                        </div>
-                       <h1 className="text-2xl md:text-5xl font-bold text-[#0F172A] tracking-tight leading-none">{sessionData.mockTitle}</h1>
-                       <div className="flex flex-wrap items-center gap-6 text-[12px] md:text-lg font-semibold text-slate-400">
-                          <div className="flex items-center gap-2"><Calendar className="h-5 w-5 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</span></div>
-                          <div className="flex items-center gap-2"><TimerIcon className="h-5 w-5 text-slate-300" /> <span>Duration: {mockData?.duration || 120}:00</span></div>
+                       <h1 className="text-lg md:text-4xl font-bold text-[#0F172A] tracking-tight leading-tight truncate">{sessionData.mockTitle}</h1>
+                       <div className="flex flex-wrap items-center gap-4 text-[10px] md:text-base font-semibold text-slate-400">
+                          <div className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span></div>
+                          <div className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4 text-slate-300" /> <span>{mockData?.duration || 120}:00</span></div>
                        </div>
                     </div>
                  </div>
-                 <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-                    <Button onClick={handleShareOfficialReport} disabled={isGenerating} className="flex-1 lg:flex-none h-14 px-8 md:px-12 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 text-sm shadow-lg active:scale-95 transition-all border-none">
-                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-5 w-5" />} Share report
+
+                 {/* ACTION BAR: PWA FIXED */}
+                 <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto mt-2">
+                    <Button onClick={handleShareOfficialReport} disabled={isGenerating} className="flex-[2] lg:flex-none h-12 px-4 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[11px] md:text-sm shadow-lg active:scale-95 border-none">
+                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
+                       <span className="whitespace-nowrap">Share report</span>
                     </Button>
-                    <Button onClick={handleDownloadPDF} disabled={isGenerating} variant="outline" className="flex-1 lg:flex-none h-14 px-8 border-2 border-slate-100 rounded-2xl gap-2 font-bold text-slate-500 hover:text-primary active:scale-95 transition-all">
-                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} PDF
+                    <Button onClick={handleDownloadPDF} disabled={isGenerating} variant="outline" className="flex-1 lg:flex-none h-12 px-2 border-2 border-slate-100 rounded-full gap-1 font-bold text-slate-400 hover:text-primary active:scale-95 transition-all text-[11px] md:text-sm">
+                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} 
+                       <span>PDF</span>
                     </Button>
-                    <Button asChild className="flex-1 lg:flex-none h-14 px-8 md:px-12 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl gap-3 text-sm shadow-md transition-all active:scale-95 border-none">
-                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake</Link>
+                    <Button asChild className="flex-[1.5] lg:flex-none h-12 px-4 bg-[#0F172A] hover:bg-black text-white font-bold rounded-full gap-2 text-[11px] md:text-sm shadow-md transition-all active:scale-95 border-none">
+                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`} className="flex items-center justify-center gap-2">
+                          <RefreshCw className="h-4 w-4" /> 
+                          <span className="whitespace-nowrap">Retake</span>
+                       </Link>
                     </Button>
                  </div>
               </Card>
@@ -332,8 +330,8 @@ export default function ResultClient() {
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-10">
                   <div className="flex justify-center">
                      <TabsList className="bg-slate-100 p-1 rounded-3xl border border-[#E5EAF2] shadow-inner flex w-fit gap-1 h-auto">
-                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-12 font-bold text-[12px] h-12 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-2xl px-12 font-bold text-[12px] h-12 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review portal</TabsTrigger>
+                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-8 md:px-12 font-bold text-[11px] md:text-[12px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-2xl px-8 md:px-12 font-bold text-[11px] md:text-[12px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review portal</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -350,8 +348,8 @@ export default function ResultClient() {
                   </TabsContent>
 
                   <TabsContent value="REVIEW" className="m-0 max-w-5xl mx-auto space-y-6 md:space-y-10">
-                      <div className="bg-white p-4 md:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
-                          <div className="grid grid-cols-4 gap-1.5 md:gap-4 w-full">
+                      <div className="bg-white p-2 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                          <div className="grid grid-cols-4 gap-1 md:gap-4 w-full">
                              <FilterButton active={activeReviewFilter === 'ALL'} label="All" count={reviewNodes.all.length} onClick={() => setActiveReviewFilter('ALL')} />
                              <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" count={reviewNodes.correct.length} onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                              <FilterButton active={activeReviewFilter === 'WRONG'} label="Wrong" count={reviewNodes.wrong.length} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
@@ -360,7 +358,7 @@ export default function ResultClient() {
                       </div>
                       <div className="grid grid-cols-1 gap-6">
                           {filteredQuestions.map((q) => (
-                              <Card key={q.id} className="border border-[#E5EAF2] shadow-sm rounded-[2.5rem] bg-white p-6 md:p-12 space-y-8 text-left">
+                              <Card key={q.id} className="border border-[#E5EAF2] shadow-sm rounded-[2rem] bg-white p-6 md:p-12 space-y-8 text-left">
                                   <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                                      <div className="flex items-center gap-3">
                                         <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-[#0F172A] shadow-inner">#{q.originalIndex + 1}</div>
@@ -380,7 +378,6 @@ export default function ResultClient() {
                   </TabsContent>
               </Tabs>
               
-              {/* HIDDEN CAPTURE NODE */}
               <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none opacity-0">
                  <ShareableResultCard 
                    ref={reportRef}
@@ -418,12 +415,11 @@ export default function ResultClient() {
 function FilterButton({ active, label, count, onClick }: any) {
   return (
     <button onClick={onClick} className={cn(
-      "flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 px-1 md:px-6 h-12 md:h-12 rounded-xl transition-all active:scale-95 border",
+      "flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-3 px-1 md:px-6 h-12 rounded-xl transition-all active:scale-95 border",
       active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-slate-50 border-transparent text-slate-400 hover:bg-slate-100"
     )}>
        <span className="text-[9px] md:text-[11px] font-bold tracking-tight">{label}</span>
-       <span className={cn("text-[10px] md:text-xs font-bold opacity-40 tabular-nums")}>{count}</span>
+       <span className={cn("text-[9px] md:text-xs font-bold opacity-40 tabular-nums")}>{count}</span>
     </button>
   )
 }
-
