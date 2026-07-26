@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useRef } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -58,11 +58,6 @@ import { useExamStore } from "@/store/useExamStore"
 import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
-/**
- * @fileOverview Official Result Hub v6.0 [Critical Fix Hub].
- * FIXED: Re-engineered Download PDF to use Binary Blobs for Android/PWA.
- * FIXED: Hardened Retake logic with definitive Registry Purge.
- */
 export default function ResultClient() {
   const db = useFirestore()
   const { user, profile, loading: userLoading } = useUser()
@@ -122,20 +117,23 @@ export default function ResultClient() {
            );
            
            const snap = await getDocs(q);
-           setTotalCandidates(snap.size);
-           
-           const myIndex = snap.docs.findIndex(d => d.id === user?.uid);
-           if (myIndex !== -1) {
-              setLiveRank(myIndex + 1);
-           } else {
-              setLiveRank(sessionData.rankAtSubmission || "---");
+           if (isMounted) {
+              setTotalCandidates(snap.size);
+              const myIndex = snap.docs.findIndex(d => d.id === user?.uid);
+              if (myIndex !== -1) {
+                 setLiveRank(myIndex + 1);
+              } else {
+                 setLiveRank(sessionData.rankAtSubmission || "---");
+              }
            }
         } catch (e) { 
            setLiveRank(sessionData.rankAtSubmission || "---"); 
            setTotalCandidates(sessionData.totalCandidatesAtSubmission || 0);
         }
      }
+     let isMounted = true;
      fetchRankingMetrics();
+     return () => { isMounted = false; };
   }, [db, mockId, sessionData?.score, user?.uid, sessionData?.rankAtSubmission, sessionData?.totalCandidatesAtSubmission]);
 
   useEffect(() => {
@@ -181,28 +179,20 @@ export default function ResultClient() {
 
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
-    if (!confirm("Start new attempt? Your current progress will be reset, but this result will remain in history.")) return;
+    if (!confirm("Start new attempt? Your current standings will be preserved until a better score is achieved.")) return;
     
     setIsSyncing(true);
     try {
-      // 1. Clear Firestore attempt tracker to bypass resume logic
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
-      
-      // 2. Wipe Local Store
       resetStore();
-      
-      // 3. Clear Guest Cache if any
       if (typeof window !== 'undefined') {
         localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
         localStorage.removeItem(`cracklix_guest_result_${mockId}`);
       }
-
-      toast({ title: "Session Reset", description: "Identity sync active. Redirecting to start node." });
-      
-      // 4. Force direct jump to attempt node
+      toast({ title: "Registry Reset", description: "Redirecting to start node." });
       router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
     } catch (e) { 
-      toast({ variant: "destructive", title: "Sync failure", description: "Please refresh and try again." }); 
+      toast({ variant: "destructive", title: "Sync failure" }); 
       setIsSyncing(false);
     }
   };
@@ -212,44 +202,24 @@ export default function ResultClient() {
     setIsExporting(true);
     
     try {
-      // 1. Direct tab jump for capture
       setActiveMainTab("REPORT"); 
       toast({ title: "Generating PDF", description: "Preparing your professional report..." });
-      
-      // 2. Allow DOM to settle for fonts/images
       await new Promise(r => setTimeout(r, 1000));
       
       const element = document.getElementById('cracklix-result-card');
       if (!element) throw new Error("Capture node not found.");
 
-      // 3. High-Res Capture
-      const dataUrl = await toPng(element, { 
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: '#ffffff'
-      });
-
-      // 4. PDF Assembler
-      const pdf = new jsPDF({
-        orientation: 'p',
-        unit: 'mm',
-        format: 'a4',
-        compress: true
-      });
-
+      const dataUrl = await toPng(element, { quality: 0.95, pixelRatio: 2, backgroundColor: '#ffffff' });
+      const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-
       pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
       
       const fileName = `Cracklix_${activeSession.mockTitle.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.pdf`;
-      
-      // 5. Binary Trigger (Safe for Android/PWA)
       pdf.save(fileName);
-      
-      toast({ title: "Download Successful", description: "Check your device's downloads folder." });
+      toast({ title: "Download Successful" });
     } catch (e) {
-      toast({ variant: "destructive", title: "Export Failed", description: "Please try again or use Chrome." });
+      toast({ variant: "destructive", title: "Export Failed" });
     } finally {
       setIsExporting(false);
     }
@@ -355,7 +325,6 @@ export default function ResultClient() {
         </div>
 
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
-           
            <TabsContent value="OVERVIEW" className="space-y-10 animate-in fade-in duration-500">
               <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
                  <StatCard label="Final Score" val={activeSession.score.toFixed(1)} icon={<Zap className="text-primary" />} />
@@ -385,24 +354,6 @@ export default function ResultClient() {
                                       className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : sub.accuracy > 40 ? "bg-blue-500" : "bg-rose-500")} 
                                    />
                                 </div>
-                                <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                   <span>Correct: {sub.correct} / {sub.total}</span>
-                                   <span>Score: {sub.score.toFixed(1)}</span>
-                                </div>
-                             </div>
-                          ))}
-                       </div>
-                    </Card>
-
-                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
-                       <h2 className="text-xl md:text-2xl font-bold text-[#0F172A] mb-8 flex items-center gap-4">
-                          <Zap className="h-6 w-6 text-primary fill-current" /> Performance insights
-                       </h2>
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {Array.isArray(activeSession.insights) && activeSession.insights.map((ins: string, i: number) => (
-                             <div key={i} className="p-5 rounded-2xl bg-slate-50/50 border border-slate-100 flex items-start gap-4 shadow-sm">
-                                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                                <p className="text-[12px] md:text-sm font-medium text-slate-600 tracking-tight leading-snug">{ins}</p>
                              </div>
                           ))}
                        </div>
@@ -410,32 +361,6 @@ export default function ResultClient() {
                  </div>
 
                  <div className="lg:col-span-4 space-y-8">
-                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-8 md:p-10 text-left space-y-8">
-                       <div className="space-y-1">
-                          <h3 className="text-lg font-bold flex items-center gap-3 text-[#0F172A] uppercase tracking-widest">
-                            <Layers className="h-4 w-4 text-primary" /> Mastery level
-                          </h3>
-                       </div>
-                       <div className="space-y-8">
-                          {Array.isArray(activeSession.complexityAnalysis) && activeSession.complexityAnalysis.map((diff: any, i: number) => (
-                             <div key={i} className="space-y-2.5">
-                                <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">
-                                   <span>{diff.name} Questions</span>
-                                   <span className="text-[#0F172A] font-black tabular-nums">{diff.accuracy}%</span>
-                                </div>
-                                <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
-                                   <motion.div 
-                                      initial={{ width: 0 }} 
-                                      animate={{ width: `${diff.accuracy}%` }} 
-                                      transition={{ duration: 1 }} 
-                                      className={cn("h-full", i === 0 ? "bg-emerald-500" : i === 1 ? "bg-blue-500" : "bg-rose-500")} 
-                                   />
-                                </div>
-                             </div>
-                          ))}
-                       </div>
-                    </Card>
-
                     <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden group">
                        <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-48 w-48 text-primary" /></div>
                        <div className="relative z-10 space-y-6">
@@ -471,7 +396,6 @@ export default function ResultClient() {
                        const isAttempted = rawAns !== null && rawAns !== undefined && String(rawAns) !== "";
                        const userSelectedLabel = isAttempted ? ['A', 'B', 'C', 'D'][Number(rawAns)] : null;
                        const isCorrect = userSelectedLabel === q.correctAnswer;
-                       
                        return (
                           <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white text-left group">
                              <div className="p-8 md:p-12 space-y-8 md:space-y-10">
@@ -479,24 +403,8 @@ export default function ResultClient() {
                                    <Badge variant="outline" className="px-4 py-1 rounded-full border-slate-100 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
                                       Question {q.originalIndex + 1}
                                    </Badge>
-                                   <div className="flex items-center gap-2">
-                                      {!isAttempted ? (
-                                         <Badge className="bg-slate-100 text-slate-500 border-none px-3 py-1 font-bold text-[9px] uppercase tracking-widest">Skipped</Badge>
-                                      ) : isCorrect ? (
-                                         <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] px-3 py-1 rounded shadow-sm">Correct</Badge>
-                                      ) : (
-                                         <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] px-3 py-1 rounded shadow-sm">Wrong</Badge>
-                                      )}
-                                   </div>
                                 </div>
-                                
-                                <QuestionRenderer 
-                                  question={q} 
-                                  language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
-                                  showSolution={true} 
-                                  selectedAnswer={isAttempted ? Number(rawAns) : null} 
-                                  className="p-0 shadow-none border-none bg-transparent" 
-                                />
+                                <QuestionRenderer question={q} language={activeSession.languageMode || 'ENGLISH_PUNJABI'} showSolution={true} selectedAnswer={isAttempted ? Number(rawAns) : null} className="p-0 shadow-none border-none bg-transparent" />
                              </div>
                           </Card>
                        )
@@ -526,20 +434,8 @@ export default function ResultClient() {
                        grade={activeSession.grade}
                     />
                  </div>
-                 <div className="mt-12 text-center space-y-4 print:hidden">
-                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Official Institutional Report Card.</p>
-                    <Button 
-                      onClick={handleDownloadPDF} 
-                      disabled={isExporting}
-                      className="h-14 px-12 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-[11px] rounded-xl shadow-xl border-none active:scale-95"
-                    >
-                      {isExporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                      Download High-Quality PDF
-                    </Button>
-                 </div>
               </div>
            </TabsContent>
-
         </Tabs>
       </main>
       <Footer />

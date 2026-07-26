@@ -30,45 +30,35 @@ export interface BrandingSettings {
 }
 
 export interface UserPermissions {
-  // Subjects
   createSubject: boolean;
   editSubject: boolean;
   deleteSubject: boolean;
-  // Mocks
   createMock: boolean;
   editMock: boolean;
   deleteMock: boolean;
-  // Questions
   uploadQuestions: boolean;
   editQuestions: boolean;
   deleteQuestions: boolean;
-  // PYQs
   uploadPYQs: boolean;
   editPYQs: boolean;
   deletePYQs: boolean;
-  // Media & Content
   uploadImages: boolean;
   publishContent: boolean;
   unpublishContent: boolean;
   reviewContent: boolean;
-  // Ecosystem
   manageCategories: boolean;
   manageSeries: boolean;
   managePasses: boolean;
   manageCoupons: boolean;
-  // User Governance
   manageUsers: boolean;
   manageRoles: boolean;
-  // Monetization
-  viewRevenue: boolean;
-  managePayments: boolean;
-  viewAnalytics: boolean;
-  // Settings & Comm
   manageNotifications: boolean;
   manageAnnouncements: boolean;
+  viewAnalytics: boolean;
+  viewRevenue: boolean;
+  managePayments: boolean;
   websiteSettings: boolean;
   firebaseSettings: boolean;
-  // Data
   exportData: boolean;
   importData: boolean;
 }
@@ -85,19 +75,18 @@ export interface UserProfile {
   permissions: UserPermissions;
   state: "Punjab";
   targetExam: string;
-  createdAt: string;
+  createdAt: any;
   updatedAt: any;
-  createdBy?: string;
   lastLoginAt?: any;
   activeDeviceId?: string;
   passStatus: 'active' | 'expired' | 'none';
-  passType: 'FREE' | 'SILVER' | 'GOLD' | 'PREMIUM';
   passExpiresAt?: string;
   photoURL?: string;
   gender?: Gender;
   pinnedExams?: string[];
   savedVacancies?: string[];
-  // Aggregate Stats
+  savedCA?: string[];
+  // Platform-Wide Aggregates
   totalTests?: number;
   highestScore?: number;
   averageAccuracy?: number;
@@ -125,24 +114,6 @@ export interface LeaderboardEntry {
   attemptCount: number;
   bestAttemptId: string;
   submittedAt: any;
-  rank: number;
-}
-
-export interface DistributionSettings {
-  primaryWebsiteUrl: string;
-  installUrl: string;
-  playStoreUrl: string;
-  appStoreUrl: string;
-  shareTitle: string;
-  shareDescription: string;
-  shareMessage: string;
-  seoTitle: string;
-  seoDescription: string;
-  ogImageUrl: string;
-  twitterImageUrl: string;
-  keywords: string;
-  canonicalUrl: string;
-  updatedAt: any;
 }
 
 export interface Category {
@@ -162,15 +133,17 @@ export interface Board {
   displayOrder?: number;
 }
 
-export interface Subject {
+export interface Exam {
   id: string;
   name: string;
+  boardId: string;
+  categoryId: string;
+  displayOrder?: number;
   description?: string;
-  imageUrl?: string;
-  displayOrder: number;
-  isActive: boolean;
-  boardId?: string;
-  createdBy?: string;
+  isTrending?: boolean;
+  totalMocks?: string | number;
+  studentCount?: string;
+  activeQuestions?: number;
 }
 
 export interface TestSeries {
@@ -183,7 +156,6 @@ export interface TestSeries {
   displayOrder: number;
   isActive: boolean;
   accessLevel: AccessLevel;
-  createdBy?: string;
 }
 
 export interface MockTest {
@@ -205,7 +177,6 @@ export interface MockTest {
   languageMode: LanguageDisplayMode;
   createdAt: any;
   updatedAt: any;
-  createdBy?: string;
 }
 
 export interface Question {
@@ -225,22 +196,86 @@ export interface Question {
   marks: number;
   negativeMarks: number;
   status: ContentStatus;
-  createdBy: string;
   createdAt: any;
   updatedAt: any;
 }
 
-export interface Advertisement {
+export interface AuditLog {
   id: string;
-  title: string;
-  type: 'BANNER' | 'ADSENSE' | 'HTML';
-  status: 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
-  placements: string[];
-  desktopImageUrl?: string;
-  externalUrl?: string;
-  priority: number;
-  stats?: { impressions: number, clicks: number };
+  user: string;
+  action: string;
+  details: string;
+  timestamp: any;
 }
 
-export type Ad = Advertisement;
-export type Mock = MockTest;
+export interface CalendarEvent {
+  id: string;
+  board: string;
+  post: string;
+  date: string;
+  status: string;
+  type: string;
+  color?: string;
+  published: boolean;
+  createdAt: any;
+}
+
+export interface SuccessStory {
+  id: string;
+  name: string;
+  exam: string;
+  rank: string;
+  year: string;
+  quote: string;
+  imageUrl: string;
+  published: boolean;
+  createdAt: any;
+}
+
+export interface HelpArticle {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+  published: boolean;
+  displayOrder: number;
+  createdAt: any;
+}
+
+export interface Vacancy {
+  id: string;
+  title: string;
+  department: string;
+  board: string;
+  category: string;
+  type: string;
+  adNumber: string;
+  postName: string;
+  totalPosts: string;
+  salary: string;
+  ageLimit: string;
+  education: string;
+  experience: string;
+  selectionProcess: string;
+  applicationFee: string;
+  officialWebsite: string;
+  applyLink: string;
+  state: "Punjab";
+  district: string;
+  startDate: string;
+  lastDate: string;
+  examDate?: string;
+  admitCardDate?: string;
+  resultDate?: string;
+  status: ContentStatus;
+  isFeatured?: boolean;
+  isBreaking?: boolean;
+  showOnHomepage?: boolean;
+  logoUrl?: string;
+  bannerUrl?: string;
+  notificationPdfUrl?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  publishedAt?: any;
+  updatedAt?: any;
+}

@@ -2,8 +2,21 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useUser, useAuth, useFirestore } from "@/firebase";
-import { doc, getDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc, updateDoc, increment } from "firebase/firestore";
+import { useUser, useFirestore } from "@/firebase";
+import { 
+  doc, 
+  getDoc, 
+  serverTimestamp, 
+  collection, 
+  query, 
+  where, 
+  documentId, 
+  getDocs, 
+  setDoc, 
+  updateDoc, 
+  increment,
+  runTransaction 
+} from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import ExamHeader from "@/components/exam/ExamHeader";
 import TacticalFooter from "@/components/exam/TacticalFooter";
@@ -14,7 +27,7 @@ import SubjectTabs from "@/components/exam/SubjectTabs";
 import { Button } from "@/components/ui/button";
 import { Loader2, Play, ShieldCheck, Zap, AlertCircle, Save, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
 import { useActiveSession } from "@/hooks/useStudyAnalytics";
 import {
@@ -28,11 +41,6 @@ import {
 import { nanoid } from "nanoid";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
-
-/**
- * @fileOverview Official Mock Attempt Hub v15.0 [Critical Maintenance Hub].
- * FIXED: Implemented 'forceNew' detection to bypass resume logic during Retakes.
- */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
   const router = useRouter();
@@ -54,7 +62,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     return null;
   }, [pathname, searchParams, propMockId]);
 
-  // CRITICAL: Detection of retake request to bypass resume logic
   const isRetakeRequested = searchParams?.get('retake') === 'true';
 
   const { startSession, stopSession } = useActiveSession('MOCK', mockId || undefined);
@@ -80,7 +87,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     answers,
     mockTitle,
     setAnswer,
-    startTime,
     language,
     timeLeft,
     elapsedSeconds,
@@ -121,22 +127,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const mData = targetSnap.data();
       setMockData(mData);
 
-      // Access Check
-      const tier = (mData.accessLevel || 'FREE').toUpperCase();
-      if (tier === 'PREMIUM') {
-         if (!user && !userLoading) { router.replace(`/login?returnUrl=${encodeURIComponent(pathname)}`); return; }
-         if (user && profile) {
-            const userEmail = user.email?.toLowerCase();
-            const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
-            const expiry = profile?.passExpiresAt ? new Date(profile.passExpiresAt) : null;
-            if (!isAdmin && (!expiry || expiry <= new Date())) {
-               router.replace('/pass');
-               toast({ title: "Elite Pass Required" });
-               return;
-            }
-         }
-      }
-
       const questionIds: string[] = mData.questionIds || [];
       if (questionIds.length === 0) throw new Error("No questions configured.");
       
@@ -154,19 +144,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          usedSnap.forEach(d => { if (!fetchedQuestions.find(f => f.id === d.id)) fetchedQuestions.push({ ...d.data(), id: d.id }); });
       }
 
-      const sectionsConfig = mData.sections || [{ name: 'General', count: questionIds.length }];
-      const enrichedQuestions: any[] = [];
-      let qPointer = 0;
-      sectionsConfig.forEach((sec: any) => {
-        const count = Number(sec.count) || 0;
-        const sectionQIds = questionIds.slice(qPointer, qPointer + count);
-        qPointer += count;
-        sectionQIds.forEach(id => {
-          const qNode = fetchedQuestions.find(fq => fq.id === id);
-          if (qNode) enrichedQuestions.push({ ...qNode, sectionId: sec.name });
-        });
-      });
-
+      const enrichedQuestions = questionIds.map(id => fetchedQuestions.find(fq => fq.id === id)).filter(Boolean);
       if (enrichedQuestions.length === 0) throw new Error("Question sync failure.");
 
       let resumeData = null;
@@ -186,7 +164,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       setInitError(err.message || "Sync failure."); 
       setIsInitializing(false);
     }
-  }, [db, mockId, user, userLoading, profile, router, pathname, initExam, startSession, toast, isRetakeRequested]);
+  }, [db, mockId, user, userLoading, profile, router, initExam, startSession, isRetakeRequested]);
 
   useEffect(() => { loadExam(); }, [loadExam]);
 
@@ -195,16 +173,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const interval = setInterval(() => { tick(); }, 1000);
     return () => clearInterval(interval);
   }, [isInitializing, initError, tick]);
-
-  const calculateGrade = (accuracy: number) => {
-    if (accuracy >= 90) return 'A+';
-    if (accuracy >= 80) return 'A';
-    if (accuracy >= 70) return 'B+';
-    if (accuracy >= 60) return 'B';
-    if (accuracy >= 50) return 'C';
-    if (accuracy >= 40) return 'D';
-    return 'F';
-  };
 
   const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
@@ -258,26 +226,27 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
     try {
       if (user) {
-        // 1. UPDATE LEADERBOARD (Best Attempt Protocol)
-        const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
-        const lbSnap = await getDoc(lbEntryRef);
-        
-        let isNewBest = true;
-        let attemptCount = 1;
+        // 1. UPDATE LEADERBOARD & RANK (Atomic Consistency)
+        await runTransaction(db, async (transaction) => {
+          const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
+          const globalMeritRef = doc(db, "leaderboard", user.uid);
+          
+          const lbSnap = await transaction.get(lbEntryRef);
+          
+          let isNewBest = true;
+          let oldAttemptCount = 0;
 
-        if (lbSnap.exists()) {
-           const existing = lbSnap.data();
-           attemptCount = (existing.attemptCount || 0) + 1;
-           
-           const hasHigherScore = finalScore > existing.highestScore;
-           const hasEqualScoreHigherAcc = (finalScore === existing.highestScore && accuracy > existing.accuracy);
-           const hasEqualScoreAccLowerTime = (finalScore === existing.highestScore && accuracy === existing.accuracy && timeTaken < existing.timeTaken);
-           
-           isNewBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
-        }
+          if (lbSnap.exists()) {
+            const existing = lbSnap.data();
+            oldAttemptCount = existing.attemptCount || 0;
+            const hasHigherScore = finalScore > existing.highestScore;
+            const hasEqualScoreHigherAcc = (finalScore === existing.highestScore && accuracy > existing.accuracy);
+            const hasEqualScoreAccLowerTime = (finalScore === existing.highestScore && accuracy === existing.accuracy && timeTaken < existing.timeTaken);
+            isNewBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
+          }
 
-        if (isNewBest) {
-           await setDoc(lbEntryRef, {
+          if (isNewBest) {
+            transaction.set(lbEntryRef, {
               userId: user.uid,
               userName: profile?.name || 'Aspirant',
               photoURL: profile?.photoURL || "",
@@ -286,81 +255,66 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               highestScore: finalScore,
               accuracy,
               timeTaken,
-              attemptCount,
+              attemptCount: oldAttemptCount + 1,
               bestAttemptId: attemptId,
               submittedAt: serverTimestamp()
-           }, { merge: true });
-        } else {
-           await updateDoc(lbEntryRef, {
+            }, { merge: true });
+
+            transaction.set(globalMeritRef, {
+              uid: user.uid,
+              displayName: profile?.name || 'Aspirant',
+              photoURL: profile?.photoURL || "",
+              highestScore: increment(finalScore > (profile?.highestScore || 0) ? finalScore - (profile?.highestScore || 0) : 0),
+              totalTests: increment(1),
+              updatedAt: serverTimestamp(),
+              recentMockTitle: mockData.title
+            }, { merge: true });
+          } else {
+            transaction.update(lbEntryRef, {
               attemptCount: increment(1),
               updatedAt: serverTimestamp()
-           });
-        }
+            });
+          }
 
-        // 2. CALCULATE LIVE RANK (Rank at Submission)
-        const entriesSnap = await getDocs(query(collection(db, "leaderboards", mockId, "entries")));
-        const allEntries = entriesSnap.docs.map(d => d.data());
-        
-        allEntries.sort((a: any, b: any) => {
-           if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
-           if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
-           if (a.timeTaken !== b.timeTaken) return a.timeTaken - b.timeTaken;
-           return (a.submittedAt?.seconds || 0) - (b.submittedAt?.seconds || 0);
+          // 2. SAVE FINAL RESULT DOCUMENT
+          const resultRef = doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
+          transaction.set(resultRef, {
+             attemptId,
+             mockId,
+             mockTitle: mockData.title || mockTitle,
+             userId: user.uid,
+             userName: profile?.name || 'Aspirant',
+             userEmail: user.email || "",
+             score: finalScore,
+             correctCount,
+             wrongCount,
+             skippedCount: questions.length - attemptedCount,
+             attemptedCount,
+             totalQuestions: questions.length,
+             accuracy,
+             timeTaken,
+             timestamp: new Date().toISOString(),
+             createdAt: serverTimestamp(),
+             languageMode: language,
+             mockType: mockData.mockType || 'PRACTICE',
+             positiveMarks: posMarks,
+             negativeMarks: negMarks,
+             subjectAnalysis: Object.values(subMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
+             complexityAnalysis: Object.values(diffMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) }))
+          });
+
+          // 3. FINALIZE ATTEMPT TRACKER
+          transaction.set(doc(db, "attempts", `${user.uid}_${mockId}`), { 
+             attemptId,
+             status: 'COMPLETED', 
+             updatedAt: serverTimestamp() 
+          }, { merge: true });
         });
-
-        const myRankIndex = allEntries.findIndex(e => e.userId === user.uid);
-        const rankAtSubmission = myRankIndex + 1;
-        const totalCandidates = allEntries.length;
-
-        // 3. SAVE FINAL RESULT
-        const resultPayload = {
-           attemptId,
-           mockId,
-           mockTitle: mockData.title || mockTitle,
-           userId: user.uid,
-           userName: profile?.name || 'Aspirant',
-           userEmail: user.email || "",
-           score: finalScore,
-           correctCount,
-           wrongCount,
-           skippedCount: questions.length - attemptedCount,
-           attemptedCount,
-           totalQuestions: questions.length,
-           accuracy,
-           grade: calculateGrade(accuracy),
-           timeTaken,
-           rankAtSubmission,
-           totalCandidatesAtSubmission: totalCandidates,
-           timestamp: new Date().toISOString(),
-           createdAt: serverTimestamp(),
-           languageMode: language,
-           mockType: mockData.mockType || 'PRACTICE',
-           positiveMarks: posMarks,
-           negativeMarks: negMarks,
-           subjectAnalysis: Object.values(subMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
-           complexityAnalysis: Object.values(diffMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) }))
-        };
-
-        await setDoc(doc(db, "results", `${user.uid}_${mockId}_${attemptId}`), resultPayload);
-        
-        // Update User Profile Aggregates
-        const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, {
-           totalTests: increment(1),
-           updatedAt: serverTimestamp()
-        });
-
-        // 4. SYNC ATTEMPT STATUS
-        await setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { 
-           attemptId,
-           status: 'COMPLETED', 
-           updatedAt: serverTimestamp() 
-        }, { merge: true });
 
         resetStore();
         router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
       } else {
-        const guestResult = {
+        localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify({
            attemptId,
            mockId,
            mockTitle: mockData.title || mockTitle,
@@ -371,10 +325,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            wrongCount,
            timeTaken,
            timestamp: new Date().toISOString()
-        };
-        localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify(guestResult));
+        }));
         resetStore();
-        router.replace(`/results/view?id=${mockId}&guest=true`);
+        router.replace(`/results/view?id=${mockId}`);
       }
     } catch (e) {
       console.error("[SUBMISSION_FAILURE]:", e);
@@ -447,8 +400,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         <TacticalFooter onSubmit={() => currentIdx >= questions.length - 1 ? setShowSubmitModal(true) : saveAndNext(db)} />
       </main>
 
-      <Sheet open={isPaletteOpen} onOpenChange={isPaletteOpen ? setIsPaletteOpen : undefined}>
-        <SheetContent side="right" className="p-0 border-none w-[280px] md:w-[320px] shadow-5xl z-[1200]">
+      <Sheet open={isPaletteOpen} onOpenChange={setIsPaletteOpen}>
+        <SheetContent side="right" className="p-0 border-none w-[280px] md:w-[320px] shadow-5xl z-[1200] [&>button]:hidden">
           <QuestionPalette onSelect={(idx: number) => { setCurrentIdx(idx); setIsPaletteOpen(false); }} onSubmit={() => { setIsPaletteOpen(false); setShowSubmitModal(true); }} />
         </SheetContent>
       </Sheet>
