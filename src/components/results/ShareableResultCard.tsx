@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { forwardRef, useMemo } from 'react';
@@ -37,8 +36,8 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Platform Result Report v3.0.
- * UPDATED: Replaced "Registry" with "Database".
+ * @fileOverview Official Platform Result Report v3.1.
+ * UPDATED: Purged remaining "Registry" and "Node" terminology for simplified vocabulary.
  */
 
 const toTitleCase = (str: string) => {
@@ -133,7 +132,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
       {/* 2. TEST CONTEXT HUB */}
       <div className="grid grid-cols-12 gap-6 mb-6">
          <div className="col-span-8 space-y-0.5">
-            <p className="text-[9px] font-bold text-primary">Test series hub</p>
+            <p className="text-[9px] font-bold text-primary">Test series center</p>
             <h1 className="text-[24px] font-[700] text-[#0F172A] leading-tight tracking-tight">
                {data.mockTitle}
             </h1>
@@ -224,7 +223,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
       {/* 6. COMPETITION SNAPSHOT */}
       <div className="grid grid-cols-2 gap-6 mb-8">
          <div className="space-y-4">
-            <h3 className="text-[11px] font-bold text-slate-400 ml-1">Competition hub</h3>
+            <h3 className="text-[11px] font-bold text-slate-400 ml-1">Competition center</h3>
             <Card className="border border-[#E5EAF2] p-6 rounded-[16px] grid grid-cols-2 gap-4 bg-white shadow-sm">
                <CompNode label="Top score" val={topScore.toFixed(1)} />
                <CompNode label="Avg score" val={avgScore.toFixed(1)} />
@@ -252,13 +251,13 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
             <div className="flex items-center gap-3 text-slate-400">
                <ShieldCheck className="h-6 w-6 text-emerald-500" />
                <div className="space-y-0.5">
-                  <p className="text-base font-bold tracking-tight text-[#0F172A]">Official report hub</p>
+                  <p className="text-base font-bold tracking-tight text-[#0F172A]">Official report center</p>
                   <p className="text-[10px] font-medium text-slate-400">Digitally verified by Cracklix Official Database</p>
                </div>
             </div>
             <div className="space-y-0.5 pt-1">
                <p className="text-[8px] font-bold text-slate-300">Report ID</p>
-               <code className="text-[11px] font-mono font-bold text-primary">{data.attemptId || "NODE_01_VERIFIED"}</code>
+               <code className="text-[11px] font-mono font-bold text-primary">{data.attemptId || "RECORD_01_VERIFIED"}</code>
             </div>
          </div>
          <div className="flex items-center gap-8">

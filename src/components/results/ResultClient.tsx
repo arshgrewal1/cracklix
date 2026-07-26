@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
@@ -48,8 +47,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v103.0.
- * UPDATED: Reduced title font size and refined button scales for improved spatial balance.
+ * @fileOverview Universal Result Hub Engine v104.0.
+ * FIXED: Implemented robust sharing with navigator.canShare and download fallback.
  */
 
 export default function ResultClient() {
@@ -258,24 +257,36 @@ export default function ResultClient() {
     if (!shareRef.current || isSharing) return;
     setIsSharing(true);
     try {
-      const dataUrl = await toPng(shareRef.current, { quality: 0.95, pixelRatio: 2 });
+      // 1. Generate PNG with cache busting to prevent CORS issues
+      const dataUrl = await toPng(shareRef.current, { 
+        quality: 0.95, 
+        pixelRatio: 2,
+        cacheBust: true 
+      });
+
+      // 2. Convert to file object
       const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], `cracklix-report-${sessionData.attemptId}.png`, { type: 'image/png' });
+      const fileName = `cracklix-report-${sessionData.attemptId || 'result'}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
       
-      if (navigator.share) {
+      // 3. Attempt Native Share with File Support Check
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
           title: 'My Cracklix Performance',
           text: `Check out my score on ${sessionData.mockTitle}!`
         });
       } else {
+        // Fallback: Immediate Download
         const link = document.createElement('a');
-        link.download = `cracklix-result.png`;
+        link.download = fileName;
         link.href = dataUrl;
         link.click();
+        toast({ title: "Report downloaded", description: "Native sharing not available in this browser." });
       }
     } catch (e) {
-      toast({ variant: "destructive", title: "Share failed" });
+      console.error("[SHARE_ERROR]:", e);
+      toast({ variant: "destructive", title: "Share failed", description: "Could not generate report image." });
     } finally {
       setIsSharing(false);
     }
