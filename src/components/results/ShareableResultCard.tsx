@@ -16,7 +16,8 @@ import {
   FileText,
   BarChart3,
   Medal,
-  Users
+  Users,
+  Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -29,9 +30,9 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Scorecard v15.0 [100% Visual Match].
+ * @fileOverview Official Institutional Scorecard v16.0 [FIXED Activity Reference].
  * HIERARCHY: Score Card (Blue) > Accuracy Card (White) > Rank Hub.
- * Size: 1080x1350 optimized.
+ * Size: 1080x1350 optimized for Social Sharing.
  */
 const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>(({ data, rank, totalCandidates }, ref) => {
   if (!data) return null;
@@ -74,7 +75,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
                </div>
             </div>
             <div className="space-y-1">
-               <h2 className="text-[44px] font-[900] tracking-tight uppercase leading-none">{data.userName || "Arsh Grewal"}</h2>
+               <h2 className="text-[44px] font-[900] tracking-tight uppercase leading-none">{data.userName || "Aspirant"}</h2>
                <p className="text-lg font-bold text-slate-400 uppercase tracking-widest">{data.userEmail}</p>
             </div>
          </div>
