@@ -18,8 +18,9 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v4.1.
- * FIXED: Standardized typography to Sentence Case and unified alignment.
+ * @fileOverview Premium Analysis Screen v4.5.
+ * FIXED: Standardized typography to Sentence Case.
+ * FIXED: Rebuilt metric grid for Title Case and alignment.
  */
 
 interface ReportScreenProps {
@@ -134,7 +135,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                      <thead className="bg-slate-50/50">
                         <tr className="h-14">
                            <th className="px-8 font-bold text-xs text-slate-400">Subject</th>
-                           <th className="px-4 font-bold text-xs text-slate-400">Progress</th>
+                           <th className="px-4 min-w-[140px] font-bold text-xs text-slate-400 text-center">Progress</th>
                            <th className="px-8 font-bold text-xs text-slate-400 text-right">Score</th>
                         </tr>
                      </thead>
@@ -142,7 +143,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                         {subjectAnalysis.map((s, i) => (
                            <tr key={i} className="h-20 group hover:bg-slate-50 transition-colors">
                               <td className="px-8 font-bold text-[#071B4D]">{s.name}</td>
-                              <td className="px-4 min-w-[140px] md:min-w-[200px]">
+                              <td className="px-4">
                                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                     <div className="h-full bg-[#1677FF] rounded-full" style={{ width: `${s.accuracy}%` }} />
                                  </div>

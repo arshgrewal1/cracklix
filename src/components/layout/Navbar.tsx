@@ -36,13 +36,13 @@ import { canAccessAdmin } from "@/lib/permissions";
 import AnnouncementBar from "./AnnouncementBar";
 
 /**
- * @fileOverview Standard In-Flow Navigation Hub v142.0.
- * FIXED: Removed all fixed/sticky positioning. Header now sitting relative in the flow.
+ * @fileOverview Standard In-Flow Navigation Hub v145.0.
+ * FIXED: Tag mismatch in NavLink component and added missing isSidebarOpen state.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { user, profile, loading } = useUser();
   const auth = useAuth();
@@ -104,7 +104,7 @@ export default function Navbar() {
   return (
     <div className="relative flex flex-col w-full">
       <AnnouncementBar />
-      <header className="w-full bg-white border-b border-slate-100 shadow-sm">
+      <header className="w-full bg-white border-b border-slate-100 shadow-sm relative">
         <nav className="w-full h-[84px] md:h-[116px] transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 

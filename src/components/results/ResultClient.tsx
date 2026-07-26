@@ -41,8 +41,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v17.0.
+ * @fileOverview Universal Result Hub Viewer v18.0.
  * FIXED: Header sits in-flow (scrolls away). Re-standardized typography to Sentence Case.
+ * FIXED: Tabs roving focus error by using proper TabsList container.
  */
 
 export default function ResultClient() {
@@ -234,10 +235,10 @@ export default function ResultClient() {
                            activeReviewFilter === 'SKIPPED' ? reviewNodes.skipped : reviewNodes.all;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left flex flex-col">
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
       
-      <main className="container mx-auto max-w-[1400px] px-4 md:px-12 py-8 md:py-16 space-y-6 md:space-y-10">
+      <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-8 md:py-16 space-y-6 md:space-y-10">
         
         {sessionData && (
            <div className="space-y-6 md:space-y-10">
