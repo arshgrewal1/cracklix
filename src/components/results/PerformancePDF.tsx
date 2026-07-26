@@ -4,18 +4,17 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 /**
- * @fileOverview Institutional Performance PDF Template Engine v1.5.
- * FIXED: Updated font URLs to use verified Google Fonts TTF nodes to resolve 404 errors.
- * FIXED: Implemented rigid vertical spacing (60px buffer) in merit node to prevent overlap.
+ * @fileOverview Institutional Performance PDF Template Engine v1.6.
+ * FIXED: Updated font URLs to use high-availability TTF nodes from fonts.gstatic.com.
  */
 
 // Register professional typography with high-availability TTF sources
 Font.register({
   family: 'Inter',
   fonts: [
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Regular.ttf', fontWeight: 400 },
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Bold.ttf', fontWeight: 700 },
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Black.ttf', fontWeight: 900 },
+    { src: 'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuI6fAZ9hjp-EkCc.ttf', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.ttf', fontWeight: 700 },
+    { src: 'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.ttf', fontWeight: 900 },
   ],
 });
 
@@ -117,9 +116,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 56,
     fontWeight: 900,
-  },
-  rankSpacer: {
-    height: 40,
   },
   rankTotal: {
     color: 'rgba(255, 255, 255, 0.5)',

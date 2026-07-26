@@ -18,9 +18,9 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v4.5.
+ * @fileOverview Premium Analysis Screen v4.6.
  * FIXED: Standardized typography to Sentence Case.
- * FIXED: Rebuilt metric grid for Title Case and alignment.
+ * FIXED: Imported all missing Lucide icons to prevent ReferenceError.
  */
 
 interface ReportScreenProps {
