@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo } from "react";
@@ -5,11 +6,11 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useFirestore, useUser } from "@/firebase";
-import { doc, getDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Info, CheckCircle2, Clock, BookOpen, Zap, Lock, AlertCircle, ChevronRight, ArrowLeft, RotateCcw, Loader2, Play } from "lucide-react";
+import { ShieldCheck, Info, CheckCircle2, Clock, BookOpen, Zap, Lock, AlertCircle, ChevronRight, ArrowLeft, RotateCcw, Loader2, Play, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
@@ -23,9 +24,8 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v6.2.
- * FIXED: Instant one-click retake by navigating directly to attempt with retake=true.
- * FIXED: Removed all uppercase text.
+ * @fileOverview Official Test Rules Hub v6.5.
+ * FIXED: 'View Analysis' intelligently finds the latest attemptId.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -38,7 +38,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
   
   const [mock, setMock] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isFinished, setIsFinished] = useState(false);
+  const [latestAttemptId, setLatestAttemptId] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState(false);
   const [accessChecked, setAccessChecked] = useState(false);
   const [accessError, setAccessError] = useState<string | null>(null);
@@ -50,9 +50,6 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
     if (queryId && queryId !== 'manual') return queryId;
     
     const segments = pathname.split('/').filter(Boolean);
-    if (segments.length >= 2 && segments[segments.length-1] === 'instructions') {
-      return segments[segments.length - 2];
-    }
     const last = segments[segments.length - 1];
     return (last && last !== 'instructions' && last !== 'view') ? last : null;
   }, [pathname, searchParams, propMockId]);
@@ -69,7 +66,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
       try {
         setIsLoading(true);
-        setIsFinished(false);
+        setLatestAttemptId(null);
         
         const mockRef = doc(db, "mocks", activeId);
         const dailyRef = doc(db, "daily_quizzes", activeId);
@@ -89,14 +86,24 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
         setMock(mData);
 
         if (user) {
-          const attemptRef = doc(db, "attempts", `${user.uid}_${activeId}`);
-          const attemptSnap = await getDoc(attemptRef);
-          if (attemptSnap.exists() && attemptSnap.data().status === 'COMPLETED') {
-            setIsFinished(true);
+          const resultsRef = collection(db, "results");
+          const q = query(
+            resultsRef, 
+            where("userId", "==", user.uid), 
+            where("mockId", "==", activeId),
+            orderBy("timestamp", "desc"),
+            limit(1)
+          );
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            setLatestAttemptId(snap.docs[0].id);
           }
         } else {
           const guestResult = localStorage.getItem(`cracklix_guest_result_${activeId}`);
-          if (guestResult) setIsFinished(true);
+          if (guestResult) {
+             const parsed = JSON.parse(guestResult);
+             setLatestAttemptId(parsed.attemptId || activeId);
+          }
         }
 
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
@@ -131,7 +138,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
       } catch (err: any) {
         console.error("[INSTRUCTIONS_SYNC_ERROR]:", err);
-        setAccessError("Database sync failed. Please refresh.");
+        setAccessError("Registry sync failed. Please refresh.");
       } finally {
         setIsLoading(false);
       }
@@ -147,10 +154,16 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
     router.push(`/mocks/attempt?id=${activeId}&retake=true`);
   };
 
+  const handleViewAnalysis = () => {
+     if (!activeId) return;
+     const url = `/results/view?id=${activeId}${latestAttemptId ? `&attemptId=${latestAttemptId}` : ''}`;
+     router.push(url);
+  };
+
   if (isLoading || userLoading) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white space-y-8 p-6">
        <Zap className="h-12 w-12 text-primary animate-pulse" />
-       <div className="space-y-3 w-full max-w-md">
+       <div className="space-y-3 w-full max-w-md text-center">
           <Skeleton className="h-10 w-3/4 mx-auto rounded-xl" />
           <Skeleton className="h-4 w-1/2 mx-auto rounded-xl" />
        </div>
@@ -163,9 +176,9 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
            <div className="h-20 w-20 bg-blue-50 rounded-[2rem] flex items-center justify-center mx-auto text-primary shadow-xl border border-blue-100">
               <AlertCircle className="h-10 w-10" />
            </div>
-           <div className="space-y-3">
+           <div className="space-y-3 text-center">
               <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Test not found</h2>
-              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This test is unavailable or the link has expired.</p>
+              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This test is unavailable or the registry link has expired.</p>
            </div>
            <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold text-sm shadow-xl">
               <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to hub</Link>
@@ -181,7 +194,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
         <div className="space-y-8 md:space-y-12">
            <div className="flex flex-col items-start gap-4">
               <div className="flex items-center gap-3">
-                 <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary shadow-sm transition-all">
+                 <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary shadow-sm transition-all cursor-pointer">
                     <ArrowLeft className="h-5 w-5" />
                  </button>
                  <Badge className="bg-blue-50 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[8px] md:text-[10px] tracking-widest shadow-sm">Verified Practice</Badge>
@@ -221,13 +234,13 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                  </div>
 
                  <div className="flex flex-col gap-6 items-center w-full max-w-2xl mx-auto pt-4">
-                   {isFinished ? (
+                   {latestAttemptId ? (
                       <div className="w-full space-y-4">
                         <Button 
-                          onClick={() => router.push(`/results/view?id=${activeId}`)}
+                          onClick={handleViewAnalysis}
                           className="w-full h-16 md:h-20 bg-emerald-600 hover:bg-emerald-700 text-white font-black tracking-widest text-[12px] md:text-sm rounded-[18px] md:rounded-[2rem] shadow-xl transition-all active:scale-95 border-none flex items-center justify-center gap-3"
                         >
-                           View analysis <ChevronRight className="h-5 w-5" />
+                           <BarChart3 className="h-5 w-5" /> View analysis <ChevronRight className="h-4 w-4" />
                         </Button>
                         <Button 
                           onClick={handleRetake}
@@ -273,7 +286,7 @@ function StatPlate({ icon, label, val }: any) {
        <div className={cn("h-10 w-10 md:h-16 md:w-16 bg-slate-50 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto text-primary mb-2 shadow-inner group-hover:scale-110 transition-transform")}>
           {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-8 md:w-8" }) : icon}
        </div>
-       <p className="text-[8px] md:text-[11px] font-bold text-slate-400 tracking-widest leading-none">{label}</p>
+       <p className="text-[8px] md:text-[11px] font-bold text-slate-400 tracking-widest leading-none uppercase">{label}</p>
        <p className="text-xl md:text-4xl font-black text-[#0F172A] leading-none tabular-nums">{val}</p>
     </div>
   )
@@ -281,7 +294,7 @@ function StatPlate({ icon, label, val }: any) {
 
 function Instruction({ text }: { text: string }) {
   return (
-    <div className="flex items-start gap-4 group">
+    <div className="flex items-start gap-4 group text-left">
        <div className="h-6 w-6 md:h-8 md:w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-primary transition-all shadow-inner">
           <CheckCircle2 className="h-3.5 w-3.5 md:h-5 md:w-5 text-slate-400 group-hover:text-white" />
        </div>

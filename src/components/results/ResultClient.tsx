@@ -15,7 +15,8 @@ import {
   getDocs, 
   where,
   limit,
-  orderBy
+  orderBy,
+  QueryConstraint
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -43,9 +44,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Engine v97.0 [Guest & Sync Hardened].
- * FIXED: Integrated localStorage fallback for guest attempts.
- * FIXED: Implemented resilient polling for high-speed retrieval.
+ * @fileOverview Universal Result Hub Engine v98.0 [Atomic Recovery].
+ * FIXED: Implemented 'Latest Attempt' discovery when attemptId is missing.
+ * FIXED: Optimized Firestore polling for production propagation.
  */
 
 export default function ResultClient() {
@@ -70,24 +71,45 @@ export default function ResultClient() {
   const [avgScore, setAvgScore] = useState<number>(0)
 
   const mockId = searchParams.get('id')
-  const attemptId = searchParams.get('attemptId')
+  const attemptIdFromUrl = searchParams.get('attemptId')
 
   const fetchResultNode = useCallback(async () => {
-    if (!db || !attemptId) return false;
+    if (!db) return false;
 
     try {
-       // 1. Primary Check: Firestore Registry
-       const snap = await getDoc(doc(db, "results", attemptId));
-       
-       if (snap.exists()) {
-          setSessionData({ ...snap.data(), id: snap.id });
-          setIsSearching(false);
-          return true;
+       // 1. PRIMARY: DIRECT ATTEMPT ID LOOKUP
+       if (attemptIdFromUrl) {
+          const snap = await getDoc(doc(db, "results", attemptIdFromUrl));
+          if (snap.exists()) {
+             setSessionData({ ...snap.data(), id: snap.id });
+             setIsSearching(false);
+             return true;
+          }
        }
 
-       // 2. Secondary Check: Local Registry (Guest Fallback)
-       if (typeof window !== 'undefined') {
-          const guestKey = `cracklix_guest_result_${attemptId}`;
+       // 2. SECONDARY: LATEST ATTEMPT DISCOVERY (FOR LOGGED IN USERS)
+       if (user && mockId && !attemptIdFromUrl) {
+          const resultsRef = collection(db, "results");
+          const q = query(
+            resultsRef, 
+            where("userId", "==", user.uid), 
+            where("mockId", "==", mockId),
+            orderBy("timestamp", "desc"),
+            limit(1)
+          );
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+             const data = snap.docs[0].data();
+             setSessionData({ ...data, id: snap.docs[0].id });
+             setIsSearching(false);
+             return true;
+          }
+       }
+
+       // 3. TERTIARY: GUEST FALLBACK (LOCAL STORAGE)
+       if (typeof window !== 'undefined' && mockId) {
+          const lookupId = attemptIdFromUrl || mockId;
+          const guestKey = `cracklix_guest_result_${lookupId}`;
           const localData = localStorage.getItem(guestKey);
           if (localData) {
              const parsed = JSON.parse(localData);
@@ -99,13 +121,13 @@ export default function ResultClient() {
        
        return false;
     } catch (e) {
+       console.error("[Registry_Lookup_Error]:", e);
        return false;
     }
-  }, [db, attemptId]);
+  }, [db, attemptIdFromUrl, user, mockId]);
 
-  // Orchestrate Resilient Data Fetching
   useEffect(() => {
-    if (userLoading || !attemptId) return;
+    if (userLoading) return;
 
     let isSubscribed = true;
     let timer: NodeJS.Timeout;
@@ -114,7 +136,7 @@ export default function ResultClient() {
        const found = await fetchResultNode();
        if (!found && isSubscribed) {
           setPollCount(prev => {
-             if (prev < 20) {
+             if (prev < 15) { // 15 attempts (~22 seconds total)
                 timer = setTimeout(runPoll, 1500);
                 return prev + 1;
              } else {
@@ -131,16 +153,18 @@ export default function ResultClient() {
        isSubscribed = false;
        clearTimeout(timer);
     };
-  }, [attemptId, fetchResultNode, userLoading]);
+  }, [fetchResultNode, userLoading]);
 
-  // Secondary Data Loading (Metrics & Questions)
+  // Load Metadata once Result Node is Found
   useEffect(() => {
-     if (!db || !mockId || !sessionData) return;
+     if (!db || !sessionData) return;
+     const mId = mockId || sessionData.mockId;
+     if (!mId) return;
      
      const loadMetrics = async () => {
-        if (sessionData.isGuestNode) return; // Ranks not available for local nodes
+        if (sessionData.isGuestNode) return;
         try {
-           const lbRef = collection(db, "leaderboards", mockId, "entries");
+           const lbRef = collection(db, "leaderboards", mId, "entries");
            const lbSnap = await getDocs(query(lbRef, orderBy("highestScore", "desc")));
            const entries = lbSnap.docs.map(d => d.data());
            const myRank = entries.findIndex(e => e.userId === sessionData.userId) + 1;
@@ -153,8 +177,8 @@ export default function ResultClient() {
 
      const loadQuestions = async () => {
         try {
-           const mRef = doc(db, "mocks", mockId);
-           const dRef = doc(db, "daily_quizzes", mockId);
+           const mRef = doc(db, "mocks", mId);
+           const dRef = doc(db, "daily_quizzes", mId);
            const [mSnap, dSnap] = await Promise.all([getDoc(mRef), getDoc(dRef)]);
            const targetSnap = mSnap.exists() ? mSnap : dSnap;
 
@@ -208,7 +232,7 @@ export default function ResultClient() {
      setPollCount(0);
      fetchResultNode().then(found => {
         if (found) toast({ title: "Sync successful" });
-        else toast({ variant: "destructive", title: "Still not found", description: "The registry node has not propagated yet." });
+        else toast({ variant: "destructive", title: "Record not found", description: "The registry has not propagated yet." });
      });
   };
 
@@ -217,12 +241,15 @@ export default function ResultClient() {
       <Navbar />
       <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-8 md:py-16 space-y-10">
         
-        {(isSearching || userLoading) ? (
-           <div className="py-40 flex flex-col items-center justify-center space-y-6">
-              <Loader2 className="h-12 w-12 text-primary animate-spin" />
-              <div className="text-center space-y-1">
-                 <p className="font-black uppercase tracking-[0.4em] text-primary text-xs">Generating your report</p>
-                 <p className="text-slate-400 font-bold text-[10px] uppercase">Attempt ID: {attemptId?.slice(0, 12)}...</p>
+        {isSearching ? (
+           <div className="py-40 flex flex-col items-center justify-center space-y-8">
+              <div className="relative">
+                 <Loader2 className="h-16 w-16 text-primary animate-spin" />
+                 <Zap className="absolute inset-0 m-auto h-6 w-6 text-primary animate-pulse" />
+              </div>
+              <div className="text-center space-y-2">
+                 <p className="font-black uppercase tracking-[0.4em] text-[#0F172A] text-sm">Generating your report</p>
+                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Registry synchronization in progress...</p>
               </div>
            </div>
         ) : sessionData ? (
@@ -232,31 +259,31 @@ export default function ResultClient() {
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-24 md:w-24 shadow-xl border border-slate-100 rounded-2xl" />
                     <div className="text-left space-y-2 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 font-bold text-[9px] rounded-lg">Verified Result</Badge>
-                          {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-3 font-bold text-[9px] rounded-lg">Guest Mode</Badge>}
+                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 font-bold text-[9px] rounded-lg shadow-sm">Verified result</Badge>
+                          {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-3 font-bold text-[9px] rounded-lg shadow-sm">Guest mode</Badge>}
                        </div>
                        <h1 className="text-xl md:text-4xl font-bold text-[#0F172A] tracking-tight truncate">{sessionData.mockTitle}</h1>
-                       <div className="flex items-center gap-4 text-xs font-semibold text-slate-400">
+                       <div className="flex items-center gap-4 text-xs font-semibold text-slate-400 uppercase tracking-tight">
                           <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
                           <span className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4" /> {Math.round((sessionData.timeTaken || 0) / 60)}m</span>
                        </div>
                     </div>
                  </div>
                  <div className="flex items-center gap-3 w-full lg:w-auto">
-                    <Button onClick={() => router.refresh()} className="flex-1 lg:flex-none h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-xs">
+                    <Button onClick={() => router.refresh()} className="flex-1 lg:flex-none h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-xs transition-all active:scale-95 border-none shadow-lg">
                        <RefreshCw className="h-4 w-4" /> Sync Hub
                     </Button>
-                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-12 px-8 border-slate-200 text-[#0F172A] font-bold rounded-full text-xs">
-                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}>Retake Test</Link>
+                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-12 px-8 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-xs transition-all active:scale-95 shadow-sm">
+                       <Link href={`/mocks/instructions?id=${mockId || sessionData.mockId}&retake=true`}>Retake Test</Link>
                     </Button>
                  </div>
               </Card>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-10">
                   <div className="flex justify-center">
-                     <TabsList className="bg-slate-100 p-1 rounded-full border border-slate-200 flex w-fit h-auto">
-                        <TabsTrigger value="OVERVIEW" className="rounded-full px-8 md:px-12 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm">Analysis hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-full px-8 md:px-12 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm">Review portal</TabsTrigger>
+                     <TabsList className="bg-slate-100 p-1 rounded-full border border-slate-200 flex w-fit h-auto shadow-inner">
+                        <TabsTrigger value="OVERVIEW" className="rounded-full px-8 md:px-12 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm uppercase tracking-tight">Analysis hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-full px-8 md:px-12 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm uppercase tracking-tight">Review portal</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -281,10 +308,10 @@ export default function ResultClient() {
                       </div>
                       <div className="grid grid-cols-1 gap-6">
                           {filtered.map(q => (
-                              <Card key={q.id} className="border border-slate-100 shadow-sm rounded-[2rem] bg-white p-6 md:p-12 space-y-8 text-left">
+                              <Card key={q.id} className="border border-slate-100 shadow-sm rounded-[2rem] bg-white p-6 md:p-12 space-y-8 text-left group hover:border-primary/20 transition-all">
                                   <div className="flex items-center gap-3 border-b border-slate-50 pb-6">
-                                     <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black">#{q.originalIndex+1}</div>
-                                     <Badge variant="outline" className="text-[9px] font-bold">Subject: {q.subjectId}</Badge>
+                                     <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black group-hover:bg-primary group-hover:text-white transition-all shadow-inner">#{q.originalIndex+1}</div>
+                                     <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest border-slate-200">Subject: {q.subjectId}</Badge>
                                   </div>
                                   <QuestionRenderer 
                                     question={q} 
@@ -302,20 +329,19 @@ export default function ResultClient() {
         ) : (
            <div className="py-40 text-center space-y-10">
               <div className="relative mx-auto w-24 h-24">
-                 <AlertCircle className="h-24 w-24 text-slate-100" />
-                 <div className="absolute inset-0 flex items-center justify-center">
-                    <AlertCircle className="h-12 w-12 text-slate-300" />
+                 <div className="h-24 w-24 bg-slate-50 rounded-[2rem] flex items-center justify-center text-slate-200 shadow-inner">
+                    <AlertCircle className="h-12 w-12" />
                  </div>
               </div>
-              <div className="space-y-3">
-                 <h2 className="text-2xl md:text-3xl font-black text-[#0F172A]">Result audit not found</h2>
-                 <p className="text-slate-500 font-medium max-w-sm mx-auto">No synchronized attempt records were found for this ID in the registry.</p>
+              <div className="space-y-3 px-4">
+                 <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tighter">Result audit not found</h2>
+                 <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">No synchronized attempt records were found for this ID in the registry. Try forcing a sync or return to the bank.</p>
               </div>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                 <Button onClick={handleManualSync} className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3">
-                    <RotateCcw className="h-4 w-4" /> Force Sync
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
+                 <Button onClick={handleManualSync} className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 shadow-xl border-none active:scale-95 transition-all">
+                    <RotateCcw className="h-4 w-4" /> Force Sync Hub
                  </Button>
-                 <Button asChild variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-2xl border-2">
+                 <Button asChild variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-2xl border-2 border-slate-200 font-bold active:scale-95 transition-all">
                     <Link href="/mocks">Explore Tests</Link>
                  </Button>
               </div>
@@ -329,9 +355,9 @@ export default function ResultClient() {
 
 function FilterNode({ active, label, count, onClick, color }: any) {
   return (
-    <button onClick={onClick} className={cn("flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 h-12 md:h-14 rounded-xl transition-all border", active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-transparent text-slate-400 hover:bg-slate-50")}>
-       <span className="text-[9px] md:text-[11px] font-bold">{label}</span>
-       <span className="text-[9px] md:text-xs font-bold opacity-40 tabular-nums">{count}</span>
+    <button onClick={onClick} className={cn("flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 h-12 md:h-14 rounded-xl transition-all border group cursor-pointer", active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-transparent text-slate-400 hover:bg-slate-50")}>
+       <span className="text-[9px] md:text-[11px] font-bold uppercase tracking-tight">{label}</span>
+       <span className={cn("text-[9px] md:text-xs font-bold opacity-40 tabular-nums", active && "opacity-60")}>{count}</span>
     </button>
   )
 }
