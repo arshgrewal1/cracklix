@@ -20,8 +20,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v8.2.
- * UPDATED: Replaced "Registry" with "Database" and "Node" with "Item".
+ * @fileOverview Premium Analysis Screen v8.3.
+ * UPDATED: Simplified vocabulary and Title Case normalization.
  */
 
 interface ReportScreenProps {
@@ -71,18 +71,18 @@ export default function ReportScreen(props: ReportScreenProps) {
       }
       
       if (worst.accuracy < 50 && worst.total > 0) {
-        list.push({ type: 'WEAKNESS', text: `Immediate focus required in ${toTitleCase(worst.name)}.` });
+        list.push({ type: 'WEAKNESS', text: `Focus required in ${toTitleCase(worst.name)}.` });
       }
     }
 
     if (acc >= 90) list.push({ type: 'STRENGTH', text: "Elite accuracy maintained across the attempt." });
     
     if (wrongCount > totalQuestions * 0.25) {
-      list.push({ type: 'WEAKNESS', text: "Negative penalty audit: Excessive guesswork detected." });
+      list.push({ type: 'WEAKNESS', text: "Negative penalty: Excessive guesswork detected." });
     }
 
     if (scoreNum < avgScore) {
-       list.push({ type: 'SUGGESTION', text: "Target the platform average by increasing attempt volume." });
+       list.push({ type: 'SUGGESTION', text: "Increase attempt volume to target platform average." });
     }
     
     return list.slice(0, 4);
@@ -91,7 +91,7 @@ export default function ReportScreen(props: ReportScreenProps) {
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-500 pb-20 px-0 md:px-1">
       
-      {/* SCORE GRID - REALTIME UPDATES */}
+      {/* SCORE GRID */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
          <Card className="col-span-1 h-32 md:h-44 rounded-[22px] md:rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-4 md:px-6">
             <p className="text-[9px] md:text-xs font-bold text-slate-500 mb-1">Attempt score</p>
@@ -135,7 +135,7 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       </Card>
 
-      {/* SUBJECT ANALYTICS - ATTEMPT SPECIFIC */}
+      {/* SUBJECT MASTERY */}
       {subjectAnalysis.length > 0 && (
          <div className="space-y-6">
             <div className="flex items-center gap-3 px-1">
@@ -177,7 +177,7 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       )}
 
-      {/* COMPARISON HUB */}
+      {/* BENCHMARK */}
       <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <TrendingUp className="h-5 w-5 text-[#1677FF]" />
@@ -191,11 +191,11 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       </div>
 
-      {/* INSIGHTS HUB */}
+      {/* INSIGHTS */}
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 space-y-6">
          <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
             <Lightbulb className="h-5 w-5 text-[#F59E0B]" />
-            <h3 className="text-lg md:text-2xl font-black text-[#071B4D] tracking-tight">Audit insights</h3>
+            <h3 className="text-lg md:text-2xl font-black text-[#071B4D] tracking-tight">Attempt insights</h3>
          </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {insights.map((insight, i) => (

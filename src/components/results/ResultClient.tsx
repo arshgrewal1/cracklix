@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
@@ -47,8 +48,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v104.0.
- * FIXED: Implemented robust sharing with navigator.canShare and download fallback.
+ * @fileOverview Universal Result Hub Engine v104.1.
+ * UPDATED: Final terminology simplification and font scale balancing.
  */
 
 export default function ResultClient() {
@@ -135,7 +136,6 @@ export default function ResultClient() {
        
        return false;
     } catch (e: any) {
-       console.error("[Result_Hub_Error]:", e.message);
        return false;
     }
   }, [db, attemptIdFromUrl, user, mockId]);
@@ -248,8 +248,8 @@ export default function ResultClient() {
      setIsSearching(true);
      setPollCount(0);
      fetchResultNode().then(found => {
-        if (found) toast({ title: "Sync successful" });
-        else toast({ variant: "destructive", title: "Record not found", description: "The database has not updated yet." });
+        if (found) toast({ title: "Analysis updated" });
+        else toast({ variant: "destructive", title: "Record not found", description: "Database has not updated yet." });
      });
   };
 
@@ -257,36 +257,31 @@ export default function ResultClient() {
     if (!shareRef.current || isSharing) return;
     setIsSharing(true);
     try {
-      // 1. Generate PNG with cache busting to prevent CORS issues
       const dataUrl = await toPng(shareRef.current, { 
         quality: 0.95, 
         pixelRatio: 2,
         cacheBust: true 
       });
 
-      // 2. Convert to file object
       const blob = await (await fetch(dataUrl)).blob();
       const fileName = `cracklix-report-${sessionData.attemptId || 'result'}.png`;
       const file = new File([blob], fileName, { type: 'image/png' });
       
-      // 3. Attempt Native Share with File Support Check
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'My Cracklix Performance',
+          title: 'My Performance Report',
           text: `Check out my score on ${sessionData.mockTitle}!`
         });
       } else {
-        // Fallback: Immediate Download
         const link = document.createElement('a');
         link.download = fileName;
         link.href = dataUrl;
         link.click();
-        toast({ title: "Report downloaded", description: "Native sharing not available in this browser." });
+        toast({ title: "Report downloaded" });
       }
     } catch (e) {
-      console.error("[SHARE_ERROR]:", e);
-      toast({ variant: "destructive", title: "Share failed", description: "Could not generate report image." });
+      toast({ variant: "destructive", title: "Share failed" });
     } finally {
       setIsSharing(false);
     }
@@ -295,7 +290,7 @@ export default function ResultClient() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
-      <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-8 md:py-12 space-y-8 md:space-y-12">
+      <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-6 md:py-12 space-y-6 md:space-y-12">
         
         {isSearching ? (
            <div className="py-40 flex flex-col items-center justify-center space-y-8">
@@ -304,21 +299,21 @@ export default function ResultClient() {
                  <Zap className="absolute inset-0 m-auto h-6 w-6 text-primary animate-pulse" />
               </div>
               <div className="text-center space-y-2">
-                 <p className="font-black tracking-[0.4em] text-[#0F172A] text-sm uppercase">Generating your report</p>
-                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Database synchronization in progress...</p>
+                 <p className="font-bold tracking-[0.4em] text-[#0F172A] text-sm uppercase">Generating report</p>
+                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Database synchronization in progress</p>
               </div>
            </div>
         ) : sessionData ? (
            <>
-              <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 flex flex-col lg:flex-row justify-between items-center gap-6">
-                 <div className="flex items-center gap-5 md:gap-8 w-full min-w-0 text-left">
-                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-20 md:w-20 shadow-xl border border-slate-100 rounded-xl" />
-                    <div className="text-left space-y-1.5 flex-1 min-w-0">
+              <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-8 flex flex-col lg:flex-row justify-between items-center gap-6">
+                 <div className="flex items-center gap-4 md:gap-8 w-full min-w-0 text-left">
+                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-16 md:w-16 shadow-lg border border-slate-100 rounded-xl" />
+                    <div className="text-left space-y-1 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
                           <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 py-0.5 rounded-lg font-bold text-[9px] shadow-sm">Verified result</Badge>
                           {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-0.5 rounded-lg font-bold text-[9px] shadow-sm">Guest mode</Badge>}
                        </div>
-                       <h1 className="text-lg md:text-2xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
+                       <h1 className="text-lg md:text-xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
                        <div className="flex items-center gap-4 text-[10px] md:text-xs font-semibold text-slate-400 tracking-tight">
                           <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
                           <span className="flex items-center gap-1.5"><TimerIcon className="h-3.5 w-3.5" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
@@ -327,7 +322,7 @@ export default function ResultClient() {
                  </div>
                  <div className="flex items-center gap-2 md:gap-3 w-full lg:w-auto">
                     <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-11 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-[11px] border-none shadow-lg">
-                       {isSharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />} Share result
+                       {isSharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />} Share
                     </Button>
                     <Button onClick={() => router.refresh()} className="flex-1 lg:flex-none h-11 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[11px] border-none shadow-lg">
                        <RefreshCw className="h-3.5 w-3.5" /> Refresh
@@ -356,7 +351,7 @@ export default function ResultClient() {
                       percentile={totalCandidates > 0 ? Math.max(0, Math.round(((totalCandidates-Number(liveRank))/(totalCandidates||1))*100)) : 0} 
                     />
                   </TabsContent>
-                  <TabsContent value="REVIEW" className="m-0 space-y-10">
+                  <TabsContent value="REVIEW" className="m-0 space-y-6 md:space-y-10">
                       <div className="bg-white p-2 md:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
                           <div className="grid grid-cols-4 gap-2">
                              <FilterNode active={activeReviewFilter === 'ALL'} label="All" count={reviewNodes.all.length} onClick={() => setActiveReviewFilter('ALL')} />
@@ -367,7 +362,7 @@ export default function ResultClient() {
                       </div>
                       <div className="grid grid-cols-1 gap-6">
                           {filtered.map(q => (
-                              <Card key={q.id} className="border border-slate-100 shadow-sm rounded-[2rem] bg-white p-6 md:p-12 space-y-8 text-left group hover:border-primary/20 transition-all">
+                              <Card key={q.id} className="border border-slate-100 shadow-sm rounded-[2rem] bg-white p-6 md:p-12 space-y-6 md:space-y-8 text-left group hover:border-primary/20 transition-all">
                                   <div className="flex items-center gap-3 border-b border-slate-50 pb-6">
                                      <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black group-hover:bg-primary group-hover:text-white transition-all shadow-inner">#{q.originalIndex+1}</div>
                                      <Badge variant="outline" className="text-[9px] font-bold tracking-widest border-slate-200">Subject: {q.subjectId}</Badge>
@@ -394,7 +389,7 @@ export default function ResultClient() {
               </div>
               <div className="space-y-3 px-4">
                  <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tighter">Result record not found</h2>
-                 <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">No synchronized attempt records were found for this ID in the database. Try refreshing or return to the bank.</p>
+                 <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">No attempt records were found in the database. Try refreshing or return to the bank.</p>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
                  <Button onClick={handleManualSync} className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 shadow-xl border-none active:scale-95 transition-all">

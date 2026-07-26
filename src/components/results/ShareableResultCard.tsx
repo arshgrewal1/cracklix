@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { forwardRef, useMemo } from 'react';
@@ -36,8 +37,8 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Platform Result Report v3.1.
- * UPDATED: Purged remaining "Registry" and "Node" terminology for simplified vocabulary.
+ * @fileOverview Official Platform Result Report v3.2.
+ * UPDATED: Final terminology purification and Title Case standard.
  */
 
 const toTitleCase = (str: string) => {
@@ -82,7 +83,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
         list.push({ 
           type: 'WEAKNESS', 
           label: 'Weakness', 
-          text: `Needs focus in ${toTitleCase(worst.name)}`, 
+          text: `Focus in ${toTitleCase(worst.name)}`, 
           color: 'text-rose-600', 
           bg: 'bg-rose-50' 
         });
@@ -90,7 +91,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
     }
 
     if (list.length === 0) {
-       list.push({ type: 'STRENGTH', label: 'Insight', text: 'Verified attempt completed', color: 'text-blue-600', bg: 'bg-blue-50' });
+       list.push({ type: 'STRENGTH', label: 'Insight', text: 'Official attempt verified', color: 'text-blue-600', bg: 'bg-blue-50' });
     }
 
     return list.slice(0, 2);
@@ -103,7 +104,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
       className="w-[1080px] h-[1350px] bg-white flex flex-col p-12 text-[#0F172A] font-body relative overflow-hidden"
       style={{ fontFamily: 'Poppins, sans-serif' }}
     >
-      {/* 1. OFFICIAL HEADER */}
+      {/* OFFICIAL HEADER */}
       <div className="flex justify-between items-start mb-6 border-b-2 border-slate-100 pb-6">
          <div className="space-y-4">
             <img 
@@ -129,7 +130,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
          </div>
       </div>
 
-      {/* 2. TEST CONTEXT HUB */}
+      {/* CONTEXT HUB */}
       <div className="grid grid-cols-12 gap-6 mb-6">
          <div className="col-span-8 space-y-0.5">
             <p className="text-[9px] font-bold text-primary">Test series center</p>
@@ -143,7 +144,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
          </div>
       </div>
 
-      {/* 3. MAIN SCORE HUB */}
+      {/* MAIN SCORE */}
       <Card className="border-none shadow-xl rounded-[20px] bg-[#F0F7FF] p-8 mb-6 flex justify-between items-center relative overflow-hidden">
          <div className="absolute top-0 right-0 p-6 opacity-[0.03]">
             <Trophy className="h-40 w-40 text-primary" />
@@ -178,7 +179,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
          </div>
       </Card>
 
-      {/* 4. PERFORMANCE MATRIX */}
+      {/* PERFORMANCE MATRIX */}
       <div className="grid grid-cols-4 gap-4 mb-6">
          <StatBox label="Correct" val={data.correctCount} color="text-[#10B981]" bg="bg-[#E6F9F3]" icon={CheckCircle2} />
          <StatBox label="Wrong" val={data.wrongCount} color="text-[#F43F5E]" bg="bg-[#FEF2F2]" icon={XCircle} />
@@ -186,7 +187,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
          <StatBox label="Accuracy" val={`${data.attemptAccuracy}%`} color="text-primary" bg="bg-blue-50" icon={Target} />
       </div>
 
-      {/* 5. SUBJECT MASTERY TABLE */}
+      {/* SUBJECT MASTERY */}
       <div className="space-y-4 mb-6">
          <h3 className="text-[11px] font-bold text-slate-400 ml-1">Subject performance</h3>
          <Card className="border border-[#E5EAF2] shadow-sm rounded-[16px] bg-white overflow-hidden">
@@ -220,32 +221,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
          </Card>
       </div>
 
-      {/* 6. COMPETITION SNAPSHOT */}
-      <div className="grid grid-cols-2 gap-6 mb-8">
-         <div className="space-y-4">
-            <h3 className="text-[11px] font-bold text-slate-400 ml-1">Competition center</h3>
-            <Card className="border border-[#E5EAF2] p-6 rounded-[16px] grid grid-cols-2 gap-4 bg-white shadow-sm">
-               <CompNode label="Top score" val={topScore.toFixed(1)} />
-               <CompNode label="Avg score" val={avgScore.toFixed(1)} />
-               <div className="col-span-2 pt-3 border-t border-slate-50 flex items-center justify-between">
-                  <span className="text-[9px] font-bold text-slate-400">Readiness status</span>
-                  <Badge className={cn("border-none px-3 py-0.5 rounded-lg font-bold text-[9px]", readinessStatus.bg, readinessStatus.color)}>
-                     {readinessStatus.label}
-                  </Badge>
-               </div>
-            </Card>
-         </div>
-         <div className="space-y-4">
-            <h3 className="text-[11px] font-bold text-slate-400 ml-1">Smart insights</h3>
-            <div className="grid grid-cols-1 gap-2">
-               {insights.map((insight, i) => (
-                  <InsightNode key={i} label={insight.label} val={insight.text} color={insight.color} bg={insight.bg} />
-               ))}
-            </div>
-         </div>
-      </div>
-
-      {/* 7. VERIFICATION FOOTER */}
+      {/* FOOTER */}
       <div className="mt-auto pt-6 border-t-2 border-slate-100 flex justify-between items-end bg-white relative z-20">
          <div className="space-y-4 text-left">
             <div className="flex items-center gap-3 text-slate-400">
