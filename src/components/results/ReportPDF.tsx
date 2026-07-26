@@ -31,7 +31,7 @@ interface ReportPDFProps {
 }
 
 /**
- * @fileOverview Hardened PDF Fixed-Layout Hub v2.0.
+ * @fileOverview Hardened PDF Fixed-Layout Hub v3.0.
  * FIXED: High-density layout ensures Subject Mastery fits on Page 1.
  * UPDATED: Title Case strictly enforced and branding scaled.
  */
@@ -112,7 +112,7 @@ export default function ReportPDF(props: ReportPDFProps) {
             <CountPill label="Correct" val={correct} color="bg-emerald-50 text-emerald-600" />
             <CountPill label="Wrong" val={wrong} color="bg-rose-50 text-rose-600" />
             <CountPill label="Skipped" val={skipped} color="bg-slate-50 text-slate-400" />
-            <CountPill label="Total Items" val={total} color="bg-blue-50 text-blue-600" />
+            <CountPill label="Total Questions" val={total} color="bg-blue-50 text-blue-600" />
          </div>
 
          {/* 4. Subject Table - High Density for Single Page */}

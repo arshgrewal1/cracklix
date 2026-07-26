@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
-import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useFirestore, useDoc, useCollection } from "@/firebase"
@@ -15,7 +15,10 @@ import {
   where,
   limit,
   orderBy,
-  getCountFromServer
+  getCountFromServer,
+  serverTimestamp,
+  increment,
+  runTransaction
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -25,7 +28,14 @@ import {
   Download,
   RotateCcw,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  BarChart3,
+  History,
+  TrendingUp,
+  Target,
+  Award,
+  Clock,
+  BookOpen
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -41,15 +51,14 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 
 /**
- * @fileOverview Institutional Result System v12.0 [PWA Full-Width FIXED].
- * FIXED: Reduced main container padding on mobile for 100% screen utility.
+ * @fileOverview Institutional Result System v14.0 [Full-Width & Terminology Sync].
+ * FIXED: ReferenceError for filteredQuestions and localized PWA viewport utility.
  */
 
 export default function ResultClient() {
   const db = useFirestore()
   const { user, profile, loading: userLoading } = useUser()
   const searchParams = useSearchParams()
-  const pathname = usePathname()
   const router = useRouter()
   const { toast } = useToast()
   
@@ -255,6 +264,13 @@ export default function ResultClient() {
     return { all, correct, wrong, skipped };
   }, [questions, activeSession]);
 
+  const filteredQuestions = useMemo(() => {
+    if (activeReviewFilter === 'CORRECT') return reviewNodes.correct;
+    if (activeReviewFilter === 'WRONG') return reviewNodes.wrong;
+    if (activeReviewFilter === 'SKIPPED') return reviewNodes.skipped;
+    return reviewNodes.all;
+  }, [activeReviewFilter, reviewNodes]);
+
   if (userLoading || !mounted) return null;
 
   return (
@@ -262,6 +278,26 @@ export default function ResultClient() {
       <Navbar />
       <main className="container mx-auto max-w-[1440px] px-1 md:px-10 py-6 md:py-10 space-y-8 pb-32">
         
+        {isSearching && (
+           <div className="py-24 text-center flex flex-col items-center gap-4">
+              <Loader2 className="h-10 w-10 text-primary animate-spin" />
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Resolving attempt node...</p>
+           </div>
+        )}
+
+        {errorNotFound && (
+           <div className="py-24 text-center flex flex-col items-center gap-6">
+              <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-inner">
+                 <AlertCircle className="h-8 w-8" />
+              </div>
+              <div className="space-y-1">
+                 <h2 className="text-xl font-bold text-[#0F172A]">Result Node Missing</h2>
+                 <p className="text-slate-500 text-sm">We could not locate this specific attempt in the registry.</p>
+              </div>
+              <Button asChild variant="outline" className="rounded-xl"><Link href="/dashboard">Back to Hub</Link></Button>
+           </div>
+        )}
+
         {!isSearching && !errorNotFound && activeSession && finalMetrics && (
            <>
               <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1">

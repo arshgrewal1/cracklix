@@ -40,9 +40,9 @@ interface ReportScreenProps {
 }
 
 /**
- * @fileOverview Responsive Screen Layout for Browser Viewing v2.0.
- * FIXED: Optimized for PWA mode with zero-horizontal-overflow and high-density typography.
- * UPDATED: Logo scaled and Title Case enforced.
+ * @fileOverview Responsive Screen Layout for Browser Viewing v3.0.
+ * FIXED: Null-safety for resultId and Title Case enforcement.
+ * FIXED: Missing Card reference error.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
@@ -61,7 +61,7 @@ export default function ReportScreen(props: ReportScreenProps) {
             <div className="flex items-center gap-4 md:gap-6 min-w-0 flex-1">
                <AuthorityLogo boardId={boardId || "GENERAL"} size="md" className="h-14 w-14 md:h-20 md:w-20 rounded-xl" />
                <div className="space-y-1 min-w-0 flex-1">
-                  <p className="text-[10px] font-bold text-primary tracking-tight uppercase">Performance Report</p>
+                  <p className="text-[10px] font-bold text-primary tracking-tight">Performance Report</p>
                   <h1 className="text-xl md:text-3xl font-[900] text-[#0F172A] leading-tight break-words">{studentName}</h1>
                   <p className="text-sm md:text-xl font-bold text-slate-500 line-clamp-1">{examTitle}</p>
                </div>
@@ -70,7 +70,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                <Badge className={cn("border-none px-4 py-1 rounded-full text-[10px] font-black", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
                   {isQualified ? 'Qualified' : 'Attempted'}
                </Badge>
-               <p className="text-[9px] font-bold text-slate-300 mt-2">ID: {resultId?.slice(0, 12) || 'Registry'}</p>
+               <p className="text-[9px] font-bold text-slate-300 mt-2">ID: {resultId?.slice(0, 12) || "Registry"}</p>
             </div>
          </div>
          
@@ -99,7 +99,7 @@ export default function ReportScreen(props: ReportScreenProps) {
 
       {/* 3. Main Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-         <MetricBox label="Net Score" val={score} sub="Actual pts" icon={<Zap />} color="text-primary" bg="bg-blue-50" />
+         <MetricBox label="Net Score" val={score} sub="Actual points" icon={<Zap />} color="text-primary" bg="bg-blue-50" />
          <MetricBox label="Percentile" val={`${percentile}%`} sub="Standing" icon={<TrendingUp />} color="text-purple-600" bg="bg-purple-50" />
          <MetricBox label="Accuracy" val={`${attemptAccuracy}%`} sub="Precision" icon={<Target />} color="text-emerald-600" bg="bg-emerald-50" />
          <MetricBox label="Grade Hub" val={grade} sub="Audit level" color="text-amber-600" bg="bg-amber-50" />
@@ -137,12 +137,12 @@ export default function ReportScreen(props: ReportScreenProps) {
          </section>
       )}
 
-      {/* 5. Item Analysis Grid */}
+      {/* 5. Question Analysis Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
          <CountNode label="Correct" val={correct} color="text-emerald-600 bg-emerald-50" />
          <CountNode label="Wrong" val={wrong} color="text-rose-600 bg-rose-50" />
          <CountNode label="Skipped" val={skipped} color="text-slate-400 bg-slate-50" />
-         <CountNode label="Total Items" val={total} color="text-blue-600 bg-blue-50" />
+         <CountNode label="Total Questions" val={total} color="text-blue-600 bg-blue-50" />
       </div>
 
     </div>
