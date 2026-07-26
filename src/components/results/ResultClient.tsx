@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -6,7 +5,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useUser, useFirestore, useDoc } from "@/firebase"
+import { useUser, useAuth, useFirestore, useDoc } from "@/firebase"
 import { 
   collection, 
   query, 
@@ -62,9 +61,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import ResultCard from "./ResultCard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Result Hub 2.3 [Rank Reintegrated].
+ * @fileOverview Official Result Hub v2.4 [Import Fixed].
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -322,7 +322,7 @@ export default function ResultClient() {
                           {Array.isArray(activeSession.complexityAnalysis) && activeSession.complexityAnalysis.map((diff: any, i: number) => (
                              <div key={i} className="space-y-2.5">
                                 <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">
-                                   <span>{diff.name} items</span>
+                                   <span>{diff.name} Questions</span>
                                    <span className="text-[#0F172A] font-black">{diff.accuracy}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
