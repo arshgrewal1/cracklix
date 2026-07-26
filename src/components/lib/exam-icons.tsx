@@ -5,9 +5,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v41.0 (Global Scale Refinement).
- * FIXED: Removed internal padding buffers (p-0) to maximize visual zoom.
- * UPDATED: Calibrated XL size for professional report focal points.
+ * @fileOverview Institutional Branding Engine v42.0.
+ * FIXED: Removed internal padding buffers (p-0) and normalized container scaling.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -67,9 +66,9 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   
   const sizeClasses = {
     sm: "h-11 w-11 md:h-12 md:w-12",
-    md: "h-14 w-14 md:h-20 md:w-20",
+    md: "h-14 w-14 md:h-18 md:w-18",
     lg: "h-20 w-20 md:h-28 md:w-28",
-    xl: "h-32 w-32 md:h-44 md:w-44"
+    xl: "h-28 w-28 md:h-40 md:w-40"
   };
 
   const containerSize = sizeClasses[size];

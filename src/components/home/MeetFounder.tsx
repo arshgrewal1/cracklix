@@ -11,8 +11,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Refined Meet Founder Section v7.6.
- * UPDATED: Normalized typography to Title Case.
+ * @fileOverview Refined Meet Founder Section v7.7.
+ * FIXED: Removed uppercase from name and labels.
  */
 export default function MeetFounder() {
   const db = useFirestore();
@@ -44,7 +44,7 @@ export default function MeetFounder() {
                  <Star className="h-3 w-3 fill-current" /> Verified Founder
               </div>
               
-              <h2 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-[0.95] antialiased">
+              <h2 className="text-3xl md:text-6xl font-[800] text-[#0F172A] tracking-tighter leading-[0.95] antialiased">
                 Meet the <br/> <span className="text-primary italic">founder.</span>
               </h2>
               

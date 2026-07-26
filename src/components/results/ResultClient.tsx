@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -5,22 +6,16 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useUser, useFirestore, useDoc, useCollection } from "@/firebase"
+import { useUser, useFirestore, useDoc } from "@/firebase"
 import { 
   collection, 
   query, 
-  where, 
   doc, 
   getDoc, 
   documentId, 
   getDocs, 
-  limit, 
-  serverTimestamp,
-  increment,
-  runTransaction,
-  deleteDoc,
-  getCountFromServer,
-  orderBy
+  orderBy,
+  deleteDoc
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -30,27 +25,15 @@ import {
   Loader2, 
   ShieldCheck,
   CheckCircle2,
-  RefreshCw,
   Clock,
   BarChart3,
-  List,
-  Award,
-  Timer,
-  FileText,
-  AlertCircle,
-  ChevronRight,
+  Download,
   RotateCcw,
   Layers,
   XCircle,
-  HelpCircle,
   ArrowRight,
   BookOpen,
-  Search,
-  Download,
-  X,
-  MapPin,
-  TrendingUp,
-  History
+  X
 } from "lucide-react"
 import { 
   Card, 
@@ -67,9 +50,11 @@ import ResultCard from "./ResultCard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
+import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Official Result Hub v5.0 [Ranking Rebuilt].
+ * @fileOverview Official Result Hub v5.2 [Hardened].
+ * FIXED: Retake logic and Title Case normalization for all headers.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -77,6 +62,7 @@ export default function ResultClient() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { toast } = useToast()
+  const resetStore = useExamStore(s => s.resetStore);
   
   const [mounted, setMounted] = useState(false)
   const [questions, setQuestions] = useState<any[]>([])
@@ -119,9 +105,6 @@ export default function ResultClient() {
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
-           
-           // Fetch all entries to calculate true percentile-based ranking
-           // Rule: Score DESC, Accuracy DESC, TimeTaken ASC
            const q = query(
               entriesRef,
               orderBy("highestScore", "desc"),
@@ -195,6 +178,7 @@ export default function ResultClient() {
     setIsSyncing(true);
     try {
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
+      resetStore();
       toast({ title: "Ready for Retake", description: "Identity node cleared. Starting fresh." });
       router.push(`/mocks/instructions?id=${mockId}&retake=true`);
     } catch (e) { 
@@ -250,70 +234,66 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
       <Navbar />
-      <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-16 pb-40">
+      <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-12 pb-40">
         
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 px-1 print:hidden">
            <div className="flex items-center gap-6 md:gap-10 text-left w-full md:w-auto">
               <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-28 md:w-28 rounded-2xl" />
-              <div className="space-y-2 flex-1 min-w-0">
-                 <div className="flex items-center gap-3">
+              <div className="space-y-1.5 flex-1 min-w-0">
+                 <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Verified Performance</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verified Performance</span>
                  </div>
-                 <h1 className="text-2xl md:text-5xl font-black tracking-tight text-[#0F172A] leading-tight truncate">
+                 <h1 className="text-xl md:text-4xl font-bold tracking-tight text-[#0F172A] leading-tight truncate">
                    {activeSession.mockTitle}
                  </h1>
-                 <div className="flex flex-wrap items-center gap-4 font-bold text-[10px] md:text-sm tracking-tight">
+                 <div className="flex flex-wrap items-center gap-3 font-bold text-[10px] md:text-xs tracking-tight">
                     <div className="flex items-center gap-1.5 bg-white border border-slate-100 px-3 py-1.5 rounded-lg text-slate-500 shadow-sm">
-                       <Clock className="h-4 w-4" /> 
+                       <Clock className="h-3.5 w-3.5 text-slate-400" /> 
                        <span>{new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
                     </div>
                     <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg text-primary shadow-sm">
-                       <Trophy className="h-4 w-4" /> 
+                       <Trophy className="h-3.5 w-3.5" /> 
                        <span>Rank #{liveRank} of {totalCandidates || 1} Candidates</span>
                     </div>
                  </div>
               </div>
            </div>
            
-           <div className="flex flex-col gap-4 w-full md:w-auto shrink-0">
-              <div className="flex bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm w-full md:w-auto overflow-hidden">
+           <div className="flex flex-col gap-3 w-full md:w-auto shrink-0">
+              <div className="flex bg-white border border-slate-100 p-1 rounded-xl shadow-sm w-full md:w-auto overflow-hidden">
                  <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                    <TabsList className="bg-transparent border-none p-0 flex h-12 w-full gap-1">
+                    <TabsList className="bg-transparent border-none p-0 flex h-10 w-full gap-1">
                        <HubTab value="OVERVIEW" label="Summary" />
                        <HubTab value="REVIEW" label="Review" />
                        <HubTab value="REPORT" label="Report" />
                     </TabsList>
                  </Tabs>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                  <Button 
                    onClick={handleRetake} 
                    disabled={isSyncing} 
                    variant="outline"
-                   className="flex-1 h-12 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-widest hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
+                   className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50 shadow-sm"
                  >
-                    <div className="flex items-center justify-center gap-2">
-                       {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} 
-                       <span>Retake</span>
-                    </div>
+                    {isSyncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />} 
+                    Retake
                  </Button>
                  <Button 
                    onClick={handleDownloadPDF} 
-                   className="flex-1 h-12 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-widest transition-all active:scale-95 border-none shadow-xl"
+                   className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight shadow-xl border-none"
                  >
-                    <div className="flex items-center justify-center gap-2">
-                       <Download className="h-4 w-4" /> 
-                       <span>PDF Report</span>
-                    </div>
+                    <Download className="h-3.5 w-3.5" /> 
+                    PDF Report
                  </Button>
               </div>
            </div>
         </div>
 
-        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-16">
+        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
            
-           <TabsContent value="OVERVIEW" className="space-y-12 animate-in fade-in duration-500">
+           <TabsContent value="OVERVIEW" className="space-y-10 animate-in fade-in duration-500">
               <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
                  <StatCard label="Final Score" val={activeSession.score.toFixed(1)} icon={<Zap className="text-primary" />} />
                  <StatCard label="Punjab Rank" val={`#${liveRank}`} icon={<Trophy className="text-amber-500" />} highlight />
@@ -325,12 +305,12 @@ export default function ResultClient() {
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                  <div className="lg:col-span-8 space-y-8">
-                    <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
-                       <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight mb-12">Subject Performance Audit</h2>
-                       <div className="space-y-12">
+                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
+                       <h2 className="text-xl md:text-2xl font-[800] text-[#0F172A] tracking-tight mb-10">Subject performance audit</h2>
+                       <div className="space-y-10">
                           {Array.isArray(activeSession.subjectAnalysis) && activeSession.subjectAnalysis.map((sub: any, i: number) => (
                              <div key={i} className="space-y-3">
-                                <div className="flex justify-between items-center text-[10px] md:text-sm font-bold text-slate-500 uppercase tracking-widest">
+                                <div className="flex justify-between items-center text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest">
                                    <div className="flex items-center gap-3"><BookOpen className="h-4 w-4 text-primary" /> {sub.name}</div>
                                    <span className="text-[#0F172A] tabular-nums font-black">{sub.accuracy}%</span>
                                 </div>
@@ -351,9 +331,9 @@ export default function ResultClient() {
                        </div>
                     </Card>
 
-                    <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
-                       <h2 className="text-xl md:text-2xl font-black text-[#0F172A] mb-8 flex items-center gap-4">
-                          <Zap className="h-6 w-6 text-primary fill-current" /> Performance Insights
+                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
+                       <h2 className="text-xl md:text-2xl font-[800] text-[#0F172A] mb-8 flex items-center gap-4">
+                          <Zap className="h-6 w-6 text-primary fill-current" /> Performance insights
                        </h2>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {Array.isArray(activeSession.insights) && activeSession.insights.map((ins: string, i: number) => (
@@ -367,16 +347,17 @@ export default function ResultClient() {
                  </div>
 
                  <div className="lg:col-span-4 space-y-8">
-                    <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-10 text-left space-y-8">
+                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-white p-8 md:p-10 text-left space-y-8">
                        <div className="space-y-1">
-                          <h3 className="text-lg md:text-xl font-black flex items-center gap-3 text-[#0F172A] uppercase tracking-tight"><Layers className="h-5 w-5 text-primary" /> Mastery Level</h3>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Difficulty Breakdown</p>
+                          <h3 className="text-lg font-bold flex items-center gap-3 text-[#0F172A] uppercase tracking-widest">
+                            <Layers className="h-4 w-4 text-primary" /> Mastery level
+                          </h3>
                        </div>
                        <div className="space-y-8">
                           {Array.isArray(activeSession.complexityAnalysis) && activeSession.complexityAnalysis.map((diff: any, i: number) => (
                              <div key={i} className="space-y-2.5">
                                 <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">
-                                   <span>{diff.name} Questions</span>
+                                   <span>{diff.name} items</span>
                                    <span className="text-[#0F172A] font-black tabular-nums">{diff.accuracy}%</span>
                                 </div>
                                 <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
@@ -387,24 +368,23 @@ export default function ResultClient() {
                                       className={cn("h-full", i === 0 ? "bg-emerald-500" : i === 1 ? "bg-blue-500" : "bg-rose-500")} 
                                    />
                                 </div>
-                                <p className="text-[9px] font-bold text-slate-300 px-1 tracking-widest uppercase">Verified: {diff.correct} / {diff.total}</p>
                              </div>
                           ))}
                        </div>
                     </Card>
 
-                    <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden group">
+                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden group">
                        <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-48 w-48 text-primary" /></div>
                        <div className="relative z-10 space-y-6">
                           <div className="space-y-1">
-                             <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight uppercase">Leaderboard</h3>
+                             <h3 className="text-xl font-bold tracking-tight leading-tight uppercase">Leaderboard</h3>
                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Test Standings</p>
                           </div>
-                          <div className="p-6 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-2 text-left">
+                          <div className="p-5 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-1 text-left">
                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Current Rank</p>
-                             <p className="text-4xl font-black text-primary tabular-nums tracking-tighter">#{liveRank} of {totalCandidates}</p>
+                             <p className="text-3xl font-black text-primary tabular-nums tracking-tighter">#{liveRank} of {totalCandidates}</p>
                           </div>
-                          <Button asChild className="w-full h-14 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-2xl border-none active:scale-95 transition-all">
+                          <Button asChild className="w-full h-12 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-2xl border-none active:scale-95 transition-all">
                              <Link href={`/leaderboard?id=${mockId}`}>View Full Leaderboard <ArrowRight className="ml-2 h-4 w-4" /></Link>
                           </Button>
                        </div>
@@ -413,16 +393,16 @@ export default function ResultClient() {
               </div>
            </TabsContent>
 
-           <TabsContent value="REVIEW" className="space-y-12 animate-in fade-in duration-500">
+           <TabsContent value="REVIEW" className="space-y-10 animate-in fade-in duration-500">
               <div className="max-w-4xl mx-auto space-y-10">
-                 <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
+                 <div className="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
                     <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
                     <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                     <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                     <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skipped" onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
                  </div>
 
-                 <div className="space-y-8">
+                 <div className="space-y-6">
                     {filteredQuestions.map((q) => {
                        const rawAns = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
                        const isAttempted = rawAns !== null && rawAns !== undefined && String(rawAns) !== "";
@@ -430,19 +410,19 @@ export default function ResultClient() {
                        const isCorrect = userSelectedLabel === q.correctAnswer;
                        
                        return (
-                          <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-white text-left group">
-                             <div className="p-8 md:p-14 space-y-8 md:space-y-12">
+                          <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white text-left group">
+                             <div className="p-8 md:p-12 space-y-8 md:space-y-10">
                                 <div className="flex justify-between items-center">
-                                   <Badge variant="outline" className="px-5 py-1.5 rounded-full border-slate-100 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
+                                   <Badge variant="outline" className="px-4 py-1 rounded-full border-slate-100 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
                                       Question {q.originalIndex + 1}
                                    </Badge>
-                                   <div className="flex items-center gap-3">
+                                   <div className="flex items-center gap-2">
                                       {!isAttempted ? (
-                                         <Badge className="bg-slate-100 text-slate-500 border-none px-4 py-1 font-bold text-[9px] uppercase tracking-widest">Skipped</Badge>
+                                         <Badge className="bg-slate-100 text-slate-500 border-none px-3 py-1 font-bold text-[9px] uppercase tracking-widest">Skipped</Badge>
                                       ) : isCorrect ? (
-                                         <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[8px] md:text-[9px] px-3 py-1 rounded shadow-sm">Correct</Badge>
+                                         <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] px-3 py-1 rounded shadow-sm">Correct</Badge>
                                       ) : (
-                                         <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[8px] md:text-[9px] px-3 py-1 rounded shadow-sm">Wrong</Badge>
+                                         <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[9px] px-3 py-1 rounded shadow-sm">Wrong</Badge>
                                       )}
                                    </div>
                                 </div>
@@ -464,7 +444,7 @@ export default function ResultClient() {
 
            <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 pb-20">
               <div className="flex flex-col items-center">
-                 <div className="transform scale-[0.45] sm:scale-[0.6] md:scale-[0.85] lg:scale-100 origin-top bg-white p-0 rounded-[3rem] shadow-5xl border border-slate-100">
+                 <div className="transform scale-[0.45] sm:scale-[0.6] md:scale-[0.85] lg:scale-100 origin-top bg-white p-0 rounded-none shadow-5xl border border-slate-100">
                     <ResultCard 
                        studentName={activeSession.userName || profile?.name || "Aspirant"} 
                        examTitle={activeSession.mockTitle || "Mock Test"} 
@@ -485,7 +465,7 @@ export default function ResultClient() {
                  </div>
                  <div className="mt-12 text-center space-y-4 print:hidden">
                     <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Official Institutional Report Card.</p>
-                    <Button onClick={handleDownloadPDF} className="h-16 px-16 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-xs rounded-2xl shadow-xl border-none active:scale-95">Print Report Card</Button>
+                    <Button onClick={handleDownloadPDF} className="h-14 px-12 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-[11px] rounded-xl shadow-xl border-none active:scale-95">Print Report Card</Button>
                  </div>
               </div>
            </TabsContent>
@@ -500,13 +480,13 @@ export default function ResultClient() {
 function StatCard({ label, val, icon, highlight }: any) {
   return (
     <Card className={cn(
-       "border border-slate-100 shadow-md bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] text-left relative overflow-hidden h-full flex flex-col justify-center transition-all hover:translate-y-[-4px]",
+       "border border-slate-100 shadow-md bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] text-left relative overflow-hidden h-full flex flex-col justify-center transition-all hover:translate-y-[-4px]",
        highlight && "ring-2 ring-primary/5 bg-primary/[0.02]"
     )}>
        <div className="absolute top-0 right-0 p-4 opacity-5">{icon}</div>
        <div className="space-y-1 relative z-10">
-          <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-          <p className={cn("text-xl md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+          <p className={cn("text-xl md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
        </div>
     </Card>
   )
@@ -514,7 +494,7 @@ function StatCard({ label, val, icon, highlight }: any) {
 
 function HubTab({ value, label }: { value: string, label: string }) {
    return (
-      <TabsTrigger value={value} className="flex-1 rounded-xl px-4 md:px-10 font-bold text-[9px] md:text-[11px] tracking-tight data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all h-full uppercase">
+      <TabsTrigger value={value} className="flex-1 rounded-lg px-2 md:px-8 font-bold text-[9px] md:text-[11px] tracking-tight data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all h-full">
          {label}
       </TabsTrigger>
    )
@@ -525,7 +505,7 @@ function FilterButton({ active, label, onClick, color = "primary" }: any) {
       <button 
         onClick={onClick} 
         className={cn(
-          "px-5 md:px-8 py-2.5 rounded-xl text-[9px] md:text-[10px] font-bold tracking-tight transition-all active:scale-95 whitespace-nowrap border border-transparent uppercase",
+          "px-4 md:px-8 py-2 rounded-lg text-[9px] md:text-[10px] font-bold tracking-tight transition-all active:scale-95 whitespace-nowrap border border-transparent uppercase",
           active 
             ? color === 'rose' ? "bg-rose-600 text-white shadow-lg" : 
               color === 'emerald' ? "bg-emerald-600 text-white shadow-lg" :
