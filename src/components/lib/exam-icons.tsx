@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v36.0 (Global Scale Refinement).
- * FIXED: Standardized XL size to match the new Report focal requirements (h-40/w-40).
- * UPDATED: Reduced padding for cleaner institutional aesthetics.
+ * @fileOverview Institutional Branding Engine v41.0 (Global Scale Refinement).
+ * FIXED: Removed internal padding buffers (p-0) to maximize visual zoom.
+ * UPDATED: Calibrated XL size for professional report focal points.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -69,7 +69,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     sm: "h-11 w-11 md:h-12 md:w-12",
     md: "h-14 w-14 md:h-20 md:w-20",
     lg: "h-20 w-20 md:h-28 md:w-28",
-    xl: "h-40 w-40 md:h-48 md:w-48"
+    xl: "h-32 w-32 md:h-44 md:w-44"
   };
 
   const containerSize = sizeClasses[size];
@@ -86,7 +86,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           alt="Authority" 
           fill
           sizes="256px"
-          className="object-contain p-0.5"
+          className="object-contain p-0"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -112,7 +112,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
       containerSize, 
       className
     )}>
-      <div className="h-full w-full p-2.5">
+      <div className="h-full w-full p-2">
         {getFallbackIcon()}
       </div>
     </div>

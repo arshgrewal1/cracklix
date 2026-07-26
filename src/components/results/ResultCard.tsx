@@ -43,8 +43,9 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v12.2 [A4 Margins Hardened].
- * FIXED: Standardized margins and Terminology (Wrong).
+ * @fileOverview Official Institutional Report Card v12.5 [Alignment Hardened].
+ * FIXED: Footer alignment to items-start for consistent top-line registry.
+ * FIXED: QR Container safe-area to prevent clipping.
  */
 export default function ResultCard({
   studentName,
@@ -68,7 +69,7 @@ export default function ResultCard({
   const webUrlRaw = (branding?.websiteUrl || "www.cracklix.com");
   const verifyBase = branding?.verificationUrl || `${webUrlRaw}/results/view?id=`;
   const fullVerifyUrl = verifyBase + resultId;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(fullVerifyUrl)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullVerifyUrl)}`;
 
   return (
     <div id="cracklix-result-card" className="w-[794px] min-h-[1123px] bg-white border border-slate-200 shadow-2xl rounded-none overflow-hidden text-left font-body relative p-0 mx-auto">
@@ -177,22 +178,22 @@ export default function ResultCard({
           </div>
         )}
 
-        {/* FOOTER VERIFICATION */}
-        <div className="pt-20 border-t-4 border-slate-100 flex flex-col md:flex-row items-center justify-between gap-16">
-          <div className="h-56 w-52 bg-white border-4 border-slate-100 p-6 rounded-[3rem] shadow-4xl shrink-0 group hover:scale-105 transition-transform duration-500 flex flex-col items-center justify-center gap-4">
+        {/* FOOTER VERIFICATION - ALIGNMENT FIXED */}
+        <div className="pt-16 border-t-4 border-slate-100 flex flex-row items-start justify-between gap-12">
+          <div className="h-60 w-52 bg-white border-4 border-slate-100 p-6 rounded-[3rem] shadow-4xl shrink-0 flex flex-col items-center justify-center gap-4">
             <img src={qrUrl} alt="Verify" className="h-40 w-40 object-contain" crossOrigin="anonymous" />
-            <span className="text-[11px] font-bold text-primary tracking-widest uppercase">Verify Hub</span>
+            <span className="text-[11px] font-black text-primary tracking-widest uppercase">Verify Hub</span>
           </div>
 
-          <div className="space-y-6 flex-1 text-left">
+          <div className="pt-6 space-y-8 flex-1 text-left">
             <div className="flex items-center justify-start gap-6">
               <ShieldCheck className="h-14 w-14 text-emerald-500" />
               <div className="text-left">
                  <p className="text-3xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">Institutional Precision Verified</p>
-                 <p className="text-[14px] font-bold text-slate-400 mt-2 tracking-widest uppercase">Registry ID: {resultId}</p>
+                 <p className="text-[14px] font-bold text-slate-400 mt-2 tracking-[0.3em] uppercase">Registry ID: {resultId}</p>
               </div>
             </div>
-            <p className="text-[12px] font-medium text-slate-400 tracking-tight leading-relaxed max-w-xl">
+            <p className="text-[13px] font-bold text-slate-400 tracking-tight leading-relaxed max-w-xl uppercase">
                This report is generated based on verified recruitment patterns. Authenticity can be audited via the QR node or at {webUrlRaw.toLowerCase()}.
             </p>
           </div>

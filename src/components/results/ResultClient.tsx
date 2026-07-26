@@ -66,9 +66,9 @@ import { BrandingSettings } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Result Hub v4.5 [PDF & Retake Hardened].
- * FIXED: Retake logic now properly purges attemptId to prevent resume loops.
- * FIXED: PDF Download triggers native print engine for minimum file weight.
+ * @fileOverview Official Result Hub v4.6 [Alignment & Terminology Refined].
+ * FIXED: Optimized mobile header spacing and normalized Title Case terminology.
+ * FIXED: Integrity gate verification (Correct + Wrong + Skipped == Total).
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -171,7 +171,6 @@ export default function ResultClient() {
     
     setIsSyncing(true);
     try {
-      // PURGE ATTEMPT TRACKER - Essential to prevent 'Resume' loop
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
       toast({ title: "Reset Complete", description: "Identity node cleared. Starting fresh." });
       router.push(`/mocks/instructions?id=${mockId}&retake=true`);
@@ -184,10 +183,7 @@ export default function ResultClient() {
   const handleDownloadPDF = () => { 
     setActiveMainTab("REPORT"); 
     toast({ title: "Preparing Report", description: "Generating lightweight A4 document..." });
-    // Minimal delay to ensure tab content mounts before print capture
-    setTimeout(() => { 
-      if (typeof window !== 'undefined') window.print(); 
-    }, 500); 
+    setTimeout(() => { if (typeof window !== 'undefined') window.print(); }, 500); 
   };
 
   const reviewNodes = useMemo(() => {
@@ -223,6 +219,9 @@ export default function ResultClient() {
   if (!mounted || (resultLoading && user) || !activeSession) {
      return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
   }
+
+  // DATA INTEGRITY GATE
+  const integrityPass = activeSession.correctCount + activeSession.wrongCount + activeSession.skippedCount === questions.length;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
@@ -270,13 +269,19 @@ export default function ResultClient() {
                    variant="outline"
                    className="flex-1 h-12 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-widest hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
                  >
-                    {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} Retake
+                    <div className="flex items-center justify-center gap-2">
+                       {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} 
+                       <span>Retake</span>
+                    </div>
                  </Button>
                  <Button 
                    onClick={handleDownloadPDF} 
                    className="flex-1 h-12 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-widest transition-all active:scale-95 border-none shadow-xl"
                  >
-                    <Download className="h-4 w-4" /> Download PDF
+                    <div className="flex items-center justify-center gap-2">
+                       <Download className="h-4 w-4" /> 
+                       <span>PDF Report</span>
+                    </div>
                  </Button>
               </div>
            </div>
@@ -285,6 +290,13 @@ export default function ResultClient() {
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-16">
            
            <TabsContent value="OVERVIEW" className="space-y-12 animate-in fade-in duration-500">
+              {!integrityPass && (
+                 <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-4 animate-pulse">
+                    <AlertCircle className="h-5 w-5 text-rose-500" />
+                    <p className="text-xs font-bold text-rose-700 uppercase tracking-tight">Registry Integrity Warning: Data node mismatch detected.</p>
+                 </div>
+              )}
+
               <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
                  <StatCard label="Final Score" val={activeSession.score.toFixed(1)} icon={<Zap className="text-primary" />} />
                  <StatCard label="Punjab Rank" val={`#${liveRank}`} icon={<Trophy className="text-amber-500" />} highlight />
@@ -323,7 +335,7 @@ export default function ResultClient() {
                     </Card>
 
                     <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
-                       <h2 className="text-xl md:text-3xl font-black text-[#0F172A] mb-8 flex items-center gap-4">
+                       <h2 className="text-xl md:text-2xl font-black text-[#0F172A] mb-8 flex items-center gap-4">
                           <Zap className="h-6 w-6 text-primary fill-current" /> Performance Insights
                        </h2>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -340,8 +352,8 @@ export default function ResultClient() {
                  <div className="lg:col-span-4 space-y-8">
                     <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-10 text-left space-y-8">
                        <div className="space-y-1">
-                          <h3 className="text-lg md:text-2xl font-black flex items-center gap-3 text-[#0F172A] uppercase tracking-tight"><Layers className="h-5 w-5 text-primary" /> Complexity</h3>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mastery Level Hub</p>
+                          <h3 className="text-lg md:text-xl font-black flex items-center gap-3 text-[#0F172A] uppercase tracking-tight"><Layers className="h-5 w-5 text-primary" /> Complexity</h3>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mastery Level</p>
                        </div>
                        <div className="space-y-8">
                           {Array.isArray(activeSession.complexityAnalysis) && activeSession.complexityAnalysis.map((diff: any, i: number) => (
@@ -369,9 +381,9 @@ export default function ResultClient() {
                        <div className="relative z-10 space-y-6">
                           <div className="space-y-1">
                              <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight uppercase">Punjab Rank</h3>
-                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global Standing Node</p>
+                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global standing</p>
                           </div>
-                          <div className="p-6 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-2">
+                          <div className="p-6 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-2 text-left">
                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Current Position</p>
                              <p className="text-4xl font-black text-primary tabular-nums tracking-tighter">#{liveRank}</p>
                           </div>
@@ -413,7 +425,7 @@ export default function ResultClient() {
                                       ) : isCorrect ? (
                                          <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[8px] md:text-[9px] px-3 py-1 rounded shadow-sm">Correct</Badge>
                                       ) : (
-                                         <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[8px] md:text-[9px] px-3 py-1 rounded shadow-sm">Incorrect</Badge>
+                                         <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[8px] md:text-[9px] px-3 py-1 rounded shadow-sm">Wrong</Badge>
                                       )}
                                    </div>
                                 </div>
@@ -455,7 +467,7 @@ export default function ResultClient() {
                     />
                  </div>
                  <div className="mt-12 text-center space-y-4 print:hidden">
-                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Official Institutional Report Card Node.</p>
+                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Official Institutional Report Card.</p>
                     <Button onClick={handleDownloadPDF} className="h-16 px-16 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-xs rounded-2xl shadow-xl border-none active:scale-95">Print Report Card</Button>
                  </div>
               </div>
