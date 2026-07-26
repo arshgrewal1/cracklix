@@ -43,7 +43,7 @@ import Link from "next/link"
 
 /**
  * @fileOverview Universal Result Hub Viewer v24.0.
- * FIXED: Toast terminology and ReferenceErrors for Timer icon.
+ * FIXED: Tabs layout structure to satisfy Radix UI roving focus group requirements and added missing Timer import.
  */
 
 export default function ResultClient() {

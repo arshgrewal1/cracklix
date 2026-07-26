@@ -4,16 +4,16 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 /**
- * @fileOverview Institutional PDF Template Engine v1.3.
- * FIXED: Migrated to high-availability TTF font nodes to prevent generation timeouts.
+ * @fileOverview Institutional PDF Template Engine v1.4.
+ * FIXED: Migrated to high-availability OTF nodes from official Inter repository to prevent 404 errors.
  */
 
 Font.register({
   family: 'Inter',
   fonts: [
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Regular.ttf', fontWeight: 400 },
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Bold.ttf', fontWeight: 700 },
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Black.ttf', fontWeight: 900 },
+    { src: 'https://cdn.jsdelivr.net/gh/rsms/inter@v3.19.3/docs/font-files/Inter-Regular.otf', fontWeight: 400 },
+    { src: 'https://cdn.jsdelivr.net/gh/rsms/inter@v3.19.3/docs/font-files/Inter-Bold.otf', fontWeight: 700 },
+    { src: 'https://cdn.jsdelivr.net/gh/rsms/inter@v3.19.3/docs/font-files/Inter-Black.otf', fontWeight: 900 },
   ],
 });
 
@@ -237,7 +237,6 @@ export default function CracklixReportPDF({ data, qrData }: CracklixReportProps)
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* 1. HEADER */}
         <View style={styles.header}>
           <Image src="https://cracklix.vercel.app/logo/cracklix-logo-dark.png" style={styles.logo} />
           <View style={styles.headerRight}>
@@ -246,7 +245,6 @@ export default function CracklixReportPDF({ data, qrData }: CracklixReportProps)
           </View>
         </View>
 
-        {/* 2. CANDIDATE DETAILS */}
         <View style={styles.detailsSection}>
           <View style={styles.detailsGrid}>
             <View style={styles.detailItem}>
@@ -276,7 +274,6 @@ export default function CracklixReportPDF({ data, qrData }: CracklixReportProps)
           </View>
         </View>
 
-        {/* 3. RANKING CARD */}
         <View style={styles.rankCard}>
           <View style={styles.rankInfo}>
             <Text style={styles.rankLabel}>Punjab State Rank</Text>
@@ -288,7 +285,6 @@ export default function CracklixReportPDF({ data, qrData }: CracklixReportProps)
           </View>
         </View>
 
-        {/* 4. SCORE SUMMARY */}
         <View style={styles.statsRow}>
            <View style={[styles.statBox, { backgroundColor: '#F0FDF4' }]}>
               <Text style={[styles.statValue, { color: '#10B981' }]}>{correct}</Text>
@@ -308,7 +304,6 @@ export default function CracklixReportPDF({ data, qrData }: CracklixReportProps)
            </View>
         </View>
 
-        {/* 5. PERFORMANCE OVERVIEW */}
         <View style={styles.statsRow}>
            <View style={styles.statBox}>
               <Text style={styles.statValue}>{accuracy}%</Text>
@@ -328,7 +323,6 @@ export default function CracklixReportPDF({ data, qrData }: CracklixReportProps)
            </View>
         </View>
 
-        {/* 6. SUBJECT MASTERY */}
         {subjectAnalysis && subjectAnalysis.length > 0 && (
           <View style={styles.table}>
             <View style={styles.tableHeader}>
@@ -346,7 +340,6 @@ export default function CracklixReportPDF({ data, qrData }: CracklixReportProps)
           </View>
         )}
 
-        {/* 7. INSIGHTS */}
         <View style={styles.insightsSection}>
            <View style={styles.insightCard}>
               <Text style={styles.insightTitle}>Institutional Insight</Text>
@@ -364,7 +357,6 @@ export default function CracklixReportPDF({ data, qrData }: CracklixReportProps)
            </View>
         </View>
 
-        {/* 8. FOOTER */}
         <View style={styles.footer}>
           <View style={styles.footerInfo}>
             <Text style={styles.footerBrand}>Digitally Verified by Cracklix</Text>
