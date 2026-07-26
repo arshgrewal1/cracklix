@@ -23,8 +23,8 @@ interface ReportPDFProps {
 }
 
 /**
- * Hardened PDF Report Template v5.0.
- * Designed for 794px width fixed rendering to prevent text overlap.
+ * Hardened PDF Report Template v6.0.
+ * FIXED: Removed absolute positioning and implemented rigid vertical buffers to prevent text overlap.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
@@ -40,7 +40,7 @@ export default function ReportPDF(props: ReportPDFProps) {
       className="bg-[#F8FAFC] p-0 m-0 box-border text-center font-body flex flex-col items-center"
       style={{ width: '794px', height: '1123px', position: 'relative' }}
     >
-      {/* HEADER NODES - NO ABSOLUTE POS */}
+      {/* HEADER NODES */}
       <div className="w-full flex items-center justify-between px-16 py-12 bg-white border-b border-slate-100 shrink-0">
          <div className="flex items-center gap-8">
             <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-16 w-auto" />
@@ -58,7 +58,7 @@ export default function ReportPDF(props: ReportPDFProps) {
 
       <div className="w-full flex-1 p-16 flex flex-col items-center space-y-12">
          
-         {/* CANDIDATE BOX */}
+         {/* CANDIDATE IDENTITY HUB */}
          <div className="w-full p-10 bg-white rounded-[40px] border border-slate-100 shadow-sm text-center space-y-8">
             <div className="space-y-2">
                <p className="text-xs font-black text-[#1677FF] uppercase tracking-[0.5em]">Official Result</p>
@@ -66,6 +66,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                <p className="text-xl font-bold text-slate-400 uppercase tracking-tighter">{examTitle}</p>
             </div>
             
+            {/* BOXED IDENTITY GRID */}
             <div className="flex justify-center gap-12 pt-4">
                <PDFMeta label="Attempt Date" val={date} />
                <PDFMeta label="Time Taken" val={timeTaken} />
@@ -73,20 +74,20 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
          </div>
 
-         {/* RANKING HUB */}
+         {/* PUNJAB RANK HUB - RIGID VERTICAL BUFFER */}
          <div className="w-full bg-[#1677FF] rounded-[48px] p-16 text-white text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center">
             <p className="text-[14px] font-black uppercase tracking-[0.6em] mb-12 opacity-80">Punjab Merit Standing</p>
             
-            <div className="space-y-4">
+            <div className="flex flex-col items-center space-y-10">
                <span className="text-[120px] font-black tabular-nums tracking-tighter leading-none">#{rank}</span>
-               <div className="h-[60px]" /> {/* Rigid spacer to prevent overlap */}
+               <div className="h-[60px]" aria-hidden="true" /> {/* RIGID SPACER Node */}
                <p className="text-2xl font-bold text-white/60 tabular-nums uppercase tracking-widest">
                   Out of {totalCandidates.toLocaleString()} Candidates
                </p>
             </div>
          </div>
 
-         {/* STATS GRID */}
+         {/* STATS KPI GRID */}
          <div className="grid grid-cols-2 gap-8 w-full">
             <PDFKPIBox label="Net Score" val={score} sub={`/ ${totalQuestions}`} color="text-[#1677FF]" />
             <PDFKPIBox label="Accuracy" val={`${attemptAccuracy}%`} sub="Candidate Index" color="text-emerald-500" />
@@ -94,7 +95,7 @@ export default function ReportPDF(props: ReportPDFProps) {
             <PDFKPIBox label="Status" val={Number(score) >= (totalQuestions/2) ? 'Qualified' : 'Attempted'} sub="Assessment" color="text-[#071B4D]" />
          </div>
 
-         {/* VERIFICATION FOOTER */}
+         {/* VERIFICATION HUB FOOTER */}
          <div className="w-full pt-12 border-t border-slate-100 flex items-center justify-between mt-auto">
             <div className="flex items-center gap-10">
                <div className="h-28 w-28 bg-white border border-slate-100 p-2 rounded-[20px] shadow-lg flex items-center justify-center">

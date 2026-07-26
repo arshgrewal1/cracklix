@@ -22,11 +22,11 @@ import {
   ChevronRight,
   ShieldCheck,
   RefreshCw,
-  FileText,
-  Bookmark,
+  Clock,
+  Users,
   CheckCircle2,
   XCircle,
-  Clock
+  Bookmark
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -40,6 +40,11 @@ import ReportPDF from "./ReportPDF"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
+
+/**
+ * @fileOverview Universal Result Hub Viewer v10.0 [Premium Redesign].
+ * FIXED: Imported missing 'Users' icon and resolved Card/Div tag mismatch.
+ */
 
 export default function ResultClient() {
   const db = useFirestore()
@@ -224,17 +229,16 @@ export default function ResultClient() {
         
         {sessionData && (
            <div className="space-y-10">
-              {/* TEST HEADER */}
-              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+              <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-6 md:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                  <div className="flex items-center gap-6 md:gap-10">
-                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-24 md:w-24 bg-white shadow-xl border-4 border-slate-100" />
-                    <div className="text-left space-y-4">
+                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-20 md:w-20 bg-white shadow-xl border border-slate-100" />
+                    <div className="text-left space-y-2">
                        <div className="flex flex-wrap items-center gap-3">
                           <Badge className="bg-[#10B981] text-white border-none px-3 py-1 font-bold text-[9px] uppercase tracking-widest">Verified Hub</Badge>
                           <Badge className="bg-[#1677FF] text-white border-none px-3 py-1 font-bold text-[9px] uppercase tracking-widest">Attempt #{profile?.totalTests || 1}</Badge>
                        </div>
-                       <h1 className="text-2xl md:text-5xl font-[900] text-[#071B4D] tracking-tighter leading-tight uppercase">{sessionData.mockTitle}</h1>
-                       <div className="flex items-center gap-6 text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-widest">
+                       <h1 className="text-xl md:text-3xl font-black text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
+                       <div className="flex items-center gap-6 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">
                           <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
                           <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> {mockData?.duration || 120}m Duration</span>
                           <span className="flex items-center gap-2"><Users className="h-4 w-4" /> {totalCandidates} Candidates</span>
@@ -242,19 +246,19 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 lg:flex-none h-14 px-8 bg-white border border-slate-200 text-[#071B4D] hover:bg-slate-50 font-bold rounded-2xl gap-3">
-                       {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />} Download PDF
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 lg:flex-none h-12 px-6 bg-white border border-slate-200 text-[#071B4D] hover:bg-slate-50 font-bold rounded-xl gap-3 text-xs">
+                       {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download PDF
                     </Button>
-                    <Button asChild className="flex-1 lg:flex-none h-14 px-8 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl gap-3">
-                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-5 w-5" /> Retake Test</Link>
+                    <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs">
+                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
                     </Button>
                  </div>
-              </div>
+              </Card>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-12">
-                  <div className="bg-white p-1.5 rounded-3xl border border-slate-200 shadow-sm flex w-fit gap-2 mx-auto lg:mx-0">
-                     <TabsTrigger value="OVERVIEW" className="rounded-2xl px-12 font-black uppercase text-[10px] h-12 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis Hub</TabsTrigger>
-                     <TabsTrigger value="REVIEW" className="rounded-2xl px-12 font-black uppercase text-[10px] h-12 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review Portal</TabsTrigger>
+                  <div className="bg-white p-1 rounded-3xl border border-[#E5EAF2] shadow-sm flex w-fit gap-1 mx-auto lg:mx-0">
+                     <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-10 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Analysis hub</TabsTrigger>
+                     <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-10 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review portal</TabsTrigger>
                   </div>
 
                   <TabsContent value="OVERVIEW" className="m-0 max-w-4xl mx-auto">
@@ -332,19 +336,10 @@ export default function ResultClient() {
   )
 }
 
-function HeaderMiniNode({ label, val }: { label: string, val: string }) {
-   return (
-      <div className="text-center md:text-left space-y-1 px-4 border-r border-slate-100 last:border-0">
-         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
-         <p className="text-sm font-bold text-[#071B4D] tabular-nums leading-none">{val}</p>
-      </div>
-   )
-}
-
 function FilterButton({ active, label, count, onClick, color = "primary" }: any) {
   return (
     <button onClick={onClick} className={cn(
-      "flex items-center gap-3 px-6 h-10 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all active:scale-95 border",
+      "flex items-center gap-3 px-6 h-10 rounded-xl text-[10px] font-bold transition-all active:scale-95 border whitespace-nowrap",
       active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-slate-50 border-transparent text-slate-400 hover:bg-slate-100"
     )}>
        {label} <span className="opacity-40">{count}</span>

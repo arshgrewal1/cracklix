@@ -12,14 +12,16 @@ import {
   Activity,
   AlertCircle,
   Lightbulb,
-  ArrowRight,
   TrendingDown,
   LayoutGrid
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+
+/**
+ * @fileOverview Premium Analysis Screen v2.0.
+ * FIXED: Explicit imports for all used lucide icons.
+ */
 
 interface ReportScreenProps {
   score: string | number;
@@ -64,13 +66,12 @@ export default function ReportScreen(props: ReportScreenProps) {
   }, [attemptAccuracy, score, avgScore, wrongCount, totalQuestions]);
 
   return (
-    <div className="w-full space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-20">
+    <div className="w-full space-y-8 animate-in fade-in duration-500 pb-20">
       
       {/* SCORE SUMMARY ROW */}
-      <div className="flex overflow-x-auto no-scrollbar -mx-4 px-4 gap-3 md:gap-4 snap-x">
-         {/* YOUR SCORE */}
-         <Card className="min-w-[160px] md:flex-1 h-32 md:h-40 rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-6 snap-start shrink-0">
-            <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-2">Your Score</p>
+      <div className="flex overflow-x-auto no-scrollbar -mx-4 px-4 gap-4 snap-x">
+         <Card className="min-w-[160px] md:flex-1 h-36 md:h-44 rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-6 snap-start shrink-0">
+            <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-2">Your score</p>
             <div className="flex items-baseline gap-1">
                <span className="text-2xl md:text-4xl font-black text-[#10B981] tabular-nums">{score}</span>
                <span className="text-sm md:text-xl font-bold text-slate-400">/{totalQuestions}</span>
@@ -85,50 +86,50 @@ export default function ReportScreen(props: ReportScreenProps) {
       </div>
 
       {/* RANKING CARD */}
-      <Card className="border-none shadow-sm rounded-[24px] bg-white p-5 md:p-8 flex items-center justify-between border border-[#E5EAF2]">
-         <div className="flex items-center gap-4 md:gap-6">
+      <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 flex items-center justify-between">
+         <div className="flex items-center gap-4 md:gap-8">
             <div className="h-12 w-12 md:h-16 md:w-16 rounded-full bg-[#1677FF] flex items-center justify-center text-white shadow-lg">
                <Trophy className="h-6 w-6 md:h-8 md:w-8" />
             </div>
             <div className="text-left">
-               <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Your Punjab Rank</p>
+               <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Your Punjab rank</p>
                <div className="flex items-baseline gap-2">
                   <span className="text-3xl md:text-5xl font-black text-[#1677FF] tabular-nums">#{rank}</span>
                   <span className="text-[10px] md:text-sm font-bold text-slate-300">/ {totalCandidates} Candidates</span>
                </div>
             </div>
          </div>
-         <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 md:px-6 md:py-3 rounded-2xl">
-            <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 text-[#1677FF]" />
+         <div className="hidden sm:flex items-center gap-3 bg-blue-50 px-6 py-3 rounded-2xl">
+            <ShieldCheck className="h-5 w-5 text-[#1677FF]" />
             <div className="text-left">
-               <p className="text-[10px] md:text-xs font-black text-[#1677FF] leading-none">Verified Standing</p>
-               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1 uppercase">Top Ranked Hub</p>
+               <p className="text-[10px] md:text-xs font-black text-[#1677FF] leading-none">Verified standing</p>
+               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1 uppercase">Top ranked hub</p>
             </div>
          </div>
       </Card>
 
       {/* PERFORMANCE OVERVIEW */}
-      <div className="space-y-4">
+      <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <BarChart3 className="h-5 w-5 text-[#1677FF]" />
-            <h3 className="text-lg font-black text-[#071B4D]">Performance Overview</h3>
+            <h3 className="text-lg font-black text-[#071B4D]">Performance overview</h3>
          </div>
          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatsBox label="Accuracy" val={`${attemptAccuracy}%`} sub={`(${correctCount}/${correctCount + wrongCount})`} />
-            <StatsBox label="Pass Grade" val={grade} sub="(Min. 40%)" color={grade === 'F' ? 'text-[#FF3366]' : 'text-[#10B981]'} />
-            <StatsBox label="Net Score" val={score} sub={`(Out of ${totalQuestions})`} />
+            <StatsBox label="Pass grade" val={grade} sub="(Min. 40%)" color={grade === 'F' ? 'text-[#FF3366]' : 'text-[#10B981]'} />
+            <StatsBox label="Net score" val={score} sub={`(Out of ${totalQuestions})`} />
             <StatsBox label="Percentile" val={percentile > 0 ? `${percentile}%` : "--"} sub="Not enough data" />
          </div>
       </div>
 
       {/* SUBJECT MASTERY */}
       {subjectAnalysis.length > 0 && (
-         <div className="space-y-4">
+         <div className="space-y-6">
             <div className="flex items-center gap-3 px-1">
                <Target className="h-5 w-5 text-[#1677FF]" />
-               <h3 className="text-lg font-black text-[#071B4D]">Subject Mastery</h3>
+               <h3 className="text-lg font-black text-[#071B4D]">Subject mastery</h3>
             </div>
-            <Card className="border-none shadow-sm rounded-[24px] bg-white overflow-hidden border border-[#E5EAF2]">
+            <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden">
                <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                      <thead className="bg-slate-50/50">
@@ -160,24 +161,24 @@ export default function ReportScreen(props: ReportScreenProps) {
       )}
 
       {/* COMPETITION SNAPSHOT */}
-      <div className="space-y-4">
+      <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <TrendingUp className="h-5 w-5 text-[#1677FF]" />
-            <h3 className="text-lg font-black text-[#071B4D]">Competition Snapshot</h3>
+            <h3 className="text-lg font-black text-[#071B4D]">Competition snapshot</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <ComparisonPill label="Top Score" val={topScore.toFixed(1)} icon={<Award className="text-amber-500" />} />
-            <ComparisonPill label="Avg Score" val={avgScore.toFixed(1)} icon={<Activity className="text-blue-500" />} />
-            <ComparisonPill label="Avg Accuracy" val={`${avgAccuracy.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500" />} />
-            <ComparisonPill label="Topper Gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500" />} />
+            <ComparisonPill label="Top score" val={topScore.toFixed(1)} icon={<Award className="text-amber-500" />} />
+            <ComparisonPill label="Avg score" val={avgScore.toFixed(1)} icon={<Activity className="text-blue-500" />} />
+            <ComparisonPill label="Avg accuracy" val={`${avgAccuracy.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500" />} />
+            <ComparisonPill label="Topper gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500" />} />
          </div>
       </div>
 
       {/* SMART INSIGHTS */}
-      <Card className="border-none shadow-sm rounded-[24px] bg-white p-6 md:p-8 space-y-6 border border-[#E5EAF2]">
+      <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 space-y-6">
          <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
             <Lightbulb className="h-5 w-5 text-[#F59E0B]" />
-            <h3 className="text-lg font-black text-[#071B4D]">Smart Insights</h3>
+            <h3 className="text-lg font-black text-[#071B4D]">Smart insights</h3>
          </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {insights.map((insight, i) => (
@@ -201,7 +202,7 @@ export default function ReportScreen(props: ReportScreenProps) {
 
 function SummaryMiniCard({ label, val, color, bg }: any) {
    return (
-      <Card className={cn("min-w-[100px] md:flex-1 h-32 md:h-40 rounded-[24px] border-none shadow-sm flex flex-col items-center justify-center p-4 snap-start shrink-0", bg)}>
+      <Card className={cn("min-w-[110px] md:flex-1 h-36 md:h-44 rounded-[24px] border-none shadow-sm flex flex-col items-center justify-center p-4 snap-start shrink-0", bg)}>
          <span className={cn("text-2xl md:text-4xl font-black tabular-nums", color)}>{val}</span>
          <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">{label}</span>
       </Card>
@@ -210,7 +211,7 @@ function SummaryMiniCard({ label, val, color, bg }: any) {
 
 function StatsBox({ label, val, sub, color }: any) {
    return (
-      <Card className="border-none shadow-sm rounded-[24px] bg-white p-6 md:p-8 text-center space-y-3 border border-[#E5EAF2]">
+      <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 text-center space-y-3">
          <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</p>
          <p className={cn("text-2xl md:text-4xl font-black tabular-nums tracking-tighter leading-none", color || "text-[#071B4D]")}>{val}</p>
          <p className="text-[10px] font-bold text-slate-300 leading-none">{sub}</p>
