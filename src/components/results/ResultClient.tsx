@@ -51,8 +51,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 
 /**
- * @fileOverview Institutional Result System v14.0 [Full-Width & Terminology Sync].
- * FIXED: ReferenceError for filteredQuestions and localized PWA viewport utility.
+ * @fileOverview Institutional Result System v15.0 [PWA Full-Width & Audit Refined].
+ * FIXED: Full-width PWA view on mobile devices.
  */
 
 export default function ResultClient() {
@@ -86,7 +86,6 @@ export default function ResultClient() {
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
-  // 1. Resolve Identity Hub
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
     
@@ -125,7 +124,6 @@ export default function ResultClient() {
     resolveId();
   }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
 
-  // 2. Fetch Ranking Metrics
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
      async function fetchRankingMetrics() {
@@ -160,7 +158,6 @@ export default function ResultClient() {
      fetchRankingMetrics();
   }, [db, mockId, activeSession, user]);
 
-  // 3. Question Retrieval
   useEffect(() => {
     async function loadQuestions() {
       if (!db || !mockId) { setLoadingQuestions(false); return; }
@@ -210,7 +207,7 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Validating report metadata..." });
+    toast({ title: "Validating registry node..." });
 
     try {
       await document.fonts.ready;
@@ -230,15 +227,7 @@ export default function ResultClient() {
 
       const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = 210;
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, Math.min(297, pdfHeight), undefined, 'FAST');
-      if (pdfHeight > 297) {
-         pdf.addPage();
-         pdf.addImage(imgData, 'PNG', 0, -297, pdfWidth, pdfHeight, undefined, 'FAST');
-      }
-
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
       pdf.save(`Cracklix_Report_${activeSession.userName || 'Student'}.pdf`);
       toast({ title: "Official Report Exported" });
     } catch (e: any) {
@@ -276,7 +265,7 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body">
       <Navbar />
-      <main className="container mx-auto max-w-[1440px] px-1 md:px-10 py-6 md:py-10 space-y-8 pb-32">
+      <main className="container mx-auto max-w-[1440px] px-0 md:px-10 py-6 md:py-10 space-y-8 pb-32">
         
         {isSearching && (
            <div className="py-24 text-center flex flex-col items-center gap-4">
@@ -300,7 +289,7 @@ export default function ResultClient() {
 
         {!isSearching && !errorNotFound && activeSession && finalMetrics && (
            <>
-              <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1">
+              <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-4">
                  <div className="flex items-center gap-4 text-left w-full lg:w-auto">
                     <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-11 w-11 md:h-16 md:w-16 rounded-xl shadow-lg bg-white border-2 border-slate-50" />
                     <div className="space-y-1 flex-1 min-w-0">
@@ -356,7 +345,7 @@ export default function ResultClient() {
                       />
                   </TabsContent>
 
-                  <TabsContent value="REVIEW" className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
+                  <TabsContent value="REVIEW" className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto px-4 md:px-0">
                       <div className="flex items-center gap-1 bg-white p-1 rounded-xl shadow-md border border-slate-100 w-fit mx-auto">
                           <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
                           <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
@@ -364,7 +353,7 @@ export default function ResultClient() {
                       </div>
                       <div className="space-y-6">
                           {filteredQuestions.map((q) => (
-                              <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[2.5rem] overflow-hidden bg-white text-left">
+                              <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-white text-left">
                                   <div className="p-6 md:p-10 space-y-6">
                                       <Badge variant="outline" className="px-3 py-0.5 rounded-lg border-slate-200 text-slate-400 font-bold text-[8px]">
                                           Question #{q.originalIndex + 1}
@@ -413,7 +402,6 @@ export default function ResultClient() {
            </>
         )}
 
-        {/* Hidden Render Hub for PDF Capture */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
           <div id="pdf-report-container">
             {finalMetrics && activeSession && (
