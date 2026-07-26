@@ -51,9 +51,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v28.0.
- * FIXED: Instant one-click retake by navigating directly to attempt with retake=true.
- * FIXED: Removed all remaining uppercase text from result section.
+ * @fileOverview Institutional Result Hub v29.0.
+ * FIXED: Displays attempt count for the specific session.
+ * FIXED: Removed all remaining uppercase labels.
  */
 
 export default function ResultClient() {
@@ -79,6 +79,7 @@ export default function ResultClient() {
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
   const [previewScale, setPreviewScale] = useState(1);
+  const [userAttemptCount, setUserAttemptCount] = useState<number>(1);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -126,16 +127,24 @@ export default function ResultClient() {
        try {
           const docRef = doc(db, "results", targetId);
           const snap = await getDoc(docRef);
+          
+          const resQuery = query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId), orderBy("timestamp", "asc"));
+          const querySnap = await getDocs(resQuery);
+          const resultsList = querySnap.docs.map(d => ({ ...d.data(), id: d.id }));
+          
+          setUserAttemptCount(resultsList.length || 1);
+
           if (snap.exists()) {
-             setSessionData({ ...snap.data(), id: snap.id });
+             const data = snap.data();
+             const nth = resultsList.findIndex(r => r.id === snap.id) + 1;
+             setSessionData({ ...data, id: snap.id, attemptNumber: nth > 0 ? nth : resultsList.length });
              setIsSearching(false);
              return;
           }
-          const resQuery = query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId), limit(5));
-          const querySnap = await getDocs(resQuery);
-          if (!querySnap.empty) {
-             const resultsList = querySnap.docs.map(d => ({ ...d.data(), id: d.id }));
-             setSessionData(resultsList.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]);
+          
+          if (resultsList.length > 0) {
+             const latest = resultsList[resultsList.length - 1];
+             setSessionData({ ...latest, attemptNumber: resultsList.length });
              setIsSearching(false);
              return;
           }
@@ -225,7 +234,7 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Optimizing download" });
+    toast({ title: "Optimizing report" });
 
     try {
       await document.fonts.ready;
@@ -247,9 +256,9 @@ export default function ResultClient() {
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
       pdf.save(`Cracklix_Report_${activeSession.userName?.replace(/\s+/g, '_') || 'Student'}.pdf`);
-      toast({ title: "Report ready" });
+      toast({ title: "Download ready" });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Export error" });
+      toast({ variant: "destructive", title: "Export failed" });
     } finally { setIsExporting(false); }
   };
 
@@ -294,7 +303,10 @@ export default function ResultClient() {
                        <h1 className="text-xl md:text-4xl font-black tracking-tight text-[#0F172A] truncate">
                          {activeSession?.mockTitle}
                        </h1>
-                       <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">Verified Attempt</Badge>
+                       <div className="flex items-center gap-3">
+                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">Verified Attempt</Badge>
+                          <span className="text-[10px] md:text-[11px] font-bold text-primary">Attempt #{activeSession.attemptNumber || 1}</span>
+                       </div>
                     </div>
                  </div>
                  
@@ -340,6 +352,7 @@ export default function ResultClient() {
                          subjects={activeSession.subjectAnalysis}
                          duration={mockData?.duration}
                          boardId={activeSession?.boardId}
+                         attemptNumber={activeSession.attemptNumber || 1}
                       />
                   </TabsContent>
 
@@ -405,6 +418,7 @@ export default function ResultClient() {
                             grade={finalMetrics.grade}
                             subjects={activeSession.subjectAnalysis}
                             duration={mockData?.duration}
+                            attemptNumber={activeSession.attemptNumber || 1}
                          />
                       </div>
                   </TabsContent>
@@ -435,6 +449,7 @@ export default function ResultClient() {
                  grade={finalMetrics.grade}
                  subjects={activeSession.subjectAnalysis}
                  duration={mockData?.duration}
+                 attemptNumber={activeSession.attemptNumber || 1}
               />
             )}
           </div>

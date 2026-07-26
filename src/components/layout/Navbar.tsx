@@ -37,7 +37,8 @@ import { Button } from "@/components/ui/button";
 import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Cracklix Navigation Hub v127.0 [Uppercase Removed].
+ * @fileOverview Cracklix Navigation Hub v128.0.
+ * UPDATED: Changed from 'sticky' to 'relative' to allow header to scroll away naturally.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -103,7 +104,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
+      <header className="relative z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
         <nav className="w-full h-[84px] md:h-[116px] transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 

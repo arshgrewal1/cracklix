@@ -36,18 +36,19 @@ interface ReportScreenProps {
   isQualified?: boolean;
   duration?: number | string;
   boardId?: string;
+  attemptNumber?: number;
 }
 
 /**
- * @fileOverview Responsive Screen Layout for Browser Viewing v10.0.
- * FIXED: Removed all remaining uppercase text and optimized for PWA full-screen.
+ * @fileOverview Responsive Screen Layout for Browser Viewing v11.0.
+ * FIXED: Displays attempt count and normalized Title Case labels.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
     studentName, examTitle, score, rank, totalCandidates, 
     attemptAccuracy, timeTaken, correct, wrong, skipped,
     total, date, resultId, percentile, subjects = [], grade = "F",
-    isQualified, duration, boardId
+    isQualified, duration, boardId, attemptNumber = 1
   } = props;
 
   return (
@@ -72,11 +73,14 @@ export default function ReportScreen(props: ReportScreenProps) {
             </div>
          </div>
          
-         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-slate-50">
+         <div className="grid grid-cols-2 md:grid-cols-5 gap-6 pt-6 border-t border-slate-50">
             <DataMiniNode label="Attempt date" val={date} />
             <DataMiniNode label="Time taken" val={timeTaken} />
             <DataMiniNode label="Duration" val={duration ? `${duration}m` : 'Self'} />
-            <DataMiniNode label="Total pool" val={totalCandidates.toLocaleString()} />
+            <DataMiniNode label="Attempt #" val={String(attemptNumber)} />
+            <div className="hidden md:block">
+              <DataMiniNode label="Total pool" val={totalCandidates.toLocaleString()} />
+            </div>
          </div>
       </div>
 
@@ -154,7 +158,7 @@ export default function ReportScreen(props: ReportScreenProps) {
 function DataMiniNode({ label, val }: { label: string, val: string }) {
    return (
       <div className="space-y-1 text-left">
-         <p className="text-[8px] md:text-[10px] font-bold text-slate-400">{label}</p>
+         <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
          <p className="text-[12px] md:text-lg font-black text-[#0F172A] tabular-nums truncate leading-none">{val}</p>
       </div>
    )
@@ -163,7 +167,7 @@ function DataMiniNode({ label, val }: { label: string, val: string }) {
 function MetricBox({ label, val, color, bg }: any) {
    return (
       <Card className="border-none shadow-xl bg-white p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] flex flex-col items-center justify-center gap-3 transition-all border border-slate-50 h-32 md:h-44 text-center">
-         <p className="text-[9px] md:text-xs font-bold text-slate-400">{label}</p>
+         <p className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</p>
          <p className={cn("text-2xl md:text-5xl font-black tabular-nums tracking-tighter leading-none", color)}>{val}</p>
       </Card>
    )
@@ -173,7 +177,7 @@ function CountCard({ label, val, color }: any) {
    return (
       <div className={cn("p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] flex flex-col items-center justify-center text-center gap-1 shadow-sm", color)}>
          <span className="text-2xl md:text-4xl font-black tabular-nums tracking-tighter leading-none">{val}</span>
-         <span className="text-[9px] font-bold opacity-60 mt-2">{label}</span>
+         <span className="text-[9px] font-bold uppercase tracking-widest opacity-60 mt-2">{label}</span>
       </div>
    )
 }

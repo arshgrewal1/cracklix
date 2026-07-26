@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -25,19 +24,19 @@ interface ReportPDFProps {
   grade?: string;
   isQualified?: boolean;
   duration?: number | string;
+  attemptNumber?: number;
 }
 
 /**
- * @fileOverview Institutional Portrait PDF Layout Hub v16.0.
- * FIXED: Vertical overlap in Punjab Rank hub by removing leading-none and adding explicit gaps.
- * OPTIMIZED: High-density centering for all identity and merit nodes.
+ * @fileOverview Institutional Portrait PDF Layout Hub v17.0.
+ * FIXED: Standardized text alignment and synchronized domain to cracklix.in.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
     studentName, examTitle, score, rank, totalCandidates,
     attemptAccuracy, timeTaken, correct, wrong, skipped,
     total, date, resultId, percentile, subjects = [], grade = "F",
-    isQualified, duration
+    isQualified, duration, attemptNumber = 1
   } = props;
 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent('https://cracklix.in/results/view?id=' + resultId)}`;
@@ -66,7 +65,7 @@ export default function ReportPDF(props: ReportPDFProps) {
 
       <div className="w-full flex-1 p-8 space-y-6 flex flex-col items-center overflow-hidden">
          
-         {/* 2. Candidate Identity - ABSOLUTE CENTERED */}
+         {/* 2. Candidate Identity */}
          <div className="w-full bg-white rounded-[2rem] p-10 border border-slate-100 flex flex-col items-center justify-center shadow-sm relative overflow-hidden text-center">
             <div className="space-y-3 w-full">
                <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Candidate Identity</p>
@@ -76,7 +75,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                <p className="text-lg font-bold text-slate-500 line-clamp-1">{examTitle}</p>
             </div>
             
-            <div className="pt-6 border-t border-slate-100 mt-6 w-full max-w-md mx-auto flex items-center justify-center gap-16">
+            <div className="pt-6 border-t border-slate-100 mt-6 w-full max-w-lg mx-auto grid grid-cols-3 gap-8">
                <div className="space-y-1 text-center">
                   <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Attempt Date</p>
                   <p className="text-sm font-black text-[#0F172A] tabular-nums">{date}</p>
@@ -85,22 +84,25 @@ export default function ReportPDF(props: ReportPDFProps) {
                   <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Time Taken</p>
                   <p className="text-sm font-black text-[#0F172A] tabular-nums">{timeTaken}</p>
                </div>
+               <div className="space-y-1 text-center">
+                  <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Attempt #</p>
+                  <p className="text-sm font-black text-primary tabular-nums">{attemptNumber}</p>
+               </div>
             </div>
          </div>
 
-         {/* 3. Merit Standing - FIXED OVERLAP */}
-         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center gap-2 shadow-2xl relative overflow-hidden">
+         {/* 3. Merit Standing */}
+         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center gap-4 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-48 w-48 text-primary" /></div>
             
-            <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] relative z-10 mb-2">Your Punjab Rank</p>
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] relative z-10">Your Punjab Rank</p>
             
-            <div className="flex flex-col items-center justify-center relative z-10 w-full">
-               {/* Explicit leading-tight and padding prevents overlap with child text */}
+            <div className="flex flex-col items-center justify-center relative z-10 w-full py-2">
                <span className="text-8xl font-black tabular-nums tracking-tighter leading-tight">#{rank}</span>
-               <span className="text-[12px] font-bold text-slate-400 tabular-nums mt-2">/ {totalCandidates.toLocaleString()} Candidates</span>
+               <span className="text-[14px] font-bold text-slate-400 tabular-nums mt-4">/ {totalCandidates.toLocaleString()} Candidates</span>
             </div>
 
-            <div className="pt-6 relative z-10">
+            <div className="pt-4 relative z-10">
               <Badge className="bg-emerald-500 text-white border-none font-black text-[10px] px-8 py-2.5 rounded-full shadow-2xl uppercase tracking-widest">
                  Verified Standing
               </Badge>
@@ -120,7 +122,7 @@ export default function ReportPDF(props: ReportPDFProps) {
             <CountPill label="Correct" val={correct} color="bg-emerald-50 text-emerald-600" />
             <CountPill label="Wrong" val={wrong} color="bg-rose-50 text-rose-600" />
             <CountPill label="Skipped" val={skipped} color="bg-slate-50 text-slate-400" />
-            <CountPill label="Questions" val={total} color="bg-blue-50 text-blue-600" />
+            <CountPill label="Total Items" val={total} color="bg-blue-50 text-blue-600" />
          </div>
 
          {/* 6. Subject Analysis */}
@@ -131,7 +133,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                   <table className="w-full text-center">
                      <thead>
                         <tr className="bg-slate-50 border-b border-slate-100 h-10">
-                           <th className="px-8 font-black text-[10px] text-slate-500 uppercase tracking-widest text-left">Subject Hub</th>
+                           <th className="px-8 font-black text-[10px] text-slate-500 uppercase tracking-widest text-left">Subject hub</th>
                            <th className="px-4 font-black text-[10px] text-center text-slate-500 uppercase tracking-widest">Score</th>
                            <th className="px-4 font-black text-[10px] text-center text-slate-500 uppercase tracking-widest">Accuracy</th>
                         </tr>
