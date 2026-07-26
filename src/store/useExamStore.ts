@@ -54,7 +54,7 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v8.0 [Strict Attempt Isolation].
+ * @fileOverview Hardened Test Store v9.0 [Strict Attempt Isolation].
  * Every initialization performs a total memory purge to prevent data leakage.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({

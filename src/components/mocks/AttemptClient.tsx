@@ -29,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v11.0 [Unified Analytical Snapshot].
- * Rebuild: Calculates all performance metrics (Subject/Complexity/Grade) at submission.
+ * @fileOverview Official Mock Attempt Hub v12.0 [Hardened Analytics].
+ * Rebuild: Calculates complete Performance Snapshots at submission.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -216,7 +216,12 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
     // SUBJECT & COMPLEXITY SNAPSHOT ENGINE
     const subMap: Record<string, any> = {};
-    const diffMap: Record<string, any> = { easy: { total: 0, correct: 0 }, medium: { total: 0, correct: 0 }, hard: { total: 0, correct: 0 } };
+    const diffMap: Record<string, any> = { 
+      easy: { name: 'Easy', total: 0, correct: 0, wrong: 0, accuracy: 0 }, 
+      medium: { name: 'Medium', total: 0, correct: 0, wrong: 0, accuracy: 0 }, 
+      hard: { name: 'Hard', total: 0, correct: 0, wrong: 0, accuracy: 0 },
+      expert: { name: 'Expert', total: 0, correct: 0, wrong: 0, accuracy: 0 }
+    };
 
     questions.forEach((q: any, idx: number) => {
       const studentAnsIdx = answers?.[idx];
@@ -225,24 +230,40 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const isAttempted = studentAnsIdx !== undefined && studentAnsIdx !== null;
 
       const sId = q.subjectId || 'General';
-      if (!subMap[sId]) subMap[sId] = { name: sId, total: 0, correct: 0, score: 0 };
+      if (!subMap[sId]) subMap[sId] = { name: sId, total: 0, correct: 0, wrong: 0, score: 0 };
       subMap[sId].total++;
-      if (isCorrect) { subMap[sId].correct++; subMap[sId].score += posMarks; }
-      else if (isAttempted) { subMap[sId].score -= negMarks; }
-
+      
       const dKey = (q.difficulty || 'Medium').toLowerCase();
-      if (diffMap[dKey]) {
-         diffMap[dKey].total++;
-         if (isCorrect) diffMap[dKey].correct++;
-      }
+      if (diffMap[dKey]) diffMap[dKey].total++;
 
-      if (isCorrect) correctCount++; else if (isAttempted) wrongCount++;
+      if (isCorrect) { 
+        subMap[sId].correct++; 
+        subMap[sId].score += posMarks; 
+        if (diffMap[dKey]) diffMap[dKey].correct++;
+        correctCount++; 
+      } else if (isAttempted) { 
+        subMap[sId].wrong++;
+        subMap[sId].score -= negMarks; 
+        if (diffMap[dKey]) diffMap[dKey].wrong++;
+        wrongCount++; 
+      }
     });
 
     const finalScore = Number(parseFloat(((correctCount * posMarks) - (wrongCount * negMarks)).toFixed(2)));
     const timeTaken = Math.max(1, elapsedSeconds);
     const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
     
+    // Generate Performance Insights
+    const insights = [];
+    if (accuracy >= 85) insights.push("Excellent accuracy levels maintained.");
+    else if (accuracy < 50) insights.push("Accuracy needs significant attention. Focus on core concepts.");
+    
+    if (wrongCount > (correctCount / 2)) insights.push("High error rate detected. Avoid random guessing.");
+    if (timeTaken > (mockData.duration * 60 * 0.9)) insights.push("Speed optimization required to complete on time.");
+    
+    const skippedCount = questions.length - attemptedCount;
+    if (skippedCount > (questions.length * 0.4)) insights.push("High skip rate. Review unattempted subject areas.");
+
     await stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
 
     const resultPayload: any = {
@@ -252,6 +273,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       score: finalScore,
       correctCount, 
       wrongCount, 
+      skippedCount,
       attemptedCount, 
       totalQuestions: questions.length,
       accuracy,
@@ -261,12 +283,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       timestamp: new Date().toISOString(),
       accessLevel: (mockData.accessLevel || 'FREE').toUpperCase(),
       mockType: mockData.mockType || 'PRACTICE',
+      positiveMarks: posMarks,
+      negativeMarks: negMarks,
+      insights,
       subjectAnalysis: Object.values(subMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
-      complexityAnalysis: {
-         easy: Math.round((diffMap.easy.correct / (diffMap.easy.total || 1)) * 100),
-         medium: Math.round((diffMap.medium.correct / (diffMap.medium.total || 1)) * 100),
-         hard: Math.round((diffMap.hard.correct / (diffMap.hard.total || 1)) * 100)
-      }
+      complexityAnalysis: Object.values(diffMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) }))
     };
 
     try {

@@ -10,7 +10,10 @@ import {
   Clock, 
   BarChart3, 
   Award,
-  CheckCircle2
+  CheckCircle2,
+  Check,
+  XCircle,
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -41,12 +44,11 @@ interface ResultCardProps {
   branding?: BrandingSettings;
   subjects?: SubPerformance[];
   grade?: string;
-  isForPdf?: boolean;
 }
 
 /**
- * @fileOverview Official Institutional Result Card v6.0.
- * Rebuild: Integrated Grade Hub and attempt-isolated metrics.
+ * @fileOverview Official Institutional Result Card v7.0.
+ * Rebuild: Redesigned for Professional Printable Output with High-Fidelity Branding.
  */
 export default function ResultCard({
   studentName,
@@ -68,20 +70,19 @@ export default function ResultCard({
   
   const orgName = branding?.organizationName || "Cracklix";
   const webUrlRaw = branding?.websiteUrl || "https://cracklix.vercel.app";
-  const displayUrl = webUrlRaw.replace(/^https?:\/\//, '');
   const verifyBase = branding?.verificationUrl || `${webUrlRaw}/results/view?id=`;
   const fullVerifyUrl = verifyBase + resultId;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(fullVerifyUrl)}`;
 
   return (
-    <div className="w-full max-w-[800px] mx-auto bg-white border border-slate-200 shadow-2xl rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden text-left font-body relative">
+    <div className="w-[800px] bg-white border border-slate-200 shadow-2xl rounded-[3rem] overflow-hidden text-left font-body relative">
       <div className="h-3 w-full bg-primary" />
       
-      <div className="p-10 md:p-16 space-y-12">
-        {/* Header Hub */}
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-6">
-            <div className="h-20 w-20 bg-slate-50 rounded-2xl flex items-center justify-center p-3 border border-slate-100 shadow-inner">
+      <div className="p-16 space-y-12">
+        {/* Institutional Header */}
+        <div className="flex justify-between items-start border-b border-slate-100 pb-12">
+          <div className="flex items-center gap-8">
+            <div className="h-24 w-24 bg-slate-50 rounded-[2rem] flex items-center justify-center p-3 border border-slate-100 shadow-inner">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
               ) : (
@@ -89,80 +90,87 @@ export default function ResultCard({
               )}
             </div>
             <div className="space-y-1">
-              <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter">{orgName}</h2>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Official score report</p>
+              <h2 className="text-4xl font-black text-[#0F172A] tracking-tighter leading-none">{orgName}</h2>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.4em]">Official Performance Snapshot</p>
             </div>
           </div>
           <div className="text-right space-y-3">
-            <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[10px] px-4 py-1.5 rounded-full uppercase tracking-widest shadow-sm">Verified Node</Badge>
-            <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest tabular-nums">{date}</p>
+            <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[11px] px-5 py-2 rounded-full uppercase tracking-widest shadow-sm">Verified Attempt</Badge>
+            <p className="text-[13px] font-bold text-[#0F172A] uppercase tracking-widest tabular-nums">{date}</p>
           </div>
         </div>
 
-        {/* Grade & Identity Hub */}
-        <div className="relative p-10 bg-slate-50/80 rounded-[3rem] border border-slate-100 flex items-center justify-between overflow-hidden group">
-           <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000"><Trophy className="h-48 w-48 text-[#0F172A]" /></div>
-           
-           <div className="space-y-4 relative z-10">
+        {/* Identity Node */}
+        <div className="grid grid-cols-12 gap-10 items-center">
+           <div className="col-span-8 space-y-6">
               <div className="space-y-1">
-                 <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] uppercase tracking-tighter">{studentName}</h1>
-                 <p className="text-primary font-black text-[11px] md:text-sm uppercase tracking-[0.3em]">{examTitle}</p>
+                 <h1 className="text-5xl font-black text-[#0F172A] tracking-tighter uppercase leading-none">{studentName}</h1>
+                 <p className="text-primary font-black text-sm uppercase tracking-[0.3em]">{examTitle}</p>
               </div>
-              <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                 <ShieldCheck className="h-4 w-4 text-emerald-500" /> Authorized registry attempt
+              <div className="flex items-center gap-6">
+                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
+                    <ShieldCheck className="h-5 w-5 text-emerald-500" /> Authorized Registry Ingestion
+                 </div>
+                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
+                    <Target className="h-5 w-5 text-primary" /> Attempt ID: {resultId.slice(-8).toUpperCase()}
+                 </div>
               </div>
            </div>
 
-           <div className="relative z-10 shrink-0 text-center space-y-2">
-              <div className="h-24 w-24 md:h-32 md:w-32 bg-white rounded-[2rem] shadow-2xl border-4 border-white flex items-center justify-center relative">
-                 <span className="text-4xl md:text-6xl font-black text-primary tabular-nums">{grade}</span>
-                 <div className="absolute -top-3 -right-3 h-10 w-10 bg-amber-400 rounded-xl flex items-center justify-center text-white shadow-xl border-4 border-white">
+           <div className="col-span-4 flex justify-end">
+              <div className="h-32 w-32 bg-[#0F172A] rounded-[2.5rem] shadow-2xl flex flex-col items-center justify-center relative group">
+                 <div className="absolute top-0 left-0 w-full h-full bg-primary opacity-5 animate-pulse" />
+                 <span className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Grade</span>
+                 <span className="text-6xl font-black text-white tabular-nums leading-none">{grade}</span>
+                 <div className="absolute -bottom-3 -right-3 h-10 w-10 bg-amber-400 rounded-xl flex items-center justify-center text-white shadow-xl border-4 border-white">
                     <Award className="h-5 w-5" />
                  </div>
               </div>
-              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Performance Grade</p>
            </div>
         </div>
 
-        {/* Matrix Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-           <ReportNode label="Mastery Index" val={`${accuracy}%`} icon={<Target className="text-emerald-500" />} />
-           <ReportNode label="Total Score" val={score} icon={<Zap className="text-primary" />} />
-           <ReportNode label="State Rank" val={`#${rank}`} icon={<Trophy className="text-amber-500" />} />
-           <ReportNode label="Percentile" val={`${percentile}%`} icon={<TrendingUp className="text-indigo-500" />} />
-           <ReportNode label="Time Taken" val={timeTaken} icon={<Clock className="text-slate-400" />} />
-           <ReportNode label="Attempts" val={correct + wrong} icon={<BarChart3 className="text-blue-500" />} />
+        {/* Analytics Matrix */}
+        <div className="grid grid-cols-3 gap-6">
+           <AnalyticNode label="Total Score" val={score} icon={<Zap className="text-primary" />} />
+           <AnalyticNode label="All Punjab Rank" val={`#${rank}`} icon={<Trophy className="text-amber-500" />} />
+           <AnalyticNode label="Accuracy" val={`${accuracy}%`} icon={<Target className="text-emerald-500" />} />
+           <AnalyticNode label="Percentile" val={`${percentile}%`} icon={<TrendingUp className="text-blue-500" />} />
+           <AnalyticNode label="Time Taken" val={timeTaken} icon={<Clock className="text-slate-400" />} />
+           <AnalyticNode label="Status" val={Number(accuracy) > 40 ? "QUALIFIED" : "LEARNING"} icon={<CheckCircle2 className="text-emerald-600" />} />
         </div>
 
-        {/* Breakdown Hub */}
-        <div className="bg-[#F8FAFC] rounded-[2rem] p-8 md:p-12 flex items-center justify-around shadow-inner border border-slate-100">
-           <LegacyMetric label="Correct" val={correct} color="text-emerald-600" />
-           <div className="w-px h-12 bg-slate-200" />
-           <LegacyMetric label="Incorrect" val={wrong} color="text-rose-600" />
-           <div className="w-px h-12 bg-slate-200" />
-           <LegacyMetric label="Skipped" val={total - (correct + wrong)} color="text-slate-300" />
+        {/* Quant Matrix */}
+        <div className="bg-[#F8FAFC] rounded-[2.5rem] p-12 flex items-center justify-around shadow-inner border border-slate-100">
+           <MetricNode label="Correct" val={correct} color="text-emerald-600" />
+           <div className="w-px h-16 bg-slate-200" />
+           <MetricNode label="Incorrect" val={wrong} color="text-rose-600" />
+           <div className="w-px h-16 bg-slate-200" />
+           <MetricNode label="Skipped" val={total - (correct + wrong)} color="text-slate-300" />
         </div>
 
-        {/* Subject Audit Table */}
+        {/* Vertical Audit Table */}
         {subjects.length > 0 && (
           <div className="space-y-6">
-            <h3 className="text-xs font-black uppercase text-slate-400 tracking-[0.4em] ml-2">Subject Performance Hub</h3>
+            <h3 className="text-sm font-black uppercase text-slate-400 tracking-[0.4em] ml-2">Vertical Performance Audit</h3>
             <div className="border border-slate-100 rounded-[2rem] overflow-hidden shadow-xl bg-white">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-slate-50/80 text-slate-500 border-b border-slate-100">
-                    <th className="px-8 py-5 font-black text-left uppercase text-[9px] tracking-widest">Subject Vertical</th>
-                    <th className="px-6 py-5 font-black text-center uppercase text-[9px] tracking-widest">Score</th>
-                    <th className="px-8 py-5 font-black text-right uppercase text-[9px] tracking-widest">Accuracy</th>
+                  <tr className="bg-slate-50 text-slate-500 border-b border-slate-100">
+                    <th className="px-10 py-6 font-black text-left uppercase text-[10px] tracking-widest">Subject Hub</th>
+                    <th className="px-6 py-6 font-black text-center uppercase text-[10px] tracking-widest">Score</th>
+                    <th className="px-10 py-6 font-black text-right uppercase text-[10px] tracking-widest">Accuracy</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {subjects.map((s, i) => (
                     <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-8 py-6 font-bold text-[#0F172A] text-base">{s.name}</td>
-                      <td className="px-6 py-6 text-center font-black text-primary tabular-nums text-lg">{s.score}</td>
-                      <td className="px-8 py-6 text-right">
-                        <Badge className={cn("bg-emerald-50 text-emerald-600 border-none font-black text-[10px] px-3 py-1 rounded-lg tabular-nums shadow-sm", s.accuracy < 50 && "bg-amber-50 text-amber-600")}>
+                      <td className="px-10 py-8 font-bold text-[#0F172A] text-lg uppercase tracking-tight">{s.name}</td>
+                      <td className="px-6 py-8 text-center font-black text-primary tabular-nums text-2xl">{s.score.toFixed(1)}</td>
+                      <td className="px-10 py-8 text-right">
+                        <Badge className={cn(
+                           "bg-emerald-50 text-emerald-600 border-none font-black text-sm px-5 py-1.5 rounded-xl tabular-nums shadow-sm", 
+                           s.accuracy < 50 && "bg-rose-50 text-rose-600"
+                        )}>
                           {s.accuracy}%
                         </Badge>
                       </td>
@@ -174,22 +182,23 @@ export default function ResultCard({
           </div>
         )}
 
-        {/* Verification Node */}
-        <div className="pt-12 border-t border-slate-100 flex items-center justify-between gap-12">
-          <div className="space-y-6">
+        {/* Footer Signature Node */}
+        <div className="pt-16 border-t border-slate-100 flex items-center justify-between gap-12">
+          <div className="space-y-6 flex-1">
             <div className="flex items-center gap-4">
-              <ShieldCheck className="h-8 w-8 text-emerald-500" />
+              <ShieldCheck className="h-10 w-10 text-emerald-500" />
               <div className="text-left">
-                 <p className="text-sm font-black text-[#0F172A] uppercase tracking-tight">Institutional Registry verified</p>
-                 <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Master Audit ID: {resultId}</p>
+                 <p className="text-lg font-black text-[#0F172A] uppercase tracking-tight">Institutional Accuracy Verified</p>
+                 <p className="text-[11px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Registry ID: {resultId}</p>
               </div>
             </div>
-            <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest leading-relaxed max-w-sm">
-               This report is generated by the Cracklix preparation engine. Authenticity can be verified using the unique registry ID or QR node.
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed max-w-md">
+               This performance report is derived from official recruitment patterns. Authenticity can be verified via the QR node or by accessing the master registry at {webUrlRaw}.
             </p>
           </div>
-          <div className="h-32 w-32 bg-white border-2 border-slate-50 p-2 rounded-2xl shadow-2xl shrink-0 group hover:scale-110 transition-transform duration-500">
-            <img src={qrUrl} alt="QR Verification" className="h-full w-full object-contain" crossOrigin="anonymous" />
+          <div className="h-36 w-32 bg-white border-2 border-slate-50 p-2 rounded-[2rem] shadow-2xl shrink-0 group hover:scale-105 transition-transform duration-500 flex flex-col items-center justify-center gap-2">
+            <img src={qrUrl} alt="Verification QR" className="h-24 w-24 object-contain" crossOrigin="anonymous" />
+            <span className="text-[8px] font-black uppercase text-primary">Verify Hub</span>
           </div>
         </div>
       </div>
@@ -197,25 +206,25 @@ export default function ResultCard({
   );
 }
 
-function ReportNode({ label, val, icon }: any) {
+function AnalyticNode({ label, val, icon }: any) {
   return (
-    <div className="p-6 bg-slate-50/50 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 flex items-center gap-4 group hover:bg-white hover:shadow-xl transition-all duration-500">
-      <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0 border border-slate-100 group-hover:scale-110 transition-transform">
+    <div className="p-8 bg-slate-50/50 rounded-[2rem] border border-slate-100 flex flex-col items-start gap-5 hover:bg-white hover:shadow-2xl transition-all duration-500 group">
+      <div className="h-14 w-14 rounded-2xl bg-white shadow-sm flex items-center justify-center shrink-0 border border-slate-100 group-hover:scale-110 transition-transform">
         {icon}
       </div>
-      <div className="min-w-0">
-        <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5 truncate">{label}</p>
-        <p className="text-lg md:text-3xl font-black text-[#0F172A] leading-none tabular-nums tracking-tighter truncate">{val}</p>
+      <div className="space-y-1">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1 truncate">{label}</p>
+        <p className="text-3xl font-black text-[#0F172A] leading-none tabular-nums tracking-tighter truncate">{val}</p>
       </div>
     </div>
   );
 }
 
-function LegacyMetric({ label, val, color }: any) {
+function MetricNode({ label, val, color }: any) {
   return (
-    <div className="text-center space-y-1">
-       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
-       <p className={cn("text-2xl md:text-5xl font-black tabular-nums tracking-tighter", color)}>{val}</p>
+    <div className="text-center space-y-2">
+       <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
+       <p className={cn("text-5xl font-black tabular-nums tracking-tighter", color)}>{val}</p>
     </div>
   );
 }
