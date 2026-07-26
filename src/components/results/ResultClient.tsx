@@ -52,8 +52,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v40.0 [Parallelized Data Handshake].
- * FIXED: Replaced sequential awaits with Promise.all for high-speed analysis loading.
+ * @fileOverview Institutional Result Hub v41.0 [Parallelized Data Handshake].
+ * FIXED: Implemented robust attempt resolution and PDF frame safety.
  */
 
 export default function ResultClient() {
@@ -128,7 +128,6 @@ export default function ResultClient() {
        }
 
        try {
-          // ⚡ Parallel Session and Registry Check
           const resQuery = query(
              collection(db, "results"), 
              where("userId", "==", user.uid), 
@@ -146,9 +145,9 @@ export default function ResultClient() {
           const resultsList = querySnap.docs
             .map(d => ({ ...d.data(), id: d.id }))
             .sort((a: any, b: any) => {
-              const tA = new Date(a.timestamp || 0).getTime();
-              const tB = new Date(b.timestamp || 0).getTime();
-              return tA - tB;
+              const timeA = new Date(a.timestamp || 0).getTime();
+              const timeB = new Date(b.timestamp || 0).getTime();
+              return timeA - timeB;
             });
           
           setUserAttemptCount(resultsList.length);
@@ -182,7 +181,6 @@ export default function ResultClient() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
            
-           // Parallel Ranking Calculations
            const [countSnap, superiorCountSnap] = await Promise.all([
              getCountFromServer(entriesRef),
              getCountFromServer(query(entriesRef, where("highestScore", ">", activeSession.score)))
@@ -216,8 +214,6 @@ export default function ResultClient() {
       if (!db || !mockId) { setLoadingQuestions(false); return; }
       try {
         setLoadingQuestions(true);
-        
-        // ⚡ Parallel Mock and Questions Check
         const mockRef = doc(db, "mocks", mockId);
         const dailyRef = doc(db, "daily_quizzes", mockId);
         const [mSnap, dSnap] = await Promise.all([getDoc(mockRef), getDoc(dailyRef)]);
@@ -239,8 +235,8 @@ export default function ResultClient() {
               ]);
               const localResults: any[] = [];
               mcqSnap.docs.forEach(d => localResults.push({ ...d.data(), id: d.id }));
-              legacySnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
               usedSnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
+              legacySnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
               return localResults;
             });
 
@@ -270,7 +266,7 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Synchronizing report node" });
+    toast({ title: "Syncing report node" });
 
     try {
       await document.fonts.ready;
@@ -326,7 +322,7 @@ export default function ResultClient() {
   if (isSearching) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
         <Zap className="h-12 w-12 text-primary animate-pulse" />
-        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Syncing result hub...</p>
+        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Resolving analysis...</p>
      </div>
   );
 
@@ -484,7 +480,6 @@ export default function ResultClient() {
            </div>
         )}
 
-        {/* HIDDEN CAPTURE NODE */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
           <div id="pdf-report-container">
             {finalMetrics && activeSession && (
@@ -533,3 +528,4 @@ function formatTimeStr(seconds: number) {
   const s = Math.floor(seconds % 60);
   return `${m}m ${s}s`;
 }
+

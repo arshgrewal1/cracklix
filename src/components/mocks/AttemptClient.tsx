@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useUser, useFirestore } from "@/firebase";
+import { useUser, useAuth } from "@/firebase";
 import { 
   doc, 
   getDoc, 
@@ -26,7 +26,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer";
 import QuestionPalette from "@/components/mocks/QuestionPalette";
 import SubjectTabs from "@/components/exam/SubjectTabs";
 import { Button } from "@/components/ui/button";
-import { Loader2, Play, ShieldCheck, Zap, AlertCircle, Save, RefreshCw } from "lucide-react";
+import { Loader2, Play, ShieldCheck, Zap, AlertCircle, Save, RefreshCw, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,8 +42,7 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Node v48.0 [Speed Hardened].
- * FIXED: Parallelized question loading and non-blocking submission for instant UI response.
+ * @fileOverview Institutional Attempt Node v49.0 [Modal Persistence Fixed].
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -126,7 +125,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const mockRef = doc(db, "mocks", mockId);
       const dailyRef = doc(db, "daily_quizzes", mockId);
       
-      // Parallel fetch for test metadata
       const [mSnap, dSnap] = await Promise.all([getDoc(mockRef), getDoc(dailyRef)]);
       const targetSnap = mSnap.exists() ? mSnap : dSnap;
       
@@ -138,7 +136,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const questionIds: string[] = mData.questionIds || [];
       if (questionIds.length === 0) throw new Error("No questions configured.");
       
-      // ⚡ Parallel Question Fetching Protocol
       const chunks = [];
       for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
       
@@ -191,9 +188,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
   const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
+    
+    // UI Restoration Hub: Close modal immediately to prevent reappearance
+    setShowSubmitModal(false);
     setIsSubmittingFinal(true);
     
-    // Core Counts Audit
     let correctCount = 0; 
     let wrongCount = 0;
     const totalQuestions = questions.length;
@@ -204,7 +203,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const posMarks = Number(mockData.positiveMarks) || 1;
     const negMarks = Number(mockData.negativeMarks) || 0.25;
 
-    // Categorical Audit
     const subjectMap: Record<string, any> = {};
     const complexityMap: Record<string, any> = { 
       easy: { name: 'Easy', total: 0, correct: 0, wrong: 0, score: 0 }, 
@@ -259,14 +257,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
     const isQualified = percentage >= 40;
 
-    // ✨ Non-Blocking Navigation Strategy
-    // We navigate immediately, the database logic runs in the background.
     const navigationUrl = user 
       ? `/results/view?id=${mockId}&attemptId=${attemptId}` 
       : `/results/view?id=${mockId}`;
 
     if (user) {
-      // Initiate background writes
       runTransaction(db, async (transaction) => {
         const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
         const globalMeritRef = doc(db, "leaderboard", user.uid);
@@ -332,6 +327,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          correctCount, wrongCount, timeTaken, timestamp: new Date().toISOString(),
          mockTitle: mockData.title, positiveMarks: posMarks, negativeMarks: negMarks,
       }));
+    }
+
+    // Clean up local attempt session
+    if (typeof window !== 'undefined') {
+       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
     }
 
     router.replace(navigationUrl);
