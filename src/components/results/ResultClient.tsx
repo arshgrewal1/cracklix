@@ -48,8 +48,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v109.0 [Review Portal Fix].
- * FIXED: Replaced "__name__" with documentId() and handled string-key answer mapping.
+ * @fileOverview Universal Result Hub Engine v110.0 [UI Scale Hardened].
+ * FIXED: Reduced font sizes and icon scales for single-row PWA alignment.
  */
 
 export default function ResultClient() {
@@ -120,7 +120,7 @@ export default function ResultClient() {
           collection(db, "results"), 
           where("userId", "==", user.uid), 
           where("mockId", "==", mockIdFromUrl),
-          limit(5)
+          limit(10)
         );
         const snap = await getDocs(q);
         if (!snap.empty) {
@@ -204,7 +204,6 @@ export default function ResultClient() {
     const correct: any[] = [], wrong: any[] = [], skipped: any[] = [];
     
     all.forEach((q) => {
-      // Handle string vs number keys for answers
       const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[q.originalIndex.toString()];
       if (ans === undefined || ans === null) {
          skipped.push(q);
@@ -243,7 +242,7 @@ export default function ResultClient() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
-      <main className="container mx-auto max-w-[1440px] px-3 md:px-12 py-6 md:py-12 space-y-6 md:space-y-12">
+      <main className="container mx-auto max-w-[1440px] px-3 md:px-12 py-4 md:py-12 space-y-6 md:space-y-12">
         
         {isSearching ? (
            <div className="py-40 flex flex-col items-center justify-center space-y-6">
@@ -260,13 +259,13 @@ export default function ResultClient() {
            <>
               <Card className="border border-slate-100 shadow-sm rounded-[24px] bg-white p-4 md:p-8 flex flex-col lg:flex-row justify-between items-center gap-6">
                  <div className="flex items-center gap-3 md:gap-8 w-full min-w-0 text-left">
-                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-11 w-11 md:h-16 md:w-16 shadow-lg border border-slate-100 rounded-xl" />
+                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-10 w-10 md:h-16 md:w-16 shadow-lg border border-slate-100 rounded-xl shrink-0" />
                     <div className="text-left space-y-0.5 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
                           <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Verified result</Badge>
                           {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-2 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Guest</Badge>}
                        </div>
-                       <h1 className="text-base md:text-2xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
+                       <h1 className="text-sm md:text-2xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
                        <div className="flex items-center gap-3 text-[9px] md:text-xs font-semibold text-slate-400 tracking-tight">
                           <span className="flex items-center gap-1.5"><Calendar className="h-3 w-3" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
                           <span className="flex items-center gap-1.5"><TimerIcon className="h-3 w-3" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
@@ -274,13 +273,13 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex items-center gap-2 w-full lg:w-auto">
-                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-11 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-[10px] md:text-[11px] border-none shadow-lg">
+                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-10 md:h-11 px-3 md:px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-[10px] md:text-[11px] border-none shadow-lg">
                        {isSharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />} Share
                     </Button>
-                    <Button onClick={() => window.location.reload()} className="flex-1 lg:flex-none h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[10px] md:text-[11px] border-none shadow-lg">
+                    <Button onClick={() => window.location.reload()} className="flex-1 lg:flex-none h-10 md:h-11 px-3 md:px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[10px] md:text-[11px] border-none shadow-lg">
                        <RefreshCw className="h-3.5 w-3.5" /> Refresh
                     </Button>
-                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-11 px-4 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[10px] md:text-[11px] shadow-sm">
+                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-10 md:h-11 px-3 md:px-4 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[10px] md:text-[11px] shadow-sm">
                        <Link href={`/mocks/instructions?id=${mockIdFromUrl || sessionData.mockId}&retake=true`}>Retake</Link>
                     </Button>
                  </div>
