@@ -42,8 +42,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v23.0.
- * FIXED: Imported missing Timer icon to resolve ReferenceError.
+ * @fileOverview Universal Result Hub Viewer v24.0.
+ * FIXED: Toast terminology and ReferenceErrors for Timer icon.
  */
 
 export default function ResultClient() {
@@ -177,7 +177,7 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !sessionData) return;
     setIsExporting(true);
-    toast({ title: "Synchronizing report..." });
+    toast({ title: "Initializing report hub..." });
     
     try {
       await generateReport({
@@ -201,7 +201,7 @@ export default function ResultClient() {
 
       toast({ title: "Report downloaded" });
     } catch (e: any) { 
-       toast({ variant: "destructive", title: "Unable to generate report", description: "Audit engine timed out. Please try again." }); 
+       toast({ variant: "destructive", title: "Report Generation Error", description: "The PDF engine timed out. Please check your connection and try again." }); 
     } finally { setIsExporting(false); }
   };
 

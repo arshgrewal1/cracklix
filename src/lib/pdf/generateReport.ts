@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -8,8 +7,8 @@ import QRCode from 'qrcode';
 import CracklixReportPDF from './CracklixReportPDF';
 
 /**
- * @fileOverview Institutional PDF Orchestrator v1.0.
- * Handles async generation, blob conversion and secure download flow.
+ * @fileOverview Institutional PDF Orchestrator v1.1.
+ * FIXED: Wrapped PDF generation in a robust timeout safety node to prevent hangs.
  */
 
 export interface ReportData {
@@ -44,13 +43,19 @@ export async function generateReport(data: ReportData) {
       }
     });
 
-    // 2. Generate PDF Blob
+    // 2. Generate PDF Blob with internal resilience
     const doc = React.createElement(CracklixReportPDF, { 
       data, 
       qrData 
     });
     
-    const blob = await pdf(doc).toBlob();
+    // Logic: pdf().toBlob() can hang if fonts fail. We use a 10s timeout safety node.
+    const blobPromise = pdf(doc).toBlob();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("PDF Engine Timeout")), 10000)
+    );
+
+    const blob = await Promise.race([blobPromise, timeoutPromise]) as Blob;
     
     // 3. Trigger Secure Download
     const fileName = `Cracklix_Report_${data.studentName.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
