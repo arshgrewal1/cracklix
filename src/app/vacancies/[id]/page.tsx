@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -30,7 +29,7 @@ import {
   Briefcase,
   GraduationCap
 } from "lucide-react"
-import { CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AuthorityLogo } from "@/lib/exam-icons"
@@ -41,8 +40,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Professional Vacancy Detail Hub v3.0.
- * UPDATED: Removed Admin Edit button (moved to admin hub) and refined alignment.
+ * @fileOverview Professional Vacancy Detail Hub v3.1.
+ * FIXED: Imported missing Card component to resolve runtime crash.
  * TYPOGRAPHY: Strict Title Case and Sentence Case enforcement.
  */
 
@@ -204,7 +203,7 @@ export default function VacancyDetailPage() {
                   </div>
                </Card>
 
-               <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-xl space-y-8 text-left">
+               <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-xl space-y-8 text-left group hover:translate-y-[-4px] transition-all duration-500">
                   <div className="flex items-center gap-4">
                      <HelpCircle className="h-8 w-8 text-primary" />
                      <h4 className="text-[11px] font-black tracking-tight text-[#0F172A]">Aspirant support</h4>
