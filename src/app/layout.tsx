@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -24,8 +23,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v12.0.
- * UPDATED: Enforced Global Dark Mode as primary institutional theme.
+ * @fileOverview Global Layout Registry v13.0.
+ * UPDATED: Restored Light Mode as the primary institutional theme.
  */
 
 export const metadata: Metadata = {
@@ -60,7 +59,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#05070B",
+  themeColor: "#FFFFFF",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -95,8 +94,8 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          forcedTheme="dark"
+          defaultTheme="light"
+          forcedTheme="light"
           disableTransitionOnChange
         >
           <FirebaseClientProvider>

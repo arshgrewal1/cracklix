@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -37,8 +36,8 @@ import { canAccessAdmin } from "@/lib/permissions";
 import AnnouncementBar from "./AnnouncementBar";
 
 /**
- * @fileOverview Standard In-Flow Navigation Hub v158.0.
- * UPDATED: Logo set to variant="dark" to support Global Dark Mode registry.
+ * @fileOverview Standard In-Flow Navigation Hub v159.0.
+ * UPDATED: Logo variant restored to "light" for light theme compatibility.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -99,13 +98,13 @@ export default function Navbar() {
   }, [user, profile]);
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 dark:border-slate-800 bg-background h-[84px] md:h-[116px]" />;
+    return <nav className="w-full border-b border-slate-100 bg-background h-[84px] md:h-[116px]" />;
   }
 
   return (
     <div className="relative flex flex-col w-full">
       <AnnouncementBar />
-      <header className="w-full bg-background border-b border-slate-100 dark:border-slate-800 shadow-sm relative z-[1000]">
+      <header className="w-full bg-background border-b border-slate-100 shadow-sm relative z-[1000]">
         <nav className="w-full h-[84px] md:h-[116px] transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
@@ -114,7 +113,7 @@ export default function Navbar() {
                 <SheetTrigger asChild>
                   <button
                     aria-label="Open menu"
-                    className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-lg border border-slate-200 dark:border-slate-700 bg-card text-foreground shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 cursor-pointer"
+                    className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-lg border border-slate-200 bg-card text-foreground shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 cursor-pointer"
                   >
                     <Menu className="w-6 h-6 md:w-7 md:h-7" />
                   </button>
@@ -129,7 +128,7 @@ export default function Navbar() {
               </Sheet>
 
               <Logo
-                variant="dark"
+                variant="light"
                 className="flex-shrink-0 p-0 h-full"
                 imgClassName="h-20 md:h-28 w-auto"
                 align="left"
@@ -154,7 +153,7 @@ export default function Navbar() {
 
               <Link
                 href="/search"
-                className="w-10 h-10 md:w-12 rounded-lg flex items-center justify-center bg-muted dark:bg-slate-900 text-foreground hover:text-primary transition-all active:scale-95 shadow-sm shrink-0"
+                className="w-10 h-10 md:w-12 rounded-lg flex items-center justify-center bg-muted text-foreground hover:text-primary transition-all active:scale-95 shadow-sm shrink-0"
               >
                 <Search className="w-6 h-6" />
               </Link>
@@ -164,7 +163,7 @@ export default function Navbar() {
               ) : user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="w-10 h-10 md:w-12 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800 bg-muted flex items-center justify-center active:scale-95 transition-all shadow-sm shrink-0">
+                    <button className="w-10 h-10 md:h-12 rounded-lg overflow-hidden border border-slate-100 bg-muted flex items-center justify-center active:scale-95 transition-all shadow-sm shrink-0">
                       <StudentAvatar
                         profile={profile}
                         className="w-full h-full border-none"
@@ -197,7 +196,7 @@ export default function Navbar() {
                          {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Console" />}
                          <ProfileMenuItem href="/profile" icon={Settings} label="Portal Settings" />
                       </div>
-                      <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-500 font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
+                      <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>

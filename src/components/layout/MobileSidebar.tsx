@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -15,8 +14,7 @@ import {
   X,
   Award,
   CreditCard,
-  ShieldCheck,
-  Palette
+  ShieldCheck
 } from "lucide-react";
 
 import Link from "next/link";
@@ -30,12 +28,11 @@ import Logo from "@/components/brand/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import ShareButton from "@/components/navigation/ShareButton";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Mobile Sidebar v91.0 [Theme Toggle Removed].
- * FIXED: Removed Appearance section to enforce global dark mode registry.
+ * @fileOverview Mobile Sidebar v92.0.
+ * UPDATED: Restored Light Mode branding.
  */
 export default function MobileSidebar({
   onClose,
@@ -85,9 +82,9 @@ export default function MobileSidebar({
     <div className="flex h-full flex-col bg-background font-body overflow-hidden text-left">
 
       {/* HEADER */}
-      <div className="h-[84px] md:h-[116px] px-6 shrink-0 bg-background border-b border-slate-100 dark:border-white/5 flex items-center justify-center relative">
+      <div className="h-[84px] md:h-[116px] px-6 shrink-0 bg-background border-b border-slate-100 flex items-center justify-center relative">
          <Logo
-           variant="dark"
+           variant="light"
            align="center"
            className="flex-shrink-0"
            imgClassName="h-20 md:h-28 w-auto"
@@ -95,7 +92,7 @@ export default function MobileSidebar({
          />
          <button
             onClick={onClose}
-            className="absolute right-6 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-white/5 text-slate-500 active:scale-95 transition-all border border-slate-100 dark:border-white/5 cursor-pointer z-20"
+            className="absolute right-6 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all border border-slate-100 cursor-pointer z-20"
           >
             <X className="h-6 w-6" />
           </button>
@@ -111,8 +108,8 @@ export default function MobileSidebar({
             onClick={onClose}
             className="block active:scale-[0.98] transition-all cursor-pointer"
           >
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 dark:border-white/5 bg-card p-4 shadow-sm hover:border-primary/20 transition-all">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 dark:bg-white/5">
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-card p-4 shadow-sm hover:border-primary/20 transition-all">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50">
                 {profileLoading ? (
                   <Skeleton className="h-full w-full rounded-xl" />
                 ) : (
@@ -169,7 +166,7 @@ export default function MobileSidebar({
                     "flex h-14 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] cursor-pointer border border-transparent",
                     isActive
                       ? "bg-primary/5 text-primary border-primary/10 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
+                      : "text-slate-600 hover:bg-slate-50"
                   )}
                 >
                   <item.icon
@@ -208,11 +205,11 @@ export default function MobileSidebar({
       </div>
 
       {/* FOOTER */}
-      <div className="border-t border-slate-100 dark:border-white/5 bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+16px)] shrink-0">
+      <div className="border-t border-slate-100 bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+16px)] shrink-0">
         <Button
           variant="ghost"
           onClick={handleLogout}
-          className="w-full h-14 justify-start text-red-500 text-sm font-black rounded-2xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-all active:scale-95 cursor-pointer border-none"
+          className="w-full h-14 justify-start text-red-500 text-sm font-black rounded-2xl hover:bg-red-50 transition-all active:scale-95 cursor-pointer border-none"
         >
           <LogOut className="h-5 w-5 mr-4" />
           Sign Out
