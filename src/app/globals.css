@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -60,6 +59,7 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    background-color: #000000; /* Force black early to prevent FOUC */
   }
   
   body {
@@ -73,6 +73,12 @@
     -webkit-overflow-scrolling: touch;
     padding: 0;
     padding-bottom: env(safe-area-inset-bottom);
+    background-color: #000000; /* Match splash screen */
+  }
+
+  /* Prevent FOUC for hydration states */
+  [data-hydrating="true"] {
+    opacity: 0;
   }
 
   /* Prevent CLS for inputs */

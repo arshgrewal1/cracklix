@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from "react";
@@ -9,8 +8,8 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v61.9.
- * FIXED: Removed uppercase transforms for a cleaner look.
+ * @fileOverview Premium Mobile-First PWA Hero v62.0.
+ * FIXED: Defined explicit height nodes to eliminate layout shift during hydration.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -31,10 +30,21 @@ export default function Hero() {
     }
   };
 
-  if (!mounted) return null;
+  // Stability Node: Render a structural skeleton if not mounted to prevent CLS
+  if (!mounted) {
+    return (
+      <section className="relative overflow-hidden bg-background pt-6 pb-5 md:pt-16 md:pb-20 w-full min-h-[400px] md:min-h-[600px] flex items-center justify-center">
+         <div className="animate-pulse flex flex-col items-center gap-6 w-full max-w-lg px-6">
+            <div className="h-8 w-40 bg-slate-100 rounded-full" />
+            <div className="h-20 w-full bg-slate-100 rounded-2xl" />
+            <div className="h-16 w-3/4 bg-slate-100 rounded-2xl" />
+         </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="relative overflow-hidden bg-white pt-6 pb-5 md:pt-16 md:pb-20 w-full">
+    <section className="relative overflow-hidden bg-background pt-6 pb-5 md:pt-16 md:pb-20 w-full min-h-[400px] md:min-h-[600px] flex items-center">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-full max-w-lg aspect-square bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

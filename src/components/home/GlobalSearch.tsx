@@ -11,8 +11,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 
 /**
- * @fileOverview Institutional Sticky Search Hub v16.0.
- * FIXED: Implemented functional Voice Search (Mic).
+ * @fileOverview Institutional Sticky Search Hub v16.1.
+ * FIXED: Defined explicit height container to prevent layout shift during hydration.
  */
 
 const TRENDING = [
@@ -29,9 +29,11 @@ export default function GlobalSearch() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setIsMounted(true);
     const timer = setTimeout(() => setDebouncedQuery(query), 300);
     return () => clearTimeout(timer);
   }, [query]);
@@ -107,8 +109,14 @@ export default function GlobalSearch() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  if (!isMounted) return (
+    <section className="bg-background pb-6 pt-2 h-[80px]">
+       <div className="max-w-[700px] mx-auto h-[68px] bg-slate-50 rounded-[20px] animate-pulse" />
+    </section>
+  );
+
   return (
-    <section className="bg-white pb-6 pt-2">
+    <section className="bg-background pb-6 pt-2 min-h-[80px]">
       <div className="max-w-[1440px] mx-auto px-4 relative z-40" ref={containerRef}>
         <div className="max-w-[700px] mx-auto relative group w-full">
           
@@ -147,7 +155,7 @@ export default function GlobalSearch() {
                  onClick={startListening}
                  className={cn(
                    "h-9 w-9 md:h-11 md:w-11 rounded-xl flex items-center justify-center transition-all shrink-0",
-                   isListening ? "bg-rose-500 text-white animate-pulse" : "text-slate-400 hover:text-primary"
+                   isListening ? "bg-rose-50 text-white animate-pulse" : "text-slate-400 hover:text-primary"
                  )}
                >
                   <Mic className="h-4 w-4 md:h-5 md:w-5" />

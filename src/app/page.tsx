@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/home/Hero";
 import QuickActions from "@/components/home/QuickActions";
@@ -16,37 +15,54 @@ import GlobalSearch from "@/components/home/GlobalSearch";
 import LatestVacancy from "@/components/home/LatestVacancy";
 import MeetFounder from "@/components/home/MeetFounder";
 import { useUser, useCollection, useFirestore } from "@/firebase";
-import { Zap, Clock, Trophy, ChevronRight, Flame, ShieldCheck } from "lucide-react";
+import { Zap, Clock, Trophy, ChevronRight, Flame, ShieldCheck, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v501.9.
- * UPDATED: Removed uppercase transforms for clean Title Case design.
+ * @fileOverview Institutional Premium Hub v502.0 [Start Experience Hardened].
+ * FIXED: Implemented structural stability nodes to prevent layout shifts during hydration.
  */
 export default function HomePage() {
   const { user } = useUser();
   const db = useFirestore();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const quizQuery = useMemo(() => (db ? query(collection(db, "daily_quizzes"), where("status", "==", "PUBLISHED"), where("isTodayQuiz", "==", true), limit(1)) : null), [db]);
-  const { data: quizzes } = useCollection<any>(quizQuery);
+  const { data: quizzes, loading: quizLoading } = useCollection<any>(quizQuery);
   const activeQuiz = quizzes?.[0];
 
   return (
-    <main className="min-h-screen bg-white font-body pb-safe text-left overflow-x-hidden">
+    <main className="min-h-screen bg-background font-body pb-safe text-left overflow-x-hidden">
       <Navbar />
       
-      <Hero />
-      <GlobalSearch />
+      {/* ABOVE THE FOLD: Reserved height nodes to prevent CLS */}
+      <div className="min-h-[400px] md:min-h-[600px] bg-background">
+        <Hero />
+      </div>
+
+      <div className="min-h-[60px] md:h-[80px]">
+        <GlobalSearch />
+      </div>
       
-      <QuickActions />
+      <div className="min-h-[100px] md:h-[140px]">
+        <QuickActions />
+      </div>
 
-      {user && <ContinueLearning />}
+      {user && (
+        <div className="min-h-[200px] md:h-[300px]">
+           <ContinueLearning />
+        </div>
+      )}
 
-      {/* Today's challenge */}
-      <section className="py-6 md:py-16 bg-white">
+      {/* TODAY'S CHALLENGE HUB */}
+      <section className="py-6 md:py-16 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
                initial={{ opacity: 0, y: 20 }}
@@ -67,12 +83,20 @@ export default function HomePage() {
                            Today's Challenge
                         </h2>
                      </div>
-                     <p className="text-[16px] text-slate-300 font-medium mt-[6px] max-w-lg mx-auto">
-                        {activeQuiz?.title || "Practice Mode"}
-                     </p>
+                     {!isMounted || quizLoading ? (
+                        <div className="h-6 w-48 mx-auto bg-white/5 animate-pulse rounded-lg mt-2" />
+                     ) : (
+                        <p className="text-[16px] text-slate-300 font-medium mt-[6px] max-w-lg mx-auto">
+                           {activeQuiz?.title || "Practice Mode"}
+                        </p>
+                     )}
                   </div>
 
-                  {activeQuiz ? (
+                  {!isMounted || quizLoading ? (
+                    <div className="mt-8 flex justify-center">
+                       <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                    </div>
+                  ) : activeQuiz ? (
                     <>
                       <div className="mt-[18px] flex flex-row flex-wrap items-center justify-center gap-[10px]">
                          <ChallengeChip icon={<Clock className="h-3.5 w-3.5" />} label={`${activeQuiz.duration} min`} />
@@ -98,20 +122,22 @@ export default function HomePage() {
                       </div>
                     </>
                   ) : (
-                    <div className="py-10 opacity-20"><p className="text-white font-bold">Loading latest tests...</p></div>
+                    <div className="py-10 opacity-20"><p className="text-white font-bold">No active challenge found.</p></div>
                   )}
                </div>
             </motion.div>
          </div>
       </section>
 
-      <LatestVacancy />
-      <FeaturedCategories />
-      <PopularExams />
-      <LatestMocks />
-      <CurrentAffairsPreview />
-      <MeritPreview />
-      <MeetFounder />
+      {/* DYNAMIC SECTIONS: Wrapped in stability containers */}
+      <div className="min-h-[400px]"><LatestVacancy /></div>
+      <div className="min-h-[300px]"><FeaturedCategories /></div>
+      <div className="min-h-[400px]"><PopularExams /></div>
+      <div className="min-h-[400px]"><LatestMocks /></div>
+      <div className="min-h-[300px]"><CurrentAffairsPreview /></div>
+      <div className="min-h-[400px]"><MeritPreview /></div>
+      <div className="min-h-[400px]"><MeetFounder /></div>
+      
       <Footer />
     </main>
   );
