@@ -29,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v10.0 [Isolated Attempt Engine].
- * FIXED: Result documents are now immutable and unique per attempt.
+ * @fileOverview Official Mock Attempt Hub v11.0 [Unified Analytical Snapshot].
+ * Rebuild: Calculates all performance metrics (Subject/Complexity/Grade) at submission.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -194,6 +194,16 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     return () => clearInterval(interval);
   }, [isInitializing, initError, tick]);
 
+  const calculateGrade = (accuracy: number) => {
+    if (accuracy >= 90) return 'A+';
+    if (accuracy >= 80) return 'A';
+    if (accuracy >= 70) return 'B+';
+    if (accuracy >= 60) return 'B';
+    if (accuracy >= 50) return 'C';
+    if (accuracy >= 40) return 'D';
+    return 'F';
+  };
+
   const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
     setIsSubmittingFinal(true);
@@ -204,15 +214,34 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const posMarks = Number(mockData.positiveMarks) || 1;
     const negMarks = Number(mockData.negativeMarks) || 0.25;
 
+    // SUBJECT & COMPLEXITY SNAPSHOT ENGINE
+    const subMap: Record<string, any> = {};
+    const diffMap: Record<string, any> = { easy: { total: 0, correct: 0 }, medium: { total: 0, correct: 0 }, hard: { total: 0, correct: 0 } };
+
     questions.forEach((q: any, idx: number) => {
       const studentAnsIdx = answers?.[idx];
-      if (studentAnsIdx === undefined || studentAnsIdx === null) return;
       const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
-      if (correctOptIdx === studentAnsIdx) correctCount++; else wrongCount++;
+      const isCorrect = studentAnsIdx !== undefined && studentAnsIdx === correctOptIdx;
+      const isAttempted = studentAnsIdx !== undefined && studentAnsIdx !== null;
+
+      const sId = q.subjectId || 'General';
+      if (!subMap[sId]) subMap[sId] = { name: sId, total: 0, correct: 0, score: 0 };
+      subMap[sId].total++;
+      if (isCorrect) { subMap[sId].correct++; subMap[sId].score += posMarks; }
+      else if (isAttempted) { subMap[sId].score -= negMarks; }
+
+      const dKey = (q.difficulty || 'Medium').toLowerCase();
+      if (diffMap[dKey]) {
+         diffMap[dKey].total++;
+         if (isCorrect) diffMap[dKey].correct++;
+      }
+
+      if (isCorrect) correctCount++; else if (isAttempted) wrongCount++;
     });
 
     const finalScore = Number(parseFloat(((correctCount * posMarks) - (wrongCount * negMarks)).toFixed(2)));
     const timeTaken = Math.max(1, elapsedSeconds);
+    const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
     
     await stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
 
@@ -225,12 +254,19 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       wrongCount, 
       attemptedCount, 
       totalQuestions: questions.length,
-      accuracy: attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0,
+      accuracy,
+      grade: calculateGrade(accuracy),
       timeTaken, 
       answers: answers || {}, 
       timestamp: new Date().toISOString(),
       accessLevel: (mockData.accessLevel || 'FREE').toUpperCase(),
-      mockType: mockData.mockType || 'PRACTICE'
+      mockType: mockData.mockType || 'PRACTICE',
+      subjectAnalysis: Object.values(subMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
+      complexityAnalysis: {
+         easy: Math.round((diffMap.easy.correct / (diffMap.easy.total || 1)) * 100),
+         medium: Math.round((diffMap.medium.correct / (diffMap.medium.total || 1)) * 100),
+         hard: Math.round((diffMap.hard.correct / (diffMap.hard.total || 1)) * 100)
+      }
     };
 
     try {
@@ -240,7 +276,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         resultPayload.userEmail = user.email || ""; 
         resultPayload.createdAt = serverTimestamp();
         
-        // UNIQUE ATTEMPT DOCUMENT
+        // UNIQUE ATTEMPT SNAPSHOT
         const resDocId = `${user.uid}_${mockId}_${attemptId}`;
         await setDoc(doc(db, "results", resDocId), resultPayload);
         

@@ -52,8 +52,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 
 /**
- * @fileOverview Hardened Result Engine v5.1 [Strict source-of-truth].
- * FIXED: Metrics are strictly derived from the unique Attempt/Result document.
+ * @fileOverview Official Result Dashboard v6.0 [Attempt Isolated].
+ * Rebuild: Consumes static analytical snapshot from the result document.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -65,11 +65,9 @@ export default function ResultClient() {
   
   const [mounted, setMounted] = useState(false)
   const [questions, setQuestions] = useState<any[]>([])
-  const [mockData, setMockData] = useState<any>(null)
   const [loadingQuestions, setLoadingQuestions] = useState(true)
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
   const [guestResult, setGuestResult] = useState<any>(null)
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
   const [activeMainTab, setActiveMainTab] = useState<string>("OVERVIEW")
 
   useEffect(() => { setMounted(true) }, [])
@@ -85,17 +83,15 @@ export default function ResultClient() {
   const attemptId = searchParams?.get('attemptId');
   const isGuestMode = !user || searchParams?.get('guest') === 'true';
 
-  // SOURCE OF TRUTH Registry Node
+  // SOURCE OF TRUTH: Attempt Registry Node
   const resultRef = useMemo(() => {
      if (!db || !mockId) return null;
-     // Priority 1: Specific attemptId from URL (Immutable source)
      if (attemptId && user) return doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
-     // Priority 2: Latest attempt for this user/mock (Backward compatibility/fallback)
      if (user) return doc(db, "results", `${user.uid}_${mockId}`);
      return null;
   }, [db, user, mockId, attemptId]);
 
-  const { data: cloudSession, loading: resultLoading } = useDoc<any>(resultRef);
+  const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
   useEffect(() => {
@@ -110,12 +106,7 @@ export default function ResultClient() {
      }
   }, [isGuestMode, mockId, attemptId]);
 
-  const sessionData = useMemo(() => user ? cloudSession : guestResult, [user, cloudSession, guestResult]);
-
-  const merit = useMemo(() => {
-     if (!sessionData) return { rank: '?', total: 0, percentile: 0 };
-     return { rank: 'Verified', total: 1, percentile: sessionData.accuracy || 0 };
-  }, [sessionData]);
+  const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
   useEffect(() => {
     async function loadQuestions() {
@@ -127,7 +118,6 @@ export default function ResultClient() {
         
         if (mockSnap.exists()) {
           const mData = mockSnap.data();
-          setMockData(mData);
           const questionIds = mData.questionIds || [];
           if (questionIds.length > 0) {
             const fetchedQuestions: any[] = [];
@@ -151,13 +141,18 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  const categorizedNodes = useMemo(() => {
-    if (!sessionData || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
+  const merit = useMemo(() => {
+     if (!activeSession) return { rank: '?', total: 0, percentile: 0 };
+     return { rank: 'Verified', total: 1, percentile: activeSession.accuracy || 0 };
+  }, [activeSession]);
+
+  const reviewNodes = useMemo(() => {
+    if (!activeSession || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
     const all = questions.map((q, i) => ({ ...q, originalIndex: i }));
     const correct: any[] = [], wrong: any[] = [], skipped: any[] = [];
 
     all.forEach((q) => {
-      const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)];
+      const ans = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
       const isAttempted = ans !== null && ans !== undefined && String(ans) !== "";
       if (!isAttempted) skipped.push(q);
       else {
@@ -166,53 +161,18 @@ export default function ResultClient() {
       }
     });
     return { all, correct, wrong, skipped };
-  }, [questions, sessionData]);
-
-  const analysis = useMemo(() => {
-     if (!sessionData || !questions.length) return { subjects: [], difficulty: { easy: 0, medium: 0, hard: 0 } };
-     const subMap: Record<string, any> = {};
-     const diffCount = { easy: 0, medium: 0, hard: 0 }, diffCorrect = { easy: 0, medium: 0, hard: 0 };
-
-     categorizedNodes.all.forEach((q) => {
-        const sId = q.subjectId || 'General';
-        const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)];
-        const isAttempted = ans !== null && ans !== undefined && String(ans) !== "";
-        const isCorrect = isAttempted && ['A','B','C','D'][Number(ans)] === q.correctAnswer;
-
-        if (!subMap[sId]) subMap[sId] = { name: sId, total: 0, correct: 0, score: 0 };
-        subMap[sId].total++;
-        if (isCorrect) { 
-           subMap[sId].correct++; 
-           subMap[sId].score += Number(mockData?.positiveMarks || 1); 
-        } else if (isAttempted) {
-           subMap[sId].score -= Number(mockData?.negativeMarks || 0.25);
-        }
-
-        const dKey = (q.difficulty || 'Medium').toLowerCase() as keyof typeof diffCount;
-        if (diffCount[dKey] !== undefined) diffCount[dKey]++;
-        if (isCorrect && diffCorrect[dKey] !== undefined) diffCorrect[dKey]++;
-     });
-
-     return { 
-        subjects: Object.values(subMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / s.total) * 100), score: parseFloat(s.score.toFixed(1)) })),
-        difficulty: { 
-           easy: Math.round((diffCorrect.easy / (diffCount.easy || 1)) * 100),
-           medium: Math.round((diffCorrect.medium / (diffCount.medium || 1)) * 100),
-           hard: Math.round((diffCorrect.hard / (diffCount.hard || 1)) * 100)
-        }
-     };
-  }, [categorizedNodes, sessionData, mockData]);
+  }, [questions, activeSession]);
 
   const filteredQuestions = useMemo(() => {
-    if (activeReviewFilter === 'CORRECT') return categorizedNodes.correct;
-    if (activeReviewFilter === 'WRONG') return categorizedNodes.wrong;
-    if (activeReviewFilter === 'SKIPPED') return categorizedNodes.skipped;
-    return categorizedNodes.all;
-  }, [activeReviewFilter, categorizedNodes]);
+    if (activeReviewFilter === 'CORRECT') return reviewNodes.correct;
+    if (activeReviewFilter === 'WRONG') return reviewNodes.wrong;
+    if (activeReviewFilter === 'SKIPPED') return reviewNodes.skipped;
+    return reviewNodes.all;
+  }, [activeReviewFilter, reviewNodes]);
 
   if (!mounted || (resultLoading && user)) return <div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
 
-  if (!sessionData) return (
+  if (!activeSession) return (
      <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
         <AlertCircle className="h-16 w-16 text-slate-200" />
         <h2 className="text-2xl font-black text-[#0F172A]">Result node missing</h2>
@@ -225,102 +185,126 @@ export default function ResultClient() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
       <Navbar />
       <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-16 pb-40">
-        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-12">
-           <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
-              <div className="bg-white border border-slate-100 p-1 rounded-xl flex items-center h-12 md:h-14 shadow-sm w-full lg:w-auto">
-                 <TabsList className="bg-transparent border-none p-0 flex h-full w-full gap-0.5">
-                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-6 font-bold text-[9px] md:text-xs tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white h-full">Performance</TabsTrigger>
-                    <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-6 font-bold text-[9px] md:text-xs tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white h-full">Review Test</TabsTrigger>
-                    <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-6 font-bold text-[9px] md:text-xs tracking-tight gap-2 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white h-full">Report Card</TabsTrigger>
+        
+        {/* ACTION BAR HUB */}
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
+           <div className="bg-white border border-slate-100 p-1 rounded-2xl flex items-center h-14 md:h-16 shadow-sm w-full lg:w-auto">
+              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
+                 <TabsList className="bg-transparent border-none p-0 flex h-full w-full gap-1">
+                    <HubTab value="OVERVIEW" label="Performance" />
+                    <HubTab value="REVIEW" label="Review Test" />
+                    <HubTab value="REPORT" label="Report Card" />
                  </TabsList>
-              </div>
-              <div className="flex items-center gap-2 w-full lg:w-auto">
-                 <Button onClick={() => setActiveMainTab("REPORT")} className="flex-1 lg:flex-none h-12 md:h-14 px-8 bg-[#2563EB] text-white font-bold rounded-xl shadow-lg border-none">Download PDF</Button>
-                 <Button onClick={() => router.push(`/mocks/instructions?id=${mockId}&retake=true`)} variant="outline" className="flex-1 lg:flex-none h-12 md:h-14 px-8 border-2 border-slate-200 rounded-xl font-bold text-[#0F172A]">Retake</Button>
-              </div>
+              </Tabs>
            </div>
+           <div className="flex items-center gap-3 w-full lg:w-auto">
+              <Button onClick={() => router.push(`/mocks/instructions?id=${mockId}&retake=true`)} variant="outline" className="flex-1 lg:flex-none h-14 md:h-16 border-2 border-slate-200 rounded-2xl font-bold text-[#0F172A] gap-2 active:scale-95 transition-all">
+                 <RotateCcw className="h-4 w-4" /> Retake Test
+              </Button>
+              <Button onClick={() => setActiveMainTab("REPORT")} className="flex-1 lg:flex-none h-14 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl border-none">Download PDF</Button>
+           </div>
+        </div>
 
-           <TabsContent value="OVERVIEW" className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
-              <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-6">
-                 <StatCard label="Final score" val={sessionData.score.toFixed(1)} icon={<Zap className="text-primary" />} />
-                 <StatCard label="Accuracy" val={`${sessionData.accuracy}%`} icon={<Target className="text-emerald-500" />} />
-                 <StatCard label="Correct" val={sessionData.correctCount} icon={<CheckCircle2 className="text-emerald-600" />} />
-                 <StatCard label="Incorrect" val={sessionData.wrongCount} icon={<AlertCircle className="text-rose-500" />} />
-                 <StatCard label="Time taken" val={`${Math.round(sessionData.timeTaken / 60)}m`} icon={<Timer className="text-blue-500" />} />
-                 <StatCard label="Attempt ID" val={sessionData.attemptId?.slice(0,6) || "REG"} icon={<ShieldCheck className="text-slate-400" />} />
+        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-16">
+           {/* OVERVIEW TAB */}
+           <TabsContent value="OVERVIEW" className="space-y-12 animate-in fade-in duration-500">
+              <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+                 <StatCard label="Final score" val={activeSession.score.toFixed(1)} icon={<Zap className="text-primary" />} />
+                 <StatCard label="Attempt grade" val={activeSession.grade || 'F'} icon={<Award className="text-amber-500" />} highlight />
+                 <StatCard label="Accuracy" val={`${activeSession.accuracy}%`} icon={<Target className="text-emerald-500" />} />
+                 <StatCard label="Time taken" val={`${Math.round(activeSession.timeTaken / 60)}m`} icon={<Timer className="text-blue-500" />} />
+                 <StatCard label="Correct items" val={activeSession.correctCount} icon={<CheckCircle2 className="text-emerald-600" />} />
+                 <StatCard label="Mistakes" val={activeSession.wrongCount} icon={<AlertCircle className="text-rose-500" />} />
               </section>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-                 <div className="lg:col-span-8 space-y-8">
-                    <Card className="border-none shadow-sm rounded-[24px] bg-white p-6 md:p-10 border border-slate-100">
-                       <h2 className="text-xl font-bold mb-8">Subject Analysis</h2>
-                       <div className="space-y-8">
-                          {analysis.subjects.map((sub, i) => (
+                 <div className="lg:col-span-8 space-y-12">
+                    <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 border border-slate-100">
+                       <h2 className="text-xl md:text-3xl font-black text-[#0F172A] mb-12 flex items-center gap-4">
+                          <BarChart3 className="h-8 w-8 text-primary" /> Subject analysis
+                       </h2>
+                       <div className="space-y-10">
+                          {activeSession.subjectAnalysis?.map((sub: any, i: number) => (
                              <div key={i} className="space-y-3">
-                                <div className="flex justify-between items-center text-xs font-bold text-slate-500 uppercase">
+                                <div className="flex justify-between items-center text-[10px] md:text-sm font-bold text-slate-500 uppercase tracking-widest">
                                    <span>{sub.name}</span>
-                                   <span>{sub.accuracy}% Accuracy</span>
+                                   <span className="text-[#0F172A] tabular-nums">{sub.accuracy}% Accuracy</span>
                                 </div>
-                                <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden">
-                                   <motion.div initial={{ width: 0 }} animate={{ width: `${sub.accuracy}%` }} transition={{ duration: 1 }} className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : "bg-amber-500")} />
+                                <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
+                                   <motion.div initial={{ width: 0 }} animate={{ width: `${sub.accuracy}%` }} transition={{ duration: 1.2 }} className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : sub.accuracy > 40 ? "bg-amber-500" : "bg-rose-500")} />
                                 </div>
                              </div>
                           ))}
                        </div>
                     </Card>
                  </div>
+                 
                  <div className="lg:col-span-4 space-y-8">
-                    <Card className="border-none shadow-sm rounded-[24px] bg-white p-8 border border-slate-100 text-left space-y-6">
-                       <h3 className="font-bold text-lg">Complexity Audit</h3>
-                       <div className="space-y-4">
-                          <ComplexityNode label="Easy items" val={analysis.difficulty.easy} color="bg-emerald-500" />
-                          <ComplexityNode label="Medium items" val={analysis.difficulty.medium} color="bg-blue-500" />
-                          <ComplexityNode label="Hard items" val={analysis.difficulty.hard} color="bg-rose-500" />
+                    <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 border border-slate-100 text-left space-y-8">
+                       <div className="space-y-1">
+                          <h3 className="text-xl font-bold flex items-center gap-3"><Layers className="h-6 w-6 text-primary" /> Complexity audit</h3>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mastery by difficulty</p>
+                       </div>
+                       <div className="space-y-6">
+                          <ComplexityNode label="Easy items" val={activeSession.complexityAnalysis?.easy || 0} color="bg-emerald-500" />
+                          <ComplexityNode label="Medium items" val={activeSession.complexityAnalysis?.medium || 0} color="bg-blue-500" />
+                          <ComplexityNode label="Hard items" val={activeSession.complexityAnalysis?.hard || 0} color="bg-rose-500" />
                        </div>
                     </Card>
                  </div>
               </div>
            </TabsContent>
 
-           <TabsContent value="REVIEW" className="space-y-6 animate-in fade-in duration-500">
-              <div className="flex items-center gap-3 bg-white p-1 rounded-xl shadow-sm border border-slate-100 w-fit mx-auto mb-8">
-                 <button onClick={() => setActiveReviewFilter('ALL')} className={cn("px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all", activeReviewFilter === 'ALL' ? "bg-[#0F172A] text-white shadow-md" : "text-slate-400 hover:text-slate-600")}>All</button>
-                 <button onClick={() => setActiveReviewFilter('WRONG')} className={cn("px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all", activeReviewFilter === 'WRONG' ? "bg-rose-600 text-white shadow-md" : "text-slate-400 hover:text-rose-500")}>Mistakes ({categorizedNodes.wrong.length})</button>
+           {/* REVIEW TAB */}
+           <TabsContent value="REVIEW" className="space-y-10 animate-in fade-in duration-500">
+              <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100 w-fit mx-auto mb-12">
+                 <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
+                 <FilterButton active={activeReviewFilter === 'WRONG'} label={`Mistakes (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                 <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
               </div>
-              <div className="max-w-4xl mx-auto space-y-6">
-                 {filteredQuestions.map((q, idx) => (
-                    <Card key={q.id} className="border-none shadow-sm rounded-[32px] bg-white overflow-hidden border border-slate-100 text-left">
+
+              <div className="max-w-4xl mx-auto space-y-8">
+                 {filteredQuestions.map((q) => (
+                    <Card key={q.id} className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden border border-slate-100 text-left">
                        <div className="p-8 md:p-14 space-y-10">
                           <div className="flex justify-between items-center">
-                             <Badge variant="outline" className="px-4 py-1.5 rounded-full border-slate-200 text-slate-400 font-black text-[10px] uppercase">Node {q.originalIndex + 1}</Badge>
+                             <Badge variant="outline" className="px-4 py-1.5 rounded-full border-slate-100 text-slate-300 font-black text-[9px] md:text-[10px] uppercase">Attempt item {q.originalIndex + 1}</Badge>
                           </div>
-                          <QuestionRenderer question={q} language={mockData?.languageMode || 'ENGLISH_PUNJABI'} showSolution={true} selectedAnswer={sessionData.answers?.[q.originalIndex]} className="p-0 shadow-none border-none bg-transparent" />
+                          <QuestionRenderer 
+                            question={q} 
+                            language={mockData?.languageMode || 'ENGLISH_PUNJABI'} 
+                            showSolution={true} 
+                            selectedAnswer={activeSession.answers?.[q.originalIndex]} 
+                            className="p-0 shadow-none border-none bg-transparent" 
+                          />
                        </div>
                     </Card>
                  ))}
+                 {filteredQuestions.length === 0 && (
+                    <div className="py-32 text-center opacity-30 italic font-black uppercase text-xl">No items in this category</div>
+                 )}
               </div>
            </TabsContent>
 
-           <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700">
+           {/* REPORT TAB */}
+           <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 pb-20">
               <div className="flex flex-col items-center">
-                 <div className="transform scale-[0.35] sm:scale-[0.6] md:scale-[0.8] lg:scale-100 origin-top">
+                 <div className="transform scale-[0.38] sm:scale-[0.6] md:scale-[0.8] lg:scale-100 origin-top">
                     <ResultCard 
                        studentName={profile?.name || "Aspirant"} 
-                       examTitle={mockData?.title || "Mock Test"} 
-                       score={sessionData.score.toFixed(1)} 
+                       examTitle={activeSession.mockTitle || "Mock Test"} 
+                       score={activeSession.score.toFixed(1)} 
                        rank={merit.rank} 
-                       accuracy={sessionData.accuracy} 
-                       timeTaken={formatTimeTaken(sessionData.timeTaken)} 
-                       correct={categorizedNodes.correct.length} 
-                       wrong={categorizedNodes.wrong.length} 
+                       accuracy={activeSession.accuracy} 
+                       timeTaken={formatTimeTaken(activeSession.timeTaken)} 
+                       correct={activeSession.correctCount} 
+                       wrong={activeSession.wrongCount} 
                        total={questions.length} 
-                       date={new Date(sessionData.timestamp).toLocaleDateString('en-GB')} 
-                       resultId={sessionData.attemptId || "REG"} 
+                       date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')} 
+                       resultId={activeSession.attemptId || "REG"} 
                        percentile={merit.percentile} 
                        branding={branding}
-                       subjects={analysis.subjects}
-                       difficulty={analysis.difficulty}
-                       isForPdf={true}
+                       subjects={activeSession.subjectAnalysis}
                     />
                  </div>
               </div>
@@ -332,13 +316,16 @@ export default function ResultClient() {
   )
 }
 
-function StatCard({ label, val, icon }: any) {
+function StatCard({ label, val, icon, highlight }: any) {
   return (
-    <Card className="border-none shadow-sm bg-white p-5 rounded-2xl border border-slate-100 text-left relative overflow-hidden h-full flex flex-col justify-center">
-       <div className="absolute top-0 right-0 p-3 opacity-5">{icon}</div>
-       <div className="space-y-0.5">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-          <p className="text-xl md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter">{val}</p>
+    <Card className={cn(
+       "border-none shadow-xl bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 text-left relative overflow-hidden h-full flex flex-col justify-center transition-all hover:translate-y-[-4px]",
+       highlight && "ring-2 ring-primary/10 bg-primary/5 shadow-primary/5"
+    )}>
+       <div className="absolute top-0 right-0 p-4 opacity-5">{icon}</div>
+       <div className="space-y-1.5 relative z-10">
+          <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+          <p className={cn("text-xl md:text-4xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
        </div>
     </Card>
   )
@@ -346,22 +333,48 @@ function StatCard({ label, val, icon }: any) {
 
 function ComplexityNode({ label, val, color }: any) {
    return (
-      <div className="space-y-1.5">
+      <div className="space-y-2">
          <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">
             <span>{label}</span>
-            <span>{val}%</span>
+            <span className="text-[#0F172A]">{val}%</span>
          </div>
          <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
-            <div className={cn("h-full transition-all duration-1000", color)} style={{ width: `${val}%` }} />
+            <motion.div initial={{ width: 0 }} animate={{ width: `${val}%` }} transition={{ duration: 1 }} className={cn("h-full", color)} />
          </div>
       </div>
+   )
+}
+
+function HubTab({ value, label }: { value: string, label: string }) {
+   return (
+      <TabsTrigger value={value} className="flex-1 rounded-xl px-4 md:px-10 font-black uppercase text-[8px] md:text-[11px] tracking-widest data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all h-full">
+         {label}
+      </TabsTrigger>
+   )
+}
+
+function FilterButton({ active, label, onClick, color = "primary" }: any) {
+   return (
+      <button 
+        onClick={onClick} 
+        className={cn(
+          "px-5 md:px-8 py-2.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95",
+          active 
+            ? color === 'rose' ? "bg-rose-600 text-white shadow-lg" : 
+              color === 'emerald' ? "bg-emerald-600 text-white shadow-lg" :
+              "bg-[#0F172A] text-white shadow-lg"
+            : "text-slate-400 hover:text-slate-600"
+        )}
+      >
+         {label}
+      </button>
    )
 }
 
 function formatTimeTaken(seconds: any) {
    const totalSecs = Number(seconds);
    if (isNaN(totalSecs) || totalSecs <= 0) return "0s";
-   const m = Math.floor((seconds % 3600) / 60);
+   const m = Math.floor(totalSecs / 60);
    const s = Math.round(totalSecs % 60);
    return m > 0 ? `${m}m ${s}s` : `${s}s`;
 }

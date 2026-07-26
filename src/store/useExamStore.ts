@@ -54,8 +54,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v7.0 [Data Consistency Guard].
- * FIXED: Implemented unique attemptId and total memory purge.
+ * @fileOverview Hardened Test Store v8.0 [Strict Attempt Isolation].
+ * Every initialization performs a total memory purge to prevent data leakage.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -81,20 +81,25 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   resetStore: () => set({
     mockId: null,
     attemptId: null,
+    mockTitle: "",
+    userId: null,
     questions: [],
     answers: {},
     status: {},
     visited: [0],
+    bookmarks: [],
     timeLeft: 0,
+    initialTime: 0,
     elapsedSeconds: 0,
     currentIdx: 0,
     isPaused: false,
     startTime: 0,
-    violations: 0
+    violations: 0,
+    isGuest: false
   }),
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode, forceNew = false) => {
-    // 1. Memory Purge - Essential for preventing data leaks
+    // 1. CRITICAL: Total memory purge before every new attempt
     get().resetStore();
 
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
@@ -118,7 +123,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const now = Date.now();
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
     
-    // Generate or Restore Unique Attempt ID
+    // 2. Generate a cryptographically unique ID for the attempt
     const attemptId = isResuming ? (effectiveResume.attemptId || nanoid(12)) : nanoid(12);
 
     set({
