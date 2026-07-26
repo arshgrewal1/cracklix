@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -25,7 +24,6 @@ import { useToast } from "@/hooks/use-toast"
 import { 
   Zap, 
   Loader2, 
-  ShieldCheck,
   Download,
   RotateCcw,
   ChevronRight,
@@ -50,10 +48,12 @@ import ReportScreen from "./ReportScreen"
 import ReportPDF from "./ReportPDF"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
+import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result System v17.0.
- * FIXED: Implemented Dynamic Scaling for Report Tab to ensure PWA Fit.
+ * @fileOverview Institutional Result System v18.0 [Portrait Scale Fix].
+ * FIXED: Dynamic Preview Scaling for Report Hub to ensure perfect Portrait Fit on PWA.
+ * FIXED: Ranking bug - Rank never exceeds participants.
  */
 
 export default function ResultClient() {
@@ -87,12 +87,13 @@ export default function ResultClient() {
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
-  // PWA Preview Scaling Logic
+  // PWA Portrait Fit Logic
   useEffect(() => {
     if (activeMainTab === 'REPORT') {
       const calculateScale = () => {
+        if (typeof window === 'undefined') return;
         const screenWidth = window.innerWidth;
-        const targetWidth = 794; // A4 px width
+        const targetWidth = 794; // Explicit A4 Portrait px width
         const padding = 32; 
         const available = screenWidth - padding;
         if (available < targetWidth) {
@@ -151,20 +152,22 @@ export default function ResultClient() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
            const countSnap = await getCountFromServer(entriesRef);
-           const dbCount = countSnap.data().count;
-           const displayTotal = user ? Math.max(dbCount, 1) : dbCount + 1;
+           const displayTotal = countSnap.data().count;
            setTotalCandidates(displayTotal);
            
            const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
            const superiorCountSnap = await getCountFromServer(superiorQuery);
            let superiorCount = superiorCountSnap.data().count;
 
+           // Self-Exclusion Protocol: Subtract 1 if current user has a previous best score that is superior
            if (user) {
               const myEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
               const myEntrySnap = await getDoc(myEntryRef);
               if (myEntrySnap.exists()) {
                  const myBest = myEntrySnap.data().highestScore;
-                 if (myBest > activeSession.score) superiorCount = Math.max(0, superiorCount - 1);
+                 if (myBest > activeSession.score) {
+                    superiorCount = Math.max(0, superiorCount - 1);
+                 }
               }
            }
 
@@ -224,14 +227,14 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Synchronizing report..." });
+    toast({ title: "Audit in progress..." });
 
     try {
       await document.fonts.ready;
       await new Promise(r => setTimeout(r, 1000));
 
       const container = document.getElementById('pdf-report-container');
-      if (!container) throw new Error("Registry failure.");
+      if (!container) throw new Error("Registry handshake failed.");
 
       const canvas = await html2canvas(container, {
         scale: 4,
@@ -245,10 +248,10 @@ export default function ResultClient() {
       const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
-      pdf.save(`Cracklix_Report_${activeSession.userName || 'Student'}.pdf`);
+      pdf.save(`Cracklix_Report_${activeSession.userName?.replace(/\s+/g, '_') || 'Student'}.pdf`);
       toast({ title: "Report Downloaded" });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Export failed" });
+      toast({ variant: "destructive", title: "Export Error" });
     } finally { setIsExporting(false); }
   };
 
@@ -285,51 +288,54 @@ export default function ResultClient() {
       <main className="container mx-auto max-w-7xl px-0 md:px-8 py-6 md:py-12 space-y-10 pb-32">
         
         {isSearching && (
-           <div className="py-24 text-center flex flex-col items-center gap-4">
-              <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Resolving data...</p>
+           <div className="py-32 text-center flex flex-col items-center gap-6">
+              <Loader2 className="h-12 w-12 text-primary animate-spin" />
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Resolving Result Node...</p>
            </div>
         )}
 
         {errorNotFound && (
-           <div className="py-24 text-center flex flex-col items-center gap-6">
-              <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-inner">
-                 <AlertCircle className="h-8 w-8" />
+           <div className="py-32 text-center flex flex-col items-center gap-8">
+              <div className="h-20 w-20 bg-rose-50 rounded-[2.5rem] flex items-center justify-center text-rose-500 shadow-xl border border-rose-100">
+                 <AlertCircle className="h-10 w-10" />
               </div>
-              <h2 className="text-xl font-bold text-[#0F172A]">Registry record missing</h2>
-              <Button asChild variant="outline" className="rounded-xl px-10"><Link href="/dashboard">Back to hub</Link></Button>
+              <div className="space-y-2">
+                 <h2 className="text-2xl font-black text-[#0F172A]">Result Entry Missing</h2>
+                 <p className="text-slate-500 max-w-sm mx-auto">This attempt record could not be located in the primary registry.</p>
+              </div>
+              <Button asChild variant="outline" className="rounded-xl h-14 px-10"><Link href="/dashboard">Return to Hub</Link></Button>
            </div>
         )}
 
         {!isSearching && !errorNotFound && activeSession && finalMetrics && (
            <div className="space-y-10 animate-in fade-in duration-500">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-6 px-4">
-                 <div className="flex items-center gap-5 text-left w-full md:w-auto">
-                    <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-16 md:w-16 rounded-xl shadow-lg bg-white border-2 border-slate-50" />
-                    <div className="space-y-0.5 flex-1 min-w-0">
-                       <h1 className="text-lg md:text-2xl font-bold tracking-tight text-[#0F172A] truncate">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-8 px-4">
+                 <div className="flex items-center gap-6 text-left w-full md:w-auto">
+                    <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-16 md:w-16 rounded-2xl shadow-xl bg-white border-2 border-slate-50" />
+                    <div className="space-y-1 flex-1 min-w-0">
+                       <h1 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A] truncate uppercase">
                          {activeSession?.mockTitle}
                        </h1>
-                       <div className="flex items-center gap-2">
-                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm">Verified result</Badge>
+                       <div className="flex items-center gap-3">
+                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Verified Attempt</Badge>
                        </div>
                     </div>
                  </div>
                  
-                 <div className="flex gap-3 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-12 px-8 rounded-xl border-2 font-bold text-[10px] uppercase tracking-tight">Retake</Button>
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-12 px-10 bg-[#0F172A] text-white rounded-xl shadow-xl font-bold text-[10px] uppercase tracking-tight">
-                       {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} Get Report
+                 <div className="flex gap-4 w-full md:w-auto">
+                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 px-8 rounded-2xl border-2 font-bold text-[11px] uppercase tracking-widest">Retake</Button>
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-12 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-black text-[11px] uppercase tracking-widest">
+                       {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Download Report
                     </Button>
                  </div>
               </div>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
                   <div className="flex justify-center mb-10 px-4">
-                     <TabsList className="bg-white border border-slate-100 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full md:w-auto overflow-x-auto no-scrollbar">
-                        <TabsTrigger value="OVERVIEW" className="flex-1 md:flex-none rounded-xl px-10 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="flex-1 md:flex-none rounded-xl px-10 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
-                        <TabsTrigger value="REPORT" className="flex-1 md:flex-none rounded-xl px-10 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
+                     <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl shadow-xl h-14 md:h-16 w-full md:w-auto overflow-x-auto no-scrollbar">
+                        <TabsTrigger value="OVERVIEW" className="flex-1 md:flex-none rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="flex-1 md:flex-none rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
+                        <TabsTrigger value="REPORT" className="flex-1 md:flex-none rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -348,9 +354,9 @@ export default function ResultClient() {
                          date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')}
                          percentile={finalMetrics.percentile}
                          score={finalMetrics.score.toFixed(2)}
-                         accuracy={finalMetrics.overallAccuracy}
+                         accuracy={finalMetrics.percentage}
                          attemptAccuracy={finalMetrics.attemptAccuracy}
-                         attemptRate={finalMetrics.attemptRate}
+                         attemptRate={activeSession.attemptRate}
                          isQualified={finalMetrics.isQualified}
                          grade={finalMetrics.grade}
                          subjects={activeSession.subjectAnalysis}
@@ -359,19 +365,22 @@ export default function ResultClient() {
                       />
                   </TabsContent>
 
-                  <TabsContent value="REVIEW" className="space-y-8 max-w-4xl mx-auto px-4">
-                      <div className="flex items-center gap-1 bg-white p-1 rounded-xl shadow-md border border-slate-100 w-fit mx-auto sticky top-[180px] z-20">
-                          <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
-                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Mistakes (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                  <TabsContent value="REVIEW" className="space-y-8 max-w-5xl mx-auto px-4">
+                      <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl shadow-xl border border-slate-100 w-fit mx-auto sticky top-[180px] z-[40]">
+                          <FilterButton active={activeReviewFilter === 'ALL'} label="All Questions" onClick={() => setActiveReviewFilter('ALL')} />
+                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Fix Errors (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                           <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                       </div>
-                      <div className="space-y-6">
+                      <div className="space-y-6 md:space-y-10">
                           {filteredQuestions.map((q) => (
-                              <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[2.5rem] overflow-hidden bg-white text-left">
-                                  <div className="p-6 md:p-12 space-y-6">
-                                      <Badge variant="outline" className="px-3 py-1 rounded-lg border-slate-200 text-slate-400 font-bold text-[9px]">
-                                          Question #{q.originalIndex + 1}
-                                      </Badge>
+                              <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-white text-left">
+                                  <div className="p-8 md:p-14 space-y-8">
+                                      <div className="flex items-center justify-between">
+                                         <Badge variant="outline" className="px-4 py-1.5 rounded-xl border-slate-200 text-slate-400 font-black text-[9px] uppercase tracking-widest">
+                                             Question #{q.originalIndex + 1}
+                                         </Badge>
+                                         <Badge className="bg-primary/5 text-primary border-none text-[8px] font-black uppercase tracking-widest">{q.subjectId || 'GENERAL'}</Badge>
+                                      </div>
                                       <QuestionRenderer 
                                           question={q} 
                                           language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
@@ -385,8 +394,8 @@ export default function ResultClient() {
                       </div>
                   </TabsContent>
 
-                  <TabsContent value="REPORT" className="px-4 pb-20">
-                      <div className="flex flex-col items-center pt-2 md:pt-4 overflow-hidden w-full">
+                  <TabsContent value="REPORT" className="px-4 pb-40">
+                      <div className="flex flex-col items-center pt-6 md:pt-10 overflow-hidden w-full">
                          <div 
                             style={{ 
                               width: '794px',
@@ -394,7 +403,7 @@ export default function ResultClient() {
                               transformOrigin: 'top center',
                               marginBottom: `${(1123 * previewScale) - 1123}px`
                             }}
-                            className="bg-white p-0 shadow-2xl border border-slate-100 origin-top"
+                            className="bg-white p-0 shadow-4xl border border-slate-200 origin-top rounded-lg"
                          >
                             <ReportPDF 
                                {...activeSession}
@@ -410,7 +419,7 @@ export default function ResultClient() {
                                date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')}
                                percentile={finalMetrics.percentile}
                                score={finalMetrics.score.toFixed(2)}
-                               accuracy={finalMetrics.overallAccuracy}
+                               accuracy={finalMetrics.percentage}
                                attemptAccuracy={finalMetrics.attemptAccuracy}
                                isQualified={finalMetrics.isQualified}
                                grade={finalMetrics.grade}
@@ -424,6 +433,7 @@ export default function ResultClient() {
            </div>
         )}
 
+        {/* HIDDEN CAPTURE NODE */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
           <div id="pdf-report-container">
             {finalMetrics && activeSession && (
@@ -441,7 +451,7 @@ export default function ResultClient() {
                  date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')}
                  percentile={finalMetrics.percentile}
                  score={finalMetrics.score.toFixed(2)}
-                 accuracy={finalMetrics.attemptAccuracy}
+                 accuracy={finalMetrics.percentage}
                  attemptAccuracy={finalMetrics.attemptAccuracy}
                  isQualified={finalMetrics.isQualified}
                  grade={finalMetrics.grade}
@@ -459,7 +469,7 @@ export default function ResultClient() {
 
 function FilterButton({ active, label, onClick, color = "primary" }: any) {
   return (
-    <button onClick={onClick} className={cn("px-4 md:px-7 py-2.5 rounded-lg text-[10px] font-bold tracking-tight transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-lg" : color === 'emerald' ? "bg-emerald-600 text-white shadow-lg" : "bg-[#0F172A] text-white shadow-lg" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
+    <button onClick={onClick} className={cn("px-5 md:px-10 py-3 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
        {label}
     </button>
   )
@@ -471,3 +481,4 @@ function formatTimeStr(seconds: number) {
   const s = Math.floor(seconds % 60);
   return `${m}m ${s}s`;
 }
+
