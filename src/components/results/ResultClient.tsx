@@ -51,11 +51,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result System v20.0.
- * FIXED: Alignment for navigation tabs and filters - now frozen at top.
+ * @fileOverview Institutional Result Hub v21.0.
+ * FIXED: Edge-to-edge mobile presentation for PWA.
  * FIXED: Domain updated to cracklix.in.
- * FIXED: Ranking bug (Self-exclusion logic).
- * TERMINOLOGY: Nodes -> Questions.
  */
 
 export default function ResultClient() {
@@ -89,14 +87,13 @@ export default function ResultClient() {
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
-  // PWA Portrait Fit Logic
   useEffect(() => {
     if (activeMainTab === 'REPORT') {
       const calculateScale = () => {
         if (typeof window === 'undefined') return;
         const screenWidth = window.innerWidth;
         const targetWidth = 794; 
-        const padding = 32; 
+        const padding = 20; 
         const available = screenWidth - padding;
         if (available < targetWidth) {
           setPreviewScale(available / targetWidth);
@@ -161,7 +158,6 @@ export default function ResultClient() {
            const superiorCountSnap = await getCountFromServer(superiorQuery);
            let superiorCount = superiorCountSnap.data().count;
 
-           // Self-Exclusion Protocol: Subtract 1 if current user has a previous best score that is superior
            if (user) {
               const myEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
               const myEntrySnap = await getDoc(myEntryRef);
@@ -229,17 +225,17 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Processing report..." });
+    toast({ title: "Synchronizing Registry..." });
 
     try {
       await document.fonts.ready;
       await new Promise(r => setTimeout(r, 1000));
 
       const container = document.getElementById('pdf-report-container');
-      if (!container) throw new Error("Registry handshake failed.");
+      if (!container) throw new Error("Capture node not found.");
 
       const canvas = await html2canvas(container, {
-        scale: 4,
+        scale: 3,
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
@@ -256,8 +252,6 @@ export default function ResultClient() {
       toast({ variant: "destructive", title: "Export Error" });
     } finally { setIsExporting(false); }
   };
-
-  const handleRetake = () => mockId && router.push(`/mocks/instructions?id=${mockId}`);
 
   const reviewNodes = useMemo(() => {
     if (!activeSession || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
@@ -282,12 +276,14 @@ export default function ResultClient() {
     return reviewNodes.all;
   }, [activeReviewFilter, reviewNodes]);
 
+  const handleRetake = () => mockId && router.push(`/mocks/instructions?id=${mockId}`);
+
   if (userLoading || !mounted) return null;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body">
       <Navbar />
-      <main className="container mx-auto max-w-7xl px-0 md:px-8 py-6 md:py-12 space-y-10 pb-32">
+      <main className="container mx-auto max-w-7xl px-0 md:px-8 py-6 md:py-12 space-y-8 md:space-y-12 pb-32">
         
         {isSearching && (
            <div className="py-32 text-center flex flex-col items-center gap-6">
@@ -298,36 +294,34 @@ export default function ResultClient() {
 
         {errorNotFound && (
            <div className="py-32 text-center flex flex-col items-center gap-8">
-              <div className="h-20 w-20 bg-rose-50 rounded-[2.5rem] flex items-center justify-center text-rose-500 shadow-xl border border-rose-100">
+              <div className="h-20 w-20 bg-rose-50 rounded-[2.5rem] flex items-center justify-center text-rose-500 shadow-xl">
                  <AlertCircle className="h-10 w-10" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                  <h2 className="text-2xl font-black text-[#0F172A]">Result entry missing</h2>
-                 <p className="text-slate-500 max-w-sm mx-auto">This attempt record could not be located in the primary registry.</p>
+                 <p className="text-slate-500 max-w-sm mx-auto">This attempt record could not be found.</p>
               </div>
               <Button asChild variant="outline" className="rounded-xl h-14 px-10"><Link href="/dashboard">Return to Hub</Link></Button>
            </div>
         )}
 
         {!isSearching && !errorNotFound && activeSession && finalMetrics && (
-           <div className="space-y-10 animate-in fade-in duration-500">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-8 px-4">
+           <div className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-6 px-4 md:px-0">
                  <div className="flex items-center gap-6 text-left w-full md:w-auto">
-                    <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-16 md:w-16 rounded-2xl shadow-xl bg-white border-2 border-slate-50" />
+                    <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-14 w-14 md:h-18 md:w-18 rounded-2xl shadow-xl bg-white" />
                     <div className="space-y-1 flex-1 min-w-0">
-                       <h1 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A] truncate">
+                       <h1 className="text-xl md:text-4xl font-black tracking-tight text-[#0F172A] truncate uppercase">
                          {activeSession?.mockTitle}
                        </h1>
-                       <div className="flex items-center gap-3">
-                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[9px] font-bold px-3 py-1 rounded-full shadow-sm">Verified Attempt</Badge>
-                       </div>
+                       <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">Verified Attempt</Badge>
                     </div>
                  </div>
                  
                  <div className="flex gap-4 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 px-8 rounded-2xl border-2 font-bold text-[11px]">Retake</Button>
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-12 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-bold text-[11px]">
-                       {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Download Report
+                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 px-8 rounded-2xl border-2 font-bold text-[11px] uppercase tracking-widest bg-white">Retake</Button>
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-10 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-bold text-[11px] uppercase tracking-widest">
+                       {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Download PDF
                     </Button>
                  </div>
               </div>
@@ -335,10 +329,10 @@ export default function ResultClient() {
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
                   <div className="sticky top-[84px] md:top-[116px] z-[46] bg-[#F8FAFC]/95 backdrop-blur-md py-4 -mx-4 px-4 border-b border-slate-100">
                      <div className="flex justify-center w-full max-w-2xl mx-auto">
-                        <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center overflow-x-auto no-scrollbar">
-                           <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
-                           <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
-                           <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
+                        <TabsList className="bg-white border border-slate-100 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center overflow-x-auto no-scrollbar">
+                           <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
+                           <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
+                           <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
                         </TabsList>
                      </div>
                   </div>
@@ -401,39 +395,37 @@ export default function ResultClient() {
                       </div>
                   </TabsContent>
 
-                  <TabsContent value="REPORT" className="px-4 pb-40 pt-6">
-                      <div className="flex flex-col items-center pt-6 md:pt-10 overflow-hidden w-full">
-                         <div 
-                            style={{ 
-                              width: '794px',
-                              transform: `scale(${previewScale})`,
-                              transformOrigin: 'top center',
-                              marginBottom: `${(1123 * previewScale) - 1123}px`
-                            }}
-                            className="bg-white p-0 shadow-4xl border border-slate-200 origin-top rounded-lg overflow-hidden"
-                         >
-                            <ReportPDF 
-                               {...activeSession}
-                               resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
-                               studentName={activeSession.userName || profile?.name || "Aspirant"}
-                               rank={liveRank} 
-                               totalCandidates={totalCandidates}
-                               timeTaken={formatTimeStr(activeSession.timeTaken)}
-                               correct={activeSession.correctCount}
-                               wrong={activeSession.wrongCount}
-                               skipped={activeSession.skippedCount}
-                               total={activeSession.totalQuestions}
-                               date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')}
-                               percentile={finalMetrics.percentile}
-                               score={finalMetrics.score.toFixed(2)}
-                               accuracy={finalMetrics.percentage}
-                               attemptAccuracy={finalMetrics.attemptAccuracy}
-                               isQualified={finalMetrics.isQualified}
-                               grade={finalMetrics.grade}
-                               subjects={activeSession.subjectAnalysis}
-                               duration={mockData?.duration}
-                            />
-                         </div>
+                  <TabsContent value="REPORT" className="px-4 pb-40 pt-6 flex flex-col items-center">
+                      <div 
+                        style={{ 
+                          width: '794px',
+                          transform: `scale(${previewScale})`,
+                          transformOrigin: 'top center',
+                          marginBottom: `${(1123 * previewScale) - 1123}px`
+                        }}
+                        className="bg-white p-0 shadow-4xl border border-slate-200 origin-top rounded-lg overflow-hidden"
+                      >
+                         <ReportPDF 
+                            {...activeSession}
+                            resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
+                            studentName={activeSession.userName || profile?.name || "Aspirant"}
+                            rank={liveRank} 
+                            totalCandidates={totalCandidates}
+                            timeTaken={formatTimeStr(activeSession.timeTaken)}
+                            correct={activeSession.correctCount}
+                            wrong={activeSession.wrongCount}
+                            skipped={activeSession.skippedCount}
+                            total={activeSession.totalQuestions}
+                            date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')}
+                            percentile={finalMetrics.percentile}
+                            score={finalMetrics.score.toFixed(2)}
+                            accuracy={finalMetrics.percentage}
+                            attemptAccuracy={finalMetrics.attemptAccuracy}
+                            isQualified={finalMetrics.isQualified}
+                            grade={finalMetrics.grade}
+                            subjects={activeSession.subjectAnalysis}
+                            duration={mockData?.duration}
+                         />
                       </div>
                   </TabsContent>
               </Tabs>
