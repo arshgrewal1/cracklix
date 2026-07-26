@@ -18,8 +18,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v6.5.
- * FIXED: Syntax error in ComparisonNode and missing icon imports.
+ * @fileOverview Premium Analysis Screen v6.6.
+ * FIXED: Resolved syntax errors and ensured all icons are imported for stable compilation.
  */
 
 interface ReportScreenProps {

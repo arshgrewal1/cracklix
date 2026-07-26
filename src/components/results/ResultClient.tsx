@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useRef } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -25,11 +25,13 @@ import {
   Users,
   CheckCircle2,
   RefreshCw,
-  ArrowLeft,
   BarChart3,
   List,
-  Timer,
-  Download
+  Timer as TimerIcon,
+  Download,
+  Calendar,
+  Newspaper,
+  TrendingUp
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -44,8 +46,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v25.0.
- * UPDATED: Replaced PDF Flow with a Premium Social Share Result Card (PNG).
+ * @fileOverview Universal Result Hub Viewer v25.1.
+ * FIXED: Renamed Timer icon to TimerIcon to resolve naming conflicts.
  */
 
 export default function ResultClient() {
@@ -254,7 +256,7 @@ export default function ResultClient() {
                        <h1 className="text-xl md:text-3xl font-[800] text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
                        <div className="flex flex-wrap items-center gap-6 text-[10px] md:xs font-bold text-slate-400">
                           <div className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span></div>
-                          <div className="flex items-center gap-2"><Timer className="h-3.5 w-3.5" /> <span>{mockData?.duration || 120}m</span></div>
+                          <div className="flex items-center gap-2"><TimerIcon className="h-3.5 w-3.5" /> <span>{mockData?.duration || 120}m</span></div>
                           <div className="flex items-center gap-2"><Users className="h-3.5 w-3.5" /> <span>{totalCandidates.toLocaleString()} Candidates</span></div>
                        </div>
                     </div>
