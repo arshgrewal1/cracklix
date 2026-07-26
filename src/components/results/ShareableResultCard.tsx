@@ -10,12 +10,13 @@ import {
   Clock, 
   Zap, 
   Award,
-  Globe,
-  FileText,
   Calendar,
   Layers,
   Trophy,
-  Users
+  Users,
+  Timer,
+  Star,
+  BookOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -29,12 +30,12 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Scorecard v5.0.
- * REBUILT AS OFFICIAL EXAM REPORT CARD:
- * 1. Net Score (Massive Focal Point)
- * 2. Accuracy & Percentile (Secondary Stats)
- * 3. Punjab State Rank (Professional Secondary Card)
- * 4. Institutional Branding (3x Larger)
+ * @fileOverview Official Institutional Scorecard v6.0 [Hierarchy Hardened].
+ * 1. Score (Massive - 180px)
+ * 2. Accuracy (Secondary)
+ * 3. Percentile (Tertiary)
+ * 4. Punjab State Rank (Professional Secondary Card)
+ * 5. Institutional Branding (Enlarged Logo: 180px height)
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
@@ -60,7 +61,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
       {/* 1. PROFESSIONAL HEADER HUB - ENLARGED LOGO */}
       <div className="relative z-10 px-16 pt-16 flex justify-between items-start border-b border-slate-100 pb-12 bg-white">
          <div className="space-y-6">
-            <div className="h-[140px] w-auto">
+            <div className="h-[180px] w-auto">
                <img 
                  src="/logo/cracklix-logo-dark.png" 
                  alt="Cracklix" 
@@ -91,7 +92,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
                <h3 className="text-3xl font-[800] text-[#0B57D0] tracking-tight uppercase">{data.mockTitle}</h3>
             </div>
             <div className="flex gap-10">
-               <DetailNode icon={<Zap />} label="Attempt No" val="01" />
+               <DetailNode icon={<Zap />} label="Attempt No" val={data.attemptCount || "01"} />
                <DetailNode icon={<Calendar />} label="Cycle" val="Feb 2026" />
             </div>
          </div>
@@ -116,8 +117,8 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
          </div>
 
          <div className="col-span-5 grid grid-cols-1 gap-6">
-            <SecondaryMetric label="Accuracy" val={`${data.attemptAccuracy}%`} color="text-emerald-500" bg="bg-emerald-50" icon={<CheckCircle2 className="h-8 w-8" />} />
-            <SecondaryMetric label="Percentile" val={`${Math.max(0, Math.round(((totalCandidates - Number(rank)) / (totalCandidates || 1)) * 100))}%`} color="text-blue-600" bg="bg-blue-50" icon={<Target className="h-8 w-8" />} />
+            <SecondaryMetric label="Accuracy" val={`${data.attemptAccuracy}%`} color="text-emerald-500" bg="bg-emerald-50" icon={<CheckCircle2 className="h-10 w-10" />} />
+            <SecondaryMetric label="Percentile" val={`${Math.max(0, Math.round(((totalCandidates - Number(rank)) / (totalCandidates || 1)) * 100))}%`} color="text-blue-600" bg="bg-blue-50" icon={<Target className="h-10 w-10" />} />
             
             <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 flex items-center justify-between group overflow-hidden relative">
                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:rotate-12 transition-transform">

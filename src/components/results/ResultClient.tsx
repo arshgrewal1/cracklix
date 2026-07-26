@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useMemo, useEffect, useCallback } from "react"
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -43,9 +43,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toBlob } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v52.0 [Professional Scorecard].
- * FIXED: Dual-Action Share logic (Native Share on Mobile / Download on PC).
- * FIXED: Wrapped in Suspense for Next.js 15 build stability.
+ * @fileOverview Universal Result Hub Viewer v53.0 [Direct Share Prioritized].
+ * FIXED: Optimized handleShareResult to prioritize Native Share Sheet for all platforms.
  */
 
 export default function ResultClient() {
@@ -178,21 +177,20 @@ export default function ResultClient() {
   }, [db, mockId]);
 
   /**
-   * @description Smart Sharing Logic:
-   * - Mobile: Direct native share sheet for WhatsApp/Instagram.
-   * - Desktop: Instant High-Quality PNG download.
+   * @description Direct Share Protocol:
+   * Prioritizes Native Share Sheet for all platforms (WhatsApp, Instagram, Telegram).
+   * Falls back to HD Download only if sharing is blocked by the browser.
    */
   const handleShareResult = async () => {
     if (!sessionData || isSharing) return;
     
     setIsSharing(true);
-    toast({ title: "Registry Audit", description: "Preparing professional report card..." });
+    toast({ title: "Registry Audit", description: "Preparing official scorecard..." });
 
     try {
       const node = document.getElementById('cracklix-result-card-canvas');
       if (!node) throw new Error("Registry node missing.");
 
-      // Capture at 2x resolution for printing/high-end displays
       const blob = await toBlob(node, {
          pixelRatio: 2,
          cacheBust: true,
@@ -201,31 +199,30 @@ export default function ResultClient() {
 
       if (!blob) throw new Error("Image rasterization failed.");
 
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       const fileName = `Cracklix_Report_${sessionData.mockTitle.replace(/\s+/g, '_')}.png`;
       const file = new File([blob], fileName, { type: 'image/png' });
 
-      // 1. Logic: Share on Mobile if supported
-      if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      // Logic: Favor Direct Share across all devices (Native Share Sheet)
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
             title: `My Cracklix Result`,
             text: `🎯 Check my official scorecard for ${sessionData.mockTitle}. Verified standing on Cracklix!`,
             files: [file]
          });
       } else {
-         // 2. Logic: Direct Download on Laptop/PC
+         // Fallback: Direct Download only if sharing is unavailable
          const url = URL.createObjectURL(blob);
          const link = document.createElement('a');
          link.download = fileName;
          link.href = url;
          link.click();
          URL.revokeObjectURL(url);
-         toast({ title: "Report Downloaded", description: "Scorecard saved to your device." });
+         toast({ title: "Report Ready", description: "Scorecard downloaded to device." });
       }
     } catch (e: any) {
        console.error("[SHARE_ERROR]:", e);
        if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Audit Error", description: "Could not generate report." });
+          toast({ variant: "destructive", title: "Audit Error", description: "Could not broadcast scorecard." });
        }
     } finally {
        setIsSharing(false);
@@ -277,7 +274,7 @@ export default function ResultClient() {
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
                     <Button onClick={handleShareResult} disabled={isSharing} className="flex-1 lg:flex-none h-12 px-8 bg-[#0B57D0] hover:bg-blue-700 text-white font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
                        {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
-                       {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'Direct share card' : 'Download PNG'}
+                       Share Official Result
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
