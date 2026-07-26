@@ -30,8 +30,7 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v12.1 [Hardened Verification].
- * FIXED: Ensures correctAnswer is available for all verification paths.
+ * @fileOverview Official Mock Attempt Hub v12.2 [Optimized Submission].
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -254,17 +253,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const timeTaken = Math.max(1, elapsedSeconds);
     const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
     
-    // Generate Performance Insights
     const insights = [];
     if (accuracy >= 85) insights.push("Excellent accuracy levels maintained.");
-    else if (accuracy < 50) insights.push("Accuracy needs significant attention. Focus on core concepts.");
+    else if (accuracy < 50) insights.push("Accuracy needs attention. Focus on core concepts.");
+    if (wrongCount > (correctCount / 2)) insights.push("High error rate detected. Avoid guessing.");
     
-    if (wrongCount > (correctCount / 2)) insights.push("High error rate detected. Avoid random guessing.");
-    if (timeTaken > (mockData.duration * 60 * 0.9)) insights.push("Speed optimization required to complete on time.");
-    
-    const skippedCount = questions.length - attemptedCount;
-    if (skippedCount > (questions.length * 0.4)) insights.push("High skip rate. Review unattempted subject areas.");
-
     await stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
 
     const resultPayload: any = {
@@ -274,7 +267,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       score: finalScore,
       correctCount, 
       wrongCount, 
-      skippedCount,
+      skippedCount: questions.length - attemptedCount,
       attemptedCount, 
       totalQuestions: questions.length,
       accuracy,
@@ -299,18 +292,15 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         resultPayload.userEmail = user.email || ""; 
         resultPayload.createdAt = serverTimestamp();
         
-        // UNIQUE ATTEMPT SNAPSHOT
         const resDocId = `${user.uid}_${mockId}_${attemptId}`;
         await setDoc(doc(db, "results", resDocId), resultPayload);
         
-        // UPDATE ACTIVE ATTEMPT TRACKER
         await setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { 
            attemptId,
            status: 'COMPLETED', 
            updatedAt: serverTimestamp() 
         }, { merge: true });
         
-        // TRANSACTIONAL LEADERBOARD UPDATE
         const leaderboardRef = doc(db, "leaderboard", user.uid);
         await runTransaction(db, async (transaction) => {
           const lbSnap = await transaction.get(leaderboardRef);
@@ -349,10 +339,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}&guest=true`);
       }
     } catch (e) {
-      toast({ variant: "destructive", title: "Submission failed" });
       setIsSubmittingFinal(false);
     }
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, toast, attemptId, resetStore, language]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language]);
 
   useEffect(() => {
      if (!isInitializing && !initError && timeLeft === 0 && !isSubmittingFinal && questions.length > 0) {
@@ -457,4 +446,3 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     </div>
   );
 }
-

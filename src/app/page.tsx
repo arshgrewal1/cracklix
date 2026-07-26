@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -22,7 +23,7 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v507.0 [UI Standardized].
+ * @fileOverview Institutional Premium Hub v508.0 [Terminology Updated].
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -49,7 +50,7 @@ export default function HomePage() {
         <ContinueLearning />
       )}
 
-      {/* TODAY'S CHALLENGE HUB - STANDARDIZED */}
+      {/* Today's Challenge Hub */}
       <section className="py-12 md:py-24 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
@@ -90,7 +91,7 @@ export default function HomePage() {
                     <div className="space-y-10 mt-10">
                       <div className="flex flex-row flex-wrap items-center justify-center gap-4">
                          <ChallengeChip icon={<Clock className="h-3.5 w-3.5" />} label={`${activeQuiz.duration} min`} />
-                         <ChallengeChip icon={<ShieldCheck className="h-3.5 w-3.5" />} label={`${activeQuiz.totalQuestions} questions`} />
+                         <ChallengeChip icon={<ShieldCheck className="h-3.5 w-3.5" />} label={`${activeQuiz.totalQuestions} Questions`} />
                          <ChallengeChip icon={<Trophy className="h-3.5 w-3.5" />} label={`${activeQuiz.rewardXP} XP`} />
                       </div>
 

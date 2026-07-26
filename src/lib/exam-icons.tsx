@@ -1,11 +1,13 @@
+
 import React from "react"
 import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Activity, Cpu, Building2, Globe, Settings, FileText, FileStack } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v33.0 (Maximization Overhaul).
- * FIXED: Removed all internal padding and radius overrides to allow edge-to-edge icon fill.
+ * @fileOverview Institutional Branding Engine v38.0 (Global Focal Overhaul).
+ * FIXED: Removed internal padding to allow icons to fill the container (Zoom Effect).
+ * UPDATED: Standardized XL size for Report focal nodes.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -14,14 +16,14 @@ const CANONICAL_BOARD_LOGOS: Record<string, string> = {
   'punjab-police': '/logos/boards/punjab-police.png',
   'teaching-hub': '/logos/boards/education-board.png',
   'pscl': '/logos/boards/pscb.png',
-  'pspcl': '/logos/boards/pspcl.png',
+  'pspcl': '/logos/boards/pscl.png',
   'pstcl': '/logos/boards/pstcl.png',
   'bfuhs': '/logos/boards/bfuhs.png',
   'banking-hub': '/logos/boards/pscb.png',
   'judiciary-hub': '/logos/boards/high-court.png',
   'ssc': '/logos/boards/ssc.png',
   'rrb': '/logos/boards/rrb.png',
-  'ibps': '/logos/boards/ibps.png',
+  'idps': '/logos/boards/ibps.png',
   'defense': '/logos/boards/upsc.png',
   'pstet': '/logos/boards/pstet.png',
   'ctet': '/logos/boards/ctet.png',
@@ -34,7 +36,7 @@ const CANONICAL_BOARD_LOGOS: Record<string, string> = {
 const CANONICAL_CAT_LOGOS: Record<string, string> = {
   'punjab-government-exams': '/logos/categories/punjab-government-exams.png',
   'punjab-teaching-exams': '/logos/categories/punjab-teaching-exams.png',
-  'punjab-technical-exams': '/logos/punjab-technical-exams.png',
+  'punjab-technical-exams': '/logos/categories/punjab-government-exams.png',
   'banking-exams': '/logos/categories/banking-exams.png',
   'judiciary-exams': '/logos/categories/judiciary-exams.png',
   'central-government-exams': '/logos/categories/punjab-government-exams.png'
@@ -64,19 +66,18 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     category?.logoUrl;
   
   const sizeClasses = {
-    sm: "h-12 w-12 md:h-14 md:w-14",
-    md: "h-16 w-16 md:h-24 md:w-24",
-    lg: "h-24 w-24 md:h-32 md:w-32",
-    xl: "h-32 w-32 md:h-48 md:w-48"
+    sm: "h-11 w-11 md:h-12 md:w-12",
+    md: "h-14 w-14 md:h-20 md:w-20",
+    lg: "h-20 w-20 md:h-28 md:w-28",
+    xl: "h-40 w-40 md:h-48 md:w-48"
   };
 
   const containerSize = sizeClasses[size];
-  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10');
 
   if (logoUrl) {
     return (
       <div className={cn(
-        "relative shrink-0 overflow-hidden transition-all bg-white rounded-full border border-slate-100 shadow-xl",
+        "relative shrink-0 overflow-hidden transition-all bg-white rounded-2xl border border-slate-100 shadow-xl",
         containerSize, 
         className
       )}>
@@ -85,7 +86,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           alt="Authority" 
           fill
           sizes="256px"
-          className="object-cover"
+          className="object-contain p-0"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -107,11 +108,11 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "flex items-center justify-center transition-all bg-white rounded-full border border-slate-100 shadow-xl",
+      "flex items-center justify-center transition-all bg-white rounded-2xl border border-slate-100 shadow-xl",
       containerSize, 
       className
     )}>
-      <div className="h-full w-full p-2">
+      <div className="h-full w-full p-0">
         {getFallbackIcon()}
       </div>
     </div>

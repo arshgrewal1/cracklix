@@ -48,8 +48,7 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Result Card v8.1 [Premium Branding].
- * UPDATED: Increased logo container for maximum visual focus and scannability.
+ * @fileOverview Official Institutional Result Card v8.2 [Focal Logo Zoom].
  */
 export default function ResultCard({
   studentName,
@@ -80,10 +79,10 @@ export default function ResultCard({
       <div className="h-3 w-full bg-primary" />
       
       <div className="p-16 space-y-12">
-        {/* Institutional Header - Large Focal Logo [RESIZED] */}
+        {/* Institutional Header - Large Focal Logo (ZOOMED) */}
         <div className="flex justify-between items-start border-b border-slate-100 pb-12">
           <div className="flex items-center gap-10">
-            <div className="h-40 w-40 bg-white rounded-[2.5rem] flex items-center justify-center p-1 border border-slate-100 shadow-2xl overflow-hidden shrink-0">
+            <div className="h-44 w-44 bg-white rounded-[2.5rem] flex items-center justify-center p-0 border border-slate-100 shadow-2xl overflow-hidden shrink-0">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
               ) : (
@@ -105,8 +104,8 @@ export default function ResultCard({
         <div className="grid grid-cols-12 gap-10 items-center">
            <div className="col-span-8 space-y-6">
               <div className="space-y-1">
-                 <h1 className="text-5xl font-black text-[#0F172A] tracking-tighter uppercase leading-none">{studentName}</h1>
-                 <p className="text-primary font-black text-sm uppercase tracking-[0.3em]">{examTitle}</p>
+                 <h1 className="text-5xl font-black text-[#0F172A] tracking-tighter leading-none">{studentName}</h1>
+                 <p className="text-primary font-bold text-base uppercase tracking-widest">{examTitle}</p>
               </div>
               <div className="flex items-center gap-6">
                  <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
@@ -189,7 +188,7 @@ export default function ResultCard({
             <div className="flex items-center gap-4">
               <ShieldCheck className="h-10 w-10 text-emerald-500" />
               <div className="text-left">
-                 <p className="text-lg font-black text-[#0F172A] uppercase tracking-tight">Institutional Accuracy Verified</p>
+                 <p className="text-lg font-black text-[#0F172A] tracking-tight">Institutional Accuracy Verified</p>
                  <p className="text-[11px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Registry ID: {resultId}</p>
               </div>
             </div>

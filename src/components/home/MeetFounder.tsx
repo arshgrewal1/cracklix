@@ -11,8 +11,7 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Refined Meet Founder Section v7.4.
- * UPDATED: Conditional visibility for founder image.
+ * @fileOverview Refined Meet Founder Section v7.5 [Uppercase Removed].
  */
 export default function MeetFounder() {
   const db = useFirestore();
@@ -28,13 +27,11 @@ export default function MeetFounder() {
 
   return (
     <section className="py-12 md:py-24 bg-slate-50/50 border-y border-slate-100 relative overflow-hidden">
-      {/* Decorative Glow */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="container mx-auto px-4 md:px-8 max-w-6xl relative z-10">
         <div className="flex flex-col-reverse lg:flex-row items-center gap-12 md:gap-20">
           
-          {/* Narrative Content - Positioned Above on Mobile */}
           <div className="flex-1 space-y-8 text-center lg:text-left">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -77,7 +74,6 @@ export default function MeetFounder() {
             </div>
           </div>
 
-          {/* Founder Visual Hub */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -90,7 +86,7 @@ export default function MeetFounder() {
                   src="/founder.png"
                   alt={founder.name}
                   fill
-                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+                  className="object-cover grayscale hover:grayscale-0 transition-all duration-1000 group-hover:scale-110"
                   priority
                 />
               ) : (
@@ -99,7 +95,7 @@ export default function MeetFounder() {
                     <ShieldCheck className="h-10 w-10 text-primary animate-pulse" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[11px] font-black text-primary uppercase tracking-[0.2em]">Security Protocol</p>
+                    <p className="text-[11px] font-black text-primary">Security Protocol</p>
                     <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none">Photo hidden by admin</p>
                   </div>
                 </div>

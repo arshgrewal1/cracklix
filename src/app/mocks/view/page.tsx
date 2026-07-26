@@ -1,12 +1,42 @@
+
 "use client"
 
-import React, { Suspense } from "react"
-import MockOverviewClient from "@/components/mocks/MockOverviewClient"
-import { Loader2 } from "lucide-react"
+import React, { Suspense, useMemo, useEffect, useState } from "react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import Navbar from "@/components/layout/Navbar"
+import Footer from "@/components/layout/Footer"
+import { useDoc, useFirestore, useUser } from "@/firebase"
+import { doc, getDoc } from "firebase/firestore"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { 
+  Clock, 
+  BookOpen, 
+  ShieldCheck, 
+  ChevronRight, 
+  ChevronLeft,
+  Lock,
+  Zap,
+  Play,
+  Target,
+  RefreshCw,
+  Gem,
+  CheckCircle2,
+  ArrowRight,
+  AlertCircle,
+  BarChart3,
+  Home
+} from "lucide-react"
+import Link from "next/link"
+import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
+import { AuthorityLogo } from "@/lib/exam-icons"
+
+const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub.
- * FIXED: Added Suspense boundary for static export compatibility.
+ * @fileOverview Universal Mock Overview Hub Client v4.5 [Terminology Updated].
  */
 
 export default function MockViewPage() {
@@ -15,4 +45,182 @@ export default function MockViewPage() {
       <MockOverviewClient />
     </Suspense>
   )
+}
+
+function MockOverviewClient() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const db = useFirestore()
+  const { user, profile, loading: userLoading } = useUser()
+  
+  const [isLocked, setIsLocked] = useState(false);
+  const [accessChecked, setAccessChecked] = useState(false);
+  const [activeAttempt, setActiveAttempt] = useState<any>(null);
+
+  const mockId = useMemo(() => {
+    const queryId = searchParams.get('id');
+    if (queryId) return queryId;
+    const pathSegments = pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    return lastSegment !== 'view' ? lastSegment : null;
+  }, [pathname, searchParams]);
+
+  const { data: mock, loading: mockLoading } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
+
+  useEffect(() => {
+    async function checkAccess() {
+      if (mockLoading || !user || !mock || !db || !profile || !mockId) return;
+
+      const tier = (mock.accessLevel || 'FREE').toUpperCase();
+      const isPremium = tier === 'PREMIUM';
+      
+      try {
+        const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
+        if (attemptSnap.exists()) {
+           setActiveAttempt(attemptSnap.data());
+        }
+      } catch (e) {}
+
+      const userEmail = user?.email?.toLowerCase();
+      const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
+      const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
+      
+      let hasActivePass = false;
+      if (isAdmin) {
+         hasActivePass = true;
+      } else if (profile?.passExpiresAt) {
+         const expiry = new Date(profile.passExpiresAt);
+         if (expiry > new Date() && profile.pass?.active !== false) {
+           hasActivePass = true;
+         }
+      }
+      
+      setIsLocked(isPremium && !hasActivePass);
+      setAccessChecked(true);
+    }
+    checkAccess();
+  }, [mock, mockLoading, user, profile, db, mockId]);
+
+  if (mockLoading || userLoading || (user && mockId && !accessChecked)) return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
+       <Zap className="h-12 w-12 text-primary animate-pulse" />
+       <p className="text-[10px] font-bold text-slate-300 tracking-tight">Synchronizing hub...</p>
+    </div>
+  );
+
+  if (!mockId || (!mock && !mockLoading)) return (
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center font-body">
+      <div className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-16 shadow-5xl border border-slate-100 space-y-10">
+        <div className="relative mx-auto w-24 h-24">
+           <div className="h-24 w-24 bg-blue-50 rounded-[2rem] flex items-center justify-center text-primary shadow-inner border border-blue-100">
+              <Zap className="h-10 w-10 animate-pulse" />
+           </div>
+           <div className="absolute -bottom-2 -right-2 h-10 w-10 bg-[#0F172A] rounded-xl flex items-center justify-center text-white shadow-2xl border-4 border-white">
+              <AlertCircle className="h-5 w-5 text-primary" />
+           </div>
+        </div>
+
+        <div className="space-y-3">
+          <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">Coming Soon</h1>
+          <p className="text-slate-500 font-medium leading-relaxed pt-4">
+            This preparation hub is currently being updated. Please check back later.
+          </p>
+        </div>
+
+        <div className="pt-4">
+           <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-bold text-sm shadow-3xl border-none transition-all active:scale-95">
+              <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to hub</Link>
+           </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const isFinished = activeAttempt?.status === 'COMPLETED';
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col font-body">
+      <Navbar />
+      <main className="flex-1 text-left pb-20">
+        <section className="bg-slate-50 border-b border-slate-100 pt-6 pb-10 min-h-[420px] md:min-h-[480px] flex items-center">
+          <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+            <div className="flex flex-col items-start gap-4 md:gap-6">
+              
+              <Badge className={cn(
+                "border-none text-[10px] font-bold px-2.5 py-0.5 rounded-lg tracking-widest shadow-sm h-7 flex items-center", 
+                mock.accessLevel === 'PREMIUM' ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
+              )}>
+                {mock.accessLevel === 'PREMIUM' ? '🔒 Elite' : 'Free Hub'}
+              </Badge>
+
+              <div className="space-y-4 md:space-y-6 w-full">
+                <h1 className="text-[32px] md:text-[44px] lg:text-[56px] font-[800] text-[#0F172A] leading-[1.05] tracking-tight lg:max-w-[60%] break-words antialiased">
+                  {mock.title}
+                </h1>
+
+                <div className="flex flex-wrap items-center gap-6 text-[#64748B] text-base font-bold tracking-widest">
+                    <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /> {mock.duration}m Time</span>
+                    <span className="text-slate-300">|</span>
+                    <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Questions</span>
+                    <span className="text-slate-300">|</span>
+                    <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> {mock.totalQuestions * (mock.positiveMarks || 1)} Marks</span>
+                </div>
+
+                <div className="pt-2 md:pt-4 flex flex-col sm:flex-row gap-4">
+                  <Button asChild className="h-14 w-full sm:w-60 bg-[#0F172A] hover:bg-black text-white font-bold rounded-[16px] shadow-3xl transition-all active:scale-95 border-none">
+                    <Link href={isFinished ? `/results/view?id=${mock.id}` : `/mocks/instructions?id=${mock.id}`} className="flex items-center justify-center gap-3">
+                      {isFinished ? (
+                         <><BarChart3 className="h-4 w-4 text-primary" /> View Analysis</>
+                      ) : activeAttempt?.status === 'IN_PROGRESS' ? (
+                         <><RefreshCw className="h-4 w-4 animate-spin" /> Resume Prep</>
+                      ) : (
+                         <><Play className="h-4 w-4 fill-current text-primary" /> Start Test</>
+                      )}
+                    </Link>
+                  </Button>
+                  
+                  {isFinished && (
+                    <Button asChild variant="outline" className="h-14 w-full sm:w-48 border-2 border-slate-100 rounded-[16px] text-[#0F172A] font-bold text-sm hover:bg-slate-50 transition-all">
+                       <Link href={`/mocks/instructions?id=${mock.id}`}>Retake Test</Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 md:py-24 bg-white">
+           <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                 <FeatureNode icon={ShieldCheck} title="Official Pattern" desc="Curated according to latest board notifications." />
+                 <FeatureNode icon={Zap} title="Expert Solutions" desc="Detailed explanations for every question." />
+                 <FeatureNode icon={Target} title="State Rankings" desc="Compare performance with toppers across Punjab." />
+              </div>
+           </div>
+        </section>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+function FeatureNode({ icon: Icon, title, desc }: any) {
+  return (
+    <div className="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 space-y-6 text-left group hover:bg-white hover:shadow-4xl transition-all duration-500">
+      <div className="h-14 w-14 bg-white rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+        <Icon className="h-6 w-6 text-primary" />
+      </div>
+      <div className="space-y-1">
+         <h3 className="text-xl font-bold text-[#0F172A] leading-tight">{title}</h3>
+         <p className="text-slate-400 font-bold text-[10px] tracking-widest leading-relaxed uppercase">{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+function Loader2({ className }: any) {
+  return <Loader2 className={cn("animate-spin", className)} />;
 }

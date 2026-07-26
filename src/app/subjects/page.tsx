@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -41,8 +42,7 @@ import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
- * @fileOverview Premium Subject Selection Hub v8.1.
- * UPDATED: Recalculated sticky offset to top-[84px] md:top-[116px] for reduced header height.
+ * @fileOverview Premium Subject Selection Hub v8.2 [Terminology Updated].
  */
 
 export default function SubjectsPage() {
@@ -93,7 +93,6 @@ export default function SubjectsPage() {
         ? Math.round((attemptCount / subjectMocks.length) * 100) 
         : 0
 
-      // Identify if everything in this hub is premium
       const hasPremium = subjectMocks.some(m => m.accessLevel === 'PREMIUM');
 
       return {
@@ -108,13 +107,11 @@ export default function SubjectsPage() {
       }
     })
 
-    // Filter & Search
     let filtered = base.filter(s => 
       s.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (boardFilter === 'all' || s.boardId === boardFilter)
     )
 
-    // Sort
     if (sortBy === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name))
     if (sortBy === 'popular') filtered.sort((a, b) => b.attemptCount - a.attemptCount)
     if (sortBy === 'progress') filtered.sort((a, b) => b.progress - a.progress)
@@ -141,7 +138,6 @@ export default function SubjectsPage() {
            </p>
         </header>
 
-        {/* PREMIUM TOOLBAR */}
         <div className="bg-white border border-slate-100 rounded-2xl md:rounded-[1.5rem] p-2 md:p-3 shadow-sm sticky top-[84px] md:top-[116px] z-[45] flex flex-col md:flex-row items-center gap-3">
            <div className="relative group flex-1 w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-primary transition-colors" />
@@ -181,7 +177,6 @@ export default function SubjectsPage() {
            </div>
         </div>
 
-        {/* COMPACT ENTERPRISE GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
            <AnimatePresence mode="popLayout">
               {sLoading ? (
@@ -203,15 +198,8 @@ export default function SubjectsPage() {
                              
                              <CardContent className="p-5 md:p-7 flex flex-col h-full space-y-4">
                                 
-                                {/* TOP ROW: Logo & Badges */}
                                 <div className="flex items-center justify-between gap-4">
-                                   <div className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-blue-50/80 flex items-center justify-center shadow-inner relative overflow-hidden group-hover:scale-105 transition-transform shrink-0 border border-blue-100/50">
-                                      {s.imageUrl ? (
-                                         <Image src={s.imageUrl} alt={s.name} fill className="object-cover" />
-                                      ) : (
-                                         <BookMarked className="h-6 w-6 text-primary/60" />
-                                      )}
-                                   </div>
+                                   <AuthorityLogo boardId={s.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-14 md:w-14" />
                                    <div className="flex items-center gap-2">
                                       {s.hasPremium && (
                                          <Badge className="bg-amber-50 text-amber-600 border-none text-[8px] font-black uppercase tracking-widest px-2 shadow-sm h-6">
@@ -222,18 +210,15 @@ export default function SubjectsPage() {
                                    </div>
                                 </div>
 
-                                {/* SECOND ROW: Title */}
                                 <div className="space-y-1">
                                    <h3 className="text-lg md:text-xl font-[800] text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 min-h-[2.4em]">
                                       {s.name}
                                    </h3>
-                                   {/* THIRD ROW: Description */}
                                    <p className="text-[11px] md:text-xs text-slate-400 font-medium leading-relaxed line-clamp-2 h-[3em]">
                                       {s.description || "Master the latest official patterns through verified mock test series."}
                                    </p>
                                 </div>
 
-                                {/* FOURTH ROW: Statistics Grid */}
                                 {(s.testCount > 0 || s.mockCount > 0 || s.pyqCount > 0) ? (
                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pt-3 border-t border-slate-50">
                                       <MetricPlate label="Subject tests" val={s.testCount} icon={<BookOpen className="h-3 w-3" />} />
@@ -247,7 +232,6 @@ export default function SubjectsPage() {
                                    </div>
                                 )}
 
-                                {/* FIFTH ROW: Progress Hub */}
                                 {user && (s.testCount > 0 || s.mockCount > 0) && (
                                    <div className="space-y-2 pt-2">
                                       <div className="flex justify-between items-center text-[8px] font-black uppercase text-slate-400 tracking-widest">
@@ -265,7 +249,6 @@ export default function SubjectsPage() {
                                    </div>
                                 )}
 
-                                {/* BOTTOM ACTION */}
                                 <div className="pt-4 mt-auto">
                                    <Button className="w-full h-[48px] md:h-[52px] rounded-xl bg-gradient-to-r from-[#0F172A] to-[#1E293B] group-hover:from-primary group-hover:to-blue-500 text-white font-bold uppercase text-[10px] tracking-widest shadow-lg transition-all active:scale-95 border-none flex items-center justify-center gap-2">
                                       {s.progress > 0 ? 'Continue learning' : 'Explore subject'}
