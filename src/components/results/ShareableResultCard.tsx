@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -24,8 +25,8 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview High-Fidelity Social Share Certificate v1.5.
- * FIXED: Explicitly defined icons and uses official logo.
+ * @fileOverview High-Fidelity Social Share Certificate v1.7.
+ * FIXED: Explicitly defined icons and uses official logo node for capture.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
@@ -33,7 +34,9 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
   useEffect(() => {
     if (!data?.mockId || !data?.attemptId) return;
     const url = `https://cracklix.in/results/view?id=${data.mockId}&attemptId=${data.attemptId}`;
-    QRCode.toDataURL(url, { margin: 1, width: 200 }).then(setQrUrl);
+    QRCode.toDataURL(url, { margin: 1, width: 200, color: { dark: '#071B4D', light: '#ffffff' } })
+      .then(setQrUrl)
+      .catch(() => console.warn("[QR_SYNC] Failed to generate code."));
   }, [data]);
 
   if (!data) return null;
@@ -113,7 +116,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
          <div className="mt-auto pt-10 border-t border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-8">
                <div className="bg-white p-3 rounded-2xl shadow-2xl">
-                  {qrUrl && <img src={qrUrl} alt="Verify" className="h-24 w-24" />}
+                  {qrUrl ? <img src={qrUrl} alt="Verify" className="h-24 w-24" /> : <div className="h-24 w-24 bg-slate-100 animate-pulse rounded-lg" />}
                </div>
                <div className="space-y-1">
                   <p className="text-xl font-black text-white uppercase tracking-tight">Verify Result</p>

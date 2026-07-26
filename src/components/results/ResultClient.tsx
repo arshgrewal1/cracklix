@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
@@ -47,9 +48,9 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v30.0.
- * FIXED: Background generation loop using useRef guard.
- * FIXED: Standardized Sentence Case for all UI labels.
+ * @fileOverview Universal Result Hub Viewer v32.0.
+ * FIXED: Implemented 15s timeout for background generation to prevent infinite loading.
+ * FIXED: Added extensive debug logging for image generation flow.
  */
 
 export default function ResultClient() {
@@ -188,17 +189,36 @@ export default function ResultClient() {
     
     generationAttempted.current = true;
     setIsGenerating(true);
+    console.log("[SHARE_DEBUG] STEP 1: Initialization started");
     
-    // Safety delay for final style settling
-    await new Promise(r => setTimeout(r, 2500));
-    
+    const timeoutId = setTimeout(() => {
+       if (!preGeneratedImage) {
+          console.error("[SHARE_DEBUG] ERROR: Generation timed out after 15s");
+          setIsGenerating(false);
+          generationAttempted.current = false; // Allow retry
+       }
+    }, 15000);
+
     try {
+      // Small delay to ensure all DOM styles and local images (logo) are rendered
+      await new Promise(r => setTimeout(r, 2000));
+      
       const node = document.getElementById('shareable-result-certificate');
       if (!node) {
-         generationAttempted.current = false;
-         setIsGenerating(false);
-         return;
+         throw new Error("Target node 'shareable-result-certificate' not found in DOM");
       }
+      console.log("[SHARE_DEBUG] STEP 2: Target node found");
+
+      // Verify images are loaded
+      const images = Array.from(node.getElementsByTagName('img'));
+      await Promise.all(images.map(img => {
+         if (img.complete) return Promise.resolve();
+         return new Promise((res) => {
+            img.onload = res;
+            img.onerror = res;
+         });
+      }));
+      console.log("[SHARE_DEBUG] STEP 3: Images verified/loaded");
 
       const dataUrl = await toPng(node, {
          quality: 0.95,
@@ -208,10 +228,13 @@ export default function ResultClient() {
          cacheBust: true,
       });
 
+      console.log("[SHARE_DEBUG] STEP 4: PNG generated successfully");
       setPreGeneratedImage(dataUrl);
-    } catch (e) {
-      console.warn("[Registry] Image generation failed:", e);
+      clearTimeout(timeoutId);
+    } catch (e: any) {
+      console.error("[SHARE_DEBUG] FATAL ERROR:", e);
       generationAttempted.current = false;
+      clearTimeout(timeoutId);
     } finally {
       setIsGenerating(false);
     }
@@ -226,16 +249,14 @@ export default function ResultClient() {
   const handleShareResult = async () => {
     if (!sessionData) return;
     
-    let imageToShare = preGeneratedImage;
-    
-    if (!imageToShare) {
-       toast({ title: "Syncing card", description: "Almost ready. Try again in 2 seconds." });
+    if (!preGeneratedImage) {
+       toast({ title: "Syncing card", description: "Almost ready. Please wait 5 seconds." });
        if (!isGenerating) prepareShareCard();
        return;
     }
 
     try {
-      const blob = await (await fetch(imageToShare)).blob();
+      const blob = await (await fetch(preGeneratedImage)).blob();
       const file = new File([blob], `Cracklix_Result.png`, { type: 'image/png' });
 
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -252,12 +273,12 @@ export default function ResultClient() {
       } else {
          const link = document.createElement('a');
          link.download = `Cracklix_Result_${Date.now()}.png`;
-         link.href = imageToShare;
+         link.href = preGeneratedImage;
          link.click();
       }
     } catch (e: any) { 
        if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Transmission Error" }); 
+          toast({ variant: "destructive", title: "Transmission error" }); 
        }
     }
   };
@@ -308,7 +329,7 @@ export default function ResultClient() {
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
                     <Button onClick={handleShareResult} disabled={isGenerating && !preGeneratedImage} className="flex-1 lg:flex-none h-12 px-8 bg-gradient-to-r from-[#2563EB] to-[#4F46E5] text-white hover:brightness-110 font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
                        {isGenerating && !preGeneratedImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
-                       {preGeneratedImage ? "Direct share card" : "Preparing card..."}
+                       {preGeneratedImage ? "Direct share card" : isGenerating ? "Preparing card..." : "Generate share card"}
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake test</Link>
