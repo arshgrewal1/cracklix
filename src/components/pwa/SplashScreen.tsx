@@ -7,8 +7,9 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v11.0 [FIXED VERTICAL CENTER].
- * FIXED: Removed top-biasing and justify-start to achieve absolute vertical centering.
+ * @fileOverview Premium PWA Splash Hub v12.0 [RE-CENTERED].
+ * FIXED: Absolute vertical centering using justify-center and removing top padding.
+ * FIXED: Branding block pulled tight to icon with minimized spacing.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -82,7 +83,7 @@ export default function SplashScreen() {
                    />
                    <div 
                      className="relative"
-                     style={{ width: 'clamp(280px, 40vw, 450px)', height: 'auto', aspectRatio: '1/1' }}
+                     style={{ width: 'clamp(280px, 45vw, 500px)', height: 'auto', aspectRatio: '1/1' }}
                    >
                       <Image 
                         src="/logo/cracklix-icon.png" 
@@ -99,7 +100,7 @@ export default function SplashScreen() {
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 1, delay: 0.5 }}
-               className="text-center space-y-2 w-full -mt-16 md:-mt-24"
+               className="text-center space-y-2 w-full -mt-20 md:-mt-32"
              >
                 <div className="space-y-1">
                    <h1 className="text-[52px] md:text-[80px] font-[900] tracking-tighter text-white leading-none antialiased">

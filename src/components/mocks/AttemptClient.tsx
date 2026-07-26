@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useUser, useAuth } from "@/firebase";
+import { useUser, useAuth, useFirestore } from "@/firebase";
 import { 
   doc, 
   getDoc, 
@@ -42,7 +42,7 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Node v49.0 [Modal Persistence Fixed].
+ * @fileOverview Institutional Attempt Node v50.0 [ReferenceError FIXED].
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -189,7 +189,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
     
-    // UI Restoration Hub: Close modal immediately to prevent reappearance
     setShowSubmitModal(false);
     setIsSubmittingFinal(true);
     
@@ -329,7 +328,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }));
     }
 
-    // Clean up local attempt session
     if (typeof window !== 'undefined') {
        localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
     }
