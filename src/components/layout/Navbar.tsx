@@ -36,8 +36,8 @@ import { canAccessAdmin } from "@/lib/permissions";
 import AnnouncementBar from "./AnnouncementBar";
 
 /**
- * @fileOverview Standard In-Flow Navigation Hub v156.0.
- * FIXED: Corrected Link tag mismatch and added missing isSidebarOpen state.
+ * @fileOverview Standard In-Flow Navigation Hub v157.0.
+ * UPDATED: Integrated adaptive dark mode shell and border consistency.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -98,13 +98,13 @@ export default function Navbar() {
   }, [user, profile]);
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-[84px] md:h-[116px]" />;
+    return <nav className="w-full border-b border-slate-100 dark:border-slate-800 bg-background h-[84px] md:h-[116px]" />;
   }
 
   return (
     <div className="relative flex flex-col w-full">
       <AnnouncementBar />
-      <header className="w-full bg-white border-b border-slate-100 shadow-sm relative">
+      <header className="w-full bg-background border-b border-slate-100 dark:border-slate-800 shadow-sm relative z-[1000]">
         <nav className="w-full h-[84px] md:h-[116px] transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
@@ -113,12 +113,12 @@ export default function Navbar() {
                 <SheetTrigger asChild>
                   <button
                     aria-label="Open menu"
-                    className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 cursor-pointer"
+                    className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-lg border border-slate-200 dark:border-slate-700 bg-card text-foreground shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 cursor-pointer"
                   >
                     <Menu className="w-6 h-6 md:w-7 md:h-7" />
                   </button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
+                <SheetContent side="left" className="w-[300px] p-0 border-none bg-background z-[2001] shadow-2xl [&>button]:hidden">
                   <SheetHeader className="sr-only">
                     <SheetTitle>Menu</SheetTitle>
                     <SheetDescription>Navigation Menu</SheetDescription>
@@ -129,7 +129,7 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 p-0 h-full"
+                className="flex-shrink-0 p-0 h-full dark:invert"
                 imgClassName="h-20 md:h-28 w-auto"
                 align="left"
               />
@@ -146,24 +146,24 @@ export default function Navbar() {
             <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10 shrink-0">
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden lg:flex flex-col items-end shrink-0">
-                    <span className="text-[9px] font-bold text-emerald-600 leading-none">Elite Access</span>
-                    <span className="text-[11px] font-medium text-slate-400 mt-1.5 leading-none tabular-nums">{timeLeft}</span>
+                    <span className="text-[9px] font-black text-emerald-600 leading-none uppercase tracking-widest">Elite Access</span>
+                    <span className="text-[11px] font-bold text-muted-foreground mt-1.5 leading-none tabular-nums">{timeLeft}</span>
                  </div>
               )}
 
               <Link
                 href="/search"
-                className="w-10 h-10 md:w-12 rounded-lg flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm shrink-0"
+                className="w-10 h-10 md:w-12 rounded-lg flex items-center justify-center bg-muted dark:bg-slate-900 text-foreground hover:text-primary transition-all active:scale-95 shadow-sm shrink-0"
               >
                 <Search className="w-6 h-6" />
               </Link>
 
               {loading ? (
-                <Skeleton className="w-10 h-10 md:w-12 rounded-lg bg-slate-100 shrink-0" />
+                <Skeleton className="w-10 h-10 md:w-12 rounded-lg bg-muted shrink-0" />
               ) : user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="w-10 h-10 md:w-12 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all shadow-sm shrink-0">
+                    <button className="w-10 h-10 md:w-12 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800 bg-muted flex items-center justify-center active:scale-95 transition-all shadow-sm shrink-0">
                       <StudentAvatar
                         profile={profile}
                         className="w-full h-full border-none"
@@ -175,28 +175,28 @@ export default function Navbar() {
                   <DropdownMenuContent
                     align="end"
                     sideOffset={12}
-                    className="w-[280px] rounded-[24px] p-4 bg-white border border-[#EEF2F7] shadow-xl z-[2001]"
+                    className="w-[280px] rounded-[24px] p-4 bg-card border border-border shadow-xl z-[2001]"
                   >
                     <div className="flex flex-col items-center text-center space-y-6">
                       <div className="flex flex-col items-center gap-4">
-                         <div className="h-14 w-14 rounded-2xl bg-[#EEF4FF] flex items-center justify-center text-[#2563EB] shadow-sm relative overflow-hidden">
+                         <div className="h-14 w-14 rounded-2xl bg-muted flex items-center justify-center text-primary shadow-sm relative overflow-hidden">
                             <StudentAvatar profile={profile} className="w-full h-full" iconClassName="h-8 w-8" />
                          </div>
                          <div className="space-y-0.5">
-                           <h3 className="text-base font-bold text-[#0F172A] truncate max-w-[240px]">
+                           <h3 className="text-base font-bold text-foreground truncate max-w-[240px]">
                              {profile?.name || "Aspirant"}
                            </h3>
-                           <Link href="/profile" className="text-[11px] font-medium text-[#94A3B8] hover:text-primary">My Profile</Link>
+                           <Link href="/profile" className="text-[11px] font-medium text-muted-foreground hover:text-primary">My Profile</Link>
                          </div>
                       </div>
-                      <div className="h-px w-full bg-slate-100" />
+                      <div className="h-px w-full bg-border" />
                       <div className="w-full space-y-1 text-left">
                          <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My Progress" />
                          <ProfileMenuItem href="/pass" icon={Gem} label="Elite Pass Hub" />
                          {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Console" />}
                          <ProfileMenuItem href="/profile" icon={Settings} label="Portal Settings" />
                       </div>
-                      <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
+                      <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-500 font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -216,7 +216,7 @@ export default function Navbar() {
     return (
       <Link href={href} className={cn(
         "text-[14px] xl:text-[15px] font-bold transition-all whitespace-nowrap border-b-2 py-1", 
-        active ? "text-primary border-primary" : "text-slate-400 border-transparent hover:text-primary hover:border-primary/20"
+        active ? "text-primary border-primary" : "text-muted-foreground border-transparent hover:text-primary hover:border-primary/20"
       )}>
         {label}
       </Link>
@@ -225,8 +225,8 @@ export default function Navbar() {
 
   function ProfileMenuItem({ href, icon: Icon, label }: { href: string, icon: any, label: string }) {
     return (
-      <Link href={href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-[13px] font-semibold text-slate-600 hover:bg-slate-50">
-         <Icon className="h-4 w-4 shrink-0 text-slate-400" />
+      <Link href={href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-[13px] font-semibold text-foreground/80 hover:bg-muted">
+         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
          <span className="truncate">{label}</span>
       </Link>
     );

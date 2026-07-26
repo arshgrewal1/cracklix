@@ -23,8 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Standardized Popular Exams Hub v56.0.
- * UPDATED: Limited to 3 cards as per institutional layout request.
+ * @fileOverview Standardized Popular Exams Hub v57.0.
+ * UPDATED: Integrated adaptive dark mode support.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -99,18 +99,18 @@ export default function PopularExams() {
   };
 
   return (
-    <section className="py-12 md:py-20 bg-white">
+    <section className="py-12 md:py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-10">
         
         {/* Standardized Header */}
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-4">
-             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500 shadow-inner shrink-0">
+             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center text-rose-500 shadow-inner shrink-0">
                <TrendingUp className="h-5 w-5 md:h-6 md:w-6" />
              </div>
              <div className="text-left">
-                <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Trending hubs</h2>
-                <p className="text-[11px] md:text-sm font-medium text-slate-500">Popular recruitment verticals.</p>
+                <h2 className="text-xl md:text-3xl font-black text-foreground tracking-tight">Trending hubs</h2>
+                <p className="text-[11px] md:text-sm font-medium text-muted-foreground">Popular recruitment verticals.</p>
              </div>
           </div>
           <Link href="/exams" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline group">
@@ -121,7 +121,7 @@ export default function PopularExams() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
            {loading ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-64 w-full rounded-[2.5rem] bg-slate-50" />
+                <Skeleton key={i} className="h-64 w-full rounded-[2rem] bg-muted border border-border" />
               ))
            ) : exams?.map((exam: any, idx: number) => {
               const board = boards?.find((b: any) => b.id === exam.boardId || b.abbreviation === exam.boardId);
@@ -138,14 +138,14 @@ export default function PopularExams() {
                     className="flex flex-col h-full"
                  >
                     <Link href={`/exams/view?id=${exam.id}`} className="flex-1 flex flex-col h-full">
-                       <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-8 flex flex-col relative overflow-hidden group hover:-translate-y-2 flex-1">
+                       <Card className="border border-border shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2rem] bg-card p-6 md:p-8 flex flex-col relative overflow-hidden group hover:-translate-y-2 flex-1">
                           
                           <div className="flex justify-between items-start mb-8 w-full relative z-10">
                              <AuthorityLogo 
                                board={board} 
                                boardId={exam.boardId} 
                                size="sm" 
-                               className="h-12 w-12 md:h-16 md:w-16 shadow-xl border-4 border-white bg-slate-50" 
+                               className="h-12 w-12 md:h-16 md:w-16 shadow-xl border-4 border-border bg-muted" 
                              />
                              <button 
                                onClick={(e) => handleTogglePin(e, exam.id)}
@@ -154,7 +154,7 @@ export default function PopularExams() {
                                  "h-10 w-10 rounded-xl border flex items-center justify-center transition-all active:scale-90 shadow-sm",
                                  isPinned 
                                    ? "bg-primary border-primary text-white" 
-                                   : "bg-white border-slate-100 text-slate-300 hover:text-primary"
+                                   : "bg-muted border-border text-muted-foreground hover:text-primary"
                                )}
                              >
                                 {pinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : isPinned ? <CheckCircle2 className="h-4 w-4" /> : <Star className="h-4 w-4" />}
@@ -162,19 +162,19 @@ export default function PopularExams() {
                           </div>
 
                           <div className="space-y-4 flex-1 text-left relative z-10">
-                             <h3 className="text-lg md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                             <h3 className="text-lg md:text-xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">
                                 {exam.name}
                              </h3>
                              
-                             <div className="flex flex-wrap items-center gap-4 text-[9px] font-bold text-slate-400 tracking-tight">
+                             <div className="flex flex-wrap items-center gap-4 text-[9px] font-bold text-muted-foreground tracking-tight">
                                 <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-primary" /> {stats.mocks} Mocks</span>
                                 <span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Verified</span>
                              </div>
                           </div>
 
-                          <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between group-hover:text-primary relative z-10">
-                             <span className="text-[9px] font-bold text-slate-400 group-hover:text-primary transition-colors">Start prep</span>
-                             <ChevronRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1" />
+                          <div className="mt-8 pt-6 border-t border-border flex items-center justify-between group-hover:text-primary relative z-10">
+                             <span className="text-[9px] font-bold text-muted-foreground group-hover:text-primary transition-colors">Start prep</span>
+                             <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
                           </div>
                        </Card>
                     </Link>
@@ -183,7 +183,7 @@ export default function PopularExams() {
            })}
         </div>
 
-        <div className="flex items-center justify-center gap-4 text-slate-300 py-4 opacity-50">
+        <div className="flex items-center justify-center gap-4 text-muted-foreground py-4 opacity-50">
            <ShieldCheck className="h-5 w-5" />
            <span className="text-[10px] font-semibold tracking-tight">Institutional registry verified</span>
         </div>

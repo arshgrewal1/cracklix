@@ -12,7 +12,8 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Standardized Institutional Categories Hub v43.0 [Uppercase Removed].
+ * @fileOverview Standardized Institutional Categories Hub v44.0.
+ * UPDATED: Adaptive dark mode support for text and cards.
  */
 
 const TARGET_IDS = [
@@ -35,7 +36,7 @@ export default function FeaturedCategories() {
   }, [rawCategories]);
 
   return (
-    <section className="py-12 md:py-20 bg-slate-50/50 border-t border-slate-100">
+    <section className="py-12 md:py-20 bg-background border-t border-border">
       <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
         {/* Standardized Header */}
@@ -45,8 +46,8 @@ export default function FeaturedCategories() {
                <Layers className="h-5 w-5 md:h-6 md:w-6" />
              </div>
              <div className="text-left">
-                <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Quick categories</h2>
-                <p className="text-[11px] md:text-sm font-medium text-slate-500">Target your recruitment vertical hub.</p>
+                <h2 className="text-xl md:text-3xl font-black text-foreground tracking-tight">Quick categories</h2>
+                <p className="text-[11px] md:text-sm font-medium text-muted-foreground">Target your recruitment vertical hub.</p>
              </div>
           </div>
           <Link href="/exams" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline group">
@@ -56,7 +57,7 @@ export default function FeaturedCategories() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {loading ? (
-             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-[2rem] bg-white border border-slate-100" />)
+             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-[2rem] bg-muted border border-border" />)
           ) : categories.map((cat, idx) => (
              <motion.div 
                key={cat.id}
@@ -66,22 +67,22 @@ export default function FeaturedCategories() {
                transition={{ delay: idx * 0.05 }}
              >
                 <Link href={`/exams/category/${cat.id}`}>
-                  <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-10 flex flex-col group h-full relative overflow-hidden text-left">
+                  <Card className="border border-border shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2rem] bg-card p-6 md:p-10 flex flex-col group h-full relative overflow-hidden text-left">
                      <div className="flex justify-between items-start mb-8">
-                        <AuthorityLogo category={cat} size="md" />
-                        <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+                        <AuthorityLogo category={cat} size="md" className="dark:border-slate-800" />
+                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
                            <ChevronRight className="h-5 w-5" />
                         </div>
                      </div>
 
                      <div className="flex-1 space-y-4 text-left">
-                        <h3 className="text-lg md:text-2xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight">
+                        <h3 className="text-lg md:text-2xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
                            {cat.title}
                         </h3>
                         
                         <div className="flex flex-wrap gap-2">
-                           <MiniBadge icon={Zap} label="Tests" color="text-blue-600 bg-blue-50" />
-                           <MiniBadge icon={BookOpen} label="Notes" color="text-indigo-600 bg-indigo-50" />
+                           <MiniBadge icon={Zap} label="Tests" color="text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400" />
+                           <MiniBadge icon={BookOpen} label="Notes" color="text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400" />
                         </div>
                      </div>
                   </Card>

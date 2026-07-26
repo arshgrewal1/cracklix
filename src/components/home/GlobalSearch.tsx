@@ -11,8 +11,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 
 /**
- * @fileOverview Institutional Sticky Search Hub v16.1.
- * FIXED: Defined explicit height container to prevent layout shift during hydration.
+ * @fileOverview Institutional Sticky Search Hub v16.2.
+ * UPDATED: Hardened dark mode support for input and result containers.
  */
 
 const TRENDING = [
@@ -111,7 +111,7 @@ export default function GlobalSearch() {
 
   if (!isMounted) return (
     <section className="bg-background pb-6 pt-2 h-[80px]">
-       <div className="max-w-[700px] mx-auto h-[68px] bg-slate-50 rounded-[20px] animate-pulse" />
+       <div className="max-w-[700px] mx-auto h-[68px] bg-muted rounded-[20px] animate-pulse" />
     </section>
   );
 
@@ -120,10 +120,10 @@ export default function GlobalSearch() {
       <div className="max-w-[1440px] mx-auto px-4 relative z-40" ref={containerRef}>
         <div className="max-w-[700px] mx-auto relative group w-full">
           
-          <div className="relative flex items-center h-[56px] md:h-[68px] bg-slate-50 border border-slate-100 rounded-[20px] shadow-inner px-4 md:px-6 gap-2 md:gap-4 overflow-hidden focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/5 transition-all duration-300">
+          <div className="relative flex items-center h-[56px] md:h-[68px] bg-muted dark:bg-slate-900 border border-border rounded-[20px] shadow-inner px-4 md:px-6 gap-2 md:gap-4 overflow-hidden focus-within:bg-card focus-within:ring-4 focus-within:ring-primary/5 transition-all duration-300">
             <Search className={cn(
               "h-5 w-5 shrink-0 transition-colors",
-              isOpen ? "text-primary" : "text-slate-400"
+              isOpen ? "text-primary" : "text-muted-foreground"
             )} />
             
             <input
@@ -135,27 +135,27 @@ export default function GlobalSearch() {
                 setQuery(e.target.value);
                 setIsOpen(true);
               }}
-              className="flex-1 min-w-0 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-xl"
+              className="flex-1 min-w-0 bg-transparent border-none outline-none font-bold text-foreground placeholder:text-muted-foreground text-sm md:text-xl"
             />
 
             <div className="flex items-center gap-1 md:gap-2 shrink-0">
                {query && (
                  <button 
                    onClick={() => { setQuery(''); setDebouncedQuery(''); }}
-                   className="p-1.5 hover:bg-slate-200 rounded-full transition-colors"
+                   className="p-1.5 hover:bg-muted rounded-full transition-colors"
                  >
-                   <X className="h-4 w-4 text-slate-400" />
+                   <X className="h-4 w-4 text-muted-foreground" />
                  </button>
                )}
                {isLoading && debouncedQuery && (
                  <Loader2 className="h-4 w-4 text-primary animate-spin mr-1" />
                )}
-               <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block" />
+               <div className="h-8 w-px bg-border mx-1 hidden sm:block" />
                <button 
                  onClick={startListening}
                  className={cn(
                    "h-9 w-9 md:h-11 md:w-11 rounded-xl flex items-center justify-center transition-all shrink-0",
-                   isListening ? "bg-rose-50 text-white animate-pulse" : "text-slate-400 hover:text-primary"
+                   isListening ? "bg-rose-500 text-white animate-pulse" : "text-muted-foreground hover:text-primary"
                  )}
                >
                   <Mic className="h-4 w-4 md:h-5 md:w-5" />
@@ -169,13 +169,13 @@ export default function GlobalSearch() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute top-full left-0 right-0 mt-2 bg-white rounded-[1.5rem] shadow-5xl border border-slate-100 overflow-hidden z-50 max-h-[400px] overflow-y-auto custom-scrollbar"
+                className="absolute top-full left-0 right-0 mt-2 bg-card rounded-[1.5rem] shadow-5xl border border-border overflow-hidden z-50 max-h-[400px] overflow-y-auto custom-scrollbar"
               >
                 {(!debouncedQuery || debouncedQuery.length < 2) ? (
                   <div className="p-5 md:p-6 space-y-4">
                     <div className="flex items-center gap-2">
                       <Sparkles className="h-3.5 w-3.5 text-primary fill-primary" />
-                      <p className="text-[10px] font-bold tracking-tight text-slate-400 uppercase tracking-widest">Trending hubs</p>
+                      <p className="text-[10px] font-bold tracking-tight text-muted-foreground uppercase tracking-widest">Trending hubs</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {TRENDING.map((item) => (
@@ -183,7 +183,7 @@ export default function GlobalSearch() {
                           key={item.label} 
                           href={item.href}
                           onClick={() => setIsOpen(false)}
-                          className="px-4 py-2 bg-slate-50 hover:bg-primary/5 border border-slate-100 rounded-xl text-[11px] font-bold text-slate-600 hover:text-primary transition-all flex items-center gap-2 active:scale-95 tracking-tight"
+                          className="px-4 py-2 bg-muted hover:bg-primary/5 border border-border rounded-xl text-[11px] font-bold text-foreground/80 hover:text-primary transition-all flex items-center gap-2 active:scale-95 tracking-tight"
                         >
                           <Zap className="h-3 w-3" /> {item.label}
                         </Link>
@@ -191,7 +191,7 @@ export default function GlobalSearch() {
                     </div>
                   </div>
                 ) : hasResults ? (
-                  <div className="divide-y divide-slate-50 text-left">
+                  <div className="divide-y divide-border text-left">
                     {results.exams.length > 0 && (
                       <SearchGroup label="Exam verticals">
                         {results.exams.map(e => (
@@ -218,10 +218,10 @@ export default function GlobalSearch() {
                   </div>
                 ) : (
                   <div className="p-12 text-center space-y-4 opacity-40">
-                    <AlertCircle className="h-12 w-12 mx-auto text-slate-300" />
+                    <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground" />
                     <div className="space-y-1">
-                       <p className="font-bold text-sm tracking-tight text-[#0F172A]">No results matched</p>
-                       <p className="text-[10px] font-medium text-slate-400">Try searching for PSSSB or Police.</p>
+                       <p className="font-bold text-sm tracking-tight text-foreground">No results matched</p>
+                       <p className="text-[10px] font-medium text-muted-foreground">Try searching for PSSSB or Police.</p>
                     </div>
                   </div>
                 )}
@@ -231,7 +231,7 @@ export default function GlobalSearch() {
         </div>
 
         {/* Official System Verified Badge */}
-        <div className="mt-4 flex items-center justify-center gap-2 text-slate-400">
+        <div className="mt-4 flex items-center justify-center gap-2 text-muted-foreground">
            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
            <span className="text-[9px] font-bold uppercase tracking-widest antialiased">Official system verified</span>
         </div>
@@ -243,7 +243,7 @@ export default function GlobalSearch() {
 function SearchGroup({ label, children }: { label: string, children: React.ReactNode }) {
   return (
     <div className="p-4 space-y-2">
-      <h5 className="px-3 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{label}</h5>
+      <h5 className="px-3 text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">{label}</h5>
       <div className="space-y-1">{children}</div>
     </div>
   );
@@ -254,18 +254,18 @@ function SearchResult({ href, title, sub, icon, onClick }: any) {
     <Link 
       href={href} 
       onClick={onClick}
-      className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-all group active:scale-[0.99] border border-transparent hover:border-slate-100"
+      className="flex items-center justify-between p-3 rounded-xl hover:bg-muted transition-all group active:scale-[0.99] border border-transparent hover:border-border"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+        <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
           {icon}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-bold text-sm md:text-base text-[#0F172A] truncate leading-tight">{title}</p>
-          <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{sub}</p>
+          <p className="font-bold text-sm md:text-base text-foreground truncate leading-tight">{title}</p>
+          <p className="text-[10px] font-bold text-muted-foreground mt-1 uppercase tracking-widest">{sub}</p>
         </div>
       </div>
-      <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary transition-all group-hover:translate-x-1 shrink-0" />
+      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all group-hover:translate-x-1 shrink-0" />
     </Link>
   );
 }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -35,6 +34,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useStudySessions } from '@/hooks/useStudyAnalytics';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { motion } from 'framer-motion';
+
+/**
+ * @fileOverview Institutional Performance Hub v6.8.
+ * UPDATED: Integrated adaptive dark mode support.
+ */
 
 const formatTime = (seconds: number) => {
   if (!seconds || seconds <= 0 || isNaN(seconds)) return "0m";
@@ -83,47 +87,47 @@ export default function StudentDashboard() {
     return days.map((d) => ({ day: d, progress: 0 }));
   }, [results]);
 
-  if (!mounted || authLoading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
+  if (!mounted || authLoading) return <div className="h-screen flex items-center justify-center bg-background"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10">
+    <div className="min-h-screen bg-background font-body text-left selection:bg-primary/10">
       <Navbar />
       <main className="container mx-auto px-4 md:px-8 py-8 md:py-16 max-w-7xl space-y-8 md:space-y-12">
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-6 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col md:flex-row items-center gap-8 md:gap-12">
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-card p-6 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-xl border border-border flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div className="relative shrink-0">
-            <StudentAvatar profile={profile} className="h-24 w-24 md:h-44 md:w-44 rounded-[2.5rem] md:rounded-[3.5rem] border-4 border-slate-50 shadow-2xl" />
-            <div className="absolute -bottom-2 -right-2 bg-primary h-8 w-8 md:h-12 md:w-12 rounded-xl flex items-center justify-center text-white shadow-xl border-4 border-white"><ShieldCheck className="h-4 w-4 md:h-6 md:w-6" /></div>
+            <StudentAvatar profile={profile} className="h-24 w-24 md:h-44 md:w-44 rounded-[2.5rem] md:rounded-[3.5rem] border-4 border-background shadow-2xl" />
+            <div className="absolute -bottom-2 -right-2 bg-primary h-8 w-8 md:h-12 md:w-12 rounded-xl flex items-center justify-center text-white shadow-xl border-4 border-background"><ShieldCheck className="h-4 w-4 md:h-6 md:w-6" /></div>
           </div>
           <div className="flex-1 text-center md:text-left space-y-4 min-w-0">
             <div className="space-y-1">
-              <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter antialiased leading-none">{profile?.name || "Aspirant"}</h1>
-              <p className="text-slate-400 font-bold text-[10px] md:text-xs tracking-tight">{profile?.email}</p>
+              <h1 className="text-2xl md:text-6xl font-black text-foreground tracking-tighter antialiased leading-none">{profile?.name || "Aspirant"}</h1>
+              <p className="text-muted-foreground font-bold text-[10px] md:text-xs tracking-tight">{profile?.email}</p>
             </div>
             <div className="flex flex-wrap justify-center md:justify-start gap-3">
               <Badge className="bg-primary/10 text-primary border-none font-bold text-[10px] px-4 py-1.5 rounded-full">{profile?.pass?.plan || 'Free'} member</Badge>
-              <Badge variant="outline" className="bg-white border-slate-100 text-slate-500 font-bold text-[10px] px-4 py-1.5 rounded-full shadow-sm">🔥 {stats.currentStreak} day streak</Badge>
-              <Badge variant="outline" className="bg-emerald-50 border-emerald-100 text-emerald-600 font-bold text-[10px] px-4 py-1.5 rounded-full">Total tests: {results?.length || 0}</Badge>
+              <Badge variant="outline" className="bg-muted border-border text-foreground font-bold text-[10px] px-4 py-1.5 rounded-full shadow-sm">🔥 {stats.currentStreak} day streak</Badge>
+              <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-500 font-bold text-[10px] px-4 py-1.5 rounded-full">Total tests: {results?.length || 0}</Badge>
             </div>
           </div>
-          <Button asChild className="h-14 md:h-16 px-10 bg-[#0F172A] hover:bg-black text-white font-bold text-[11px] tracking-tight rounded-2xl shadow-xl transition-all border-none">
+          <Button asChild className="h-14 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold text-[11px] tracking-tight rounded-2xl shadow-xl transition-all border-none">
             <Link href="/profile">Edit profile <ChevronRight className="h-4 w-4 ml-2" /></Link>
           </Button>
         </motion.section>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
-          <MetricPill label="Accuracy" val={`${performance.accuracy}%`} icon={<Target />} color="text-primary" bg="bg-blue-50" progress={performance.accuracy} />
-          <MetricPill label="Avg time" val={formatTime(performance.time)} icon={<Clock />} color="text-orange-500" bg="bg-orange-50" />
-          <MetricPill label="Today's study" val={formatTime(stats.today)} icon={<Zap />} color="text-emerald-500" bg="bg-emerald-50" />
-          <MetricPill label="Solved questions" val={performance.totalCorrect.toLocaleString()} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50" />
+          <MetricPill label="Accuracy" val={`${performance.accuracy}%`} icon={<Target />} color="text-primary" bg="bg-blue-50 dark:bg-blue-950/30" progress={performance.accuracy} />
+          <MetricPill label="Avg time" val={formatTime(performance.time)} icon={<Clock />} color="text-orange-500" bg="bg-orange-50 dark:bg-orange-950/30" />
+          <MetricPill label="Today's study" val={formatTime(stats.today)} icon={<Zap />} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-950/30" />
+          <MetricPill label="Solved questions" val={performance.totalCorrect.toLocaleString()} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-950/30" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
           <div className="lg:col-span-8 space-y-8 md:space-y-12">
-            <Card className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden border border-slate-100">
-              <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30 flex flex-row items-center justify-between">
+            <Card className="border-none shadow-xl rounded-[2.5rem] bg-card overflow-hidden border border-border">
+              <CardHeader className="p-8 md:p-12 border-b border-border bg-muted/30 flex flex-row items-center justify-between">
                 <div className="text-left">
-                  <CardTitle className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Performance flow</CardTitle>
-                  <p className="text-[10px] font-bold text-slate-400 mt-1">Practice consistency index</p>
+                  <CardTitle className="text-xl md:text-3xl font-black text-foreground tracking-tight">Performance flow</CardTitle>
+                  <p className="text-[10px] font-bold text-muted-foreground mt-1 uppercase tracking-widest">Practice consistency index</p>
                 </div>
                 <Badge className="bg-primary text-white border-none text-[9px] font-bold px-3 py-1 rounded-lg shadow-lg">Live sync</Badge>
               </CardHeader>
@@ -132,7 +136,7 @@ export default function StudentDashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
                       <defs><linearGradient id="colorProg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#2563EB" stopOpacity={0.1}/><stop offset="95%" stopColor="#2563EB" stopOpacity={0}/></linearGradient></defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-border" />
                       <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 11, fontWeight: 700}} />
                       <YAxis hide />
                       <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
@@ -152,8 +156,8 @@ export default function StudentDashboard() {
               <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Activity className="h-64 w-64 text-primary" /></div>
               <div className="relative z-10 space-y-8 text-left">
                 <div className="space-y-1">
-                  <h3 className="text-2xl font-black tracking-tight leading-none">Milestones</h3>
-                  <p className="text-[10px] font-bold text-slate-500">Platform rewards</p>
+                  <h3 className="text-2xl font-black tracking-tight leading-none uppercase">Milestones</h3>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Platform rewards</p>
                 </div>
                 <div className="space-y-6">
                   <MilestoneItem label="7 day streak" progress={Math.min(100, (stats.currentStreak / 7) * 100)} target={`${stats.currentStreak}/7`} />
@@ -167,10 +171,10 @@ export default function StudentDashboard() {
                 </div>
               </div>
             </Card>
-            <div className="p-8 md:p-10 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl space-y-6 text-left group hover:translate-y-[-4px] transition-all duration-500">
-              <h4 className="text-[10px] font-black text-slate-400 tracking-tight">Certificates</h4>
+            <div className="p-8 md:p-10 bg-card rounded-[2.5rem] border border-border shadow-xl space-y-6 text-left group hover:translate-y-[-4px] transition-all duration-500">
+              <h4 className="text-[10px] font-black text-muted-foreground tracking-widest uppercase">Certificates</h4>
               <div className="h-40 flex flex-col items-center justify-center text-center opacity-30 italic">
-                <Award className="h-10 w-10 mb-4" />
+                <Award className="h-10 w-10 mb-4 text-muted-foreground" />
                 <p className="text-[11px] font-bold tracking-tight">Syncing milestones...</p>
               </div>
             </div>
@@ -184,24 +188,24 @@ export default function StudentDashboard() {
 
 function MetricPill({ label, val, icon, color, bg, progress }: any) {
   return (
-    <motion.div whileHover={{ y: -4 }} className="p-5 md:p-8 bg-white rounded-[2rem] shadow-lg border border-slate-50 flex flex-col gap-4 text-left group transition-all duration-300">
+    <motion.div whileHover={{ y: -4 }} className="p-5 md:p-8 bg-card rounded-[2rem] shadow-lg border border-border flex flex-col gap-4 text-left group transition-all duration-300">
       <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner", bg, color)}>{React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}</div>
       <div className="space-y-0.5">
-        <p className="text-xl md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none">{val}</p>
-        <p className="text-[8px] md:text-[9px] font-bold text-slate-400">{label}</p>
+        <p className="text-xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter leading-none">{val}</p>
+        <p className="text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
       </div>
-      {progress !== undefined && <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden mt-2"><div className="h-full bg-primary transition-all duration-1000" style={{ width: `${progress}%` }} /></div>}
+      {progress !== undefined && <div className="h-1 w-full bg-muted rounded-full overflow-hidden mt-2"><div className="h-full bg-primary transition-all duration-1000" style={{ width: `${progress}%` }} /></div>}
     </motion.div>
   );
 }
 
 function InsightNode({ label, value, icon }: any) {
   return (
-    <Card className="p-6 md:p-10 rounded-[2.5rem] shadow-xl bg-white border border-slate-100 flex items-center gap-6 group hover:translate-x-1 transition-all duration-300">
-      <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-slate-50 flex items-center justify-center shadow-inner shrink-0 group-hover:scale-110 transition-transform">{icon}</div>
+    <Card className="p-6 md:p-10 rounded-[2.5rem] shadow-xl bg-card border border-border flex items-center gap-6 group hover:translate-x-1 transition-all duration-300">
+      <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-muted flex items-center justify-center shadow-inner shrink-0 group-hover:scale-110 transition-transform">{icon}</div>
       <div className="min-w-0 text-left">
-        <p className="text-[9px] font-black text-slate-400 leading-none mb-2">{label}</p>
-        <p className="text-lg md:text-xl font-bold text-[#0F172A] truncate tracking-tight">{value}</p>
+        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-2">{label}</p>
+        <p className="text-lg md:text-xl font-bold text-foreground truncate tracking-tight uppercase">{value}</p>
       </div>
     </Card>
   );
@@ -211,7 +215,7 @@ function MilestoneItem({ label, progress, target }: any) {
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center text-[10px] font-bold">
-        <span className="text-slate-400">{label}</span> <span className="text-primary">{target}</span>
+        <span className="text-slate-400 uppercase tracking-widest">{label}</span> <span className="text-primary tabular-nums">{target}</span>
       </div>
       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
         <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 1.5, ease: "easeOut" }} className="h-full bg-primary shadow-[0_0_15px_rgba(37,99,235,0.5)]" />
