@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v7.0 [Dynamic Insights].
+ * @fileOverview Premium Analysis Screen v7.1 [Title Case Fixed].
  * FIXED: Replaced hardcoded insights with real subject-based analytics.
  * FIXED: Enforced Title Case for all subject nodes.
  */
@@ -133,7 +133,7 @@ export default function ReportScreen(props: ReportScreenProps) {
          <div className="hidden sm:flex items-center gap-3 bg-blue-50 px-6 py-3 rounded-2xl">
             <ShieldCheck className="h-5 w-5 text-[#1677FF]" />
             <div className="text-left">
-               <p className="text-[10px] md:text-xs font-black text-[#1677FF] leading-none uppercase">Verified</p>
+               <p className="text-[10px] font-black text-[#1677FF] leading-none uppercase">Verified</p>
                <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1 uppercase">Top ranked</p>
             </div>
          </div>

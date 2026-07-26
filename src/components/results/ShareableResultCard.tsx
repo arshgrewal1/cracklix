@@ -37,9 +37,8 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Result Report v2.5 [Dynamic Analytics].
- * FIXED: Replaced hardcoded insights with real subject-based metrics.
- * FIXED: Enforced Title Case for subject nodes (e.g., english -> English).
+ * @fileOverview Official Institutional Result Report v2.6 [Full Title Fixed].
+ * FIXED: Removed truncate from title to ensure full name visibility.
  */
 
 const toTitleCase = (str: string) => {
@@ -91,7 +90,6 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
       }
     }
 
-    // Default fallbacks if data is thin
     if (list.length === 0) {
        list.push({ type: 'STRENGTH', label: 'Insight', text: 'Verified attempt synchronized', color: 'text-blue-600', bg: 'bg-blue-50' });
     }

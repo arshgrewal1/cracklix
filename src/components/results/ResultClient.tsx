@@ -48,9 +48,9 @@ import { toJpeg } from 'html-to-image'
 import jsPDF from 'jspdf'
 
 /**
- * @fileOverview Universal Result Hub Viewer v76.0.
- * FIXED: Actual test duration and real-time competition stats (Top/Avg).
- * FIXED: Bottom clipping in share image by re-balancing vertical spacing.
+ * @fileOverview Universal Result Hub Viewer v77.0.
+ * FIXED: Title truncation solved by removing truncate class.
+ * FIXED: Action bar spacing optimized by removing PDF button from primary header.
  */
 
 export default function ResultClient() {
@@ -84,7 +84,6 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
-  // Real data listeners for the user's specific attempts
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mockId) return null;
     return query(collection(db, "results"), where("mockId", "==", mockId), where("userId", "==", user.uid));
@@ -203,31 +202,6 @@ export default function ResultClient() {
     }
   };
 
-  const handleDownloadPDF = async () => {
-    if (!sessionData || isGenerating) return;
-    setIsGenerating(true);
-    
-    try {
-      const node = reportRef.current;
-      if (!node) throw new Error("Node missing.");
-
-      const imgData = await toJpeg(node, { quality: 0.7, pixelRatio: 1.5, backgroundColor: '#ffffff' });
-
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-      pdf.save(`Cracklix_Report_${sessionData.attemptId}.pdf`);
-      toast({ title: "PDF Synced" });
-    } catch (e) {
-      toast({ variant: "destructive", title: "PDF Failure" });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   useEffect(() => {
     async function loadQuestions() {
       if (!db || !mockId) return;
@@ -302,7 +276,8 @@ export default function ResultClient() {
                           <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 py-0.5 font-bold text-[9px] rounded-lg">Verified report</Badge>
                           <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-3 py-0.5 font-bold text-[9px] rounded-lg">Attempt #{userResults?.length || 1}</Badge>
                        </div>
-                       <h1 className="text-lg md:text-4xl font-bold text-[#0F172A] tracking-tight leading-tight truncate">{sessionData.mockTitle}</h1>
+                       {/* REMOVED TRUNCATE TO SHOW FULL TITLE */}
+                       <h1 className="text-[17px] md:text-4xl font-bold text-[#0F172A] tracking-tight leading-tight">{sessionData.mockTitle}</h1>
                        <div className="flex flex-wrap items-center gap-4 text-[10px] md:text-base font-semibold text-slate-400">
                           <div className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span></div>
                           <div className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4 text-slate-300" /> <span>{mockData?.duration || 120}:00</span></div>
@@ -310,16 +285,12 @@ export default function ResultClient() {
                     </div>
                  </div>
 
-                 <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto mt-2">
-                    <Button onClick={handleShareOfficialReport} disabled={isGenerating} className="flex-[2] lg:flex-none h-12 px-4 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[11px] md:text-sm shadow-lg active:scale-95 border-none">
+                 <div className="flex items-center gap-3 w-full lg:w-auto mt-2">
+                    <Button onClick={handleShareOfficialReport} disabled={isGenerating} className="flex-[2] lg:flex-none h-12 px-8 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[12px] md:text-sm shadow-lg active:scale-95 border-none">
                        {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
                        <span className="whitespace-nowrap">Share report</span>
                     </Button>
-                    <Button onClick={handleDownloadPDF} disabled={isGenerating} variant="outline" className="flex-1 lg:flex-none h-12 px-2 border-2 border-slate-100 rounded-full gap-1 font-bold text-slate-400 hover:text-primary active:scale-95 transition-all text-[11px] md:text-sm">
-                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} 
-                       <span>PDF</span>
-                    </Button>
-                    <Button asChild className="flex-[1.5] lg:flex-none h-12 px-4 bg-[#0F172A] hover:bg-black text-white font-bold rounded-full gap-2 text-[11px] md:text-sm shadow-md transition-all active:scale-95 border-none">
+                    <Button asChild className="flex-[1.5] lg:flex-none h-12 px-8 bg-[#0F172A] hover:bg-black text-white font-bold rounded-full gap-2 text-[12px] md:text-sm shadow-md transition-all active:scale-95 border-none">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`} className="flex items-center justify-center gap-2">
                           <RefreshCw className="h-4 w-4" /> 
                           <span className="whitespace-nowrap">Retake</span>
