@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -19,8 +18,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v6.1.
- * UPDATED: Standardized to Sentence Case and unified boxed architecture.
+ * @fileOverview Premium Analysis Screen v6.2.
+ * FIXED: Globally removed uppercase shouting and standardized to professional Title Case.
  */
 
 interface ReportScreenProps {
@@ -60,7 +59,7 @@ export default function ReportScreen(props: ReportScreenProps) {
     else list.push({ type: 'WEAKNESS', text: "Low accuracy detected. Focus on conceptual clarity." });
 
     if (scoreNum < avgScore) list.push({ type: 'SUGGESTION', text: "Attempt more mock tests to beat the platform average." });
-    if (wrongCount > totalQuestions * 0.2) list.push({ type: 'WEAKNESS', text: "High negative penalty. Reduce guesswork in difficult items." });
+    if (wrongCount > totalQuestions * 0.2) list.push({ type: 'WEAKNESS', text: "High negative penalty. Reduce guesswork in difficult zones." });
     
     return list.slice(0, 4);
   }, [attemptAccuracy, score, avgScore, wrongCount, totalQuestions]);
@@ -68,7 +67,7 @@ export default function ReportScreen(props: ReportScreenProps) {
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-500 pb-20">
       
-      {/* Score summary row */}
+      {/* Score Summary Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 overflow-x-auto no-scrollbar -mx-1 px-1">
          <Card className="col-span-2 md:col-span-1 h-36 md:h-44 rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-6">
             <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-2">Your score</p>
@@ -82,12 +81,12 @@ export default function ReportScreen(props: ReportScreenProps) {
          <SummaryMiniCard label="Correct" val={correctCount} color="text-[#10B981]" bg="bg-[#F0FDF4]" />
          <SummaryMiniCard label="Wrong" val={wrongCount} color="text-[#FF3366]" bg="bg-[#FFF1F2]" />
          <SummaryMiniCard label="Skipped" val={skippedCount} color="text-slate-400" bg="bg-slate-50" />
-         <SummaryMiniCard label="Total" val={totalQuestions} color="text-[#1677FF]" bg="bg-blue-50" />
+         <SummaryMiniCard label="Total items" val={totalQuestions} color="text-[#1677FF]" bg="bg-blue-50" />
       </div>
 
-      {/* Ranking card */}
+      {/* Ranking Node */}
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 flex items-center justify-between">
-         <div className="flex items-center gap-4 md:gap-8">
+         <div className="flex items-center gap-4 md:gap-8 text-left">
             <div className="h-12 w-12 md:h-16 md:h-16 rounded-full bg-[#1677FF] flex items-center justify-center text-white shadow-lg">
                <Trophy className="h-6 w-6 md:h-8 md:w-8" />
             </div>
@@ -108,7 +107,7 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       </Card>
 
-      {/* Performance overview */}
+      {/* Performance Matrix */}
       <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <BarChart3 className="h-5 w-5 text-[#1677FF]" />
@@ -122,7 +121,7 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       </div>
 
-      {/* Subject mastery */}
+      {/* Subject Analytics */}
       {subjectAnalysis.length > 0 && (
          <div className="space-y-6">
             <div className="flex items-center gap-3 px-1">
@@ -160,21 +159,21 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       )}
 
-      {/* Competition snapshot */}
+      {/* Competition Snapshot */}
       <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <TrendingUp className="h-5 w-5 text-[#1677FF]" />
             <h3 className="text-lg font-black text-[#071B4D]">Competition snapshot</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <ComparisonNode label="Top score" val={topScore?.toFixed(1)} icon={<Award className="text-amber-500" />} />
-            <ComparisonNode label="Avg. score" val={avgScore?.toFixed(1)} icon={<Activity className="text-blue-500" />} />
-            <ComparisonNode label="Avg. accuracy" val={`${avgAccuracy?.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500" />} />
-            <ComparisonNode label="Score gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500" />} />
+            <ComparisonNode label="Top score" val={topScore?.toFixed(1)} icon={<Award className="text-amber-500 h-5 w-5" />} />
+            <ComparisonNode label="Avg. score" val={avgScore?.toFixed(1)} icon={<Activity className="text-blue-500 h-5 w-5" />} />
+            <ComparisonNode label="Avg. accuracy" val={`${avgAccuracy?.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500 h-5 w-5" />} />
+            <ComparisonNode label="Score gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500 h-5 w-5" />} />
          </div>
       </div>
 
-      {/* Smart insights */}
+      {/* Smart Insights */}
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 space-y-6">
          <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
             <Lightbulb className="h-5 w-5 text-[#F59E0B]" />
@@ -221,7 +220,7 @@ function StatsBox({ label, val, sub, color }: any) {
 
 function ComparisonNode({ label, val, icon }: any) {
    return (
-      <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-[#E5EAF2] shadow-sm">
+      <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-[#E5EAF2] shadow-sm text-left">
          <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center shrink-0">{icon}</div>
          <div className="min-w-0">
             <p className="text-[9px] font-bold text-slate-400 truncate">{label}</p>

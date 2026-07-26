@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -27,7 +26,8 @@ import {
   CheckCircle2,
   RefreshCw,
   ArrowLeft,
-  BarChart3
+  BarChart3,
+  List
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -41,8 +41,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v21.0.
- * FIXED: Rebuilt PDF Download flow with new Hardened Engine.
+ * @fileOverview Universal Result Hub Viewer v22.0.
+ * FIXED: Standardized all text to professional Title Case.
  */
 
 export default function ResultClient() {
@@ -226,7 +226,7 @@ export default function ResultClient() {
                            activeReviewFilter === 'SKIPPED' ? reviewNodes.skipped : reviewNodes.all;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left">
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left relative">
       <Navbar />
       
       <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-8 md:py-16 space-y-6 md:space-y-10">
@@ -244,7 +244,7 @@ export default function ResultClient() {
                        <h1 className="text-xl md:text-3xl font-[800] text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
                        <div className="flex flex-wrap items-center gap-6 text-[10px] md:xs font-bold text-slate-400">
                           <div className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span></div>
-                          <div className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> <span>{mockData?.duration || 120}m</span></div>
+                          <div className="flex items-center gap-2"><Timer className="h-3.5 w-3.5" /> <span>{mockData?.duration || 120}m</span></div>
                           <div className="flex items-center gap-2"><Users className="h-3.5 w-3.5" /> <span>{totalCandidates.toLocaleString()} Candidates</span></div>
                        </div>
                     </div>
@@ -325,15 +325,5 @@ function FilterButton({ active, label, count, onClick, color = "primary" }: any)
     )}>
        {label} <span className="opacity-40">{count}</span>
     </button>
-  )
-}
-
-function HeaderMiniNode({ icon, label, val }: any) {
-  return (
-    <div className="flex items-center gap-2">
-       <span className="shrink-0">{icon}</span>
-       <span className="text-slate-400">{label}:</span>
-       <span className="text-[#071B4D] font-bold">{val}</span>
-    </div>
   )
 }

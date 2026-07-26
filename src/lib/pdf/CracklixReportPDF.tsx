@@ -1,21 +1,20 @@
-
 'use client';
 
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 /**
- * @fileOverview Institutional PDF Template Engine v1.0.
- * RULES: No absolute positioning. Rigid margins. Verified Title Case.
+ * @fileOverview Institutional PDF Template Engine v1.1.
+ * FIXED: Updated font registry to use stable, high-availability TTF nodes to prevent 404 errors.
  */
 
-// Hardened Font Registration (Using stable versioned TTF nodes)
+// Hardened Font Registration (Using stable versioned TTF nodes from JSDelivr)
 Font.register({
   family: 'Inter',
   fonts: [
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.ttf', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.ttf', fontWeight: 700 },
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.ttf', fontWeight: 900 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Regular.ttf', fontWeight: 400 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Bold.ttf', fontWeight: 700 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Black.ttf', fontWeight: 900 },
   ],
 });
 
@@ -48,7 +47,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 900,
     color: '#1677FF',
-    textTransform: 'uppercase',
   },
   assessmentId: {
     fontSize: 8,
@@ -76,7 +74,6 @@ const styles = StyleSheet.create({
     fontSize: 7,
     color: '#64748B',
     fontWeight: 700,
-    textTransform: 'uppercase',
   },
   detailValue: {
     fontSize: 10,
@@ -100,8 +97,7 @@ const styles = StyleSheet.create({
     color: '#60A5FA',
     fontSize: 9,
     fontWeight: 700,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 1,
   },
   rankValue: {
     color: '#FFFFFF',
@@ -146,7 +142,6 @@ const styles = StyleSheet.create({
     color: '#64748B',
     fontWeight: 700,
     marginTop: 4,
-    textTransform: 'uppercase',
   },
   table: {
     marginTop: 10,
@@ -191,7 +186,6 @@ const styles = StyleSheet.create({
     fontWeight: 900,
     marginBottom: 6,
     color: '#10B981',
-    textTransform: 'uppercase',
   },
   insightText: {
     fontSize: 9,
@@ -249,7 +243,7 @@ export default function CracklixReportPDF({ data, qrData }: CracklixReportProps)
           <Image src="https://cracklix.vercel.app/logo/cracklix-logo-dark.png" style={styles.logo} />
           <View style={styles.headerRight}>
             <Text style={styles.reportTitle}>Performance Report</Text>
-            <Text style={styles.assessmentId}>REF: {attemptId?.slice(0, 16).toUpperCase()}</Text>
+            <Text style={styles.assessmentId}>Ref: {attemptId?.slice(0, 16).toUpperCase()}</Text>
           </View>
         </View>
 
@@ -274,7 +268,7 @@ export default function CracklixReportPDF({ data, qrData }: CracklixReportProps)
             </View>
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>Attempts</Text>
-              <Text style={styles.detailValue}>1 verified node</Text>
+              <Text style={styles.detailValue}>1 Verified node</Text>
             </View>
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>Registry Status</Text>

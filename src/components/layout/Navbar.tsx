@@ -36,8 +36,8 @@ import { canAccessAdmin } from "@/lib/permissions";
 import AnnouncementBar from "./AnnouncementBar";
 
 /**
- * @fileOverview Standard In-Flow Navigation Hub v151.0.
- * FIXED: Link tag mismatch in NavLink component and added missing isSidebarOpen state.
+ * @fileOverview Standard In-Flow Navigation Hub v152.0.
+ * FIXED: Removed all fixed/sticky positioning. Header is strictly in-flow and scrolls away.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
