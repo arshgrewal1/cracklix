@@ -4,17 +4,16 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 /**
- * @fileOverview Institutional Performance PDF Template Engine v2.1.
- * FIXED: Updated font registry to use stable, versioned OTF nodes from RSMS Inter repository.
+ * @fileOverview Institutional Performance PDF Template Engine v3.0.
+ * FIXED: Updated font registry to use stable Google Fonts TTF nodes to resolve 404 fetch errors.
  */
 
-// Register professional typography with stable versioned sources
 Font.register({
   family: 'Inter',
   fonts: [
-    { src: 'https://cdn.jsdelivr.net/gh/rsms/inter@v3.19.3/docs/font-files/Inter-Regular.otf', fontWeight: 400 },
-    { src: 'https://cdn.jsdelivr.net/gh/rsms/inter@v3.19.3/docs/font-files/Inter-Bold.otf', fontWeight: 700 },
-    { src: 'https://cdn.jsdelivr.net/gh/rsms/inter@v3.19.3/docs/font-files/Inter-Black.otf', fontWeight: 900 },
+    { src: 'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.ttf', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.ttf', fontWeight: 700 }, // Fallback to standard for weight matching
+    { src: 'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.ttf', fontWeight: 900 },
   ],
 });
 
@@ -42,7 +41,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 900,
+    fontWeight: 700,
     color: '#071B4D',
     textAlign: 'right',
   },
@@ -115,7 +114,7 @@ const styles = StyleSheet.create({
   rankValue: {
     color: '#FFFFFF',
     fontSize: 48,
-    fontWeight: 900,
+    fontWeight: 700,
   },
   rankTotal: {
     color: 'rgba(255, 255, 255, 0.5)',
@@ -146,7 +145,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
-    fontWeight: 900,
+    fontWeight: 700,
   },
   statLabel: {
     fontSize: 7,
@@ -175,8 +174,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F8FAFC',
   },
   colSubject: { flex: 3, fontSize: 9, fontWeight: 700 },
-  colScore: { flex: 1, fontSize: 9, fontWeight: 900, textAlign: 'center' },
-  colAccuracy: { flex: 1, fontSize: 9, fontWeight: 900, textAlign: 'right' },
+  colScore: { flex: 1, fontSize: 9, fontWeight: 700, textAlign: 'center' },
+  colAccuracy: { flex: 1, fontSize: 9, fontWeight: 700, textAlign: 'right' },
   
   bottomRow: {
     flexDirection: 'row',
@@ -191,7 +190,7 @@ const styles = StyleSheet.create({
   },
   insightTitle: {
     fontSize: 8,
-    fontWeight: 900,
+    fontWeight: 700,
     marginBottom: 8,
     textTransform: 'uppercase',
     color: '#1677FF',
@@ -378,7 +377,7 @@ export default function PerformancePDF({ data, qrData }: Props) {
         <View style={styles.footer}>
           <View>
             <Text style={styles.footerText}>Verified Digital Report</Text>
-            <Text style={[styles.footerText, { color: '#071B4D', marginTop: 4 }]}>Cracklix Assessment Engine v2.0</Text>
+            <Text style={[styles.footerText, { color: '#071B4D', marginTop: 4 }]}>Cracklix Assessment Engine v3.0</Text>
             <Text style={[styles.footerText, { color: '#1677FF', marginTop: 4 }]}>cracklix.in</Text>
           </View>
           <Image src={qrData} style={styles.qrCode} />

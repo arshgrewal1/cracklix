@@ -25,7 +25,8 @@ import {
   Users,
   CheckCircle2,
   RefreshCw,
-  ArrowLeft
+  ArrowLeft,
+  BarChart3
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -42,8 +43,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v19.2.
- * FIXED: Nesting TabsTriggers within TabsList to ensure Radix UI roving focus stability.
+ * @fileOverview Universal Result Hub Viewer v20.0.
+ * FIXED: Tabs triggers properly nested within TabsList to satisfy Radix UI roving focus group.
+ * FIXED: Sentence case typography and missing icon imports.
  */
 
 export default function ResultClient() {
