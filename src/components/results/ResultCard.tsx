@@ -58,8 +58,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Premium Institutional Score Report v5.0.
- * UPDATED: Fully dynamic branding, QR generation and Digital Stamp registry.
+ * @fileOverview Premium Institutional Score Report v5.1.
+ * UPDATED: Increased Logo Size and implemented "Arsh Grewal" watermark node for copyright protection.
  */
 export default function ResultCard({
   studentName,
@@ -121,12 +121,19 @@ export default function ResultCard({
         className="bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl border border-slate-100"
         style={containerStyle}
       >
-        <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A]" />
-        <div className="absolute top-4 left-0 right-0 h-1 bg-[#2563EB]" />
+        {/* WATERMARK NODE */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
+           <span className="text-[140px] font-black text-[#0F172A] opacity-[0.03] -rotate-[35deg] whitespace-nowrap">
+              ARSH GREWAL
+           </span>
+        </div>
 
-        <div className="px-16 pt-16 flex justify-between items-start">
+        <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A] z-10" />
+        <div className="absolute top-4 left-0 right-0 h-1 bg-[#2563EB] z-10" />
+
+        <div className="px-16 pt-16 flex justify-between items-start relative z-10">
            <div className="flex items-center gap-6">
-              <div className="h-20 w-20 bg-white rounded-2xl flex items-center justify-center shadow-xl overflow-hidden p-2 border border-slate-50">
+              <div className="h-28 w-28 md:h-32 md:w-32 bg-white rounded-2xl flex items-center justify-center shadow-xl overflow-hidden p-2 border border-slate-50">
                  {branding?.logoUrl ? (
                     <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
                  ) : (
@@ -144,7 +151,7 @@ export default function ResultCard({
            </div>
         </div>
 
-        <div className="px-16 mt-12 flex flex-col items-center">
+        <div className="px-16 mt-12 flex flex-col items-center relative z-10">
            <div className="relative">
               <div className="h-48 w-48 rounded-full border-[10px] border-slate-50 flex flex-col items-center justify-center bg-white shadow-2xl relative z-10">
                  <span className={cn("text-[80px] font-black leading-none", grade.color)}>{grade.label}</span>
@@ -164,7 +171,7 @@ export default function ResultCard({
            </div>
         </div>
 
-        <div className="px-16 mt-14 grid grid-cols-3 gap-6">
+        <div className="px-16 mt-14 grid grid-cols-3 gap-6 relative z-10">
            <ReportMetric label="State rank" val={`#${rank}`} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50" />
            <ReportMetric label="Score achieved" val={score} icon={<Zap />} color="text-[#2563EB]" bg="bg-blue-50" />
            <ReportMetric label="Subject accuracy" val={`${accuracy}%`} icon={<Target />} color="text-emerald-500" bg="bg-emerald-50" />
@@ -173,8 +180,8 @@ export default function ResultCard({
            <ReportMetric label="Engagement rate" val={`${Math.round(((correct + wrong) / (total || 1)) * 100)}%`} icon={<BarChart3 />} color="text-purple-500" bg="bg-purple-50" />
         </div>
 
-        <div className="px-16 mt-10">
-           <div className="bg-[#F8FAFC] border border-slate-100 rounded-[2.5rem] p-10 flex items-center justify-around shadow-inner">
+        <div className="px-16 mt-10 relative z-10">
+           <div className="bg-[#F8FAFC]/80 backdrop-blur-sm border border-slate-100 rounded-[2.5rem] p-10 flex items-center justify-around shadow-inner">
               <ReportDataPoint label="Total items" val={total} color="text-slate-400" />
               <div className="w-px h-10 bg-slate-200" />
               <ReportDataPoint label="Correct" val={correct} color="text-emerald-600" />
@@ -185,7 +192,7 @@ export default function ResultCard({
            </div>
         </div>
 
-        <div className="mt-auto bg-[#0F172A] p-12 flex items-center justify-between text-white">
+        <div className="mt-auto bg-[#0F172A] p-12 flex items-center justify-between text-white relative z-10">
            <div className="text-left space-y-6">
               <div className="flex items-center gap-4">
                  <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center">
@@ -215,7 +222,7 @@ export default function ResultCard({
            </div>
         </div>
 
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-300 tracking-widest">Page 1 of 2</div>
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-300 tracking-widest z-10">Page 1 of 2</div>
       </div>
 
       {/* PAGE 2: PERFORMANCE ANALYTICS */}
@@ -224,9 +231,16 @@ export default function ResultCard({
         className="bg-white text-[#0F172A] flex flex-col relative overflow-hidden shrink-0 shadow-2xl border border-slate-100"
         style={containerStyle}
       >
-        <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A]" />
+        {/* WATERMARK NODE */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
+           <span className="text-[140px] font-black text-[#0F172A] opacity-[0.03] -rotate-[35deg] whitespace-nowrap">
+              ARSH GREWAL
+           </span>
+        </div>
+
+        <div className="absolute top-0 left-0 right-0 h-4 bg-[#0F172A] z-10" />
         
-        <div className="px-16 pt-16 space-y-10 flex-1 flex flex-col">
+        <div className="px-16 pt-16 space-y-10 flex-1 flex flex-col relative z-10">
            <div className="flex justify-between items-end border-b-2 border-slate-100 pb-8">
               <div className="text-left space-y-2">
                  <h2 className="text-4xl font-black tracking-tighter text-[#0F172A]">Detailed analytics</h2>
@@ -242,7 +256,7 @@ export default function ResultCard({
                  <Layers className="h-6 w-6 text-primary" />
                  <h3 className="text-xl font-black tracking-widest text-[#0F172A]">Subject mastery matrix</h3>
               </div>
-              <div className="rounded-[2rem] border-2 border-slate-100 overflow-hidden shadow-sm bg-white">
+              <div className="rounded-[2rem] border-2 border-slate-100 overflow-hidden shadow-sm bg-white/90 backdrop-blur-sm">
                  <table className="w-full text-left border-collapse">
                     <thead className="bg-[#0F172A] text-white">
                        <tr className="h-14">
@@ -280,7 +294,7 @@ export default function ResultCard({
                     <TrendingUp className="h-6 w-6 text-primary" />
                     <h3 className="text-lg font-black tracking-widest text-[#0F172A]">Complexity audit</h3>
                  </div>
-                 <div className="space-y-6 p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
+                 <div className="space-y-6 p-8 bg-slate-50/80 backdrop-blur-sm rounded-[2rem] border border-slate-100">
                     <ComplexityRow label="Easy items" val={difficulty.easy} color="bg-emerald-500" />
                     <ComplexityRow label="Medium items" val={difficulty.medium} color="bg-blue-500" />
                     <ComplexityRow label="Expert items" val={difficulty.hard} color="bg-rose-500" />
@@ -292,7 +306,7 @@ export default function ResultCard({
                     <Timer className="h-6 w-6 text-primary" />
                     <h3 className="text-lg font-black tracking-widest text-[#0F172A]">Temporal analytics</h3>
                  </div>
-                 <div className="space-y-6 p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
+                 <div className="space-y-6 p-8 bg-slate-50/80 backdrop-blur-sm rounded-[2rem] border border-slate-100">
                     <MetricPill label="Avg ingestion speed" val={timeMetrics.avg} />
                     <MetricPill label="Decision speed" val="High" />
                     <MetricPill label="Efficiency hub" val="Active" />
@@ -301,7 +315,7 @@ export default function ResultCard({
            </div>
         </div>
 
-        <div className="mt-auto border-t-2 border-slate-100 p-12 flex items-center justify-between text-slate-300 shrink-0">
+        <div className="mt-auto border-t-2 border-slate-100 p-12 flex items-center justify-between text-slate-300 shrink-0 relative z-10">
            <div className="flex items-center gap-4">
               <ShieldCheck className="h-6 w-6" />
               <span className="text-[11px] font-black tracking-[0.5em] uppercase">Institutional merit registry verified</span>
@@ -318,7 +332,7 @@ export default function ResultCard({
 
 function ReportMetric({ label, val, icon, color, bg }: any) {
    return (
-      <div className="bg-white border-2 border-slate-50 rounded-[2rem] p-6 shadow-md flex flex-col items-center justify-center text-center space-y-4">
+      <div className="bg-white/80 backdrop-blur-sm border-2 border-slate-50 rounded-[2rem] p-6 shadow-md flex flex-col items-center justify-center text-center space-y-4">
          <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shadow-inner", bg, color)}>
             {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6" }) : null}
          </div>
