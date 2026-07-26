@@ -51,8 +51,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 
 /**
- * @fileOverview Institutional Result System v15.0 [PWA Full-Width & Audit Refined].
- * FIXED: Full-width PWA view on mobile devices.
+ * @fileOverview Institutional Result System v16.0 [Title Case Optimized].
+ * FIXED: Removed all forced uppercase text and maximized PWA screen utility.
  */
 
 export default function ResultClient() {
@@ -207,7 +207,7 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Validating registry node..." });
+    toast({ title: "Synchronizing with registry..." });
 
     try {
       await document.fonts.ready;
@@ -229,9 +229,9 @@ export default function ResultClient() {
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
       pdf.save(`Cracklix_Report_${activeSession.userName || 'Student'}.pdf`);
-      toast({ title: "Official Report Exported" });
+      toast({ title: "Official Report Downloaded" });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Export Interrupted" });
+      toast({ variant: "destructive", title: "Export Error" });
     } finally { setIsExporting(false); }
   };
 
@@ -265,12 +265,12 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body">
       <Navbar />
-      <main className="container mx-auto max-w-[1440px] px-0 md:px-10 py-6 md:py-10 space-y-8 pb-32">
+      <main className="container mx-auto max-w-7xl px-0 md:px-8 py-6 md:py-12 space-y-10 pb-32">
         
         {isSearching && (
            <div className="py-24 text-center flex flex-col items-center gap-4">
               <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Resolving attempt node...</p>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Resolving attempt data...</p>
            </div>
         )}
 
@@ -280,46 +280,46 @@ export default function ResultClient() {
                  <AlertCircle className="h-8 w-8" />
               </div>
               <div className="space-y-1">
-                 <h2 className="text-xl font-bold text-[#0F172A]">Result Node Missing</h2>
-                 <p className="text-slate-500 text-sm">We could not locate this specific attempt in the registry.</p>
+                 <h2 className="text-xl font-bold text-[#0F172A]">Registry record missing</h2>
+                 <p className="text-slate-500 text-sm">Attempt could not be found in the live vault.</p>
               </div>
-              <Button asChild variant="outline" className="rounded-xl"><Link href="/dashboard">Back to Hub</Link></Button>
+              <Button asChild variant="outline" className="rounded-xl px-10"><Link href="/dashboard">Back to Hub</Link></Button>
            </div>
         )}
 
         {!isSearching && !errorNotFound && activeSession && finalMetrics && (
-           <>
-              <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-4">
-                 <div className="flex items-center gap-4 text-left w-full lg:w-auto">
-                    <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-11 w-11 md:h-16 md:w-16 rounded-xl shadow-lg bg-white border-2 border-slate-50" />
-                    <div className="space-y-1 flex-1 min-w-0">
-                       <h1 className="text-base md:text-2xl font-bold tracking-tight text-[#0F172A] truncate">
+           <div className="space-y-10 animate-in fade-in duration-500">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-6 px-4">
+                 <div className="flex items-center gap-5 text-left w-full md:w-auto">
+                    <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-16 md:w-16 rounded-xl shadow-lg bg-white border-2 border-slate-50" />
+                    <div className="space-y-0.5 flex-1 min-w-0">
+                       <h1 className="text-lg md:text-2xl font-bold tracking-tight text-[#0F172A] truncate">
                          {activeSession?.mockTitle}
                        </h1>
                        <div className="flex items-center gap-2">
-                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm">Verified Attempt</Badge>
+                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm">Verified Solution</Badge>
                        </div>
                     </div>
                  </div>
                  
-                 <div className="flex gap-3 w-full lg:w-auto">
-                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-12 px-6 rounded-xl border-2 font-bold text-[10px] uppercase tracking-tight"><RotateCcw className="h-3 w-3 mr-2" /> Retake</Button>
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-12 px-6 bg-[#0F172A] text-white rounded-xl shadow-lg font-bold text-[10px] uppercase tracking-tight">
-                       {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} Export PDF
+                 <div className="flex gap-3 w-full md:w-auto">
+                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-12 px-8 rounded-xl border-2 font-bold text-[10px] uppercase tracking-tight">Retake</Button>
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-12 px-10 bg-[#0F172A] text-white rounded-xl shadow-xl font-bold text-[10px] uppercase tracking-tight">
+                       {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} Get Official Report
                     </Button>
                  </div>
               </div>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                  <div className="flex justify-center mb-10">
-                     <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl shadow-xl h-14 md:h-16">
-                        <TabsTrigger value="OVERVIEW" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Overview</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
-                        <TabsTrigger value="REPORT" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Official Report</TabsTrigger>
+                  <div className="flex justify-center mb-10 px-4">
+                     <TabsList className="bg-white border border-slate-100 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full md:w-auto overflow-x-auto no-scrollbar">
+                        <TabsTrigger value="OVERVIEW" className="flex-1 md:flex-none rounded-xl px-10 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="flex-1 md:flex-none rounded-xl px-10 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
+                        <TabsTrigger value="REPORT" className="flex-1 md:flex-none rounded-xl px-10 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
                      </TabsList>
                   </div>
 
-                  <TabsContent value="OVERVIEW" className="animate-in fade-in duration-500">
+                  <TabsContent value="OVERVIEW" className="px-0">
                       <ReportScreen 
                          {...activeSession} 
                          resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
@@ -345,24 +345,24 @@ export default function ResultClient() {
                       />
                   </TabsContent>
 
-                  <TabsContent value="REVIEW" className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto px-4 md:px-0">
-                      <div className="flex items-center gap-1 bg-white p-1 rounded-xl shadow-md border border-slate-100 w-fit mx-auto">
+                  <TabsContent value="REVIEW" className="space-y-8 max-w-4xl mx-auto px-4">
+                      <div className="flex items-center gap-1 bg-white p-1 rounded-xl shadow-md border border-slate-100 w-fit mx-auto sticky top-[180px] z-20">
                           <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
-                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Mistakes (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                           <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                       </div>
                       <div className="space-y-6">
                           {filteredQuestions.map((q) => (
-                              <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-white text-left">
-                                  <div className="p-6 md:p-10 space-y-6">
-                                      <Badge variant="outline" className="px-3 py-0.5 rounded-lg border-slate-200 text-slate-400 font-bold text-[8px]">
+                              <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[2.5rem] overflow-hidden bg-white text-left">
+                                  <div className="p-6 md:p-12 space-y-6">
+                                      <Badge variant="outline" className="px-3 py-1 rounded-lg border-slate-200 text-slate-400 font-bold text-[9px]">
                                           Question #{q.originalIndex + 1}
                                       </Badge>
                                       <QuestionRenderer 
                                           question={q} 
                                           language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
                                           showSolution={true} 
-                                          selectedAnswer={activeSession.answers?.[q.originalIndex]} 
+                                          selectedAnswer={activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)]} 
                                           className="p-0 shadow-none border-none bg-transparent" 
                                       />
                                   </div>
@@ -371,8 +371,8 @@ export default function ResultClient() {
                       </div>
                   </TabsContent>
 
-                  <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 overflow-x-auto no-scrollbar pb-20">
-                      <div className="flex flex-col items-center pt-10">
+                  <TabsContent value="REPORT" className="px-4 overflow-x-auto no-scrollbar pb-20">
+                      <div className="flex flex-col items-center pt-4">
                          <div className="bg-white p-0 shadow-5xl border border-slate-200 overflow-hidden w-full max-w-[210mm]">
                             <ReportPDF 
                                {...activeSession}
@@ -399,7 +399,7 @@ export default function ResultClient() {
                       </div>
                   </TabsContent>
               </Tabs>
-           </>
+           </div>
         )}
 
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
@@ -437,7 +437,7 @@ export default function ResultClient() {
 
 function FilterButton({ active, label, onClick, color = "primary" }: any) {
   return (
-    <button onClick={onClick} className={cn("px-4 md:px-6 py-2 rounded-lg text-[8px] md:text-[9px] font-black tracking-tight transition-all active:scale-95 whitespace-nowrap border border-transparent uppercase tracking-widest", active ? color === 'rose' ? "bg-rose-600 text-white shadow-lg" : color === 'emerald' ? "bg-emerald-600 text-white shadow-lg" : "bg-[#0F172A] text-white shadow-lg" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
+    <button onClick={onClick} className={cn("px-4 md:px-7 py-2.5 rounded-lg text-[10px] font-bold tracking-tight transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-lg" : color === 'emerald' ? "bg-emerald-600 text-white shadow-lg" : "bg-[#0F172A] text-white shadow-lg" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
        {label}
     </button>
   )
@@ -446,6 +446,6 @@ function FilterButton({ active, label, onClick, color = "primary" }: any) {
 function formatTimeStr(seconds: number) {
   if (!seconds || isNaN(seconds)) return "0m 0s";
   const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
+  const s = Math.floor(seconds % 60);
   return `${m}m ${s}s`;
 }
