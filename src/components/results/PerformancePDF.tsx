@@ -4,17 +4,17 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 /**
- * @fileOverview Institutional Performance PDF Template Engine v1.9.
- * FIXED: Updated font URLs to use high-availability nodes to prevent 404 errors.
+ * @fileOverview Institutional Performance PDF Template Engine v2.0.
+ * FIXED: Updated font registry to use high-availability stable TTF nodes.
  */
 
 // Register professional typography with high-availability TTF sources
 Font.register({
   family: 'Inter',
   fonts: [
-    { src: 'https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/Inter-UI-Regular.ttf', fontWeight: 400 },
-    { src: 'https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/Inter-UI-Bold.ttf', fontWeight: 700 },
-    { src: 'https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/Inter-UI-Black.ttf', fontWeight: 900 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Regular.ttf', fontWeight: 400 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Bold.ttf', fontWeight: 700 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Black.ttf', fontWeight: 900 },
   ],
 });
 
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 120,
-    height: 'auto',
+    height: 40,
   },
   headerTitle: {
     fontSize: 20,
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     fontWeight: 400,
   },
   candidateCard: {
-    padding: 24,
+    padding: 20,
     backgroundColor: '#F8FAFC',
     borderRadius: 16,
     marginBottom: 20,
@@ -77,14 +77,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   infoLabel: {
-    fontSize: 8,
+    fontSize: 7,
     color: '#64748B',
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   infoValue: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: 700,
     color: '#071B4D',
     marginTop: 2,
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   rankSection: {
     backgroundColor: '#071B4D',
     borderRadius: 24,
-    padding: 32,
+    padding: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -103,23 +103,23 @@ const styles = StyleSheet.create({
   },
   rankLabel: {
     color: '#60A5FA',
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: 2,
   },
   rankValueContainer: {
-    marginTop: 8,
-    marginBottom: 8,
+    marginTop: 6,
+    marginBottom: 6,
   },
   rankValue: {
     color: '#FFFFFF',
-    fontSize: 56,
+    fontSize: 48,
     fontWeight: 900,
   },
   rankTotal: {
     color: 'rgba(255, 255, 255, 0.5)',
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: 700,
   },
   badge: {
@@ -128,30 +128,30 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     color: '#FFFFFF',
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 700,
   },
   statsGrid: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     marginBottom: 20,
   },
   statCard: {
     flex: 1,
-    padding: 16,
+    padding: 12,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
   },
   statValue: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 900,
   },
   statLabel: {
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: 700,
-    marginTop: 4,
+    marginTop: 2,
     textTransform: 'uppercase',
   },
   table: {
@@ -164,41 +164,41 @@ const styles = StyleSheet.create({
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#F8FAFC',
-    padding: 10,
+    padding: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#E5EAF2',
   },
   tableRow: {
     flexDirection: 'row',
-    padding: 10,
+    padding: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#F8FAFC',
   },
-  colSubject: { flex: 3, fontSize: 10, fontWeight: 700 },
-  colScore: { flex: 1, fontSize: 10, fontWeight: 900, textAlign: 'center' },
-  colAccuracy: { flex: 1, fontSize: 10, fontWeight: 900, textAlign: 'right' },
+  colSubject: { flex: 3, fontSize: 9, fontWeight: 700 },
+  colScore: { flex: 1, fontSize: 9, fontWeight: 900, textAlign: 'center' },
+  colAccuracy: { flex: 1, fontSize: 9, fontWeight: 900, textAlign: 'right' },
   
   bottomRow: {
     flexDirection: 'row',
-    gap: 20,
+    gap: 15,
     marginBottom: 20,
   },
   insightBox: {
     flex: 1,
-    padding: 20,
+    padding: 15,
     backgroundColor: '#F8FAFC',
     borderRadius: 16,
   },
   insightTitle: {
-    fontSize: 10,
+    fontSize: 8,
     fontWeight: 900,
-    marginBottom: 10,
+    marginBottom: 8,
     textTransform: 'uppercase',
     color: '#1677FF',
   },
   insightItem: {
-    fontSize: 9,
-    marginBottom: 6,
+    fontSize: 8,
+    marginBottom: 4,
     color: '#475569',
     fontWeight: 700,
   },
@@ -206,22 +206,22 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     borderTopWidth: 1,
     borderTopColor: '#E5EAF2',
-    paddingTop: 20,
+    paddingTop: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   footerText: {
-    fontSize: 8,
+    fontSize: 7,
     color: '#94A3B8',
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   qrCode: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
+    width: 50,
+    height: 50,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: '#E5EAF2',
   }
@@ -361,15 +361,15 @@ export default function PerformancePDF({ data, qrData }: Props) {
         <View style={styles.bottomRow}>
           <View style={styles.insightBox}>
             <Text style={styles.insightTitle}>Smart Insights</Text>
-            <Text style={styles.insightItem}>• Strength: {accuracy >= 80 ? 'High Accuracy' : 'Speed Control'}</Text>
-            <Text style={styles.insightItem}>• Weakness: {wrong > 5 ? 'Negative Marking' : 'Topic Depth'}</Text>
-            <Text style={styles.insightItem}>• Recommendation: Practice more {subjectAnalysis?.[0]?.name || 'Mocks'}</Text>
+            <Text style={styles.insightItem}>• Strength: {accuracy >= 80 ? 'High Accuracy' : 'Consistency'}</Text>
+            <Text style={styles.insightItem}>• Weakness: {wrong > 5 ? 'Negative Penalty' : 'Syllabus Depth'}</Text>
+            <Text style={styles.insightItem}>• Action: Focus on {subjectAnalysis?.[0]?.name || 'Practice'}</Text>
           </View>
           <View style={styles.insightBox}>
             <Text style={styles.insightTitle}>Competition Snapshot</Text>
             <Text style={styles.insightItem}>Top Score: {topScore}</Text>
-            <Text style={styles.insightItem}>Average Score: {avgScore.toFixed(1)}</Text>
-            <Text style={styles.insightItem}>Average Accuracy: {avgAccuracy.toFixed(1)}%</Text>
+            <Text style={styles.insightItem}>Avg Score: {avgScore.toFixed(1)}</Text>
+            <Text style={styles.insightItem}>Avg Accuracy: {avgAccuracy.toFixed(1)}%</Text>
             <Text style={styles.insightItem}>Topper Gap: {Math.max(0, topScore - score).toFixed(1)} Pts</Text>
           </View>
         </View>
@@ -378,7 +378,7 @@ export default function PerformancePDF({ data, qrData }: Props) {
         <View style={styles.footer}>
           <View>
             <Text style={styles.footerText}>Verified Digital Report</Text>
-            <Text style={[styles.footerText, { color: '#071B4D', marginTop: 4 }]}>Generated by Cracklix Assessment Engine</Text>
+            <Text style={[styles.footerText, { color: '#071B4D', marginTop: 4 }]}>Cracklix Assessment Engine v2.0</Text>
             <Text style={[styles.footerText, { color: '#1677FF', marginTop: 4 }]}>cracklix.in</Text>
           </View>
           <Image src={qrData} style={styles.qrCode} />

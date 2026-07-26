@@ -18,8 +18,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v5.0.
- * FIXED: Standardized typography to Sentence Case and fixed syntax error in ComparisonNode.
+ * @fileOverview Premium Analysis Screen v5.1.
+ * FIXED: Standardized typography to Title Case and resolved syntax brackets.
  */
 
 interface ReportScreenProps {
@@ -54,9 +54,9 @@ export default function ReportScreen(props: ReportScreenProps) {
     const acc = Number(attemptAccuracy);
     const scoreNum = Number(score);
 
-    if (acc >= 90) list.push({ type: 'STRENGTH', text: "Outstanding accuracy level in core subjects." });
+    if (acc >= 90) list.push({ type: 'STRENGTH', text: "Outstanding Accuracy level in core subjects." });
     else if (acc >= 75) list.push({ type: 'STRENGTH', text: "Strong understanding of attempted questions." });
-    else list.push({ type: 'WEAKNESS', text: "Low accuracy detected. Focus on conceptual clarity." });
+    else list.push({ type: 'WEAKNESS', text: "Low Accuracy detected. Focus on conceptual clarity." });
 
     if (scoreNum < avgScore) list.push({ type: 'SUGGESTION', text: "Attempt more mock tests to beat the platform average." });
     if (wrongCount > totalQuestions * 0.2) list.push({ type: 'WEAKNESS', text: "High negative penalty. Reduce guesswork in difficult items." });
@@ -70,7 +70,7 @@ export default function ReportScreen(props: ReportScreenProps) {
       {/* SCORE SUMMARY ROW */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 overflow-x-auto no-scrollbar -mx-1 px-1">
          <Card className="col-span-2 md:col-span-1 h-36 md:h-44 rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-6">
-            <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-2">Your score</p>
+            <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-2">Your Score</p>
             <div className="flex items-baseline gap-1">
                <span className="text-2xl md:text-4xl font-black text-[#10B981] tabular-nums">{score}</span>
                <span className="text-sm md:text-xl font-bold text-slate-400">/{totalQuestions}</span>
@@ -87,11 +87,11 @@ export default function ReportScreen(props: ReportScreenProps) {
       {/* RANKING CARD */}
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 flex items-center justify-between">
          <div className="flex items-center gap-4 md:gap-8">
-            <div className="h-12 w-12 md:h-16 md:w-16 rounded-full bg-[#1677FF] flex items-center justify-center text-white shadow-lg">
+            <div className="h-12 w-12 md:h-16 md:h-16 rounded-full bg-[#1677FF] flex items-center justify-center text-white shadow-lg">
                <Trophy className="h-6 w-6 md:h-8 md:w-8" />
             </div>
             <div className="text-left">
-               <p className="text-[10px] md:text-xs font-bold text-slate-400">Your Punjab rank</p>
+               <p className="text-[10px] md:text-xs font-bold text-slate-400">Your Punjab Rank</p>
                <div className="flex items-baseline gap-2">
                   <span className="text-3xl md:text-5xl font-black text-[#1677FF] tabular-nums">#{rank}</span>
                   <span className="text-[10px] md:text-sm font-bold text-slate-300">/ {totalCandidates} Candidates</span>
@@ -101,8 +101,8 @@ export default function ReportScreen(props: ReportScreenProps) {
          <div className="hidden sm:flex items-center gap-3 bg-blue-50 px-6 py-3 rounded-2xl">
             <ShieldCheck className="h-5 w-5 text-[#1677FF]" />
             <div className="text-left">
-               <p className="text-[10px] md:text-xs font-black text-[#1677FF] leading-none">Verified standing</p>
-               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1">Top ranked hub</p>
+               <p className="text-[10px] md:text-xs font-black text-[#1677FF] leading-none">Verified Standing</p>
+               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1">Top Ranked Hub</p>
             </div>
          </div>
       </Card>
@@ -111,13 +111,13 @@ export default function ReportScreen(props: ReportScreenProps) {
       <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <BarChart3 className="h-5 w-5 text-[#1677FF]" />
-            <h3 className="text-lg font-black text-[#071B4D]">Performance overview</h3>
+            <h3 className="text-lg font-black text-[#071B4D]">Performance Overview</h3>
          </div>
          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatsBox label="Accuracy" val={`${attemptAccuracy}%`} sub={`(${correctCount}/${correctCount + wrongCount})`} />
-            <StatsBox label="Pass grade" val={grade} sub="(Min. 40%)" color={grade === 'F' ? 'text-[#FF3366]' : 'text-[#10B981]'} />
-            <StatsBox label="Net score" val={score} sub={`(Out of ${totalQuestions})`} />
-            <StatsBox label="Percentile" val={percentile > 0 ? `${percentile}%` : "--"} sub="Verified index" />
+            <StatsBox label="Pass Grade" val={grade} sub="(Min. 40%)" color={grade === 'F' ? 'text-[#FF3366]' : 'text-[#10B981]'} />
+            <StatsBox label="Net Score" val={score} sub={`(Out of ${totalQuestions})`} />
+            <StatsBox label="Percentile" val={percentile > 0 ? `${percentile}%` : "--"} sub="Verified Index" />
          </div>
       </div>
 
@@ -126,7 +126,7 @@ export default function ReportScreen(props: ReportScreenProps) {
          <div className="space-y-6">
             <div className="flex items-center gap-3 px-1">
                <Target className="h-5 w-5 text-[#1677FF]" />
-               <h3 className="text-lg font-black text-[#071B4D]">Subject mastery</h3>
+               <h3 className="text-lg font-black text-[#071B4D]">Subject Mastery</h3>
             </div>
             <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden">
                <div className="overflow-x-auto">
@@ -163,13 +163,13 @@ export default function ReportScreen(props: ReportScreenProps) {
       <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <TrendingUp className="h-5 w-5 text-[#1677FF]" />
-            <h3 className="text-lg font-black text-[#071B4D]">Competition snapshot</h3>
+            <h3 className="text-lg font-black text-[#071B4D]">Competition Snapshot</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <ComparisonNode label="Top score" val={topScore.toFixed(1)} icon={<Award className="text-amber-500" />} />
-            <ComparisonNode label="Avg. score" val={avgScore.toFixed(1)} icon={<Activity className="text-blue-500" />} />
-            <ComparisonNode label="Avg. accuracy" val={`${avgAccuracy.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500" />} />
-            <ComparisonNode label="Score gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500" />} />
+            <ComparisonNode label="Top Score" val={topScore.toFixed(1)} icon={<Award className="text-amber-500" />} />
+            <ComparisonNode label="Avg. Score" val={avgScore.toFixed(1)} icon={<Activity className="text-blue-500" />} />
+            <ComparisonNode label="Avg. Accuracy" val={`${avgAccuracy.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500" />} />
+            <ComparisonNode label="Score Gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500" />} />
          </div>
       </div>
 
@@ -177,7 +177,7 @@ export default function ReportScreen(props: ReportScreenProps) {
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 space-y-6">
          <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
             <Lightbulb className="h-5 w-5 text-[#F59E0B]" />
-            <h3 className="text-lg font-black text-[#071B4D]">Smart insights</h3>
+            <h3 className="text-lg font-black text-[#071B4D]">Smart Insights</h3>
          </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {insights.map((insight, i) => (

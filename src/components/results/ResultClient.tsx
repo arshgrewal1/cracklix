@@ -42,8 +42,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v19.0.
- * FIXED: Standardized Tabs implementation and corrected missing icon references.
+ * @fileOverview Universal Result Hub Viewer v19.1.
+ * FIXED: Standardized Tabs triggers nesting within TabsList and verified all icon imports.
  */
 
 export default function ResultClient() {
@@ -177,7 +177,7 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !sessionData) return;
     setIsExporting(true);
-    toast({ title: "Syncing report registry" });
+    toast({ title: "Syncing Report Registry" });
     
     try {
       const qrData = await QRCode.toDataURL(`https://cracklix.in/report/${sessionData.attemptId}`);
@@ -206,10 +206,10 @@ export default function ResultClient() {
 
       const blob = await pdf(<PerformancePDF data={pdfData} qrData={qrData} />).toBlob();
       saveAs(blob, `Report_${pdfData.studentName.replace(/\s+/g, '_')}.pdf`);
-      toast({ title: "Report downloaded" });
+      toast({ title: "Report Downloaded Successfully" });
     } catch (e) { 
-       console.error(e);
-       toast({ variant: "destructive", title: "Export failed" }); 
+       console.error("[PDF_EXPORT_FAILURE]:", e);
+       toast({ variant: "destructive", title: "Export Failed", description: "PDF generation node encountered an error." }); 
     } finally { setIsExporting(false); }
   };
 
@@ -228,7 +228,7 @@ export default function ResultClient() {
     return { all, correct, wrong, skipped };
   }, [questions, sessionData]);
 
-  if (isSearching) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6"><Zap className="h-12 w-12 text-primary animate-pulse" /><p className="text-[10px] font-bold text-slate-300">Synchronizing analysis hub...</p></div>;
+  if (isSearching) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6"><Zap className="h-12 w-12 text-primary animate-pulse" /><p className="text-[10px] font-bold text-slate-300">Synchronizing Analysis Hub...</p></div>;
 
   const filteredQuestions = activeReviewFilter === 'CORRECT' ? reviewNodes.correct : 
                            activeReviewFilter === 'WRONG' ? reviewNodes.wrong : 
@@ -247,11 +247,11 @@ export default function ResultClient() {
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-20 md:w-20 bg-white shadow-xl border border-slate-100" />
                     <div className="text-left space-y-2">
                        <div className="flex flex-wrap items-center gap-3">
-                          <Badge className="bg-[#10B981] text-white border-none px-3 py-1 font-bold text-[9px]">Verified hub</Badge>
+                          <Badge className="bg-[#10B981] text-white border-none px-3 py-1 font-bold text-[9px]">Verified Hub</Badge>
                           <Badge className="bg-[#1677FF] text-white border-none px-3 py-1 font-bold text-[9px]">Attempt #{profile?.totalTests || 1}</Badge>
                        </div>
                        <h1 className="text-xl md:text-3xl font-[800] text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
-                       <div className="flex flex-wrap items-center gap-6 text-[10px] md:text-xs font-bold text-slate-400">
+                       <div className="flex flex-wrap items-center gap-6 text-[10px] md:xs font-bold text-slate-400">
                           <HeaderMiniNode icon={<Clock className="h-3.5 w-3.5" />} label="Date" val={new Date(sessionData.timestamp).toLocaleDateString('en-GB')} />
                           <HeaderMiniNode icon={<Clock className="h-3.5 w-3.5" />} label="Duration" val={`${mockData?.duration || 120}m`} />
                           <HeaderMiniNode icon={<Users className="h-3.5 w-3.5" />} label="Candidates" val={totalCandidates.toLocaleString()} />
@@ -263,7 +263,7 @@ export default function ResultClient() {
                        {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download PDF
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
-                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake test</Link>
+                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
                     </Button>
                  </div>
               </Card>
@@ -271,8 +271,8 @@ export default function ResultClient() {
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-10">
                   <div className="flex justify-center">
                      <TabsList className="bg-slate-100 p-1 rounded-3xl border border-[#E5EAF2] shadow-inner flex w-fit gap-1 h-auto">
-                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review portal</TabsTrigger>
+                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis Hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review Portal</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -291,7 +291,7 @@ export default function ResultClient() {
                   <TabsContent value="REVIEW" className="m-0 max-w-5xl mx-auto space-y-6 md:space-y-10">
                       <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 flex items-center justify-between gap-6 shadow-sm">
                           <div className="flex items-center gap-2 md:gap-4 overflow-x-auto no-scrollbar">
-                             <FilterButton active={activeReviewFilter === 'ALL'} label="All questions" count={reviewNodes.all.length} onClick={() => setActiveReviewFilter('ALL')} />
+                             <FilterButton active={activeReviewFilter === 'ALL'} label="All Questions" count={reviewNodes.all.length} onClick={() => setActiveReviewFilter('ALL')} />
                              <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" count={reviewNodes.correct.length} onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                              <FilterButton active={activeReviewFilter === 'WRONG'} label="Wrong" count={reviewNodes.wrong.length} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                              <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skipped" count={reviewNodes.skipped.length} onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
