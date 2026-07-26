@@ -3,14 +3,11 @@
 import React from 'react';
 import { 
   ShieldCheck, 
-  CheckCircle2, 
   Trophy,
   Zap,
   TrendingUp,
   Target,
-  Award,
-  BarChart3,
-  Clock
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
@@ -21,9 +18,7 @@ interface ReportPDFProps {
   score: string | number;
   rank: string | number;
   totalCandidates: number;
-  accuracy: string | number;
   attemptAccuracy: string | number;
-  attemptRate: string | number;
   timeTaken: string;
   correct: number;
   wrong: number;
@@ -35,23 +30,18 @@ interface ReportPDFProps {
   subjects?: any[];
   grade?: string;
   isQualified?: boolean;
-  readinessLevel?: string;
-  topperScore?: number;
-  avgScore?: number;
   duration?: number | string;
 }
 
 /**
- * @fileOverview Hardened PDF Fixed-Layout Hub v1.4.
- * UPDATED: Optimized scaling for larger logo and Title Case standard.
+ * @fileOverview Hardened PDF Fixed-Layout Hub v1.5 [Title Case Verified].
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
-    studentName, examTitle, score, rank, totalCandidates, accuracy,
-    attemptAccuracy, attemptRate, timeTaken, correct, wrong, skipped,
+    studentName, examTitle, score, rank, totalCandidates,
+    attemptAccuracy, timeTaken, correct, wrong, skipped,
     total, date, resultId, percentile, subjects = [], grade = "F",
-    isQualified, readinessLevel = "Standard", topperScore = 0, avgScore = 0,
-    duration
+    isQualified, duration
   } = props;
 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('https://cracklix.in')}`;
@@ -61,10 +51,10 @@ export default function ReportPDF(props: ReportPDFProps) {
       className="bg-white p-0 m-0 box-border text-left font-body overflow-hidden"
       style={{ width: '794px', minHeight: '1123px' }}
     >
-      {/* 1. Header Hub - Scaled Logo */}
+      {/* 1. Header Hub */}
       <div className="flex items-center justify-between px-10 py-12 border-b-2 border-slate-100 bg-slate-50/20">
          <div className="flex items-center gap-8">
-            <div className="h-32 w-32 relative bg-white border-2 border-slate-100 rounded-3xl shadow-xl overflow-hidden p-2">
+            <div className="h-28 w-28 relative bg-white border-2 border-slate-100 rounded-3xl shadow-xl overflow-hidden p-1">
                <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
             </div>
             <div className="space-y-1">
@@ -103,7 +93,9 @@ export default function ReportPDF(props: ReportPDFProps) {
                   <p className="text-7xl font-black tabular-nums tracking-tighter">#{rank}</p>
                   <p className="text-sm font-bold text-slate-500 tabular-nums">/ {totalCandidates.toLocaleString()} Candidates</p>
                   <div className="mt-8">
-                    <Badge className="bg-emerald-500 text-white border-none font-bold text-[10px] px-5 py-2 rounded-full shadow-lg">Verified Standing</Badge>
+                    <Badge className="bg-emerald-500 text-white border-none font-bold text-[10px] px-5 py-2 rounded-full shadow-lg">
+                       {Number(rank) <= 10 && totalCandidates >= 5 ? 'Top Performer' : 'Verified Attempt'}
+                    </Badge>
                   </div>
                </div>
             </div>
@@ -129,7 +121,7 @@ export default function ReportPDF(props: ReportPDFProps) {
          {subjects.length > 0 && (
             <div className="space-y-6">
                <p className="text-[11px] font-black text-[#0F172A] tracking-tight flex items-center gap-3">
-                  <BarChart3 className="h-5 w-5 text-primary" /> Subject Mastery Analytics
+                  <BarChart3 className="h-5 w-5 text-primary" /> Subject Analytics
                </p>
                <div className="border border-slate-100 rounded-[2rem] overflow-hidden bg-white shadow-xl">
                   <table className="w-full text-left">

@@ -3,22 +3,16 @@
 import React from 'react';
 import { 
   ShieldCheck, 
-  Clock, 
   BarChart3, 
   Target,
   Trophy,
   TrendingUp,
   Zap,
-  Activity,
-  Award,
-  CheckCircle2,
-  BookOpen,
-  Timer
+  Award
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { motion } from 'framer-motion';
 
 interface ReportScreenProps {
   studentName: string;
@@ -35,28 +29,24 @@ interface ReportScreenProps {
   skipped: number;
   total: number;
   date: string;
-  resultId: string;
+  resultId?: string;
   percentile: number;
   subjects?: any[];
   grade?: string;
   isQualified?: boolean;
-  readinessLevel?: string;
-  topperScore?: number;
-  avgScore?: number;
   duration?: number | string;
 }
 
 /**
  * @fileOverview Responsive Screen Layout for Browser Viewing.
- * FIXED: Added missing Card import and handled undefined resultId.
+ * FIXED: Removed icons from Grade cards and ensured professional Title Case.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
-    studentName, examTitle, score, rank, totalCandidates, accuracy,
-    attemptAccuracy, attemptRate, timeTaken, correct, wrong, skipped,
+    studentName, examTitle, score, rank, totalCandidates, 
+    attemptAccuracy, timeTaken, correct, wrong, skipped,
     total, date, resultId, percentile, subjects = [], grade = "F",
-    isQualified, readinessLevel = "Standard", topperScore = 0, avgScore = 0,
-    duration
+    isQualified, duration
   } = props;
 
   return (
@@ -92,7 +82,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                <p className="text-sm font-bold text-[#0F172A]">{duration ? `${duration}m` : 'Timed'}</p>
             </div>
             <div className="space-y-1">
-               <p className="text-[9px] font-bold text-slate-400">Candidates</p>
+               <p className="text-[9px] font-bold text-slate-400">Participants</p>
                <p className="text-sm font-bold text-[#0F172A] tabular-nums">{totalCandidates.toLocaleString()}</p>
             </div>
          </div>
@@ -118,7 +108,7 @@ export default function ReportScreen(props: ReportScreenProps) {
          <MetricBox label="Net Score" val={score} sub="Actual points" icon={<Zap />} color="text-primary" bg="bg-blue-50" />
          <MetricBox label="Percentile" val={`${percentile}%`} sub="Verified standing" icon={<TrendingUp />} color="text-purple-600" bg="bg-purple-50" />
          <MetricBox label="Accuracy" val={`${attemptAccuracy}%`} sub="Precision index" icon={<Target />} color="text-emerald-600" bg="bg-emerald-50" />
-         <MetricBox label="Status" val={`Grade ${grade}`} sub="Audit level" icon={<Award />} color="text-amber-600" bg="bg-amber-50" />
+         <MetricBox label="Status" val={`Grade ${grade}`} sub="Audit level" icon={null} color="text-amber-600" bg="bg-amber-50" />
       </div>
 
       {/* Subject Analysis */}
@@ -167,9 +157,11 @@ export default function ReportScreen(props: ReportScreenProps) {
 function MetricBox({ label, val, icon, color, bg }: any) {
    return (
       <Card className="border-none shadow-lg bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] flex flex-col items-start gap-4 hover:translate-y-[-2px] transition-all border border-slate-50">
-         <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner", bg, color)}>
-            {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" }) : icon}
-         </div>
+         {icon && (
+            <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner", bg, color)}>
+               {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" }) : icon}
+            </div>
+         )}
          <div>
             <p className="text-[10px] md:text-xl font-black text-[#0F172A] tabular-nums leading-none tracking-tight">{val}</p>
             <p className="text-[8px] md:text-[10px] font-bold text-slate-400 tracking-tight mt-1">{label}</p>

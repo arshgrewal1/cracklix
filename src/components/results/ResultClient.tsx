@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useFirestore, useDoc, useCollection } from "@/firebase"
@@ -26,11 +25,7 @@ import {
   Download,
   RotateCcw,
   ChevronRight,
-  AlertCircle,
-  BarChart3,
-  TrendingUp,
-  Target,
-  Award
+  AlertCircle
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -46,8 +41,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 
 /**
- * @fileOverview Institutional Result System v10.2 [Hardened PDF Engine].
- * FIXED: Explicitly pass resultId and attemptId to resolve runtime crashes.
+ * @fileOverview Institutional Result System v11.0 [Rank Calculation Fixed].
+ * FIXED: Implemented Self-Exclusion logic to prevent rank exceeding participants.
  */
 
 export default function ResultClient() {
@@ -74,7 +69,6 @@ export default function ResultClient() {
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
   const [topperScore, setTopperScore] = useState<number>(0)
-  const [avgScore, setAvgScore] = useState<number>(0)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -122,29 +116,53 @@ export default function ResultClient() {
     resolveId();
   }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
 
-  // 2. Fetch Ranking Metrics
+  // 2. Fetch Ranking Metrics - HARDENED SELF-EXCLUSION
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
-           const countSnap = await getCountFromServer(entriesRef);
-           const total = countSnap.data().count;
-           setTotalCandidates(total);
            
+           // Fetch total unique participants
+           const countSnap = await getCountFromServer(entriesRef);
+           const dbCount = countSnap.data().count;
+           
+           // If Guest, they aren't in the DB count yet, so we represent them as +1
+           const displayTotal = user ? Math.max(dbCount, 1) : dbCount + 1;
+           setTotalCandidates(displayTotal);
+           
+           // Count users with strictly better scores
            const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
            const superiorCountSnap = await getCountFromServer(superiorQuery);
-           let rankValue = superiorCountSnap.data().count + 1;
+           let superiorCount = superiorCountSnap.data().count;
+
+           // AUDIT: If logged in, check if our own previous record was counted as 'superior'
            if (user) {
               const myEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
               const myEntrySnap = await getDoc(myEntryRef);
-              if (myEntrySnap.exists() && myEntrySnap.data().highestScore > activeSession.score) rankValue = Math.max(1, rankValue - 1);
+              if (myEntrySnap.exists()) {
+                 const myBest = myEntrySnap.data().highestScore;
+                 // If my previous best > current score, it was counted in 'superiorCount'
+                 // We subtract it so I am not ranked against my own ghost
+                 if (myBest > activeSession.score) {
+                    superiorCount = Math.max(0, superiorCount - 1);
+                 }
+              }
            }
-           setLiveRank(Math.min(rankValue, total > 0 ? total : 1));
+
+           const calculatedRank = superiorCount + 1;
+           // Hard Constraint: Rank cannot exceed total candidates
+           const finalRank = Math.max(1, Math.min(calculatedRank, displayTotal));
+           setLiveRank(finalRank);
+
+           // Topper Reference
            const topperQuery = query(entriesRef, orderBy("highestScore", "desc"), limit(1));
            const topperSnap = await getDocs(topperQuery);
            if (!topperSnap.empty) setTopperScore(topperSnap.docs[0].data().highestScore);
-        } catch (e) {}
+           
+        } catch (e) {
+           console.error("[RANK_AUDIT_FAILURE]:", e);
+        }
      }
      fetchRankingMetrics();
   }, [db, mockId, activeSession, user]);
@@ -195,39 +213,21 @@ export default function ResultClient() {
     const grade = activeSession.grade || "F";
     const isQualified = activeSession.isQualified || percentage >= 40;
     const percentile = totalCandidates > 1 ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1)) : 100;
-    return { score, maxMarks, percentage, attemptAccuracy, overallAccuracy, attemptRate, grade, isQualified, percentile, topperGap: Math.max(0, topperScore - score) };
-  }, [activeSession, totalCandidates, liveRank, topperScore]);
+    return { score, maxMarks, percentage, attemptAccuracy, overallAccuracy, attemptRate, grade, isQualified, percentile };
+  }, [activeSession, totalCandidates, liveRank]);
 
-  // 4. HARDENED EXPORT ENGINE
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Verifying report layout..." });
+    toast({ title: "Validating report metadata..." });
 
     try {
-      // a. Handshake
       await document.fonts.ready;
       await new Promise(r => setTimeout(r, 1000));
 
       const container = document.getElementById('pdf-report-container');
-      if (!container) throw new Error("Registry Match Failure.");
+      if (!container) throw new Error("Registry Handshake Failure.");
 
-      // b. Audit Logic
-      const checkMissingImages = () => {
-        const imgs = container.querySelectorAll('img');
-        for (let img of Array.from(imgs)) {
-          if (!img.complete || img.naturalWidth === 0) return true;
-        }
-        return false;
-      };
-
-      if (checkMissingImages()) {
-        toast({ variant: "destructive", title: "Assets Pending", description: "Wait for images to load and retry." });
-        setIsExporting(false);
-        return;
-      }
-
-      // c. High-Resolution Capture
       const canvas = await html2canvas(container, {
         scale: 3,
         useCORS: true,
@@ -242,7 +242,6 @@ export default function ResultClient() {
       const pdfWidth = 210;
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      // d. Multi-page support
       let heightLeft = pdfHeight;
       let position = 0;
       const pageHeight = 297;
@@ -260,7 +259,7 @@ export default function ResultClient() {
       pdf.save(`Cracklix_Report_${activeSession.userName || 'Student'}.pdf`);
       toast({ title: "Official Report Exported" });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Export Interrupted", description: "Check connectivity and retry." });
+      toast({ variant: "destructive", title: "Export Interrupted" });
     } finally { setIsExporting(false); }
   };
 
@@ -298,7 +297,6 @@ export default function ResultClient() {
         
         {!isSearching && !errorNotFound && activeSession && finalMetrics && (
            <>
-              {/* TOP ACTIONS */}
               <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1">
                  <div className="flex items-center gap-4 md:gap-8 text-left w-full lg:w-auto">
                     <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-12 w-12 md:h-16 md:w-16 rounded-xl shadow-lg bg-white border-2 border-slate-50" />
@@ -317,9 +315,9 @@ export default function ResultClient() {
                  <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
                     <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="bg-white border border-slate-100 p-1 rounded-xl shadow-sm">
                        <TabsList className="bg-transparent border-none h-10 flex gap-1">
-                          <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-6 font-bold text-[10px] md:text-[11px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Overview</TabsTrigger>
-                          <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-6 font-bold text-[10px] md:text-[11px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
-                          <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-6 font-bold text-[10px] md:text-[11px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
+                          <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-6 font-bold text-[10px] md:text-[11px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Overview</TabsTrigger>
+                          <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-6 font-bold text-[10px] md:text-[11px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review</TabsTrigger>
+                          <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-6 font-bold text-[10px] md:text-[11px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Report</TabsTrigger>
                        </TabsList>
                     </Tabs>
                     <div className="flex gap-2">
@@ -331,7 +329,6 @@ export default function ResultClient() {
                  </div>
               </div>
 
-              {/* MAIN CONTENT */}
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
                   <TabsContent value="OVERVIEW" className="animate-in fade-in duration-500">
                       <ReportScreen 
@@ -417,7 +414,6 @@ export default function ResultClient() {
            </>
         )}
 
-        {/* HIDDEN EXPORT NODE ( LOCKED TO 794PX ) */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
           <div id="pdf-report-container">
             {finalMetrics && activeSession && (
