@@ -20,6 +20,7 @@ import {
   Check
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 import QRCode from 'qrcode';
 
 interface ShareableResultCardProps {
@@ -31,6 +32,7 @@ interface ShareableResultCardProps {
 /**
  * @fileOverview Institutional Merit Certificate v4.0 [Professional Redesign].
  * Requirements: White background, Blue theme (#0B57D0), Testbook style.
+ * FIXED: Imported missing Badge component to resolve runtime ReferenceError.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
