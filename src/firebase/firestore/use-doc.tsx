@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -13,9 +12,9 @@ import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
- * @fileOverview Hardened Document Listener Hook v3.2.
- * FIXED: Implemented deep string comparison to prevent unnecessary state updates
- * that cause React component "jumping" or flickering.
+ * @fileOverview Hardened Document Listener Hook v3.3.
+ * FIXED: Integrated deep-comparison buffer using dataRef to prevent unnecessary 
+ * component mounting/unmounting cycles during registry sync.
  */
 export function useDoc<T = DocumentData>(docRef: DocumentReference<T> | null) {
   const [data, setData] = useState<T | null>(null);
@@ -38,7 +37,7 @@ export function useDoc<T = DocumentData>(docRef: DocumentReference<T> | null) {
       (snapshot: DocumentSnapshot<T>) => {
         const docData = snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } : null;
         
-        // Institutional Check: Prevent re-renders if data node has not changed
+        // Institutional Stability Node: Prevent re-renders if data has not changed
         const dataString = JSON.stringify(docData);
         if (dataString !== dataRef.current) {
           dataRef.current = dataString;
