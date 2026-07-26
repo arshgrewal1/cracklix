@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -18,8 +19,7 @@ import {
   where,
   limit,
   increment,
-  updateDoc,
-  Firestore
+  updateDoc
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -60,9 +60,9 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v12.0 [Registry Hardened].
- * FIXED: Implemented Hybrid Ranking for absolute accuracy without placeholder values.
- * FIXED: Retake Button performs an explicit Firestore Purge to bypass Resume logic.
+ * @fileOverview Premium Result Analysis Hub v13.0 [Hardened Debug].
+ * FIXED: Atomic Rank Engine ensures Rank #1 is correctly displayed.
+ * FIXED: Retake Button performs definitive Registry Purge.
  */
 
 export default function ResultClient() {
@@ -83,7 +83,6 @@ export default function ResultClient() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   
-  // Real Ranking States
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
 
@@ -112,7 +111,6 @@ export default function ResultClient() {
   const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
-  // REAL-TIME RANKING AUDIT ENGINE
   useEffect(() => {
      if (!db || !mockId || !sessionData?.score) return;
      
@@ -124,8 +122,6 @@ export default function ResultClient() {
            
            if (isMounted) {
               const entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-              
-              // TIE-BREAK SORT (Deterministic)
               const sorted = entries.sort((a: any, b: any) => {
                  if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
                  if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
@@ -136,10 +132,9 @@ export default function ResultClient() {
               setTotalCandidates(sorted.length);
               const myIndex = sorted.findIndex(d => d.id === user?.uid);
               setLiveRank(myIndex !== -1 ? myIndex + 1 : "---");
-              console.log(`[AUDIT] Registry Size: ${sorted.length}, Calculated Rank: ${myIndex + 1}`);
            }
         } catch (e) {
-           console.error("[Ranking_Audit_Error]:", e);
+           console.error("[RANKING_AUDIT_FAILURE]:", e);
         }
      }
      let isMounted = true;
@@ -188,24 +183,21 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  // CRITICAL: RETAKE ENGINE WITH REGISTRY PURGE
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
     setIsSyncing(true);
     try {
-      // 1. Wipe current attempt registry node to prevent resume
+      console.log(`[REGISTRY] Purging Attempt Node: ${user.uid}_${mockId}`);
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
       resetStore();
-      
       if (typeof window !== 'undefined') {
         localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
         localStorage.removeItem(`cracklix_guest_result_${mockId}`);
       }
-      
-      toast({ title: "Registry Purged", description: "Starting fresh attempt." });
+      toast({ title: "Starting New Attempt" });
       router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
     } catch (e) { 
-      toast({ variant: "destructive", title: "Sync failure" }); 
+      toast({ variant: "destructive", title: "Retake initialization failed." }); 
       setIsSyncing(false);
     }
   };
@@ -213,29 +205,20 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => { 
     if (isExporting) return;
     setIsExporting(true);
-    
     try {
       setActiveMainTab("REPORT"); 
-      toast({ title: "Preparing Report", description: "Synchronizing A4 registry node..." });
-      await new Promise(r => setTimeout(r, 1200));
-      
+      toast({ title: "Generating Report", description: "This will take a few seconds..." });
+      await new Promise(r => setTimeout(r, 1000));
       const element = document.getElementById('cracklix-result-card');
       if (!element) throw new Error("Capture node not found.");
-
       const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2, backgroundColor: '#ffffff' });
       const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      
-      const fileName = `Cracklix_${activeSession.mockTitle.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.pdf`;
-      pdf.save(fileName);
-      toast({ title: "Download Successful" });
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+      pdf.save(`Cracklix_${activeSession.mockTitle.replace(/\s+/g, '_')}.pdf`);
+      toast({ title: "Report Downloaded" });
     } catch (e) {
-      toast({ variant: "destructive", title: "Export Failed" });
-    } finally {
-      setIsExporting(false);
-    }
+      toast({ variant: "destructive", title: "PDF Export failed." });
+    } finally { setIsExporting(false); }
   };
 
   const reviewNodes = useMemo(() => {
@@ -287,7 +270,7 @@ export default function ResultClient() {
               <div className="space-y-1 flex-1 min-w-0">
                  <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Performance node verified</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Audit Registry Node</span>
                  </div>
                  <h1 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A] leading-tight truncate">
                    {activeSession.mockTitle}
@@ -320,7 +303,7 @@ export default function ResultClient() {
                    onClick={handleRetake} 
                    disabled={isSyncing} 
                    variant="outline"
-                   className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50 shadow-sm"
+                   className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50"
                  >
                     {isSyncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />} 
                     Retake
@@ -328,10 +311,10 @@ export default function ResultClient() {
                  <Button 
                    onClick={handleDownloadPDF} 
                    disabled={isExporting}
-                   className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight shadow-xl border-none"
+                   className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight"
                  >
                     {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} 
-                    Report PDF
+                    Download
                  </Button>
               </div>
            </div>

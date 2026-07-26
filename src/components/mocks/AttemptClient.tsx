@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -179,6 +180,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
     setIsSubmittingFinal(true);
     
+    console.log(`[REGISTRY] FINALIZING SUBMISSION: ${attemptId}`);
+    
     let correctCount = 0; 
     let wrongCount = 0;
     const attemptedCount = Object.keys(answers || {}).length;
@@ -223,18 +226,16 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const timeTaken = Math.max(1, elapsedSeconds);
     const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
     
-    console.log(`[SUBMISSION] Finalizing attempt ${attemptId} for mock ${mockId}`);
-
     try {
       if (user) {
-        // ATOMIC TRANSACTION: Result + Leaderboard + Profile Sync
         await runTransaction(db, async (transaction) => {
           const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
           const globalMeritRef = doc(db, "leaderboard", user.uid);
           const userRef = doc(db, "users", user.uid);
-          
+          const resultRef = doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
+          const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
+
           const lbSnap = await transaction.get(lbEntryRef);
-          const userSnap = await transaction.get(userRef);
           
           let isNewBest = true;
           let oldAttemptCount = 0;
@@ -242,13 +243,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           if (lbSnap.exists()) {
             const existing = lbSnap.data();
             oldAttemptCount = existing.attemptCount || 0;
-            const hasHigherScore = finalScore > existing.highestScore;
+            const hasHigherScore = finalScore > (existing.highestScore || 0);
             const hasEqualScoreHigherAcc = (finalScore === existing.highestScore && accuracy > existing.accuracy);
             const hasEqualScoreAccLowerTime = (finalScore === existing.highestScore && accuracy === existing.accuracy && timeTaken < existing.timeTaken);
             isNewBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
           }
 
-          const leaderboardPayload = {
+          transaction.set(lbEntryRef, {
             userId: user.uid,
             userName: profile?.name || 'Aspirant',
             photoURL: profile?.photoURL || "",
@@ -260,11 +261,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             attemptCount: oldAttemptCount + 1,
             bestAttemptId: isNewBest ? attemptId : (lbSnap.data()?.bestAttemptId || attemptId),
             submittedAt: serverTimestamp()
-          };
+          }, { merge: true });
 
-          transaction.set(lbEntryRef, leaderboardPayload, { merge: true });
-
-          // Sync to Global Standings
           transaction.set(globalMeritRef, {
             uid: user.uid,
             displayName: profile?.name || 'Aspirant',
@@ -275,8 +273,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             recentMockTitle: mockData.title
           }, { merge: true });
 
-          // Individual Result Ledger Entry
-          const resultRef = doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
           transaction.set(resultRef, {
              attemptId,
              mockId,
@@ -295,42 +291,30 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
              timestamp: new Date().toISOString(),
              createdAt: serverTimestamp(),
              languageMode: language,
-             mockType: mockData.mockType || 'PRACTICE',
-             positiveMarks: posMarks,
-             negativeMarks: negMarks,
              subjectAnalysis: Object.values(subMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
              complexityAnalysis: Object.values(diffMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) })),
-             answers: answers // Persist actual answers for review
+             answers: answers 
           });
 
-          // Finalize Attempt Pointer
-          transaction.set(doc(db, "attempts", `${user.uid}_${mockId}`), { 
+          transaction.set(attemptPtrRef, { 
              attemptId,
              status: 'COMPLETED', 
              updatedAt: serverTimestamp() 
           }, { merge: true });
-          
-          console.log('Leaderboard Saved ✅');
         });
 
         await stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
-        resetStore();
+        console.log(`[REGISTRY] SUBMISSION SYNCED: ${attemptId}`);
         router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
+        resetStore();
       } else {
         localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify({
-           attemptId,
-           mockId,
-           mockTitle: mockData.title || mockTitle,
-           score: finalScore,
-           accuracy,
-           totalQuestions: questions.length,
-           correctCount,
-           wrongCount,
-           timeTaken,
-           timestamp: new Date().toISOString()
+           attemptId, mockId, score: finalScore, accuracy, totalQuestions: questions.length,
+           correctCount, wrongCount, timeTaken, timestamp: new Date().toISOString(),
+           mockTitle: mockData.title
         }));
-        resetStore();
         router.replace(`/results/view?id=${mockId}`);
+        resetStore();
       }
     } catch (e) {
       console.error("[SUBMISSION_FAILURE]:", e);
@@ -351,17 +335,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Synchronizing Hub</p>
           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Loading questions from registry...</p>
        </div>
-    </div>
-  );
-
-  if (initError) return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-white p-10 text-center space-y-10">
-       <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100"><AlertCircle className="h-10 w-10" /></div>
-       <div className="space-y-4 max-w-sm mx-auto">
-          <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Sync failure</h2>
-          <p className="text-slate-500 font-medium leading-relaxed">{initError}</p>
-       </div>
-       <Button onClick={() => window.location.reload()} className="h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl font-bold gap-2"><RefreshCw className="h-4 w-4" /> Retry synchronization</Button>
     </div>
   );
 
@@ -417,7 +390,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             <div className="w-full flex flex-col gap-3 mt-8">
               <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg">Submit test</Button>
               <Button variant="outline" onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/'); }} className="h-12 border-slate-200 text-slate-500 font-bold rounded-xl"><Save className="h-4 w-4 mr-2" /> Save & Exit</Button>
-              <Button variant="ghost" onClick={() => setShowExitModal(false)} className="h-12 text-[#0F172A] font-bold rounded-xl bg-slate-50">Continue</Button>
             </div>
           </div>
         </DialogContent>

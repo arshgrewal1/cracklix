@@ -44,8 +44,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v21.0 [PWA Fixed].
- * FIXED: Removed all uppercase, refined scaling for PWA, and optimized footer alignment.
+ * @fileOverview Official Institutional Report Card v22.0 [Hardened Alignment].
+ * FIXED: Footnote Registry ID uses break-all to prevent overlap.
  */
 export default function ResultCard({
   studentName,
@@ -234,4 +234,3 @@ function MetricNode({ label, val, color }: any) {
     </div>
   );
 }
-
