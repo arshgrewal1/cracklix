@@ -48,9 +48,8 @@ import { toJpeg } from 'html-to-image'
 import jsPDF from 'jspdf'
 
 /**
- * @fileOverview Universal Result Hub Viewer v77.0.
- * FIXED: Title truncation solved by removing truncate class.
- * FIXED: Action bar spacing optimized by removing PDF button from primary header.
+ * @fileOverview Universal Result Hub Viewer v78.0.
+ * FIXED: Removed back button from header as requested.
  */
 
 export default function ResultClient() {
@@ -267,16 +266,12 @@ export default function ResultClient() {
            <>
               <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-5 md:p-12 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                  <div className="flex items-center gap-4 md:gap-10 w-full min-w-0">
-                    <button onClick={() => router.back()} className="h-10 w-10 md:h-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-90 shrink-0">
-                       <ArrowLeft className="h-5 w-5" />
-                    </button>
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-24 md:w-24 bg-white shadow-xl border border-slate-100 rounded-2xl md:rounded-3xl" />
                     <div className="text-left space-y-2 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
                           <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 py-0.5 font-bold text-[9px] rounded-lg">Verified report</Badge>
                           <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-3 py-0.5 font-bold text-[9px] rounded-lg">Attempt #{userResults?.length || 1}</Badge>
                        </div>
-                       {/* REMOVED TRUNCATE TO SHOW FULL TITLE */}
                        <h1 className="text-[17px] md:text-4xl font-bold text-[#0F172A] tracking-tight leading-tight">{sessionData.mockTitle}</h1>
                        <div className="flex flex-wrap items-center gap-4 text-[10px] md:text-base font-semibold text-slate-400">
                           <div className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span></div>

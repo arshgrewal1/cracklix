@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -23,8 +24,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v11.0.
- * UPDATED: Standardized flow. Removed pt-safe and height hacks. Header is now in-flow.
+ * @fileOverview Global Layout Registry v12.0.
+ * UPDATED: Enforced Global Dark Mode as primary institutional theme.
  */
 
 export const metadata: Metadata = {
@@ -94,8 +95,8 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
-          enableSystem
+          defaultTheme="dark"
+          forcedTheme="dark"
           disableTransitionOnChange
         >
           <FirebaseClientProvider>

@@ -32,10 +32,10 @@ import ShareButton from "@/components/navigation/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { canAccessAdmin } from "@/lib/permissions";
-import { ThemeToggle } from "./ThemeToggle";
 
 /**
- * @fileOverview Mobile Sidebar v90.0 [Theme Toggle Integrated].
+ * @fileOverview Mobile Sidebar v91.0 [Theme Toggle Removed].
+ * FIXED: Removed Appearance section to enforce global dark mode registry.
  */
 export default function MobileSidebar({
   onClose,
@@ -87,10 +87,10 @@ export default function MobileSidebar({
       {/* HEADER */}
       <div className="h-[84px] md:h-[116px] px-6 shrink-0 bg-background border-b border-slate-100 dark:border-white/5 flex items-center justify-center relative">
          <Logo
-           variant="light"
+           variant="dark"
            align="center"
            className="flex-shrink-0"
-           imgClassName="h-20 md:h-28 w-auto dark:invert"
+           imgClassName="h-20 md:h-28 w-auto"
            onClick={onClose}
          />
          <button
@@ -190,16 +190,6 @@ export default function MobileSidebar({
               );
             })}
           </div>
-        </div>
-
-        {/* THEME TOGGLE HUB */}
-        <div className="px-3 py-4">
-           <p className="mb-2 px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase text-left">
-             Appearance
-           </p>
-           <div className="px-1">
-              <ThemeToggle />
-           </div>
         </div>
 
         {/* SHARE APP PROMO */}

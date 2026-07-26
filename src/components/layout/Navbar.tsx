@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -36,8 +37,8 @@ import { canAccessAdmin } from "@/lib/permissions";
 import AnnouncementBar from "./AnnouncementBar";
 
 /**
- * @fileOverview Standard In-Flow Navigation Hub v157.0.
- * UPDATED: Integrated adaptive dark mode shell and border consistency.
+ * @fileOverview Standard In-Flow Navigation Hub v158.0.
+ * UPDATED: Logo set to variant="dark" to support Global Dark Mode registry.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -128,8 +129,8 @@ export default function Navbar() {
               </Sheet>
 
               <Logo
-                variant="light"
-                className="flex-shrink-0 p-0 h-full dark:invert"
+                variant="dark"
+                className="flex-shrink-0 p-0 h-full"
                 imgClassName="h-20 md:h-28 w-auto"
                 align="left"
               />
