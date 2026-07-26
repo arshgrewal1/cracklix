@@ -1,16 +1,15 @@
-
 'use client';
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, ChevronRight, Star, Download, Loader2, Landmark } from "lucide-react";
+import { Play, ChevronRight, Star, Download, Loader2, Landmark, ShieldCheck, Zap, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v64.1.
- * UPDATED: Purged all uppercase classes.
+ * @fileOverview Premium Mobile-First PWA Hero v64.2.
+ * FIXED: Added missing icon imports (ShieldCheck, Zap, Layers) and purged uppercase styling.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);

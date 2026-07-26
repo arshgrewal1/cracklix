@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { forwardRef, useMemo } from 'react';
@@ -37,8 +36,8 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Result Report v2.6 [Full Title Fixed].
- * FIXED: Removed truncate from title to ensure full name visibility.
+ * @fileOverview Official Institutional Result Report v2.7.
+ * FIXED: Removed all uppercase styling for professional clarity.
  */
 
 const toTitleCase = (str: string) => {
@@ -58,7 +57,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
     if (p >= 85) return { label: "Excellent", color: "text-emerald-600", bg: "bg-emerald-50" };
     if (p >= 70) return { label: "Good", color: "text-blue-600", bg: "bg-blue-50" };
     if (p >= 50) return { label: "Average", color: "text-amber-600", bg: "bg-amber-50" };
-    return { label: "Needs Improvement", color: "text-rose-600", bg: "bg-rose-50" };
+    return { label: "Needs improvement", color: "text-rose-600", bg: "bg-rose-50" };
   }, [data.percentage]);
 
   const insights = useMemo(() => {
@@ -114,7 +113,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
             />
             <div className="space-y-1">
                <h2 className="text-[28px] font-[700] text-[#0F172A] tracking-tight">{data.userName || "Aspirant"}</h2>
-               <p className="text-xs font-bold text-slate-400">Candidate Id: {data.userId?.slice(-12).toUpperCase()}</p>
+               <p className="text-xs font-bold text-slate-400">Candidate ID: {data.userId?.slice(-12).toUpperCase()}</p>
             </div>
          </div>
 
@@ -253,11 +252,11 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
                <ShieldCheck className="h-6 w-6 text-emerald-500" />
                <div className="space-y-0.5">
                   <p className="text-base font-bold tracking-tight text-[#0F172A]">Official report hub</p>
-                  <p className="text-[10px] font-medium text-slate-400">Digitally verified by Arsh Grewal Management Registry</p>
+                  <p className="text-[10px] font-medium text-slate-400">Digitally verified by Arsh Grewal Management registry</p>
                </div>
             </div>
             <div className="space-y-0.5 pt-1">
-               <p className="text-[8px] font-bold text-slate-300">Report Id</p>
+               <p className="text-[8px] font-bold text-slate-300">Report ID</p>
                <code className="text-[11px] font-mono font-bold text-primary">{data.attemptId || "NODE_01_VERIFIED"}</code>
             </div>
          </div>

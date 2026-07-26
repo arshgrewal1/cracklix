@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -23,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v508.1.
- * UPDATED: Removed all uppercase styling for a cleaner UI.
+ * @fileOverview Institutional Premium Hub v508.2.
+ * UPDATED: Systematically removed all uppercase text classes.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -72,14 +71,14 @@ export default function HomePage() {
                            <Flame className="h-5 w-5 md:h-6 md:w-6 fill-current animate-pulse" />
                         </div>
                         <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white antialiased leading-tight">
-                           Today's Challenge
+                           Today's challenge
                         </h2>
                      </div>
                      {!isMounted || quizLoading ? (
                         <div className="h-8 w-64 mx-auto bg-white/5 animate-pulse rounded-lg mt-2" />
                      ) : (
                         <p className="text-base md:text-xl text-slate-300 font-medium max-w-2xl mx-auto italic">
-                           "{activeQuiz?.title || "Daily Practice Mode"}"
+                           "{activeQuiz?.title || "Daily practice mode"}"
                         </p>
                      )}
                   </div>
@@ -114,7 +113,9 @@ export default function HomePage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="py-20 opacity-20"><p className="text-white font-bold text-xl tracking-tight">No active challenge node found</p></div>
+                    <div className="py-20 opacity-20">
+                       <p className="text-white font-bold text-xl tracking-tight">No active challenge found</p>
+                    </div>
                   )}
                </div>
             </motion.div>
