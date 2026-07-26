@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -38,8 +37,7 @@ import { Button } from "@/components/ui/button";
 import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Cracklix Navigation Hub v126.0.
- * UPDATED: Reduced header height to h-[84px] md:h-[116px] to decrease extra space.
+ * @fileOverview Cracklix Navigation Hub v127.0 [Uppercase Removed].
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);

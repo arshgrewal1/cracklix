@@ -23,8 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Standardized Popular Exams Hub v54.0.
- * STANDARDIZED: Heading font sizes and icon containers matched to Home Page registry.
+ * @fileOverview Standardized Popular Exams Hub v55.0 [Uppercase Removed].
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -100,7 +99,7 @@ export default function PopularExams() {
 
   return (
     <section className="py-12 md:py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-10">
+      <div className="max-w-7xl auto px-4 md:px-8 space-y-10">
         
         {/* Standardized Header */}
         <div className="flex items-center justify-between px-1">
@@ -162,18 +161,18 @@ export default function PopularExams() {
                           </div>
 
                           <div className="space-y-4 flex-1 text-left relative z-10">
-                             <h3 className="text-lg md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 uppercase">
+                             <h3 className="text-lg md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
                                 {exam.name}
                              </h3>
                              
-                             <div className="flex flex-wrap items-center gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                             <div className="flex flex-wrap items-center gap-4 text-[9px] font-bold text-slate-400 tracking-tight">
                                 <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-primary" /> {stats.mocks} Mocks</span>
                                 <span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Verified</span>
                              </div>
                           </div>
 
                           <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between group-hover:text-primary relative z-10">
-                             <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest group-hover:text-primary transition-colors">Start prep</span>
+                             <span className="text-[9px] font-bold text-slate-400 group-hover:text-primary transition-colors">Start prep</span>
                              <ChevronRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1" />
                           </div>
                        </Card>
@@ -185,7 +184,7 @@ export default function PopularExams() {
 
         <div className="flex items-center justify-center gap-4 text-slate-300 py-4 opacity-50">
            <ShieldCheck className="h-5 w-5" />
-           <span className="text-[10px] font-semibold tracking-widest uppercase">Institutional registry verified</span>
+           <span className="text-[10px] font-semibold tracking-tight">Institutional registry verified</span>
         </div>
 
       </div>

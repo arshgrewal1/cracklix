@@ -10,8 +10,7 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Refined Meet Founder Section v7.2.
- * UPDATED: Normalized casing for headings.
+ * @fileOverview Refined Meet Founder Section v7.3 [Uppercase Removed].
  */
 export default function MeetFounder() {
   const db = useFirestore();
@@ -40,7 +39,7 @@ export default function MeetFounder() {
               viewport={{ once: true }}
               className="space-y-6"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-[10px] md:text-xs font-black tracking-widest text-primary">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-[10px] md:text-xs font-bold tracking-tight text-primary">
                  <Star className="h-3 w-3 fill-current" /> Verified Founder
               </div>
               
@@ -66,7 +65,7 @@ export default function MeetFounder() {
             <div className="pt-4">
               <Button
                 asChild
-                className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-black tracking-widest rounded-2xl shadow-xl transition-all active:scale-95 border-none group"
+                className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-bold tracking-tight rounded-2xl shadow-xl transition-all active:scale-95 border-none group"
               >
                 <Link href="/meet-founder" className="flex items-center justify-center gap-3">
                   Read My Full Story <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

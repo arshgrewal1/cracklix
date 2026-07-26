@@ -13,8 +13,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Standardized Current Affairs Preview v23.0.
- * STANDARDIZED: Heading font sizes and icon containers normalized.
+ * @fileOverview Standardized Current Affairs Preview v24.0 [Uppercase Removed].
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -70,12 +69,12 @@ export default function CurrentAffairsPreview() {
                        </div>
 
                        <div className="flex-1 flex flex-col justify-start text-center min-w-0">
-                          <h3 className="text-[15px] md:text-lg font-bold leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors mb-2 md:mb-6 uppercase">
+                          <h3 className="text-[15px] md:text-lg font-bold leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors mb-2 md:mb-6">
                              {item.title}
                           </h3>
                           
                           <div className="mt-auto md:mt-0 space-y-2 md:space-y-4">
-                             <div className="flex items-center justify-center gap-2 md:gap-4 text-[11px] md:text-[13px] font-bold text-slate-400 tracking-tight uppercase">
+                             <div className="flex items-center justify-center gap-2 md:gap-4 text-[11px] md:text-[13px] font-bold text-slate-400 tracking-tight">
                                 <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" /> {item.month}</span>
                                 <span className="h-1 w-1 rounded-full bg-slate-200" />
                                 <span>Bilingual</span>
@@ -84,7 +83,7 @@ export default function CurrentAffairsPreview() {
                        </div>
 
                        <div className="mt-auto pt-4 md:pt-8 shrink-0">
-                          <Button variant="ghost" className="w-full h-11 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[12px] md:text-[13px] tracking-tight shadow-lg border-none active:scale-95 gap-2 uppercase">
+                          <Button variant="ghost" className="w-full h-11 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[12px] md:text-[13px] tracking-tight shadow-lg border-none active:scale-95 gap-2">
                              Start test
                              <ChevronRight className="h-4 w-4" />
                           </Button>

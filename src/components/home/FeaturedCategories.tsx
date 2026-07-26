@@ -12,8 +12,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Standardized Institutional Categories Hub v42.0.
- * STANDARDIZED: Font sizes and icon containers normalized to match site-wide registry.
+ * @fileOverview Standardized Institutional Categories Hub v43.0 [Uppercase Removed].
  */
 
 const TARGET_IDS = [
@@ -97,7 +96,7 @@ export default function FeaturedCategories() {
 
 function MiniBadge({ icon: Icon, label, color }: any) {
    return (
-      <div className={cn("px-2.5 py-1 rounded-lg flex items-center gap-1.5 font-semibold text-[9px] tracking-tight uppercase", color)}>
+      <div className={cn("px-2.5 py-1 rounded-lg flex items-center gap-1.5 font-semibold text-[9px] tracking-tight", color)}>
          <Icon className="h-3 w-3" />
          {label}
       </div>

@@ -6,8 +6,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Official Premium Splash Screen v1.3.
- * FIXED: Optimized exit sequence to perfectly sync with Next.js hydration.
+ * @fileOverview Official Premium Splash Screen v1.4 [Uppercase Removed].
  */
 export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
@@ -16,11 +15,7 @@ export default function SplashScreen() {
 
   useEffect(() => {
     setMounted(true);
-    // 1. Initial Handshake delay
     const contentTimer = setTimeout(() => setShowContent(true), 100);
-    
-    // 2. Hydration Buffer: Wait for the main thread to settle
-    // Native apps usually take 1.5 - 2.5s to boot.
     const exitTimer = setTimeout(() => setIsVisible(false), 2400);
 
     return () => {
@@ -31,7 +26,6 @@ export default function SplashScreen() {
 
   if (!mounted) return (
      <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
-        {/* Static logo for server-rendered phase */}
         <div className="relative h-20 w-20 md:h-28 md:w-28 rounded-2xl overflow-hidden bg-black">
             <Image src="/logo/cracklix-icon.png" alt="Logo" fill priority className="object-cover" />
         </div>
@@ -48,7 +42,6 @@ export default function SplashScreen() {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center overflow-hidden pointer-events-none"
         >
-          {/* 1. AMBIENT GLOW NODE */}
           <motion.div 
             animate={{ 
               scale: [1, 1.1, 1],
@@ -59,8 +52,6 @@ export default function SplashScreen() {
           />
 
           <div className="relative z-10 flex flex-col items-center gap-12">
-             
-             {/* 2. LOGO HUB */}
              <motion.div
                initial={{ opacity: 0, scale: 0.9, y: 10 }}
                animate={showContent ? { opacity: 1, scale: 1, y: 0 } : {}}
@@ -84,22 +75,20 @@ export default function SplashScreen() {
                 </motion.div>
              </motion.div>
 
-             {/* 3. BRANDING REGISTRY */}
              <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={showContent ? { opacity: 1, y: 0 } : {}}
                transition={{ duration: 0.6, delay: 0.4 }}
                className="text-center space-y-3"
              >
-                <h1 className="text-2xl md:text-4xl font-black tracking-[0.4em] text-white uppercase antialiased">
+                <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white antialiased">
                    Cracklix
                 </h1>
-                <p className="text-[10px] md:text-sm font-bold text-[#64748B] uppercase tracking-[0.2em]">
+                <p className="text-[10px] md:text-sm font-bold text-[#64748B] tracking-tight">
                    Punjab's Smart <span className="text-[#0A84FF]">Mock Test</span> Platform
                 </p>
              </motion.div>
 
-             {/* 4. PREMIUM LOADING NODE */}
              <div className="flex items-center gap-2.5">
                 {[0, 1, 2].map((i) => (
                   <motion.div
@@ -120,14 +109,13 @@ export default function SplashScreen() {
              </div>
           </div>
 
-          {/* FOOTER BADGE */}
           <motion.div 
             initial={{ opacity: 0 }}
             animate={showContent ? { opacity: 0.4 } : {}}
             className="absolute bottom-12 flex items-center gap-2"
           >
              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-             <span className="text-[8px] font-black uppercase text-white tracking-[0.4em]">Verified Security Node</span>
+             <span className="text-[8px] font-black uppercase text-white tracking-widest">Verified Security Node</span>
           </motion.div>
         </motion.div>
       )}

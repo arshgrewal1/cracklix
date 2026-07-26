@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from "react";
@@ -25,8 +24,7 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Footer Hub v24.1.
- * UPDATED: Standardized casing for headings and labels.
+ * @fileOverview Institutional Footer Hub v24.2 [Uppercase Removed].
  */
 export default function Footer() {
   const db = useFirestore();

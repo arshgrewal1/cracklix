@@ -14,8 +14,7 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Standardized Latest Tests Hub v43.0.
- * STANDARDIZED: Heading font sizes and icon containers normalized.
+ * @fileOverview Standardized Latest Tests Hub v44.0 [Uppercase Removed].
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -81,7 +80,7 @@ export default function LatestMocks() {
                   <div className="flex justify-between items-start mb-6">
                     <AuthorityLogo boardId={boardId} size="md" className="shadow-xl" />
                     {isPremium && (
-                       <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm flex items-center gap-1.5">
+                       <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-full font-black text-[9px] shadow-sm flex items-center gap-1.5">
                           <Lock className="h-3 w-3" /> Premium
                        </Badge>
                     )}
@@ -90,7 +89,7 @@ export default function LatestMocks() {
                   <div className="flex-1 space-y-4">
                     <div className="space-y-1.5">
                        <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">{mock.difficulty || 'Mixed'} level</p>
-                       <h3 className="text-lg md:text-xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2 uppercase">
+                       <h3 className="text-lg md:text-xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
                            {mock.title}
                        </h3>
                     </div>
@@ -105,7 +104,7 @@ export default function LatestMocks() {
 
                   <div className="mt-8 pt-4">
                     <Button asChild className={cn(
-                      "w-full h-12 md:h-14 rounded-xl md:rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-2", 
+                      "w-full h-12 md:h-14 rounded-xl md:rounded-2xl font-black text-[10px] tracking-tight shadow-xl border-none transition-all active:scale-95 gap-2", 
                       locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                     )}>
                         <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`}>
@@ -129,7 +128,7 @@ function StatPill({ icon: Icon, label }: any) {
    return (
       <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
          <Icon className="h-3.5 w-3.5 text-slate-300" />
-         <span className="leading-none uppercase tracking-tight">{label}</span>
+         <span className="leading-none tracking-tight">{label}</span>
       </div>
    )
 }

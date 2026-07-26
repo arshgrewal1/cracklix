@@ -13,8 +13,7 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Vacancy Registry v3.0.
- * STANDARDIZED: Heading and Icon sizes matched to Home Page global registry.
+ * @fileOverview Institutional Vacancy Registry v3.1 [Uppercase Removed].
  */
 export default function LatestVacancy() {
   const db = useFirestore();
@@ -73,20 +72,20 @@ export default function LatestVacancy() {
                        <div className="flex justify-between items-start mb-8 w-full relative z-10">
                           <AuthorityLogo boardId={v.board} size="md" className="h-16 w-16 md:h-20 md:w-20 shadow-2xl border-4 border-white bg-slate-50" />
                           <div className="flex flex-col items-end gap-2">
-                             {v.isBreaking && <Badge className="bg-rose-500 text-white border-none px-3 py-1 font-semibold text-[9px] uppercase animate-pulse">Breaking</Badge>}
+                             {v.isBreaking && <Badge className="bg-rose-500 text-white border-none px-3 py-1 font-semibold text-[9px] shadow-sm">Breaking</Badge>}
                              <span className="text-[10px] md:text-[11px] font-semibold text-slate-300 tabular-nums uppercase">Last: {new Date(v.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
                           </div>
                        </div>
 
                        <div className="space-y-4 flex-1 relative z-10">
-                          <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight line-clamp-2 uppercase">{v.title}</h3>
-                          <p className="text-[9px] md:text-[11px] font-semibold text-slate-400 tracking-tight uppercase">{v.department}</p>
+                          <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight line-clamp-2">{v.title}</h3>
+                          <p className="text-[9px] md:text-[11px] font-semibold text-slate-400 tracking-tight">{v.department}</p>
                           
                           <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-50">
-                             <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-400 tracking-tight uppercase">
+                             <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-400 tracking-tight">
                                 <Zap className="h-4 w-4 text-primary" /> {v.totalPosts} Posts
                              </div>
-                             <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-400 tracking-tight uppercase">
+                             <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-400 tracking-tight">
                                 <Target className="h-4 w-4 text-emerald-500" /> {v.education?.split(' ')[0]}
                              </div>
                           </div>

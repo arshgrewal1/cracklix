@@ -8,8 +8,7 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v62.0.
- * FIXED: Defined explicit height nodes to eliminate layout shift during hydration.
+ * @fileOverview Premium Mobile-First PWA Hero v63.0 [Uppercase Removed].
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -30,7 +29,6 @@ export default function Hero() {
     }
   };
 
-  // Stability Node: Render a structural skeleton if not mounted to prevent CLS
   if (!mounted) {
     return (
       <section className="relative overflow-hidden bg-background pt-6 pb-5 md:pt-16 md:pb-20 w-full min-h-[400px] md:min-h-[600px] flex items-center justify-center">
