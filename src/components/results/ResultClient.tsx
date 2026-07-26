@@ -498,9 +498,9 @@ export default function ResultClient() {
                              </h3>
                              <Badge className={cn(
                                 "border-none text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg uppercase",
-                                metrics.readiness >= 80 ? "bg-emerald-500 text-white" :
+                                metrics.readiness >= 80 ? "bg-emerald-50 text-white" :
                                 metrics.readiness >= 60 ? "bg-blue-500 text-white" :
-                                metrics.readiness >= 40 ? "bg-amber-500 text-white" : "bg-rose-500 text-white"
+                                metrics.readiness >= 40 ? "bg-amber-500 text-white" : "bg-rose-50 text-white"
                              )}>
                                 {metrics.readinessLevel}
                              </Badge>
