@@ -52,8 +52,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v4.7.
- * FIXED: Refined filtering logic for 'Free preview' to include series with preview tests.
+ * @fileOverview Institutional Practice Hub v4.8.
+ * FIXED: Refined "Premium tests" filter to include series with locked content.
  */
 
 const FILTER_CHIPS = [
@@ -140,7 +140,7 @@ export default function PracticeHub() {
 
       const matchesAccess = !isAccessFilter || 
                            (activeFilter === 'FREE' && (s.accessLevel === 'FREE' || s.counts.free > 0)) || 
-                           (activeFilter === 'PREMIUM' && s.accessLevel === 'PREMIUM')
+                           (activeFilter === 'PREMIUM' && (s.accessLevel === 'PREMIUM' || s.counts.premium > 0))
       
       const matchesDifficulty = !isDifficultyFilter || s.difficulty === activeFilter
       

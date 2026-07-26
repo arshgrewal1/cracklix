@@ -3,7 +3,6 @@
 
 import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useFirestore, useDoc } from "@/firebase"
@@ -19,7 +18,8 @@ import {
   where,
   limit,
   increment,
-  updateDoc
+  updateDoc,
+  getCountFromServer
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -60,9 +60,8 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v16.0 [Stability Lock].
- * FIXED: Ranking logic check for 0 scores.
- * FIXED: handleRetake finalized for one-click responsiveness.
+ * @fileOverview Premium Result Analysis Hub v17.0.
+ * FIXED: Rebuilt participant counting and rank retrieval to ensure absolute accuracy.
  */
 
 export default function ResultClient() {
@@ -113,17 +112,24 @@ export default function ResultClient() {
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
   useEffect(() => {
-     // FIXED: Check for score === undefined to allow 0 scores to rank
-     if (!db || !mockId || sessionData?.score === undefined) return;
+     if (!db || !mockId || !sessionData) return;
      
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
+           
+           // 1. Get Total Candidates Node
+           const countSnap = await getCountFromServer(entriesRef);
+           setTotalCandidates(countSnap.data().count);
+
+           // 2. Fetch Standings
            const q = query(entriesRef, orderBy("highestScore", "desc"), limit(500));
            const snap = await getDocs(q);
            
            if (isMounted) {
               const entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+              
+              // Apply institutional tie-break logic in memory to ensure 100% precision
               const sorted = entries.sort((a: any, b: any) => {
                  if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
                  if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
@@ -131,9 +137,18 @@ export default function ResultClient() {
                  return (a.submittedAt?.seconds || 0) - (b.submittedAt?.seconds || 0);
               });
 
-              setTotalCandidates(sorted.length);
               const myIndex = sorted.findIndex(d => d.id === user?.uid);
-              setLiveRank(myIndex !== -1 ? myIndex + 1 : "---");
+              
+              if (myIndex !== -1) {
+                 setLiveRank(myIndex + 1);
+              } else if (countSnap.data().count > 500) {
+                 // If not in Top 500, calculate exact rank via secondary count
+                 const superiorQuery = query(entriesRef, where("highestScore", ">", sessionData.score));
+                 const superiorCountSnap = await getCountFromServer(superiorQuery);
+                 setLiveRank(superiorCountSnap.data().count + 1);
+              } else {
+                 setLiveRank("---");
+              }
            }
         } catch (e) {
            console.error("[RANKING_AUDIT_FAILURE]:", e);
@@ -142,7 +157,7 @@ export default function ResultClient() {
      let isMounted = true;
      fetchRankingMetrics();
      return () => { isMounted = false; };
-  }, [db, mockId, sessionData?.score, user?.uid, mounted]);
+  }, [db, mockId, sessionData, user?.uid, mounted]);
 
   useEffect(() => {
      if (!user && !userLoading && mockId) {
@@ -305,15 +320,14 @@ export default function ResultClient() {
                  </Tabs>
               </div>
               <div className="flex gap-2">
-                 <Button 
+                 <button 
                    onClick={handleRetake} 
                    disabled={isSyncing} 
-                   variant="outline"
-                   className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50"
+                   className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50 flex items-center justify-center cursor-pointer transition-all"
                  >
                     {isSyncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />} 
                     Retake
-                 </Button>
+                 </button>
                  <Button 
                    onClick={handleDownloadPDF} 
                    disabled={isExporting}

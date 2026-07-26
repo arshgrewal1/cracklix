@@ -19,8 +19,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Punjab Merit Registry v4.3 [Centered & Rescaled].
- * FIXED: Centered name alignment in podium cards and reduced overall scale for PWA.
+ * @fileOverview Official Punjab Merit Registry v4.4 [Minimum PWA Scale].
+ * FIXED: Reduced card sizes and refined centered alignment for high-fidelity mobile view.
  */
 
 export default function LeaderboardPage() {
@@ -247,7 +247,7 @@ function Metric({ label, val, color, className }: any) {
 
 function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any) {
    if (!data) return (
-      <div className={cn("bg-white border border-dashed border-slate-200 rounded-[3rem] p-5 md:p-8 h-80 flex items-center justify-center opacity-40", order)}>
+      <div className={cn("bg-white border border-dashed border-slate-200 rounded-[3rem] p-4 h-64 flex items-center justify-center opacity-40", order)}>
          <Trophy className="h-10 w-10 text-slate-200" />
       </div>
    );
@@ -262,60 +262,60 @@ function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any)
          className={cn("flex", order)}
       >
          <Card className={cn(
-            "border-none shadow-xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] p-5 md:p-8 flex flex-col items-center text-center group hover:-translate-y-2 relative overflow-hidden w-full",
+            "border-none shadow-xl transition-all duration-500 rounded-[2rem] p-4 md:p-6 flex flex-col items-center text-center group hover:-translate-y-1 relative overflow-hidden w-full",
             isMain ? "bg-[#0F172A] text-white ring-8 ring-primary/10 scale-[1.02] z-10" : "bg-white text-[#0F172A]",
             isCurrent && !isMain && "ring-4 ring-primary/20"
          )}>
             <div className={cn(
-               "absolute top-6 left-6 h-8 w-8 rounded-xl flex items-center justify-center text-white font-black text-xs md:text-sm shadow-2xl transition-transform group-hover:rotate-12",
+               "absolute top-4 left-4 h-7 w-7 rounded-lg flex items-center justify-center text-white font-black text-[10px] shadow-2xl transition-transform group-hover:rotate-12",
                rank === 1 ? "bg-amber-400" : rank === 2 ? "bg-slate-300" : "bg-orange-400"
             )}>
                #{rank}
             </div>
 
-            <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform">
-               {rank === 1 ? <Medal className="h-24 w-24" /> : <Trophy className="h-24 w-24" />}
+            <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform">
+               {rank === 1 ? <Medal className="h-16 w-16" /> : <Trophy className="h-16 w-16" />}
             </div>
 
-            <div className="space-y-6 relative z-10 w-full flex flex-col items-center">
+            <div className="space-y-4 relative z-10 w-full flex flex-col items-center">
                <div className="relative inline-block">
                   <StudentAvatar 
                     profile={{ name: data.userName || data.displayName, photoURL: data.photoURL, gender: data.gender }} 
                     className={cn(
-                      "rounded-[2rem] border-[4px] shadow-2xl transition-all group-hover:scale-105", 
-                      isMain ? "h-24 w-24 md:h-32 md:w-32 border-primary/20" : "h-20 w-20 md:h-28 md:w-28 border-white"
+                      "rounded-[1.5rem] border-[3px] shadow-xl transition-all group-hover:scale-105", 
+                      isMain ? "h-20 w-20 md:h-24 md:w-24 border-primary/20" : "h-16 w-16 md:h-20 md:w-20 border-white"
                     )} 
                   />
                   {rank === 1 && (
-                     <div className="absolute -top-3 -right-3 bg-amber-400 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-2xl animate-bounce">
-                        <Star className="h-5 w-5 fill-current" />
+                     <div className="absolute -top-2 -right-2 bg-amber-400 text-white h-7 w-7 rounded-full flex items-center justify-center shadow-xl animate-bounce">
+                        <Star className="h-4 w-4 fill-current" />
                      </div>
                   )}
                </div>
 
-               <div className="space-y-2 flex flex-col items-center">
-                  <h3 className="text-lg md:text-2xl font-black truncate max-w-[200px] leading-tight tracking-tight">{data.userName || data.displayName}</h3>
-                  {isCurrent && <Badge className="bg-primary text-white border-none text-[8px] font-black uppercase px-3 shadow-lg">Candidate Account</Badge>}
+               <div className="space-y-1.5 flex flex-col items-center">
+                  <h3 className="text-base md:text-xl font-black truncate max-w-[180px] leading-tight tracking-tight">{data.userName || data.displayName}</h3>
+                  {isCurrent && <Badge className="bg-primary text-white border-none text-[7px] font-black uppercase px-2 shadow-lg">Candidate Account</Badge>}
                </div>
 
-               <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-500/10 w-full">
+               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-500/10 w-full">
                   <div className="text-center space-y-1">
-                     <p className={cn("text-[8px] font-bold uppercase tracking-tight", isMain ? "text-slate-400" : "text-slate-400")}>Best Score</p>
-                     <p className={cn("text-lg md:text-3xl font-black tabular-nums tracking-tighter", isMain ? "text-white" : "text-primary")}>
+                     <p className="text-[7px] font-bold uppercase tracking-tight text-slate-400">Score</p>
+                     <p className={cn("text-base md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-white" : "text-primary")}>
                         {(data.highestScore || 0).toFixed(1)}
                      </p>
                   </div>
                   <div className="text-center space-y-1">
-                     <p className={cn("text-[8px] font-bold uppercase tracking-tight", isMain ? "text-slate-400" : "text-slate-400")}>Accuracy</p>
-                     <p className={cn("text-lg md:text-3xl font-black tabular-nums tracking-tighter", isMain ? "text-emerald-400" : "text-[#0F172A]")}>
+                     <p className="text-[7px] font-bold uppercase tracking-tight text-slate-400">Accuracy</p>
+                     <p className={cn("text-base md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-emerald-400" : "text-[#0F172A]")}>
                         {data.accuracy || 0}%
                      </p>
                   </div>
                </div>
 
-               <div className="pt-2">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center justify-center gap-2">
-                     <Timer className="h-3 w-3" /> {formatTime(data.timeTaken || 0)}
+               <div className="pt-1">
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                     <Timer className="h-2.5 w-2.5" /> {formatTime(data.timeTaken || 0)}
                   </p>
                </div>
             </div>
