@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BrandingSettings } from '@/types';
+import { Badge } from "@/components/ui/badge";
 import { motion } from 'framer-motion';
 
 interface SubPerformance {
@@ -59,8 +60,8 @@ interface ResultCardProps {
 
 /**
  * @fileOverview Cracklix Performance Report V4 (Premium Institutional Standard).
- * DESIGN: Clean white background, colorful modern cards, high-density data.
- * FIXED: Blank PDF issues resolved via explicit CORS and asset waiting.
+ * FIXED: Resolved Badge ReferenceError and normalized all labels to Title Case.
+ * REMOVED: Icons from Grade/Status cards as per redesign protocol.
  */
 export default function ResultCard({
   studentName,
@@ -96,7 +97,7 @@ export default function ResultCard({
     <div 
       id="cracklix-result-card" 
       className="w-full max-w-[210mm] min-h-[297mm] bg-white shadow-none overflow-hidden text-left font-body relative p-0 mx-auto box-border flex flex-col"
-      style={{ minWidth: '800px' }} // Ensure horizontal space for PDF capture
+      style={{ minWidth: '800px' }}
     >
       {/* 1. PREMIUM HEADER */}
       <div className="relative px-12 pt-12 pb-8 flex justify-between items-start">
@@ -111,14 +112,13 @@ export default function ResultCard({
             </div>
             <div className="space-y-0.5">
                <h2 className="text-3xl font-black tracking-tighter text-[#0F172A] leading-none">Cracklix</h2>
-               <p className="text-[11px] font-bold text-primary tracking-widest uppercase">Smart Preparation. Better Results.</p>
+               <p className="text-[11px] font-bold text-primary tracking-widest">Smart Preparation. Better Results.</p>
             </div>
          </div>
          <div className="text-right space-y-1">
-            <p className="text-[13px] font-black text-[#0F172A] uppercase tracking-wider">Performance Report</p>
+            <p className="text-[13px] font-black text-[#0F172A] tracking-wider">Performance Report</p>
             <p className="text-[9px] font-bold text-slate-400">ID: {resultId?.slice(0, 14)}</p>
          </div>
-         {/* Decorative Header Line */}
          <div className="absolute bottom-0 left-12 right-12 h-0.5 bg-gradient-to-r from-blue-600 via-purple-500 to-emerald-500 opacity-20" />
       </div>
 
@@ -128,7 +128,7 @@ export default function ResultCard({
         <div className="bg-slate-50/50 rounded-[2.5rem] p-10 border border-slate-100 flex justify-between items-center relative overflow-hidden">
            <div className="relative z-10 space-y-6">
               <div className="space-y-1">
-                 <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Candidate Name</p>
+                 <p className="text-[10px] font-bold text-primary">Candidate Name</p>
                  <h1 className="text-4xl font-black text-[#0F172A] tracking-tight">{studentName}</h1>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -146,21 +146,21 @@ export default function ResultCard({
            <div className="flex-1 bg-gradient-to-br from-[#0F172A] to-[#1E293B] rounded-[3rem] p-10 text-white relative overflow-hidden flex flex-col items-center justify-center text-center shadow-2xl">
               <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12"><Trophy className="h-48 w-48 text-primary" /></div>
               <div className="relative z-10 space-y-4">
-                 <p className="text-[11px] font-bold text-primary tracking-[0.3em] uppercase">Your State Rank</p>
+                 <p className="text-[11px] font-bold text-primary tracking-[0.3em]">Your State Rank</p>
                  <div className="flex items-baseline justify-center gap-2">
                     <span className="text-8xl font-black tracking-tighter text-white">#{rank}</span>
                     <span className="text-xl font-bold text-slate-400">/ {totalCandidates}</span>
                  </div>
-                 <Badge className="bg-emerald-500 text-white border-none px-5 py-2 rounded-full font-black text-[10px] uppercase shadow-xl">
+                 <Badge className="bg-emerald-500 text-white border-none px-5 py-2 rounded-full font-black text-[10px] shadow-xl">
                    {Number(rank) <= 10 ? 'Top Performer' : 'Verified Attempt'}
                  </Badge>
               </div>
            </div>
 
            <div className="w-[320px] grid grid-cols-1 gap-4">
-              <MiniGradeCard label="Net Score" val={score} color="text-primary" icon={<Zap />} />
-              <MiniGradeCard label="Percentile" val={`${percentile}%`} color="text-purple-500" icon={<TrendingUp />} />
-              <MiniGradeCard label="Status" val={isQualified ? "Qualified" : "Failed"} color={isQualified ? "text-emerald-600" : "text-rose-600"} icon={isQualified ? <CheckCircle2 /> : <XCircle />} />
+              <MiniGradeCard label="Net Score" val={score} color="text-primary" />
+              <MiniGradeCard label="Percentile" val={`${percentile}%`} color="text-purple-500" />
+              <MiniGradeCard label="Status" val={isQualified ? "Qualified" : "Failed"} color={isQualified ? "text-emerald-600" : "text-rose-600"} />
            </div>
         </div>
 
@@ -184,16 +184,16 @@ export default function ResultCard({
           <div className="space-y-6">
             <div className="flex items-center justify-between px-1">
                <h3 className="text-xl font-black text-[#0F172A] flex items-center gap-3"><BarChart3 className="h-6 w-6 text-primary" /> Subject Analysis</h3>
-               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mastery Index</span>
+               <span className="text-[10px] font-bold text-slate-400">Mastery Index</span>
             </div>
             <div className="border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-xl bg-white">
               <table className="w-full">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100">
-                    <th className="px-10 py-6 font-black text-left text-[11px] tracking-widest text-slate-500 uppercase">Subject Hub</th>
-                    <th className="px-6 py-6 font-black text-center text-[11px] tracking-widest text-slate-500 uppercase">Score</th>
-                    <th className="px-6 py-6 font-black text-center text-[11px] tracking-widest text-slate-500 uppercase">Accuracy</th>
-                    <th className="px-10 py-6 font-black text-right text-[11px] tracking-widest text-slate-500 uppercase">Mastery</th>
+                    <th className="px-10 py-6 font-black text-left text-[11px] text-slate-500">Subject Hub</th>
+                    <th className="px-6 py-6 font-black text-center text-[11px] text-slate-500">Score</th>
+                    <th className="px-6 py-6 font-black text-center text-[11px] text-slate-500">Accuracy</th>
+                    <th className="px-10 py-6 font-black text-right text-[11px] text-slate-500">Mastery</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -222,7 +222,7 @@ export default function ResultCard({
         <div className="grid grid-cols-2 gap-8">
            <div className="bg-slate-900 rounded-[3rem] p-10 text-white space-y-8 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 p-8 opacity-5"><Zap className="h-40 w-40" /></div>
-              <h4 className="text-xl font-black flex items-center gap-3 uppercase tracking-tight"><Zap className="text-primary h-5 w-5" /> Smart Insights</h4>
+              <h4 className="text-xl font-black flex items-center gap-3 tracking-tight"><Zap className="text-primary h-5 w-5" /> Smart Insights</h4>
               <div className="space-y-5">
                  <InsightPill text={`Your accuracy is ${attemptAccuracy}%. ${Number(attemptAccuracy) < 60 ? 'Avoid negative marking.' : 'Keep it up!'}`} />
                  <InsightPill text={isQualified ? 'Qualified for next stage nodes.' : 'Improve subject mastery to qualify.'} />
@@ -232,7 +232,7 @@ export default function ResultCard({
 
            <div className="bg-blue-50 rounded-[3rem] p-10 border border-blue-100 space-y-8 relative overflow-hidden">
               <div className="absolute bottom-0 right-0 p-8 opacity-10"><TrendingUp className="h-32 w-32 text-primary" /></div>
-              <h4 className="text-xl font-black text-[#0F172A] flex items-center gap-3 uppercase tracking-tight"><Target className="text-primary h-5 w-5" /> Competition</h4>
+              <h4 className="text-xl font-black text-[#0F172A] flex items-center gap-3 tracking-tight"><Target className="text-primary h-5 w-5" /> Competition</h4>
               <div className="grid grid-cols-2 gap-y-6 gap-x-10">
                  <CompMetric label="Topper Score" val={topperScore} />
                  <CompMetric label="Average Score" val={avgScore.toFixed(1)} />
@@ -261,7 +261,7 @@ export default function ResultCard({
               <div className="h-14 w-auto relative ml-auto">
                  <img src="/logo/cracklix-logo-dark.png" alt="Cracklix" className="h-full w-auto object-contain ml-auto opacity-40 grayscale" crossOrigin="anonymous" />
               </div>
-              <p className="text-[11px] font-black text-slate-300 tracking-[0.4em] uppercase">www.cracklix.in</p>
+              <p className="text-[11px] font-black text-slate-300 tracking-[0.4em]">www.cracklix.in</p>
            </div>
         </div>
       </div>
@@ -272,23 +272,18 @@ export default function ResultCard({
 function HeroInfo({ label, val }: { label: string, val: string }) {
    return (
       <div className="space-y-1 min-w-0">
-         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+         <p className="text-[10px] font-bold text-slate-400">{label}</p>
          <p className="text-base md:text-xl font-black text-[#0F172A] truncate">{val}</p>
       </div>
    )
 }
 
-function MiniGradeCard({ label, val, color, icon }: any) {
+function MiniGradeCard({ label, val, color }: { label: string, val: string | number, color: string }) {
    return (
-      <div className="bg-white border border-slate-100 rounded-3xl p-4 flex items-center justify-between shadow-sm group hover:shadow-xl transition-all border-l-4 border-l-primary">
-         <div className="flex items-center gap-4">
-            <div className={cn("h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform", color)}>
-               {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
-            </div>
-            <div className="text-left">
-               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</p>
-               <p className={cn("text-xl font-black tabular-nums mt-1", color)}>{val}</p>
-            </div>
+      <div className="bg-white border border-slate-100 rounded-3xl p-5 flex items-center justify-between shadow-sm group hover:shadow-xl transition-all border-l-4 border-l-primary">
+         <div className="text-left">
+            <p className="text-[9px] font-bold text-slate-400 tracking-widest leading-none">{label}</p>
+            <p className={cn("text-xl font-black tabular-nums mt-1.5", color)}>{val}</p>
          </div>
       </div>
    )
@@ -320,7 +315,7 @@ function CircleMetric({ label, val, color, textColor }: any) {
                <span className={cn("text-3xl md:text-5xl font-black tracking-tighter tabular-nums", textColor)}>{val}%</span>
             </div>
          </div>
-         <p className="text-[11px] md:text-sm font-black text-[#0F172A] uppercase tracking-widest">{label}</p>
+         <p className="text-[11px] md:text-sm font-black text-[#0F172A] tracking-widest">{label}</p>
       </div>
    )
 }
@@ -329,7 +324,7 @@ function AnalysisBox({ label, val, color, border }: any) {
    return (
       <div className={cn("p-6 rounded-[2rem] border-2 flex flex-col items-center justify-center text-center gap-1 transition-all hover:scale-105 shadow-sm", color, border)}>
          <span className="text-3xl font-black tabular-nums">{val}</span>
-         <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">{label}</span>
+         <span className="text-[9px] font-bold tracking-widest opacity-60">{label}</span>
       </div>
    )
 }
@@ -346,7 +341,7 @@ function InsightPill({ text }: { text: string }) {
 function CompMetric({ label, val }: any) {
    return (
       <div className="space-y-1">
-         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+         <p className="text-[9px] font-black text-slate-400 tracking-widest">{label}</p>
          <p className="text-xl md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none">{val}</p>
       </div>
    )
