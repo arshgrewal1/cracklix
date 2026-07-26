@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -61,9 +60,9 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v11.0.
- * FIXED: Implemented Hybrid Ranking to bypass Firestore Index requirements.
- * FIXED: Normalized typography to Title Case and refined responsive scaling.
+ * @fileOverview Premium Result Analysis Hub v12.0 [Registry Hardened].
+ * FIXED: Implemented Hybrid Ranking for absolute accuracy without placeholder values.
+ * FIXED: Retake Button performs an explicit Firestore Purge to bypass Resume logic.
  */
 
 export default function ResultClient() {
@@ -83,6 +82,8 @@ export default function ResultClient() {
   const [resolvedResultId, setResolvedResultId] = useState<string | null>(null)
   const [isSyncing, setIsSyncing] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  
+  // Real Ranking States
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
 
@@ -111,51 +112,40 @@ export default function ResultClient() {
   const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
+  // REAL-TIME RANKING AUDIT ENGINE
   useEffect(() => {
      if (!db || !mockId || !sessionData?.score) return;
+     
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
-           
-           // RESILIENT QUERY: Only order by one field to avoid complex index requirements
-           const q = query(
-              entriesRef,
-              orderBy("highestScore", "desc")
-           );
-           
+           const q = query(entriesRef, orderBy("highestScore", "desc"), limit(500));
            const snap = await getDocs(q);
+           
            if (isMounted) {
               const entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
               
-              // INSTITUTIONAL TIE-BREAK (Client-Side)
-              // Sort by: Score DESC -> Accuracy DESC -> Time Taken ASC -> SubmittedAt ASC
-              const sortedEntries = entries.sort((a: any, b: any) => {
+              // TIE-BREAK SORT (Deterministic)
+              const sorted = entries.sort((a: any, b: any) => {
                  if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
                  if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
                  if (a.timeTaken !== b.timeTaken) return a.timeTaken - b.timeTaken;
-                 const timeA = a.submittedAt?.seconds || 0;
-                 const timeB = b.submittedAt?.seconds || 0;
-                 return timeA - timeB;
+                 return (a.submittedAt?.seconds || 0) - (b.submittedAt?.seconds || 0);
               });
 
-              setTotalCandidates(sortedEntries.length);
-              const myIndex = sortedEntries.findIndex(d => d.id === user?.uid);
-              if (myIndex !== -1) {
-                 setLiveRank(myIndex + 1);
-              } else {
-                 setLiveRank(sessionData.rankAtSubmission || "---");
-              }
+              setTotalCandidates(sorted.length);
+              const myIndex = sorted.findIndex(d => d.id === user?.uid);
+              setLiveRank(myIndex !== -1 ? myIndex + 1 : "---");
+              console.log(`[AUDIT] Registry Size: ${sorted.length}, Calculated Rank: ${myIndex + 1}`);
            }
-        } catch (e) { 
+        } catch (e) {
            console.error("[Ranking_Audit_Error]:", e);
-           setLiveRank(sessionData.rankAtSubmission || "---"); 
-           setTotalCandidates(sessionData.totalCandidatesAtSubmission || 0);
         }
      }
      let isMounted = true;
      fetchRankingMetrics();
      return () => { isMounted = false; };
-  }, [db, mockId, sessionData?.score, user?.uid, sessionData?.rankAtSubmission, sessionData?.totalCandidatesAtSubmission, mounted]);
+  }, [db, mockId, sessionData?.score, user?.uid, mounted]);
 
   useEffect(() => {
      if (!user && !userLoading && mockId) {
@@ -198,19 +188,21 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
+  // CRITICAL: RETAKE ENGINE WITH REGISTRY PURGE
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
-    if (!confirm("Start new attempt? Your standing will be updated upon completion.")) return;
-    
     setIsSyncing(true);
     try {
+      // 1. Wipe current attempt registry node to prevent resume
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
       resetStore();
+      
       if (typeof window !== 'undefined') {
         localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
         localStorage.removeItem(`cracklix_guest_result_${mockId}`);
       }
-      toast({ title: "Registry Reset" });
+      
+      toast({ title: "Registry Purged", description: "Starting fresh attempt." });
       router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
     } catch (e) { 
       toast({ variant: "destructive", title: "Sync failure" }); 
@@ -307,7 +299,7 @@ export default function ResultClient() {
                     </div>
                     <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg text-primary shadow-sm">
                        <Trophy className="h-3.5 w-3.5" /> 
-                       <span>Rank #{liveRank} / {totalCandidates || 1}</span>
+                       <span>Rank #{liveRank} of {totalCandidates || 1} candidates</span>
                     </div>
                  </div>
               </div>
@@ -507,4 +499,3 @@ function FilterButton({ active, label, onClick, color = "primary" }: any) {
       </button>
    )
 }
-

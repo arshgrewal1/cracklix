@@ -92,7 +92,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     elapsedSeconds,
     setCurrentIdx,
     saveAndNext,
-    resetStore
+    resetStore,
+    status
   } = useExamStore();
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -222,16 +223,18 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const timeTaken = Math.max(1, elapsedSeconds);
     const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
     
-    await stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
+    console.log(`[SUBMISSION] Finalizing attempt ${attemptId} for mock ${mockId}`);
 
     try {
       if (user) {
-        // 1. UPDATE LEADERBOARD & RANK (Atomic Consistency)
+        // ATOMIC TRANSACTION: Result + Leaderboard + Profile Sync
         await runTransaction(db, async (transaction) => {
           const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
           const globalMeritRef = doc(db, "leaderboard", user.uid);
+          const userRef = doc(db, "users", user.uid);
           
           const lbSnap = await transaction.get(lbEntryRef);
+          const userSnap = await transaction.get(userRef);
           
           let isNewBest = true;
           let oldAttemptCount = 0;
@@ -245,38 +248,34 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             isNewBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
           }
 
-          if (isNewBest) {
-            transaction.set(lbEntryRef, {
-              userId: user.uid,
-              userName: profile?.name || 'Aspirant',
-              photoURL: profile?.photoURL || "",
-              gender: profile?.gender || 'Other',
-              mockId,
-              highestScore: finalScore,
-              accuracy,
-              timeTaken,
-              attemptCount: oldAttemptCount + 1,
-              bestAttemptId: attemptId,
-              submittedAt: serverTimestamp()
-            }, { merge: true });
+          const leaderboardPayload = {
+            userId: user.uid,
+            userName: profile?.name || 'Aspirant',
+            photoURL: profile?.photoURL || "",
+            gender: profile?.gender || 'Other',
+            mockId,
+            highestScore: isNewBest ? finalScore : (lbSnap.data()?.highestScore || 0),
+            accuracy: isNewBest ? accuracy : (lbSnap.data()?.accuracy || 0),
+            timeTaken: isNewBest ? timeTaken : (lbSnap.data()?.timeTaken || 0),
+            attemptCount: oldAttemptCount + 1,
+            bestAttemptId: isNewBest ? attemptId : (lbSnap.data()?.bestAttemptId || attemptId),
+            submittedAt: serverTimestamp()
+          };
 
-            transaction.set(globalMeritRef, {
-              uid: user.uid,
-              displayName: profile?.name || 'Aspirant',
-              photoURL: profile?.photoURL || "",
-              highestScore: increment(finalScore > (profile?.highestScore || 0) ? finalScore - (profile?.highestScore || 0) : 0),
-              totalTests: increment(1),
-              updatedAt: serverTimestamp(),
-              recentMockTitle: mockData.title
-            }, { merge: true });
-          } else {
-            transaction.update(lbEntryRef, {
-              attemptCount: increment(1),
-              updatedAt: serverTimestamp()
-            });
-          }
+          transaction.set(lbEntryRef, leaderboardPayload, { merge: true });
 
-          // 2. SAVE FINAL RESULT DOCUMENT
+          // Sync to Global Standings
+          transaction.set(globalMeritRef, {
+            uid: user.uid,
+            displayName: profile?.name || 'Aspirant',
+            photoURL: profile?.photoURL || "",
+            highestScore: increment(finalScore > (profile?.highestScore || 0) ? finalScore - (profile?.highestScore || 0) : 0),
+            totalTests: increment(1),
+            updatedAt: serverTimestamp(),
+            recentMockTitle: mockData.title
+          }, { merge: true });
+
+          // Individual Result Ledger Entry
           const resultRef = doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
           transaction.set(resultRef, {
              attemptId,
@@ -300,17 +299,21 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
              positiveMarks: posMarks,
              negativeMarks: negMarks,
              subjectAnalysis: Object.values(subMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
-             complexityAnalysis: Object.values(diffMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) }))
+             complexityAnalysis: Object.values(diffMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) })),
+             answers: answers // Persist actual answers for review
           });
 
-          // 3. FINALIZE ATTEMPT TRACKER
+          // Finalize Attempt Pointer
           transaction.set(doc(db, "attempts", `${user.uid}_${mockId}`), { 
              attemptId,
              status: 'COMPLETED', 
              updatedAt: serverTimestamp() 
           }, { merge: true });
+          
+          console.log('Leaderboard Saved ✅');
         });
 
+        await stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
         resetStore();
         router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
       } else {

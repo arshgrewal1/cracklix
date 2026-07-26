@@ -6,7 +6,7 @@ import {
   QuestionStatus, 
   LanguageDisplayMode 
 } from "@/types";
-import { Firestore, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { Firestore, doc, deleteDoc } from 'firebase/firestore';
 import { nanoid } from "nanoid";
 
 export interface ExamStoreState {
@@ -54,7 +54,7 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v10.0 [State Isolation Hub].
+ * @fileOverview Hardened Test Store v11.0 [Total State Isolation].
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -98,14 +98,16 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   }),
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode, forceNew = false) => {
-    // 1. CRITICAL: Total memory purge
+    // 1. CRITICAL: Immediate memory purge
     get().resetStore();
 
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     const defaultTime = duration * 60;
     
+    // 2. Logic: If forceNew (Retake), completely ignore resumeData
     let effectiveResume = !forceNew ? (resumeData || null) : null;
 
+    // Guest Resume Logic
     if (!effectiveResume && !userId && !forceNew && typeof window !== 'undefined') {
        try {
          const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
@@ -122,8 +124,8 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const now = Date.now();
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
     
-    // 2. Generate a unique ID for the attempt
-    const attemptId = isResuming ? (effectiveResume.attemptId || nanoid(12)) : nanoid(12);
+    // 3. NEW Attempt ID Generation
+    const attemptId = (isResuming && !forceNew) ? (effectiveResume.attemptId || nanoid(12)) : nanoid(12);
 
     set({
       mockId,
@@ -156,6 +158,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         elapsedSeconds: s.elapsedSeconds + 1
       }));
       
+      // Auto-save guest progress every 30s
       if (get().timeLeft % 30 === 0) state.persistGuestData();
     }
   },
@@ -179,26 +182,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const newStatus = { ...state.status, [idx]: 'answered' as QuestionStatus };
     
     set({ answers: newAnswers, status: newStatus });
-
-    if (db && state.userId && state.mockId) {
-      const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      setDoc(attemptRef, {
-        attemptId: state.attemptId,
-        answers: newAnswers,
-        statusMap: newStatus,
-        visited: state.visited,
-        bookmarks: state.bookmarks,
-        timeLeft: state.timeLeft,
-        elapsedSeconds: state.elapsedSeconds,
-        currentIdx: state.currentIdx,
-        violations: state.violations,
-        startTime: state.startTime,
-        status: 'IN_PROGRESS',
-        updatedAt: serverTimestamp()
-      }, { merge: true }).catch(() => {});
-    } else {
-      state.persistGuestData(true);
-    }
+    state.persistGuestData(true);
   },
 
   clearAnswer: (idx, db) => {
@@ -208,18 +192,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const newStatus = { ...state.status, [idx]: 'not-answered' as QuestionStatus };
     
     set({ answers: newAnswers, status: newStatus });
-
-    if (db && state.userId && state.mockId) {
-      const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      updateDoc(attemptRef, { 
-         answers: newAnswers, 
-         statusMap: newStatus, 
-         elapsedSeconds: state.elapsedSeconds,
-         updatedAt: serverTimestamp() 
-      }).catch(() => {});
-    } else {
-      state.persistGuestData(true);
-    }
+    state.persistGuestData(true);
   },
 
   markForReview: (idx, db) => {
@@ -228,17 +201,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const newStatus = { ...state.status, [idx]: (hasAnswer ? 'answered-marked' : 'marked') as QuestionStatus };
     
     set({ status: newStatus });
-
-    if (db && state.userId && state.mockId) {
-      const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      updateDoc(attemptRef, { 
-        statusMap: newStatus, 
-        elapsedSeconds: state.elapsedSeconds, 
-        updatedAt: serverTimestamp() 
-      }).catch(() => {});
-    } else {
-      state.persistGuestData(true);
-    }
+    state.persistGuestData(true);
   },
 
   saveAndNext: (db) => {
@@ -251,16 +214,8 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   addViolation: (db: Firestore | null) => {
     const state = get();
     const nextVal = (state.violations || 0) + 1;
-    
     set({ violations: nextVal });
-
-    if (db && state.userId && state.mockId) {
-      const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      updateDoc(attemptRef, { 
-        violations: nextVal, 
-        updatedAt: serverTimestamp() 
-      }).catch(() => {});
-    }
+    state.persistGuestData(true);
   },
 
   persistGuestData: (force = false) => {
