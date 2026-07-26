@@ -40,7 +40,7 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v44.1 [Hardened Index-Less].
+ * @fileOverview Institutional Result Hub v44.2 [Hardened Index-Less].
  * FIXED: Removed server-side orderBy to bypass Firestore Index requirement.
  * FIXED: Implemented client-side sorting for attempt history.
  */
@@ -112,7 +112,6 @@ export default function ResultClient() {
        }
 
        try {
-          // Hardened Lookup: Fetch matching results and sort client-side to bypass Index requirement
           const resQuery = query(
              collection(db, "results"), 
              where("userId", "==", user.uid), 
@@ -127,7 +126,6 @@ export default function ResultClient() {
              return;
           }
 
-          // Sort by timestamp newest first
           const resultsList = querySnap.docs
             .map(d => ({ ...d.data(), id: d.id }))
             .sort((a: any, b: any) => {

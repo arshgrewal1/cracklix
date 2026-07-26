@@ -7,8 +7,8 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v10.0 [FIXED VERTICAL ALIGN].
- * FIXED: Minimized brand gap and moved composition to upper-middle quadrant.
+ * @fileOverview Premium PWA Splash Hub v11.0 [FIXED VERTICAL CENTER].
+ * FIXED: Removed top-biasing and justify-start to achieve absolute vertical centering.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -63,16 +63,16 @@ export default function SplashScreen() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] bg-[#05070B] flex flex-col items-center justify-start overflow-hidden pointer-events-none select-none pt-[6dvh] md:pt-[10dvh]"
+          className="fixed inset-0 z-[9999] bg-[#05070B] flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none"
         >
-          <div className="absolute top-[-10%] left-[-10%] w-full h-[70%] bg-primary/10 blur-[140px] rounded-full" />
+          <div className="absolute top-0 left-0 w-full h-full bg-primary/5 blur-[140px] rounded-full" />
           
           <div className="relative z-10 flex flex-col items-center w-full px-8 max-w-lg">
              <motion.div
                initial={{ opacity: 0, scale: 0.7, y: 30 }}
                animate={{ opacity: 1, scale: 1, y: 0 }}
                transition={{ duration: 1.2, ease: "easeOut" }}
-               className="relative mb-0"
+               className="relative"
              >
                 <div className="relative flex items-center justify-center">
                    <motion.div 
@@ -82,7 +82,7 @@ export default function SplashScreen() {
                    />
                    <div 
                      className="relative"
-                     style={{ width: 'clamp(300px, 45vw, 500px)', height: 'auto', aspectRatio: '1/1' }}
+                     style={{ width: 'clamp(280px, 40vw, 450px)', height: 'auto', aspectRatio: '1/1' }}
                    >
                       <Image 
                         src="/logo/cracklix-icon.png" 
@@ -99,18 +99,18 @@ export default function SplashScreen() {
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 1, delay: 0.5 }}
-               className="text-center space-y-2 w-full -mt-20 md:-mt-32"
+               className="text-center space-y-2 w-full -mt-16 md:-mt-24"
              >
                 <div className="space-y-1">
-                   <h1 className="text-[56px] md:text-[88px] font-[900] tracking-tighter text-white leading-none antialiased">
+                   <h1 className="text-[52px] md:text-[80px] font-[900] tracking-tighter text-white leading-none antialiased">
                       Cracklix
                    </h1>
-                   <p className="text-[14px] md:text-[20px] font-medium text-slate-400 tracking-tight leading-none opacity-90 italic">
+                   <p className="text-[14px] md:text-[18px] font-medium text-slate-400 tracking-tight leading-none opacity-80 italic">
                       Punjab's Smart Mock Test Platform
                    </p>
                 </div>
 
-                <div className="pt-12 md:pt-16 w-full max-w-[200px] md:max-w-[260px] mx-auto space-y-6">
+                <div className="pt-10 md:pt-14 w-full max-w-[180px] md:max-w-[220px] mx-auto space-y-6">
                    <div className="flex flex-col items-center gap-5">
                       <div className="relative h-[2px] w-full bg-white/5 rounded-full overflow-hidden shadow-inner">
                          <motion.div 
@@ -119,7 +119,7 @@ export default function SplashScreen() {
                             className="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-500 shadow-[0_0_10px_rgba(37,99,235,0.8)]"
                          />
                       </div>
-                      <p className="text-[10px] md:text-xs font-bold text-slate-500 tracking-tight uppercase opacity-40">
+                      <p className="text-[9px] md:text-[10px] font-bold text-slate-500 tracking-widest uppercase opacity-40">
                          Loading your learning journey...
                       </p>
                    </div>
