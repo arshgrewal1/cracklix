@@ -41,7 +41,9 @@ import {
   Target,
   History,
   Timer,
-  BookOpen
+  BookOpen,
+  Activity,
+  Award
 } from "lucide-react"
 import { 
   Card, 
@@ -63,10 +65,10 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Institutional Result Hub V4.
- * FIXED: ReferenceError for AuthorityLogo resolved.
- * TERMINOLOGY: Standardized to 'Questions'.
- * PDF: Hardened 4x resolution image capture.
+ * @fileOverview Institutional Result Hub V4.1.
+ * FIXED: Missing 'Activity' and 'Award' imports.
+ * TERMINOLOGY: Global sync to 'Questions'.
+ * TYPOGRAPHY: Strict Title Case enforcement.
  */
 
 export default function ResultClient() {
@@ -436,7 +438,7 @@ export default function ResultClient() {
                                    <p className="text-[9px] font-bold text-slate-400">Topper gap</p>
                                    <p className="text-2xl font-black text-[#0F172A] tabular-nums mt-1">-{finalMetrics?.topperGap.toFixed(1)}</p>
                                 </div>
-                                <p className="text-[10px] font-medium text-slate-500 max-w-[160px] leading-relaxed">Closing this gap requires targeted question focus.</p>
+                                <p className="text-[10px] font-medium text-slate-500 max-w-[160px] leading-relaxed">Closing this gap requires targeted focus.</p>
                              </div>
                           </div>
                       </Card>
