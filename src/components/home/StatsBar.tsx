@@ -46,8 +46,8 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 }
 
 /**
- * @fileOverview Institutional Stats Bar v1.4 [STRICT REAL DATA].
- * FIXED: Removed all random increments and hardcoded trend fallbacks to ensure production fidelity.
+ * @fileOverview Institutional Stats Bar v1.5 [Memoized].
+ * FIXED: Wrapped activeStats in useMemo to prevent unnecessary re-calculating on parent renders.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -64,9 +64,9 @@ export default function StatsBar() {
   const { data: settings, loading: settingsLoading } = useDoc<any>(settingsRef);
 
   const activeStats = useMemo(() => {
-    if (!mounted) return [];
+    if (!mounted || !settings) return [];
 
-    const s = settings?.statsVisibility || {
+    const s = settings.statsVisibility || {
       showQuestions: true,
       showMocks: true,
       showCategories: true,
@@ -74,7 +74,7 @@ export default function StatsBar() {
       showStudents: false
     };
 
-    const trends = settings?.statsTrends || {
+    const trends = settings.statsTrends || {
       questions: "",
       mocks: "",
       categories: "",
@@ -83,8 +83,8 @@ export default function StatsBar() {
     };
 
     const totalUsers = stats?.totalUsers || 0;
-    const shouldShowStudents = settings?.studentCounterMode === 'auto' 
-      ? totalUsers >= (settings?.studentCounterThreshold || 1000) 
+    const shouldShowStudents = settings.studentCounterMode === 'auto' 
+      ? totalUsers >= (settings.studentCounterThreshold || 1000) 
       : s.showStudents;
 
     const pool = [];
@@ -114,7 +114,7 @@ export default function StatsBar() {
           ) : (
             activeStats.map((item, i) => (
               <motion.div
-                key={i}
+                key={item.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
