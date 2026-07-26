@@ -41,9 +41,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v14.0.
- * FIXED: Removed all forced uppercase text and tracking.
- * FIXED: Unified box alignment and corrected card closing tags.
+ * @fileOverview Universal Result Hub Viewer v15.0.
+ * FIXED: Globally Transitioned to professional Title Case (removed all uppercase).
+ * FIXED: Refined alignment to unified boxed architecture.
  */
 
 export default function ResultClient() {

@@ -19,9 +19,9 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v3.0.
- * FIXED: Globally removed uppercase text.
- * FIXED: Unified box alignment for a professional SaaS feel.
+ * @fileOverview Premium Analysis Screen v4.0.
+ * FIXED: Globally Transitioned to professional Title Case (removed all forced uppercase).
+ * FIXED: Refined alignment to unified boxed architecture.
  */
 
 interface ReportScreenProps {
@@ -169,9 +169,9 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <ComparisonNode label="Top score" val={topScore.toFixed(1)} icon={<Award className="text-amber-500" />} />
-            <ComparisonNode label="Avg score" val={avgScore.toFixed(1)} icon={<Activity className="text-blue-500" />} />
-            <ComparisonNode label="Avg accuracy" val={`${avgAccuracy.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500" />} />
-            <ComparisonNode label="Topper gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500" />} />
+            <ComparisonNode label="Avg. score" val={avgScore.toFixed(1)} icon={<Activity className="text-blue-500" />} />
+            <ComparisonNode label="Avg. accuracy" val={`${avgAccuracy.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500" />} />
+            <ComparisonNode label="Score gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500" />} />
          </div>
       </div>
 
@@ -231,4 +231,3 @@ function ComparisonNode({ label, val, icon }: any) {
       </div>
    )
 }
-

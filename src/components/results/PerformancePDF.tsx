@@ -1,22 +1,20 @@
-
 'use client';
 
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 /**
- * @fileOverview Institutional Performance PDF Template Engine v1.1.
- * FIXED: Updated font links to use high-availability TTF sources to resolve 404 errors.
- * Strictly adheres to A4 Portrait (794px x 1123px equivalent) norms.
+ * @fileOverview Institutional Performance PDF Template Engine v1.2.
+ * FIXED: Updated font links to use correct static subfolder paths to resolve 404 errors.
  */
 
 // Register professional typography with reliable sources
 Font.register({
   family: 'Inter',
   fonts: [
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter-Regular.ttf', fontWeight: 400 },
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter-Bold.ttf', fontWeight: 700 },
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter-Black.ttf', fontWeight: 900 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Regular.ttf', fontWeight: 400 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Bold.ttf', fontWeight: 700 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Black.ttf', fontWeight: 900 },
   ],
 });
 
