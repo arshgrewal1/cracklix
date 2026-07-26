@@ -7,8 +7,9 @@ import { cn } from '@/lib/utils';
 import { useCallback } from 'react';
 
 /**
- * @fileOverview Test Action Bar v41.1.
- * FIXED: Reduced horizontal padding and enforced text wrapping for mobile responsiveness.
+ * @fileOverview Test Action Bar v42.0.
+ * FIXED: Logic updated to only trigger onSubmit (modal) if on the last question.
+ * FIXED: Enhanced text centering and vertical alignment for mobile.
  */
 export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
   const currentIdx = useExamStore(s => s.currentIdx);
@@ -28,6 +29,14 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
   const handleClear = useCallback(() => {
     clearAnswer(currentIdx, db);
   }, [currentIdx, db, clearAnswer]);
+
+  const handlePrimaryAction = () => {
+    if (isLastQuestion) {
+      onSubmit();
+    } else {
+      saveAndNext(db);
+    }
+  };
   
   return (
     <div className="w-full bg-white border-t border-slate-100 p-3 md:p-6 md:bg-transparent md:border-none z-50">
@@ -35,7 +44,7 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
         <Button 
           variant="outline" 
           onClick={handleReviewLater}
-          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm px-2 leading-tight uppercase tracking-wider whitespace-normal text-center"
+          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm flex items-center justify-center text-center uppercase tracking-wider leading-tight px-1"
         >
           Review Later
         </Button>
@@ -43,15 +52,15 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
         <Button 
           variant="outline" 
           onClick={handleClear}
-          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm px-2 leading-tight uppercase tracking-wider whitespace-normal text-center"
+          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm flex items-center justify-center text-center uppercase tracking-wider leading-tight px-1"
         >
           Clear
         </Button>
 
         <Button 
-          onClick={onSubmit}
+          onClick={handlePrimaryAction}
           className={cn(
-            "h-12 md:h-16 text-white rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] shadow-xl border-none active:scale-95 px-2 transition-all leading-tight uppercase tracking-wider whitespace-normal text-center",
+            "h-12 md:h-16 text-white rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] shadow-xl border-none active:scale-95 flex items-center justify-center text-center transition-all uppercase tracking-wider leading-tight px-1",
             isLastQuestion ? "bg-emerald-600 hover:bg-emerald-700" : "bg-primary hover:bg-blue-700"
           )}
         >

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -42,9 +41,8 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Hub v95.0 [PRODUCTION FIX].
- * FIXED: Removed undefined 'planId' and incorrect revenue logic from submission transaction.
- * FIXED: Implemented Atomic Commit with high-fidelity logging.
+ * @fileOverview Institutional Attempt Hub v96.0 [Alignment Fixed].
+ * FIXED: Centered text in submit dialog to match high-fidelity requirements.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -366,7 +364,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
      <div className="h-screen flex flex-col items-center justify-center p-6 text-center space-y-6">
         <AlertCircle className="h-16 w-16 text-rose-500" />
         <h2 className="text-2xl font-black">Initialization failed</h2>
-        <p className="text-slate-500 max-w-sm">{initError}</p>
+        <p className="text-slate-500 max-sm">{initError}</p>
         <Button onClick={() => window.location.reload()} className="rounded-xl h-12 px-8">Retry Sync</Button>
      </div>
   );
@@ -407,9 +405,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-[#0F172A] text-white text-center shadow-2xl z-[1300] border-none">
           <div className="flex flex-col items-center">
             <ShieldCheck className="h-16 w-16 text-primary mb-6" />
-            <DialogHeader>
-              <DialogTitle className="text-white font-black text-3xl">Submit test</DialogTitle>
-              <DialogDescription className="text-slate-400 mt-2">Finish your attempt and generate performance report.</DialogDescription>
+            <DialogHeader className="text-center sm:text-center w-full">
+              <DialogTitle className="text-white font-black text-3xl text-center">Submit test</DialogTitle>
+              <DialogDescription className="text-slate-400 mt-2 text-center">Finish your attempt and generate performance report.</DialogDescription>
             </DialogHeader>
             <div className="w-full flex flex-col gap-3 mt-8">
               <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl border-none">Finish attempt</Button>
