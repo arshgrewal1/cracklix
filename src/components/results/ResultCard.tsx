@@ -43,7 +43,9 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v18.0 [Hardened Uppercase Hub].
+ * @fileOverview Official Institutional Report Card v20.0 [PWA Scale Fixed].
+ * FIXED: Removed fixed w-[210mm] to allow PWA scaling. 
+ * FIXED: Removed forced uppercase.
  */
 export default function ResultCard({
   studentName,
@@ -70,99 +72,102 @@ export default function ResultCard({
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullVerifyUrl)}`;
 
   return (
-    <div id="cracklix-result-card" className="w-[210mm] min-h-[297mm] bg-white border border-slate-200 shadow-none overflow-hidden text-left font-body relative p-0 mx-auto box-border uppercase">
-      <div className="h-4 w-full bg-[#0F172A]" />
+    <div 
+      id="cracklix-result-card" 
+      className="w-full max-w-[800px] print:w-[210mm] min-h-auto print:min-h-[297mm] bg-white border border-slate-200 shadow-none overflow-hidden text-left font-body relative p-0 mx-auto box-border"
+    >
+      <div className="h-2 md:h-4 w-full bg-[#0F172A]" />
       
-      <div className="px-12 py-12 space-y-10">
+      <div className="px-6 md:px-12 py-8 md:py-12 space-y-8 md:space-y-10">
         {/* HEADER HUB */}
-        <div className="flex justify-between items-start border-b-2 border-slate-100 pb-10">
-          <div className="flex items-center gap-8">
-            <div className="h-32 w-32 md:h-40 md:w-40 bg-white rounded-2xl flex items-center justify-center p-0 border-2 border-slate-50 shadow-xl overflow-hidden shrink-0">
+        <div className="flex justify-between items-start border-b border-slate-100 pb-8 md:pb-10">
+          <div className="flex items-center gap-4 md:gap-8">
+            <div className="h-20 w-20 md:h-32 md:w-32 bg-white rounded-xl md:rounded-2xl flex items-center justify-center p-0 border border-slate-50 shadow-lg overflow-hidden shrink-0">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
               ) : (
                 <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
               )}
             </div>
-            <div className="space-y-1 text-left">
-              <h2 className="text-4xl font-black text-[#0F172A] tracking-tighter leading-none">{orgName}</h2>
-              <p className="text-[11px] font-bold text-slate-400 tracking-[0.3em]">Official Merit Portal</p>
+            <div className="space-y-0.5 text-left min-w-0">
+              <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">{orgName}</h2>
+              <p className="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest truncate">Official Merit Portal</p>
             </div>
           </div>
-          <div className="text-right space-y-3">
-            <Badge className="bg-[#0F172A] text-white border-none font-bold text-[10px] px-6 py-2 rounded-full tracking-widest">Verified Attempt</Badge>
-            <p className="text-[14px] font-black text-[#0F172A] tabular-nums tracking-widest">{date}</p>
+          <div className="text-right space-y-2 md:space-y-3 shrink-0">
+            <Badge className="bg-[#0F172A] text-white border-none font-bold text-[8px] md:text-[10px] px-3 md:px-6 py-1 md:py-2 rounded-full tracking-widest uppercase">Verified Attempt</Badge>
+            <p className="text-[10px] md:text-[14px] font-black text-[#0F172A] tabular-nums tracking-widest">{date}</p>
           </div>
         </div>
 
         {/* IDENTITY HUB */}
-        <div className="grid grid-cols-12 gap-10 items-center">
-           <div className="col-span-8 space-y-4">
-              <div className="space-y-1 text-left">
-                 <h1 className="text-4xl font-[800] text-[#0F172A] tracking-tight leading-none">{studentName}</h1>
-                 <p className="text-primary font-bold text-xl tracking-tight mt-1">{examTitle}</p>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10 items-center">
+           <div className="md:col-span-8 space-y-4 text-left">
+              <div className="space-y-1">
+                 <h1 className="text-2xl md:text-5xl font-[800] text-[#0F172A] tracking-tight leading-tight">{studentName}</h1>
+                 <p className="text-primary font-bold text-base md:text-2xl tracking-tight">{examTitle}</p>
               </div>
-              <div className="flex items-center gap-8 pt-2">
-                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px] tracking-widest">
-                    <ShieldCheck className="h-4 w-4 text-emerald-500" /> Identity Verified
+              <div className="flex flex-wrap items-center gap-4 md:gap-8 pt-1">
+                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[9px] md:text-[11px] uppercase tracking-widest">
+                    <ShieldCheck className="h-3.5 w-3.5 md:h-4 md:w-4 text-emerald-500" /> Identity Verified
                  </div>
-                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px] tracking-widest">
-                    <Target className="h-4 w-4 text-primary" /> Punjab Rank: #{rank}
+                 <div className="flex items-center gap-2 text-slate-400 font-bold text-[9px] md:text-[11px] uppercase tracking-widest">
+                    <Target className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" /> Punjab Rank: #{rank}
                  </div>
               </div>
            </div>
 
-           <div className="col-span-4 flex justify-end">
-              <div className="h-36 w-36 bg-[#0F172A] rounded-[2.5rem] shadow-xl flex flex-col items-center justify-center relative border-[6px] border-slate-50">
-                 <span className="text-[10px] font-bold text-slate-500 tracking-widest mb-1">Grade</span>
-                 <span className="text-[80px] font-black text-white tabular-nums leading-none tracking-tighter">{grade}</span>
-                 <div className="absolute -bottom-3 -right-3 h-11 w-11 bg-amber-400 rounded-xl flex items-center justify-center text-white shadow-lg border-2 border-white">
-                    <Award className="h-6 w-6" />
+           <div className="md:col-span-4 flex justify-center md:justify-end">
+              <div className="h-28 w-28 md:h-36 md:w-36 bg-[#0F172A] rounded-[2rem] md:rounded-[2.5rem] shadow-xl flex flex-col items-center justify-center relative border-[4px] md:border-[6px] border-slate-50">
+                 <span className="text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Grade</span>
+                 <span className="text-4xl md:text-[80px] font-black text-white tabular-nums leading-none tracking-tighter">{grade}</span>
+                 <div className="absolute -bottom-2 -right-2 md:-bottom-3 md:-right-3 h-8 w-8 md:h-11 md:w-11 bg-amber-400 rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-lg border-2 border-white">
+                    <Award className="h-4 w-4 md:h-6 md:w-6" />
                  </div>
               </div>
            </div>
         </div>
 
         {/* ANALYTICS HUB */}
-        <div className="grid grid-cols-3 gap-5">
-           <AnalyticNode label="Total Score" val={score} icon={<Zap className="text-primary h-5 w-5" />} />
-           <AnalyticNode label="Punjab Rank" val={`#${rank}`} icon={<Trophy className="text-amber-500 h-5 w-5" />} highlight />
-           <AnalyticNode label="Accuracy" val={`${accuracy}%`} icon={<Target className="text-emerald-500 h-5 w-5" />} />
-           <AnalyticNode label="Percentile" val={`${percentile}%`} icon={<TrendingUp className="text-blue-500 h-5 w-5" />} />
-           <AnalyticNode label="Time Taken" val={timeTaken} icon={<Clock className="text-slate-400 h-5 w-5" />} />
-           <AnalyticNode label="Status" val={Number(accuracy) > 40 ? "Qualified" : "Learning"} icon={<CheckCircle2 className="text-emerald-600 h-5 w-5" />} />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
+           <AnalyticNode label="Total Score" val={score} icon={<Zap className="text-primary h-4 w-4" />} />
+           <AnalyticNode label="Punjab Rank" val={`#${rank}`} icon={<Trophy className="text-amber-500 h-4 w-4" />} highlight />
+           <AnalyticNode label="Accuracy" val={`${accuracy}%`} icon={<Target className="text-emerald-500 h-4 w-4" />} />
+           <AnalyticNode label="Percentile" val={`${percentile}%`} icon={<TrendingUp className="text-blue-500 h-4 w-4" />} />
+           <AnalyticNode label="Time Taken" val={timeTaken} icon={<Clock className="text-slate-400 h-4 w-4" />} />
+           <AnalyticNode label="Status" val={Number(accuracy) > 40 ? "Qualified" : "Learning"} icon={<CheckCircle2 className="text-emerald-600 h-4 w-4" />} />
         </div>
 
         {/* PERFORMANCE SUMMARY */}
-        <div className="bg-[#F8FAFC] rounded-[2rem] p-10 flex items-center justify-around shadow-inner border border-slate-100">
+        <div className="bg-[#F8FAFC] rounded-2xl md:rounded-[2rem] p-6 md:p-10 flex items-center justify-around shadow-inner border border-slate-100">
            <MetricNode label="Correct" val={correct} color="text-emerald-600" />
-           <div className="w-px h-16 bg-slate-200" />
+           <div className="w-px h-10 md:h-16 bg-slate-200" />
            <MetricNode label="Wrong" val={wrong} color="text-rose-600" />
-           <div className="w-px h-16 bg-slate-200" />
+           <div className="w-px h-10 md:h-16 bg-slate-200" />
            <MetricNode label="Skipped" val={total - (correct + wrong)} color="text-slate-300" />
         </div>
 
         {/* SUBJECT AUDIT */}
         {subjects.length > 0 && (
           <div className="space-y-4">
-            <h3 className="text-[10px] font-bold text-slate-400 tracking-[0.4em] ml-2 text-left">Subject Performance Audit</h3>
-            <div className="border border-slate-100 rounded-[2rem] overflow-hidden shadow-xl bg-white">
+            <h3 className="text-[10px] font-bold text-slate-400 tracking-[0.4em] ml-2 text-left uppercase">Subject Performance Audit</h3>
+            <div className="border border-slate-100 rounded-2xl md:rounded-[2rem] overflow-hidden shadow-xl bg-white">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-[#0F172A] text-white">
-                    <th className="px-8 py-5 font-bold text-left tracking-widest">Subject Hub</th>
-                    <th className="px-4 py-5 font-bold text-center tracking-widest">Score</th>
-                    <th className="px-8 py-5 font-bold text-right tracking-widest">Mastery</th>
+                    <th className="px-4 md:px-8 py-4 md:py-5 font-bold text-left tracking-widest uppercase text-[10px] md:text-sm">Subject</th>
+                    <th className="px-2 md:px-4 py-4 md:py-5 font-bold text-center tracking-widest uppercase text-[10px] md:text-sm">Score</th>
+                    <th className="px-4 md:px-8 py-4 md:py-5 font-bold text-right tracking-widest uppercase text-[10px] md:text-sm">Mastery</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {subjects.map((s, i) => (
                     <tr key={i} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-8 py-5 font-bold text-[#0F172A] text-lg tracking-tight text-left">{s.name}</td>
-                      <td className="px-4 py-5 text-center font-black text-primary tabular-nums text-2xl">{s.score.toFixed(1)}</td>
-                      <td className="px-8 py-5 text-right">
+                      <td className="px-4 md:px-8 py-4 md:py-5 font-bold text-[#0F172A] text-sm md:text-lg tracking-tight text-left">{s.name}</td>
+                      <td className="px-2 md:px-4 py-4 md:py-5 text-center font-black text-primary tabular-nums text-base md:text-2xl">{s.score.toFixed(1)}</td>
+                      <td className="px-4 md:px-8 py-4 md:py-5 text-right">
                         <Badge className={cn(
-                           "bg-emerald-50 text-emerald-600 border-none font-bold text-lg px-6 py-2 rounded-xl tabular-nums", 
+                           "bg-emerald-50 text-emerald-600 border-none font-bold text-xs md:text-lg px-3 md:px-6 py-1 md:py-2 rounded-xl tabular-nums", 
                            s.accuracy < 50 && "bg-rose-50 text-rose-600"
                         )}>
                           {s.accuracy}%
@@ -177,25 +182,25 @@ export default function ResultCard({
         )}
 
         {/* FOOTER VERIFICATION */}
-        <div className="pt-10 border-t-2 border-slate-100 flex flex-row items-start justify-between gap-10">
-          <div className="bg-white border-2 border-slate-100 p-4 rounded-[2rem] shadow-lg shrink-0 flex flex-col items-center justify-center gap-3">
-            <img src={qrUrl} alt="Verify" className="h-32 w-32 object-contain" crossOrigin="anonymous" />
-            <span className="text-[9px] font-black text-primary tracking-widest">Verify Hub</span>
+        <div className="pt-8 md:pt-10 border-t border-slate-100 flex flex-col md:flex-row items-start justify-between gap-8 md:gap-10">
+          <div className="bg-white border border-slate-100 p-3 md:p-4 rounded-xl md:rounded-[2rem] shadow-lg shrink-0 flex flex-col items-center justify-center gap-2">
+            <img src={qrUrl} alt="Verify" className="h-24 w-24 md:h-32 md:w-32 object-contain" crossOrigin="anonymous" />
+            <span className="text-[8px] md:text-[9px] font-black text-primary tracking-widest uppercase">Verify Hub</span>
           </div>
 
-          <div className="pt-2 space-y-6 flex-1 text-left">
-            <div className="space-y-1.5">
+          <div className="pt-0 md:pt-2 space-y-4 md:space-y-6 flex-1 text-left min-w-0">
+            <div className="space-y-2">
                <div className="flex items-center gap-3">
-                  <ShieldCheck className="h-8 w-8 text-emerald-500" />
-                  <p className="text-2xl font-black text-[#0F172A] tracking-tighter leading-none">Institutional Precision Verified</p>
+                  <ShieldCheck className="h-6 w-6 md:h-8 md:w-8 text-emerald-500 shrink-0" />
+                  <p className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tighter leading-none">Institutional Precision Verified</p>
                </div>
-               <div className="pl-11">
-                  <p className="text-[9px] font-bold text-slate-400 tracking-widest">Registry Id:</p>
-                  <p className="text-[10px] font-mono font-black text-primary break-all max-w-[400px] leading-tight mt-1">{resultId}</p>
+               <div className="pl-9 md:pl-11 min-w-0">
+                  <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest">Registry ID:</p>
+                  <p className="text-[9px] md:text-[10px] font-mono font-black text-primary break-all leading-tight mt-1">{resultId}</p>
                </div>
             </div>
-            <p className="text-[10px] font-bold text-slate-300 tracking-tight leading-relaxed max-w-lg">
-               This report is generated based on verified recruitment patterns. Authenticity can be audited via the QR node or at {webUrlRaw.toLowerCase()}.
+            <p className="text-[9px] md:text-[10px] font-medium text-slate-400 leading-relaxed max-w-lg">
+               This report is generated based on verified recruitment patterns. Authenticity can be audited via the QR node or at {webUrlRaw.toLowerCase()}. All scores are final and synchronized with the state registry.
             </p>
           </div>
         </div>
@@ -207,15 +212,15 @@ export default function ResultCard({
 function AnalyticNode({ label, val, icon, highlight }: any) {
   return (
     <div className={cn(
-       "p-6 rounded-[2rem] border-2 flex flex-col items-start gap-4 transition-all duration-500 group text-left",
+       "p-4 md:p-6 rounded-xl md:rounded-[2rem] border-2 flex flex-col items-start gap-3 md:gap-4 transition-all duration-500 group text-left",
        highlight ? "bg-primary/5 border-primary shadow-lg" : "bg-slate-50/50 border-slate-100 hover:bg-white hover:shadow-xl"
     )}>
-      <div className="h-10 w-10 rounded-xl bg-white shadow-md flex items-center justify-center shrink-0 border border-slate-100 group-hover:scale-110 transition-transform">
+      <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-white shadow-md flex items-center justify-center shrink-0 border border-slate-100 group-hover:scale-110 transition-transform">
         {icon}
       </div>
-      <div className="space-y-0.5">
-        <p className="text-[9px] font-bold text-slate-400 tracking-widest leading-none mb-1">{label}</p>
-        <p className="text-xl md:text-2xl font-black text-[#0F172A] leading-none tabular-nums tracking-tighter">{val}</p>
+      <div className="space-y-0.5 w-full min-w-0">
+        <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1 truncate">{label}</p>
+        <p className="text-base md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none truncate">{val}</p>
       </div>
     </div>
   );
@@ -224,8 +229,8 @@ function AnalyticNode({ label, val, icon, highlight }: any) {
 function MetricNode({ label, val, color }: any) {
   return (
     <div className="text-center space-y-1">
-       <p className="text-[11px] font-bold text-slate-400 tracking-widest leading-none">{label}</p>
-       <p className={cn("text-5xl font-black tabular-nums tracking-tighter", color)}>{val}</p>
+       <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</p>
+       <p className={cn("text-2xl md:text-5xl font-black tabular-nums tracking-tighter", color)}>{val}</p>
     </div>
   );
 }

@@ -1,12 +1,11 @@
-
 import React from "react"
 import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Activity, Cpu, Building2, Globe, Settings, FileText, FileStack } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v42.0.
- * FIXED: Removed internal padding buffers (p-0) and normalized container scaling.
+ * @fileOverview Institutional Branding Engine v43.0.
+ * FIXED: Removed all internal padding buffers (p-0) and normalized scaling.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -68,7 +67,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     sm: "h-11 w-11 md:h-12 md:w-12",
     md: "h-14 w-14 md:h-18 md:w-18",
     lg: "h-20 w-20 md:h-28 md:w-28",
-    xl: "h-28 w-28 md:h-40 md:w-40"
+    xl: "h-28 w-28 md:h-36 md:w-36"
   };
 
   const containerSize = sizeClasses[size];

@@ -58,6 +58,11 @@ import { useExamStore } from "@/store/useExamStore"
 import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
+/**
+ * @fileOverview Premium Result Analysis Hub v10.0 [PWA Fixed].
+ * FIXED: Removed forced uppercase. Corrected scaling for mobile view.
+ */
+
 export default function ResultClient() {
   const db = useFirestore()
   const { user, profile, loading: userLoading } = useUser()
@@ -179,7 +184,7 @@ export default function ResultClient() {
 
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
-    if (!confirm("Start new attempt? Your current standings will be preserved until a better score is achieved.")) return;
+    if (!confirm("Start new attempt? Your standing will be updated upon completion.")) return;
     
     setIsSyncing(true);
     try {
@@ -189,7 +194,7 @@ export default function ResultClient() {
         localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
         localStorage.removeItem(`cracklix_guest_result_${mockId}`);
       }
-      toast({ title: "Registry Reset", description: "Redirecting to start node." });
+      toast({ title: "Registry Reset" });
       router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
     } catch (e) { 
       toast({ variant: "destructive", title: "Sync failure" }); 
@@ -203,13 +208,13 @@ export default function ResultClient() {
     
     try {
       setActiveMainTab("REPORT"); 
-      toast({ title: "Generating PDF", description: "Preparing your professional report..." });
-      await new Promise(r => setTimeout(r, 1000));
+      toast({ title: "Preparing Report", description: "Synchronizing A4 registry node..." });
+      await new Promise(r => setTimeout(r, 1200));
       
       const element = document.getElementById('cracklix-result-card');
       if (!element) throw new Error("Capture node not found.");
 
-      const dataUrl = await toPng(element, { quality: 0.95, pixelRatio: 2, backgroundColor: '#ffffff' });
+      const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2, backgroundColor: '#ffffff' });
       const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -266,34 +271,34 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
       <Navbar />
-      <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-12 pb-40">
+      <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-10 pb-40">
         
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8 px-1 print:hidden">
-           <div className="flex items-center gap-6 md:gap-10 text-left w-full md:w-auto">
-              <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-28 md:w-28 rounded-2xl" />
-              <div className="space-y-1.5 flex-1 min-w-0">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-8 px-1 print:hidden">
+           <div className="flex items-center gap-5 md:gap-10 text-left w-full lg:w-auto">
+              <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="lg" className="h-14 w-14 md:h-24 md:w-24 rounded-2xl" />
+              <div className="space-y-1 flex-1 min-w-0">
                  <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verified Performance</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Performance node verified</span>
                  </div>
-                 <h1 className="text-xl md:text-4xl font-bold tracking-tight text-[#0F172A] leading-tight truncate">
+                 <h1 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A] leading-tight truncate">
                    {activeSession.mockTitle}
                  </h1>
-                 <div className="flex flex-wrap items-center gap-3 font-bold text-[10px] md:xs tracking-tight">
+                 <div className="flex flex-wrap items-center gap-2 md:gap-3 font-bold text-[9px] md:text-xs">
                     <div className="flex items-center gap-1.5 bg-white border border-slate-100 px-3 py-1.5 rounded-lg text-slate-500 shadow-sm">
                        <Clock className="h-3.5 w-3.5 text-slate-400" /> 
                        <span>{new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
                     </div>
                     <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg text-primary shadow-sm">
                        <Trophy className="h-3.5 w-3.5" /> 
-                       <span>Rank #{liveRank} of {totalCandidates || 1} Candidates</span>
+                       <span>Rank #{liveRank} / {totalCandidates || 1}</span>
                     </div>
                  </div>
               </div>
            </div>
            
-           <div className="flex flex-col gap-3 w-full md:w-auto shrink-0">
-              <div className="flex bg-white border border-slate-100 p-1 rounded-xl shadow-sm w-full md:w-auto overflow-hidden">
+           <div className="flex flex-col gap-3 w-full lg:w-auto shrink-0">
+              <div className="flex bg-white border border-slate-100 p-1 rounded-xl shadow-sm w-full lg:w-auto">
                  <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
                     <TabsList className="bg-transparent border-none p-0 flex h-10 w-full gap-1">
                        <HubTab value="OVERVIEW" label="Summary" />
@@ -318,7 +323,7 @@ export default function ResultClient() {
                    className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight shadow-xl border-none"
                  >
                     {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} 
-                    Download PDF
+                    Report PDF
                  </Button>
               </div>
            </div>
@@ -326,7 +331,7 @@ export default function ResultClient() {
 
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
            <TabsContent value="OVERVIEW" className="space-y-10 animate-in fade-in duration-500">
-              <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+              <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
                  <StatCard label="Final Score" val={activeSession.score.toFixed(1)} icon={<Zap className="text-primary" />} />
                  <StatCard label="Punjab Rank" val={`#${liveRank}`} icon={<Trophy className="text-amber-500" />} highlight />
                  <StatCard label="Percentile" val={`${percentile}%`} icon={<TrendingUp className="text-blue-500" />} />
@@ -335,22 +340,22 @@ export default function ResultClient() {
                  <StatCard label="Time Taken" val={formatTimeStr(activeSession.timeTaken)} icon={<Clock className="text-blue-500" />} />
               </section>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                 <div className="lg:col-span-8 space-y-8">
-                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
-                       <h2 className="text-xl md:text-2xl font-bold text-[#0F172A] tracking-tight mb-10">Subject performance audit</h2>
-                       <div className="space-y-10">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
+                 <div className="lg:col-span-8">
+                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-white p-6 md:p-10 text-left">
+                       <h2 className="text-lg md:text-2xl font-bold text-[#0F172A] tracking-tight mb-8">Subject performance audit</h2>
+                       <div className="space-y-8">
                           {Array.isArray(activeSession.subjectAnalysis) && activeSession.subjectAnalysis.map((sub: any, i: number) => (
-                             <div key={i} className="space-y-3">
-                                <div className="flex justify-between items-center text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest">
-                                   <div className="flex items-center gap-3"><BookOpen className="h-4 w-4 text-primary" /> {sub.name}</div>
+                             <div key={i} className="space-y-2">
+                                <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                   <div className="flex items-center gap-2"><BookOpen className="h-3.5 w-3.5 text-primary" /> {sub.name}</div>
                                    <span className="text-[#0F172A] tabular-nums font-black">{sub.accuracy}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
                                    <motion.div 
                                       initial={{ width: 0 }} 
                                       animate={{ width: `${sub.accuracy}%` }} 
-                                      transition={{ duration: 1.2, delay: i * 0.1 }} 
+                                      transition={{ duration: 1, delay: i * 0.05 }} 
                                       className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : sub.accuracy > 40 ? "bg-blue-500" : "bg-rose-500")} 
                                    />
                                 </div>
@@ -360,20 +365,20 @@ export default function ResultClient() {
                     </Card>
                  </div>
 
-                 <div className="lg:col-span-4 space-y-8">
-                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden group">
-                       <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-48 w-48 text-primary" /></div>
-                       <div className="relative z-10 space-y-6">
+                 <div className="lg:col-span-4">
+                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-[#0F172A] text-white p-6 md:p-8 space-y-6 relative overflow-hidden group">
+                       <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-40 w-40 text-primary" /></div>
+                       <div className="relative z-10 space-y-6 text-left">
                           <div className="space-y-1">
-                             <h3 className="text-xl font-bold tracking-tight leading-tight uppercase">Leaderboard</h3>
-                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Test Standings</p>
+                             <h3 className="text-xl font-bold tracking-tight uppercase">Leaderboard</h3>
+                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global standing</p>
                           </div>
-                          <div className="p-5 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-1 text-left">
-                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Current Rank</p>
-                             <p className="text-3xl font-black text-primary tabular-nums tracking-tighter">#{liveRank} of {totalCandidates}</p>
+                          <div className="p-4 bg-white/5 rounded-xl border border-white/5 flex flex-col gap-1">
+                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">My Standing</p>
+                             <p className="text-2xl font-black text-primary tabular-nums tracking-tighter">#{liveRank} of {totalCandidates}</p>
                           </div>
-                          <Button asChild className="w-full h-12 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-2xl border-none active:scale-95 transition-all">
-                             <Link href={`/leaderboard?id=${mockId}`}>View Full Leaderboard <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                          <Button asChild className="w-full h-11 bg-primary hover:bg-blue-700 text-white font-bold rounded-lg shadow-xl border-none active:scale-95 transition-all text-xs">
+                             <Link href={`/leaderboard?id=${mockId}`}>Full rankings <ArrowRight className="ml-2 h-4 w-4" /></Link>
                           </Button>
                        </div>
                     </Card>
@@ -381,9 +386,9 @@ export default function ResultClient() {
               </div>
            </TabsContent>
 
-           <TabsContent value="REVIEW" className="space-y-10 animate-in fade-in duration-500">
-              <div className="max-w-4xl mx-auto space-y-10">
-                 <div className="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
+           <TabsContent value="REVIEW" className="space-y-8 animate-in fade-in duration-500">
+              <div className="max-w-4xl mx-auto space-y-8">
+                 <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
                     <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
                     <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                     <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
@@ -395,16 +400,19 @@ export default function ResultClient() {
                        const rawAns = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
                        const isAttempted = rawAns !== null && rawAns !== undefined && String(rawAns) !== "";
                        const userSelectedLabel = isAttempted ? ['A', 'B', 'C', 'D'][Number(rawAns)] : null;
-                       const isCorrect = userSelectedLabel === q.correctAnswer;
                        return (
-                          <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white text-left group">
-                             <div className="p-8 md:p-12 space-y-8 md:space-y-10">
-                                <div className="flex justify-between items-center">
-                                   <Badge variant="outline" className="px-4 py-1 rounded-full border-slate-100 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
-                                      Question {q.originalIndex + 1}
-                                   </Badge>
-                                </div>
-                                <QuestionRenderer question={q} language={activeSession.languageMode || 'ENGLISH_PUNJABI'} showSolution={true} selectedAnswer={isAttempted ? Number(rawAns) : null} className="p-0 shadow-none border-none bg-transparent" />
+                          <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white text-left group">
+                             <div className="p-6 md:p-10 space-y-6">
+                                <Badge variant="outline" className="px-3 py-0.5 rounded-full border-slate-100 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
+                                   Question {q.originalIndex + 1}
+                                </Badge>
+                                <QuestionRenderer 
+                                  question={q} 
+                                  language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
+                                  showSolution={true} 
+                                  selectedAnswer={isAttempted ? Number(rawAns) : null} 
+                                  className="p-0 shadow-none border-none bg-transparent" 
+                                />
                              </div>
                           </Card>
                        )
@@ -414,8 +422,8 @@ export default function ResultClient() {
            </TabsContent>
 
            <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 pb-20">
-              <div className="flex flex-col items-center">
-                 <div className="bg-white p-0 rounded-none shadow-5xl border border-slate-100 overflow-hidden">
+              <div className="flex flex-col items-center overflow-x-auto no-scrollbar">
+                 <div className="bg-white p-0 rounded-none shadow-5xl border border-slate-100 overflow-hidden min-w-[320px] max-w-full">
                     <ResultCard 
                        studentName={activeSession.userName || profile?.name || "Aspirant"} 
                        examTitle={activeSession.mockTitle || "Mock Test"} 
@@ -446,13 +454,13 @@ export default function ResultClient() {
 function StatCard({ label, val, icon, highlight }: any) {
   return (
     <Card className={cn(
-       "border border-slate-100 shadow-md bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] text-left relative overflow-hidden h-full flex flex-col justify-center transition-all hover:translate-y-[-4px]",
-       highlight && "ring-2 ring-primary/5 bg-primary/[0.02]"
+       "border border-slate-100 shadow-md bg-white p-4 md:p-6 rounded-xl md:rounded-[1.5rem] text-left relative overflow-hidden h-full flex flex-col justify-center transition-all hover:translate-y-[-2px]",
+       highlight && "ring-2 ring-primary/5 bg-primary/[0.01]"
     )}>
-       <div className="absolute top-0 right-0 p-4 opacity-5">{icon}</div>
-       <div className="space-y-1 relative z-10">
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-          <p className={cn("text-xl md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
+       <div className="absolute top-0 right-0 p-3 opacity-5">{icon}</div>
+       <div className="space-y-0.5 relative z-10">
+          <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{label}</p>
+          <p className={cn("text-lg md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
        </div>
     </Card>
   )
@@ -471,7 +479,7 @@ function FilterButton({ active, label, onClick, color = "primary" }: any) {
       <button 
         onClick={onClick} 
         className={cn(
-          "px-4 md:px-8 py-2 rounded-lg text-[9px] md:text-[10px] font-bold tracking-tight transition-all active:scale-95 whitespace-nowrap border border-transparent uppercase",
+          "px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-bold tracking-tight transition-all active:scale-95 whitespace-nowrap border border-transparent uppercase",
           active 
             ? color === 'rose' ? "bg-rose-600 text-white shadow-lg" : 
               color === 'emerald' ? "bg-emerald-600 text-white shadow-lg" :
