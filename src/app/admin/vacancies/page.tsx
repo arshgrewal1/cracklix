@@ -4,6 +4,7 @@
 import React, { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
 import { 
   Megaphone, 
   Plus, 
@@ -28,8 +29,8 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/components/admin"
 
 /**
- * @fileOverview Official Vacancy Registry Management v3.0.
- * UPDATED: Finalized Title Case typography and consistent control alignment.
+ * @fileOverview Official Vacancy Registry Management v3.1.
+ * FIXED: Added missing Button import.
  */
 
 export default function VacancyDashboard() {
