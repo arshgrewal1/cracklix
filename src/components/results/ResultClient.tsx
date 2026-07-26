@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -51,8 +52,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v34.0.
- * FIXED: Removed server-side orderBy to bypass index requirements and fix "Result not found" bug.
+ * @fileOverview Institutional Result Hub v35.0.
+ * FIXED: Accurate attempt number resolution and Title Case synchronization.
  * UPDATED: Domain strictly synchronized to cracklix.in.
  */
 
@@ -128,7 +129,6 @@ export default function ResultClient() {
        }
 
        try {
-          // INDEX-LESS QUERY PROTOCOL: No orderBy used here to prevent crashes
           const resQuery = query(
              collection(db, "results"), 
              where("userId", "==", user.uid), 
@@ -142,18 +142,16 @@ export default function ResultClient() {
              return;
           }
 
-          // Sort client-side for stability
           const resultsList = querySnap.docs
             .map(d => ({ ...d.data(), id: d.id }))
             .sort((a: any, b: any) => {
               const tA = new Date(a.timestamp || 0).getTime();
               const tB = new Date(b.timestamp || 0).getTime();
-              return tA - tB; // Chronological order
+              return tA - tB;
             });
           
           setUserAttemptCount(resultsList.length || 1);
 
-          // 1. Resolve by URL ID
           if (attemptIdFromUrl) {
              const target = resultsList.find(r => r.id.endsWith(attemptIdFromUrl));
              if (target) {
@@ -164,13 +162,11 @@ export default function ResultClient() {
              }
           }
 
-          // 2. Primary fallback (primary key or latest)
           const latest = resultsList[resultsList.length - 1];
           setSessionData({ ...latest, attemptNumber: resultsList.length });
           setIsSearching(false);
 
        } catch (e) { 
-          console.error("[REGISTRY_RESOLUTION_FAILURE]:", e);
           setErrorNotFound(true); 
        } finally { 
           setIsSearching(false); 
@@ -404,7 +400,7 @@ export default function ResultClient() {
                   </TabsContent>
 
                   <TabsContent value="REVIEW" className="space-y-4 max-w-5xl mx-auto px-4 pt-2">
-                      <div className="py-1.5 -mx-4 px-4 mb-2 bg-transparent">
+                      <div className="py-1 -mx-4 px-4 mb-2 bg-transparent">
                          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-lg border border-slate-100 w-full max-w-2xl mx-auto h-12 md:h-14">
                              <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
                              <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
