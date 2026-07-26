@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -42,7 +41,8 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Node v46.1 [Analytics V2 Sync].
+ * @fileOverview Institutional Attempt Node v47.0 [Analytics V2 Logic Hardened].
+ * FIXED: Implemented deterministic result calculation during submission.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -98,7 +98,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     setCurrentIdx,
     saveAndNext,
     resetStore,
-    status
   } = useExamStore();
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -184,49 +183,86 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
     setIsSubmittingFinal(true);
     
+    // Core Counts Audit
     let correctCount = 0; 
     let wrongCount = 0;
-    const attemptedCount = Object.keys(answers || {}).length;
+    const totalQuestions = questions.length;
+    const studentAnswers = answers || {};
+    const attemptedCount = Object.keys(studentAnswers).length;
+    const skippedCount = totalQuestions - attemptedCount;
+
     const posMarks = Number(mockData.positiveMarks) || 1;
     const negMarks = Number(mockData.negativeMarks) || 0.25;
 
-    const subMap: Record<string, any> = {};
-    const diffMap: Record<string, any> = { 
-      easy: { name: 'Easy', total: 0, correct: 0, wrong: 0, accuracy: 0 }, 
-      medium: { name: 'Medium', total: 0, correct: 0, wrong: 0, accuracy: 0 }, 
-      hard: { name: 'Hard', total: 0, correct: 0, wrong: 0, accuracy: 0 },
-      expert: { name: 'Expert', total: 0, correct: 0, wrong: 0, accuracy: 0 }
+    // Categorical Audit
+    const subjectMap: Record<string, any> = {};
+    const complexityMap: Record<string, any> = { 
+      easy: { name: 'Easy', total: 0, correct: 0, wrong: 0, score: 0 }, 
+      medium: { name: 'Medium', total: 0, correct: 0, wrong: 0, score: 0 }, 
+      hard: { name: 'Hard', total: 0, correct: 0, wrong: 0, score: 0 },
+      expert: { name: 'Expert', total: 0, correct: 0, wrong: 0, score: 0 }
     };
 
     questions.forEach((q: any, idx: number) => {
-      const studentAnsIdx = answers?.[idx];
+      const studentAnsIdx = studentAnswers[idx];
       const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
-      const isCorrect = studentAnsIdx !== undefined && studentAnsIdx === correctOptIdx;
       const isAttempted = studentAnsIdx !== undefined && studentAnsIdx !== null;
+      const isCorrect = isAttempted && studentAnsIdx === correctOptIdx;
 
       const sId = q.subjectId || 'General';
-      if (!subMap[sId]) subMap[sId] = { name: sId, total: 0, correct: 0, wrong: 0, score: 0 };
-      subMap[sId].total++;
+      if (!subjectMap[sId]) subjectMap[sId] = { name: sId, total: 0, correct: 0, wrong: 0, score: 0 };
+      subjectMap[sId].total++;
       
       const dKey = (q.difficulty || 'Medium').toLowerCase();
-      if (diffMap[dKey]) diffMap[dKey].total++;
+      if (complexityMap[dKey]) complexityMap[dKey].total++;
 
       if (isCorrect) { 
-        subMap[sId].correct++; 
-        subMap[sId].score += posMarks; 
-        if (diffMap[dKey]) diffMap[dKey].correct++;
         correctCount++; 
+        subjectMap[sId].correct++; 
+        subjectMap[sId].score += posMarks; 
+        if (complexityMap[dKey]) complexityMap[dKey].correct++;
       } else if (isAttempted) { 
-        subMap[sId].wrong++;
-        subMap[sId].score -= negMarks; 
-        if (diffMap[dKey]) diffMap[dKey].wrong++;
         wrongCount++; 
+        subjectMap[sId].wrong++;
+        subjectMap[sId].score -= negMarks; 
+        if (complexityMap[dKey]) complexityMap[dKey].wrong++;
       }
     });
 
-    const finalScore = Number(parseFloat(((correctCount * posMarks) - (wrongCount * negMarks)).toFixed(2)));
+    // Score Calculations
+    const score = Number(parseFloat(((correctCount * posMarks) - (wrongCount * negMarks)).toFixed(2)));
+    const maxMarks = totalQuestions * posMarks;
+    const percentage = Number(((score / maxMarks) * 100).toFixed(1));
     const timeTaken = Math.max(1, elapsedSeconds);
-    const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
+
+    // Accuracy Metrics
+    const attemptAccuracy = attemptedCount > 0 ? Number(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
+    const overallAccuracy = Number(((correctCount / totalQuestions) * 100).toFixed(1));
+    const attemptRate = Number(((attemptedCount / totalQuestions) * 100).toFixed(1));
+
+    // Readiness Score (V2 Formula)
+    const readiness = (percentage + attemptAccuracy + attemptRate) / 3;
+
+    // Grade System
+    let grade = "F";
+    if (percentage >= 90) grade = "A+";
+    else if (percentage >= 80) grade = "A";
+    else if (percentage >= 70) grade = "B+";
+    else if (percentage >= 60) grade = "B";
+    else if (percentage >= 50) grade = "C";
+    else if (percentage >= 40) grade = "D";
+    else if (percentage >= 30) grade = "E";
+
+    const isQualified = percentage >= 40;
+
+    console.log('[Cracklix_Audit] Finalizing attempt:', {
+       candidateId: user?.uid || 'guest',
+       correct: correctCount,
+       wrong: wrongCount,
+       score,
+       accuracy: attemptAccuracy,
+       rate: attemptRate
+    });
     
     try {
       if (user) {
@@ -244,9 +280,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           if (lbSnap.exists()) {
             const existing = lbSnap.data();
             oldAttemptCount = existing.attemptCount || 0;
-            const hasHigherScore = finalScore > (existing.highestScore || 0);
-            const hasEqualScoreHigherAcc = (finalScore === existing.highestScore && accuracy > existing.accuracy);
-            const hasEqualScoreAccLowerTime = (finalScore === existing.highestScore && accuracy === existing.accuracy && timeTaken < existing.timeTaken);
+            const hasHigherScore = score > (existing.highestScore || 0);
+            const hasEqualScoreHigherAcc = (score === existing.highestScore && attemptAccuracy > existing.accuracy);
+            const hasEqualScoreAccLowerTime = (score === existing.highestScore && attemptAccuracy === existing.accuracy && timeTaken < existing.timeTaken);
             isNewBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
           }
 
@@ -256,8 +292,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             photoURL: profile?.photoURL || "",
             gender: profile?.gender || 'Other',
             mockId,
-            highestScore: isNewBest ? finalScore : (lbSnap.data()?.highestScore || 0),
-            accuracy: isNewBest ? accuracy : (lbSnap.data()?.accuracy || 0),
+            highestScore: isNewBest ? score : (lbSnap.data()?.highestScore || 0),
+            accuracy: isNewBest ? attemptAccuracy : (lbSnap.data()?.accuracy || 0),
             timeTaken: isNewBest ? timeTaken : (lbSnap.data()?.timeTaken || 0),
             attemptCount: oldAttemptCount + 1,
             bestAttemptId: isNewBest ? attemptId : (lbSnap.data()?.bestAttemptId || attemptId),
@@ -268,7 +304,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             uid: user.uid,
             displayName: profile?.name || 'Aspirant',
             photoURL: profile?.photoURL || "",
-            highestScore: increment(finalScore > (profile?.highestScore || 0) ? finalScore - (profile?.highestScore || 0) : 0),
+            highestScore: increment(score > (profile?.highestScore || 0) ? score - (profile?.highestScore || 0) : 0),
             totalTests: increment(1),
             updatedAt: serverTimestamp(),
             recentMockTitle: mockData.title
@@ -281,22 +317,29 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
              userId: user.uid,
              userName: profile?.name || 'Aspirant',
              userEmail: user.email || "",
-             score: finalScore,
+             score,
+             maxMarks,
+             percentage,
+             grade,
+             isQualified,
              positiveMarks: posMarks,
              negativeMarks: negMarks,
              correctCount,
              wrongCount,
-             skippedCount: questions.length - attemptedCount,
+             skippedCount,
              attemptedCount,
-             totalQuestions: questions.length,
-             accuracy,
+             totalQuestions,
+             attemptAccuracy,
+             overallAccuracy,
+             attemptRate,
+             readiness,
              timeTaken,
              timestamp: new Date().toISOString(),
              createdAt: serverTimestamp(),
              languageMode: language,
-             subjectAnalysis: Object.values(subMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
-             complexityAnalysis: Object.values(diffMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) })),
-             answers: answers 
+             subjectAnalysis: Object.values(subjectMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
+             complexityAnalysis: Object.values(complexityMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) })),
+             answers: studentAnswers 
           });
 
           transaction.set(attemptPtrRef, { 
@@ -310,8 +353,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
         resetStore();
       } else {
+        // GUEST MODE PERSISTENCE
         localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify({
-           attemptId, mockId, score: finalScore, accuracy, totalQuestions: questions.length,
+           attemptId, mockId, score, maxMarks, percentage, grade, isQualified,
+           attemptAccuracy, overallAccuracy, attemptRate, totalQuestions,
            correctCount, wrongCount, timeTaken, timestamp: new Date().toISOString(),
            mockTitle: mockData.title,
            positiveMarks: posMarks,

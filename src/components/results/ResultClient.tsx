@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -20,7 +19,8 @@ import {
   increment,
   updateDoc,
   getCountFromServer,
-  serverTimestamp
+  serverTimestamp,
+  orderBy
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -63,6 +63,10 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useExamStore } from "@/store/useExamStore"
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+
+/**
+ * @fileOverview Institutional Result Engine v48.0 [Analytics V2 Display].
+ */
 
 export default function ResultClient() {
   const db = useFirestore()
@@ -119,6 +123,7 @@ export default function ResultClient() {
           return;
        }
 
+       // Suffix priority for exact lookup
        const targetId = attemptIdFromUrl 
           ? `${user.uid}_${mockId}_${attemptIdFromUrl}` 
           : `${user.uid}_${mockId}`;
@@ -135,6 +140,7 @@ export default function ResultClient() {
                 return;
              }
 
+             // Fallback search in collection
              const resQuery = query(
                 collection(db, "results"),
                 where("userId", "==", user.uid),
@@ -197,6 +203,32 @@ export default function ResultClient() {
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
+  const finalMetrics = useMemo(() => {
+    if (!activeSession) return null;
+    
+    // V2 Logic: Favor pre-calculated Firestore nodes over client-side fallbacks
+    const score = Number(activeSession.score) || 0;
+    const totalQ = Number(activeSession.totalQuestions) || 0;
+    const maxMarks = Number(activeSession.maxMarks) || totalQ;
+    const percentage = Number(activeSession.percentage) || ((score / maxMarks) * 100);
+    const attemptAccuracy = Number(activeSession.attemptAccuracy) || 0;
+    const overallAccuracy = Number(activeSession.overallAccuracy) || 0;
+    const attemptRate = Number(activeSession.attemptRate) || 0;
+    const readiness = Number(activeSession.readiness) || 0;
+    const grade = activeSession.grade || "F";
+    const isQualified = activeSession.isQualified || percentage >= 40;
+    
+    const percentile = totalCandidates > 1 
+      ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1)) 
+      : 0;
+
+    return { 
+      score, maxMarks, percentage, attemptAccuracy, overallAccuracy, 
+      attemptRate, readiness, readinessLevel: activeSession.readinessLevel || "Audit Pending", 
+      grade, isQualified, percentile, topperGap: Math.max(0, topperScore - score) 
+    };
+  }, [activeSession, totalCandidates, liveRank, topperScore]);
+
   useEffect(() => {
     async function loadQuestions() {
       if (!db || !mockId) { setLoadingQuestions(false); return; }
@@ -230,35 +262,6 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  const metrics = useMemo(() => {
-    if (!activeSession) return null;
-    const posMarks = activeSession.positiveMarks || 1;
-    const negMarks = activeSession.negativeMarks || 0.25;
-    const correct = activeSession.correctCount || 0;
-    const wrong = activeSession.wrongCount || 0;
-    const totalQ = activeSession.totalQuestions || questions.length;
-    const attempted = correct + wrong;
-    const score = Number(activeSession.score) || 0;
-    const maxMarks = totalQ * posMarks;
-    const percentage = (score / maxMarks) * 100;
-    const attemptAccuracy = attempted > 0 ? (correct / attempted) * 100 : 0;
-    const overallAccuracy = (correct / totalQ) * 100;
-    const attemptRate = (attempted / totalQ) * 100;
-    const readiness = (percentage + attemptAccuracy + attemptRate) / 3;
-    const getGrade = (p: number) => {
-      if (p >= 90) return "A+"; if (p >= 80) return "A"; if (p >= 70) return "B+";
-      if (p >= 60) return "B"; if (p >= 50) return "C"; if (p >= 40) return "D";
-      if (p >= 30) return "E"; return "F";
-    };
-    const getReadinessLevel = (r: number) => {
-      if (r >= 80) return "Excellent"; if (r >= 60) return "Good";
-      if (r >= 40) return "Average"; if (r >= 20) return "Weak";
-      return "Critical";
-    };
-    const percentile = totalCandidates > 1 ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1)) : 0;
-    return { score, maxMarks, percentage, attemptAccuracy, overallAccuracy, attemptRate, readiness, readinessLevel: getReadinessLevel(readiness), grade: getGrade(percentage), isQualified: percentage >= 40, percentile, topperGap: Math.max(0, topperScore - score) };
-  }, [activeSession, questions, liveRank, totalCandidates, topperScore]);
-
   const handleRetake = useCallback(() => {
     if (!mockId) return;
     if (user && db) { deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {}); }
@@ -275,7 +278,7 @@ export default function ResultClient() {
     setIsExporting(true);
     try {
       setActiveMainTab("REPORT"); 
-      toast({ title: "Preparing report..." });
+      toast({ title: "Preparing high-fidelity report..." });
       await new Promise(r => setTimeout(r, 1200));
       if (typeof window !== 'undefined' && 'fonts' in document) await (document as any).fonts.ready;
       const element = document.getElementById('cracklix-result-card');
@@ -333,23 +336,6 @@ export default function ResultClient() {
     </div>
   );
 
-  if (errorNotFound || !activeSession || !metrics) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center">
-        <Card className="max-w-md w-full bg-white rounded-[2rem] p-10 md:p-14 shadow-5xl border border-slate-100 space-y-8">
-          <AlertCircle className="h-12 w-12 text-rose-500 mx-auto" />
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold text-[#0F172A]">Entry not found</h2>
-            <p className="text-sm text-slate-400 font-medium">Re-syncing with registry...</p>
-          </div>
-          <Button onClick={() => window.location.reload()} className="w-full h-12 bg-[#0F172A] rounded-xl font-bold gap-2">
-             <RefreshCw className="h-4 w-4" /> Retry sync
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
       <Navbar />
@@ -360,8 +346,8 @@ export default function ResultClient() {
               <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-12 w-12 md:h-20 md:w-20 rounded-xl shadow-lg" />
               <div className="space-y-1 flex-1 min-w-0">
                  <div className="flex items-center gap-2">
-                    <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm", metrics.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                       {metrics.isQualified ? "Qualified" : "Not Qualified"}
+                    <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm", finalMetrics?.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+                       {finalMetrics?.isQualified ? "Qualified" : "Not Qualified"}
                     </Badge>
                  </div>
                  <h1 className="text-lg md:text-2xl font-bold tracking-tight text-[#0F172A] leading-tight truncate">
@@ -395,12 +381,12 @@ export default function ResultClient() {
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-10">
             <TabsContent value="OVERVIEW" className="space-y-10 animate-in fade-in duration-500">
                 <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-                  <StatCard label="Net score" val={`${metrics.score} / ${metrics.maxMarks}`} sub={`${metrics.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
+                  <StatCard label="Net score" val={`${finalMetrics?.score} / ${finalMetrics?.maxMarks}`} sub={`${finalMetrics?.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
                   <StatCard label="Punjab rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
-                  <StatCard label="Percentile" val={`${metrics.percentile}%`} sub="Verified" icon={<TrendingUp className="text-blue-500" />} />
-                  <StatCard label="Attempt accuracy" val={`${metrics.attemptAccuracy.toFixed(1)}%`} sub="Precision" icon={<Target className="text-emerald-500" />} />
-                  <StatCard label="Overall accuracy" val={`${metrics.overallAccuracy.toFixed(1)}%`} sub="Efficiency" icon={<ShieldCheck className="text-indigo-500" />} />
-                  <StatCard label="Grade" val={metrics.grade} sub="Category" icon={<Award className="text-purple-500" />} />
+                  <StatCard label="Percentile" val={`${finalMetrics?.percentile}%`} sub="Verified" icon={<TrendingUp className="text-blue-500" />} />
+                  <StatCard label="Attempt accuracy" val={`${finalMetrics?.attemptAccuracy.toFixed(1)}%`} sub="Precision" icon={<Target className="text-emerald-500" />} />
+                  <StatCard label="Overall accuracy" val={`${finalMetrics?.overallAccuracy.toFixed(1)}%`} sub="Efficiency" icon={<ShieldCheck className="text-indigo-500" />} />
+                  <StatCard label="Grade" val={finalMetrics?.grade} sub="Category" icon={<Award className="text-purple-500" />} />
                 </section>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
@@ -411,15 +397,15 @@ export default function ResultClient() {
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                              <div className="space-y-6">
-                                <ComparisonPill label="Your score" val={metrics.score} color="bg-primary" />
-                                <ComparisonPill label="Avg score" val={Number(avgScore.toFixed(1))} color="bg-slate-200" />
-                                <ComparisonPill label="Topper score" val={topperScore} color="bg-amber-400" />
+                                <ComparisonPill label="Your score" val={finalMetrics?.score || 0} max={finalMetrics?.maxMarks || 1} color="bg-primary" />
+                                <ComparisonPill label="Avg score" val={Number(avgScore.toFixed(1))} max={finalMetrics?.maxMarks || 1} color="bg-slate-200" />
+                                <ComparisonPill label="Topper score" val={topperScore} max={finalMetrics?.maxMarks || 1} color="bg-amber-400" />
                              </div>
                              <div className="bg-slate-50 rounded-[1.5rem] p-6 flex flex-col items-center justify-center text-center space-y-3 border border-slate-100">
                                 <Target className="h-6 w-6 text-rose-500" />
                                 <div>
                                    <p className="text-[9px] font-bold text-slate-400">Gap from topper</p>
-                                   <p className="text-2xl font-black text-[#0F172A] tabular-nums mt-1">-{metrics.topperGap.toFixed(1)}</p>
+                                   <p className="text-2xl font-black text-[#0F172A] tabular-nums mt-1">-{finalMetrics?.topperGap.toFixed(1)}</p>
                                 </div>
                                 <p className="text-[10px] font-medium text-slate-500 max-w-[160px] leading-relaxed">Focus on weak subjects to close this gap.</p>
                              </div>
@@ -433,11 +419,11 @@ export default function ResultClient() {
                              </h3>
                              <Badge className={cn(
                                 "border-none text-[8px] font-black px-3 py-1 rounded-full shadow-lg",
-                                metrics.readiness >= 80 ? "bg-emerald-50 text-emerald-600" :
-                                metrics.readiness >= 60 ? "bg-blue-500 text-white" :
-                                metrics.readiness >= 40 ? "bg-amber-500 text-white" : "bg-rose-50 text-rose-600"
+                                finalMetrics?.readiness && finalMetrics.readiness >= 80 ? "bg-emerald-50 text-emerald-600" :
+                                finalMetrics?.readiness && finalMetrics.readiness >= 60 ? "bg-blue-500 text-white" :
+                                finalMetrics?.readiness && finalMetrics.readiness >= 40 ? "bg-amber-500 text-white" : "bg-rose-50 text-rose-600"
                              )}>
-                                {metrics.readinessLevel}
+                                {finalMetrics?.readinessLevel}
                              </Badge>
                           </div>
                           <div className="space-y-6">
@@ -449,8 +435,8 @@ export default function ResultClient() {
                                 <div className="h-full bg-emerald-500 w-[20%]" />
                              </div>
                              <div className="relative pt-4">
-                                <motion.div initial={{ left: 0 }} animate={{ left: `${metrics.readiness}%` }} transition={{ duration: 2, ease: "easeOut" }} className="absolute -top-10 -translate-x-1/2 flex flex-col items-center gap-0.5">
-                                   <div className="px-2 py-0.5 bg-[#0F172A] text-white text-[9px] font-bold rounded shadow-xl">{metrics.readiness.toFixed(1)}</div>
+                                <motion.div initial={{ left: 0 }} animate={{ left: `${finalMetrics?.readiness || 0}%` }} transition={{ duration: 2, ease: "easeOut" }} className="absolute -top-10 -translate-x-1/2 flex flex-col items-center gap-0.5">
+                                   <div className="px-2 py-0.5 bg-[#0F172A] text-white text-[9px] font-bold rounded shadow-xl">{finalMetrics?.readiness.toFixed(1)}</div>
                                    <div className="w-0.5 h-8 bg-[#0F172A] rounded-full" />
                                 </motion.div>
                                 <div className="flex justify-between text-[7px] font-bold text-slate-400">
@@ -470,13 +456,13 @@ export default function ResultClient() {
                                 <p className="text-[9px] font-bold text-slate-500">AI audit hub</p>
                              </div>
                              <div className="space-y-5">
-                                <InsightItem text={`Attempt rate is ${metrics.attemptRate.toFixed(1)}%. ${metrics.attemptRate < 50 ? 'Lower than standard.' : 'Good volume.'}`} />
-                                <InsightItem text={`Precision is ${metrics.attemptAccuracy.toFixed(1)}%. ${metrics.attemptAccuracy < 60 ? 'Reduce guesswork.' : 'Strong accuracy.'}`} />
-                                <InsightItem text={metrics.isQualified ? 'Meets institutional cutoff.' : 'Below passing threshold.'} />
+                                <InsightItem text={`Attempt rate is ${finalMetrics?.attemptRate.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptRate < 50 ? 'Lower than standard.' : 'Good volume.'}`} />
+                                <InsightItem text={`Precision is ${finalMetrics?.attemptAccuracy.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptAccuracy < 60 ? 'Reduce guesswork.' : 'Strong accuracy.'}`} />
+                                <InsightItem text={finalMetrics?.isQualified ? 'Meets institutional cutoff.' : 'Below passing threshold.'} />
                              </div>
                              <div className="pt-6 border-t border-white/5">
                                 <Button asChild variant="ghost" className="w-full text-primary hover:text-white hover:bg-white/5 font-bold text-[10px] tracking-tight gap-2">
-                                   <Link href={`/leaderboard?id=${mockId}`}>Full rankings <ArrowRight className="h-3 w-3" /></Link>
+                                   <Link href={`/leaderboard?id=${mockId}`}>Full rankings <ArrowRight className="h-3" /></Link>
                                 </Button>
                              </div>
                           </div>
@@ -546,23 +532,25 @@ export default function ResultClient() {
             <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 pb-20">
                 <div className="flex flex-col items-center overflow-x-auto no-scrollbar">
                    <div className="bg-white p-0 rounded-none shadow-5xl border border-slate-200 overflow-hidden min-w-[320px] max-w-full">
-                       <ResultCard 
-                           studentName={activeSession.userName || profile?.name || "Aspirant"} 
-                           examTitle={activeSession.mockTitle || "Mock Test"} 
-                           score={metrics.score.toFixed(1)} 
-                           rank={liveRank} 
-                           accuracy={metrics.overallAccuracy.toFixed(1)} 
-                           timeTaken={formatTimeStr(activeSession.timeTaken)} 
-                           correct={activeSession.correctCount} 
-                           wrong={activeSession.wrongCount} 
-                           total={questions.length} 
-                           date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')} 
-                           resultId={activeSession.id || "Question registry"} 
-                           percentile={metrics.percentile} 
-                           branding={branding}
-                           subjects={activeSession.subjectAnalysis}
-                           grade={metrics.grade}
-                       />
+                       {finalMetrics && (
+                          <ResultCard 
+                              studentName={activeSession.userName || profile?.name || "Aspirant"} 
+                              examTitle={activeSession.mockTitle || "Mock Test"} 
+                              score={finalMetrics.score.toFixed(2)} 
+                              rank={liveRank} 
+                              accuracy={finalMetrics.overallAccuracy.toFixed(1)} 
+                              timeTaken={formatTimeStr(activeSession.timeTaken)} 
+                              correct={activeSession.correctCount} 
+                              wrong={activeSession.wrongCount} 
+                              total={activeSession.totalQuestions} 
+                              date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')} 
+                              resultId={activeSession.attemptId || activeSession.id} 
+                              percentile={finalMetrics.percentile} 
+                              branding={branding}
+                              subjects={activeSession.subjectAnalysis}
+                              grade={finalMetrics.grade}
+                          />
+                       )}
                    </div>
                 </div>
             </TabsContent>
@@ -586,14 +574,18 @@ function StatCard({ label, val, sub, icon, highlight }: any) {
   )
 }
 
-function ComparisonPill({ label, val, color }: any) {
+function ComparisonPill({ label, val, max, color }: any) {
+  const safeVal = Number(val) || 0;
+  const safeMax = Number(max) || 1;
+  const progress = Math.min(100, Math.max(0, (safeVal / safeMax) * 100));
+  
   return (
     <div className="space-y-2">
        <div className="flex justify-between text-[9px] font-bold text-slate-400">
-          <span>{label}</span> <span className="text-[#0F172A] tabular-nums">{val}</span>
+          <span>{label}</span> <span className="text-[#0F172A] tabular-nums">{safeVal}</span>
        </div>
        <div className="h-2 w-full bg-slate-50 rounded-lg overflow-hidden border border-slate-100 shadow-inner">
-          <motion.div initial={{ width: 0 }} whileInView={{ width: `${(val / 100) * 100}%` }} className={cn("h-full shadow-lg", color)} />
+          <motion.div initial={{ width: 0 }} whileInView={{ width: `${progress}%` }} transition={{ duration: 1.5 }} className={cn("h-full shadow-lg", color)} />
        </div>
     </div>
   )
