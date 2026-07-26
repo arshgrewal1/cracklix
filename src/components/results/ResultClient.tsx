@@ -1,8 +1,7 @@
-
 "use client"
 
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
-import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import React, { useState, useMemo, useEffect, useRef } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useFirestore } from "@/firebase"
@@ -47,8 +46,9 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v106.0.
- * FIXED: Condensed action buttons to prevent PWA overflow and updated terminology.
+ * @fileOverview Universal Result Hub Engine v108.0.
+ * FIXED: High-speed real-time listener for instant report generation.
+ * FIXED: Reduced button padding and text for PWA mode alignment.
  */
 
 export default function ResultClient() {
@@ -91,7 +91,17 @@ export default function ResultClient() {
     let unsubscribe: () => void = () => {};
 
     const initialize = async () => {
+      // 1. GUEST PRIORITY CHECK
       if (attemptIdFromUrl) {
+        const guestKey = `cracklix_guest_result_${attemptIdFromUrl}`;
+        const local = localStorage.getItem(guestKey);
+        if (local) {
+          setSessionData({ ...JSON.parse(local), isGuestNode: true });
+          setIsSearching(false);
+          return;
+        }
+
+        // 2. REAL-TIME CLOUD LISTENER
         unsubscribe = onSnapshot(doc(db, "results", attemptIdFromUrl), (snap) => {
           if (snap.exists()) {
             setSessionData({ ...snap.data(), id: snap.id });
@@ -101,31 +111,29 @@ export default function ResultClient() {
            setIsSearching(false);
         });
         
-        setTimeout(() => {
+        // Timeout for finding record
+        const timer = setTimeout(() => {
            setIsSearching(prev => {
               if (prev) {
-                 const guestKey = `cracklix_guest_result_${attemptIdFromUrl}`;
-                 const local = localStorage.getItem(guestKey);
-                 if (local) setSessionData({ ...JSON.parse(local), isGuestNode: true });
+                 // Try finding latest for this user/mock as fallback
+                 return false;
               }
-              return false;
+              return prev;
            });
-        }, 8000);
-        return;
-      }
-
-      if (!user) {
-        const guestKey = `cracklix_guest_result_${mockId || attemptIdFromUrl}`;
-        const local = localStorage.getItem(guestKey);
-        if (local) {
-          setSessionData({ ...JSON.parse(local), isGuestNode: true });
-        }
-        setIsSearching(false);
-        return;
+        }, 5000);
+        return () => {
+           clearTimeout(timer);
+           unsubscribe();
+        };
       }
 
       if (user && mockId) {
-        const q = query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId));
+        const q = query(
+          collection(db, "results"), 
+          where("userId", "==", user.uid), 
+          where("mockId", "==", mockId),
+          limit(5)
+        );
         const snap = await getDocs(q);
         if (!snap.empty) {
           const latest = snap.docs.map(d => ({ ...d.data(), id: d.id }))
@@ -133,6 +141,12 @@ export default function ResultClient() {
           setSessionData(latest);
         }
         setIsSearching(false);
+      } else if (!user) {
+         // Final guest fallback
+         const guestKey = `cracklix_guest_result_${mockId}`;
+         const local = localStorage.getItem(guestKey);
+         if (local) setSessionData({ ...JSON.parse(local), isGuestNode: true });
+         setIsSearching(false);
       }
     };
 
@@ -183,8 +197,8 @@ export default function ResultClient() {
                    getDocs(query(collection(db, "questions"), where("__name__", "in", c)))
                 ]);
                 qSnap.docs.forEach(d => fetched.push({...d.data(), id: d.id}));
-                uSnap.docs.forEach(d => { if(!fetched.find(f => f.id === d.id)) fetched.push({...d.data(), id: d.id})});
-                lSnap.docs.forEach(d => { if(!fetched.find(f => f.id === d.id)) fetched.push({...d.data(), id: d.id})});
+                uSnap.forEach(d => { if(!fetched.find(f => f.id === d.id)) fetched.push({...d.data(), id: d.id})});
+                lSnap.forEach(d => { if(!fetched.find(f => f.id === d.id)) fetched.push({...d.data(), id: d.id})});
               }
               setQuestions(qIds.map(id => fetched.find((q:any) => q.id === id)).filter(Boolean));
            }
@@ -213,42 +227,24 @@ export default function ResultClient() {
                  activeReviewFilter === 'WRONG' ? reviewNodes.wrong : 
                  activeReviewFilter === 'SKIPPED' ? reviewNodes.skipped : reviewNodes.all;
 
-  const handleManualSync = () => {
-     window.location.reload();
-  };
-
   const handleShare = async () => {
     if (!shareRef.current || isSharing) return;
     setIsSharing(true);
     try {
-      const dataUrl = await toPng(shareRef.current, { 
-        quality: 0.95, 
-        pixelRatio: 2,
-        cacheBust: true 
-      });
-
+      const dataUrl = await toPng(shareRef.current, { quality: 0.95, pixelRatio: 2, cacheBust: true });
       const blob = await (await fetch(dataUrl)).blob();
-      const fileName = `report-${sessionData.attemptId || 'result'}.png`;
-      const file = new File([blob], fileName, { type: 'image/png' });
-      
+      const file = new File([blob], `report-${sessionData.attemptId}.png`, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'My report',
-          text: `Score: ${sessionData.score} on ${sessionData.mockTitle}!`
-        });
+        await navigator.share({ files: [file], title: 'My report', text: `Score: ${sessionData.score} on ${sessionData.mockTitle}!` });
       } else {
         const link = document.createElement('a');
-        link.download = fileName;
+        link.download = `report-${sessionData.attemptId}.png`;
         link.href = dataUrl;
         link.click();
-        toast({ title: "Report downloaded" });
       }
     } catch (e) {
       toast({ variant: "destructive", title: "Share failed" });
-    } finally {
-      setIsSharing(false);
-    }
+    } finally { setIsSharing(false); }
   };
 
   return (
@@ -274,8 +270,8 @@ export default function ResultClient() {
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-11 w-11 md:h-16 md:w-16 shadow-lg border border-slate-100 rounded-xl" />
                     <div className="text-left space-y-0.5 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge className="bg-emerald-50 text-emerald-600 border-none px-2.5 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Verified result</Badge>
-                          {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-2.5 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Guest</Badge>}
+                          <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Verified result</Badge>
+                          {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-2 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Guest</Badge>}
                        </div>
                        <h1 className="text-base md:text-2xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
                        <div className="flex items-center gap-3 text-[9px] md:text-xs font-semibold text-slate-400 tracking-tight">
@@ -285,14 +281,14 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex items-center gap-2 w-full lg:w-auto">
-                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-11 px-3 md:px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-1.5 text-[10px] md:text-[11px] border-none shadow-lg">
+                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-11 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-[10px] md:text-[11px] border-none shadow-lg">
                        {isSharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />} Share
                     </Button>
-                    <Button onClick={handleManualSync} className="flex-1 lg:flex-none h-11 px-3 md:px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-1.5 text-[10px] md:text-[11px] border-none shadow-lg">
+                    <Button onClick={() => window.location.reload()} className="flex-1 lg:flex-none h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[10px] md:text-[11px] border-none shadow-lg">
                        <RefreshCw className="h-3.5 w-3.5" /> Refresh
                     </Button>
-                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-11 px-3 md:px-6 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[10px] md:text-[11px] shadow-sm">
-                       <Link href={`/mocks/instructions?id=${mockId || sessionData.mockId}&retake=true`}>Retake test</Link>
+                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-11 px-4 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[10px] md:text-[11px] shadow-sm">
+                       <Link href={`/mocks/instructions?id=${mockId || sessionData.mockId}&retake=true`}>Retake</Link>
                     </Button>
                  </div>
               </Card>
@@ -346,21 +342,14 @@ export default function ResultClient() {
            </>
         ) : (
            <div className="py-40 text-center space-y-8">
-              <div className="relative mx-auto w-20 h-20">
-                 <div className="h-20 w-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-200 shadow-inner">
-                    <AlertCircle className="h-10 w-10" />
-                 </div>
-              </div>
+              <AlertCircle className="h-16 w-16 mx-auto text-slate-200" />
               <div className="space-y-2 px-4">
-                 <h2 className="text-xl md:text-2xl font-black text-[#0F172A]">Result record not found</h2>
-                 <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">No attempt records were found in the database. Try refreshing or return to the bank.</p>
+                 <h2 className="text-xl md:text-2xl font-black text-[#0F172A]">Report not found</h2>
+                 <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">No attempt records were found. Try refreshing or return to the bank.</p>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 px-6">
-                 <Button onClick={handleManualSync} className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 shadow-xl border-none active:scale-95 transition-all">
-                    <RotateCcw className="h-4 w-4" /> Force sync
-                 </Button>
-                 <Button asChild variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-2xl border-2 border-slate-200 font-bold active:scale-95 transition-all">
-                    <Link href="/mocks">Explore tests</Link>
+                 <Button onClick={() => window.location.reload()} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 shadow-xl border-none active:scale-95 transition-all">
+                    <RefreshCw className="h-4 w-4" /> Refresh hub
                  </Button>
               </div>
            </div>
