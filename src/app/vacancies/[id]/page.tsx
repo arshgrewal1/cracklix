@@ -2,6 +2,7 @@
 
 import React, { useMemo, useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useFirestore, useUser, useCollection } from "@/firebase"
@@ -42,9 +43,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Official Vacancy Detail Node v1.2.
- * FIXED: Added missing GraduationCap icon import to resolve runtime ReferenceError.
- * TYPOGRAPHY: Finalized Title Case normalization for all labels and buttons.
+ * @fileOverview Official Vacancy Detail Node v1.3.
+ * FIXED: Added missing Link import from next/link.
+ * TYPOGRAPHY: Purged remaining uppercase styling for Title Case consistency.
  */
 
 export default function VacancyDetailPage() {
@@ -127,7 +128,7 @@ export default function VacancyDetailPage() {
                <div className="flex-1 space-y-8 text-center lg:text-left">
                   <div className="space-y-4">
                      <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-                        <Badge className="bg-primary text-white border-none px-5 py-2 rounded-full font-bold text-[10px] md:text-xs tracking-tight shadow-xl">{vacancy.board} registry</Badge>
+                        <Badge className="bg-primary text-white border-none px-5 py-2 rounded-full font-bold text-[10px] md:text-xs tracking-tight shadow-xl">{vacancy.board} Registry</Badge>
                         <Badge variant="outline" className="bg-white border-slate-200 text-slate-400 px-4 py-1.5 rounded-full font-bold text-[9px] tracking-tight">{vacancy.category}</Badge>
                      </div>
                      <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-[#0F172A] tracking-tighter leading-[1] antialiased">
@@ -212,7 +213,7 @@ export default function VacancyDetailPage() {
                      <HelpCircle className="h-8 w-8 text-primary" />
                      <h4 className="text-[11px] font-black tracking-tight text-[#0F172A]">Aspirant support</h4>
                   </div>
-                  <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed font-medium">Verify your eligibility metrics before authorizing the transaction node. Official PDFs contain the final binding rules for the recruitment vertical.</p>
+                  <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">Verify your eligibility metrics before authorizing the transaction node. Official PDFs contain the final binding rules for the recruitment vertical.</p>
                   <Button asChild variant="outline" className="w-full h-12 md:h-14 rounded-xl border-slate-200 text-[#0F172A] font-bold text-xs">
                      <Link href="/support">Open support desk <ChevronRight className="h-4 w-4" /></Link>
                   </Button>
