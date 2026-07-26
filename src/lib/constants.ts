@@ -4,6 +4,6 @@
  */
 
 export const TELEGRAM_GROUP = "https://t.me/cracklixapp";
-export const INSTAGRAM_PROFILE = "https://www.instagram.com/arshgrewal_official/";
+export const INSTAGRAM_PROFILE = "https://www.instagram.com/cracklix.in/";
 export const SUPPORT_EMAIL = "cracklixhelp@gmail.com";
 export const SUPPORT_PHONE = "+91 98881 88602";

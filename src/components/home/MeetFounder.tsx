@@ -4,15 +4,15 @@
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, Target, Star, ShieldCheck, Heart } from "lucide-react";
+import { ArrowRight, Check, Target, Star, ShieldCheck, Heart, Instagram } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Refined Meet Founder Section v7.7.
- * FIXED: Removed uppercase from name and labels.
+ * @fileOverview Refined Meet Founder Section v8.0.
+ * UPDATED: Added Follow on Instagram button next to the story link.
  */
 export default function MeetFounder() {
   const db = useFirestore();
@@ -23,6 +23,7 @@ export default function MeetFounder() {
     name: settings?.founderName || "Arsh Grewal",
     bio: settings?.founderBio || "I'm Arsh Grewal, a student from Punjab dedicated to building Punjab's smartest exam preparation platform.",
     quote: settings?.founderQuote || "Empowering every aspirant in Punjab with institutional-grade technology.",
+    instagramUrl: settings?.instagramUrl || "https://www.instagram.com/cracklix.in/",
     showImage: settings?.showFounderImage !== false
   };
 
@@ -63,14 +64,24 @@ export default function MeetFounder() {
               </div>
             </motion.div>
             
-            <div className="pt-4">
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <Button
                 asChild
-                className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-bold tracking-tight rounded-2xl shadow-xl transition-all active:scale-95 border-none group"
+                className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-bold tracking-tight rounded-2xl shadow-xl transition-all active:scale-95 border-none group w-full sm:w-auto"
               >
                 <Link href="/meet-founder" className="flex items-center justify-center gap-3">
                   Read my full story <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="h-16 px-12 border-2 border-slate-200 text-[#0F172A] font-bold tracking-tight rounded-2xl shadow-sm hover:bg-slate-50 active:scale-95 transition-all w-full sm:w-auto"
+              >
+                <a href={founder.instagramUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3">
+                  <Instagram className="h-5 w-5 text-rose-500" />
+                  Follow on Instagram
+                </a>
               </Button>
             </div>
           </div>

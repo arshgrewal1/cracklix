@@ -160,7 +160,7 @@ export default function AdminSettings() {
     supportPhone: "+91 98881 88602",
     supportEmail: "cracklixhelp@gmail.com",
     telegramUrl: "https://t.me/cracklixapp",
-    instagramUrl: "https://www.instagram.com/arshgrewal_official/",
+    instagramUrl: "https://www.instagram.com/cracklix.in/",
     whatsappPhone: "+91 98881 88602",
     freeTrialEnabled: true,
     freeTrialDays: 7,

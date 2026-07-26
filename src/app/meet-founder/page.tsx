@@ -18,7 +18,8 @@ import {
   Calendar,
   Briefcase,
   MapPin,
-  ShieldAlert
+  ShieldAlert,
+  Instagram
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,8 +28,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Official Meet the Founder Page v3.2.
- * UPDATED: Normalized typography to Title Case.
+ * @fileOverview Official Meet the Founder Page v4.0.
+ * UPDATED: Optimized social CTAs and synchronized Instagram handle.
  */
 export default function MeetFounderPage() {
   const db = useFirestore();
@@ -44,6 +45,7 @@ export default function MeetFounderPage() {
     commitment: settings?.founderCommitment || "I am committed to continuously evolving this platform into Punjab's most trusted learning node. My goal is to ensure that quality preparation is accessible, affordable, and accurate for everyone—from Bathinda to Amritsar.",
     buildingSince: settings?.founderBuildingSince || "19 July 2026",
     email: settings?.founderEmail || settings?.supportEmail || "cracklixhelp@gmail.com",
+    instagramUrl: settings?.instagramUrl || "https://www.instagram.com/cracklix.in/",
     showImage: settings?.showFounderImage !== false
   };
 
@@ -149,9 +151,17 @@ export default function MeetFounderPage() {
                   <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Connect directly</p>
                   <p className="text-xl md:text-2xl font-bold text-[#0F172A]">{founder.email}</p>
                </div>
-               <Button asChild className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold uppercase text-[11px] tracking-widest rounded-2xl shadow-xl border-none active:scale-95 transition-all">
-                  <Link href="/contact">Get in Touch <MessageCircle className="ml-2 h-4 w-4" /></Link>
-               </Button>
+               <div className="flex items-center gap-4 w-full md:w-auto">
+                 <Button asChild variant="outline" className="h-16 px-8 rounded-2xl border-2 border-slate-200 text-[#0F172A] font-bold gap-3 active:scale-95 transition-all">
+                    <a href={founder.instagramUrl} target="_blank" rel="noopener noreferrer">
+                      <Instagram className="h-5 w-5 text-rose-500" />
+                      Follow @cracklix.in
+                    </a>
+                 </Button>
+                 <Button asChild className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold uppercase text-[11px] tracking-widest rounded-2xl shadow-xl border-none active:scale-95 transition-all flex-1 md:flex-none">
+                    <Link href="/contact">Get in Touch <MessageCircle className="ml-2 h-4 w-4" /></Link>
+                 </Button>
+               </div>
             </div>
           </div>
         </section>

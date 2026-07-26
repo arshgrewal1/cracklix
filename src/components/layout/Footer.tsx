@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from "react";
@@ -24,7 +25,7 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Footer Hub v24.2 [Uppercase Removed].
+ * @fileOverview Institutional Footer Hub v25.0 [Social Sync].
  */
 export default function Footer() {
   const db = useFirestore();
@@ -58,9 +59,9 @@ export default function Footer() {
               {info.footerText}
             </p>
             <div className="flex items-center gap-4 pt-2">
-              <SocialIcon href={info.telegram} icon={<MessageCircle className="h-5 w-5" />} />
-              <SocialIcon href={info.instagram} icon={<Instagram className="h-5 w-5" />} />
-              <SocialIcon href="/download" icon={<Download className="h-5 w-5" />} />
+              <SocialIcon href={info.telegram} icon={<MessageCircle className="h-5 w-5" />} title="Telegram" />
+              <SocialIcon href={info.instagram} icon={<Instagram className="h-5 w-5" />} title="Instagram" />
+              <SocialIcon href="/download" icon={<Download className="h-5 w-5" />} title="App" />
             </div>
           </div>
 
@@ -134,10 +135,15 @@ export default function Footer() {
     );
   }
 
-  function SocialIcon({ href, icon }: { href: string; icon: React.ReactNode; }) {
+  function SocialIcon({ href, icon, title }: { href: string; icon: React.ReactNode; title?: string; }) {
     return (
-      <Link href={href} target={href.startsWith('http') ? "_blank" : undefined} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-white hover:bg-primary transition-all border border-white/5">
-        {icon}
+      <Link 
+        href={href} 
+        target={href.startsWith('http') ? "_blank" : undefined} 
+        className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 text-white hover:bg-primary transition-all border border-white/5 group"
+        title={title}
+      >
+        {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 transition-transform group-hover:scale-110" })}
       </Link>
     );
   }
