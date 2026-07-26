@@ -52,9 +52,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v35.0.
- * FIXED: Accurate attempt number resolution and Title Case synchronization.
- * UPDATED: Domain strictly synchronized to cracklix.in.
+ * @fileOverview Institutional Result Hub v36.0.
+ * FIXED: High-density PDF capture logic ensuring footer visibility.
  */
 
 export default function ResultClient() {
@@ -259,7 +258,7 @@ export default function ResultClient() {
 
     try {
       await document.fonts.ready;
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 800));
 
       const container = document.getElementById('pdf-report-container');
       if (!container) throw new Error("Capture node missing");
@@ -311,7 +310,7 @@ export default function ResultClient() {
   if (isSearching) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
         <Zap className="h-12 w-12 text-primary animate-pulse" />
-        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Syncing result hub...</p>
+        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Syncing Result Hub...</p>
      </div>
   );
 
@@ -364,7 +363,7 @@ export default function ResultClient() {
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
                   <div className="py-1.5 -mx-4 px-4 border-b border-slate-100 bg-transparent">
                      <div className="flex justify-center w-full max-w-2xl mx-auto">
-                        <TabsList className="bg-white border border-slate-100 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center overflow-x-auto no-scrollbar">
+                        <TabsList className="bg-white border border-slate-200 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center overflow-x-auto no-scrollbar">
                            <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Analysis</TabsTrigger>
                            <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review</TabsTrigger>
                            <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Report</TabsTrigger>
@@ -401,7 +400,7 @@ export default function ResultClient() {
 
                   <TabsContent value="REVIEW" className="space-y-4 max-w-5xl mx-auto px-4 pt-2">
                       <div className="py-1 -mx-4 px-4 mb-2 bg-transparent">
-                         <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-lg border border-slate-100 w-full max-w-2xl mx-auto h-12 md:h-14">
+                         <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-lg border border-slate-200 w-full max-w-2xl mx-auto h-12 md:h-14">
                              <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
                              <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                              <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
