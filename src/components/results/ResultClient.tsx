@@ -51,9 +51,10 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v32.0.
- * FIXED: Re-stabilized attempt resolution to prevent blank pages.
- * UPDATED: Integrated attempt number tracking in header.
+ * @fileOverview Institutional Result Hub v33.0.
+ * FIXED: Hardened attempt resolution to prevent blank "Result not found" screens.
+ * UPDATED: Re-synchronized "Attempt #" display and domain to cracklix.in.
+ * TYPOGRAPHY: Unified Title Case standard.
  */
 
 export default function ResultClient() {
@@ -128,10 +129,6 @@ export default function ResultClient() {
        }
 
        try {
-          const targetId = attemptIdFromUrl ? `${user.uid}_${mockId}_${attemptIdFromUrl}` : `${user.uid}_${mockId}`;
-          const docRef = doc(db, "results", targetId);
-          const snap = await getDoc(docRef);
-          
           const resQuery = query(
              collection(db, "results"), 
              where("userId", "==", user.uid), 
@@ -143,20 +140,37 @@ export default function ResultClient() {
           
           setUserAttemptCount(resultsList.length || 1);
 
-          if (snap.exists()) {
-             const data = snap.data();
-             const nth = resultsList.findIndex(r => r.id === snap.id) + 1;
-             setSessionData({ ...data, id: snap.id, attemptNumber: nth > 0 ? nth : resultsList.length });
+          // 1. Resolve by URL ID
+          if (attemptIdFromUrl) {
+             const specificId = `${user.uid}_${mockId}_${attemptIdFromUrl}`;
+             const specificRef = doc(db, "results", specificId);
+             const specificSnap = await getDoc(specificRef);
+             if (specificSnap.exists()) {
+                const nth = resultsList.findIndex(r => r.id === specificSnap.id) + 1;
+                setSessionData({ ...specificSnap.data(), id: specificSnap.id, attemptNumber: nth > 0 ? nth : resultsList.length });
+                setIsSearching(false);
+                return;
+             }
+          }
+
+          // 2. Fallback to primary key (original version)
+          const primaryRef = doc(db, "results", `${user.uid}_${mockId}`);
+          const primarySnap = await getDoc(primaryRef);
+          if (primarySnap.exists()) {
+             const nth = resultsList.findIndex(r => r.id === primarySnap.id) + 1;
+             setSessionData({ ...primarySnap.data(), id: primarySnap.id, attemptNumber: nth > 0 ? nth : resultsList.length });
              setIsSearching(false);
              return;
           }
           
+          // 3. Last fallback: latest from list
           if (resultsList.length > 0) {
              const latest = resultsList[resultsList.length - 1];
              setSessionData({ ...latest, attemptNumber: resultsList.length });
              setIsSearching(false);
              return;
           }
+
           setErrorNotFound(true);
        } catch (e) { 
           setErrorNotFound(true); 

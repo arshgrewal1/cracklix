@@ -28,8 +28,8 @@ interface ReportPDFProps {
 }
 
 /**
- * @fileOverview Institutional Portrait PDF Layout Hub v18.1.
- * FIXED: Explicit vertical spacing between Rank and Total Candidates.
+ * @fileOverview Institutional Portrait PDF Layout Hub v18.3.
+ * FIXED: Extreme Rank Overlap by implementing 48px explicit vertical spacing.
  * UPDATED: Domain strictly synchronized to cracklix.in.
  * TYPOGRAPHY: Strict Title Case across all nodes.
  */
@@ -51,7 +51,7 @@ export default function ReportPDF(props: ReportPDFProps) {
       {/* 1. Header Hub */}
       <div className="w-full flex items-center justify-between px-10 py-6 border-b border-slate-100 bg-slate-50/20 shrink-0">
          <div className="flex items-center gap-6">
-            <div className="h-16 w-16 relative bg-white border border-slate-100 rounded-2xl shadow-md overflow-hidden p-1.5">
+            <div className="h-16 w-16 relative bg-white border border-slate-100 rounded-2xl shadow-md overflow-hidden p-1.5 flex items-center justify-center">
                <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
             </div>
             <div className="space-y-0.5 text-left">
@@ -68,10 +68,10 @@ export default function ReportPDF(props: ReportPDFProps) {
       <div className="w-full flex-1 p-8 space-y-6 flex flex-col items-center overflow-hidden">
          
          {/* 2. Candidate Identity */}
-         <div className="w-full bg-white rounded-[2rem] p-10 border border-slate-100 flex flex-col items-center justify-center shadow-sm relative overflow-hidden text-center">
+         <div className="w-full bg-white rounded-[2rem] p-10 border border-slate-100 flex flex-col items-center justify-center shadow-sm relative overflow-hidden text-center min-h-[160px]">
             <div className="space-y-3 w-full">
                <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Candidate identity</p>
-               <h1 className="text-3xl font-black text-[#0F172A] leading-normal break-words max-w-[90%] mx-auto">
+               <h1 className="text-3xl font-black text-[#0F172A] leading-normal">
                   {studentName}
                </h1>
                <p className="text-lg font-bold text-slate-500 line-clamp-1">{examTitle}</p>
@@ -93,19 +93,19 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
          </div>
 
-         {/* 3. Merit Standing */}
-         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center gap-1 shadow-2xl relative overflow-hidden">
+         {/* 3. Merit Standing - HARDENED SPACING */}
+         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden min-h-[300px]">
             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-48 w-48 text-primary" /></div>
             
-            <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] relative z-10">Your Punjab rank</p>
+            <p className="text-[11px] font-black text-primary uppercase tracking-[0.3em] relative z-10">Your Punjab rank</p>
             
-            <div className="flex flex-col items-center justify-center relative z-10 w-full py-4 gap-4">
-               <span className="text-8xl font-black tabular-nums tracking-tighter leading-tight h-[110px]">#{rank}</span>
-               <div className="h-10" /> {/* Explicit spacer to prevent overlap */}
+            <div className="flex flex-col items-center justify-center relative z-10 w-full py-4">
+               <span className="text-8xl font-black tabular-nums tracking-tighter leading-tight block">#{rank}</span>
+               <div className="h-[48px]" /> {/* EXPLICIT SPACING TO PREVENT OVERLAP */}
                <span className="text-[14px] font-bold text-slate-400 tabular-nums">/ {totalCandidates.toLocaleString()} Candidates</span>
             </div>
 
-            <div className="pt-4 relative z-10">
+            <div className="pt-8 relative z-10">
               <Badge className="bg-emerald-500 text-white border-none font-black text-[10px] px-8 py-2.5 rounded-full shadow-2xl uppercase tracking-widest">
                  Verified Result Standing
               </Badge>
@@ -142,7 +142,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
-                        {subjects.slice(0, 6).map((s, i) => (
+                        {subjects.slice(0, 5).map((s, i) => (
                            <tr key={i} className="h-10 hover:bg-slate-50/30 transition-colors">
                               <td className="px-8 font-bold text-[13px] text-[#0F172A] text-left">{s.name}</td>
                               <td className="px-4 text-center font-black text-primary text-sm tabular-nums">{Number(s.score).toFixed(1)}</td>
