@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
 /**
- * @fileOverview Official Checkout Hub v3.9.
- * FIXED: Wrapped content in Suspense to resolve Next.js 15 build error (useSearchParams).
+ * @fileOverview Official Checkout Hub v4.0.
+ * FIXED: Wrapped content in Suspense to resolve Next.js 15 build error.
  */
 
 export default function CheckoutPage() {

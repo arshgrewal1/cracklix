@@ -40,8 +40,7 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v43.0 [Index-Less Fixed].
- * FIXED: Removed 'orderBy' from Firestore query to bypass index requirement and resolve 'Result not found' bug.
+ * @fileOverview Institutional Result Hub v44.0 [Hardened Index-Less].
  */
 
 export default function ResultClient() {
@@ -111,7 +110,7 @@ export default function ResultClient() {
        }
 
        try {
-          // Index-less query: Fetch by userId + mockId and sort client-side
+          // Hardened Lookup: Fetch all relevant entries and sort client-side to bypass index requirements
           const resQuery = query(
              collection(db, "results"), 
              where("userId", "==", user.uid), 
@@ -229,7 +228,7 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Synchronizing report node" });
+    toast({ title: "Syncing report hub" });
     try {
       const container = document.getElementById('pdf-report-container');
       if (!container) throw new Error("Capture node missing");

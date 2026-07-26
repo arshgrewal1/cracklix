@@ -7,9 +7,8 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v9.0.
- * FIXED: Tighter vertical gap between icon and title.
- * FIXED: Moved composition upwards for perfect vertical centering in viewport.
+ * @fileOverview Premium PWA Splash Hub v10.0 [FIXED VERTICAL ALIGN].
+ * FIXED: Minimized brand gap and moved composition to upper-middle quadrant.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -83,7 +82,7 @@ export default function SplashScreen() {
                    />
                    <div 
                      className="relative"
-                     style={{ width: 'clamp(260px, 50vw, 420px)', height: 'auto', aspectRatio: '1/1' }}
+                     style={{ width: 'clamp(300px, 45vw, 500px)', height: 'auto', aspectRatio: '1/1' }}
                    >
                       <Image 
                         src="/logo/cracklix-icon.png" 

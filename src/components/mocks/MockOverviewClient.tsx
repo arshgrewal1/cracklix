@@ -9,7 +9,7 @@ import { useDoc, useFirestore, useUser } from "@/firebase"
 import { doc, getDoc } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { 
   Clock, 
   BookOpen, 
@@ -20,7 +20,6 @@ import {
   Play,
   Target,
   RefreshCw,
-  Gem,
   BarChart3,
   AlertCircle,
   ArrowRight
@@ -32,8 +31,7 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client v4.8 [FIXED RECURSION].
- * FIXED: Removed recursive self-call that caused RangeError during build.
+ * @fileOverview Universal Mock Overview Hub Client v5.0 [FIXED RECURSION].
  */
 export default function MockOverviewClient() {
   const router = useRouter()
@@ -93,7 +91,7 @@ export default function MockOverviewClient() {
   if (mockLoading || userLoading || (user && mockId && !accessChecked)) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-12 w-12 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Synchronizing...</p>
+       <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Synchronizing Hub...</p>
     </div>
   );
 
@@ -108,14 +106,12 @@ export default function MockOverviewClient() {
               <AlertCircle className="h-5 w-5 text-primary" />
            </div>
         </div>
-
         <div className="space-y-3">
           <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">Coming Soon</h1>
           <p className="text-slate-500 font-medium leading-relaxed pt-4">
             This preparation hub is currently being updated. Please check back later.
           </p>
         </div>
-
         <div className="pt-4">
            <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-bold text-sm shadow-3xl border-none transition-all active:scale-95">
               <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to Hub</Link>
