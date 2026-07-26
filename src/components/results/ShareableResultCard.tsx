@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -13,10 +12,12 @@ import {
   Award,
   Activity,
   BarChart3,
-  Users
+  Users,
+  Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import Image from 'next/image';
 
 interface ShareableResultCardProps {
@@ -26,14 +27,15 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Institutional Scorecard Node v10.0.
- * UPDATED: Increased logo size to 180px and hardened icon imports.
+ * @fileOverview Institutional Scorecard Node v11.0.
+ * FIXED: Added missing Card import.
+ * HIERARCHY: Score (Biggest) > Accuracy > Percentile > Rank (Small).
  * Dimensions: 1080x1350 for Ultra-HD Social Sharing.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   if (!data) return null;
 
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://cracklix.in/results/view?id=' + data.mockId)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent('https://cracklix.in/results/view?id=' + data.mockId)}`;
 
   return (
     <div 
@@ -51,7 +53,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             />
             <div className="flex items-center gap-4">
                <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-6 py-2 rounded-full font-black text-sm uppercase tracking-widest flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4" /> Verified Result
+                  <ShieldCheck className="h-5 w-5" /> Verified Result
                </Badge>
             </div>
          </div>
@@ -59,12 +61,12 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             <div className="h-28 w-28 bg-slate-50 rounded-[2rem] border-4 border-white shadow-xl flex items-center justify-center mx-auto mb-4 overflow-hidden">
                <img src={`https://picsum.photos/seed/${data.userId}/112/112`} alt="user" />
             </div>
-            <p className="text-3xl font-black tracking-tight">{data.userName}</p>
+            <p className="text-3xl font-black tracking-tight uppercase">{data.userName}</p>
             <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{data.userEmail}</p>
          </div>
       </div>
 
-      {/* 2. TEST IDENTITY NODE */}
+      {/* 2. TEST IDENTITY HUB */}
       <div className="bg-slate-50/50 rounded-[2.5rem] p-10 border border-slate-100 mb-12 flex justify-between items-center relative overflow-hidden">
          <div className="absolute top-0 right-0 p-8 opacity-5"><Zap className="h-32 w-32" /></div>
          <div className="space-y-4 relative z-10">
@@ -72,25 +74,25 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             <div className="flex items-center gap-8">
                <DetailNode icon={Zap} label="Attempt No" val={data.attemptCount || "01"} />
                <div className="w-px h-8 bg-slate-200" />
-               <DetailNode icon={Calendar} label="Date" val={new Date(data.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} />
+               <DetailNode icon={Calendar} label="Exam Date" val={new Date(data.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} />
                <div className="w-px h-8 bg-slate-200" />
                <DetailNode icon={Clock} label="Time Taken" val={data.timeTaken ? `${Math.floor(data.timeTaken/60)}m ${data.timeTaken%60}s` : "---"} />
             </div>
          </div>
       </div>
 
-      {/* 3. PRIMARY METRIC MATRIX (THE SCORE HUB) */}
+      {/* 3. PRIMARY METRIC MATRIX (SCORE AS BIGGEST ELEMENT) */}
       <div className="grid grid-cols-12 gap-8 mb-12">
-         {/* MAIN SCORE HUB - LARGEST ELEMENT */}
+         {/* MAIN SCORE HUB */}
          <div className="col-span-8 bg-[#2563EB] rounded-[3rem] p-12 text-white shadow-2xl flex flex-col justify-center relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-10"><Award className="h-40 w-40" /></div>
             <p className="text-xl font-bold uppercase tracking-widest opacity-80 mb-4">Net Result Score</p>
             <div className="flex items-baseline gap-4">
-               <span className="text-[160px] font-[900] leading-none tracking-tighter tabular-nums">{data.score}</span>
+               <span className="text-[180px] font-[900] leading-none tracking-tighter tabular-nums">{data.score}</span>
                <span className="text-4xl font-bold opacity-40">/ {data.totalQuestions}</span>
             </div>
             <div className="mt-8 flex items-center gap-4">
-               <Badge className="bg-white/20 text-white border-none px-5 py-2 rounded-full font-black text-lg">Grade {data.grade || "A+"}</Badge>
+               <Badge className="bg-white/20 text-white border-none px-5 py-2 rounded-full font-black text-lg uppercase">Grade {data.grade || "A+"}</Badge>
                <span className="text-xl font-bold uppercase tracking-widest text-white/60">Verified performance</span>
             </div>
          </div>
@@ -143,20 +145,20 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
 
       {/* 6. FOOTER VERIFICATION */}
       <div className="mt-auto flex justify-between items-end border-t border-slate-100 pt-10">
-         <div className="space-y-3">
+         <div className="space-y-3 text-left">
             <p className="text-2xl font-black text-slate-300 uppercase tracking-[0.4em]">Official Scorecard</p>
             <div className="flex items-center gap-4 text-slate-400">
                <ShieldCheck className="h-6 w-6 text-emerald-500" />
-               <p className="text-xl font-bold tracking-tight">Verified by Arsh Grewal Management Registry</p>
+               <p className="text-xl font-bold tracking-tight uppercase">Verified by Arsh Grewal Management Registry</p>
             </div>
          </div>
          <div className="flex items-center gap-8">
             <div className="text-right space-y-1">
-               <p className="text-lg font-black text-primary uppercase">Verify Result</p>
+               <p className="text-lg font-black text-primary uppercase tracking-wider">Verify Result</p>
                <p className="text-sm font-mono text-slate-300">cracklix.in/verify/{data.attemptId}</p>
             </div>
             <div className="bg-white p-2 rounded-2xl border-4 border-slate-50 shadow-xl">
-               <img src={qrUrl} alt="Verification" className="h-24 w-24" />
+               <img src={qrUrl} alt="Verification" className="h-28 w-28" />
             </div>
          </div>
       </div>
@@ -166,9 +168,9 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
 
 function DetailNode({ icon: Icon, label, val }: any) {
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-0.5 text-left">
        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{label}</span>
-       <p className="text-xl font-bold text-[#0F172A] flex items-center gap-2">
+       <p className="text-xl font-bold text-[#0F172A] flex items-center gap-2 uppercase">
           <Icon className="h-4 w-4 text-primary" /> {val}
        </p>
     </div>
