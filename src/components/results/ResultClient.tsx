@@ -45,12 +45,12 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import ShareableResultCard from "./ShareableResultCard"
-import { toPng } from 'html-to-image'
+import html2canvas from 'html2canvas'
 
 /**
- * @fileOverview Universal Result Hub Viewer v32.0.
- * FIXED: Implemented 15s timeout for background generation to prevent infinite loading.
- * FIXED: Added extensive debug logging for image generation flow.
+ * @fileOverview Universal Result Hub Viewer v33.0.
+ * FIXED: Switched to html2canvas for robust background capture.
+ * FIXED: Added 15s safety timeout and generation guard to prevent hangs.
  */
 
 export default function ResultClient() {
@@ -189,46 +189,34 @@ export default function ResultClient() {
     
     generationAttempted.current = true;
     setIsGenerating(true);
-    console.log("[SHARE_DEBUG] STEP 1: Initialization started");
+    console.log("[SHARE_DEBUG] STEP 1: Starting html2canvas capture");
     
     const timeoutId = setTimeout(() => {
        if (!preGeneratedImage) {
-          console.error("[SHARE_DEBUG] ERROR: Generation timed out after 15s");
+          console.error("[SHARE_DEBUG] ERROR: Generation timed out");
           setIsGenerating(false);
-          generationAttempted.current = false; // Allow retry
+          generationAttempted.current = false;
        }
     }, 15000);
 
     try {
-      // Small delay to ensure all DOM styles and local images (logo) are rendered
+      // 2s delay for assets
       await new Promise(r => setTimeout(r, 2000));
       
       const node = document.getElementById('shareable-result-certificate');
-      if (!node) {
-         throw new Error("Target node 'shareable-result-certificate' not found in DOM");
-      }
-      console.log("[SHARE_DEBUG] STEP 2: Target node found");
+      if (!node) throw new Error("Capture node not found");
 
-      // Verify images are loaded
-      const images = Array.from(node.getElementsByTagName('img'));
-      await Promise.all(images.map(img => {
-         if (img.complete) return Promise.resolve();
-         return new Promise((res) => {
-            img.onload = res;
-            img.onerror = res;
-         });
-      }));
-      console.log("[SHARE_DEBUG] STEP 3: Images verified/loaded");
-
-      const dataUrl = await toPng(node, {
-         quality: 0.95,
-         pixelRatio: 2,
+      const canvas = await html2canvas(node, {
+         useCORS: true,
+         scale: 2,
+         backgroundColor: "#0B5FFF",
+         logging: false,
          width: 1080,
-         height: 1350,
-         cacheBust: true,
+         height: 1350
       });
 
-      console.log("[SHARE_DEBUG] STEP 4: PNG generated successfully");
+      const dataUrl = canvas.toDataURL('image/png', 0.9);
+      console.log("[SHARE_DEBUG] STEP 2: PNG Exported");
       setPreGeneratedImage(dataUrl);
       clearTimeout(timeoutId);
     } catch (e: any) {
@@ -238,7 +226,7 @@ export default function ResultClient() {
     } finally {
       setIsGenerating(false);
     }
-  }, [mounted, sessionData, liveRank]);
+  }, [mounted, sessionData, liveRank, preGeneratedImage]);
 
   useEffect(() => {
      if (sessionData && liveRank !== "---" && !preGeneratedImage && !isGenerating) {
@@ -250,7 +238,7 @@ export default function ResultClient() {
     if (!sessionData) return;
     
     if (!preGeneratedImage) {
-       toast({ title: "Syncing card", description: "Almost ready. Please wait 5 seconds." });
+       toast({ title: "Card sync in progress", description: "Almost ready. Please retry in 3 seconds." });
        if (!isGenerating) prepareShareCard();
        return;
     }
@@ -278,7 +266,7 @@ export default function ResultClient() {
       }
     } catch (e: any) { 
        if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Transmission error" }); 
+          toast({ variant: "destructive", title: "Transmission Error" }); 
        }
     }
   };

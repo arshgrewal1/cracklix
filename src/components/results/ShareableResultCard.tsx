@@ -25,8 +25,9 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview High-Fidelity Social Share Certificate v1.7.
+ * @fileOverview High-Fidelity Social Share Certificate v1.8.
  * FIXED: Explicitly defined icons and uses official logo node for capture.
+ * FIXED: Added missing lucide-react imports to prevent ReferenceErrors.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
@@ -38,6 +39,13 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
       .then(setQrUrl)
       .catch(() => console.warn("[QR_SYNC] Failed to generate code."));
   }, [data]);
+
+  const formatTime = (seconds: number) => {
+     if (!seconds || seconds <= 0) return "0m";
+     const m = Math.floor(seconds / 60);
+     const s = seconds % 60;
+     return `${m}m ${s}s`;
+  }
 
   if (!data) return null;
 
