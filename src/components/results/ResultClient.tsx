@@ -48,9 +48,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v102.0.
- * FIXED: Replaced "Registry" with "Database" and "Node" with "Item".
- * RESTORED: Share Performance functionality.
+ * @fileOverview Universal Result Hub Engine v103.0.
+ * UPDATED: Reduced title font size and refined button scales for improved spatial balance.
  */
 
 export default function ResultClient() {
@@ -285,7 +284,7 @@ export default function ResultClient() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
-      <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-8 md:py-16 space-y-10">
+      <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-8 md:py-12 space-y-8 md:space-y-12">
         
         {isSearching ? (
            <div className="py-40 flex flex-col items-center justify-center space-y-8">
@@ -300,29 +299,29 @@ export default function ResultClient() {
            </div>
         ) : sessionData ? (
            <>
-              <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-12 flex flex-col lg:flex-row justify-between items-center gap-6">
-                 <div className="flex items-center gap-6 md:gap-10 w-full min-w-0 text-left">
-                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-24 md:w-24 shadow-xl border border-slate-100 rounded-2xl" />
-                    <div className="text-left space-y-2 flex-1 min-w-0">
+              <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 flex flex-col lg:flex-row justify-between items-center gap-6">
+                 <div className="flex items-center gap-5 md:gap-8 w-full min-w-0 text-left">
+                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-20 md:w-20 shadow-xl border border-slate-100 rounded-xl" />
+                    <div className="text-left space-y-1.5 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 font-bold text-[9px] rounded-lg shadow-sm">Verified result</Badge>
-                          {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-3 font-bold text-[9px] rounded-lg shadow-sm">Guest mode</Badge>}
+                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 py-0.5 rounded-lg font-bold text-[9px] shadow-sm">Verified result</Badge>
+                          {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-0.5 rounded-lg font-bold text-[9px] shadow-sm">Guest mode</Badge>}
                        </div>
-                       <h1 className="text-xl md:text-3xl font-bold text-[#0F172A] tracking-tight truncate">{sessionData.mockTitle}</h1>
-                       <div className="flex items-center gap-4 text-xs font-semibold text-slate-400 tracking-tight">
-                          <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
-                          <span className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
+                       <h1 className="text-lg md:text-2xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
+                       <div className="flex items-center gap-4 text-[10px] md:text-xs font-semibold text-slate-400 tracking-tight">
+                          <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
+                          <span className="flex items-center gap-1.5"><TimerIcon className="h-3.5 w-3.5" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
                        </div>
                     </div>
                  </div>
-                 <div className="flex items-center gap-3 w-full lg:w-auto">
-                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-12 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-xs border-none shadow-lg">
-                       {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} Share result
+                 <div className="flex items-center gap-2 md:gap-3 w-full lg:w-auto">
+                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-11 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-[11px] border-none shadow-lg">
+                       {isSharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />} Share result
                     </Button>
-                    <Button onClick={() => router.refresh()} className="flex-1 lg:flex-none h-12 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-xs border-none shadow-lg">
-                       <RefreshCw className="h-4 w-4" /> Refresh
+                    <Button onClick={() => router.refresh()} className="flex-1 lg:flex-none h-11 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[11px] border-none shadow-lg">
+                       <RefreshCw className="h-3.5 w-3.5" /> Refresh
                     </Button>
-                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-12 px-6 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-xs shadow-sm">
+                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-11 px-6 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[11px] shadow-sm">
                        <Link href={`/mocks/instructions?id=${mockId || sessionData.mockId}&retake=true`}>Retake test</Link>
                     </Button>
                  </div>
