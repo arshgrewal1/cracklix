@@ -44,9 +44,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v23.3 [PWA Scaling].
- * FIXED: Removed uppercase and tracking from sub-labels for cleaner Title Case look.
- * UPDATED: Optimized scaling for mobile responsive views.
+ * @fileOverview Official Institutional Report Card v23.4 [High-Res Export Hardened].
+ * FIXED: CORS handling for images and alignment normalization for html2canvas.
  */
 export default function ResultCard({
   studentName,
@@ -85,9 +84,9 @@ export default function ResultCard({
           <div className="flex items-center gap-4 md:gap-8">
             <div className="h-16 w-16 md:h-28 md:w-28 bg-white rounded-xl md:rounded-2xl flex items-center justify-center p-0 border border-slate-50 shadow-lg overflow-hidden shrink-0">
               {branding?.logoUrl ? (
-                <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
+                <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" referrerPolicy="no-referrer" />
               ) : (
-                <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
+                <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" referrerPolicy="no-referrer" />
               )}
             </div>
             <div className="space-y-0.5 text-left min-w-0">
@@ -185,7 +184,7 @@ export default function ResultCard({
         {/* FOOTER VERIFICATION */}
         <div className="pt-6 md:pt-8 border-t border-slate-100 flex flex-col md:flex-row items-start justify-between gap-6 md:gap-10">
           <div className="bg-white border border-slate-100 p-2 md:p-3 rounded-xl md:rounded-[1.5rem] shadow-lg shrink-0 flex flex-col items-center justify-center gap-1.5">
-            <img src={qrUrl} alt="Verify" className="h-20 w-20 md:h-28 md:w-28 object-contain" crossOrigin="anonymous" />
+            <img src={qrUrl} alt="Verify" className="h-20 w-20 md:h-28 md:w-28 object-contain" crossOrigin="anonymous" referrerPolicy="no-referrer" />
             <span className="text-[7px] md:text-[8px] font-black text-primary tracking-widest uppercase">Verify Hub</span>
           </div>
 

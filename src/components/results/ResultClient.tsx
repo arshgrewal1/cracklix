@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from "react"
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -57,12 +58,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { useExamStore } from "@/store/useExamStore"
-import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v25.0 [Production Hardened].
- * FIXED: One-Click Retake responsiveness and Resilient ID Resolution.
+ * @fileOverview Premium Result Analysis Hub v26.0.
+ * FIXED: Pixel-perfect PDF Export using html2canvas high-res capture.
  */
 
 export default function ResultClient() {
@@ -73,6 +74,7 @@ export default function ResultClient() {
   const { toast } = useToast()
   const resetStore = useExamStore(s => s.resetStore);
   
+  const reportRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false)
   const [questions, setQuestions] = useState<any[]>([])
   const [loadingQuestions, setLoadingQuestions] = useState(true)
@@ -91,14 +93,11 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
-  // AGGRESSIVE ID RESOLUTION PROTOCOL
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
     
     async function resolveId() {
        setIsResolvingId(true);
-
-       // 1. GUEST RECOVERY
        if (!user) {
           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
           if (guestRes) {
@@ -108,17 +107,12 @@ export default function ResultClient() {
           setIsResolvingId(false);
           return;
        }
-
-       // 2. DIRECT URL HANDSHAKE (Highest Priority)
        if (attemptIdFromUrl) {
           setResolvedResultId(`${user.uid}_${mockId}_${attemptIdFromUrl}`);
           setIsResolvingId(false);
           return;
        }
-
-       // 3. REGISTRY AUDIT (Recovery for 'View Analysis' buttons)
        try {
-          // Check operational tracker first
           const trackerSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
           if (trackerSnap.exists()) {
              const tid = trackerSnap.data().attemptId;
@@ -128,24 +122,19 @@ export default function ResultClient() {
                 return;
              }
           }
-
-          // Fallback: Query results collection for newest entry
           const resQuery = query(
              collection(db, "results"),
              where("userId", "==", user.uid),
              where("mockId", "==", mockId),
              limit(5)
           );
-          
           const resSnap = await getDocs(resQuery);
           if (!resSnap.empty) {
              const sorted = resSnap.docs
                .map(d => ({ ...d.data(), id: d.id }))
                .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-             
              setResolvedResultId(sorted[0].id);
           } else {
-             // Hard Fallback to default expected path
              setResolvedResultId(`${user.uid}_${mockId}`);
           }
        } catch (e) {
@@ -154,7 +143,6 @@ export default function ResultClient() {
           setIsResolvingId(false);
        }
     }
-
     resolveId();
   }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
 
@@ -166,16 +154,13 @@ export default function ResultClient() {
 
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
-     
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
            const countSnap = await getCountFromServer(entriesRef);
            setTotalCandidates(countSnap.data().count);
-
            const q = query(entriesRef, orderBy("highestScore", "desc"), limit(500));
            const snap = await getDocs(q);
-           
            const entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
            const sorted = entries.sort((a: any, b: any) => {
               if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
@@ -183,7 +168,6 @@ export default function ResultClient() {
               if (a.timeTaken !== b.timeTaken) return a.timeTaken - b.timeTaken;
               return (a.submittedAt?.seconds || 0) - (b.submittedAt?.seconds || 0);
            });
-
            const myIndex = sorted.findIndex(d => d.id === user?.uid);
            if (myIndex !== -1) {
               setLiveRank(myIndex + 1);
@@ -231,38 +215,58 @@ export default function ResultClient() {
 
   const handleRetake = useCallback(() => {
     if (!mockId) return;
-    
-    // Optimistic Reset
     if (user && db) {
        deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {});
     }
-    
     if (typeof window !== 'undefined') {
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
       localStorage.removeItem(`cracklix_guest_result_${mockId}`);
     }
-
     resetStore();
     router.push(`/mocks/attempt?id=${mockId}&retake=true`);
-    toast({ title: "Test reset", description: "Starting a fresh preparation node." });
+    toast({ title: "Test reset" });
   }, [db, mockId, user, router, resetStore, toast]);
 
   const handleDownloadPDF = async () => { 
-    if (isExporting) return;
+    if (isExporting || !activeSession) return;
     setIsExporting(true);
     try {
       setActiveMainTab("REPORT"); 
-      toast({ title: "Generating Report" });
-      await new Promise(r => setTimeout(r, 1000));
+      toast({ title: "Generating pixel-perfect report..." });
+      
+      // Allow visual sync to complete
+      await new Promise(r => setTimeout(r, 1200));
+      
       const element = document.getElementById('cracklix-result-card');
-      if (!element) throw new Error("Capture node not found.");
-      const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2, backgroundColor: '#ffffff' });
-      const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', compress: true });
-      pdf.addImage(dataUrl, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
-      pdf.save(`Cracklix_${activeSession.mockTitle.replace(/\s+/g, '_')}.pdf`);
-      toast({ title: "Report Downloaded" });
-    } catch (e) {
-      toast({ variant: "destructive", title: "PDF Export failed." });
+      if (!element) throw new Error("Report capture hub missing.");
+
+      // Capture at 4x resolution for premium clarity
+      const canvas = await html2canvas(element, {
+        scale: 4,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        allowTaint: true,
+        imageTimeout: 15000,
+      });
+
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgWidth = 210; 
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
+      pdf.save(`Cracklix_Report_${activeSession.mockTitle.replace(/\s+/g, '_')}.pdf`);
+      
+      toast({ title: "Audit Report Synced", description: "Professional PDF saved to device." });
+    } catch (e: any) {
+      console.error("[PDF_EXPORT_FAILURE]:", e);
+      toast({ variant: "destructive", title: "Export blocked", description: "Check network for asset sync." });
     } finally { setIsExporting(false); }
   };
 
@@ -368,10 +372,10 @@ export default function ResultClient() {
                  <Button 
                    onClick={handleDownloadPDF} 
                    disabled={isExporting || !activeSession}
-                   className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight"
+                   className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight shadow-xl"
                  >
                     {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} 
-                    Download
+                    Export PDF
                  </Button>
               </div>
            </div>
