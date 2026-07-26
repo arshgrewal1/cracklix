@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -32,20 +33,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { pdf } from '@react-pdf/renderer'
-import { saveAs } from 'file-saver'
-import QRCode from 'qrcode'
+import { generateReport } from "@/lib/pdf/generateReport"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import ReportScreen from "./ReportScreen"
-import PerformancePDF from "./PerformancePDF"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v20.0.
- * FIXED: Tabs triggers properly nested within TabsList to satisfy Radix UI roving focus group.
- * FIXED: Sentence case typography and missing icon imports.
+ * @fileOverview Universal Result Hub Viewer v21.0.
+ * FIXED: Rebuilt PDF Download flow with new Hardened Engine.
  */
 
 export default function ResultClient() {
@@ -179,15 +176,13 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !sessionData) return;
     setIsExporting(true);
-    toast({ title: "Syncing report registry" });
+    toast({ title: "Synchronizing report..." });
     
     try {
-      const qrData = await QRCode.toDataURL(`https://cracklix.in/report/${sessionData.attemptId}`);
-      
-      const pdfData = {
+      await generateReport({
         studentName: sessionData.userName || profile?.name || "Aspirant",
         examTitle: sessionData.mockTitle,
-        score: sessionData.score.toFixed(1),
+        score: sessionData.score,
         rank: liveRank,
         totalCandidates,
         accuracy: sessionData.attemptAccuracy,
@@ -197,21 +192,15 @@ export default function ResultClient() {
         total: sessionData.totalQuestions,
         grade: sessionData.grade || "F",
         percentile: Math.max(0, Math.round(((totalCandidates - Number(liveRank)) / (totalCandidates || 1)) * 100)),
-        topScore,
-        avgScore,
-        avgAccuracy,
         subjectAnalysis: sessionData.subjectAnalysis || [],
         date: new Date(sessionData.timestamp).toLocaleDateString('en-GB'),
         attemptId: sessionData.attemptId,
         duration: `${mockData?.duration || 120}m`
-      };
+      });
 
-      const blob = await pdf(<PerformancePDF data={pdfData} qrData={qrData} />).toBlob();
-      saveAs(blob, `Report_${pdfData.studentName.replace(/\s+/g, '_')}.pdf`);
-      toast({ title: "Report downloaded successfully" });
-    } catch (e) { 
-       console.error("[PDF_EXPORT_FAILURE]:", e);
-       toast({ variant: "destructive", title: "Export failed", description: "PDF generation node encountered an error." }); 
+      toast({ title: "Report downloaded" });
+    } catch (e: any) { 
+       toast({ variant: "destructive", title: "Unable to generate report", description: "Audit engine timed out. Please try again." }); 
     } finally { setIsExporting(false); }
   };
 
@@ -254,9 +243,9 @@ export default function ResultClient() {
                        </div>
                        <h1 className="text-xl md:text-3xl font-[800] text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
                        <div className="flex flex-wrap items-center gap-6 text-[10px] md:xs font-bold text-slate-400">
-                          <HeaderMiniNode icon={<Clock className="h-3.5 w-3.5" />} label="Date" val={new Date(sessionData.timestamp).toLocaleDateString('en-GB')} />
-                          <HeaderMiniNode icon={<Clock className="h-3.5 w-3.5" />} label="Duration" val={`${mockData?.duration || 120}m`} />
-                          <HeaderMiniNode icon={<Users className="h-3.5 w-3.5" />} label="Candidates" val={totalCandidates.toLocaleString()} />
+                          <div className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span></div>
+                          <div className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> <span>{mockData?.duration || 120}m</span></div>
+                          <div className="flex items-center gap-2"><Users className="h-3.5 w-3.5" /> <span>{totalCandidates.toLocaleString()} Candidates</span></div>
                        </div>
                     </div>
                  </div>
@@ -328,16 +317,6 @@ export default function ResultClient() {
   )
 }
 
-function HeaderMiniNode({ icon, label, val }: any) {
-  return (
-    <div className="flex items-center gap-2">
-       <span className="shrink-0">{icon}</span>
-       <span className="text-slate-400">{label}:</span>
-       <span className="text-[#071B4D] font-bold">{val}</span>
-    </div>
-  )
-}
-
 function FilterButton({ active, label, count, onClick, color = "primary" }: any) {
   return (
     <button onClick={onClick} className={cn(
@@ -346,5 +325,15 @@ function FilterButton({ active, label, count, onClick, color = "primary" }: any)
     )}>
        {label} <span className="opacity-40">{count}</span>
     </button>
+  )
+}
+
+function HeaderMiniNode({ icon, label, val }: any) {
+  return (
+    <div className="flex items-center gap-2">
+       <span className="shrink-0">{icon}</span>
+       <span className="text-slate-400">{label}:</span>
+       <span className="text-[#071B4D] font-bold">{val}</span>
+    </div>
   )
 }

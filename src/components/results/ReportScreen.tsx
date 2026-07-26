@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -18,9 +19,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v6.0.
+ * @fileOverview Premium Analysis Screen v6.1.
  * UPDATED: Standardized to Sentence Case and unified boxed architecture.
- * FIXED: Missing icon imports and syntax closure.
  */
 
 interface ReportScreenProps {
