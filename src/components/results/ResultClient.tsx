@@ -1,4 +1,5 @@
-'use client';
+
+"use client"
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -24,8 +25,6 @@ import {
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
-  Trophy, 
-  Target, 
   Zap, 
   Loader2, 
   ShieldCheck,
@@ -35,7 +34,6 @@ import {
   Download,
   RotateCcw,
   Layers,
-  XCircle,
   ArrowRight,
   BookOpen,
   X,
@@ -43,7 +41,8 @@ import {
   AlertCircle,
   Award,
   Activity,
-  Timer
+  Timer,
+  Target
 } from "lucide-react"
 import { 
   Card, 
@@ -65,8 +64,10 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Institutional Result Engine v52.0.
- * REDESIGNED: Title Case typography and high-density performance audit.
+ * @fileOverview Institutional Result Engine v55.0.
+ * FIXED: Terminology normalized to "Questions".
+ * FIXED: Blank PDF issues resolved via buffered capture.
+ * DESIGN: Minimalistic Title Case.
  */
 
 export default function ResultClient() {
@@ -216,13 +217,19 @@ export default function ResultClient() {
     const grade = activeSession.grade || "F";
     const isQualified = activeSession.isQualified || percentage >= 40;
     
+    let readinessLevel = "Critical";
+    if (readiness >= 80) readinessLevel = "Excellent";
+    else if (readiness >= 60) readinessLevel = "Good";
+    else if (readiness >= 40) readinessLevel = "Average";
+    else if (readiness >= 20) readinessLevel = "Weak";
+
     const percentile = totalCandidates > 1 
       ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1)) 
       : 0;
 
     return { 
       score, maxMarks, percentage, attemptAccuracy, overallAccuracy, 
-      attemptRate, readiness, readinessLevel: activeSession.readinessLevel || "Average", 
+      attemptRate, readiness, readinessLevel, 
       grade, isQualified, percentile, topperGap: Math.max(0, topperScore - score) 
     };
   }, [activeSession, totalCandidates, liveRank, topperScore]);
@@ -276,27 +283,56 @@ export default function ResultClient() {
     if (isExporting || !activeSession) return;
     setIsExporting(true);
     try {
+      // 1. Force visual preparation
       setActiveMainTab("REPORT"); 
-      toast({ title: "Preparing high-fidelity report..." });
-      await new Promise(r => setTimeout(r, 1200));
+      toast({ title: "Preparing performance report..." });
+      
+      // 2. Wait for fonts and tab transition
+      await new Promise(r => setTimeout(r, 1500));
       if (typeof window !== 'undefined' && 'fonts' in document) await (document as any).fonts.ready;
+      
       const element = document.getElementById('cracklix-result-card');
-      if (!element) throw new Error("Analysis node missing.");
+      if (!element) throw new Error("Report node not found in DOM.");
+
+      // 3. Inject high-contrast styles for capture
       const style = document.createElement('style');
-      style.id = 'cracklix-export-hardening';
+      style.id = 'cracklix-pdf-hardener';
       style.innerHTML = `
+        #cracklix-result-card { transform: none !important; opacity: 1 !important; visibility: visible !important; }
         #cracklix-result-card * { opacity: 1 !important; filter: none !important; text-shadow: none !important; }
         #cracklix-result-card .text-slate-300, #cracklix-result-card .text-slate-400 { color: #475569 !important; }
       `;
       document.head.appendChild(style);
-      const canvas = await html2canvas(element, { scale: 4, useCORS: true, backgroundColor: "#FFFFFF", logging: false, foreignObjectRendering: true });
+
+      // 4. Pixel-perfect binary capture
+      const canvas = await html2canvas(element, { 
+        scale: 4, 
+        useCORS: true, 
+        backgroundColor: "#FFFFFF", 
+        logging: false, 
+        foreignObjectRendering: true,
+        allowTaint: true,
+        imageTimeout: 15000
+      });
+      
       style.remove();
+
+      if (!canvas || canvas.width === 0) throw new Error("Capture engine returned blank data.");
+
       const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+      
+      // Standard A4: 210 x 297
       pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
-      pdf.save(`Result_${activeSession.userName}.pdf`);
-      toast({ title: "PDF export complete" });
-    } catch (e: any) { toast({ variant: "destructive", title: "Export failed" }); } finally { setIsExporting(false); }
+      pdf.save(`Report_${activeSession.userName || 'Aspirant'}.pdf`);
+      
+      toast({ title: "Report downloaded successfully" });
+    } catch (e: any) { 
+       console.error("[PDF_ERROR]:", e);
+       toast({ variant: "destructive", title: "Report Generation Failed", description: "Please try again in a few seconds." }); 
+    } finally { 
+       setIsExporting(false); 
+    }
   };
 
   const reviewNodes = useMemo(() => {
@@ -342,11 +378,11 @@ export default function ResultClient() {
              <AlertCircle className="h-10 w-10" />
           </div>
           <div className="space-y-3">
-             <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Record Not Found</h2>
-             <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">We couldn't synchronize your result node from the registry. Please try again or contact support.</p>
+             <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Report Not Found</h2>
+             <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">We couldn't synchronize your attempt data. Please try refreshing or return home.</p>
           </div>
           <div className="flex flex-col gap-3">
-             <Button onClick={() => window.location.reload()} className="w-full h-14 bg-primary text-white rounded-2xl font-bold shadow-xl border-none active:scale-95"><RefreshCw className="h-4 w-4 mr-2" /> Re-sync Registry</Button>
+             <Button onClick={() => window.location.reload()} className="w-full h-14 bg-primary text-white rounded-2xl font-bold shadow-xl border-none active:scale-95"><RefreshCw className="h-4 w-4 mr-2" /> Re-sync Analysis</Button>
              <Button asChild variant="ghost" className="w-full h-12 text-slate-400 font-bold text-[10px]"><Link href="/dashboard">Return Home</Link></Button>
           </div>
        </Card>
@@ -373,7 +409,7 @@ export default function ResultClient() {
                  <div className="flex flex-wrap items-center justify-start gap-2 md:gap-3 font-bold text-[9px] text-slate-400">
                     <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> {new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
                     <span className="h-1 w-1 rounded-full bg-slate-200" />
-                    <span>ID: {activeSession.attemptId?.slice(0, 8)}</span>
+                    <span>Attempt ID: {activeSession.attemptId?.slice(0, 8)}</span>
                  </div>
               </div>
            </div>
@@ -381,15 +417,15 @@ export default function ResultClient() {
            <div className="flex flex-col gap-2 w-full lg:w-auto shrink-0">
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="bg-white border border-slate-50 p-1 rounded-xl shadow-sm">
                  <TabsList className="bg-transparent border-none p-0 flex h-9 w-full gap-1">
-                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-4 font-bold text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Summary</TabsTrigger>
+                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-4 font-bold text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Overview</TabsTrigger>
                     <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-4 font-bold text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review</TabsTrigger>
                     <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-4 font-bold text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Report</TabsTrigger>
                  </TabsList>
               </Tabs>
               <div className="flex gap-2">
-                 <Button variant="outline" onClick={handleRetake} className="flex-1 h-10 border-2 font-bold text-[9px] rounded-xl active:scale-95"><RotateCcw className="h-3 w-3 mr-2" /> Retake</Button>
+                 <Button variant="outline" onClick={handleRetake} className="flex-1 h-10 border-2 font-bold text-[9px] rounded-xl active:scale-95"><RotateCcw className="h-3 w-3 mr-2" /> Retake Test</Button>
                  <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-10 bg-primary text-white font-bold text-[9px] rounded-xl shadow-md active:scale-95">
-                    {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} Export PDF
+                    {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} Download PDF
                  </Button>
               </div>
            </div>
@@ -403,7 +439,7 @@ export default function ResultClient() {
                   <StatCard label="Percentile" val={`${finalMetrics?.percentile}%`} sub="Verified" icon={<TrendingUp className="text-blue-500" />} />
                   <StatCard label="Accuracy" val={`${finalMetrics?.attemptAccuracy.toFixed(1)}%`} sub="Precision" icon={<Target className="text-emerald-500" />} />
                   <StatCard label="Attempt Rate" val={`${finalMetrics?.attemptRate.toFixed(1)}%`} sub="Volume" icon={<Activity className="text-indigo-500" />} />
-                  <StatCard label="Grade" val={finalMetrics?.grade} sub="Category" icon={<Award className="text-purple-500" />} />
+                  <StatCard label="Grade" val={finalMetrics?.grade} sub="Audit" icon={<Award className="text-purple-500" />} />
                 </section>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
@@ -470,12 +506,12 @@ export default function ResultClient() {
                           <div className="relative z-10 space-y-8 text-left">
                              <div className="space-y-1">
                                 <h3 className="text-xl font-bold tracking-tight leading-tight">Smart Insights</h3>
-                                <p className="text-[9px] font-bold text-slate-500">AI Audit Hub</p>
+                                <p className="text-[9px] font-bold text-slate-500">Preparation audit</p>
                              </div>
                              <div className="space-y-5">
                                 <InsightItem text={`Attempt rate is ${finalMetrics?.attemptRate.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptRate < 50 ? 'Lower than standard.' : 'Good volume.'}`} />
                                 <InsightItem text={`Precision is ${finalMetrics?.attemptAccuracy.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptAccuracy < 60 ? 'Reduce guesswork.' : 'Strong accuracy.'}`} />
-                                <InsightItem text={finalMetrics?.isQualified ? 'Meets institutional cutoff.' : 'Below passing threshold.'} />
+                                <InsightItem text={finalMetrics?.isQualified ? 'Meets passing cutoff.' : 'Below passing threshold.'} />
                              </div>
                              <div className="pt-6 border-t border-white/5">
                                 <Button asChild variant="ghost" className="w-full text-primary hover:text-white hover:bg-white/5 font-bold text-[10px] tracking-tight gap-2">
@@ -489,7 +525,7 @@ export default function ResultClient() {
 
                 <section className="space-y-6 md:space-y-8">
                    <h3 className="text-sm md:text-xl font-bold text-[#0F172A] px-1 flex items-center gap-3">
-                      <Layers className="h-5 w-5 text-blue-500" /> Subject Level Audit
+                      <Layers className="h-5 w-5 text-blue-500" /> Subject Analysis
                    </h3>
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {activeSession?.subjectAnalysis?.map((sub: any, i: number) => (
