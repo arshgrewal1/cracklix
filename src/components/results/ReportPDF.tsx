@@ -28,8 +28,8 @@ interface ReportPDFProps {
 }
 
 /**
- * @fileOverview Institutional Portrait PDF Layout Hub v18.3.
- * FIXED: Extreme Rank Overlap by implementing 48px explicit vertical spacing.
+ * @fileOverview Institutional Portrait PDF Layout Hub v19.0.
+ * FIXED: Extreme Overlap resolved by decoupling Merit Rank and Participant count into separate flex blocks.
  * UPDATED: Domain strictly synchronized to cracklix.in.
  * TYPOGRAPHY: Strict Title Case across all nodes.
  */
@@ -93,22 +93,28 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
          </div>
 
-         {/* 3. Merit Standing - HARDENED SPACING */}
-         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden min-h-[300px]">
+         {/* 3. Merit Standing - HARDENED VERTICAL SPACING */}
+         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-12 text-white text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden min-h-[340px]">
             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-48 w-48 text-primary" /></div>
             
-            <p className="text-[11px] font-black text-primary uppercase tracking-[0.3em] relative z-10">Your Punjab rank</p>
-            
-            <div className="flex flex-col items-center justify-center relative z-10 w-full py-4">
-               <span className="text-8xl font-black tabular-nums tracking-tighter leading-tight block">#{rank}</span>
-               <div className="h-[48px]" /> {/* EXPLICIT SPACING TO PREVENT OVERLAP */}
-               <span className="text-[14px] font-bold text-slate-400 tabular-nums">/ {totalCandidates.toLocaleString()} Candidates</span>
-            </div>
-
-            <div className="pt-8 relative z-10">
-              <Badge className="bg-emerald-500 text-white border-none font-black text-[10px] px-8 py-2.5 rounded-full shadow-2xl uppercase tracking-widest">
-                 Verified Result Standing
-              </Badge>
+            <div className="relative z-10 space-y-10 flex flex-col items-center">
+               <div className="space-y-2">
+                  <p className="text-[11px] font-black text-primary uppercase tracking-[0.3em]">Your Punjab rank</p>
+                  <span className="text-9xl font-[900] tabular-nums tracking-tighter leading-none block drop-shadow-2xl">
+                     #{rank}
+                  </span>
+               </div>
+               
+               <div className="space-y-4">
+                  <span className="text-[18px] font-bold text-slate-400 tabular-nums uppercase tracking-widest">
+                     / {totalCandidates.toLocaleString()} Candidates
+                  </span>
+                  <div className="pt-2">
+                    <Badge className="bg-emerald-500 text-white border-none font-black text-[10px] px-8 py-2.5 rounded-full shadow-2xl uppercase tracking-widest">
+                       Verified Result Standing
+                    </Badge>
+                  </div>
+               </div>
             </div>
          </div>
 
@@ -125,7 +131,7 @@ export default function ReportPDF(props: ReportPDFProps) {
             <CountPill label="Correct" val={correct} color="bg-emerald-50 text-emerald-600" />
             <CountPill label="Wrong" val={wrong} color="bg-rose-50 text-rose-600" />
             <CountPill label="Skipped" val={skipped} color="bg-slate-50 text-slate-400" />
-            <CountPill label="Total questions" val={total} color="bg-blue-50 text-blue-600" />
+            <CountPill label="Total items" val={total} color="bg-blue-50 text-blue-600" />
          </div>
 
          {/* 6. Subject Analysis */}
@@ -142,7 +148,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
-                        {subjects.slice(0, 5).map((s, i) => (
+                        {subjects.slice(0, 4).map((s, i) => (
                            <tr key={i} className="h-10 hover:bg-slate-50/30 transition-colors">
                               <td className="px-8 font-bold text-[13px] text-[#0F172A] text-left">{s.name}</td>
                               <td className="px-4 text-center font-black text-primary text-sm tabular-nums">{Number(s.score).toFixed(1)}</td>

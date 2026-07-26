@@ -51,10 +51,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v33.0.
- * FIXED: Hardened attempt resolution to prevent blank "Result not found" screens.
- * UPDATED: Re-synchronized "Attempt #" display and domain to cracklix.in.
- * TYPOGRAPHY: Unified Title Case standard.
+ * @fileOverview Institutional Result Hub v34.0.
+ * FIXED: Removed server-side orderBy to bypass index requirements and fix "Result not found" bug.
+ * UPDATED: Domain strictly synchronized to cracklix.in.
  */
 
 export default function ResultClient() {
@@ -129,50 +128,49 @@ export default function ResultClient() {
        }
 
        try {
+          // INDEX-LESS QUERY PROTOCOL: No orderBy used here to prevent crashes
           const resQuery = query(
              collection(db, "results"), 
              where("userId", "==", user.uid), 
-             where("mockId", "==", mockId), 
-             orderBy("timestamp", "asc")
+             where("mockId", "==", mockId)
           );
           const querySnap = await getDocs(resQuery);
-          const resultsList = querySnap.docs.map(d => ({ ...d.data(), id: d.id }));
+          
+          if (querySnap.empty) {
+             setErrorNotFound(true);
+             setIsSearching(false);
+             return;
+          }
+
+          // Sort client-side for stability
+          const resultsList = querySnap.docs
+            .map(d => ({ ...d.data(), id: d.id }))
+            .sort((a: any, b: any) => {
+              const tA = new Date(a.timestamp || 0).getTime();
+              const tB = new Date(b.timestamp || 0).getTime();
+              return tA - tB; // Chronological order
+            });
           
           setUserAttemptCount(resultsList.length || 1);
 
           // 1. Resolve by URL ID
           if (attemptIdFromUrl) {
-             const specificId = `${user.uid}_${mockId}_${attemptIdFromUrl}`;
-             const specificRef = doc(db, "results", specificId);
-             const specificSnap = await getDoc(specificRef);
-             if (specificSnap.exists()) {
-                const nth = resultsList.findIndex(r => r.id === specificSnap.id) + 1;
-                setSessionData({ ...specificSnap.data(), id: specificSnap.id, attemptNumber: nth > 0 ? nth : resultsList.length });
+             const target = resultsList.find(r => r.id.endsWith(attemptIdFromUrl));
+             if (target) {
+                const nth = resultsList.findIndex(r => r.id === target.id) + 1;
+                setSessionData({ ...target, attemptNumber: nth > 0 ? nth : resultsList.length });
                 setIsSearching(false);
                 return;
              }
           }
 
-          // 2. Fallback to primary key (original version)
-          const primaryRef = doc(db, "results", `${user.uid}_${mockId}`);
-          const primarySnap = await getDoc(primaryRef);
-          if (primarySnap.exists()) {
-             const nth = resultsList.findIndex(r => r.id === primarySnap.id) + 1;
-             setSessionData({ ...primarySnap.data(), id: primarySnap.id, attemptNumber: nth > 0 ? nth : resultsList.length });
-             setIsSearching(false);
-             return;
-          }
-          
-          // 3. Last fallback: latest from list
-          if (resultsList.length > 0) {
-             const latest = resultsList[resultsList.length - 1];
-             setSessionData({ ...latest, attemptNumber: resultsList.length });
-             setIsSearching(false);
-             return;
-          }
+          // 2. Primary fallback (primary key or latest)
+          const latest = resultsList[resultsList.length - 1];
+          setSessionData({ ...latest, attemptNumber: resultsList.length });
+          setIsSearching(false);
 
-          setErrorNotFound(true);
        } catch (e) { 
+          console.error("[REGISTRY_RESOLUTION_FAILURE]:", e);
           setErrorNotFound(true); 
        } finally { 
           setIsSearching(false); 
