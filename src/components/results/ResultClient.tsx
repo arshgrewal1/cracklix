@@ -1,5 +1,5 @@
 
-'use client';
+"use client"
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -48,8 +48,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import html2canvas from 'html2canvas'
 
 /**
- * @fileOverview Universal Result Hub Viewer v34.0.
- * FIXED: Background pre-caching protocol with high-fidelity asset checks.
+ * @fileOverview Universal Result Hub Viewer v35.0 [Transmission Hardened].
+ * FIXED: Optimized scale and implemented direct Blob sharing to prevent Transmission Errors.
  */
 
 export default function ResultClient() {
@@ -189,6 +189,7 @@ export default function ResultClient() {
     generationAttempted.current = true;
     setIsGenerating(true);
     
+    // Safety 15s timeout
     const timeoutId = setTimeout(() => {
        if (!preGeneratedImage) {
           setIsGenerating(false);
@@ -197,14 +198,15 @@ export default function ResultClient() {
     }, 15000);
 
     try {
-      await new Promise(r => setTimeout(r, 2500));
+      // Allow 3s for all assets (Logo, QR, Fonts) to rasterize
+      await new Promise(r => setTimeout(r, 3000));
       
       const node = document.getElementById('shareable-result-certificate');
       if (!node) throw new Error("Capture node not found");
 
       const canvas = await html2canvas(node, {
          useCORS: true,
-         scale: 2,
+         scale: 1, // High-fidelity at scale 1 (1080x1350). Scale 2 creates oversized files for mobile share.
          backgroundColor: "#0B5FFF",
          logging: false,
          width: 1080,
@@ -233,14 +235,20 @@ export default function ResultClient() {
     if (!sessionData) return;
     
     if (!preGeneratedImage) {
-       toast({ title: "Synchronizing card", description: "Almost ready. Please wait 2 seconds." });
+       toast({ title: "Synchronizing card", description: "Preparing HD certificate. Please wait 3 seconds." });
        if (!isGenerating) prepareShareCard();
        return;
     }
 
     try {
-      const response = await fetch(preGeneratedImage);
-      const blob = await response.blob();
+      // Manual Blob conversion for Native Share compatibility
+      const base64Data = preGeneratedImage.split(',')[1];
+      const binaryData = atob(base64Data);
+      const uint8Array = new Uint8Array(binaryData.length);
+      for (let i = 0; i < binaryData.length; i++) {
+        uint8Array[i] = binaryData.charCodeAt(i);
+      }
+      const blob = new Blob([uint8Array], { type: 'image/png' });
       const file = new File([blob], `Cracklix_Result_${Date.now()}.png`, { type: 'image/png' });
 
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -249,21 +257,22 @@ export default function ResultClient() {
             text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions} in ${sessionData.mockTitle}! Ranked #${liveRank} in Punjab.`,
             files: [file]
          });
-      } else if (navigator.share) {
-         await navigator.share({
-            title: 'My Cracklix Result',
-            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions}! Punjab Rank: #${liveRank}. Verify here: https://cracklix.in/results/view?id=${mockId}`
-         });
       } else {
+         // Direct Download Fallback for "Transmission Failed" scenarios
          const link = document.createElement('a');
          link.download = `Cracklix_Result_${Date.now()}.png`;
          link.href = preGeneratedImage;
          link.click();
-         toast({ title: "Card downloaded" });
+         toast({ title: "Certificate Downloaded", description: "You can now share this from your gallery." });
       }
     } catch (e: any) { 
        if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Transmission Failed" }); 
+          // Final fallback to direct download
+          const link = document.createElement('a');
+          link.download = `Cracklix_Result_Backup.png`;
+          link.href = preGeneratedImage;
+          link.click();
+          toast({ title: "Sharing limited", description: "Image saved to gallery for manual sharing." });
        }
     }
   };

@@ -25,9 +25,9 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview High-Fidelity Social Share Certificate v2.0.
+ * @fileOverview High-Fidelity Social Share Certificate v3.1 [Production Registry].
  * FIXED: Explicitly imported all lucide-react nodes to prevent background capture crashes.
- * FIXED: Uses official /logo.png for institutional branding.
+ * FIXED: Uses official /logo.png with anonymous crossOrigin for reliable capture.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
@@ -59,7 +59,12 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
          {/* 2. HEADER HUB */}
          <div className="flex flex-col items-center text-center space-y-6">
             <div className="h-[140px] w-auto flex items-center justify-center">
-               <img src="/logo.png" alt="Cracklix" className="h-full object-contain filter drop-shadow-2xl" />
+               <img 
+                 src="/logo.png" 
+                 alt="Cracklix" 
+                 crossOrigin="anonymous"
+                 className="h-full object-contain filter drop-shadow-2xl" 
+               />
             </div>
             <div className="space-y-1">
                <div className="flex items-center justify-center gap-3">
