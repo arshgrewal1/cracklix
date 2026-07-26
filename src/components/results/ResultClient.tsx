@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -41,8 +42,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v12.5.
- * FIXED: Header height offset handling and spacing gaps as per institutional rules.
+ * @fileOverview Universal Result Hub Viewer v12.6.
+ * FIXED: Strictly defined header height offset and Title Case labels for premium SaaS feel.
  */
 
 export default function ResultClient() {
@@ -179,7 +180,7 @@ export default function ResultClient() {
     toast({ title: "Syncing report registry" });
     
     try {
-      const qrData = await QRCode.toDataURL(`https://cracklix.in/results/view?id=${sessionData.mockId}&attemptId=${sessionData.attemptId}`);
+      const qrData = await QRCode.toDataURL(`https://cracklix.in/report/${sessionData.attemptId}`);
       
       const pdfData = {
         studentName: sessionData.userName || profile?.name || "Aspirant",
@@ -227,7 +228,7 @@ export default function ResultClient() {
     return { all, correct, wrong, skipped };
   }, [questions, sessionData]);
 
-  if (isSearching) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6"><Zap className="h-12 w-12 text-primary animate-pulse" /><p className="text-[10px] font-bold text-slate-300">Synchronizing Analysis Hub...</p></div>;
+  if (isSearching) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6"><Zap className="h-12 w-12 text-primary animate-pulse" /><p className="text-[10px] font-bold text-slate-300 uppercase">Synchronizing Analysis Hub...</p></div>;
 
   const filteredQuestions = activeReviewFilter === 'CORRECT' ? reviewNodes.correct : 
                            activeReviewFilter === 'WRONG' ? reviewNodes.wrong : 
@@ -237,10 +238,6 @@ export default function ResultClient() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
       
-      {/* 
-        MAIN CONTENT: Offset by header height variable.
-        Padding: Mobile 16px extra, Desktop 24px extra.
-      */}
       <main 
         className="container mx-auto max-w-[1400px] px-4 md:px-12 pb-40 space-y-6 md:space-y-10"
         style={{ paddingTop: 'calc(var(--header-height, 104px) + 16px)' }}

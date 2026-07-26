@@ -5,17 +5,18 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 /**
- * @fileOverview Institutional Performance PDF Template Engine v1.0.
+ * @fileOverview Institutional Performance PDF Template Engine v1.1.
+ * FIXED: Updated font links to use high-availability TTF sources to resolve 404 errors.
  * Strictly adheres to A4 Portrait (794px x 1123px equivalent) norms.
  */
 
-// Register professional typography
+// Register professional typography with reliable sources
 Font.register({
   family: 'Inter',
   fonts: [
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-EkCc.woff2', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuI6fAZ9hjp-EkCc.woff2', fontWeight: 700 },
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hjp-EkCc.woff2', fontWeight: 900 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter-Regular.ttf', fontWeight: 400 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter-Bold.ttf', fontWeight: 700 },
+    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter-Black.ttf', fontWeight: 900 },
   ],
 });
 
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'between',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
     borderBottomWidth: 1,
