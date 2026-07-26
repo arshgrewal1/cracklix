@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -66,8 +66,8 @@ import { BrandingSettings } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Result Hub v3.2 [Typography Normalized].
- * FIXED: Removed aggressive uppercase and rebalanced header spacing.
+ * @fileOverview Official Result Hub v4.0 [Hardened].
+ * FIXED: Terminology (Mistakes -> Wrong), Button/Icon alignment, and Punjab Rank precision.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -251,12 +251,20 @@ export default function ResultClient() {
                  </Tabs>
               </div>
               <div className="flex gap-3">
-                 <button onClick={handleRetake} disabled={isSyncing} className="flex-1 h-12 rounded-xl font-bold uppercase border-2 border-slate-100 bg-white text-[#0F172A] gap-2 text-[10px] tracking-widest hover:bg-slate-50 transition-all cursor-pointer">
-                    {isSyncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />} Retake
-                 </button>
-                 <button onClick={handleDownloadPDF} className="flex-1 h-12 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-widest transition-all cursor-pointer">
-                    <Download className="h-3.5 w-3.5" /> PDF
-                 </button>
+                 <Button 
+                   onClick={handleRetake} 
+                   disabled={isSyncing} 
+                   variant="outline"
+                   className="flex-1 h-12 rounded-xl font-bold uppercase border-2 border-slate-100 bg-white text-[#0F172A] gap-2 text-[10px] tracking-widest hover:bg-slate-50 transition-all active:scale-95"
+                 >
+                    {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} Retake
+                 </Button>
+                 <Button 
+                   onClick={handleDownloadPDF} 
+                   className="flex-1 h-12 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-widest transition-all active:scale-95 border-none shadow-xl"
+                 >
+                    <Download className="h-4 w-4" /> PDF
+                 </Button>
               </div>
            </div>
         </div>
@@ -269,7 +277,7 @@ export default function ResultClient() {
                  <StatCard label="Punjab Rank" val={`#${liveRank}`} icon={<Trophy className="text-amber-500" />} highlight />
                  <StatCard label="Accuracy" val={`${activeSession.accuracy}%`} icon={<Target className="text-emerald-500" />} />
                  <StatCard label="Correct" val={activeSession.correctCount} icon={<CheckCircle2 className="text-emerald-600" />} />
-                 <StatCard label="Mistakes" val={activeSession.wrongCount} icon={<XCircle className="text-rose-500" />} />
+                 <StatCard label="Wrong" val={activeSession.wrongCount} icon={<XCircle className="text-rose-500" />} />
                  <StatCard label="Time Taken" val={formatTimeStr(activeSession.timeTaken)} icon={<Clock className="text-blue-500" />} />
               </section>
 
@@ -367,7 +375,7 @@ export default function ResultClient() {
               <div className="max-w-4xl mx-auto space-y-10">
                  <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
                     <FilterButton active={activeReviewFilter === 'ALL'} label="All items" onClick={() => setActiveReviewFilter('ALL')} />
-                    <FilterButton active={activeReviewFilter === 'WRONG'} label={`Mistakes (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                    <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                     <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                     <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skipped" onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
                  </div>
@@ -390,9 +398,9 @@ export default function ResultClient() {
                                       {!isAttempted ? (
                                          <Badge className="bg-slate-100 text-slate-500 border-none px-4 py-1 font-bold text-[9px] uppercase tracking-widest">Skipped</Badge>
                                       ) : isCorrect ? (
-                                         <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 font-bold text-[9px] uppercase tracking-widest">Correct</Badge>
+                                         <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[8px] md:text-[9px] px-3 py-1 rounded shadow-sm">Correct</Badge>
                                       ) : (
-                                         <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 font-bold text-[9px] uppercase tracking-widest">Incorrect</Badge>
+                                         <Badge className="bg-rose-50 text-rose-600 border-none font-black text-[8px] md:text-[9px] px-3 py-1 rounded shadow-sm">Incorrect</Badge>
                                       )}
                                    </div>
                                 </div>
