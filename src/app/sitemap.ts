@@ -2,11 +2,11 @@ import { MetadataRoute } from 'next';
 
 /**
  * @fileOverview Dynamic Sitemap Generator Hub.
- * Pre-renders core route nodes for Google Search Console indexing.
+ * UPDATED: Domain synchronized to cracklix.in.
  */
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cracklix.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cracklix.in';
   const now = new Date();
 
   const routes = [

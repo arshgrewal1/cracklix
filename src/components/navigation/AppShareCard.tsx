@@ -21,11 +21,11 @@ import {
 } from 'lucide-react';
 
 /**
- * @fileOverview World-Class Institutional Share Card v3.1.
- * UPDATED: Optimized logo sizing to h-56 w-56 for premium brand prominence.
+ * @fileOverview World-Class Institutional Share Card v4.0.
+ * UPDATED: Domain synchronized to cracklix.in.
  */
 export default function AppShareCard() {
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent('https://cracklix.vercel.app/install')}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent('https://cracklix.in/install')}`;
 
   return (
     <div 
@@ -37,7 +37,7 @@ export default function AppShareCard() {
       <div className="absolute top-0 right-0 w-[900px] h-[900px] bg-[#2563EB]/20 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-[#60A5FA]/10 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2" />
       
-      {/* 2. HEADER HUB - RESIZED LOGO */}
+      {/* 2. HEADER HUB */}
       <div className="relative z-10 px-20 pt-20 flex justify-between items-start">
          <div className="space-y-6">
             <div className="flex items-center gap-10">
@@ -47,7 +47,7 @@ export default function AppShareCard() {
                <div>
                   <h1 className="text-8xl font-black tracking-tighter uppercase leading-none">Cracklix</h1>
                   <div className="flex items-center gap-3 mt-6">
-                     <span className="text-3xl font-bold text-[#60A5FA] tracking-[0.4em] uppercase">Verified Portal</span>
+                     <span className="text-3xl font-bold text-[#60A5FA] tracking-[0.4em] uppercase">Verified portal</span>
                      <div className="h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg"><CheckCircle2 className="h-6 w-6 text-white" /></div>
                   </div>
                </div>
@@ -129,7 +129,7 @@ export default function AppShareCard() {
             </div>
             <div className="space-y-2">
                <h3 className="text-4xl font-black text-white uppercase tracking-tight">Install Official App</h3>
-               <p className="text-white/70 text-xl font-bold tracking-widest">WWW.CRACKLIX.COM</p>
+               <p className="text-white/70 text-xl font-bold tracking-widest">WWW.CRACKLIX.IN</p>
             </div>
          </div>
          <div className="bg-white p-4 rounded-[2rem] shadow-5xl border-4 border-white/20">

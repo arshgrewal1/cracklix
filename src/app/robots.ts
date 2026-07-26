@@ -2,11 +2,11 @@ import { MetadataRoute } from 'next';
 
 /**
  * @fileOverview Official Platform Robots Registry Node.
- * Controls search crawler behavior for the institutional hub.
+ * UPDATED: Domain synchronized to cracklix.in.
  */
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cracklix.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cracklix.in';
 
   return {
     rules: [

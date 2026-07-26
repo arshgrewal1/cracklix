@@ -23,8 +23,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v13.0.
- * UPDATED: Restored Light Mode as the primary institutional theme.
+ * @fileOverview Global Layout Registry v14.0.
+ * UPDATED: Domain synchronized to cracklix.in.
  */
 
 export const metadata: Metadata = {

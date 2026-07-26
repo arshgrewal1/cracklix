@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from "react";
@@ -29,11 +30,60 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Institutional Share Hub v7.0 [Native Direct Share].
- * UPDATED: Uses Capacitor Share plugin to trigger direct Android/iOS sharing menu.
+ * @fileOverview Institutional Share Hub v8.0 [Domain Synchronized].
+ * UPDATED: Primary domain updated to cracklix.in and detailed recruitment list ingested.
  */
 
-const DEFAULT_SHARE_MESSAGE = `🚀 Crack Punjab Government Exams with Cracklix!\n\n🎯 Prepare for:\n• PSSSB\n• PPSC\n• Punjab Police\n\n📚 Features\n✅ Unlimited Mock Tests\n✅ Previous Year Papers\n✅ Daily Current Affairs\n\n📲 Install App: {installUrl}\n🌐 Website: {websiteUrl}`;
+const DETAILED_SHARE_MESSAGE = `🚀 Crack Punjab Government Exams with Cracklix!
+
+🎯 One App for Complete Punjab Exam Preparation
+
+📚 Prepare for:
+• PSSSB
+• PPSC
+• Punjab Police
+• Punjab Patwari
+• Punjab Jail Warder
+• Punjab Excise Inspector
+• Punjab Food Supply Inspector
+• PSPCL
+• Punjab & Haryana High Court
+• Punjab Forest Guard
+• Punjab Cooperative Bank
+• ETT
+• PSTET
+• Master Cadre
+• Lecturer Cadre
+• School Librarian
+• Clerk & DEO
+• Senior Assistant
+• JE (Civil/Electrical)
+• Naib Tehsildar
+• Tehsildar
+• Canal Patwari
+• Labour Inspector
+• Agriculture Development Officer
+• Veterinary Inspector
+• Sub Inspector (Punjab Police)
+• Constable
+• All Punjab Government Recruitment Exams
+
+✨ Features:
+✅ Full-Length Mock Tests
+✅ Previous Year Papers (PYQs)
+✅ Daily Current Affairs
+✅ Topic-wise Practice
+✅ Detailed Solutions
+✅ Performance Analysis
+✅ Fast & Smooth Experience
+
+📲 Install App:
+{installUrl}
+
+🌐 Visit Website:
+{websiteUrl}
+
+💙 Crack Punjab. Crack Your Dream Job.`;
 
 export default function ShareButton({ 
   className = "", 
@@ -52,10 +102,10 @@ export default function ShareButton({
 
   const activeSettings = useMemo(() => {
     const defaults = {
-      primaryWebsiteUrl: "https://cracklix.vercel.app",
-      installUrl: "https://cracklix.vercel.app/install",
+      primaryWebsiteUrl: "https://cracklix.in",
+      installUrl: "https://cracklix.in/install",
       shareTitle: "Cracklix – Punjab Government Exam Prep",
-      shareMessage: DEFAULT_SHARE_MESSAGE
+      shareMessage: DETAILED_SHARE_MESSAGE
     };
 
     if (!remoteSettings) return defaults;
@@ -79,7 +129,6 @@ export default function ShareButton({
     setIsSharing(true);
 
     try {
-      // 1. Check for Native Capacitor Share (Best for Android App)
       if (Capacitor.isNativePlatform()) {
         const canShare = await Share.canShare();
         if (canShare.value) {
@@ -93,7 +142,6 @@ export default function ShareButton({
         }
       }
 
-      // 2. Check for Browser Web Share API (Mobile Browsers)
       if (typeof navigator !== 'undefined' && navigator.share) {
         await navigator.share({
           title: activeSettings.shareTitle,
@@ -101,11 +149,9 @@ export default function ShareButton({
           url: activeSettings.primaryWebsiteUrl
         });
       } else {
-        // 3. Desktop Fallback Dialog
         setIsShareDialogOpen(true);
       }
     } catch (err: any) {
-      // Ignore user aborting the share
       if (err.name !== 'AbortError') {
         setIsShareDialogOpen(true);
       }
@@ -151,7 +197,7 @@ export default function ShareButton({
              <span className="text-xs md:text-base leading-none truncate w-full">Share Cracklix</span>
              {showLabel && (
                <span className="text-[9px] opacity-70 font-medium mt-1 leading-none truncate w-full">
-                 Invite your fellow aspirants
+                 Invite fellow aspirants
                </span>
              )}
           </div>
@@ -166,7 +212,7 @@ export default function ShareButton({
              <div className="h-14 w-14 bg-blue-50 rounded-[1.5rem] flex items-center justify-center mx-auto text-blue-600 shadow-xl mb-6 border border-blue-100">
                 <Share2 className="h-7 w-7" />
              </div>
-             <DialogTitle className="text-xl font-black text-[#0F172A] tracking-tighter uppercase">Share Hub</DialogTitle>
+             <DialogTitle className="text-xl font-black text-[#0F172A] tracking-tighter uppercase">Share hub</DialogTitle>
              <DialogDescription className="text-slate-400 font-bold text-[9px] mt-2 text-center uppercase tracking-widest">Select an option to share</DialogDescription>
           </DialogHeader>
 
