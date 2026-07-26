@@ -41,8 +41,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Login Hub v1.5.2.
- * UPDATED: Purged all uppercase text for professional Title Case normalization.
+ * @fileOverview Login Hub v1.6.0.
+ * UPDATED: Repositioned Google Auth and Account toggle for better visibility.
  */
 export default function LoginPage() {
   return (
@@ -116,7 +116,6 @@ function LoginContent() {
                  updatedAt: serverTimestamp()
               }, { merge: true });
 
-              // Sync Peak Score to Leaderboard Registry
               const lbSnap = await getDoc(leaderboardRef);
               if (!lbSnap.exists()) {
                 await setDoc(leaderboardRef, {
@@ -299,11 +298,11 @@ function LoginContent() {
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-12 lg:px-20 py-0 relative bg-slate-50 lg:bg-white overflow-y-auto">
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[480px] py-12">
-          <Card className="border-none shadow-5xl lg:shadow-none bg-white rounded-[32px] p-6 md:p-12 space-y-6 md:space-y-10">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[480px] py-8 md:py-12">
+          <Card className="border-none shadow-5xl lg:shadow-none bg-white rounded-[32px] p-6 md:p-10 space-y-6 md:space-y-8">
             <div className="space-y-4 text-center lg:text-left">
                <div className="flex justify-center lg:justify-start -ml-4 md:-ml-8">
-                  <Logo variant="light" align="left" imgClassName="h-20 md:h-28" />
+                  <Logo variant="light" align="left" imgClassName="h-16 md:h-24" />
                </div>
                <div className="space-y-1">
                   <h2 className="text-2xl md:text-3xl font-black tracking-tight text-[#0F172A]">
@@ -315,13 +314,13 @@ function LoginContent() {
                </div>
             </div>
 
-            <form onSubmit={handleEmailAuth} className="space-y-6">
+            <form onSubmit={handleEmailAuth} className="space-y-5">
               {mode === 'register' && (
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold text-slate-400 ml-1">Full name</Label>
                   <div className="relative group">
                     <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                    <Input value={name} onChange={(e) => setName(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="e.g. Arsh Grewal" />
+                    <Input value={name} onChange={(e) => setName(e.target.value)} required className="h-12 md:h-14 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="e.g. Arsh Grewal" />
                   </div>
                 </div>
               )}
@@ -330,7 +329,7 @@ function LoginContent() {
                 <Label className="text-[10px] font-bold text-slate-400 ml-1">Email address</Label>
                 <div className="relative group">
                   <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="name@domain.com" />
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 md:h-14 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="name@domain.com" />
                 </div>
               </div>
 
@@ -339,8 +338,8 @@ function LoginContent() {
                   <Label className="text-[10px] font-bold text-slate-400 ml-1">Password</Label>
                   <div className="relative group">
                     <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] pl-12 md:pl-14 pr-12 font-bold shadow-inner" placeholder="Password" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
+                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 md:h-14 rounded-2xl bg-slate-50 border-none text-[#0F172A] pl-12 md:pl-14 pr-12 font-bold shadow-inner" placeholder="Password" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors border-none bg-transparent cursor-pointer">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
                   </div>
                 </div>
 
@@ -350,38 +349,34 @@ function LoginContent() {
                       <Checkbox id="remember" className="rounded-md" />
                       <label htmlFor="remember" className="text-[11px] font-bold text-slate-500 tracking-tight cursor-pointer">Remember me</label>
                     </div>
-                    <button type="button" onClick={() => setIsResetDialogOpen(true)} className="text-[11px] font-black text-primary hover:underline">Forgot password?</button>
+                    <button type="button" onClick={() => setIsResetDialogOpen(true)} className="text-[11px] font-black text-primary hover:underline border-none bg-transparent cursor-pointer">Forgot password?</button>
                   </div>
                 )}
               </div>
 
-              <div className="pt-2 flex flex-col gap-4">
-                <Button type="submit" className="w-full h-14 md:h-18 bg-blue-600 text-white font-bold text-xs rounded-full shadow-xl border-none transition-all active:scale-[0.98]" disabled={loading || (user && !authLoading)}>
-                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : user ? "Redirecting..." : "Continue"}
+              <div className="pt-2 flex flex-col gap-3">
+                <Button type="submit" className="w-full h-12 md:h-14 bg-blue-600 text-white font-bold text-xs rounded-full shadow-xl border-none transition-all active:scale-[0.98]" disabled={loading || (user && !authLoading)}>
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : user ? "Redirecting..." : mode === 'login' ? "Login to portal" : "Create my account"}
                 </Button>
+                
                 {!user && (
                   <>
-                    <div className="flex items-center gap-3 py-1">
-                      <div className="h-px flex-1 bg-slate-100" />
-                      <span className="text-[9px] font-bold text-slate-300 uppercase">OR</span>
-                      <div className="h-px flex-1 bg-slate-100" />
-                    </div>
-                    <Button variant="outline" className="w-full h-14 border-2 border-slate-100 text-[#0F172A] gap-3 rounded-full font-bold text-[10px] md:text-[11px] hover:bg-slate-50 shadow-sm" onClick={handleGoogleSignIn} disabled={loading}>
-                       <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={20} height={20} className="h-5 w-5" alt="Google Logo" /> Google login
+                    <Button variant="outline" className="w-full h-12 md:h-14 border-2 border-slate-100 text-[#0F172A] gap-3 rounded-full font-bold text-[10px] md:text-[11px] hover:bg-slate-50 shadow-sm" onClick={handleGoogleSignIn} disabled={loading}>
+                       <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={20} height={20} className="h-5 w-5" alt="Google Logo" /> Login with Google
                     </Button>
+
+                    <div className="text-center pt-2">
+                       <p className="text-[11px] md:text-[13px] font-bold text-slate-400">
+                        {mode === 'login' ? "Don't have an account?" : "Already registered?"}
+                        <button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} className="text-primary font-black ml-2 hover:underline border-none bg-transparent cursor-pointer">
+                          {mode === 'login' ? 'Create account' : 'Login portal'}
+                        </button>
+                       </p>
+                    </div>
                   </>
                 )}
               </div>
             </form>
-
-            <div className="text-center pt-8 border-t border-slate-50">
-               <p className="text-[11px] md:text-[13px] font-bold text-slate-400">
-                {mode === 'login' ? "Don't have an account?" : "Already registered?"}
-                <button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} className="text-primary font-black ml-2 hover:underline">
-                  {mode === 'login' ? 'Create account' : 'Login portal'}
-                </button>
-               </p>
-            </div>
           </Card>
         </motion.div>
       </div>
