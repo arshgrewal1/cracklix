@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -20,7 +21,6 @@ import {
   ShieldCheck, 
   Landmark, 
   FileText, 
-  Globe, 
   ExternalLink,
   Target,
   Award,
@@ -30,9 +30,10 @@ import {
   Loader2,
   DollarSign,
   Briefcase,
-  GraduationCap
+  GraduationCap,
+  Edit3
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AuthorityLogo } from "@/lib/exam-icons"
@@ -41,11 +42,12 @@ import { useToast } from "@/hooks/use-toast"
 import { Vacancy } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
+import { canAccessAdmin } from "@/lib/permissions"
 
 /**
- * @fileOverview Official Vacancy Detail Node v1.3.
- * FIXED: Added missing Link import from next/link.
- * TYPOGRAPHY: Purged remaining uppercase styling for Title Case consistency.
+ * @fileOverview Redesigned Vacancy Detail Node v2.0.
+ * UPDATED: Implemented the requested "Hub" layout with ✅ bullet points.
+ * SECURITY: Added Admin-only Edit button.
  */
 
 export default function VacancyDetailPage() {
@@ -74,6 +76,7 @@ export default function VacancyDetailPage() {
   const { data: relatedVacancies } = useCollection<Vacancy>(relatedQuery as any)
 
   const isSaved = profile?.savedVacancies?.includes(id || "")
+  const isAdmin = canAccessAdmin(profile, user?.email)
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -112,6 +115,11 @@ export default function VacancyDetailPage() {
          <div className="flex items-center justify-between">
             <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90"><ArrowLeft className="h-5 w-5 md:h-6 md:w-6" /></button>
             <div className="flex items-center gap-3">
+               {isAdmin && (
+                  <Button asChild variant="outline" className="h-10 md:h-12 px-6 rounded-xl border-slate-200 bg-white text-[#0F172A] font-bold text-xs gap-2 shadow-sm">
+                     <Link href={`/admin/vacancies/add?id=${id}`}><Edit3 className="h-4 w-4" /> Edit vacancy</Link>
+                  </Button>
+               )}
                <button onClick={handleShare} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-95"><Share2 className="h-5 w-5" /></button>
                <button className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all shadow-sm active:scale-95", isSaved ? "bg-primary border-primary text-white shadow-xl" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}><Bookmark className={cn("h-5 w-5", isSaved && "fill-current")} /></button>
             </div>
@@ -128,7 +136,7 @@ export default function VacancyDetailPage() {
                <div className="flex-1 space-y-8 text-center lg:text-left">
                   <div className="space-y-4">
                      <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-                        <Badge className="bg-primary text-white border-none px-5 py-2 rounded-full font-bold text-[10px] md:text-xs tracking-tight shadow-xl">{vacancy.board} Registry</Badge>
+                        <Badge className="bg-primary text-white border-none px-5 py-2 rounded-full font-bold text-[10px] md:text-xs tracking-tight shadow-xl">{vacancy.board} Hub</Badge>
                         <Badge variant="outline" className="bg-white border-slate-200 text-slate-400 px-4 py-1.5 rounded-full font-bold text-[9px] tracking-tight">{vacancy.category}</Badge>
                      </div>
                      <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-[#0F172A] tracking-tighter leading-[1] antialiased">
@@ -156,32 +164,32 @@ export default function VacancyDetailPage() {
          </section>
 
          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-14">
-            <div className="lg:col-span-8 space-y-12 md:space-y-20">
+            <div className="lg:col-span-8 space-y-12">
                
-               <section className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-                  <DetailCard icon={Briefcase} label="Post name" value={vacancy.postName} />
-                  <DetailCard icon={Zap} label="Total posts" value={vacancy.totalPosts} color="text-primary" />
-                  <DetailCard icon={GraduationCap} label="Educational hub" value={vacancy.education} colSpan={2} />
-                  <DetailCard icon={DollarSign} label="Remuneration" value={vacancy.salary} color="text-emerald-600" />
-                  <DetailCard icon={Clock} label="Age threshold" value={vacancy.ageLimit} />
-               </section>
+               {/* REDESIGNED HUB SECTIONS */}
+               <div className="space-y-10">
+                  <HubSection label="Vacancy hub">
+                     <HubBullet text={`Post Name: ${vacancy.postName}`} />
+                     <HubBullet text={`Total vacancies: ${vacancy.totalPosts} seats`} />
+                     <HubBullet text={`Salary range: ${vacancy.salary}`} />
+                     <HubBullet text={`Age threshold: ${vacancy.ageLimit}`} />
+                  </HubSection>
 
-               <section className="space-y-8">
-                  <div className="flex items-center gap-4 border-b border-slate-100 pb-6 px-1">
-                     <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner shrink-0"><CheckCircle2 className="h-6 w-6" /></div>
-                     <h3 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight">Audit guidelines</h3>
-                  </div>
-                  <div className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-14 border border-slate-100 shadow-xl space-y-12">
-                     <div className="space-y-4">
-                        <h4 className="text-[10px] md:text-xs font-black text-primary tracking-tight ml-1">Selection cycle</h4>
-                        <div className="p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 text-sm md:text-xl font-medium leading-relaxed italic text-slate-600">"{vacancy.selectionProcess}"</div>
-                     </div>
-                     <div className="space-y-4">
-                        <h4 className="text-[10px] md:text-xs font-black text-primary tracking-tight ml-1">Financial ingestion</h4>
-                        <div className="p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 text-sm md:text-xl font-medium leading-relaxed italic text-slate-600">"{vacancy.applicationFee}"</div>
-                     </div>
-                  </div>
-               </section>
+                  <HubSection label="Educational hub">
+                     <HubBullet text={vacancy.education || "Verification pending"} />
+                     <HubBullet text="Matric (10th) Punjabi subject must be passed." />
+                     <HubBullet text="Relevant trade/degree certificate required." />
+                  </HubSection>
+
+                  <HubSection label="Selection hub">
+                     <HubBullet text={vacancy.selectionProcess || "Written exam followed by physical/document verification."} />
+                  </HubSection>
+
+                  <HubSection label="Financial hub">
+                     <HubBullet text={vacancy.applicationFee || "Payment through official portal only."} />
+                  </HubSection>
+               </div>
+
             </div>
 
             <div className="lg:col-span-4 space-y-12">
@@ -197,7 +205,6 @@ export default function VacancyDetailPage() {
                         <DatePill label="Registration opens" val={new Date(vacancy.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} icon={<Zap className="text-emerald-500" />} />
                         <DatePill label="Closure node" val={new Date(vacancy.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} icon={<Clock className="text-rose-500" />} highlight />
                         {vacancy.examDate && <DatePill label="Projected exam" val={new Date(vacancy.examDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} icon={<Target className="text-blue-500" />} />}
-                        {vacancy.admitCardDate && <DatePill label="Admit card hub" val="Update pending" icon={<FileText className="text-slate-500" />} />}
                      </div>
 
                      <div className="pt-10 border-t border-white/5">
@@ -252,18 +259,30 @@ export default function VacancyDetailPage() {
   )
 }
 
-function DetailCard({ icon: Icon, label, value, color = "text-[#0F172A]", colSpan = 1 }: any) {
-  return (
-    <div className={cn("p-8 md:p-12 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-lg flex flex-col items-start gap-5 group hover:translate-y-[-4px] transition-all duration-500", colSpan > 1 && "md:col-span-2")}>
-       <div className="h-10 w-10 md:h-14 md:w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 shadow-inner group-hover:bg-primary/5 group-hover:text-primary transition-all">
-          <Icon className="h-5 w-5 md:h-7 md:w-7" />
-       </div>
-       <div className="space-y-1">
-          <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-tight">{label}</p>
-          <p className={cn("text-base md:text-3xl font-bold leading-tight tracking-tight", color)}>{value || 'N/A'}</p>
-       </div>
-    </div>
-  )
+function HubSection({ label, children }: { label: string, children: React.ReactNode }) {
+   return (
+      <div className="space-y-4">
+         <p className="text-[10px] md:text-xs font-bold text-slate-400 ml-1 tracking-widest">{label}</p>
+         <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[3rem] bg-white overflow-hidden p-6 md:p-10">
+            <div className="space-y-6">
+               {children}
+            </div>
+         </Card>
+      </div>
+   )
+}
+
+function HubBullet({ text }: { text: string }) {
+   return (
+      <div className="flex items-start gap-4">
+         <div className="h-6 w-6 md:h-8 md:w-8 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm mt-1">
+            <CheckCircle2 className="h-3.5 w-3.5 md:h-5 md:w-5 text-emerald-500" />
+         </div>
+         <p className="text-base md:text-2xl font-[700] text-[#0F172A] leading-relaxed antialiased">
+            {text}
+         </p>
+      </div>
+   )
 }
 
 function DatePill({ label, val, icon, highlight }: any) {
