@@ -28,7 +28,8 @@ import {
   Timer as TimerIcon,
   Download,
   ShieldCheck,
-  Target
+  Target,
+  X
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -43,8 +44,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toBlob } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v54.0 [Native Direct Share Hardened].
- * FIXED: Implemented a robust background caching engine to ensure instant direct sharing.
+ * @fileOverview Universal Result Hub Viewer v55.0 [PWA Row Fix].
+ * FIXED: Replaced scrolling review filters with a fixed 4-column grid.
  */
 
 export default function ResultClient() {
@@ -143,15 +144,10 @@ export default function ResultClient() {
      fetchRankingMetrics();
   }, [db, mockId, sessionData]);
 
-  /**
-   * @description Background Caching Engine.
-   * Silently prepares the 1080x1350 result card immediately after rank audit.
-   */
   const prepareShareCard = useCallback(async () => {
     if (!sessionData || generationAttempted.current || cachedResultBlob) return;
     generationAttempted.current = true;
 
-    // Safety Delay: Ensure all fonts and official logos are painted
     await new Promise(r => setTimeout(r, 3000));
 
     try {
@@ -179,10 +175,6 @@ export default function ResultClient() {
      }
   }, [sessionData, liveRank, prepareShareCard]);
 
-  /**
-   * @description Direct Share Protocol:
-   * Prioritizes Native Share Sheet for all platforms (WhatsApp, Instagram, Telegram).
-   */
   const handleShareResult = async () => {
     if (!sessionData || isSharing) return;
     
@@ -198,7 +190,6 @@ export default function ResultClient() {
       const fileName = `Cracklix_Report_${sessionData.mockTitle.replace(/\s+/g, '_')}.png`;
       const file = new File([cachedResultBlob], fileName, { type: 'image/png' });
 
-      // LOGIC: Direct Native Share (Sidebar Style)
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
             title: `My Cracklix Result`,
@@ -206,7 +197,6 @@ export default function ResultClient() {
             files: [file]
          });
       } else {
-         // Fallback: HD Download
          const url = URL.createObjectURL(cachedResultBlob);
          const link = document.createElement('a');
          link.download = fileName;
@@ -220,7 +210,7 @@ export default function ResultClient() {
           toast({ variant: "destructive", title: "Transmission Error", description: "Try again in a moment." });
        }
     } finally {
-       setIsSharing(true); // Persist state briefly
+       setIsSharing(true); 
        setTimeout(() => setIsSharing(false), 2000);
     }
   };
@@ -335,12 +325,12 @@ export default function ResultClient() {
                   </TabsContent>
 
                   <TabsContent value="REVIEW" className="m-0 max-w-5xl mx-auto space-y-6 md:space-y-10">
-                      <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 flex items-center justify-between gap-6 shadow-sm">
-                          <div className="flex items-center gap-2 md:gap-4 overflow-x-auto no-scrollbar">
-                             <FilterButton active={activeReviewFilter === 'ALL'} label="All questions" count={reviewNodes.all.length} onClick={() => setActiveReviewFilter('ALL')} />
+                      <div className="bg-white p-4 md:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                          <div className="grid grid-cols-4 gap-1.5 md:gap-4 w-full">
+                             <FilterButton active={activeReviewFilter === 'ALL'} label="All" count={reviewNodes.all.length} onClick={() => setActiveReviewFilter('ALL')} />
                              <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" count={reviewNodes.correct.length} onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                              <FilterButton active={activeReviewFilter === 'WRONG'} label="Wrong" count={reviewNodes.wrong.length} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
-                             <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skipped" count={reviewNodes.skipped.length} onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
+                             <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skip" count={reviewNodes.skipped.length} onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
                           </div>
                       </div>
                       <div className="grid grid-cols-1 gap-6">
@@ -365,7 +355,6 @@ export default function ResultClient() {
                   </TabsContent>
               </Tabs>
               
-              {/* HIDDEN SCORECARD FOR CAPTURE */}
               <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none opacity-0">
                  <ShareableResultCard data={sessionData} rank={liveRank} totalCandidates={totalCandidates} />
               </div>
@@ -398,19 +387,11 @@ export default function ResultClient() {
 function FilterButton({ active, label, count, onClick, color }: any) {
   return (
     <button onClick={onClick} className={cn(
-      "flex items-center gap-3 px-6 h-10 rounded-xl text-[10px] font-bold transition-all active:scale-95 border whitespace-nowrap",
+      "flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 px-1 md:px-6 h-12 md:h-12 rounded-xl transition-all active:scale-95 border",
       active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-slate-50 border-transparent text-slate-400 hover:bg-slate-100"
     )}>
-       {label} <span className="opacity-40">{count}</span>
+       <span className="text-[9px] md:text-[11px] font-black uppercase tracking-tight">{label}</span>
+       <span className={cn("text-[10px] md:text-xs font-bold opacity-40 tabular-nums")}>{count}</span>
     </button>
   )
-}
-
-function SummaryMiniCard({ label, val, color, bg }: any) {
-   return (
-      <Card className={cn("h-36 md:h-44 rounded-[24px] border-none shadow-sm flex flex-col items-center justify-center p-4", bg)}>
-         <span className={cn("text-2xl md:text-4xl font-black tabular-nums", color)}>{val}</span>
-         <span className="text-[10px] md:text-xs font-bold text-slate-400 mt-2">{label}</span>
-      </Card>
-   )
 }

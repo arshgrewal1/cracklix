@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -19,8 +20,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v6.8.
- * FIXED: Corrected helper component closures and missing imports.
+ * @fileOverview Premium Analysis Screen v6.9.
+ * FIXED: Re-balanced subject Mastery table for PWA small screens.
  */
 
 interface ReportScreenProps {
@@ -66,86 +67,81 @@ export default function ReportScreen(props: ReportScreenProps) {
   }, [attemptAccuracy, score, avgScore, wrongCount, totalQuestions]);
 
   return (
-    <div className="w-full space-y-8 animate-in fade-in duration-500 pb-20">
+    <div className="w-full space-y-8 animate-in fade-in duration-500 pb-20 px-0 md:px-1">
       
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 overflow-x-auto no-scrollbar -mx-1 px-1">
-         <Card className="col-span-2 md:col-span-1 h-36 md:h-44 rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-6">
-            <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-2">Your score</p>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 overflow-x-hidden">
+         <Card className="col-span-1 h-32 md:h-44 rounded-[22px] md:rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-4 md:px-6">
+            <p className="text-[9px] md:text-xs font-bold text-slate-500 mb-1">Net score</p>
             <div className="flex items-baseline gap-1">
-               <span className="text-2xl md:text-4xl font-black text-[#10B981] tabular-nums">{score}</span>
-               <span className="text-sm md:text-xl font-bold text-slate-400">/{totalQuestions}</span>
+               <span className="text-xl md:text-4xl font-black text-[#10B981] tabular-nums">{score}</span>
+               <span className="text-[10px] md:text-xl font-bold text-slate-400">/{totalQuestions}</span>
             </div>
-            <p className="text-[10px] md:text-xs font-bold text-[#10B981] mt-1">{((Number(score)/totalQuestions)*100).toFixed(1)}%</p>
          </Card>
 
-         <SummaryMiniCard label="Correct" val={correctCount} color="text-[#10B981]" bg="bg-[#F0FDF4]" />
-         <SummaryMiniCard label="Wrong" val={wrongCount} color="text-[#FF3366]" bg="bg-[#FFF1F2]" />
-         <SummaryMiniCard label="Skipped" val={skippedCount} color="text-slate-400" bg="bg-slate-50" />
-         <SummaryMiniCard label="Total items" val={totalQuestions} color="text-[#1677FF]" bg="bg-blue-50" />
+         <Card className="col-span-1 h-32 md:h-44 rounded-[22px] md:rounded-[24px] bg-blue-50 border-blue-100 shadow-sm flex flex-col justify-center px-4 md:px-6">
+            <p className="text-[9px] md:text-xs font-bold text-slate-500 mb-1">Percentile</p>
+            <span className="text-xl md:text-4xl font-black text-blue-600 tabular-nums">{percentile > 0 ? `${percentile}%` : "--"}</span>
+            <p className="text-[8px] md:text-[10px] font-bold text-blue-400 uppercase tracking-tight mt-1">Verified index</p>
+         </Card>
+
+         <SummaryMiniCard label="Correct" val={correctCount} color="text-[#10B981]" bg="bg-[#F0FDF4]" className="hidden md:flex" />
+         <SummaryMiniCard label="Wrong" val={wrongCount} color="text-[#FF3366]" bg="bg-[#FFF1F2]" className="hidden md:flex" />
+         <SummaryMiniCard label="Skipped" val={skippedCount} color="text-slate-400" bg="bg-slate-50" className="hidden md:flex" />
       </div>
 
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 flex items-center justify-between">
          <div className="flex items-center gap-4 md:gap-8 text-left">
-            <div className="h-12 w-12 md:h-16 md:h-16 rounded-full bg-[#1677FF] flex items-center justify-center text-white shadow-lg">
+            <div className="h-12 w-12 md:h-16 md:h-16 rounded-full bg-[#1677FF] flex items-center justify-center text-white shadow-lg shrink-0">
                <Trophy className="h-6 w-6 md:h-8 md:w-8" />
             </div>
-            <div className="text-left">
-               <p className="text-[10px] md:text-xs font-bold text-slate-400">Your Punjab rank</p>
+            <div className="text-left min-w-0">
+               <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Punjab rank</p>
                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl md:text-5xl font-black text-[#1677FF] tabular-nums">#{rank}</span>
-                  <span className="text-[10px] md:text-sm font-bold text-slate-300">/ {totalCandidates} Candidates</span>
+                  <span className="text-2xl md:text-5xl font-black text-[#1677FF] tabular-nums tracking-tighter">#{rank}</span>
+                  <span className="text-[9px] md:text-sm font-bold text-slate-300 truncate">/ {totalCandidates} Candidates</span>
                </div>
             </div>
          </div>
          <div className="hidden sm:flex items-center gap-3 bg-blue-50 px-6 py-3 rounded-2xl">
             <ShieldCheck className="h-5 w-5 text-[#1677FF]" />
             <div className="text-left">
-               <p className="text-[10px] md:text-xs font-black text-[#1677FF] leading-none">Verified standing</p>
-               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1">Top ranked hub</p>
+               <p className="text-[10px] md:text-xs font-black text-[#1677FF] leading-none uppercase">Verified</p>
+               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1 uppercase">Top ranked</p>
             </div>
          </div>
       </Card>
-
-      <div className="space-y-6">
-         <div className="flex items-center gap-3 px-1">
-            <BarChart3 className="h-5 w-5 text-[#1677FF]" />
-            <h3 className="text-lg font-black text-[#071B4D]">Performance overview</h3>
-         </div>
-         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatsBox label="Accuracy" val={`${attemptAccuracy}%`} sub={`(${correctCount}/${correctCount + wrongCount})`} />
-            <StatsBox label="Pass grade" val={grade} sub="(Min. 40%)" color={grade === 'F' ? 'text-[#FF3366]' : 'text-[#10B981]'} />
-            <StatsBox label="Net score" val={score} sub={`(Out of ${totalQuestions})`} />
-            <StatsBox label="Percentile" val={percentile > 0 ? `${percentile}%` : "--"} sub="Verified index" />
-         </div>
-      </div>
 
       {subjectAnalysis.length > 0 && (
          <div className="space-y-6">
             <div className="flex items-center gap-3 px-1">
                <Target className="h-5 w-5 text-[#1677FF]" />
-               <h3 className="text-lg font-black text-[#071B4D]">Subject mastery</h3>
+               <h3 className="text-lg md:text-2xl font-black text-[#071B4D] uppercase tracking-tight">Subject mastery</h3>
             </div>
             <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden">
-               <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+               <div className="overflow-x-hidden">
+                  <table className="w-full text-left border-collapse table-fixed">
                      <thead className="bg-slate-50/50">
                         <tr className="h-14">
-                           <th className="px-8 font-bold text-xs text-slate-400">Subject</th>
-                           <th className="px-4 min-w-[140px] font-bold text-xs text-slate-400 text-center">Progress</th>
-                           <th className="px-8 font-bold text-xs text-slate-400 text-right">Score</th>
+                           <th className="px-5 md:px-8 font-bold text-[10px] md:text-xs text-slate-400 uppercase tracking-widest w-[40%]">Subject</th>
+                           <th className="px-2 font-bold text-[10px] md:text-xs text-slate-400 text-center uppercase tracking-widest">Progress</th>
+                           <th className="px-5 md:px-8 font-bold text-[10px] md:text-xs text-slate-400 text-right uppercase tracking-widest w-[25%]">Score</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
                         {subjectAnalysis.map((s, i) => (
-                           <tr key={i} className="h-20 group hover:bg-slate-50 transition-colors">
-                              <td className="px-8 font-bold text-[#071B4D]">{s.name}</td>
-                              <td className="px-4">
-                                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-[#1677FF] rounded-full" style={{ width: `${s.accuracy}%` }} />
+                           <tr key={i} className="h-16 md:h-20 group hover:bg-slate-50 transition-colors">
+                              <td className="px-5 md:px-8">
+                                 <p className="font-bold text-[13px] md:text-lg text-[#071B4D] truncate uppercase tracking-tight leading-none">{s.name}</p>
+                              </td>
+                              <td className="px-2">
+                                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                                    <div className="h-full bg-[#1677FF] rounded-full transition-all duration-1000" style={{ width: `${s.accuracy}%` }} />
                                  </div>
                               </td>
-                              <td className="px-8 text-right font-black text-[#071B4D] tabular-nums">
-                                 {s.score} <span className="text-slate-300 font-bold">/ {s.total}</span>
+                              <td className="px-5 md:px-8 text-right">
+                                 <p className="font-black text-xs md:text-xl text-[#071B4D] tabular-nums leading-none">
+                                    {s.score} <span className="text-slate-300 font-bold text-[10px] md:text-sm">/ {s.total}</span>
+                                 </p>
                               </td>
                            </tr>
                         ))}
@@ -159,7 +155,7 @@ export default function ReportScreen(props: ReportScreenProps) {
       <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <TrendingUp className="h-5 w-5 text-[#1677FF]" />
-            <h3 className="text-lg font-black text-[#071B4D]">Competition snapshot</h3>
+            <h3 className="text-lg md:text-2xl font-black text-[#071B4D] uppercase tracking-tight">Competition snapshot</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <ComparisonNode label="Top score" val={topScore?.toFixed(1)} icon={<Award className="text-amber-500 h-5 w-5" />} />
@@ -172,19 +168,19 @@ export default function ReportScreen(props: ReportScreenProps) {
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 space-y-6">
          <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
             <Lightbulb className="h-5 w-5 text-[#F59E0B]" />
-            <h3 className="text-lg font-black text-[#071B4D]">Smart insights</h3>
+            <h3 className="text-lg md:text-2xl font-black text-[#071B4D] uppercase tracking-tight">Smart insights</h3>
          </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {insights.map((insight, i) => (
-               <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+               <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-primary/20 transition-all">
                   <div className={cn(
-                     "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm",
+                     "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
                      insight.type === 'STRENGTH' ? "bg-emerald-100 text-emerald-600" :
                      insight.type === 'WEAKNESS' ? "bg-rose-100 text-rose-600" : "bg-blue-100 text-blue-600"
                   )}>
                      {insight.type === 'STRENGTH' ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
                   </div>
-                  <p className="text-sm font-semibold text-slate-600 leading-tight">{insight.text}</p>
+                  <p className="text-xs md:text-sm font-semibold text-slate-600 leading-tight">{insight.text}</p>
                </div>
             ))}
          </div>
@@ -194,32 +190,22 @@ export default function ReportScreen(props: ReportScreenProps) {
   );
 }
 
-function SummaryMiniCard({ label, val, color, bg }: any) {
+function SummaryMiniCard({ label, val, color, bg, className }: any) {
    return (
-      <Card className={cn("h-36 md:h-44 rounded-[24px] border-none shadow-sm flex flex-col items-center justify-center p-4", bg)}>
+      <Card className={cn("h-36 md:h-44 rounded-[24px] border-none shadow-sm flex flex-col items-center justify-center p-4", bg, className)}>
          <span className={cn("text-2xl md:text-4xl font-black tabular-nums", color)}>{val}</span>
-         <span className="text-[10px] md:text-xs font-bold text-slate-400 mt-2">{label}</span>
-      </Card>
-   )
-}
-
-function StatsBox({ label, val, sub, color }: any) {
-   return (
-      <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 text-center space-y-3">
-         <p className="text-[10px] md:text-xs font-bold text-slate-400 leading-none">{label}</p>
-         <p className={cn("text-2xl md:text-4xl font-black tabular-nums tracking-tighter leading-none", color || "text-[#071B4D]")}>{val}</p>
-         <p className="text-[10px] font-bold text-slate-300 leading-none">{sub}</p>
+         <span className="text-[10px] md:text-xs font-bold text-slate-400 mt-2 uppercase tracking-widest">{label}</span>
       </Card>
    )
 }
 
 function ComparisonNode({ label, val, icon }: any) {
    return (
-      <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-[#E5EAF2] shadow-sm text-left">
-         <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center shrink-0">{icon}</div>
+      <div className="flex items-center gap-4 p-4 md:p-6 rounded-2xl bg-white border border-[#E5EAF2] shadow-sm text-left group hover:translate-y-[-2px] transition-all">
+         <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">{icon}</div>
          <div className="min-w-0">
-            <p className="text-[9px] font-bold text-slate-400 truncate">{label}</p>
-            <p className="text-base md:text-lg font-black text-[#071B4D] tabular-nums leading-none mt-1">{val}</p>
+            <p className="text-[9px] md:text-[10px] font-bold text-slate-400 truncate uppercase tracking-widest leading-none">{label}</p>
+            <p className="text-sm md:text-xl font-black text-[#071B4D] tabular-nums leading-none mt-2">{val}</p>
          </div>
       </div>
    );
