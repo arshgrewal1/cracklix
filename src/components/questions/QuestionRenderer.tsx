@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -23,8 +24,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v75.0 [Table Support].
- * UPDATED: Integrated high-fidelity rendering for "tableContent" data extracted during ingestion.
+ * @fileOverview Institutional Question Renderer v75.1 [Review Logic Hardened].
+ * FIXED: Implemented precise option highlighting for Review mode.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -196,6 +197,9 @@ export default function QuestionRenderer({
             const localText = pa || hi;
             const isSelected = selectedAnswer === idx;
             const hideLocal = localText?.trim() === en?.trim();
+            
+            const isCorrect = q.correctAnswer === key;
+            const isWrongSelected = isSelected && !isCorrect;
 
             return (
               <div 
@@ -204,7 +208,7 @@ export default function QuestionRenderer({
                 className={cn(
                   "flex items-center gap-3 md:gap-6 transition-all border w-full box-border",
                   showSolution 
-                    ? `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2rem] ${q.correctAnswer === key ? "bg-emerald-50 border-emerald-500 shadow-sm" : isSelected ? "bg-rose-50 border-rose-500" : "bg-white border-slate-100"}`
+                    ? `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2rem] ${isCorrect ? "bg-emerald-50 border-emerald-500 shadow-sm" : isWrongSelected ? "bg-rose-50 border-rose-500" : "bg-white border-slate-100"}`
                     : `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2.5rem] cursor-pointer group/opt active:scale-[0.98] ${isSelected ? "bg-blue-50/50 border-primary ring-2 ring-primary/5 shadow-xl" : "bg-white border-slate-100 hover:border-slate-300 shadow-sm"}`
                 )}
               >
@@ -280,3 +284,4 @@ export default function QuestionRenderer({
     </div>
   );
 }
+

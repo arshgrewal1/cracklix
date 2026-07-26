@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -29,8 +30,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v12.0 [Hardened Analytics].
- * Rebuild: Calculates complete Performance Snapshots at submission.
+ * @fileOverview Official Mock Attempt Hub v12.1 [Hardened Verification].
+ * FIXED: Ensures correctAnswer is available for all verification paths.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -281,6 +282,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       timeTaken, 
       answers: answers || {}, 
       timestamp: new Date().toISOString(),
+      languageMode: language,
       accessLevel: (mockData.accessLevel || 'FREE').toUpperCase(),
       mockType: mockData.mockType || 'PRACTICE',
       positiveMarks: posMarks,
@@ -350,7 +352,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       toast({ variant: "destructive", title: "Submission failed" });
       setIsSubmittingFinal(false);
     }
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, toast, attemptId, resetStore]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, toast, attemptId, resetStore, language]);
 
   useEffect(() => {
      if (!isInitializing && !initError && timeLeft === 0 && !isSubmittingFinal && questions.length > 0) {
@@ -455,3 +457,4 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     </div>
   );
 }
+

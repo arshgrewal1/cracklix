@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -59,8 +60,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 
 /**
- * @fileOverview Official Result Hub 2.0 [Hardened Analytics].
- * FIXED: Added missing Link import and implemented defensive array checks.
+ * @fileOverview Official Result Hub 2.1 [Verification Hardened].
+ * FIXED: Implemented strict comparison logic for Review correctness.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -184,6 +185,19 @@ export default function ResultClient() {
      return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
   };
 
+  // Data Integrity Hub
+  const integrity = useMemo(() => {
+     if (!activeSession) return { isValid: false };
+     const { correctCount = 0, wrongCount = 0, skippedCount = 0, totalQuestions = 0 } = activeSession;
+     const sum = correctCount + wrongCount + skippedCount;
+     return { 
+        isValid: sum === totalQuestions, 
+        sum, 
+        totalQuestions,
+        mismatch: sum !== totalQuestions
+     };
+  }, [activeSession]);
+
   if (!mounted || (resultLoading && user)) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-spin" /></div>;
 
   if (!activeSession) return (
@@ -210,7 +224,7 @@ export default function ResultClient() {
                  <h1 className="text-3xl md:text-6xl font-black tracking-tighter text-[#0F172A] leading-tight antialiased">
                    {activeSession.mockTitle}
                  </h1>
-                 <div className="flex flex-wrap items-center gap-4 text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-tight">
+                 <div className="flex flex-wrap items-center gap-4 text-slate-500 font-bold text-[10px] md:sm uppercase tracking-tight">
                     <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {new Date(activeSession.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-200" />
                     <span className="flex items-center gap-1.5 text-primary"><Trophy className="h-4 w-4" /> Score: {activeSession.score.toFixed(1)}</span>
@@ -232,6 +246,13 @@ export default function ResultClient() {
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-16">
            
            <TabsContent value="OVERVIEW" className="space-y-12 animate-in fade-in duration-500">
+              {integrity.mismatch && (
+                 <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 animate-pulse">
+                    <AlertCircle className="h-5 w-5" />
+                    <p className="text-xs font-bold uppercase tracking-tight">Audit Warning: Registry count mismatch detected ({integrity.sum}/{integrity.totalQuestions})</p>
+                 </div>
+              )}
+
               <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
                  <StatCard label="Final Score" val={activeSession.score.toFixed(1)} icon={<Zap className="text-primary" />} />
                  <StatCard label="Grade" val={activeSession.grade || 'F'} icon={<Award className="text-amber-500" />} highlight />
@@ -347,37 +368,41 @@ export default function ResultClient() {
                  </div>
 
                  <div className="space-y-8">
-                    {filteredQuestions.map((q) => (
-                       <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-white text-left group">
-                          <div className="p-8 md:p-14 space-y-8 md:space-y-12">
-                             <div className="flex justify-between items-center">
-                                <Badge variant="outline" className="px-5 py-1.5 rounded-full border-slate-100 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
-                                   Question {q.originalIndex + 1}
-                                </Badge>
-                                <div className="flex items-center gap-3">
-                                   {(() => {
-                                      const ans = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
-                                      const isAttempted = ans !== null && ans !== undefined && String(ans) !== "";
-                                      const userSelectedLabel = ['A', 'B', 'C', 'D'][Number(ans)];
-                                      const isCorrect = userSelectedLabel === q.correctAnswer;
-                                      
-                                      if (!isAttempted) return <Badge className="bg-slate-100 text-slate-500 border-none px-4 py-1 font-bold text-[9px] uppercase">Skipped</Badge>;
-                                      if (isCorrect) return <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 font-bold text-[9px] uppercase">Correct (+{activeSession.positiveMarks})</Badge>;
-                                      return <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 font-bold text-[9px] uppercase">Wrong (-{activeSession.negativeMarks})</Badge>;
-                                   })()}
+                    {filteredQuestions.map((q) => {
+                       const rawAns = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
+                       const isAttempted = rawAns !== null && rawAns !== undefined && String(rawAns) !== "";
+                       const userSelectedLabel = isAttempted ? ['A', 'B', 'C', 'D'][Number(rawAns)] : null;
+                       const isCorrect = userSelectedLabel === q.correctAnswer;
+                       
+                       return (
+                          <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-white text-left group">
+                             <div className="p-8 md:p-14 space-y-8 md:space-y-12">
+                                <div className="flex justify-between items-center">
+                                   <Badge variant="outline" className="px-5 py-1.5 rounded-full border-slate-100 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
+                                      Question {q.originalIndex + 1}
+                                   </Badge>
+                                   <div className="flex items-center gap-3">
+                                      {!isAttempted ? (
+                                         <Badge className="bg-slate-100 text-slate-500 border-none px-4 py-1 font-bold text-[9px] uppercase">Skipped</Badge>
+                                      ) : isCorrect ? (
+                                         <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1 font-bold text-[9px] uppercase">Correct (+{activeSession.positiveMarks})</Badge>
+                                      ) : (
+                                         <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 font-bold text-[9px] uppercase">Wrong (-{activeSession.negativeMarks})</Badge>
+                                      )}
+                                   </div>
                                 </div>
+                                
+                                <QuestionRenderer 
+                                  question={q} 
+                                  language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
+                                  showSolution={true} 
+                                  selectedAnswer={isAttempted ? Number(rawAns) : null} 
+                                  className="p-0 shadow-none border-none bg-transparent" 
+                                />
                              </div>
-                             
-                             <QuestionRenderer 
-                               question={q} 
-                               language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
-                               showSolution={true} 
-                               selectedAnswer={activeSession.answers?.[q.originalIndex]} 
-                               className="p-0 shadow-none border-none bg-transparent" 
-                             />
-                          </div>
-                       </Card>
-                    ))}
+                          </Card>
+                       )
+                    })}
                  </div>
               </div>
            </TabsContent>
@@ -457,3 +482,4 @@ function FilterButton({ active, label, onClick, color = "primary" }: any) {
       </button>
    )
 }
+
