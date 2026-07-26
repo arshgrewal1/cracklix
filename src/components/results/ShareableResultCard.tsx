@@ -24,9 +24,8 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview High-Fidelity Social Share Certificate v1.1.
- * Designed for 1080x1350 resolution (Instagram/WhatsApp Portrait).
- * FIXED: Added missing icon imports (X, Timer) to resolve runtime crashes.
+ * @fileOverview High-Fidelity Social Share Certificate v1.2.
+ * UPDATED: Replaced icon with full official logo as requested.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
@@ -51,13 +50,12 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
       
       <div className="relative z-10 flex-1 flex flex-col p-16 space-y-12">
          
-         {/* 1. TOP HEADER */}
+         {/* 1. TOP HEADER - UPDATED TO FULL LOGO */}
          <div className="flex flex-col items-center text-center space-y-4">
-            <div className="h-[140px] w-[140px] bg-white rounded-[3rem] p-2 flex items-center justify-center shadow-2xl border-[6px] border-white/20">
-               <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain" />
+            <div className="h-[120px] w-auto flex items-center justify-center">
+               <img src="/logo.png" alt="Cracklix" className="h-full object-contain filter drop-shadow-2xl" />
             </div>
             <div className="space-y-1">
-               <h1 className="text-6xl font-black tracking-tighter text-white uppercase italic">Cracklix</h1>
                <div className="flex items-center justify-center gap-3">
                   <span className="text-xl font-bold text-white/70 uppercase tracking-[0.3em]">Punjab Smart Exam Platform</span>
                   <ShieldCheck className="h-6 w-6 text-emerald-400 fill-emerald-400/20" />
@@ -65,7 +63,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             </div>
          </div>
 
-         {/* 2. RANK SECTION (BIGGEST ELEMENT) */}
+         {/* 2. RANK SECTION */}
          <div className="relative">
             <div className="bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-600 p-1.5 rounded-[4rem] shadow-5xl">
                <div className="bg-[#071B4D] rounded-[3.8rem] p-12 text-center relative overflow-hidden">
@@ -84,8 +82,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
                   </div>
                </div>
             </div>
-            {/* ACHIEVEMENT BADGE OVERLAY */}
-            <div className="absolute -bottom-6 -right-6 h-40 w-40 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[3rem] flex flex-col items-center justify-center shadow-4xl animate-bounce">
+            <div className="absolute -bottom-6 -right-6 h-40 w-40 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[3rem] flex flex-col items-center justify-center shadow-4xl">
                <Star className="h-10 w-10 text-amber-400 fill-current mb-2" />
                <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">Verified<br/>Attempt</span>
             </div>
@@ -103,7 +100,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             </div>
          </div>
 
-         {/* 4. PERFORMANCE MATRIX (4 CARDS) */}
+         {/* 4. PERFORMANCE MATRIX */}
          <div className="grid grid-cols-4 gap-6">
             <ResultMetric label="Score" val={`${data.score}/${data.totalQuestions}`} color="bg-emerald-500" />
             <ResultMetric label="Accuracy" val={`${data.attemptAccuracy}%`} color="bg-indigo-500" />

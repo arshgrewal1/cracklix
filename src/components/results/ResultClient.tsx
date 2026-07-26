@@ -47,8 +47,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v26.0.
- * FIXED: Implemented background PNG pre-caching for instantaneous sharing.
+ * @fileOverview Universal Result Hub Viewer v27.0.
+ * FIXED: Replaced icon with full logo in Shareable Card and hardened sharing logic.
  */
 
 export default function ResultClient() {
@@ -187,8 +187,8 @@ export default function ResultClient() {
     if (!mounted || !sessionData || liveRank === "---" || preGeneratedImage || isGenerating) return;
     
     setIsGenerating(true);
-    // Give DOM a small buffer to settle
-    await new Promise(r => setTimeout(r, 1000));
+    // Institutional Delay to ensure Gurmukhi and Logo rendering
+    await new Promise(r => setTimeout(r, 1500));
     
     try {
       const node = document.getElementById('shareable-result-certificate');
@@ -203,7 +203,6 @@ export default function ResultClient() {
       });
 
       setPreGeneratedImage(dataUrl);
-      console.log("[Registry] Share card pre-cached successfully.");
     } catch (e) {
       console.warn("[Registry] Background generation bypassed:", e);
     } finally {
@@ -220,7 +219,6 @@ export default function ResultClient() {
   const handleShareResult = async () => {
     if (!sessionData) return;
     
-    // If not ready, try one last immediate generation
     let imageToShare = preGeneratedImage;
     
     if (!imageToShare) {
@@ -232,7 +230,7 @@ export default function ResultClient() {
             setPreGeneratedImage(imageToShare);
          }
        } catch (e) {
-         toast({ variant: "destructive", title: "Sharing Error", description: "Could not generate shareable card. Please try again." });
+         toast({ variant: "destructive", title: "Sharing Error", description: "Could not generate shareable card." });
          setIsGenerating(false);
          return;
        }
@@ -241,22 +239,33 @@ export default function ResultClient() {
 
     try {
       const blob = await (await fetch(imageToShare!)).blob();
-      const file = new File([blob], `Cracklix_Result_${sessionData.attemptId}.png`, { type: 'image/png' });
+      const file = new File([blob], `Cracklix_Result.png`, { type: 'image/png' });
 
-      if (navigator.share) {
+      // 1. Check for File Sharing Support
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
             title: 'My Cracklix Result',
             text: `🎯 Just scored ${sessionData.score}/${sessionData.totalQuestions} in ${sessionData.mockTitle}! Ranked #${liveRank} across Punjab.`,
             files: [file]
          });
+      } else if (navigator.share) {
+         // 2. Fallback to Text/URL Share
+         await navigator.share({
+            title: 'My Cracklix Result',
+            text: `🎯 Scored ${sessionData.score}/${sessionData.totalQuestions}! Rank: #${liveRank}. View: https://cracklix.in/results/view?id=${mockId}`
+         });
       } else {
+         // 3. Fallback to Direct Download
          const link = document.createElement('a');
          link.download = `Cracklix_Result_${Date.now()}.png`;
          link.href = imageToShare!;
          link.click();
+         toast({ title: "Certificate Downloaded" });
       }
     } catch (e: any) { 
-       toast({ variant: "destructive", title: "Transmission Error", description: "Sharing cancelled or failed." }); 
+       if (e.name !== 'AbortError') {
+          toast({ variant: "destructive", title: "Transmission Error", description: "Sharing failed. Please download instead." }); 
+       }
     }
   };
 
