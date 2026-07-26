@@ -65,8 +65,8 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Institutional Result Engine v51.0 [Hoisting Error Fixed].
- * FIXED: Moved activeSession declaration above the effect that uses it to resolve initialization crash.
+ * @fileOverview Institutional Result Engine v52.0.
+ * REDESIGNED: Title Case typography and high-density performance audit.
  */
 
 export default function ResultClient() {
@@ -176,7 +176,6 @@ export default function ResultClient() {
     return () => { isSubscribed = false; };
   }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
 
-  // Derived activeSession defined BEFORE the effects that depend on it
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
   useEffect(() => {
@@ -348,7 +347,7 @@ export default function ResultClient() {
           </div>
           <div className="flex flex-col gap-3">
              <Button onClick={() => window.location.reload()} className="w-full h-14 bg-primary text-white rounded-2xl font-bold shadow-xl border-none active:scale-95"><RefreshCw className="h-4 w-4 mr-2" /> Re-sync Registry</Button>
-             <Button asChild variant="ghost" className="w-full h-12 text-slate-400 font-bold uppercase text-[10px]"><Link href="/dashboard">Return Home</Link></Button>
+             <Button asChild variant="ghost" className="w-full h-12 text-slate-400 font-bold text-[10px]"><Link href="/dashboard">Return Home</Link></Button>
           </div>
        </Card>
     </div>
@@ -403,7 +402,7 @@ export default function ResultClient() {
                   <StatCard label="Punjab Rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
                   <StatCard label="Percentile" val={`${finalMetrics?.percentile}%`} sub="Verified" icon={<TrendingUp className="text-blue-500" />} />
                   <StatCard label="Accuracy" val={`${finalMetrics?.attemptAccuracy.toFixed(1)}%`} sub="Precision" icon={<Target className="text-emerald-500" />} />
-                  <StatCard label="Attempt Rate" val={`${finalMetrics?.attemptRate.toFixed(1)}%`} sub="Efficiency" icon={<Activity className="text-indigo-500" />} />
+                  <StatCard label="Attempt Rate" val={`${finalMetrics?.attemptRate.toFixed(1)}%`} sub="Volume" icon={<Activity className="text-indigo-500" />} />
                   <StatCard label="Grade" val={finalMetrics?.grade} sub="Category" icon={<Award className="text-purple-500" />} />
                 </section>
 
