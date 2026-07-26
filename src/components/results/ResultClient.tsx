@@ -65,8 +65,8 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Institutional Result Engine v49.0 [UI Cleaned].
- * FIXED: Removed decorative blobs and ribbons for a data-focused layout.
+ * @fileOverview Institutional Result Engine v50.0 [ReferenceError Fixed].
+ * FIXED: Defined mockData state to resolve 'mock is not defined' crash.
  */
 
 export default function ResultClient() {
@@ -79,6 +79,7 @@ export default function ResultClient() {
   
   const [mounted, setMounted] = useState(false)
   const [questions, setQuestions] = useState<any[]>([])
+  const [mockData, setMockData] = useState<any>(null)
   const [loadingQuestions, setLoadingQuestions] = useState(true)
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
   const [guestResult, setGuestResult] = useState<any>(null)
@@ -198,7 +199,7 @@ export default function ResultClient() {
         } catch (e) {}
      }
      fetchRankingMetrics();
-  }, [db, mockId, sessionData, guestResult]);
+  }, [db, mockId, sessionData, guestResult, activeSession]);
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
@@ -236,6 +237,7 @@ export default function ResultClient() {
         
         if (mockSnap.exists()) {
           const mData = mockSnap.data();
+          setMockData(mData);
           const questionIds = mData.questionIds || [];
           if (questionIds.length > 0) {
             const fetchedQuestions: any[] = [];
@@ -549,7 +551,7 @@ export default function ResultClient() {
                               branding={branding}
                               subjects={activeSession.subjectAnalysis}
                               grade={finalMetrics.grade}
-                              duration={activeSession.duration || mock?.duration}
+                              duration={activeSession.duration || mockData?.duration}
                           />
                        )}
                    </div>
