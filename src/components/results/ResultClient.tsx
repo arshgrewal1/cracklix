@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -13,14 +13,12 @@ import {
   getDoc, 
   documentId, 
   getDocs, 
-  orderBy,
   deleteDoc,
   where,
   limit,
   increment,
   updateDoc,
   getCountFromServer,
-  onSnapshot
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -62,9 +60,8 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v27.0 [Handshake Hardened].
- * FIXED: Implemented an aggressive retry loop to handle Firestore replication delays.
- * OPTIMIZED: Provides immediate UI feedback to ensure a one-click response.
+ * @fileOverview Premium Result Analysis Hub v28.0 [Binary Export Hardened].
+ * FIXED: Implemented high-fidelity PDF capture with color hardening and font synchronization.
  */
 
 export default function ResultClient() {
@@ -97,19 +94,17 @@ export default function ResultClient() {
 
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
-  // AGGRESSIVE ID RESOLUTION PROTOCOL
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
     
     let isSubscribed = true;
     let retryCount = 0;
-    const MAX_RETRIES = 8; // ~4 seconds of handshake polling
+    const MAX_RETRIES = 6;
 
     async function resolveId() {
        setIsSearching(true);
        setErrorNotFound(false);
 
-       // 1. Guest Handling
        if (!user) {
           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
           if (guestRes) {
@@ -122,14 +117,12 @@ export default function ResultClient() {
           return;
        }
 
-       // 2. Direct Attempt Mapping
        const targetId = attemptIdFromUrl 
           ? `${user.uid}_${mockId}_${attemptIdFromUrl}` 
           : `${user.uid}_${mockId}`;
 
        const tryFetch = async () => {
           if (!isSubscribed) return;
-          
           try {
              const docRef = doc(db, "results", targetId);
              const snap = await getDoc(docRef);
@@ -140,25 +133,24 @@ export default function ResultClient() {
                 return;
              }
 
-             // Fallback: If no direct ID, check for most recent in collection
              const resQuery = query(
                 collection(db, "results"),
                 where("userId", "==", user.uid),
                 where("mockId", "==", mockId),
-                limit(1)
+                limit(5)
              );
              const querySnap = await getDocs(resQuery);
              if (!querySnap.empty) {
-                const latest = querySnap.docs[0];
-                setSessionData({ ...latest.data(), id: latest.id });
+                const results = querySnap.docs.map(d => ({ ...d.data(), id: d.id }));
+                const latest = results.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+                setSessionData(latest);
                 setIsSearching(false);
                 return;
              }
 
-             // Retry logic
              if (retryCount < MAX_RETRIES) {
                 retryCount++;
-                setTimeout(tryFetch, 500); // 500ms intervals
+                setTimeout(tryFetch, 600);
              } else {
                 setErrorNotFound(true);
                 setIsSearching(false);
@@ -178,7 +170,6 @@ export default function ResultClient() {
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
-  // LIVE RANKING ENGINE
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
      async function fetchRankingMetrics() {
@@ -186,7 +177,6 @@ export default function ResultClient() {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
            const countSnap = await getCountFromServer(entriesRef);
            setTotalCandidates(countSnap.data().count);
-           
            const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
            const superiorCountSnap = await getCountFromServer(superiorQuery);
            setLiveRank(superiorCountSnap.data().count + 1);
@@ -195,7 +185,6 @@ export default function ResultClient() {
      fetchRankingMetrics();
   }, [db, mockId, activeSession]);
 
-  // QUESTIONS LOADER
   useEffect(() => {
     async function loadQuestions() {
       if (!db || !mockId) { setLoadingQuestions(false); return; }
@@ -230,50 +219,86 @@ export default function ResultClient() {
 
   const handleRetake = useCallback(() => {
     if (!mockId) return;
-    if (user && db) {
-       deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {});
-    }
+    if (user && db) { deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {}); }
     if (typeof window !== 'undefined') {
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
       localStorage.removeItem(`cracklix_guest_result_${mockId}`);
     }
     resetStore();
     router.push(`/mocks/attempt?id=${mockId}&retake=true`);
-    toast({ title: "Retake initiated", description: "Registry nodes reset." });
-  }, [db, mockId, user, router, resetStore, toast]);
+  }, [db, mockId, user, router, resetStore]);
 
   const handleDownloadPDF = async () => { 
     if (isExporting || !activeSession) return;
     setIsExporting(true);
+    
     try {
       setActiveMainTab("REPORT"); 
-      toast({ title: "Capturing high-res report..." });
-      await new Promise(r => setTimeout(r, 1000));
+      toast({ title: "Optimizing for high-fidelity capture..." });
+      
+      // 1. Wait for render and font handshake
+      await new Promise(r => setTimeout(r, 1500));
+      if (typeof window !== 'undefined' && 'fonts' in document) {
+         await (document as any).fonts.ready;
+      }
       
       const element = document.getElementById('cracklix-result-card');
-      if (!element) throw new Error("Report node missing.");
+      if (!element) throw new Error("Analysis node missing from DOM.");
 
+      // 2. Temporarily Force Contrast Hardening for Capture
+      const style = document.createElement('style');
+      style.id = 'cracklix-capture-hardening';
+      style.innerHTML = `
+        #cracklix-result-card * {
+          opacity: 1 !important;
+          filter: none !important;
+          text-shadow: none !important;
+          -webkit-print-color-adjust: exact !important;
+        }
+        #cracklix-result-card .text-slate-300, 
+        #cracklix-result-card .text-slate-400,
+        #cracklix-result-card .text-slate-500 {
+          color: #475569 !important; /* Darker Slate-600 */
+        }
+        #cracklix-result-card .bg-slate-50 {
+           background-color: #F1F5F9 !important;
+        }
+      `;
+      document.head.appendChild(style);
+
+      // 3. Binary PNG Capture (Institutional Resolution)
       const canvas = await html2canvas(element, {
         scale: 4,
         useCORS: true,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#FFFFFF",
         logging: false,
         allowTaint: true,
-        imageTimeout: 15000,
+        imageTimeout: 30000,
+        foreignObjectRendering: true,
+        removeContainer: true
       });
 
+      // 4. Cleanup Styles
+      const hardeningStyle = document.getElementById('cracklix-capture-hardening');
+      if (hardeningStyle) hardeningStyle.remove();
+
+      // 5. Binary PDF Generation (Non-Text Mode)
       const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+      
       const imgWidth = 210; 
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
-      pdf.save(`Cracklix_Analysis_${activeSession.mockTitle.replace(/\s+/g, '_')}.pdf`);
+      pdf.save(`Cracklix_Analysis_${activeSession.userName.replace(/\s+/g, '_')}.pdf`);
       
-      toast({ title: "Analysis Exported" });
+      toast({ title: "Analysis Synchronized" });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Export blocked" });
-    } finally { setIsExporting(false); }
+      console.error("[EXPORT_HUB_FAILURE]:", e);
+      toast({ variant: "destructive", title: "Export Blocked", description: "Registry capture interrupted." });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const reviewNodes = useMemo(() => {
@@ -307,36 +332,6 @@ export default function ResultClient() {
   };
 
   if (!mounted) return null;
-
-  if (isSearching) {
-     return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
-        <Loader2 className="h-10 w-10 text-primary animate-spin" />
-        <div className="text-center space-y-1">
-           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">AUDITING REGISTRY</p>
-           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Resolving attempt node...</p>
-        </div>
-     </div>;
-  }
-
-  if (errorNotFound) {
-    return (
-      <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6 bg-slate-50">
-        <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center text-rose-500 shadow-inner">
-           <AlertCircle className="h-10 w-10" />
-        </div>
-        <div className="space-y-2">
-           <h2 className="text-2xl font-black text-[#0F172A]">Entry Not Found</h2>
-           <p className="text-slate-500 font-medium text-sm max-w-xs">We could not locate this attempt node in the master registry. It might still be synchronizing.</p>
-        </div>
-        <div className="flex gap-4">
-           <Button onClick={() => window.location.reload()} variant="outline" className="rounded-xl px-8 h-12 gap-2">
-              <RefreshCw className="h-4 w-4" /> Retry sync
-           </Button>
-           <Button onClick={() => router.push('/dashboard')} className="rounded-xl px-8 h-12 bg-[#0F172A] hover:bg-black">Back to portal</Button>
-        </div>
-      </div>
-    );
-  }
 
   const percentile = totalCandidates > 1 
     ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1))
@@ -382,18 +377,8 @@ export default function ResultClient() {
                  </Tabs>
               </div>
               <div className="flex gap-2">
-                 <button 
-                   onClick={handleRetake} 
-                   className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50 flex items-center justify-center cursor-pointer transition-all active:scale-95"
-                 >
-                    <RotateCcw className="h-3.5 w-3.5" /> 
-                    Retake
-                 </button>
-                 <Button 
-                   onClick={handleDownloadPDF} 
-                   disabled={isExporting || !activeSession}
-                   className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight shadow-xl"
-                 >
+                 <button onClick={handleRetake} className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50 flex items-center justify-center cursor-pointer transition-all active:scale-95"><RotateCcw className="h-3.5 w-3.5" /> Retake</button>
+                 <Button onClick={handleDownloadPDF} disabled={isExporting || !activeSession} className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight shadow-xl">
                     {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} 
                     Export PDF
                  </Button>
