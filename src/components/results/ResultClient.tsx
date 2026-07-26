@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -52,9 +51,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v27.0.
- * FIXED: Reduced html2canvas scale to 2.0 to significantly optimize PDF export speed.
- * FIXED: Standardized Wrong terminology and shrunken sub-filter vertical spacing.
+ * @fileOverview Institutional Result Hub v28.0.
+ * FIXED: Instant one-click retake by navigating directly to attempt with retake=true.
+ * FIXED: Removed all remaining uppercase text from result section.
  */
 
 export default function ResultClient() {
@@ -226,17 +225,17 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Optimizing Download" });
+    toast({ title: "Optimizing download" });
 
     try {
       await document.fonts.ready;
       await new Promise(r => setTimeout(r, 500));
 
       const container = document.getElementById('pdf-report-container');
-      if (!container) throw new Error("Capture Node Missing");
+      if (!container) throw new Error("Capture node missing");
 
       const canvas = await html2canvas(container, {
-        scale: 2, // Scale 2.0 provides excellent clarity with fast processing
+        scale: 2, 
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
@@ -244,13 +243,13 @@ export default function ResultClient() {
         windowWidth: 794
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.85); // JPEG is faster to embed
+      const imgData = canvas.toDataURL('image/jpeg', 0.85); 
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
       pdf.save(`Cracklix_Report_${activeSession.userName?.replace(/\s+/g, '_') || 'Student'}.pdf`);
-      toast({ title: "Report Ready" });
+      toast({ title: "Report ready" });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Export Error" });
+      toast({ variant: "destructive", title: "Export error" });
     } finally { setIsExporting(false); }
   };
 
@@ -277,7 +276,7 @@ export default function ResultClient() {
     return reviewNodes.all;
   }, [activeReviewFilter, reviewNodes]);
 
-  const handleRetake = () => mockId && router.push(`/mocks/instructions?id=${mockId}`);
+  const handleRetake = () => mockId && router.push(`/mocks/attempt?id=${mockId}&retake=true`);
 
   if (userLoading || !mounted) return null;
 
@@ -300,8 +299,8 @@ export default function ResultClient() {
                  </div>
                  
                  <div className="flex gap-4 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 px-8 rounded-2xl border-2 font-bold text-[11px] uppercase tracking-widest bg-white">Retake</Button>
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-10 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-bold text-[11px] uppercase tracking-widest">
+                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 px-8 rounded-2xl border-2 font-bold text-[11px] bg-white">Retake</Button>
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-10 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-bold text-[11px]">
                        {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Download PDF
                     </Button>
                  </div>
@@ -345,9 +344,9 @@ export default function ResultClient() {
                   </TabsContent>
 
                   <TabsContent value="REVIEW" className="space-y-4 max-w-5xl mx-auto px-4 pt-2">
-                      <div className="py-1 -mx-4 px-4 mb-2 bg-transparent">
+                      <div className="py-1.5 -mx-4 px-4 mb-2 bg-transparent">
                          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-lg border border-slate-100 w-full max-w-2xl mx-auto h-12 md:h-14">
-                             <FilterButton active={activeReviewFilter === 'ALL'} label="All Questions" onClick={() => setActiveReviewFilter('ALL')} />
+                             <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
                              <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                              <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                          </div>
@@ -413,7 +412,6 @@ export default function ResultClient() {
            </div>
         )}
 
-        {/* HIDDEN CAPTURE NODE */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
           <div id="pdf-report-container">
             {finalMetrics && activeSession && (
@@ -449,7 +447,7 @@ export default function ResultClient() {
 
 function FilterButton({ active, label, onClick, color = "primary" }: any) {
   return (
-    <button onClick={onClick} className={cn("flex-1 px-3 h-full rounded-xl text-[9px] md:text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
+    <button onClick={onClick} className={cn("flex-1 px-3 h-full rounded-xl text-[10px] font-bold transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
        {label}
     </button>
   )

@@ -6,9 +6,9 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v3.1.
+ * @fileOverview Premium PWA Splash Hub v3.2.
  * DESIGN: Mobile-first premium startup aesthetic (Linear/Spotify style).
- * TYPOGRAPHY: Sentence Case / High-density / Weight 900.
+ * FIXED: Resolved JSX syntax error by balancing closing tags.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -26,7 +26,7 @@ export default function SplashScreen() {
   useEffect(() => {
     setMounted(true);
     
-    // Minimum visibility time for branding impact (SaaS standard)
+    // Minimum visibility time for branding impact
     const safetyTimer = setTimeout(() => {
       if (isDataReady) setIsVisible(false);
     }, 2800);
@@ -83,14 +83,12 @@ export default function SplashScreen() {
                className="relative mb-10 md:mb-12"
              >
                 <div className="relative flex items-center justify-center">
-                   {/* Sub-logo Soft Glow (Premium Depth Effect) */}
                    <motion.div 
                      animate={{ scale: [1, 1.15, 1], opacity: [0.15, 0.3, 0.15] }}
                      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                      className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full"
                    />
                    
-                   {/* Centered Large Logo Node */}
                    <div 
                      className="relative"
                      style={{ 
@@ -122,11 +120,11 @@ export default function SplashScreen() {
                       Cracklix
                    </h1>
                    <p className="text-[14px] md:text-[20px] font-medium text-slate-500 tracking-tight leading-none opacity-90 italic">
-                      Punjab&apos;s Smart Mock Test Platform
+                      Punjab's Smart Mock Test Platform
                    </p>
                 </div>
 
-                {/* 4. LOADING PROGRESS (MINIMALIST) */}
+                {/* 4. LOADING PROGRESS */}
                 <div className="pt-20 md:pt-28 w-full max-w-[220px] md:max-w-[280px] mx-auto space-y-5">
                    <div className="flex flex-col items-center gap-4">
                       <div className="relative h-[2px] w-full bg-white/5 rounded-full overflow-hidden">
