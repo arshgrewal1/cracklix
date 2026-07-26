@@ -51,9 +51,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v22.0.
+ * @fileOverview Institutional Result Hub v23.0.
  * FIXED: Removed sticky freezing to maximize mobile screen space.
- * FIXED: Standardized Title Case across all UI nodes.
+ * FIXED: Implemented self-exclusion ranking audit.
  */
 
 export default function ResultClient() {
@@ -93,7 +93,7 @@ export default function ResultClient() {
         if (typeof window === 'undefined') return;
         const screenWidth = window.innerWidth;
         const targetWidth = 794; 
-        const padding = 20; 
+        const padding = 2; 
         const available = screenWidth - padding;
         if (available < targetWidth) {
           setPreviewScale(available / targetWidth);
@@ -225,7 +225,7 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Synchronizing Registry..." });
+    toast({ title: "Syncing registry..." });
 
     try {
       await document.fonts.ready;
@@ -395,7 +395,7 @@ export default function ResultClient() {
                       </div>
                   </TabsContent>
 
-                  <TabsContent value="REPORT" className="px-4 pb-40 pt-6 flex flex-col items-center">
+                  <TabsContent value="REPORT" className="px-0 pb-40 pt-6 flex flex-col items-center">
                       <div 
                         style={{ 
                           width: '794px',

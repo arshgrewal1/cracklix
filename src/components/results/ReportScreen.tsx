@@ -39,8 +39,8 @@ interface ReportScreenProps {
 }
 
 /**
- * @fileOverview Responsive Screen Layout for Browser Viewing v9.1.
- * FIXED: Removed all remaining uppercase text.
+ * @fileOverview Responsive Screen Layout for Browser Viewing v10.0.
+ * FIXED: Removed all remaining uppercase text and optimized for PWA full-screen.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
@@ -59,7 +59,7 @@ export default function ReportScreen(props: ReportScreenProps) {
             <div className="flex items-center gap-5 md:gap-8 min-w-0 flex-1">
                <AuthorityLogo boardId={boardId || "GENERAL"} size="md" className="h-14 w-14 md:h-20 md:w-20 rounded-2xl shadow-xl border-4 border-slate-50 bg-slate-50" />
                <div className="space-y-1 min-w-0 flex-1">
-                  <p className="text-[10px] md:text-xs font-bold text-primary">Performance Report</p>
+                  <p className="text-[10px] md:text-xs font-bold text-primary">Performance report</p>
                   <h1 className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight break-words">{studentName}</h1>
                   <p className="text-sm md:text-lg font-bold text-slate-500 line-clamp-1">{examTitle}</p>
                </div>
@@ -68,15 +68,15 @@ export default function ReportScreen(props: ReportScreenProps) {
                <Badge className={cn("border-none px-4 py-1.5 rounded-full text-[10px] md:text-xs font-bold", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
                   {isQualified ? 'Qualified' : 'Attempted'}
                </Badge>
-               <p className="text-[10px] font-bold text-slate-300 mt-2 truncate max-w-[120px]">ID: {resultId?.slice(0, 15)}</p>
+               <p className="text-[10px] font-bold text-slate-300 mt-2 truncate max-w-[120px]">Ref: {resultId?.slice(0, 15)}</p>
             </div>
          </div>
          
          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-slate-50">
-            <DataMiniNode label="Attempt Date" val={date} />
-            <DataMiniNode label="Time Taken" val={timeTaken} />
+            <DataMiniNode label="Attempt date" val={date} />
+            <DataMiniNode label="Time taken" val={timeTaken} />
             <DataMiniNode label="Duration" val={duration ? `${duration}m` : 'Self'} />
-            <DataMiniNode label="Total Pool" val={totalCandidates.toLocaleString()} />
+            <DataMiniNode label="Total pool" val={totalCandidates.toLocaleString()} />
          </div>
       </div>
 
@@ -99,7 +99,7 @@ export default function ReportScreen(props: ReportScreenProps) {
 
       {/* 3. Stats Matrix */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-         <MetricBox label="Net Score" val={score} color="text-primary" bg="bg-blue-50" />
+         <MetricBox label="Net score" val={score} color="text-primary" bg="bg-blue-50" />
          <MetricBox label="Percentile" val={`${percentile}%`} color="text-purple-600" bg="bg-purple-50" />
          <MetricBox label="Accuracy" val={`${attemptAccuracy}%`} color="text-emerald-600" bg="bg-emerald-50" />
          <MetricBox label="Grade" val={grade} color="text-amber-600" bg="bg-amber-50" />
@@ -110,14 +110,14 @@ export default function ReportScreen(props: ReportScreenProps) {
          <section className="space-y-6">
             <div className="flex items-center gap-3 px-2">
                <BarChart3 className="h-6 w-6 text-primary" />
-               <h3 className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Subject Mastery</h3>
+               <h3 className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Subject mastery</h3>
             </div>
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
                <div className="overflow-x-auto no-scrollbar">
                   <table className="w-full text-left border-collapse">
                      <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                           <th className="px-8 py-5 font-bold text-[10px] md:text-[11px] text-slate-500 tracking-tight">Subject Hub</th>
+                           <th className="px-8 py-5 font-bold text-[10px] md:text-[11px] text-slate-500 tracking-tight">Subject hub</th>
                            <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500 tracking-tight">Score</th>
                            <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500 tracking-tight">Accuracy</th>
                         </tr>
