@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
@@ -47,9 +46,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 
 /**
- * @fileOverview Institutional Result System v10.0 [Hardened PDF Engine].
- * FIXED: Separated PDF layout from Screen layout to resolve all overlapping and scaling issues.
- * FIXED: Implemented multi-page support and layout validation protocol.
+ * @fileOverview Institutional Result System v10.2 [Hardened PDF Engine].
+ * FIXED: Explicitly pass resultId and attemptId to resolve runtime crashes.
  */
 
 export default function ResultClient() {
@@ -302,12 +300,14 @@ export default function ResultClient() {
            <>
               {/* TOP ACTIONS */}
               <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1">
-                 <div className="flex items-center gap-4 md:gap-8 w-full lg:w-auto">
+                 <div className="flex items-center gap-4 md:gap-8 text-left w-full lg:w-auto">
                     <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-12 w-12 md:h-16 md:w-16 rounded-xl shadow-lg bg-white border-2 border-slate-50" />
                     <div className="space-y-1 flex-1 min-w-0">
-                       <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm", finalMetrics?.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                          {finalMetrics?.isQualified ? "Qualified" : "Attempted"}
-                       </Badge>
+                       <div className="flex items-center gap-2">
+                          <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm", finalMetrics?.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+                             {finalMetrics?.isQualified ? "Qualified" : "Attempted"}
+                          </Badge>
+                       </div>
                        <h1 className="text-sm md:text-2xl font-bold tracking-tight text-[#0F172A] truncate">
                          {activeSession?.mockTitle}
                        </h1>
@@ -336,6 +336,7 @@ export default function ResultClient() {
                   <TabsContent value="OVERVIEW" className="animate-in fade-in duration-500">
                       <ReportScreen 
                          {...activeSession} 
+                         resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
                          studentName={activeSession.userName || profile?.name || "Aspirant"}
                          rank={liveRank} 
                          totalCandidates={totalCandidates}
@@ -389,6 +390,7 @@ export default function ResultClient() {
                          <div className="bg-white p-0 shadow-5xl border border-slate-200 overflow-hidden w-full max-w-[210mm]">
                             <ReportPDF 
                                {...activeSession}
+                               resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
                                studentName={activeSession.userName || profile?.name || "Aspirant"}
                                rank={liveRank} 
                                totalCandidates={totalCandidates}
@@ -421,6 +423,7 @@ export default function ResultClient() {
             {finalMetrics && activeSession && (
               <ReportPDF 
                  {...activeSession}
+                 resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
                  studentName={activeSession.userName || profile?.name || "Aspirant"}
                  rank={liveRank} 
                  totalCandidates={totalCandidates}
@@ -446,19 +449,6 @@ export default function ResultClient() {
       </main>
       <Footer />
     </div>
-  )
-}
-
-function StatCard({ label, val, sub, icon, highlight }: any) {
-  return (
-    <Card className={cn("border border-slate-100 shadow-sm bg-white p-4 md:p-6 rounded-xl md:rounded-[1.5rem] text-left relative overflow-hidden h-full flex flex-col justify-center transition-all hover:translate-y-[-1px]", highlight && "ring-4 ring-primary/5 border-primary/10")}>
-       <div className="absolute top-0 right-0 p-2 opacity-5">{icon}</div>
-       <div className="space-y-0.5 relative z-10">
-          <p className="text-[7px] md:text-[8px] font-bold text-slate-400 mb-0.5 uppercase tracking-tighter">{label}</p>
-          <p className={cn("text-xs md:text-xl font-black tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
-          {sub && <p className="text-[6px] md:text-[8px] font-bold text-slate-300 mt-1 uppercase tracking-widest">{sub}</p>}
-       </div>
-    </Card>
   )
 }
 

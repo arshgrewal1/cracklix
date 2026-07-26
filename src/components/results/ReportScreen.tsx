@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -48,7 +47,7 @@ interface ReportScreenProps {
 
 /**
  * @fileOverview Responsive Screen Layout for Browser Viewing.
- * Optimizes space for mobile PWA viewports.
+ * UPDATED: Fixed resultId.slice crash and normalized Title Case typography.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
@@ -74,7 +73,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                <Badge className={cn("border-none px-4 py-1 rounded-full text-[10px] font-black uppercase", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
                   {isQualified ? 'Qualified' : 'Attempted'}
                </Badge>
-               <p className="text-[10px] font-bold text-slate-300 mt-2">ID: {resultId.slice(0, 12)}</p>
+               <p className="text-[10px] font-bold text-slate-300 mt-2">ID: {resultId?.slice(0, 12) || "REF-GUEST"}</p>
             </div>
          </div>
          
@@ -168,7 +167,7 @@ function MetricBox({ label, val, sub, icon, color, bg }: any) {
    return (
       <Card className="border-none shadow-lg bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] flex flex-col items-start gap-4 hover:translate-y-[-2px] transition-all border border-slate-50">
          <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner", bg, color)}>
-            {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}
+            {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" }) : icon}
          </div>
          <div>
             <p className="text-[10px] md:text-xl font-black text-[#0F172A] tabular-nums leading-none tracking-tight">{val}</p>
