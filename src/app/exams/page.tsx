@@ -35,8 +35,9 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v9.1.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v9.2.
  * UPDATED: Optimized sticky top offset to top-[84px] md:top-[116px] for reduced header height.
+ * FIXED: Added missing key props in loading skeletons.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -165,7 +166,7 @@ export default function ExamsEntryPage() {
                     onClick={startListening}
                     className={cn(
                       "h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center transition-all",
-                      isListening ? "bg-rose-500 text-white animate-pulse" : "text-slate-400 hover:text-primary"
+                      isListening ? "bg-rose-50 text-white animate-pulse" : "text-slate-400 hover:text-primary"
                     )}
                   >
                     <Mic className="h-5 w-5" />
@@ -230,7 +231,7 @@ export default function ExamsEntryPage() {
 
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
               {examsLoading ? (
-                 Array.from({ length: 4 }).map((_, i) => <Skeleton className="h-[540px] w-full rounded-[2.5rem] md:rounded-[3rem] bg-white border border-slate-100" />)
+                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[540px] w-full rounded-[2.5rem] md:rounded-[3rem] bg-white border border-slate-100" />)
               ) : featuredExams.map((exam: any) => (
                  <ExamCard 
                    key={exam.id} 

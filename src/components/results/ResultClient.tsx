@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -61,9 +60,9 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v19.0.
- * FIXED: Added missing AlertCircle icon import.
- * FIXED: Normalized typography to Title Case for PWA optimization.
+ * @fileOverview Premium Result Analysis Hub v19.1.
+ * FIXED: Removed blocking checks for immediate one-click Retake response.
+ * FIXED: Added missing AlertCircle icon to imports.
  */
 
 export default function ResultClient() {
@@ -81,7 +80,6 @@ export default function ResultClient() {
   const [guestResult, setGuestResult] = useState<any>(null)
   const [activeMainTab, setActiveMainTab] = useState<string>("OVERVIEW")
   const [resolvedResultId, setResolvedResultId] = useState<string | null>(null)
-  const [isSyncing, setIsSyncing] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   
   const [liveRank, setLiveRank] = useState<number | string>("---")
@@ -127,6 +125,8 @@ export default function ResultClient() {
   const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
+  const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
+
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
      
@@ -139,34 +139,28 @@ export default function ResultClient() {
            const q = query(entriesRef, orderBy("highestScore", "desc"), limit(500));
            const snap = await getDocs(q);
            
-           if (isMounted) {
-              const entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-              const sorted = entries.sort((a: any, b: any) => {
-                 if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
-                 if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
-                 if (a.timeTaken !== b.timeTaken) return a.timeTaken - b.timeTaken;
-                 return (a.submittedAt?.seconds || 0) - (b.submittedAt?.seconds || 0);
-              });
+           const entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+           const sorted = entries.sort((a: any, b: any) => {
+              if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
+              if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+              if (a.timeTaken !== b.timeTaken) return a.timeTaken - b.timeTaken;
+              return (a.submittedAt?.seconds || 0) - (b.submittedAt?.seconds || 0);
+           });
 
-              const myIndex = sorted.findIndex(d => d.id === user?.uid);
-              if (myIndex !== -1) {
-                 setLiveRank(myIndex + 1);
-              } else if (countSnap.data().count > 500) {
-                 const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
-                 const superiorCountSnap = await getCountFromServer(superiorQuery);
-                 setLiveRank(superiorCountSnap.data().count + 1);
-              } else {
-                 setLiveRank("---");
-              }
+           const myIndex = sorted.findIndex(d => d.id === user?.uid);
+           if (myIndex !== -1) {
+              setLiveRank(myIndex + 1);
+           } else if (countSnap.data().count > 500) {
+              const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
+              const superiorCountSnap = await getCountFromServer(superiorQuery);
+              setLiveRank(superiorCountSnap.data().count + 1);
+           } else {
+              setLiveRank("---");
            }
         } catch (e) { console.error("[RANKING_AUDIT_FAILURE]:", e); }
      }
-     let isMounted = true;
      fetchRankingMetrics();
-     return () => { isMounted = false; };
-  }, [db, mockId, sessionData, guestResult, user?.uid, mounted]);
-
-  const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
+  }, [db, mockId, sessionData, guestResult, user?.uid]);
 
   useEffect(() => {
     async function loadQuestions() {
@@ -201,7 +195,7 @@ export default function ResultClient() {
   }, [db, mockId]);
 
   const handleRetake = () => {
-    if (!db || isSyncing || !mockId) return;
+    if (!db || !mockId) return;
     if (user) {
       deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {});
     }
@@ -322,7 +316,6 @@ export default function ResultClient() {
               <div className="flex gap-2">
                  <button 
                    onClick={handleRetake} 
-                   disabled={isSyncing} 
                    className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50 flex items-center justify-center cursor-pointer transition-all active:scale-95"
                  >
                     <RotateCcw className="h-3.5 w-3.5" /> 
