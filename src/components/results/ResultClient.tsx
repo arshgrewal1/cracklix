@@ -31,7 +31,8 @@ import {
   Target,
   X,
   FileText,
-  Calendar
+  Calendar,
+  ArrowLeft
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -48,8 +49,8 @@ import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 
 /**
- * @fileOverview Universal Result Hub Viewer v62.0.
- * FIXED: ReferenceError for Calendar icon and synchronized results data node.
+ * @fileOverview Universal Result Hub Viewer v65.0.
+ * FIXED: Re-engineered background capture to prevent "Share Failed" errors.
  */
 
 export default function ResultClient() {
@@ -76,6 +77,7 @@ export default function ResultClient() {
   const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const scorecardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -157,26 +159,27 @@ export default function ResultClient() {
     setIsGenerating(true);
 
     try {
-      const node = document.getElementById('cracklix-result-card-canvas');
-      if (!node) throw new Error("Capture node not found");
+      const node = scorecardRef.current;
+      if (!node) throw new Error("Capture node not ready.");
 
       const blob = await toBlob(node, {
         pixelRatio: 2,
         cacheBust: true,
+        backgroundColor: '#ffffff'
       });
 
-      if (!blob) throw new Error("Blob generation failed");
+      if (!blob) throw new Error("Blob generation empty.");
 
       const file = new File(
         [blob],
-        `Cracklix_Result_${sessionData.mockTitle.replace(/\s+/g, '_')}.png`,
+        `Cracklix_Scorecard_${sessionData.mockId}.png`,
         { type: "image/png" }
       );
 
       if (navigator.share) {
         await navigator.share({
-          title: "My Cracklix Result",
-          text: `Check my verified result for ${sessionData.mockTitle} on Cracklix!`,
+          title: "My Cracklix Scorecard",
+          text: `Verified result for ${sessionData.mockTitle} on Cracklix hub.`,
           files: [file]
         });
       } else {
@@ -186,11 +189,16 @@ export default function ResultClient() {
         link.href = url;
         link.click();
         URL.revokeObjectURL(url);
-        toast({ title: "Result Downloaded" });
+        toast({ title: "Scorecard Downloaded" });
       }
     } catch (e: any) {
+      console.error("[SCORECARD_CAPTURE_FAILURE]:", e);
       if (e.name !== 'AbortError') {
-        toast({ variant: "destructive", title: "Share Failed", description: "Could not generate share image." });
+        toast({ 
+          variant: "destructive", 
+          title: "Generation Failed", 
+          description: "Could not sync assets for scorecard. Please retry." 
+        });
       }
     } finally {
       setIsGenerating(false);
@@ -202,8 +210,8 @@ export default function ResultClient() {
     setIsGenerating(true);
 
     try {
-      const node = document.getElementById('cracklix-result-card-canvas');
-      if (!node) throw new Error("Capture node not found");
+      const node = scorecardRef.current;
+      if (!node) throw new Error("Document node not ready.");
 
       const canvas = await html2canvas(node, {
         scale: 2,
@@ -217,10 +225,10 @@ export default function ResultClient() {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Cracklix_Scorecard_${sessionData.mockTitle.replace(/\s+/g, '_')}.pdf`);
-      toast({ title: "PDF Generated" });
+      pdf.save(`Cracklix_Report_${sessionData.mockId}.pdf`);
+      toast({ title: "PDF Export Complete" });
     } catch (e: any) {
-       toast({ variant: "destructive", title: "PDF Failed", description: "Could not generate document." });
+       toast({ variant: "destructive", title: "PDF Sync Failed" });
     } finally {
        setIsGenerating(false);
     }
@@ -291,6 +299,9 @@ export default function ResultClient() {
            <>
               <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-6 md:p-12 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                  <div className="flex items-center gap-6 md:gap-10">
+                    <button onClick={() => router.back()} className="h-10 w-10 md:h-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
+                       <ArrowLeft className="h-5 w-5" />
+                    </button>
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-20 w-20 md:h-28 md:w-28 bg-white shadow-xl border border-slate-100 rounded-3xl" />
                     <div className="text-left space-y-3">
                        <div className="flex flex-wrap items-center gap-3">
@@ -309,7 +320,7 @@ export default function ResultClient() {
                        {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />} Download PDF
                     </Button>
                     <Button onClick={handleShareResult} disabled={isGenerating} className="flex-1 lg:flex-none h-14 px-8 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 text-sm shadow-lg active:scale-95 transition-all border-none">
-                       {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Share2 className="h-5 w-5" />} Share Result
+                       {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Share2 className="h-5 w-5" />} Direct Share
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-14 px-8 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl gap-3 text-sm shadow-md">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
@@ -371,6 +382,7 @@ export default function ResultClient() {
               {/* HIDDEN CAPTURE NODE */}
               <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none opacity-0">
                  <ShareableResultCard 
+                   ref={scorecardRef}
                    data={sessionData} 
                    rank={liveRank} 
                    totalCandidates={totalCandidates} 
@@ -413,3 +425,4 @@ function FilterButton({ active, label, count, onClick, color }: any) {
     </button>
   )
 }
+
