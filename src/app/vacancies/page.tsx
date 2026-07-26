@@ -25,7 +25,7 @@ import {
   Target,
   Users
 } from "lucide-react"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -38,8 +38,9 @@ import { Vacancy } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Punjab Vacancy Registry v1.6.
- * FIXED: Purged remaining uppercase styling and standardized labels.
+ * @fileOverview Official Punjab Vacancy Registry v2.0.
+ * REDESIGNED: Matches high-fidelity card layout from user screenshot.
+ * TYPOGRAPHY: Strict Title Case and Sentence Case enforcement.
  */
 
 const CATEGORY_CHIPS = [
@@ -176,37 +177,55 @@ export default function VacanciesPortal() {
                      {filteredVacancies.map((v, i) => (
                         <motion.div key={v.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
                            <Link href={`/vacancies/${v.id}`}>
-                              <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3.5rem] bg-white group overflow-hidden flex flex-col md:flex-row text-left">
-                                 <div className="p-8 md:p-12 flex-1 space-y-8">
-                                    <div className="flex justify-between items-start">
-                                       <div className="flex items-center gap-6">
-                                          <AuthorityLogo boardId={v.board} size="md" className="h-16 w-16 md:h-20 md:w-20 shadow-2xl bg-slate-50 border-4 border-white" />
-                                          <div className="space-y-1.5">
-                                             <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[10px] font-bold px-3 py-0.5 rounded-lg">{v.department} hub</Badge>
-                                             <h3 className="text-xl md:text-3xl font-bold text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight">{v.title}</h3>
+                              <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[3rem] md:rounded-[4rem] bg-white group overflow-hidden flex flex-col text-left relative">
+                                 <div className="p-8 md:p-12 space-y-8">
+                                    
+                                    {/* Redesigned Top Row: Department Hub Badge + Bookmark */}
+                                    <div className="flex justify-between items-start gap-4">
+                                       <div className="flex-1 flex justify-center">
+                                          <div className="bg-blue-50/50 border border-blue-100 px-5 py-3 rounded-2xl max-w-[280px] text-center">
+                                             <p className="text-[10px] md:text-[11px] font-[800] text-primary leading-tight uppercase tracking-tight">
+                                                {v.department} hub
+                                             </p>
                                           </div>
                                        </div>
-                                       <button onClick={(e) => handleToggleBookmark(e, v.id)} className={cn("h-12 w-12 rounded-2xl border flex items-center justify-center transition-all shadow-sm shrink-0 active:scale-90 border-none bg-transparent cursor-pointer", profile?.savedVacancies?.includes(v.id) ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}>
+                                       <button 
+                                          onClick={(e) => handleToggleBookmark(e, v.id)} 
+                                          className={cn(
+                                             "h-11 w-11 rounded-xl border flex items-center justify-center transition-all active:scale-90 border-none bg-transparent cursor-pointer", 
+                                             profile?.savedVacancies?.includes(v.id) ? "text-primary bg-primary/5" : "text-slate-300 hover:text-primary"
+                                          )}
+                                       >
                                           <Bookmark className={cn("h-6 w-6", profile?.savedVacancies?.includes(v.id) && "fill-current")} />
                                        </button>
                                     </div>
 
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-slate-50">
+                                    {/* Redesigned Middle Row: Logo + Bold Title */}
+                                    <div className="flex items-center gap-6 md:gap-10">
+                                       <div className="shrink-0">
+                                          <AuthorityLogo boardId={v.board} size="md" className="h-16 w-16 md:h-24 md:w-24 shadow-2xl bg-slate-50 border-4 border-white" />
+                                       </div>
+                                       <div className="min-w-0">
+                                          <h3 className="text-xl md:text-4xl font-[900] text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-[1.1]">
+                                             {v.title}
+                                          </h3>
+                                       </div>
+                                    </div>
+
+                                    {/* Metrics Grid */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-slate-50">
                                        <SummaryNode icon={Zap} label="Posts" val={v.totalPosts} />
                                        <SummaryNode icon={GraduationCap} label="Eligibility" val={v.education?.split(',')[0]} />
                                        <SummaryNode icon={DollarSign} label="Salary" val={v.salary?.split(' ')[0]} />
-                                       <SummaryNode icon={Clock} label="Last Date" val={new Date(v.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} color="text-rose-500" />
+                                       <SummaryNode icon={Clock} label="Last date" val={new Date(v.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} color="text-rose-500" />
                                     </div>
 
-                                    <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
-                                       <Button className="w-full sm:w-auto h-14 md:h-16 px-10 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] md:text-xs tracking-tight rounded-2xl shadow-xl border-none active:scale-95 transition-all">
-                                          Deep audit details <ChevronRight className="h-5 w-5" />
+                                    {/* Redesigned Full-Width Action Button */}
+                                    <div className="pt-6">
+                                       <Button className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-[800] text-sm md:text-base tracking-widest rounded-2xl md:rounded-[3rem] shadow-4xl border-none active:scale-95 transition-all flex items-center justify-center gap-3">
+                                          <span>View vacancy details</span>
+                                          <ChevronRight className="h-5 w-5 opacity-40 group-hover:translate-x-1 transition-transform" />
                                        </Button>
-                                       {v.notificationPdfUrl && (
-                                          <Button variant="ghost" className="w-full sm:w-auto h-14 text-primary font-bold text-[10px] gap-2 hover:bg-primary/5 transition-all" asChild onClick={e => e.stopPropagation()}>
-                                             <a href={v.notificationPdfUrl} target="_blank" rel="noopener noreferrer"><FileText className="h-5 w-5" /> Official PDF</a>
-                                          </Button>
-                                       )}
                                     </div>
                                  </div>
                               </Card>
@@ -261,11 +280,11 @@ export default function VacanciesPortal() {
 
 function SummaryNode({ icon: Icon, label, val, color = "text-[#0F172A]" }: any) {
    return (
-      <div className="space-y-1.5 min-w-0">
+      <div className="space-y-1.5 min-w-0 flex flex-col items-center md:items-start">
          <div className="flex items-center gap-2 text-[8px] md:text-[9px] font-bold text-slate-400 tracking-tight">
             <Icon className="h-3 w-3 text-primary" /> {label}
          </div>
-         <p className={cn("text-xs md:text-base font-bold truncate leading-none", color)}>{val || 'N/A'}</p>
+         <p className={cn("text-xs md:text-base font-bold truncate leading-none mt-1", color)}>{val || 'N/A'}</p>
       </div>
    )
 }
