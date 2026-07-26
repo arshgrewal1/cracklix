@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, Suspense } from "react"
@@ -17,6 +16,11 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
+
+/**
+ * @fileOverview Official Merit Registry Hub v11.0.
+ * UPDATED: Removed all sticky elements. Search bar and filters scroll with the page.
+ */
 
 export default function LeaderboardPage() {
   return (
@@ -108,13 +112,13 @@ function LeaderboardContent() {
             </div>
          </section>
 
-         <div className="sticky top-[84px] md:top-[116px] z-[45] bg-[#F8FAFC]/95 backdrop-blur-xl -mx-4 px-4 py-6 border-b border-slate-100">
+         <div className="bg-[#F8FAFC] -mx-4 px-4 py-6 border-b border-slate-100">
             <div className="max-w-4xl mx-auto flex flex-col md:flex-row gap-4 items-center">
                <div className="relative group flex-1 w-full">
                   <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                   <Input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search candidate by name..." className="h-14 md:h-16 pl-14 pr-12 rounded-2xl bg-white border-slate-200 shadow-xl text-base md:text-lg font-bold placeholder:text-slate-200 focus-visible:ring-4 focus-visible:ring-primary/5 transition-all" />
                   {searchTerm && (
-                    <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all border-none bg-transparent"><X className="h-4 w-4 text-slate-300" /></button>
+                    <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all border-none bg-transparent cursor-pointer"><X className="h-4 w-4 text-slate-300" /></button>
                   )}
                </div>
                <Link href="/mocks" className="w-full md:w-auto">

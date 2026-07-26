@@ -34,8 +34,8 @@ import { useRouter, usePathname } from "next/navigation"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Official Revision & Study Hub v5.2.
- * UPDATED: Optimized sticky top offset to top-[84px] md:top-[116px] for reduced header height.
+ * @fileOverview Official Revision & Study Hub v6.0.
+ * UPDATED: Removed sticky positioning for tabs and search bar.
  */
 
 export default function RevisionHub() {
@@ -66,7 +66,7 @@ export default function RevisionHub() {
     if (!rawResults) return []
     return [...rawResults].sort((a, b) => {
       const tA = new Date(a.timestamp || 0).getTime()
-      const tB = new Date(b.timestamp || 0).getTime()
+      const tB = b.updatedAt?.seconds ? b.updatedAt.seconds * 1000 : new Date(b.timestamp || 0).getTime()
       return tB - tA
     }).slice(0, 20)
   }, [rawResults])
@@ -147,7 +147,7 @@ export default function RevisionHub() {
           </div>
 
           <Tabs defaultValue="bookmarks" className="space-y-10">
-             <div className="sticky top-[84px] md:top-[116px] z-40 -mx-4 px-4 py-2 bg-[#F8FAFC]/80 backdrop-blur-md">
+             <div className="-mx-4 px-4 py-2 bg-[#F8FAFC]">
                 <div className="bg-white border border-slate-200 p-1.5 rounded-[24px] shadow-xl flex items-center h-14 md:h-16 w-full md:w-auto">
                    <TabsList className="bg-transparent border-none p-0 flex h-full gap-1 overflow-x-auto no-scrollbar justify-start">
                       <HubTab value="bookmarks" icon={<Bookmark className="h-4 w-4" />} label="Bookmarks" />
@@ -171,7 +171,7 @@ export default function RevisionHub() {
                               </Badge>
                               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Saved {new Date(b.timestamp).toLocaleDateString()}</span>
                            </div>
-                           <button onClick={() => {}} className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all opacity-20 group-hover:opacity-100">
+                           <button onClick={() => {}} className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all opacity-20 group-hover:opacity-100 border-none bg-transparent cursor-pointer">
                               <Trash2 className="h-5 w-5" />
                            </button>
                         </div>

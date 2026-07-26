@@ -19,8 +19,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Bookmarks Hub v7.1.
- * UPDATED: Reduced header height offset to top-[84px] md:top-[116px].
+ * @fileOverview Official Bookmarks Hub v8.0.
+ * UPDATED: Removed sticky positioning for search and filter hubs.
  */
 
 const FILTER_CHIPS = [
@@ -138,7 +138,7 @@ export default function BookmarksPage() {
           </motion.div>
         </section>
 
-        <div className="sticky top-[84px] md:top-[116px] z-[45] bg-white/90 backdrop-blur-xl -mx-4 px-4 py-4 md:py-6 border-b border-slate-50">
+        <div className="bg-white/90 -mx-4 px-4 py-4 md:py-6 border-b border-slate-50">
            <div className="max-w-4xl mx-auto space-y-6">
               <div className="relative group">
                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors">
@@ -151,7 +151,7 @@ export default function BookmarksPage() {
                    className="h-14 md:h-16 pl-14 pr-14 rounded-2xl bg-white border-slate-200 shadow-xl text-base md:text-lg font-bold placeholder:text-slate-200 focus:ring-4 focus:ring-primary/5 transition-all"
                  />
                  {searchTerm && (
-                   <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all">
+                   <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all border-none bg-transparent">
                       <X className="h-4 w-4 text-slate-400" />
                    </button>
                  )}
@@ -210,7 +210,7 @@ export default function BookmarksPage() {
                          </div>
                          <button 
                            onClick={() => handleDelete(b.id)}
-                           className="h-10 w-10 rounded-xl text-slate-300 hover:text-rose-50 hover:bg-rose-50 active:scale-90 transition-all flex items-center justify-center opacity-40 group-hover:opacity-100"
+                           className="h-10 w-10 rounded-xl text-slate-300 hover:text-rose-50 hover:bg-rose-50 active:scale-90 transition-all flex items-center justify-center opacity-40 group-hover:opacity-100 border-none bg-transparent"
                          >
                             <Trash2 className="h-5 w-5" />
                          </button>

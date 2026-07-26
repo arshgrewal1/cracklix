@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -9,26 +8,15 @@ import { collection, query, where, orderBy, doc } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
   Zap, 
-  ChevronRight, 
-  BookOpen, 
   Search,
-  BookMarked,
-  AlertCircle,
-  LayoutGrid,
-  List,
-  ArrowUpDown,
-  Filter,
-  ShieldCheck,
-  Target,
-  Trophy,
-  History,
-  Activity,
+  CheckCircle2,
   FileStack,
   Layers,
   ArrowRight,
-  Clock,
-  Unlock,
-  Lock
+  ShieldCheck,
+  BookOpen,
+  ArrowUpDown,
+  Filter
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -36,13 +24,14 @@ import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
-import Image from "next/image"
 import { Subject } from "@/types"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Subject Selection Hub v8.2 [Terminology Updated].
+ * @fileOverview Premium Subject Selection Hub v8.5.
+ * UPDATED: Removed sticky positioning for search and filter controls.
  */
 
 export default function SubjectsPage() {
@@ -138,7 +127,7 @@ export default function SubjectsPage() {
            </p>
         </header>
 
-        <div className="bg-white border border-slate-100 rounded-2xl md:rounded-[1.5rem] p-2 md:p-3 shadow-sm sticky top-[84px] md:top-[116px] z-[45] flex flex-col md:flex-row items-center gap-3">
+        <div className="bg-white border border-slate-100 rounded-2xl md:rounded-[1.5rem] p-2 md:p-3 shadow-sm flex flex-col md:flex-row items-center gap-3">
            <div className="relative group flex-1 w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-primary transition-colors" />
               <Input 
@@ -294,7 +283,7 @@ function MetricPlate({ label, val, icon }: any) {
             <span className="text-slate-400 shrink-0">{icon}</span>
             <span className="text-[8px] font-black uppercase tracking-tight truncate">{label}</span>
          </div>
-         <p className="text-[12px] md:text-sm font-black text-[#0F172A] tabular-nums leading-none truncate pl-4.5">{val}</p>
+         <p className="text-[12px] md:sm font-black text-[#0F172A] tabular-nums leading-none truncate pl-4.5">{val}</p>
       </div>
    )
 }

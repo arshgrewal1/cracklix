@@ -1,15 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import {
   Search,
-  User,
   Menu,
   ShieldCheck,
   Gem,
-  Settings,
-  ChevronLeft
+  Settings
 } from "lucide-react";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -38,14 +36,13 @@ import { canAccessAdmin } from "@/lib/permissions";
 import AnnouncementBar from "./AnnouncementBar";
 
 /**
- * @fileOverview Unified Fixed Navigation Hub v135.0.
- * FIXED: position: fixed z-9999 logic with dynamic height measurement for content sync.
+ * @fileOverview Standard In-Flow Navigation Hub v140.0.
+ * UPDATED: Removed all fixed/sticky positioning. Header now scrolls away naturally.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
-  const headerRef = useRef<HTMLDivElement>(null);
 
   const { user, profile, loading } = useUser();
   const auth = useAuth();
@@ -55,23 +52,6 @@ export default function Navbar() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Dynamic Height Measurement Node
-  useEffect(() => {
-    if (!mounted) return;
-    const updateHeight = () => {
-      if (headerRef.current) {
-        const height = headerRef.current.offsetHeight;
-        document.documentElement.style.setProperty('--header-height', `${height}px`);
-      }
-    };
-
-    const resizeObserver = new ResizeObserver(updateHeight);
-    if (headerRef.current) resizeObserver.observe(headerRef.current);
-    
-    updateHeight();
-    return () => resizeObserver.disconnect();
-  }, [mounted, pathname]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -122,9 +102,9 @@ export default function Navbar() {
   }
 
   return (
-    <div ref={headerRef} className="fixed top-0 left-0 right-0 z-[9999] flex flex-col w-full">
+    <div className="relative flex flex-col w-full">
       <AnnouncementBar />
-      <header className="w-full bg-white/95 backdrop-blur-md border-b border-slate-100 pt-safe shadow-sm">
+      <header className="w-full bg-white border-b border-slate-100 shadow-sm">
         <nav className="w-full h-[84px] md:h-[116px] transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 

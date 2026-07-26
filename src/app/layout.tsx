@@ -23,9 +23,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v10.5 [PWA Screening Enabled].
- * UPDATED: Removed separate AnnouncementBar to prevent fixed header conflict.
- * UPDATED: Enforced black-translucent status bar and viewport-fit cover.
+ * @fileOverview Global Layout Registry v11.0.
+ * UPDATED: Standardized flow. Removed pt-safe and height hacks. Header is now in-flow.
  */
 
 export const metadata: Metadata = {
@@ -51,7 +50,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Cracklix",
   },
   formatDetection: {
@@ -80,7 +79,6 @@ export default function RootLayout({
       lang="en" 
       suppressHydrationWarning 
       className="scroll-smooth"
-      style={{ backgroundColor: '#05070B' }}
     >
       <body
         className={`
@@ -93,7 +91,6 @@ export default function RootLayout({
           min-h-screen
           overflow-x-hidden
         `}
-        style={{ backgroundColor: '#05070B' }} 
       >
         <ThemeProvider
           attribute="class"

@@ -35,9 +35,8 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v9.2.
- * UPDATED: Optimized sticky top offset to top-[84px] md:top-[116px] for reduced header height.
- * FIXED: Added missing key props in loading skeletons.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v10.0.
+ * UPDATED: Removed all sticky positioning. Search bar now scrolls with content.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -215,7 +214,7 @@ export default function ExamsEntryPage() {
           </motion.div>
         </section>
 
-        {/* POPULAR VERTICALS GRID - UPDATED TO 3 COLS FOR WIDTH */}
+        {/* POPULAR VERTICALS GRID */}
         <section className="space-y-10 md:space-y-14 w-full text-left">
            <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
               <div className="flex items-center gap-4">
@@ -231,7 +230,7 @@ export default function ExamsEntryPage() {
 
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
               {examsLoading ? (
-                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[540px] w-full rounded-[2.5rem] md:rounded-[3rem] bg-white border border-slate-100" />)
+                 Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[540px] w-full rounded-[2.5rem] md:rounded-[3.5rem] bg-white border border-slate-100" />)
               ) : featuredExams.map((exam: any) => (
                  <ExamCard 
                    key={exam.id} 

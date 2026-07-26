@@ -19,7 +19,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useActiveSession } from "@/hooks/useStudyAnalytics";
 
 /**
- * @fileOverview Official Download Center v2.9 [Refined Tabs].
+ * @fileOverview Official Download Center v3.0.
+ * UPDATED: Removed all sticky positioning. Filter tabs and search scroll with the page.
  */
 
 export default function NotesLibrary() {

@@ -41,9 +41,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v15.0.
- * FIXED: Globally Transitioned to professional Title Case (removed all uppercase).
- * FIXED: Refined alignment to unified boxed architecture.
+ * @fileOverview Universal Result Hub Viewer v16.0.
+ * UPDATED: Standardized padding as the header is now in-flow (no fixed offset).
  */
 
 export default function ResultClient() {
@@ -235,13 +234,10 @@ export default function ResultClient() {
                            activeReviewFilter === 'SKIPPED' ? reviewNodes.skipped : reviewNodes.all;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-body text-left">
+    <div className="min-h-screen bg-[#F8FAFC] font-body text-left flex flex-col">
       <Navbar />
       
-      <main 
-        className="container mx-auto max-w-[1400px] px-4 md:px-12 pb-40 space-y-6 md:space-y-10"
-        style={{ paddingTop: 'calc(var(--header-height, 104px) + 16px)' }}
-      >
+      <main className="container mx-auto max-w-[1400px] px-4 md:px-12 py-8 md:py-16 space-y-6 md:space-y-10">
         
         {sessionData && (
            <div className="space-y-6 md:space-y-10">
@@ -254,7 +250,7 @@ export default function ResultClient() {
                           <Badge className="bg-[#1677FF] text-white border-none px-3 py-1 font-bold text-[9px]">Attempt #{profile?.totalTests || 1}</Badge>
                        </div>
                        <h1 className="text-xl md:text-3xl font-[800] text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
-                       <div className="flex items-center gap-6 text-[10px] md:text-xs font-bold text-slate-400">
+                       <div className="flex flex-wrap items-center gap-6 text-[10px] md:text-xs font-bold text-slate-400">
                           <HeaderMiniNode icon={<Clock className="h-3.5 w-3.5" />} label="Date" val={new Date(sessionData.timestamp).toLocaleDateString('en-GB')} />
                           <HeaderMiniNode icon={<Clock className="h-3.5 w-3.5" />} label="Duration" val={`${mockData?.duration || 120}m`} />
                           <HeaderMiniNode icon={<Users className="h-3.5 w-3.5" />} label="Candidates" val={totalCandidates.toLocaleString()} />
@@ -273,7 +269,7 @@ export default function ResultClient() {
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-10">
                   <div className="flex justify-center">
-                     <TabsList className="bg-slate-100 p-1 rounded-3xl border border-[#E5EAF2] shadow-inner flex w-fit gap-1 mx-auto lg:mx-0 h-auto">
+                     <TabsList className="bg-slate-100 p-1 rounded-3xl border border-[#E5EAF2] shadow-inner flex w-fit gap-1 h-auto">
                         <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis hub</TabsTrigger>
                         <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review portal</TabsTrigger>
                      </TabsList>

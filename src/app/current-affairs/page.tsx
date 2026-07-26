@@ -41,8 +41,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Current Affairs Hub v5.9.
- * UPDATED: Reduced header height offset to top-[84px] md:top-[116px].
+ * @fileOverview Premium Current Affairs Hub v6.0.
+ * UPDATED: Removed sticky positioning for search and filter controls.
  */
 
 const CATEGORIES = [
@@ -146,7 +146,7 @@ export default function CurrentAffairsCenter() {
           </div>
         </section>
 
-        <div className="sticky top-[84px] md:top-[116px] z-40 bg-[#F8FAFC]/95 backdrop-blur-md -mx-4 px-4 py-4 border-b border-slate-100">
+        <div className="bg-[#F8FAFC] -mx-4 px-4 py-4 border-b border-slate-100">
            <div className="max-w-5xl mx-auto space-y-6">
               <div className="flex flex-col md:flex-row items-center gap-4">
                  <div className="relative group flex-1 w-full">
@@ -157,7 +157,7 @@ export default function CurrentAffairsCenter() {
                       placeholder="Search current affairs..." 
                       className="h-14 rounded-2xl bg-white border-slate-200 shadow-sm text-base font-bold pl-14 pr-12 focus-visible:ring-4 focus-visible:ring-primary/5"
                     />
-                    <button className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-primary transition-all">
+                    <button className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-primary transition-all border-none bg-transparent cursor-pointer">
                        <Filter className="h-5 w-5" />
                     </button>
                  </div>
@@ -217,10 +217,10 @@ export default function CurrentAffairsCenter() {
                                          <span className="text-[9px] font-bold text-slate-300 tabular-nums uppercase">{item.month} {item.year}</span>
                                       </div>
                                       <div className="flex items-center gap-1">
-                                         <button onClick={(e) => handleToggleBookmark(e, item.id)} className={cn("p-1.5 rounded-lg transition-colors", profile?.savedCA?.includes(item.id) ? "text-primary" : "text-slate-300 hover:text-primary")}>
+                                         <button onClick={(e) => handleToggleBookmark(e, item.id)} className={cn("p-1.5 rounded-lg transition-colors border-none bg-transparent cursor-pointer", profile?.savedCA?.includes(item.id) ? "text-primary" : "text-slate-300 hover:text-primary")}>
                                             <Bookmark className={cn("h-4 w-4", profile?.savedCA?.includes(item.id) && "fill-current")} />
                                          </button>
-                                         <button className="p-1.5 text-slate-300 hover:text-primary transition-colors">
+                                         <button className="p-1.5 text-slate-300 hover:text-primary transition-colors border-none bg-transparent cursor-pointer">
                                             <Share2 className="h-4 w-4" />
                                          </button>
                                       </div>
@@ -239,7 +239,7 @@ export default function CurrentAffairsCenter() {
                                       </div>
                                       <button 
                                         onClick={() => item.quizId ? router.push(`/mocks/instructions?id=${item.quizId}`) : item.pdfUrl ? window.open(item.pdfUrl, '_blank') : null}
-                                        className="text-primary font-black text-[10px] md:text-[11px] uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all"
+                                        className="text-primary font-black text-[10px] md:text-[11px] uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all border-none bg-transparent cursor-pointer"
                                       >
                                          {item.quizId ? 'Attempt' : 'Read more'} <ChevronRight className="h-3.5 w-3.5" />
                                       </button>
@@ -327,7 +327,7 @@ function SegmentButton({ active, onClick, label }: any) {
       <button 
         onClick={onClick}
         className={cn(
-          "flex-1 h-full rounded-xl px-6 font-black uppercase text-[10px] tracking-widest transition-all",
+          "flex-1 h-full rounded-xl px-6 font-black uppercase text-[10px] tracking-widest transition-all border-none bg-transparent cursor-pointer",
           active ? "bg-white text-primary shadow-md" : "text-slate-400 hover:text-slate-600"
         )}
       >

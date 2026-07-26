@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -38,8 +37,8 @@ import { Vacancy } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Punjab Vacancy Registry v1.4.
- * UPDATED: Replaced fake 12.4K aspirants with real user data from settings/stats.
+ * @fileOverview Official Punjab Vacancy Registry v1.5.
+ * UPDATED: Removed sticky positioning for search and filter elements.
  */
 
 const CATEGORY_CHIPS = [
@@ -123,7 +122,7 @@ export default function VacanciesPortal() {
                   <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary shadow-inner shrink-0">
                     <Megaphone className="h-5 w-5 md:h-6 md:w-6" />
                   </div>
-                  <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[10px] md:text-xs tracking-widest uppercase">Official recruitment hub</Badge>
+                  <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs tracking-widest uppercase">Official recruitment hub</Badge>
                </motion.div>
                <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased">
                   Latest <br/> <span className="text-primary italic">vacancies.</span>
@@ -144,7 +143,7 @@ export default function VacanciesPortal() {
                     onChange={e => setSearchTerm(e.target.value)}
                   />
                   {searchTerm && (
-                    <button onClick={() => setSearchTerm('')} className="absolute right-6 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all">
+                    <button onClick={() => setSearchTerm('')} className="absolute right-6 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all border-none bg-transparent cursor-pointer">
                        <X className="h-6 w-6 text-slate-300" />
                     </button>
                   )}
@@ -186,7 +185,7 @@ export default function VacanciesPortal() {
                                              <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight uppercase">{v.title}</h3>
                                           </div>
                                        </div>
-                                       <button onClick={(e) => handleToggleBookmark(e, v.id)} className={cn("h-12 w-12 rounded-2xl border flex items-center justify-center transition-all shadow-sm shrink-0 active:scale-90", profile?.savedVacancies?.includes(v.id) ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}>
+                                       <button onClick={(e) => handleToggleBookmark(e, v.id)} className={cn("h-12 w-12 rounded-2xl border flex items-center justify-center transition-all shadow-sm shrink-0 active:scale-90 border-none bg-transparent cursor-pointer", profile?.savedVacancies?.includes(v.id) ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}>
                                           <Bookmark className={cn("h-6 w-6", profile?.savedVacancies?.includes(v.id) && "fill-current")} />
                                        </button>
                                     </div>
@@ -199,7 +198,7 @@ export default function VacanciesPortal() {
                                     </div>
 
                                     <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
-                                       <Button className="w-full sm:w-auto h-14 md:h-16 px-10 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-2xl shadow-xl gap-3 border-none active:scale-95 transition-all">
+                                       <Button className="w-full sm:w-auto h-14 md:h-16 px-10 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-2xl shadow-xl border-none active:scale-95 transition-all">
                                           Deep audit details <ChevronRight className="h-5 w-5" />
                                        </Button>
                                        {v.notificationPdfUrl && (
@@ -243,7 +242,7 @@ export default function VacanciesPortal() {
                   </div>
                </Card>
 
-               <div className="p-10 bg-white rounded-[3rem] border border-slate-100 shadow-xl space-y-8 text-left group hover:translate-y-[-6px] transition-all duration-500">
+               <div className="p-10 bg-white rounded-[3rem] border border-slate-100 shadow-xl space-y-8 text-left group hover:translate-y-[-4px] transition-all duration-500">
                   <div className="flex items-center gap-4">
                      <ShieldCheck className="h-8 w-8 text-emerald-500" />
                      <h4 className="text-[11px] font-black uppercase tracking-widest text-[#0F172A]">Security protocol</h4>
