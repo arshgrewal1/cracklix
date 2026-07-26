@@ -6,8 +6,8 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v12.2 [Top Stacking Fixed].
- * FIXED: Set Z-index to 10000 to ensure it covers the fixed Navbar during init.
+ * @fileOverview Optimized PWA Splash Hub v13.0 [High-Speed Entry].
+ * OPTIMIZED: Reduced artificial delays and increased animation velocity for perceived performance.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -24,18 +24,21 @@ export default function SplashScreen() {
   useEffect(() => {
     setMounted(true);
     
+    // Safety exit reduced to 2.5s - Prevents PWA hanging on slow connections
     const safetyTimer = setTimeout(() => {
       if (isDataReady) setIsVisible(false);
-    }, 4000);
+    }, 2500);
 
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 98 && !isDataReady) return 98;
+        // Hang at 90% only if data isn't ready
+        if (prev >= 90 && !isDataReady) return 90;
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
         }
-        return prev + 1.5;
+        // High-speed increment: reaches full in approx 500ms when ready
+        return prev + 4;
       });
     }, 20);
 
@@ -46,8 +49,9 @@ export default function SplashScreen() {
   }, [isDataReady]);
 
   useEffect(() => {
+    // Instant exit when ready and bar is full
     if (isDataReady && progress >= 100) {
-      const exitTimer = setTimeout(() => setIsVisible(false), 500);
+      const exitTimer = setTimeout(() => setIsVisible(false), 200);
       return () => clearTimeout(exitTimer);
     }
   }, [isDataReady, progress]);
@@ -61,34 +65,34 @@ export default function SplashScreen() {
           key="cracklix-premium-splash"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
           className="fixed inset-0 z-[10000] bg-[#05070B] flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none"
         >
           <div className="absolute top-0 left-0 w-full h-full bg-primary/5 blur-[140px] rounded-full" />
           
           <div className="relative z-10 flex flex-col items-center w-full px-8 max-w-lg">
              <motion.div
-               initial={{ opacity: 0, scale: 0.7, y: 30 }}
+               initial={{ opacity: 0, scale: 0.8, y: 10 }}
                animate={{ opacity: 1, scale: 1, y: 0 }}
-               transition={{ duration: 1.2, ease: "easeOut" }}
+               transition={{ duration: 0.6, ease: "easeOut" }}
                className="relative"
              >
                 <div className="relative flex items-center justify-center">
                    <motion.div 
-                     animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
-                     transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                     className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full scale-90"
+                     animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.4, 0.3] }}
+                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                     className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full scale-90"
                    />
                    <div 
                      className="relative"
-                     style={{ width: 'clamp(280px, 45vw, 500px)', height: 'auto', aspectRatio: '1/1' }}
+                     style={{ width: 'clamp(240px, 40vw, 400px)', height: 'auto', aspectRatio: '1/1' }}
                    >
                       <Image 
                         src="/logo/cracklix-icon.png" 
                         alt="Cracklix"
                         fill
                         priority
-                        className="object-contain drop-shadow-[0_30px_60px_rgba(37,99,235,0.4)]"
+                        className="object-contain drop-shadow-[0_20px_40px_rgba(37,99,235,0.3)]"
                       />
                    </div>
                 </div>
@@ -97,30 +101,27 @@ export default function SplashScreen() {
              <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 1, delay: 0.5 }}
-               className="text-center space-y-2 w-full -mt-20 md:-mt-32"
+               transition={{ duration: 0.6, delay: 0.2 }}
+               className="text-center space-y-2 w-full -mt-16 md:-mt-24"
              >
                 <div className="space-y-1">
-                   <h1 className="text-[52px] md:text-[80px] font-[900] tracking-tighter text-white leading-none antialiased">
+                   <h1 className="text-[48px] md:text-[64px] font-[900] tracking-tighter text-white leading-none antialiased">
                       Cracklix
                    </h1>
-                   <p className="text-[14px] md:text-[18px] font-medium text-slate-400 tracking-tight leading-none opacity-80 italic">
+                   <p className="text-[12px] md:text-[14px] font-medium text-slate-400 tracking-tight leading-none opacity-60 italic">
                       Punjab's Smart Mock Test Platform
                    </p>
                 </div>
 
-                <div className="pt-10 md:pt-14 w-full max-w-[180px] md:max-w-[220px] mx-auto space-y-6">
-                   <div className="flex flex-col items-center gap-5">
-                      <div className="relative h-[2px] w-full bg-white/5 rounded-full overflow-hidden shadow-inner">
+                <div className="pt-8 md:pt-10 w-full max-w-[140px] md:max-w-[180px] mx-auto space-y-4">
+                   <div className="flex flex-col items-center gap-4">
+                      <div className="relative h-[2px] w-full bg-white/5 rounded-full overflow-hidden">
                          <motion.div 
                             initial={{ width: 0 }}
                             animate={{ width: `${progress}%` }}
-                            className="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-500 shadow-[0_0_10px_rgba(37,99,235,0.8)]"
+                            className="h-full bg-primary shadow-[0_0_10px_rgba(37,99,235,0.8)]"
                          />
                       </div>
-                      <p className="text-[9px] md:text-[10px] font-bold text-slate-500 tracking-widest uppercase opacity-40">
-                         Loading your learning journey...
-                      </p>
                    </div>
                 </div>
              </motion.div>
