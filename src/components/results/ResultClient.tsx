@@ -14,13 +14,10 @@ import {
   getDoc, 
   documentId, 
   getDocs, 
-  deleteDoc,
   where,
   limit,
   increment,
-  updateDoc,
   getCountFromServer,
-  serverTimestamp,
   orderBy
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -32,19 +29,16 @@ import {
   BarChart3,
   Download,
   RotateCcw,
-  Layers,
-  ArrowRight,
-  X,
+  ChevronRight,
   TrendingUp,
   AlertCircle,
-  CheckCircle2,
   Trophy,
   Target,
-  History,
-  Timer,
-  BookOpen,
   Activity,
-  Award
+  Award,
+  BookOpen,
+  Timer,
+  FileStack
 } from "lucide-react"
 import { 
   Card, 
@@ -66,9 +60,9 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Institutional Result Hub V4.2.
- * FIXED: Removed fixed min-width on containers to ensure responsive PWA view.
- * REDESIGNED: Minimized footprint for mobile PWA mode.
+ * @fileOverview Institutional Result Hub V4.5.
+ * FIXED: Implemented a robust 'Hidden Rendering Node' for PDF capture to resolve blank/cut pages.
+ * FIXED: Ensured images in the card use crossOrigin="anonymous".
  */
 
 export default function ResultClient() {
@@ -271,26 +265,21 @@ export default function ResultClient() {
 
   const handleRetake = useCallback(() => {
     if (!mockId) return;
-    if (user && db) { deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {}); }
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
-      localStorage.removeItem(`cracklix_guest_result_${mockId}`);
-    }
-    resetStore();
-    router.push(`/mocks/attempt?id=${mockId}&retake=true`);
-  }, [db, mockId, user, router, resetStore]);
+    router.push(`/mocks/instructions?id=${mockId}`);
+  }, [router, mockId]);
 
   const handleDownloadPDF = async () => { 
     if (isExporting || !activeSession) return;
     setIsExporting(true);
     try {
-      setActiveMainTab("REPORT"); 
       toast({ title: "Preparing report..." });
       
-      await new Promise(r => setTimeout(r, 1500));
+      // Wait for fonts and all images to be ready
+      await new Promise(r => setTimeout(r, 1000));
       if (typeof window !== 'undefined' && 'fonts' in document) await (document as any).fonts.ready;
       
-      const element = document.getElementById('cracklix-result-card');
+      // Target the hidden export node which is always at 210mm
+      const element = document.getElementById('cracklix-export-node');
       if (!element) throw new Error("Report container not matched.");
 
       const canvas = await html2canvas(element, { 
@@ -298,9 +287,7 @@ export default function ResultClient() {
         useCORS: true, 
         backgroundColor: "#FFFFFF", 
         logging: false, 
-        foreignObjectRendering: true,
-        allowTaint: true,
-        imageTimeout: 20000
+        windowWidth: 1080 // Ensure consistent rendering width
       });
 
       if (!canvas || canvas.width === 0) throw new Error("Capture failed.");
@@ -339,28 +326,6 @@ export default function ResultClient() {
     return reviewNodes.all;
   }, [activeReviewFilter, reviewNodes]);
 
-  if (!mounted || isSearching) return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
-      <Zap className="h-8 w-8 text-primary animate-spin" />
-      <p className="text-[10px] font-bold text-slate-400">Syncing analysis...</p>
-    </div>
-  );
-
-  if (errorNotFound) return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-       <Card className="max-w-md w-full bg-white rounded-[2rem] p-10 md:p-14 shadow-5xl border-none space-y-10 animate-in fade-in zoom-in-95">
-          <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-inner border border-rose-100">
-             <AlertCircle className="h-10 w-10" />
-          </div>
-          <div className="space-y-3 text-left">
-             <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Record not found</h2>
-             <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">Could not synchronize your attempt record. Try refreshing.</p>
-          </div>
-          <Button onClick={() => window.location.reload()} className="w-full h-14 bg-primary text-white rounded-2xl font-bold shadow-xl border-none active:scale-95"><RefreshCw className="h-4 w-4 mr-2" /> Re-sync</Button>
-       </Card>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden w-full">
       <Navbar />
@@ -378,11 +343,6 @@ export default function ResultClient() {
                  <h1 className="text-sm md:text-xl font-[800] tracking-tight text-[#0F172A] leading-tight truncate w-full">
                    {activeSession?.mockTitle}
                  </h1>
-                 <div className="flex items-center gap-2 md:gap-3 font-bold text-[8px] md:text-[9px] text-slate-400">
-                    <span className="flex items-center gap-1"><Clock className="h-2.5 w-2.5" /> {new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
-                    <span className="h-0.5 w-0.5 rounded-full bg-slate-200" />
-                    <span>Attempt ID: {activeSession.attemptId?.slice(0, 8)}</span>
-                 </div>
               </div>
            </div>
            
@@ -397,7 +357,7 @@ export default function ResultClient() {
               <div className="flex gap-2 w-full">
                  <Button variant="outline" onClick={handleRetake} className="flex-1 h-9 border-2 font-bold text-[9px] rounded-xl active:scale-95"><RotateCcw className="h-3 w-3 mr-1" /> Retake</Button>
                  <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-9 bg-primary text-white font-bold text-[9px] rounded-xl shadow-md active:scale-95">
-                    {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-1" />} PDF report
+                    {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-1" />} PDF Report
                  </Button>
               </div>
            </div>
@@ -406,11 +366,11 @@ export default function ResultClient() {
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
             <TabsContent value="OVERVIEW" className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
                 <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-                  <StatCard label="Net score" val={`${finalMetrics?.score} / ${finalMetrics?.maxMarks}`} sub={`${finalMetrics?.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
-                  <StatCard label="Punjab rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
+                  <StatCard label="Net Score" val={`${finalMetrics?.score} / ${finalMetrics?.maxMarks}`} sub={`${finalMetrics?.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
+                  <StatCard label="Punjab Rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
                   <StatCard label="Percentile" val={`${finalMetrics?.percentile}%`} sub="Verified" icon={<TrendingUp className="text-blue-500" />} />
                   <StatCard label="Accuracy" val={`${finalMetrics?.attemptAccuracy.toFixed(1)}%`} sub="Precision" icon={<Target className="text-emerald-500" />} />
-                  <StatCard label="Attempt rate" val={`${finalMetrics?.attemptRate.toFixed(1)}%`} sub="Volume" icon={<Activity className="text-indigo-500" />} />
+                  <StatCard label="Attempt Rate" val={`${finalMetrics?.attemptRate.toFixed(1)}%`} sub="Volume" icon={<Activity className="text-indigo-500" />} />
                   <StatCard label="Grade" val={finalMetrics?.grade} sub="Audit" icon={<Award className="text-purple-500" />} />
                 </section>
 
@@ -418,21 +378,20 @@ export default function ResultClient() {
                   <div className="lg:col-span-8 space-y-6 md:space-y-10">
                       <Card className="border border-slate-100 shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] bg-white p-6 md:p-10 text-left">
                           <h3 className="text-xs md:text-xl font-bold text-[#0F172A] mb-8 flex items-center gap-3">
-                             <TrendingUp className="h-4 w-4 text-primary" /> Competition audit
+                             <TrendingUp className="h-4 w-4 text-primary" /> Competition Audit
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                              <div className="space-y-6">
-                                <ComparisonPill label="Your score" val={finalMetrics?.score || 0} max={finalMetrics?.maxMarks || 1} color="bg-primary" />
-                                <ComparisonPill label="Average score" val={Number(avgScore.toFixed(1))} max={finalMetrics?.maxMarks || 1} color="bg-slate-200" />
-                                <ComparisonPill label="Topper score" val={topperScore} max={finalMetrics?.maxMarks || 1} color="bg-amber-400" />
+                                <ComparisonPill label="Your Score" val={finalMetrics?.score || 0} max={finalMetrics?.maxMarks || 1} color="bg-primary" />
+                                <ComparisonPill label="Average Score" val={Number(avgScore.toFixed(1))} max={finalMetrics?.maxMarks || 1} color="bg-slate-200" />
+                                <ComparisonPill label="Topper Score" val={topperScore} max={finalMetrics?.maxMarks || 1} color="bg-amber-400" />
                              </div>
                              <div className="bg-slate-50 rounded-[1.5rem] p-6 flex flex-col items-center justify-center text-center space-y-3 border border-slate-100 shadow-inner">
                                 <Target className="h-6 w-6 text-rose-500" />
                                 <div>
-                                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Topper gap</p>
+                                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Topper Gap</p>
                                    <p className="text-2xl font-black text-[#0F172A] tabular-nums mt-1">-{finalMetrics?.topperGap.toFixed(1)}</p>
                                 </div>
-                                <p className="text-[9px] font-medium text-slate-500 max-w-[160px] leading-relaxed">Closing this gap requires targeted focus.</p>
                              </div>
                           </div>
                       </Card>
@@ -443,18 +402,13 @@ export default function ResultClient() {
                           <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-48 w-48 text-primary" /></div>
                           <div className="relative z-10 space-y-8 text-left">
                              <div className="space-y-1">
-                                <h3 className="text-xl font-black tracking-tight uppercase">Smart insights</h3>
-                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Analytics audit</p>
+                                <h3 className="text-xl font-black tracking-tight uppercase">Smart Insights</h3>
+                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Analytics Audit</p>
                              </div>
                              <div className="space-y-6">
                                 <InsightItem text={`Attempt rate is ${finalMetrics?.attemptRate.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptRate < 50 ? 'Low volume.' : 'Consistent.'}`} />
                                 <InsightItem text={`Accuracy is ${finalMetrics?.attemptAccuracy.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptAccuracy < 60 ? 'Reduce guesswork.' : 'Strong.'}`} />
                                 <InsightItem text={finalMetrics?.isQualified ? 'Target cutoff met.' : 'Target cutoff missed.'} />
-                             </div>
-                             <div className="pt-8 border-t border-white/5">
-                                <Button asChild variant="ghost" className="w-full text-primary hover:text-white hover:bg-white/5 font-black uppercase text-[10px] tracking-widest gap-2 border-none">
-                                   <Link href={`/leaderboard?id=${mockId}`}>Merit hub <ArrowRight className="h-3 w-3" /></Link>
-                                </Button>
                              </div>
                           </div>
                       </Card>
@@ -531,6 +485,42 @@ export default function ResultClient() {
                 </div>
             </TabsContent>
         </Tabs>
+
+        {/* HIDDEN EXPORT BUFFER: Fixed A4 210mm container */}
+        <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
+          <div id="cracklix-export-node">
+            {finalMetrics && activeSession && (
+              <ResultCard 
+                studentName={activeSession.userName || profile?.name || "Aspirant"} 
+                examTitle={activeSession.mockTitle || "Mock test"} 
+                score={finalMetrics.score.toFixed(2)} 
+                rank={liveRank} 
+                totalCandidates={totalCandidates}
+                accuracy={finalMetrics.overallAccuracy.toFixed(1)} 
+                attemptAccuracy={finalMetrics.attemptAccuracy.toFixed(1)}
+                attemptRate={finalMetrics.attemptRate.toFixed(1)}
+                timeTaken={formatTimeStr(activeSession.timeTaken)} 
+                correct={activeSession.correctCount} 
+                wrong={activeSession.wrongCount} 
+                skipped={activeSession.skippedCount}
+                total={activeSession.totalQuestions} 
+                date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')} 
+                resultId={activeSession.attemptId || activeSession.id} 
+                percentile={finalMetrics.percentile} 
+                branding={branding}
+                subjects={activeSession.subjectAnalysis}
+                grade={finalMetrics.grade}
+                isQualified={finalMetrics.isQualified}
+                readiness={finalMetrics.readiness}
+                readinessLevel={finalMetrics.readinessLevel}
+                topperScore={topperScore}
+                avgScore={avgScore}
+                duration={activeSession.duration || mockData?.duration}
+                isForExport
+              />
+            )}
+          </div>
+        </div>
       </main>
       <Footer />
     </div>
@@ -582,4 +572,11 @@ function FilterButton({ active, label, onClick, color = "primary" }: any) {
        {label}
     </button>
   )
+}
+
+function formatTimeStr(seconds: number) {
+  if (!seconds || isNaN(seconds)) return "0m 0s";
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}m ${s}s`;
 }
