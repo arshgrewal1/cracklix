@@ -19,9 +19,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Punjab Merit Registry v3.0 [Database Hardened].
- * FIXED: Consumers peak performance data from dedicated 'leaderboard' collection.
- * REAL-TIME: Automated updates on peak score achievement.
+ * @fileOverview Official Punjab Merit Registry v3.1 [Filtering Hardened].
+ * FIXED: Filtering logic now cross-references both boardId and mock title nodes.
  */
 
 const CATEGORY_CHIPS = [
@@ -65,7 +64,13 @@ export default function LeaderboardPage() {
     return meritList.filter((r: any) => {
         const name = (r.displayName || "Aspirant").toLowerCase();
         const matchesSearch = !term || name.includes(term) || (r.recentMockTitle || "").toLowerCase().includes(term);
-        const matchesBoard = activeBoard === 'all' || (r.recentMockTitle || "").toLowerCase().includes(activeBoard.toLowerCase());
+        
+        // Multi-node matching for Board filtering
+        const matchesBoard = activeBoard === 'all' || 
+                             (r.boardId || "").toLowerCase() === activeBoard.toLowerCase() ||
+                             (r.recentMockTitle || "").toLowerCase().includes(activeBoard.toLowerCase()) ||
+                             (activeBoard === 'Punjab Police' && (r.recentMockTitle || "").toLowerCase().includes('police'));
+
         return matchesSearch && matchesBoard;
     });
   }, [meritList, searchTerm, activeBoard]);
@@ -94,7 +99,7 @@ export default function LeaderboardPage() {
             </div>
          </section>
 
-         <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/95 backdrop-blur-xl -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
+         <div className="sticky top-[84px] md:top-[116px] z-[45] bg-[#F8FAFC]/95 backdrop-blur-xl -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
             <div className="max-w-4xl mx-auto space-y-6">
                <div className="relative group">
                   <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
@@ -130,13 +135,13 @@ export default function LeaderboardPage() {
             </div>
          </div>
 
-         {!searchTerm && filteredList.length > 0 && (
+         {!searchTerm && filteredList.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 pt-8">
                <PodiumCard rank={1} data={podium[0]} order="order-1 md:order-2" isMain />
                <PodiumCard rank={2} data={podium[1]} order="order-2 md:order-1" />
                <PodiumCard rank={3} data={podium[2]} order="order-3 md:order-3" />
             </div>
-         )}
+         ) : null}
 
          <div className="max-w-4xl mx-auto space-y-3">
             <AnimatePresence mode="popLayout">

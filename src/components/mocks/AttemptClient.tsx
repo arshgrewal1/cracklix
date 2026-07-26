@@ -30,8 +30,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v9.0 [Leaderboard Registry Hardened].
- * FIXED: Implemented Peak Score Transactional logic for global leaderboard.
+ * @fileOverview Official Mock Attempt Hub v9.1 [Leaderboard Registry Hardened].
+ * FIXED: Added boardId and examId to leaderboard node for reliable filtering.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -308,7 +308,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               totalTests: 1,
               updatedAt: serverTimestamp(),
               gender: profile?.gender || 'Other',
-              recentMockTitle: mockData.title
+              recentMockTitle: mockData.title,
+              boardId: mockData.boardId || "GENERAL",
+              examId: mockData.examId || "GENERAL"
             });
           } else {
             const data = lbSnap.data();
@@ -322,6 +324,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               updates.recentMockTitle = mockData.title;
               updates.displayName = profile?.name || data.displayName;
               updates.photoURL = profile?.photoURL || data.photoURL;
+              updates.boardId = mockData.boardId || data.boardId;
+              updates.examId = mockData.examId || data.examId;
             }
             transaction.update(leaderboardRef, updates);
           }
@@ -480,4 +484,3 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     </div>
   );
 }
-
