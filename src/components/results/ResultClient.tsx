@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -21,19 +21,14 @@ import {
   Loader2, 
   Share2,
   ChevronRight,
-  ShieldCheck,
   Clock,
-  Users,
   CheckCircle2,
   RefreshCw,
   BarChart3,
-  List,
   Timer as TimerIcon,
   Download,
-  Calendar,
-  Newspaper,
-  TrendingUp,
-  X
+  ShieldCheck,
+  Target
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -48,8 +43,9 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toBlob } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v47.0 [Professional Scorecard].
- * FIXED: blob conversion and sharing protocol.
+ * @fileOverview Universal Result Hub Viewer v52.0 [Professional Scorecard].
+ * FIXED: Dual-Action Share logic (Native Share on Mobile / Download on PC).
+ * FIXED: Wrapped in Suspense for Next.js 15 build stability.
  */
 
 export default function ResultClient() {
@@ -181,17 +177,22 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
+  /**
+   * @description Smart Sharing Logic:
+   * - Mobile: Direct native share sheet for WhatsApp/Instagram.
+   * - Desktop: Instant High-Quality PNG download.
+   */
   const handleShareResult = async () => {
     if (!sessionData || isSharing) return;
     
     setIsSharing(true);
-    toast({ title: "Audit Sync", description: "Rasterizing professional scorecard..." });
+    toast({ title: "Registry Audit", description: "Preparing professional report card..." });
 
     try {
       const node = document.getElementById('cracklix-result-card-canvas');
       if (!node) throw new Error("Registry node missing.");
 
-      // High-Fidelity capture at 2x resolution
+      // Capture at 2x resolution for printing/high-end displays
       const blob = await toBlob(node, {
          pixelRatio: 2,
          cacheBust: true,
@@ -200,29 +201,31 @@ export default function ResultClient() {
 
       if (!blob) throw new Error("Image rasterization failed.");
 
-      const file = new File([blob], `Cracklix_Scorecard_${sessionData.mockTitle}.png`, { type: 'image/png' });
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const fileName = `Cracklix_Report_${sessionData.mockTitle.replace(/\s+/g, '_')}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
 
-      // Trigger Native Device Share Sheet
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      // 1. Logic: Share on Mobile if supported
+      if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
             title: `My Cracklix Result`,
-            text: `🎯 Check my official score for ${sessionData.mockTitle}. Verified standing on Cracklix!`,
+            text: `🎯 Check my official scorecard for ${sessionData.mockTitle}. Verified standing on Cracklix!`,
             files: [file]
          });
       } else {
-         // Direct Download Fallback
+         // 2. Logic: Direct Download on Laptop/PC
          const url = URL.createObjectURL(blob);
          const link = document.createElement('a');
-         link.download = `Cracklix_Scorecard.png`;
+         link.download = fileName;
          link.href = url;
          link.click();
          URL.revokeObjectURL(url);
-         toast({ title: "Scorecard downloaded" });
+         toast({ title: "Report Downloaded", description: "Scorecard saved to your device." });
       }
     } catch (e: any) {
        console.error("[SHARE_ERROR]:", e);
        if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Audit Error", description: "Could not broadcast scorecard." });
+          toast({ variant: "destructive", title: "Audit Error", description: "Could not generate report." });
        }
     } finally {
        setIsSharing(false);
@@ -254,7 +257,7 @@ export default function ResultClient() {
       
       <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-8 md:py-16 space-y-6 md:space-y-10">
         
-        {sessionData && (
+        {sessionData ? (
            <>
               <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-6 md:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                  <div className="flex items-center gap-6 md:gap-10">
@@ -274,7 +277,7 @@ export default function ResultClient() {
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
                     <Button onClick={handleShareResult} disabled={isSharing} className="flex-1 lg:flex-none h-12 px-8 bg-[#0B57D0] hover:bg-blue-700 text-white font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
                        {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
-                       Share scorecard
+                       {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'Direct share card' : 'Download PNG'}
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
@@ -338,6 +341,24 @@ export default function ResultClient() {
                  <ShareableResultCard data={sessionData} rank={liveRank} totalCandidates={totalCandidates} />
               </div>
            </>
+        ) : isSearching ? (
+           <div className="py-40 flex flex-col items-center justify-center space-y-4">
+              <Loader2 className="h-10 w-10 text-primary animate-spin" />
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Searching registry nodes...</p>
+           </div>
+        ) : (
+           <div className="py-40 flex flex-col items-center justify-center space-y-6 text-center">
+              <div className="h-20 w-20 bg-slate-50 rounded-[2rem] flex items-center justify-center text-slate-300 shadow-inner">
+                 <ShieldCheck className="h-10 w-10" />
+              </div>
+              <div className="space-y-2">
+                 <h2 className="text-2xl font-black text-[#0F172A]">Result audit not found</h2>
+                 <p className="text-slate-500 font-medium max-w-sm">No synchronized attempt records were found for this test vertical.</p>
+              </div>
+              <Button asChild className="rounded-full px-10">
+                 <Link href="/mocks">Explore test bank</Link>
+              </Button>
+           </div>
         )}
       </main>
       <Footer />
@@ -345,7 +366,7 @@ export default function ResultClient() {
   )
 }
 
-function FilterButton({ active, label, count, onClick, color = "primary" }: any) {
+function FilterButton({ active, label, count, onClick }: any) {
   return (
     <button onClick={onClick} className={cn(
       "flex items-center gap-3 px-6 h-10 rounded-xl text-[10px] font-bold transition-all active:scale-95 border whitespace-nowrap",
@@ -354,4 +375,13 @@ function FilterButton({ active, label, count, onClick, color = "primary" }: any)
        {label} <span className="opacity-40">{count}</span>
     </button>
   )
+}
+
+function SummaryMiniCard({ label, val, color, bg }: any) {
+   return (
+      <Card className={cn("h-36 md:h-44 rounded-[24px] border-none shadow-sm flex flex-col items-center justify-center p-4", bg)}>
+         <span className={cn("text-2xl md:text-4xl font-black tabular-nums", color)}>{val}</span>
+         <span className="text-[10px] md:text-xs font-bold text-slate-400 mt-2">{label}</span>
+      </Card>
+   )
 }
