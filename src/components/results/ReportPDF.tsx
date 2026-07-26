@@ -29,9 +29,10 @@ interface ReportPDFProps {
 }
 
 /**
- * @fileOverview Institutional Portrait PDF Layout Hub v30.0 [Compacted & Hardened].
- * FIXED: Reduced vertical footprints of all nodes to move the footer up and ensure zero clipping.
- * FIXED: Enforced strict vertical axis centering.
+ * @fileOverview Institutional Portrait PDF Layout Hub v31.0 [Hardened & Boxed].
+ * FIXED: Implemented a structured identity box with internal dividers.
+ * FIXED: Increased rank spacer to 60px to prevent overlap.
+ * FIXED: Compacted nodes to ensure the footer is fully visible on a single A4 page.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
@@ -67,7 +68,7 @@ export default function ReportPDF(props: ReportPDFProps) {
 
       <div className="w-full flex-1 p-8 space-y-8 flex flex-col items-center overflow-hidden">
          
-         {/* 2. BOXED IDENTITY HUB - COMPACTED */}
+         {/* 2. BOXED IDENTITY HUB */}
          <div className="w-full bg-white rounded-[2rem] p-8 border border-slate-100 flex flex-col items-center justify-center shadow-sm relative overflow-hidden text-center min-h-[160px]">
             <div className="space-y-2 w-full">
                <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">Candidate Identity</p>
@@ -93,7 +94,7 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
          </div>
 
-         {/* 3. MERIT STANDING - COMPACTED WITH SPACER */}
+         {/* 3. MERIT STANDING */}
          <div className="w-full bg-[#0F172A] rounded-[2rem] p-10 text-white text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden min-h-[280px]">
             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-48 w-48 text-primary" /></div>
             
@@ -104,7 +105,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                   <span className="text-[100px] font-[900] tabular-nums tracking-tighter leading-none block drop-shadow-[0_15px_30px_rgba(37,99,235,0.4)]">
                      #{rank}
                   </span>
-                  <div className="h-[48px] w-full" /> {/* EXPLICIT VERTICAL SPACER */}
+                  <div className="h-[60px] w-full" /> {/* EXPLICIT VERTICAL SPACER */}
                   <span className="text-[16px] font-black text-slate-500 tabular-nums uppercase tracking-widest">
                      / {totalCandidates.toLocaleString()} Total Candidates
                   </span>
@@ -163,7 +164,7 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
          )}
 
-         {/* 7. FOOTER HUB - FIXED BOTTOM BUFFER */}
+         {/* 7. FOOTER HUB */}
          <div className="pt-6 border-t border-slate-100 flex items-center justify-between w-full mt-auto pb-8">
             <div className="flex items-center gap-6">
                <div className="h-20 w-20 bg-white border-2 border-slate-100 p-2 rounded-2xl shadow-lg relative overflow-hidden">

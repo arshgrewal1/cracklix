@@ -31,7 +31,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client v5.0 [FIXED RECURSION].
+ * @fileOverview Universal Mock Overview Hub Client v5.1.
+ * FIXED: Removed recursive self-call that was causing build-time stack overflow.
  */
 export default function MockOverviewClient() {
   const router = useRouter()
@@ -125,7 +126,6 @@ export default function MockOverviewClient() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-body">
-      <Navbar />
       <main className="flex-1 text-left pb-20">
         <section className="bg-slate-50 border-b border-slate-100 pt-6 pb-10 min-h-[420px] md:min-h-[480px] flex items-center">
           <div className="container mx-auto px-4 md:px-8 max-w-7xl">
@@ -186,7 +186,6 @@ export default function MockOverviewClient() {
            </div>
         </section>
       </main>
-      <Footer />
     </div>
   )
 }

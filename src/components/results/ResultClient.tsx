@@ -40,7 +40,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v44.0 [Hardened Index-Less].
+ * @fileOverview Institutional Result Hub v44.1 [Hardened Index-Less].
+ * FIXED: Removed server-side orderBy to bypass Firestore Index requirement.
+ * FIXED: Implemented client-side sorting for attempt history.
  */
 
 export default function ResultClient() {
@@ -110,7 +112,7 @@ export default function ResultClient() {
        }
 
        try {
-          // Hardened Lookup: Fetch all relevant entries and sort client-side to bypass index requirements
+          // Hardened Lookup: Fetch matching results and sort client-side to bypass Index requirement
           const resQuery = query(
              collection(db, "results"), 
              where("userId", "==", user.uid), 
@@ -125,12 +127,13 @@ export default function ResultClient() {
              return;
           }
 
+          // Sort by timestamp newest first
           const resultsList = querySnap.docs
             .map(d => ({ ...d.data(), id: d.id }))
             .sort((a: any, b: any) => {
               const timeA = new Date(a.timestamp || 0).getTime();
               const timeB = new Date(b.timestamp || 0).getTime();
-              return timeA - timeB;
+              return timeB - timeA;
             });
           
           setUserAttemptCount(resultsList.length);
@@ -138,14 +141,14 @@ export default function ResultClient() {
           if (attemptIdFromUrl) {
              const target = resultsList.find(r => r.attemptId === attemptIdFromUrl || r.id.endsWith(attemptIdFromUrl));
              if (target) {
-                const nth = resultsList.findIndex(r => r.id === target.id) + 1;
-                setSessionData({ ...target, attemptNumber: nth > 0 ? nth : resultsList.length });
+                const nth = resultsList.length - resultsList.findIndex(r => r.id === target.id);
+                setSessionData({ ...target, attemptNumber: nth });
                 setIsSearching(false);
                 return;
              }
           }
 
-          const latest = resultsList[resultsList.length - 1];
+          const latest = resultsList[0];
           setSessionData({ ...latest, attemptNumber: resultsList.length });
           setIsSearching(false);
 

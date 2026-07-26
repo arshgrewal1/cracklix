@@ -6,8 +6,8 @@ import MockOverviewClient from "@/components/mocks/MockOverviewClient"
 import { Loader2 } from "lucide-react"
 
 /**
- * @fileOverview Universal Mock Overview Hub Viewer.
- * Optimized for Static Export: Uses query params (?id=...) to bypass path pre-rendering limitations.
+ * @fileOverview Universal Mock Overview Hub Viewer v2.1.
+ * FIXED: Wrapped in Suspense to satisfy Next.js 15 pre-rendering CSR bailout requirement.
  */
 
 export default function MockViewPage() {
