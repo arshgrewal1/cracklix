@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -65,10 +66,9 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Institutional Result Hub V4.1.
- * FIXED: Missing 'Activity' and 'Award' imports.
- * TERMINOLOGY: Global sync to 'Questions'.
- * TYPOGRAPHY: Strict Title Case enforcement.
+ * @fileOverview Institutional Result Hub V4.2.
+ * FIXED: Removed fixed min-width on containers to ensure responsive PWA view.
+ * REDESIGNED: Minimized footprint for mobile PWA mode.
  */
 
 export default function ResultClient() {
@@ -291,7 +291,7 @@ export default function ResultClient() {
       if (typeof window !== 'undefined' && 'fonts' in document) await (document as any).fonts.ready;
       
       const element = document.getElementById('cracklix-result-card');
-      if (!element) throw new Error("Report node not found.");
+      if (!element) throw new Error("Report container not matched.");
 
       const canvas = await html2canvas(element, { 
         scale: 4, 
@@ -310,9 +310,9 @@ export default function ResultClient() {
       pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
       pdf.save(`Cracklix_Report_${activeSession.userName || 'Aspirant'}.pdf`);
       
-      toast({ title: "Report downloaded" });
+      toast({ title: "Report exported" });
     } catch (e: any) { 
-       toast({ variant: "destructive", title: "Export failed", description: "Please retry." }); 
+       toast({ variant: "destructive", title: "Sync failed", description: "Audit node timed out. Please retry." }); 
     } finally { setIsExporting(false); }
   };
 
@@ -339,12 +339,6 @@ export default function ResultClient() {
     return reviewNodes.all;
   }, [activeReviewFilter, reviewNodes]);
 
-  const formatTimeStr = (secs: number) => {
-     if (!secs || secs <= 0) return "---";
-     const m = Math.floor(secs / 60); const s = secs % 60;
-     return m > 0 ? `${m}m ${s}s` : `${s}s`;
-  };
-
   if (!mounted || isSearching) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
       <Zap className="h-8 w-8 text-primary animate-spin" />
@@ -354,7 +348,7 @@ export default function ResultClient() {
 
   if (errorNotFound) return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-       <Card className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-14 shadow-5xl border-none space-y-10 animate-in fade-in zoom-in-95">
+       <Card className="max-w-md w-full bg-white rounded-[2rem] p-10 md:p-14 shadow-5xl border-none space-y-10 animate-in fade-in zoom-in-95">
           <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-inner border border-rose-100">
              <AlertCircle className="h-10 w-10" />
           </div>
@@ -368,49 +362,49 @@ export default function ResultClient() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden w-full">
       <Navbar />
-      <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-10 space-y-6 md:space-y-10 pb-40">
+      <main className="flex-1 w-full max-w-full md:max-w-[1440px] mx-auto p-4 md:p-10 space-y-6 md:space-y-10 pb-40">
         
         <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1 print:hidden text-left">
-           <div className="flex items-center gap-4 md:gap-8 text-left w-full lg:w-auto">
-              <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-12 w-12 md:h-14 md:w-14 rounded-xl shadow-lg bg-white border-2 border-slate-50" />
-              <div className="space-y-1 flex-1 min-w-0">
+           <div className="flex items-center gap-4 md:gap-8 text-left w-full lg:w-auto min-w-0">
+              <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-10 w-10 md:h-14 md:w-14 rounded-xl shadow-lg bg-white border-2 border-slate-50 shrink-0" />
+              <div className="space-y-0.5 flex-1 min-w-0">
                  <div className="flex items-center gap-2">
-                    <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm", finalMetrics?.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+                    <Badge className={cn("border-none text-[7px] font-bold px-1.5 py-0.5 rounded-full shadow-sm", finalMetrics?.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
                        {finalMetrics?.isQualified ? "Qualified" : "Failed"}
                     </Badge>
                  </div>
-                 <h1 className="text-base md:text-xl font-[800] tracking-tight text-[#0F172A] leading-tight truncate">
+                 <h1 className="text-sm md:text-xl font-[800] tracking-tight text-[#0F172A] leading-tight truncate w-full">
                    {activeSession?.mockTitle}
                  </h1>
-                 <div className="flex flex-wrap items-center justify-start gap-2 md:gap-3 font-bold text-[9px] text-slate-400">
-                    <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> {new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
-                    <span className="h-1 w-1 rounded-full bg-slate-200" />
-                    <span>ID: {activeSession.attemptId?.slice(0, 8)}</span>
+                 <div className="flex items-center gap-2 md:gap-3 font-bold text-[8px] md:text-[9px] text-slate-400">
+                    <span className="flex items-center gap-1"><Clock className="h-2.5 w-2.5" /> {new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
+                    <span className="h-0.5 w-0.5 rounded-full bg-slate-200" />
+                    <span>Attempt ID: {activeSession.attemptId?.slice(0, 8)}</span>
                  </div>
               </div>
            </div>
            
            <div className="flex flex-col gap-2 w-full lg:w-auto shrink-0">
-              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="bg-white border border-slate-100 p-1 rounded-xl shadow-sm">
+              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="bg-white border border-slate-100 p-1 rounded-xl shadow-sm w-full">
                  <TabsList className="bg-transparent border-none p-0 flex h-9 w-full gap-1">
-                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-4 font-bold text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Overview</TabsTrigger>
-                    <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-4 font-bold text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review</TabsTrigger>
-                    <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-4 font-bold text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Report</TabsTrigger>
+                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-2 font-bold text-[9px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Overview</TabsTrigger>
+                    <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-2 font-bold text-[9px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review</TabsTrigger>
+                    <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-2 font-bold text-[9px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Report</TabsTrigger>
                  </TabsList>
               </Tabs>
-              <div className="flex gap-2">
-                 <Button variant="outline" onClick={handleRetake} className="flex-1 h-10 border-2 font-bold text-[9px] rounded-xl active:scale-95"><RotateCcw className="h-3 w-3 mr-2" /> Retake</Button>
-                 <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-10 bg-primary text-white font-bold text-[9px] rounded-xl shadow-md active:scale-95">
-                    {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} PDF report
+              <div className="flex gap-2 w-full">
+                 <Button variant="outline" onClick={handleRetake} className="flex-1 h-9 border-2 font-bold text-[9px] rounded-xl active:scale-95"><RotateCcw className="h-3 w-3 mr-1" /> Retake</Button>
+                 <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-9 bg-primary text-white font-bold text-[9px] rounded-xl shadow-md active:scale-95">
+                    {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-1" />} PDF report
                  </Button>
               </div>
            </div>
         </div>
 
-        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-10">
-            <TabsContent value="OVERVIEW" className="space-y-10 animate-in fade-in duration-500">
+        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
+            <TabsContent value="OVERVIEW" className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
                 <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
                   <StatCard label="Net score" val={`${finalMetrics?.score} / ${finalMetrics?.maxMarks}`} sub={`${finalMetrics?.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
                   <StatCard label="Punjab rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
@@ -422,8 +416,8 @@ export default function ResultClient() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
                   <div className="lg:col-span-8 space-y-6 md:space-y-10">
-                      <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 text-left">
-                          <h3 className="text-sm md:text-xl font-bold text-[#0F172A] mb-8 flex items-center gap-3">
+                      <Card className="border border-slate-100 shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] bg-white p-6 md:p-10 text-left">
+                          <h3 className="text-xs md:text-xl font-bold text-[#0F172A] mb-8 flex items-center gap-3">
                              <TrendingUp className="h-4 w-4 text-primary" /> Competition audit
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -435,100 +429,41 @@ export default function ResultClient() {
                              <div className="bg-slate-50 rounded-[1.5rem] p-6 flex flex-col items-center justify-center text-center space-y-3 border border-slate-100 shadow-inner">
                                 <Target className="h-6 w-6 text-rose-500" />
                                 <div>
-                                   <p className="text-[9px] font-bold text-slate-400">Topper gap</p>
+                                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Topper gap</p>
                                    <p className="text-2xl font-black text-[#0F172A] tabular-nums mt-1">-{finalMetrics?.topperGap.toFixed(1)}</p>
                                 </div>
-                                <p className="text-[10px] font-medium text-slate-500 max-w-[160px] leading-relaxed">Closing this gap requires targeted focus.</p>
-                             </div>
-                          </div>
-                      </Card>
-
-                      <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-white p-6 md:p-10 text-left">
-                          <div className="flex justify-between items-center mb-8">
-                             <h3 className="text-sm md:text-xl font-bold text-[#0F172A] flex items-center gap-3">
-                                <ShieldCheck className="h-4 w-4 text-emerald-500" /> Readiness index
-                             </h3>
-                             <Badge className={cn(
-                                "border-none text-[8px] font-black px-3 py-1 rounded-full shadow-lg",
-                                finalMetrics?.readiness && finalMetrics.readiness >= 80 ? "bg-emerald-50 text-emerald-600" :
-                                finalMetrics?.readiness && finalMetrics.readiness >= 60 ? "bg-blue-500 text-white" :
-                                finalMetrics?.readiness && finalMetrics.readiness >= 40 ? "bg-amber-500 text-white" : "bg-rose-50 text-rose-600"
-                             )}>
-                                {finalMetrics?.readinessLevel}
-                             </Badge>
-                          </div>
-                          <div className="space-y-6">
-                             <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner flex">
-                                <div className="h-full bg-rose-500 w-[20%]" />
-                                <div className="h-full bg-amber-500 w-[20%]" />
-                                <div className="h-full bg-blue-500 w-[20%]" />
-                                <div className="h-full bg-blue-600 w-[20%]" />
-                                <div className="h-full bg-emerald-500 w-[20%]" />
-                             </div>
-                             <div className="relative pt-4">
-                                <motion.div initial={{ left: 0 }} animate={{ left: `${finalMetrics?.readiness || 0}%` }} transition={{ duration: 2, ease: "easeOut" }} className="absolute -top-10 -translate-x-1/2 flex flex-col items-center gap-0.5">
-                                   <div className="px-2 py-0.5 bg-[#0F172A] text-white text-[9px] font-bold rounded shadow-xl">{finalMetrics?.readiness.toFixed(1)}</div>
-                                   <div className="w-0.5 h-8 bg-[#0F172A] rounded-full" />
-                                </motion.div>
-                                <div className="flex justify-between text-[7px] font-bold text-slate-400 uppercase tracking-widest">
-                                   <span>Critical</span> <span>Weak</span> <span>Average</span> <span>Good</span> <span>Excellent</span>
-                                </div>
+                                <p className="text-[9px] font-medium text-slate-500 max-w-[160px] leading-relaxed">Closing this gap requires targeted focus.</p>
                              </div>
                           </div>
                       </Card>
                   </div>
 
-                  <div className="lg:col-span-4 space-y-6 md:space-y-10">
-                      <Card className="border-none shadow-xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden h-full">
+                  <div className="lg:col-span-4 space-y-6">
+                      <Card className="border-none shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden h-full flex flex-col justify-center">
                           <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-48 w-48 text-primary" /></div>
                           <div className="relative z-10 space-y-8 text-left">
                              <div className="space-y-1">
-                                <h3 className="text-xl font-bold tracking-tight leading-tight uppercase">Smart insights</h3>
+                                <h3 className="text-xl font-black tracking-tight uppercase">Smart insights</h3>
                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Analytics audit</p>
                              </div>
                              <div className="space-y-6">
-                                <InsightItem text={`Attempt rate is ${finalMetrics?.attemptRate.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptRate < 50 ? 'Lower than standard.' : 'Consistent volume.'}`} />
-                                <InsightItem text={`Precision is ${finalMetrics?.attemptAccuracy.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptAccuracy < 60 ? 'Reduce guesswork.' : 'Strong accuracy.'}`} />
-                                <InsightItem text={finalMetrics?.isQualified ? 'Meets recruitment cutoff.' : 'Below qualification threshold.'} />
+                                <InsightItem text={`Attempt rate is ${finalMetrics?.attemptRate.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptRate < 50 ? 'Low volume.' : 'Consistent.'}`} />
+                                <InsightItem text={`Accuracy is ${finalMetrics?.attemptAccuracy.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptAccuracy < 60 ? 'Reduce guesswork.' : 'Strong.'}`} />
+                                <InsightItem text={finalMetrics?.isQualified ? 'Target cutoff met.' : 'Target cutoff missed.'} />
                              </div>
                              <div className="pt-8 border-t border-white/5">
-                                <Button asChild variant="ghost" className="w-full text-primary hover:text-white hover:bg-white/5 font-bold text-[10px] tracking-tight gap-2 border-none">
-                                   <Link href={`/leaderboard?id=${mockId}`}>Full rankings hub <ArrowRight className="h-3" /></Link>
+                                <Button asChild variant="ghost" className="w-full text-primary hover:text-white hover:bg-white/5 font-black uppercase text-[10px] tracking-widest gap-2 border-none">
+                                   <Link href={`/leaderboard?id=${mockId}`}>Merit hub <ArrowRight className="h-3 w-3" /></Link>
                                 </Button>
                              </div>
                           </div>
                       </Card>
                   </div>
                 </div>
-
-                <section className="space-y-6 md:space-y-8">
-                   <h3 className="text-sm md:text-xl font-bold text-[#0F172A] px-1 flex items-center gap-3">
-                      <Layers className="h-5 w-5 text-blue-500" /> Subject mastery hub
-                   </h3>
-                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                      {activeSession?.subjectAnalysis?.map((sub: any, i: number) => (
-                         <Card key={i} className="border border-slate-100 shadow-md rounded-[1.5rem] md:rounded-[2rem] bg-white p-6 flex flex-col gap-4 text-left group hover:-translate-y-1 transition-all">
-                            <div className="flex justify-between items-start">
-                               <h4 className="text-sm font-bold text-[#0F172A] line-clamp-1 truncate">{sub.name}</h4>
-                               <Badge className={cn("border-none text-[8px] font-bold", sub.accuracy >= 70 ? "bg-emerald-50 text-emerald-600" : sub.accuracy >= 40 ? "bg-blue-50 text-blue-600" : "bg-rose-50 text-rose-600")}>{sub.accuracy}%</Badge>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                               <SubjectMetric label="Correct" val={sub.correct} color="text-emerald-600" />
-                               <SubjectMetric label="Wrong" val={sub.wrong} color="text-rose-600" />
-                               <SubjectMetric label="Skipped" val={sub.total - (sub.correct + sub.wrong)} color="text-slate-400" />
-                               <SubjectMetric label="Score" val={sub.score.toFixed(1)} color="text-primary" />
-                            </div>
-                            <div className="h-1 w-full bg-slate-50 rounded-full overflow-hidden mt-1">
-                               <motion.div initial={{ width: 0 }} animate={{ width: `${sub.accuracy}%` }} className={cn("h-full", sub.accuracy >= 70 ? "bg-emerald-500" : "bg-blue-500")} />
-                            </div>
-                         </Card>
-                      ))}
-                   </div>
-                </section>
             </TabsContent>
 
             <TabsContent value="REVIEW" className="space-y-8 animate-in fade-in duration-500">
-                <div className="max-w-3xl mx-auto space-y-8">
+                <div className="max-w-4xl mx-auto space-y-8">
                    <div className="flex items-center gap-1 bg-white p-1 rounded-xl shadow-md border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
                        <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
                        <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
@@ -540,7 +475,7 @@ export default function ResultClient() {
                            const rawAns = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
                            const isAttempted = rawAns !== null && rawAns !== undefined && String(rawAns) !== "";
                            return (
-                               <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white text-left">
+                               <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-white text-left">
                                <div className="p-6 md:p-10 space-y-6">
                                    <Badge variant="outline" className="px-3 py-0.5 rounded-lg border-slate-200 text-slate-400 font-bold text-[8px]">
                                        Question #{q.originalIndex + 1}
@@ -560,9 +495,9 @@ export default function ResultClient() {
                 </div>
             </TabsContent>
 
-            <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 pb-20">
-                <div className="flex flex-col items-center overflow-x-auto no-scrollbar pt-10">
-                   <div className="bg-white p-0 rounded-none shadow-5xl border border-slate-200 overflow-hidden min-w-[840px]">
+            <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 pb-20 overflow-x-auto no-scrollbar">
+                <div className="flex flex-col items-center pt-6 md:pt-10 w-full">
+                   <div className="bg-white p-0 rounded-none shadow-5xl border border-slate-200 overflow-hidden w-full max-w-[210mm]">
                        {finalMetrics && (
                           <ResultCard 
                               studentName={activeSession.userName || profile?.name || "Aspirant"} 
@@ -604,12 +539,12 @@ export default function ResultClient() {
 
 function StatCard({ label, val, sub, icon, highlight }: any) {
   return (
-    <Card className={cn("border border-slate-100 shadow-sm bg-white p-4 md:p-6 rounded-xl md:rounded-[1.5rem] text-left relative overflow-hidden h-full flex flex-col justify-center transition-all hover:translate-y-[-2px]", highlight && "ring-4 ring-primary/5 border-primary/20")}>
+    <Card className={cn("border border-slate-100 shadow-sm bg-white p-4 md:p-6 rounded-xl md:rounded-[1.5rem] text-left relative overflow-hidden h-full flex flex-col justify-center transition-all hover:translate-y-[-1px]", highlight && "ring-4 ring-primary/5 border-primary/10")}>
        <div className="absolute top-0 right-0 p-2 opacity-5">{icon}</div>
        <div className="space-y-0.5 relative z-10">
-          <p className="text-[8px] md:text-[9px] font-bold text-slate-400 mb-1 uppercase tracking-tight">{label}</p>
-          <p className={cn("text-base md:text-xl font-black tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
-          {sub && <p className="text-[7px] md:text-[8px] font-bold text-slate-300 mt-1 uppercase tracking-widest">{sub}</p>}
+          <p className="text-[7px] md:text-[8px] font-bold text-slate-400 mb-0.5 uppercase tracking-tighter">{label}</p>
+          <p className={cn("text-xs md:text-xl font-black tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
+          {sub && <p className="text-[6px] md:text-[8px] font-bold text-slate-300 mt-1 uppercase tracking-widest">{sub}</p>}
        </div>
     </Card>
   )
@@ -621,11 +556,11 @@ function ComparisonPill({ label, val, max, color }: any) {
   const progress = Math.min(100, Math.max(0, (safeVal / safeMax) * 100));
   
   return (
-    <div className="space-y-2">
-       <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+    <div className="space-y-1.5">
+       <div className="flex justify-between text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest">
           <span>{label}</span> <span className="text-[#0F172A] tabular-nums">{safeVal}</span>
        </div>
-       <div className="h-2 w-full bg-slate-100 rounded-lg overflow-hidden border border-slate-200 shadow-inner">
+       <div className="h-1.5 w-full bg-slate-100 rounded-lg overflow-hidden border border-slate-50 shadow-inner">
           <motion.div initial={{ width: 0 }} whileInView={{ width: `${progress}%` }} transition={{ duration: 1.5 }} className={cn("h-full shadow-lg", color)} />
        </div>
     </div>
@@ -634,25 +569,16 @@ function ComparisonPill({ label, val, max, color }: any) {
 
 function InsightItem({ text }: { text: string }) {
   return (
-    <div className="flex items-start gap-4 group">
-       <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0 shadow-[0_0_8px_#2563EB]" />
-       <p className="text-[11px] md:text-[14px] font-bold text-slate-300 leading-snug group-hover:text-white transition-colors">{text}</p>
-    </div>
-  )
-}
-
-function SubjectMetric({ label, val, color }: any) {
-  return (
-    <div className="space-y-0.5">
-       <p className="text-[7px] font-bold text-slate-400 uppercase tracking-tight">{label}</p>
-       <p className={cn("text-sm md:text-base font-black tabular-nums leading-none", color)}>{val}</p>
+    <div className="flex items-start gap-3 group">
+       <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0 shadow-[0_0_8px_#2563EB]" />
+       <p className="text-[10px] md:text-[14px] font-bold text-slate-300 leading-snug group-hover:text-white transition-colors">{text}</p>
     </div>
   )
 }
 
 function FilterButton({ active, label, onClick, color = "primary" }: any) {
   return (
-    <button onClick={onClick} className={cn("px-4 md:px-6 py-2 rounded-lg text-[9px] font-bold tracking-tight transition-all active:scale-95 whitespace-nowrap border border-transparent uppercase tracking-widest", active ? color === 'rose' ? "bg-rose-600 text-white shadow-lg" : color === 'emerald' ? "bg-emerald-600 text-white shadow-lg" : "bg-[#0F172A] text-white shadow-lg" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
+    <button onClick={onClick} className={cn("px-4 md:px-6 py-2 rounded-lg text-[8px] md:text-[9px] font-black tracking-tight transition-all active:scale-95 whitespace-nowrap border border-transparent uppercase tracking-widest", active ? color === 'rose' ? "bg-rose-600 text-white shadow-lg" : color === 'emerald' ? "bg-emerald-600 text-white shadow-lg" : "bg-[#0F172A] text-white shadow-lg" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
        {label}
     </button>
   )
