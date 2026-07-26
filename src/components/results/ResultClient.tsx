@@ -45,11 +45,11 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import ShareableResultCard from "./ShareableResultCard"
 import { toBlob } from 'html-to-image'
+import jsPDF from 'jspdf'
 
 /**
- * @fileOverview Universal Result Hub Viewer v70.0.
- * FIXED: Removed PDF button from header to minimize it as requested.
- * FIXED: Direct Share logic mirrors the sidebar's native share behavior.
+ * @fileOverview Universal Result Hub Viewer v71.0.
+ * UPDATED: Integrated high-fidelity "Official Report" PNG and PDF engine.
  */
 
 export default function ResultClient() {
@@ -76,7 +76,7 @@ export default function ResultClient() {
   const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const scorecardRef = useRef<HTMLDivElement>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -153,13 +153,13 @@ export default function ResultClient() {
      fetchRankingMetrics();
   }, [db, mockId, sessionData]);
 
-  const handleShareResult = async () => {
+  const handleShareOfficialReport = async () => {
     if (!sessionData || isGenerating) return;
     setIsGenerating(true);
 
     try {
-      const node = scorecardRef.current;
-      if (!node) throw new Error("Capture node not ready.");
+      const node = reportRef.current;
+      if (!node) throw new Error("Report node not ready.");
 
       const blob = await toBlob(node, {
         pixelRatio: 2,
@@ -167,18 +167,18 @@ export default function ResultClient() {
         backgroundColor: '#ffffff'
       });
 
-      if (!blob) throw new Error("Blob generation empty.");
+      if (!blob) throw new Error("Blob generation failed.");
 
       const file = new File(
         [blob],
-        `Cracklix_Result_${sessionData.userId}_${Date.now()}.png`,
+        `Cracklix_Official_Report_${sessionData.userId}_${Date.now()}.png`,
         { type: "image/png" }
       );
 
       if (navigator.share) {
         await navigator.share({
-          title: "My Cracklix Result",
-          text: `Check out my verified result for ${sessionData.mockTitle} on Cracklix!`,
+          title: "Official Cracklix Report",
+          text: `My verified exam report for ${sessionData.mockTitle}. Grade: ${sessionData.grade || 'Verified'}.`,
           files: [file]
         });
       } else {
@@ -188,16 +188,48 @@ export default function ResultClient() {
         link.href = url;
         link.click();
         URL.revokeObjectURL(url);
-        toast({ title: "Scorecard saved to device" });
+        toast({ title: "Report saved to device" });
       }
     } catch (e: any) {
       if (e.name !== 'AbortError') {
         toast({ 
           variant: "destructive", 
-          title: "Audit Error", 
-          description: "Could not generate share image. Ensure connection is stable." 
+          title: "Generation Failure", 
+          description: "Registry error during report synthesis." 
         });
       }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!sessionData || isGenerating) return;
+    setIsGenerating(true);
+    
+    try {
+      const node = reportRef.current;
+      if (!node) throw new Error("Node missing.");
+
+      const blob = await toBlob(node, { pixelRatio: 3, backgroundColor: '#ffffff' });
+      if (!blob) throw new Error("Capture failure.");
+
+      const imgData = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Cracklix_Official_Report_${sessionData.attemptId}.pdf`);
+      toast({ title: "PDF Synced", description: "Official report saved successfully." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "PDF Failure" });
     } finally {
       setIsGenerating(false);
     }
@@ -274,10 +306,10 @@ export default function ResultClient() {
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-20 w-20 md:h-28 md:w-28 bg-white shadow-xl border border-slate-100 rounded-3xl" />
                     <div className="text-left space-y-3">
                        <div className="flex flex-wrap items-center gap-3">
-                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-4 py-1 font-bold text-[10px] rounded-lg">VERIFIED HUB</Badge>
-                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-4 py-1 font-bold text-[10px] rounded-lg uppercase">ATTEMPT #{userResults?.length || 1}</Badge>
+                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-4 py-1 font-bold text-[10px] rounded-lg uppercase tracking-widest">Verified Report</Badge>
+                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-4 py-1 font-bold text-[10px] rounded-lg uppercase">Attempt #{userResults?.length || 1}</Badge>
                        </div>
-                       <h1 className="text-2xl md:text-5xl font-bold text-[#0F172A] tracking-tight leading-none">{sessionData.mockTitle}</h1>
+                       <h1 className="text-2xl md:text-5xl font-bold text-[#0F172A] tracking-tight leading-none uppercase">{sessionData.mockTitle}</h1>
                        <div className="flex flex-wrap items-center gap-6 text-[12px] md:text-lg font-semibold text-slate-400">
                           <div className="flex items-center gap-2"><Calendar className="h-5 w-5 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</span></div>
                           <div className="flex items-center gap-2"><TimerIcon className="h-5 w-5 text-slate-300" /> <span>Duration: {mockData?.duration || 120}:00</span></div>
@@ -285,11 +317,14 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-                    <Button onClick={handleShareResult} disabled={isGenerating} className="flex-1 lg:flex-none h-14 px-8 md:px-12 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 text-sm shadow-lg active:scale-95 transition-all border-none">
-                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-5 w-5" />} Direct Share Card
+                    <Button onClick={handleShareOfficialReport} disabled={isGenerating} className="flex-1 lg:flex-none h-14 px-8 md:px-12 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 text-sm shadow-lg active:scale-95 transition-all border-none">
+                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-5 w-5" />} Share Report
+                    </Button>
+                    <Button onClick={handleDownloadPDF} disabled={isGenerating} variant="outline" className="flex-1 lg:flex-none h-14 px-8 border-2 border-slate-100 rounded-2xl gap-2 font-bold text-slate-500 hover:text-primary active:scale-95 transition-all">
+                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} PDF
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-14 px-8 md:px-12 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl gap-3 text-sm shadow-md transition-all active:scale-95 border-none">
-                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
+                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake</Link>
                     </Button>
                  </div>
               </Card>
@@ -329,7 +364,7 @@ export default function ResultClient() {
                                   <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                                      <div className="flex items-center gap-3">
                                         <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-[#0F172A] shadow-inner">#{q.originalIndex + 1}</div>
-                                        <Badge variant="outline" className="border-slate-100 text-slate-400 font-bold text-[9px]">{q.subjectId || 'General'}</Badge>
+                                        <Badge variant="outline" className="border-slate-100 text-slate-400 font-bold text-[9px] uppercase">{q.subjectId || 'General'}</Badge>
                                      </div>
                                   </div>
                                   <QuestionRenderer 
@@ -348,7 +383,7 @@ export default function ResultClient() {
               {/* HIDDEN CAPTURE NODE */}
               <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none opacity-0">
                  <ShareableResultCard 
-                   ref={scorecardRef}
+                   ref={reportRef}
                    data={sessionData} 
                    rank={liveRank} 
                    totalCandidates={totalCandidates} 
@@ -380,7 +415,7 @@ export default function ResultClient() {
   )
 }
 
-function FilterButton({ active, label, count, onClick, color }: any) {
+function FilterButton({ active, label, count, onClick }: any) {
   return (
     <button onClick={onClick} className={cn(
       "flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 px-1 md:px-6 h-12 md:h-12 rounded-xl transition-all active:scale-95 border",
