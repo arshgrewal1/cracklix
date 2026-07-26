@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { Suspense, useEffect, useState } from "react"
@@ -9,8 +10,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Universal Result Hub Viewer v7.0 [Registry Resiliency Hub].
- * FIXED: Implemented an exponential retry loop to prevent "Not Found" flashes during Firestore propagation.
+ * @fileOverview Universal Result Hub Viewer v8.0 [Registry Resiliency Hub].
+ * FIXED: Implemented an aggressive multi-path retry loop to handle propagation delays.
  */
 
 export default function ResultViewPage() {
@@ -45,10 +46,11 @@ function ResultGuard() {
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    // Wait for auth to settle. If we're loading auth, don't start the search yet.
     if (authLoading || !db || !mockId) return;
 
     let isSubscribed = true;
-    const MAX_RETRIES = 4;
+    const MAX_RETRIES = 6; // Increased retries for extreme cases
 
     async function verifyRegistryNode() {
       try {
@@ -56,7 +58,7 @@ function ResultGuard() {
         
         let activeAttemptId = attemptIdFromUrl;
 
-        // 1. Resolve attempt ID if missing from URL (for dashboard links)
+        // 1. Resolve attempt ID if missing from URL
         if (!activeAttemptId && user) {
            const trackerSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
            if (trackerSnap.exists()) {
@@ -64,33 +66,39 @@ function ResultGuard() {
            }
         }
 
-        // 2. Fetch Result Document
+        // 2. Multi-Path Registry Audit
         if (user) {
-          const docId = activeAttemptId ? `${user.uid}_${mockId}_${activeAttemptId}` : `${user.uid}_${mockId}`;
-          const snap = await getDoc(doc(db, "results", docId));
+          // Check path A: with attemptId
+          const pathA = activeAttemptId ? `${user.uid}_${mockId}_${activeAttemptId}` : null;
+          // Check path B: legacy/base path
+          const pathB = `${user.uid}_${mockId}`;
+
+          const pathsToCheck = [pathA, pathB].filter(Boolean) as string[];
           
-          if (snap.exists()) {
-             if (isSubscribed) {
+          for (const path of pathsToCheck) {
+             const snap = await getDoc(doc(db, "results", path));
+             if (snap.exists() && isSubscribed) {
                 setResultFound(true);
                 setLoading(false);
+                return;
              }
-             return;
           }
         } else {
-           // Guest Path
+           // Guest Path Check
            const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
-           if (guestRes) {
+           if (guestRes && isSubscribed) {
               setResultFound(true);
               setLoading(false);
               return;
            }
         }
 
-        // 3. Retry Logic for Propagation Delays
+        // 3. Retry with Exponential Backoff
         if (retryCount < MAX_RETRIES) {
+           const delay = 500 * Math.pow(1.5, retryCount);
            setTimeout(() => {
               if (isSubscribed) setRetryCount(prev => prev + 1);
-           }, 800 * (retryCount + 1)); // Exponential backoff
+           }, delay);
         } else {
            if (isSubscribed) {
               setResultFound(false);
@@ -98,7 +106,8 @@ function ResultGuard() {
            }
         }
       } catch (err) {
-        if (isSubscribed) {
+        console.error("[AUDIT_ERROR]:", err);
+        if (isSubscribed && retryCount >= MAX_RETRIES) {
            setResultFound(false);
            setLoading(false);
         }
@@ -118,8 +127,8 @@ function ResultGuard() {
            </div>
            <div className="text-center space-y-3">
               <p className="text-[11px] font-black uppercase text-[#0F172A] tracking-[0.4em]">Registry Handshake</p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest max-w-[240px] leading-relaxed">
-                 Synchronizing your performance data with the master ledger...
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest max-w-[240px] text-center leading-relaxed">
+                 Synchronizing performance node with the master ledger...
               </p>
            </div>
         </div>
@@ -135,11 +144,11 @@ function ResultGuard() {
            <div className="space-y-3">
               <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Entry not found</h2>
               <p className="text-slate-500 font-medium text-sm md:text-lg max-w-sm mx-auto leading-relaxed">
-                 We couldn't verify this attempt in the registry. Please retake the test to sync your scores.
+                 We couldn't verify this attempt in the registry. Please ensure your connection is stable and try again.
               </p>
            </div>
            <div className="flex flex-col gap-3 w-full max-w-xs">
-              <Button onClick={() => router.push('/mocks')} className="h-14 bg-primary text-white rounded-2xl font-bold border-none shadow-xl">Browse tests</Button>
+              <Button onClick={() => window.location.reload()} className="h-14 bg-primary text-white rounded-2xl font-bold border-none shadow-xl">Retry Audit</Button>
               <Button variant="ghost" onClick={() => router.push('/dashboard')} className="h-12 text-slate-400 font-bold uppercase text-[10px]">Back to portal</Button>
            </div>
         </div>

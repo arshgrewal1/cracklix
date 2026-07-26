@@ -60,9 +60,9 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v15.0 [One-Click Retake Hardened].
- * FIXED: handleRetake is now functional for all users with immediate registry purge.
- * FIXED: Removed uppercase from dashboard headers for professional SaaS aesthetic.
+ * @fileOverview Premium Result Analysis Hub v16.0 [Stability Lock].
+ * FIXED: Ranking logic check for 0 scores.
+ * FIXED: handleRetake finalized for one-click responsiveness.
  */
 
 export default function ResultClient() {
@@ -113,7 +113,8 @@ export default function ResultClient() {
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
   useEffect(() => {
-     if (!db || !mockId || !sessionData?.score) return;
+     // FIXED: Check for score === undefined to allow 0 scores to rank
+     if (!db || !mockId || sessionData?.score === undefined) return;
      
      async function fetchRankingMetrics() {
         try {
@@ -189,7 +190,6 @@ export default function ResultClient() {
     setIsSyncing(true);
     try {
       if (user) {
-        console.log(`[REGISTRY] Purging Attempt Node: ${user.uid}_${mockId}`);
         await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
       }
       
@@ -200,11 +200,10 @@ export default function ResultClient() {
         localStorage.removeItem(`cracklix_guest_result_${mockId}`);
       }
 
-      toast({ title: "Starting New Attempt" });
+      toast({ title: "Synchronizing Registry", description: "Starting new attempt node..." });
       router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
     } catch (e) { 
-      console.error("[RETAKE_FAILURE]:", e);
-      toast({ variant: "destructive", title: "Retake failed. Please refresh." }); 
+      toast({ variant: "destructive", title: "Retake failed" }); 
       setIsSyncing(false);
     }
   };
@@ -215,7 +214,7 @@ export default function ResultClient() {
     try {
       setActiveMainTab("REPORT"); 
       toast({ title: "Generating Report", description: "This will take a few seconds..." });
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise(r => setTimeout(r, 1500));
       const element = document.getElementById('cracklix-result-card');
       if (!element) throw new Error("Capture node not found.");
       const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2, backgroundColor: '#ffffff' });
