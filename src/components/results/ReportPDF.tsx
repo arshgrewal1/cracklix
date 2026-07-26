@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -28,9 +29,8 @@ interface ReportPDFProps {
 }
 
 /**
- * @fileOverview Institutional Portrait PDF Layout Hub v26.0.
- * FIXED: Boxed identity hub and aggressive rank spacing to resolve text overlap.
- * TERMINOLOGY: Using "Wrong" for errors as per standard.
+ * @fileOverview Institutional Portrait PDF Layout Hub v27.0 [Compacted Frame].
+ * FIXED: Reduced vertical footprints of all sections to ensure the footer and QR code are fully visible.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
@@ -67,49 +67,49 @@ export default function ReportPDF(props: ReportPDFProps) {
       <div className="w-full flex-1 p-8 space-y-4 flex flex-col items-center overflow-hidden">
          
          {/* 2. BOXED IDENTITY HUB */}
-         <div className="w-full bg-white rounded-[2.5rem] p-8 border border-slate-100 flex flex-col items-center justify-center shadow-sm relative overflow-hidden text-center min-h-[160px]">
-            <div className="space-y-3 w-full">
-               <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Candidate Identity</p>
-               <h1 className="text-4xl font-black text-[#0F172A] leading-normal antialiased">
+         <div className="w-full bg-white rounded-[2.5rem] p-6 border border-slate-100 flex flex-col items-center justify-center shadow-sm relative overflow-hidden text-center min-h-[140px]">
+            <div className="space-y-2 w-full">
+               <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">Candidate Identity</p>
+               <h1 className="text-3xl font-black text-[#0F172A] leading-normal antialiased">
                   {studentName}
                </h1>
-               <p className="text-base font-bold text-slate-500 line-clamp-1">{examTitle}</p>
+               <p className="text-sm font-bold text-slate-500 line-clamp-1">{examTitle}</p>
             </div>
             
-            <div className="pt-6 border-t border-slate-100 mt-6 w-full max-w-2xl mx-auto grid grid-cols-3 gap-6">
+            <div className="pt-4 border-t border-slate-100 mt-4 w-full max-w-2xl mx-auto grid grid-cols-3 gap-6">
                <div className="flex flex-col items-center gap-1">
-                  <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Attempt Date</p>
-                  <p className="text-sm font-black text-[#0F172A] tabular-nums leading-none">{date}</p>
+                  <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Attempt Date</p>
+                  <p className="text-xs font-black text-[#0F172A] tabular-nums leading-none">{date}</p>
                </div>
                <div className="flex flex-col items-center gap-1 border-x border-slate-100 px-4">
-                  <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Time Taken</p>
-                  <p className="text-sm font-black text-[#0F172A] tabular-nums leading-none">{timeTaken}</p>
+                  <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Time Taken</p>
+                  <p className="text-xs font-black text-[#0F172A] tabular-nums leading-none">{timeTaken}</p>
                </div>
                <div className="flex flex-col items-center gap-1">
-                  <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Attempt Number</p>
-                  <p className="text-sm font-black text-primary tabular-nums leading-none">#{attemptNumber}</p>
+                  <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Attempt Number</p>
+                  <p className="text-xs font-black text-primary tabular-nums leading-none">#{attemptNumber}</p>
                </div>
             </div>
          </div>
 
-         {/* 3. MERIT STANDING - HARDENED VERTICAL SPACING */}
-         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden min-h-[260px]">
+         {/* 3. MERIT STANDING - COMPACTED */}
+         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-8 text-white text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden min-h-[220px]">
             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-40 w-40 text-primary" /></div>
             
             <div className="relative z-10 flex flex-col items-center w-full">
-               <p className="text-[12px] font-black text-primary uppercase tracking-[0.4em] mb-4">Punjab Rank</p>
+               <p className="text-[11px] font-black text-primary uppercase tracking-[0.4em] mb-2">Punjab Rank</p>
                
-               <div className="flex flex-col items-center justify-center gap-6">
-                  <span className="text-[100px] font-[900] tabular-nums tracking-tighter leading-none block drop-shadow-[0_15px_30px_rgba(37,99,235,0.4)]">
+               <div className="flex flex-col items-center justify-center gap-2">
+                  <span className="text-[80px] font-[900] tabular-nums tracking-tighter leading-none block drop-shadow-[0_15px_30px_rgba(37,99,235,0.4)]">
                      #{rank}
                   </span>
-                  <span className="text-[20px] font-black text-slate-500 tabular-nums uppercase tracking-[0.2em]">
+                  <span className="text-[16px] font-black text-slate-500 tabular-nums uppercase tracking-tight">
                      / {totalCandidates.toLocaleString()} Candidates
                   </span>
                </div>
                
-               <div className="pt-8">
-                  <Badge className="bg-emerald-500 text-white border-none font-black text-[10px] px-10 py-2.5 rounded-full shadow-4xl uppercase tracking-widest">
+               <div className="pt-6">
+                  <Badge className="bg-emerald-500 text-white border-none font-black text-[9px] px-8 py-2 rounded-full shadow-4xl uppercase tracking-widest">
                      Verified Standing
                   </Badge>
                </div>
@@ -134,24 +134,24 @@ export default function ReportPDF(props: ReportPDFProps) {
 
          {/* 6. SUBJECT ANALYSIS */}
          {subjects.length > 0 && (
-            <div className="w-full space-y-3">
-               <p className="text-[10px] font-black text-slate-400 text-center uppercase tracking-widest">Subject Mastery Analysis</p>
-               <div className="border border-slate-100 rounded-[1.5rem] overflow-hidden bg-white shadow-sm">
+            <div className="w-full space-y-2">
+               <p className="text-[9px] font-black text-slate-400 text-center uppercase tracking-widest">Subject Mastery Analysis</p>
+               <div className="border border-slate-100 rounded-[1.25rem] overflow-hidden bg-white shadow-sm">
                   <table className="w-full text-center">
                      <thead>
-                        <tr className="bg-slate-50 border-b border-slate-100 h-10">
-                           <th className="px-10 font-black text-[10px] text-slate-500 uppercase tracking-widest text-left">Subject Hub</th>
-                           <th className="px-4 font-black text-[10px] text-center text-slate-500 uppercase tracking-widest">Score</th>
-                           <th className="px-10 font-black text-[10px] text-right text-slate-500 uppercase tracking-widest">Accuracy</th>
+                        <tr className="bg-slate-50 border-b border-slate-100 h-8">
+                           <th className="px-10 font-black text-[9px] text-slate-500 uppercase tracking-widest text-left">Subject Hub</th>
+                           <th className="px-4 font-black text-[9px] text-center text-slate-500 uppercase tracking-widest">Score</th>
+                           <th className="px-10 font-black text-[9px] text-right text-slate-500 uppercase tracking-widest">Accuracy</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
                         {subjects.slice(0, 3).map((s, i) => (
-                           <tr key={i} className="h-10 hover:bg-slate-50/30 transition-colors">
-                              <td className="px-10 font-bold text-[11px] text-[#0F172A] text-left">{s.name}</td>
-                              <td className="px-4 text-center font-black text-primary text-sm tabular-nums">{Number(s.score).toFixed(1)}</td>
+                           <tr key={i} className="h-8 hover:bg-slate-50/30 transition-colors">
+                              <td className="px-10 font-bold text-[10px] text-[#0F172A] text-left">{s.name}</td>
+                              <td className="px-4 text-center font-black text-primary text-xs tabular-nums">{Number(s.score).toFixed(1)}</td>
                               <td className="px-10 text-right">
-                                 <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[8px] tabular-nums px-2 py-0.5 rounded-lg shadow-sm">{s.accuracy}%</Badge>
+                                 <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[7px] tabular-nums px-2 py-0.5 rounded-lg shadow-sm">{s.accuracy}%</Badge>
                               </td>
                            </tr>
                         ))}
@@ -161,24 +161,24 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
          )}
 
-         {/* 7. FOOTER HUB - REINFORCED FOR BOTTOM VISIBILITY */}
-         <div className="pt-6 border-t border-slate-100 flex items-center justify-between mt-auto w-full pb-8">
+         {/* 7. FOOTER HUB - MOVED UP */}
+         <div className="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto w-full pb-6">
             <div className="flex items-center gap-5">
                <div className="h-16 w-16 bg-white border-2 border-slate-100 p-2 rounded-2xl shadow-lg relative overflow-hidden">
                   <img src={qrUrl} alt="Verify" className="h-full w-full object-contain" crossOrigin="anonymous" />
                </div>
                <div className="space-y-1 text-left">
-                  <p className="text-primary font-black text-[12px] flex items-center gap-2 leading-none uppercase">
-                     <ShieldCheck className="h-3.5 w-3.5" /> Digitally Verified Node
+                  <p className="text-primary font-black text-[11px] flex items-center gap-2 leading-none uppercase">
+                     <ShieldCheck className="h-3 w-3" /> Digitally Verified Node
                   </p>
-                  <p className="text-slate-400 text-[9px] max-w-[320px] leading-relaxed font-medium">
+                  <p className="text-slate-400 text-[8px] max-w-[280px] leading-relaxed font-medium">
                      Synchronized with the Cracklix institutional registry. Scan to verify authenticity on cracklix.in.
                   </p>
                </div>
             </div>
-            <div className="text-right space-y-2">
-               <img src="/logo/cracklix-logo-dark.png" alt="Cracklix" className="h-6 w-auto opacity-30 grayscale ml-auto" crossOrigin="anonymous" />
-               <p className="text-[9px] font-black tracking-[0.4em] text-slate-300 uppercase">www.cracklix.in</p>
+            <div className="text-right space-y-1">
+               <img src="/logo/cracklix-logo-dark.png" alt="Cracklix" className="h-5 w-auto opacity-30 grayscale ml-auto" crossOrigin="anonymous" />
+               <p className="text-[8px] font-black tracking-[0.4em] text-slate-300 uppercase">www.cracklix.in</p>
             </div>
          </div>
       </div>
@@ -188,18 +188,18 @@ export default function ReportPDF(props: ReportPDFProps) {
 
 function KPIBox({ label, val, color }: any) {
    return (
-      <div className="bg-white border border-slate-100 p-3 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm text-center h-24 flex-1">
-         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-         <p className={cn("text-2xl font-black tabular-nums tracking-tighter leading-none", color)}>{val}</p>
+      <div className="bg-white border border-slate-100 p-2 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm text-center h-20 flex-1">
+         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+         <p className={cn("text-xl font-black tabular-nums tracking-tighter leading-none", color)}>{val}</p>
       </div>
    )
 }
 
 function CountPill({ label, val, color }: any) {
    return (
-      <div className={cn("p-3 rounded-2xl flex flex-col items-center justify-center gap-0.5 h-16 flex-1 shadow-sm", color)}>
-         <span className="text-xl font-black tabular-nums leading-none">{val}</span>
-         <span className="text-[8px] font-black uppercase tracking-widest opacity-70">{label}</span>
+      <div className={cn("p-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 h-14 flex-1 shadow-sm", color)}>
+         <span className="text-lg font-black tabular-nums leading-none">{val}</span>
+         <span className="text-[7px] font-black uppercase tracking-widest opacity-70">{label}</span>
       </div>
    )
 }

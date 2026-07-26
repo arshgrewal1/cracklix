@@ -31,12 +31,13 @@ import {
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client v4.4.
- * UPDATED: Integrated standardized 'Coming Soon' notice for missing nodes.
+ * @fileOverview Universal Mock Overview Hub Client v4.6.
+ * FIXED: Removed recursive self-call that caused 'Maximum call stack size exceeded' build error.
  */
 
 export default function MockOverviewClient() {
@@ -114,16 +115,15 @@ export default function MockOverviewClient() {
         </div>
 
         <div className="space-y-3">
-          <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter uppercase leading-none">Coming Soon</h1>
-          <p className="text-primary font-black text-[10px] md:text-xs uppercase tracking-[0.3em]">Mock available nahi hai</p>
+          <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">Coming Soon</h1>
           <p className="text-slate-500 font-medium leading-relaxed pt-4">
-            This preparation node is currently being updated with the latest official patterns. Please check back later.
+            This preparation hub is currently being updated with the latest official patterns. Please check back later.
           </p>
         </div>
 
         <div className="pt-4">
-           <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-3xl border-none transition-all active:scale-95">
-              <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to Hub</Link>
+           <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-bold text-sm shadow-3xl border-none transition-all active:scale-95">
+              <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to hub</Link>
            </Button>
         </div>
       </div>
@@ -142,9 +142,9 @@ export default function MockOverviewClient() {
               
               <Badge className={cn(
                 "border-none text-[10px] font-bold px-2.5 py-0.5 rounded-lg tracking-widest shadow-sm h-7 flex items-center", 
-                mock.accessLevel === 'PREMIUM' ? "bg-[#FBBF24] text-[#78350F]" : "bg-emerald-50 text-emerald-600"
+                mock.accessLevel === 'PREMIUM' ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
               )}>
-                {mock.accessLevel === 'PREMIUM' ? '🔒 Premium' : 'Free Hub'}
+                {mock.accessLevel === 'PREMIUM' ? '🔒 Elite' : 'Free Hub'}
               </Badge>
 
               <div className="space-y-4 md:space-y-6 w-full">
@@ -157,25 +157,25 @@ export default function MockOverviewClient() {
                     <span className="text-slate-300">|</span>
                     <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Items</span>
                     <span className="text-slate-300">|</span>
-                    <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> {mock.totalQuestions * (mock.positiveMarks || 1)} Pts</span>
+                    <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> {mock.totalQuestions * (mock.positiveMarks || 1)} Marks</span>
                 </div>
 
                 <div className="pt-2 md:pt-4 flex flex-col sm:flex-row gap-4">
-                  <Button asChild className="h-14 w-full sm:w-60 bg-[#0F172A] hover:bg-black text-white font-bold tracking-tight text-sm rounded-[16px] shadow-3xl transition-all active:scale-95 border-none">
+                  <Button asChild className="h-14 w-full sm:w-60 bg-[#0F172A] hover:bg-black text-white font-bold rounded-[16px] shadow-3xl transition-all active:scale-95 border-none">
                     <Link href={isFinished ? `/results/view?id=${mock.id}` : `/mocks/instructions?id=${mock.id}`} className="flex items-center justify-center gap-3">
                       {isFinished ? (
-                         <><BarChart3 className="h-4 w-4 text-primary" /> View analysis</>
+                         <><BarChart3 className="h-4 w-4 text-primary" /> View Analysis</>
                       ) : activeAttempt?.status === 'IN_PROGRESS' ? (
-                         <><RefreshCw className="h-4 w-4 animate-spin" /> Resume prep</>
+                         <><RefreshCw className="h-4 w-4 animate-spin" /> Resume Prep</>
                       ) : (
-                         <><Play className="h-4 w-4 fill-current text-primary" /> Start test</>
+                         <><Play className="h-4 w-4 fill-current text-primary" /> Start Test</>
                       )}
                     </Link>
                   </Button>
                   
                   {isFinished && (
                     <Button asChild variant="outline" className="h-14 w-full sm:w-48 border-2 border-slate-100 rounded-[16px] text-[#0F172A] font-bold text-sm hover:bg-slate-50 transition-all">
-                       <Link href={`/mocks/instructions?id=${mock.id}`}>Retake test</Link>
+                       <Link href={`/mocks/instructions?id=${mock.id}`}>Retake Test</Link>
                     </Button>
                   )}
                 </div>
@@ -188,9 +188,9 @@ export default function MockOverviewClient() {
         <section className="py-12 md:py-24 bg-white">
            <div className="container mx-auto px-4 md:px-8 max-w-7xl">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                 <FeatureNode icon={ShieldCheck} title="Official pattern" desc="Curated according to latest board notifications." />
-                 <FeatureNode icon={Zap} title="Expert solutions" desc="Detailed explanations for every question." />
-                 <FeatureNode icon={Target} title="State rankings" desc="Compare performance with toppers across Punjab." />
+                 <FeatureNode icon={ShieldCheck} title="Official Pattern" desc="Curated according to latest board notifications." />
+                 <FeatureNode icon={Zap} title="Expert Solutions" desc="Detailed explanations for every question." />
+                 <FeatureNode icon={Target} title="State Rankings" desc="Compare performance with toppers across Punjab." />
               </div>
            </div>
         </section>
@@ -206,8 +206,8 @@ function FeatureNode({ icon: Icon, title, desc }: any) {
       <div className="h-14 w-14 bg-white rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
         <Icon className="h-6 w-6 text-primary" />
       </div>
-      <div className="space-y-2">
-         <h3 className="text-xl font-black text-[#0F172A] leading-tight">{title}</h3>
+      <div className="space-y-1">
+         <h3 className="text-xl font-bold text-[#0F172A] leading-tight">{title}</h3>
          <p className="text-slate-400 font-bold text-[10px] tracking-widest leading-relaxed uppercase">{desc}</p>
       </div>
     </div>

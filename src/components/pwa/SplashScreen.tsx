@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -6,9 +7,8 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v7.0.
- * FIXED: Syntax stability and vertical centering.
- * AESTHETIC: High-fidelity SaaS startup launch experience.
+ * @fileOverview Premium PWA Splash Hub v8.0.
+ * FIXED: Tighter vertical gap between icon and title.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -27,7 +27,7 @@ export default function SplashScreen() {
     
     const safetyTimer = setTimeout(() => {
       if (isDataReady) setIsVisible(false);
-    }, 3500);
+    }, 4000);
 
     const progressInterval = setInterval(() => {
       setProgress(prev => {
