@@ -37,10 +37,16 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Result Report v2.0.
- * FIXED: Actual duration and real-time competition stats.
- * FIXED: Bottom clipping by re-balancing vertical height.
+ * @fileOverview Official Institutional Result Report v2.5 [Dynamic Analytics].
+ * FIXED: Replaced hardcoded insights with real subject-based metrics.
+ * FIXED: Enforced Title Case for subject nodes (e.g., english -> English).
  */
+
+const toTitleCase = (str: string) => {
+  if (!str) return "";
+  return str.split(' ').map(w => w[0].toUpperCase() + w.substring(1).toLowerCase()).join(' ');
+};
+
 const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>(({ 
   data, rank, totalCandidates, topScore = 0, avgScore = 0, avgAccuracy = 0, duration = 120 
 }, ref) => {
@@ -55,6 +61,43 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
     if (p >= 50) return { label: "Average", color: "text-amber-600", bg: "bg-amber-50" };
     return { label: "Needs Improvement", color: "text-rose-600", bg: "bg-rose-50" };
   }, [data.percentage]);
+
+  const insights = useMemo(() => {
+    const list: { type: 'STRENGTH' | 'WEAKNESS', label: string, text: string, color: string, bg: string }[] = [];
+    const subjects = data.subjectAnalysis || [];
+
+    if (subjects.length > 0) {
+      const best = [...subjects].sort((a, b) => b.accuracy - a.accuracy)[0];
+      const worst = [...subjects].sort((a, b) => a.accuracy - b.accuracy)[0];
+
+      if (best.accuracy >= 70) {
+        list.push({ 
+          type: 'STRENGTH', 
+          label: 'Strength', 
+          text: `High accuracy in ${toTitleCase(best.name)}`, 
+          color: 'text-emerald-600', 
+          bg: 'bg-emerald-50' 
+        });
+      }
+      
+      if (worst.accuracy < 50) {
+        list.push({ 
+          type: 'WEAKNESS', 
+          label: 'Weakness', 
+          text: `Needs focus in ${toTitleCase(worst.name)}`, 
+          color: 'text-rose-600', 
+          bg: 'bg-rose-50' 
+        });
+      }
+    }
+
+    // Default fallbacks if data is thin
+    if (list.length === 0) {
+       list.push({ type: 'STRENGTH', label: 'Insight', text: 'Verified attempt synchronized', color: 'text-blue-600', bg: 'bg-blue-50' });
+    }
+
+    return list.slice(0, 2);
+  }, [data]);
 
   return (
     <div 
@@ -164,7 +207,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
                      <tr key={i} className="h-12">
                         <td className="px-8">
                            <div className="space-y-1">
-                              <p className="font-bold text-xs text-[#0F172A] tracking-tight">{s.name}</p>
+                              <p className="font-bold text-xs text-[#0F172A] tracking-tight">{toTitleCase(s.name)}</p>
                               <div className="h-1 w-24 bg-slate-100 rounded-full overflow-hidden">
                                  <div className="h-full bg-primary" style={{ width: `${s.accuracy}%` }} />
                               </div>
@@ -198,13 +241,14 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
          <div className="space-y-4">
             <h3 className="text-[11px] font-bold text-slate-400 ml-1">Smart insights</h3>
             <div className="grid grid-cols-1 gap-2">
-               <InsightNode label="Strength" val="High accuracy in Punjab Gk" color="text-emerald-600" bg="bg-emerald-50" />
-               <InsightNode label="Weakness" val="Needs speed in Reasoning" color="text-rose-600" bg="bg-rose-50" />
+               {insights.map((insight, i) => (
+                  <InsightNode key={i} label={insight.label} val={insight.text} color={insight.color} bg={insight.bg} />
+               ))}
             </div>
          </div>
       </div>
 
-      {/* 7. VERIFICATION FOOTER - MOVED UP TO PREVENT CLIPPING */}
+      {/* 7. VERIFICATION FOOTER */}
       <div className="mt-auto pt-6 border-t-2 border-slate-100 flex justify-between items-end bg-white relative z-20">
          <div className="space-y-4 text-left">
             <div className="flex items-center gap-3 text-slate-400">

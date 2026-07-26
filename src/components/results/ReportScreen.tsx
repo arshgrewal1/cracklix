@@ -20,8 +20,9 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v6.9.
- * FIXED: Re-balanced subject Mastery table for PWA small screens.
+ * @fileOverview Premium Analysis Screen v7.0 [Dynamic Insights].
+ * FIXED: Replaced hardcoded insights with real subject-based analytics.
+ * FIXED: Enforced Title Case for all subject nodes.
  */
 
 interface ReportScreenProps {
@@ -42,6 +43,11 @@ interface ReportScreenProps {
   subjectAnalysis?: any[];
 }
 
+const toTitleCase = (str: string) => {
+  if (!str) return "";
+  return str.split(' ').map(w => w[0].toUpperCase() + w.substring(1).toLowerCase()).join(' ');
+};
+
 export default function ReportScreen(props: ReportScreenProps) {
   const {
     score, rank, totalCandidates, 
@@ -52,19 +58,41 @@ export default function ReportScreen(props: ReportScreenProps) {
   } = props;
 
   const insights = useMemo(() => {
-    const list = [];
+    const list: { type: 'STRENGTH' | 'WEAKNESS' | 'SUGGESTION', text: string }[] = [];
     const acc = Number(attemptAccuracy);
     const scoreNum = Number(score);
 
-    if (acc >= 90) list.push({ type: 'STRENGTH', text: "Outstanding accuracy level in core subjects." });
-    else if (acc >= 75) list.push({ type: 'STRENGTH', text: "Strong understanding of attempted questions." });
-    else list.push({ type: 'WEAKNESS', text: "Low accuracy detected. Focus on conceptual clarity." });
+    // Dynamic Subject Insights
+    if (subjectAnalysis.length > 0) {
+      const bestSubject = [...subjectAnalysis].sort((a, b) => b.accuracy - a.accuracy)[0];
+      const worstSubject = [...subjectAnalysis].sort((a, b) => a.accuracy - b.accuracy)[0];
 
-    if (scoreNum < avgScore) list.push({ type: 'SUGGESTION', text: "Attempt more mock tests to beat the platform average." });
-    if (wrongCount > totalQuestions * 0.2) list.push({ type: 'WEAKNESS', text: "High negative penalty. Reduce guesswork in difficult zones." });
+      if (bestSubject.accuracy >= 70) {
+        list.push({ type: 'STRENGTH', text: `High accuracy in ${toTitleCase(bestSubject.name)}.` });
+      }
+      
+      if (worstSubject.accuracy < 50) {
+        list.push({ type: 'WEAKNESS', text: `Needs focus in ${toTitleCase(worstSubject.name)}.` });
+      }
+    }
+
+    if (acc >= 90) list.push({ type: 'STRENGTH', text: "Outstanding precision across all attempted nodes." });
     
+    if (wrongCount > totalQuestions * 0.2) {
+      list.push({ type: 'WEAKNESS', text: "Heavy negative penalty detected. Reduce guesswork." });
+    }
+
+    if (scoreNum < avgScore) {
+       list.push({ type: 'SUGGESTION', text: "Target the platform average by increasing attempt rate." });
+    }
+    
+    // Fallback logic for small tests
+    if (list.length < 2) {
+       list.push({ type: 'SUGGESTION', text: "Practice more mock tests to improve your Punjab Rank." });
+    }
+
     return list.slice(0, 4);
-  }, [attemptAccuracy, score, avgScore, wrongCount, totalQuestions]);
+  }, [attemptAccuracy, score, avgScore, wrongCount, totalQuestions, subjectAnalysis]);
 
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-500 pb-20 px-0 md:px-1">
@@ -131,7 +159,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                         {subjectAnalysis.map((s, i) => (
                            <tr key={i} className="h-16 md:h-20 group hover:bg-slate-50 transition-colors">
                               <td className="px-5 md:px-8">
-                                 <p className="font-bold text-[13px] md:text-lg text-[#071B4D] truncate uppercase tracking-tight leading-none">{s.name}</p>
+                                 <p className="font-bold text-[13px] md:text-lg text-[#071B4D] truncate uppercase tracking-tight leading-none">{toTitleCase(s.name)}</p>
                               </td>
                               <td className="px-2">
                                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
