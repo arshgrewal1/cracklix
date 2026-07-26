@@ -19,7 +19,7 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
-  display: 'swap', // Prevent FOIT
+  display: 'swap',
   preload: true,
 });
 
@@ -88,7 +88,7 @@ export default function RootLayout({
           min-h-screen
           overflow-x-hidden
         `}
-        style={{ backgroundColor: '#000000' }} // Force black background during initial load
+        style={{ backgroundColor: '#000000' }} 
       >
         <ThemeProvider
           attribute="class"
@@ -97,10 +97,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <FirebaseClientProvider>
-            {/* Splash Screen is the first thing users see */}
             <SplashScreen key="app-splash-screen" />
             
-            <div key="main-app-container" className="min-h-screen flex flex-col relative bg-background transition-opacity duration-700">
+            <div key="main-app-container" className="min-h-screen flex flex-col relative bg-background">
               <AnnouncementBar />
               <div className="flex-1">
                 {children}

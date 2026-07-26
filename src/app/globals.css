@@ -59,7 +59,7 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
-    background-color: #000000; /* Force black early to prevent FOUC */
+    background-color: #000000; /* FORCE BLACK FOR FOUC PREVENTION */
   }
   
   body {
@@ -73,18 +73,17 @@
     -webkit-overflow-scrolling: touch;
     padding: 0;
     padding-bottom: env(safe-area-inset-bottom);
-    background-color: #000000; /* Match splash screen */
+    background-color: #000000; /* SYNC WITH SPLASH SCREEN */
   }
 
-  /* Prevent FOUC for hydration states */
+  /* RESILIENT FOUC GUARD */
   [data-hydrating="true"] {
-    opacity: 0;
+    visibility: hidden;
   }
 
-  /* Prevent CLS for inputs */
   input, textarea {
     @apply select-text;
-    font-size: 16px !important; /* Prevent iOS auto-zoom */
+    font-size: 16px !important;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -130,7 +129,12 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
 }
 
-/* Hardened Visibility Classes */
-.loading-skeleton {
-  @apply animate-pulse bg-slate-100 rounded-2xl;
-}
+/* HARDENED STABILITY NODES */
+.stability-hero { min-height: 400px; }
+@media (min-width: 768px) { .stability-hero { min-height: 600px; } }
+
+.stability-search { min-height: 60px; }
+@media (min-width: 768px) { .stability-search { min-height: 80px; } }
+
+.stability-actions { min-height: 100px; }
+@media (min-width: 768px) { .stability-actions { min-height: 140px; } }

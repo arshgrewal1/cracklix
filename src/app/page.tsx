@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v502.0 [Start Experience Hardened].
- * FIXED: Implemented structural stability nodes to prevent layout shifts during hydration.
+ * @fileOverview Institutional Premium Hub v503.0 [Startup Experience Hardened].
+ * FIXED: Implemented strict stability nodes and reserved height containers for FOUC/CLS prevention.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -42,26 +42,29 @@ export default function HomePage() {
     <main className="min-h-screen bg-background font-body pb-safe text-left overflow-x-hidden">
       <Navbar />
       
-      {/* ABOVE THE FOLD: Reserved height nodes to prevent CLS */}
-      <div className="min-h-[400px] md:min-h-[600px] bg-background">
+      {/* 1. HERO HUB: RESERVED SPATIAL NODE */}
+      <div className="stability-hero bg-background">
         <Hero />
       </div>
 
-      <div className="min-h-[60px] md:h-[80px]">
+      {/* 2. SEARCH HUB: RESERVED SPATIAL NODE */}
+      <div className="stability-search">
         <GlobalSearch />
       </div>
       
-      <div className="min-h-[100px] md:h-[140px]">
+      {/* 3. QUICK ACTIONS: RESERVED SPATIAL NODE */}
+      <div className="stability-actions">
         <QuickActions />
       </div>
 
+      {/* 4. PERFORMANCE HUB: CONDITIONAL WITH HEIGHT GUARD */}
       {user && (
         <div className="min-h-[200px] md:h-[300px]">
            <ContinueLearning />
         </div>
       )}
 
-      {/* TODAY'S CHALLENGE HUB */}
+      {/* 5. TODAY'S CHALLENGE: HARDENED INTERACTIVE HUB */}
       <section className="py-6 md:py-16 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
