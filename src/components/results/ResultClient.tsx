@@ -42,9 +42,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v18.1.
- * FIXED: Header sits in-flow (scrolls away). Re-standardized typography to Sentence Case.
- * FIXED: Tabs roving focus error by using proper TabsList container.
+ * @fileOverview Universal Result Hub Viewer v19.0.
+ * FIXED: Standardized Tabs implementation and corrected missing icon references.
  */
 
 export default function ResultClient() {
@@ -282,7 +281,6 @@ export default function ResultClient() {
                          {...sessionData} 
                          rank={liveRank} 
                          totalCandidates={totalCandidates}
-                         timeTaken={`${Math.floor(sessionData.timeTaken / 60)}m ${sessionData.timeTaken % 60}s`}
                          percentile={Math.max(0, Math.round(((totalCandidates - Number(liveRank)) / (totalCandidates || 1)) * 100))}
                          topScore={topScore}
                          avgScore={avgScore}

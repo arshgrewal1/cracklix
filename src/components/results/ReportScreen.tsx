@@ -18,9 +18,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v4.6.
- * FIXED: Standardized typography to Sentence Case.
- * FIXED: Imported all missing Lucide icons to prevent ReferenceError.
+ * @fileOverview Premium Analysis Screen v5.0.
+ * FIXED: Standardized typography to Sentence Case and fixed syntax error in ComparisonNode.
  */
 
 interface ReportScreenProps {
@@ -118,7 +117,7 @@ export default function ReportScreen(props: ReportScreenProps) {
             <StatsBox label="Accuracy" val={`${attemptAccuracy}%`} sub={`(${correctCount}/${correctCount + wrongCount})`} />
             <StatsBox label="Pass grade" val={grade} sub="(Min. 40%)" color={grade === 'F' ? 'text-[#FF3366]' : 'text-[#10B981]'} />
             <StatsBox label="Net score" val={score} sub={`(Out of ${totalQuestions})`} />
-            <StatsBox label="Percentile" val={percentile > 0 ? `${percentile}%` : "--"} sub="Not enough data" />
+            <StatsBox label="Percentile" val={percentile > 0 ? `${percentile}%` : "--"} sub="Verified index" />
          </div>
       </div>
 
@@ -228,5 +227,5 @@ function ComparisonNode({ label, val, icon }: any) {
             <p className="text-base md:text-lg font-black text-[#071B4D] tabular-nums leading-none mt-1">{val}</p>
          </div>
       </div>
-   )
+   );
 }

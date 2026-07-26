@@ -4,17 +4,17 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 /**
- * @fileOverview Institutional Performance PDF Template Engine v1.6.
- * FIXED: Updated font URLs to use high-availability TTF nodes from fonts.gstatic.com.
+ * @fileOverview Institutional Performance PDF Template Engine v1.9.
+ * FIXED: Updated font URLs to use high-availability nodes to prevent 404 errors.
  */
 
 // Register professional typography with high-availability TTF sources
 Font.register({
   family: 'Inter',
   fonts: [
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuI6fAZ9hjp-EkCc.ttf', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.ttf', fontWeight: 700 },
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw.ttf', fontWeight: 900 },
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/Inter-UI-Regular.ttf', fontWeight: 400 },
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/Inter-UI-Bold.ttf', fontWeight: 700 },
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/Inter-UI-Black.ttf', fontWeight: 900 },
   ],
 });
 
