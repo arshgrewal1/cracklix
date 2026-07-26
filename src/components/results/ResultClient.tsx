@@ -28,7 +28,8 @@ import {
   ShieldCheck,
   Target,
   FileText,
-  Calendar
+  Calendar,
+  AlertCircle
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -41,8 +42,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Engine v96.0 [ID Lock Fix].
- * FIXED: Strictly lookups results by the unique attemptId provided in the URL.
+ * @fileOverview Universal Result Hub Engine v96.1 [Import Fix].
+ * FIXED: Added missing AlertCircle import from lucide-react.
  */
 
 export default function ResultClient() {
@@ -124,9 +125,11 @@ export default function ResultClient() {
 
      const loadQuestions = async () => {
         try {
-           const mSnap = await getDoc(doc(db, "mocks", mockId));
-           const dailySnap = !mSnap.exists() ? await getDoc(doc(db, "daily_quizzes", mockId)) : null;
-           const targetSnap = mSnap.exists() ? mSnap : dailySnap;
+           const mRef = doc(db, "mocks", mockId);
+           const dRef = doc(db, "daily_quizzes", mockId);
+           
+           const [mSnap, dSnap] = await Promise.all([getDoc(mRef), getDoc(dRef)]);
+           const targetSnap = mSnap.exists() ? mSnap : dSnap;
 
            if (targetSnap?.exists()) {
               const mData = targetSnap.data();
