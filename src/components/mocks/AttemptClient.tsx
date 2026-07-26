@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -41,8 +42,7 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Node v46.0 [Handshake Optimized].
- * UPDATED: Explicitly passes attemptId during navigation to ensure immediate resolution.
+ * @fileOverview Institutional Attempt Node v46.1 [Analytics V2 Sync].
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -282,6 +282,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
              userName: profile?.name || 'Aspirant',
              userEmail: user.email || "",
              score: finalScore,
+             positiveMarks: posMarks,
+             negativeMarks: negMarks,
              correctCount,
              wrongCount,
              skippedCount: questions.length - attemptedCount,
@@ -311,7 +313,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify({
            attemptId, mockId, score: finalScore, accuracy, totalQuestions: questions.length,
            correctCount, wrongCount, timeTaken, timestamp: new Date().toISOString(),
-           mockTitle: mockData.title
+           mockTitle: mockData.title,
+           positiveMarks: posMarks,
+           negativeMarks: negMarks,
         }));
         router.replace(`/results/view?id=${mockId}`);
         resetStore();

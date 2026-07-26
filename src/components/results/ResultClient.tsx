@@ -40,7 +40,10 @@ import {
   BookOpen,
   X,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Award,
+  Activity,
+  Timer
 } from "lucide-react"
 import { 
   Card, 
@@ -62,10 +65,9 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v30.0 [One-Click Response Hardened].
- * FIXED: Resolved TypeError by adding null guards for activeSession.
- * FIXED: Added missing Link and AlertCircle imports.
- * OPTIMIZED: Implemented immediate point-lookup for one-click response.
+ * @fileOverview Cracklix Advanced Analytics Engine V2 [Hardened].
+ * Replaced existing calculations with professional formulas:
+ * Attempt Accuracy, Overall Accuracy, Readiness Score, Grade System, and Topper Comparison.
  */
 
 export default function ResultClient() {
@@ -90,6 +92,8 @@ export default function ResultClient() {
   
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
+  const [topperScore, setTopperScore] = useState<number>(0)
+  const [avgScore, setAvgScore] = useState<number>(0)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -98,7 +102,6 @@ export default function ResultClient() {
 
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
-  // 1. Resilient ID Resolution Strategy
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
     
@@ -110,7 +113,6 @@ export default function ResultClient() {
        setIsSearching(true);
        setErrorNotFound(false);
 
-       // Case A: Guest User
        if (!user) {
           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
           if (guestRes) {
@@ -123,7 +125,6 @@ export default function ResultClient() {
           return;
        }
 
-       // Case B: Logged in User - Direct Point Lookup (High Speed)
        const targetId = attemptIdFromUrl 
           ? `${user.uid}_${mockId}_${attemptIdFromUrl}` 
           : `${user.uid}_${mockId}`;
@@ -140,7 +141,6 @@ export default function ResultClient() {
                 return;
              }
 
-             // Fallback: Query collection for latest result if direct ID fails (Legacy support)
              const resQuery = query(
                 collection(db, "results"),
                 where("userId", "==", user.uid),
@@ -156,7 +156,6 @@ export default function ResultClient() {
                 return;
              }
 
-             // Retry with backoff to handle replication delays
              if (retryCount < MAX_RETRIES) {
                 retryCount++;
                 setTimeout(tryFetch, 600);
@@ -179,7 +178,6 @@ export default function ResultClient() {
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
-  // 2. Ranking Engine Sync
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
      async function fetchRankingMetrics() {
@@ -191,12 +189,23 @@ export default function ResultClient() {
            const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
            const superiorCountSnap = await getCountFromServer(superiorQuery);
            setLiveRank(superiorCountSnap.data().count + 1);
+
+           const topperQuery = query(entriesRef, orderBy("highestScore", "desc"), limit(1));
+           const topperSnap = await getDocs(topperQuery);
+           if (!topperSnap.empty) {
+              setTopperScore(topperSnap.docs[0].data().highestScore);
+           }
+
+           const allQuery = query(entriesRef, limit(100));
+           const allSnap = await getDocs(allQuery);
+           const scores = allSnap.docs.map(d => d.data().highestScore);
+           setAvgScore(scores.reduce((a, b) => a + b, 0) / (scores.length || 1));
+
         } catch (e) {}
      }
      fetchRankingMetrics();
   }, [db, mockId, activeSession]);
 
-  // 3. Question Metadata Ingestion
   useEffect(() => {
     async function loadQuestions() {
       if (!db || !mockId) { setLoadingQuestions(false); return; }
@@ -230,6 +239,65 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
+  const metrics = useMemo(() => {
+    if (!activeSession) return null;
+    
+    const posMarks = activeSession.positiveMarks || 1;
+    const negMarks = activeSession.negativeMarks || 0.25;
+    const correct = activeSession.correctCount || 0;
+    const wrong = activeSession.wrongCount || 0;
+    const totalQ = activeSession.totalQuestions || questions.length;
+    const attempted = correct + wrong;
+    
+    const score = Number(activeSession.score) || 0;
+    const maxMarks = totalQ * posMarks;
+    const percentage = (score / maxMarks) * 100;
+    
+    const attemptAccuracy = attempted > 0 ? (correct / attempted) * 100 : 0;
+    const overallAccuracy = (correct / totalQ) * 100;
+    const attemptRate = (attempted / totalQ) * 100;
+    
+    const readiness = (percentage + attemptAccuracy + attemptRate) / 3;
+    
+    const getGrade = (p: number) => {
+      if (p >= 90) return "A+";
+      if (p >= 80) return "A";
+      if (p >= 70) return "B+";
+      if (p >= 60) return "B";
+      if (p >= 50) return "C";
+      if (p >= 40) return "D";
+      if (p >= 30) return "E";
+      return "F";
+    };
+
+    const getReadinessLevel = (r: number) => {
+      if (r >= 80) return "Excellent";
+      if (r >= 60) return "Good";
+      if (r >= 40) return "Average";
+      if (r >= 20) return "Weak";
+      return "Critical";
+    };
+
+    const percentile = totalCandidates > 1 
+      ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1))
+      : 0;
+
+    return {
+      score,
+      maxMarks,
+      percentage,
+      attemptAccuracy,
+      overallAccuracy,
+      attemptRate,
+      readiness,
+      readinessLevel: getReadinessLevel(readiness),
+      grade: getGrade(percentage),
+      isQualified: percentage >= 40,
+      percentile,
+      topperGap: Math.max(0, topperScore - score)
+    };
+  }, [activeSession, questions, liveRank, totalCandidates, topperScore]);
+
   const handleRetake = useCallback(() => {
     if (!mockId) return;
     if (user && db) { deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {}); }
@@ -247,9 +315,8 @@ export default function ResultClient() {
     
     try {
       setActiveMainTab("REPORT"); 
-      toast({ title: "Optimizing report for high-fidelity capture..." });
+      toast({ title: "Capturing institutional report..." });
       
-      // Visual Handshake
       await new Promise(r => setTimeout(r, 1200));
       if (typeof window !== 'undefined' && 'fonts' in document) {
          await (document as any).fonts.ready;
@@ -258,7 +325,6 @@ export default function ResultClient() {
       const element = document.getElementById('cracklix-result-card');
       if (!element) throw new Error("Analysis node missing from DOM.");
 
-      // Contrast Hardening Style
       const style = document.createElement('style');
       style.id = 'cracklix-export-hardening';
       style.innerHTML = `
@@ -266,16 +332,9 @@ export default function ResultClient() {
           opacity: 1 !important;
           filter: none !important;
           text-shadow: none !important;
-          -webkit-print-color-adjust: exact !important;
         }
         #cracklix-result-card .text-slate-300, 
-        #cracklix-result-card .text-slate-400,
-        #cracklix-result-card .text-slate-500 {
-          color: #475569 !important; /* Darkened Slate-600 */
-        }
-        #cracklix-result-card .bg-slate-50 {
-           background-color: #F1F5F9 !important;
-        }
+        #cracklix-result-card .text-slate-400 { color: #475569 !important; }
       `;
       document.head.appendChild(style);
 
@@ -284,27 +343,19 @@ export default function ResultClient() {
         useCORS: true,
         backgroundColor: "#FFFFFF",
         logging: false,
-        allowTaint: true,
-        imageTimeout: 30000,
         foreignObjectRendering: true
       });
 
-      const hardeningStyle = document.getElementById('cracklix-export-hardening');
-      if (hardeningStyle) hardeningStyle.remove();
+      style.remove();
 
       const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-      
-      const imgWidth = 210; 
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
-      pdf.save(`Cracklix_Report_${activeSession.userName.replace(/\s+/g, '_')}.pdf`);
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+      pdf.save(`Result_${activeSession.userName}.pdf`);
       
       toast({ title: "PDF Export Complete" });
     } catch (e: any) {
-      console.error("[PDF_EXPORT_FAILURE]:", e);
-      toast({ variant: "destructive", title: "Export Failed", description: "Registry capture was interrupted." });
+      toast({ variant: "destructive", title: "Export Failed" });
     } finally {
       setIsExporting(false);
     }
@@ -340,47 +391,24 @@ export default function ResultClient() {
      return m > 0 ? `${m}m ${s}s` : `${s}s`;
   };
 
-  if (!mounted) return null;
+  if (!mounted || isSearching) return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
+      <Zap className="h-10 w-10 text-primary animate-spin" />
+      <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em]">Syncing Analysis Node...</p>
+    </div>
+  );
 
-  // Render Loader while searching
-  if (isSearching) {
+  if (errorNotFound || !activeSession || !metrics) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
-        <div className="relative">
-          <Zap className="h-10 w-10 text-primary animate-spin" />
-          <Loader2 className="h-10 w-10 text-primary animate-spin absolute inset-0 opacity-20" />
-        </div>
-        <div className="text-center space-y-1">
-          <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em]">Registry Handshake</p>
-          <p className="text-[9px] font-bold text-primary uppercase tracking-widest">Synchronizing Analysis Node...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Render Error if not found
-  if (errorNotFound || !activeSession) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center font-body">
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center">
         <Card className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-16 shadow-5xl border border-slate-100 space-y-10">
-          <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
-            <AlertCircle className="h-10 w-10" />
-          </div>
-          <div className="space-y-3">
-            <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tighter uppercase">Entry Not Found</h2>
-            <p className="text-slate-500 font-medium leading-relaxed">Your result node is still synchronizing with the registry. Please refresh in a moment.</p>
-          </div>
-          <Button asChild className="w-full h-16 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold shadow-xl border-none active:scale-95 transition-all">
-            <Link href="/dashboard">Return to Hub</Link>
-          </Button>
+          <AlertCircle className="h-16 w-16 text-rose-500 mx-auto" />
+          <h2 className="text-2xl font-black text-[#0F172A] tracking-tighter uppercase">Entry Not Found</h2>
+          <Button asChild className="w-full h-16 bg-[#0F172A] rounded-2xl font-bold"><Link href="/dashboard">Return to Hub</Link></Button>
         </Card>
       </div>
     );
   }
-
-  const percentile = totalCandidates > 1 
-    ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1))
-    : 100;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
@@ -390,123 +418,196 @@ export default function ResultClient() {
         {/* HEADER HUB */}
         <div className="flex flex-col lg:flex-row justify-between items-center gap-8 px-1 print:hidden">
            <div className="flex items-center gap-5 md:gap-10 text-left w-full lg:w-auto">
-              <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="lg" className="h-14 w-14 md:h-24 md:w-24 rounded-2xl" />
+              <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="lg" className="h-14 w-14 md:h-24 md:w-24 rounded-2xl shadow-xl" />
               <div className="space-y-1 flex-1 min-w-0">
                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    <span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Analysis hub</span>
+                    <Badge className={cn("border-none text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm", metrics.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+                       {metrics.isQualified ? "Qualified" : "Not Qualified"}
+                    </Badge>
                  </div>
                  <h1 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A] leading-tight truncate">
                    {activeSession?.mockTitle}
                  </h1>
-                 <div className="flex flex-wrap items-center justify-start gap-2 md:gap-3 font-bold text-[9px] md:text-xs">
-                    <div className="flex items-center gap-1.5 bg-white border border-slate-100 px-3 py-1.5 rounded-lg text-slate-500 shadow-sm">
-                       <Clock className="h-3.5 w-3.5 text-slate-400" /> 
-                       <span className="tabular-nums">{new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg text-primary shadow-sm">
-                       <Trophy className="h-3.5 w-3.5" /> 
-                       <span>Rank #{liveRank} of {totalCandidates || 1} candidates</span>
-                    </div>
+                 <div className="flex flex-wrap items-center justify-start gap-2 md:gap-3 font-bold text-[9px] md:text-xs text-slate-400">
+                    <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
+                    <span className="h-1 w-1 rounded-full bg-slate-200" />
+                    <span>Attempt ID: {activeSession.attemptId?.slice(0, 8)}</span>
                  </div>
               </div>
            </div>
            
            <div className="flex flex-col gap-3 w-full lg:w-auto shrink-0">
-              <div className="flex bg-white border border-slate-100 p-1 rounded-xl shadow-sm w-full lg:w-auto overflow-x-auto no-scrollbar">
-                 <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                    <TabsList className="bg-transparent border-none p-0 flex h-10 w-full gap-1">
-                       <HubTab value="OVERVIEW" label="Summary" />
-                       <HubTab value="REVIEW" label="Review" />
-                       <HubTab value="REPORT" label="Report" />
-                    </TabsList>
-                 </Tabs>
-              </div>
+              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="bg-white border border-slate-100 p-1 rounded-xl shadow-sm">
+                 <TabsList className="bg-transparent border-none p-0 flex h-10 w-full gap-1">
+                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-6 font-bold text-[10px] uppercase data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Summary</TabsTrigger>
+                    <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-6 font-bold text-[10px] uppercase data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
+                    <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-6 font-bold text-[10px] uppercase data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
+                 </TabsList>
+              </Tabs>
               <div className="flex gap-2">
-                 <button onClick={handleRetake} className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50 flex items-center justify-center cursor-pointer transition-all active:scale-95"><RotateCcw className="h-3.5 w-3.5" /> Retake</button>
-                 <Button onClick={handleDownloadPDF} disabled={isExporting || !activeSession} className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight shadow-xl">
-                    {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} 
-                    Export PDF
+                 <Button variant="outline" onClick={handleRetake} className="flex-1 h-11 border-2 font-bold uppercase text-[10px] rounded-xl"><RotateCcw className="h-3.5 w-3.5 mr-2" /> Retake</Button>
+                 <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-11 bg-primary text-white font-bold uppercase text-[10px] rounded-xl shadow-lg shadow-primary/20">
+                    {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5 mr-2" />} Export PDF
                  </Button>
               </div>
            </div>
         </div>
 
-        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
-            <TabsContent value="OVERVIEW" className="space-y-10 animate-in fade-in duration-500">
+        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-12">
+            <TabsContent value="OVERVIEW" className="space-y-12 animate-in fade-in duration-500">
+                {/* 1. SCORE MATRIX */}
                 <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
-                  <StatCard label="Final Score" val={activeSession.score?.toFixed(1)} icon={<Zap className="text-primary" />} />
-                  <StatCard label="Punjab Rank" val={`#${liveRank}`} icon={<Trophy className="text-amber-500" />} highlight />
-                  <StatCard label="Percentile" val={`${percentile}%`} icon={<TrendingUp className="text-blue-500" />} />
-                  <StatCard label="Accuracy" val={`${activeSession.accuracy}%`} icon={<Target className="text-emerald-500" />} />
-                  <StatCard label="Wrong" val={activeSession.wrongCount} icon={<XCircle className="text-rose-500" />} />
-                  <StatCard label="Time Taken" val={formatTimeStr(activeSession.timeTaken)} icon={<Clock className="text-blue-500" />} />
+                  <StatCard label="Net Score" val={`${metrics.score} / ${metrics.maxMarks}`} sub={`${metrics.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
+                  <StatCard label="Punjab Rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
+                  <StatCard label="Percentile" val={`${metrics.percentile}%`} sub="Verified" icon={<TrendingUp className="text-blue-500" />} />
+                  <StatCard label="Attempt Acc." val={`${metrics.attemptAccuracy.toFixed(1)}%`} sub="Question focus" icon={<Target className="text-emerald-500" />} />
+                  <StatCard label="Overall Acc." val={`${metrics.overallAccuracy.toFixed(1)}%`} sub="Bank density" icon={<ShieldCheck className="text-indigo-500" />} />
+                  <StatCard label="Grade" val={metrics.grade} sub="Institutional" icon={<Award className="text-purple-500" />} />
                 </section>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
-                  <div className="lg:col-span-8">
-                      <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-white p-6 md:p-10 text-left">
-                          <h2 className="text-lg md:text-2xl font-bold text-[#0F172A] tracking-tight mb-8">Subject performance audit</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+                  {/* 2. TOPPER COMPARISON & READINESS */}
+                  <div className="lg:col-span-8 space-y-10">
+                      <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
+                          <h3 className="text-xl md:text-2xl font-black text-[#0F172A] uppercase tracking-tighter mb-10 flex items-center gap-4">
+                             <TrendingUp className="h-6 w-6 text-primary" /> Topper comparison
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                             <div className="space-y-8">
+                                <ComparisonPill label="Your Score" val={metrics.score} color="bg-primary" />
+                                <ComparisonPill label="Avg Score" val={Number(avgScore.toFixed(1))} color="bg-slate-200" />
+                                <ComparisonPill label="Topper Score" val={topperScore} color="bg-amber-400" />
+                             </div>
+                             <div className="bg-slate-50 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center space-y-4 border border-slate-100">
+                                <div className="h-14 w-14 rounded-2xl bg-white flex items-center justify-center shadow-md">
+                                   <Target className="h-6 w-6 text-rose-500" />
+                                </div>
+                                <div>
+                                   <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Gap from topper</p>
+                                   <p className="text-4xl font-black text-[#0F172A] tabular-nums mt-1">-{metrics.topperGap.toFixed(1)}</p>
+                                </div>
+                                <p className="text-xs font-bold text-slate-500 max-w-[200px] leading-relaxed">Focus on weak subjects to close this gap.</p>
+                             </div>
+                          </div>
+                      </Card>
+
+                      <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
+                          <div className="flex justify-between items-center mb-10">
+                             <h3 className="text-xl md:text-2xl font-black text-[#0F172A] uppercase tracking-tighter flex items-center gap-4">
+                                <ShieldCheck className="h-6 w-6 text-emerald-500" /> Readiness score
+                             </h3>
+                             <Badge className={cn(
+                                "border-none text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg uppercase",
+                                metrics.readiness >= 80 ? "bg-emerald-500 text-white" :
+                                metrics.readiness >= 60 ? "bg-blue-500 text-white" :
+                                metrics.readiness >= 40 ? "bg-amber-500 text-white" : "bg-rose-500 text-white"
+                             )}>
+                                {metrics.readinessLevel}
+                             </Badge>
+                          </div>
+                          
                           <div className="space-y-8">
-                              {Array.isArray(activeSession.subjectAnalysis) && activeSession.subjectAnalysis.map((sub: any, i: number) => (
-                              <div key={i} className="space-y-2">
-                                  <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                      <div className="flex items-center gap-2"><BookOpen className="h-3.5 w-3.5 text-primary" /> {sub.name}</div>
-                                      <span className="text-[#0F172A] tabular-nums font-black">{sub.accuracy}%</span>
-                                  </div>
-                                  <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
-                                      <motion.div 
-                                          initial={{ width: 0 }} 
-                                          animate={{ width: `${sub.accuracy}%` }} 
-                                          transition={{ duration: 1, delay: i * 0.05 }} 
-                                          className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : sub.accuracy > 40 ? "bg-blue-500" : "bg-rose-500")} 
-                                      />
-                                  </div>
-                              </div>
-                              ))}
+                             <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner flex">
+                                <div className="h-full bg-rose-500 w-[20%]" />
+                                <div className="h-full bg-amber-500 w-[20%]" />
+                                <div className="h-full bg-blue-500 w-[20%]" />
+                                <div className="h-full bg-blue-600 w-[20%]" />
+                                <div className="h-full bg-emerald-500 w-[20%]" />
+                             </div>
+                             <div className="relative pt-4">
+                                <motion.div 
+                                   initial={{ left: 0 }}
+                                   animate={{ left: `${metrics.readiness}%` }}
+                                   transition={{ duration: 2, ease: "easeOut" }}
+                                   className="absolute -top-12 -translate-x-1/2 flex flex-col items-center gap-1"
+                                >
+                                   <div className="px-3 py-1 bg-[#0F172A] text-white text-[10px] font-black rounded-lg shadow-xl">{metrics.readiness.toFixed(1)}</div>
+                                   <div className="w-1 h-12 bg-[#0F172A] rounded-full" />
+                                </motion.div>
+                                <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                                   <span>Critical</span>
+                                   <span>Weak</span>
+                                   <span>Average</span>
+                                   <span>Good</span>
+                                   <span>Excellent</span>
+                                </div>
+                             </div>
                           </div>
                       </Card>
                   </div>
 
-                  <div className="lg:col-span-4">
-                      <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-[#0F172A] text-white p-6 md:p-8 space-y-6 relative overflow-hidden group">
-                          <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-40 w-40 text-primary" /></div>
-                          <div className="relative z-10 space-y-6 text-left">
-                              <div className="space-y-1">
-                                <h3 className="text-xl font-bold tracking-tight uppercase">Leaderboard</h3>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global standing</p>
-                              </div>
-                              <div className="p-4 bg-white/5 rounded-xl border border-white/5 flex flex-col gap-1">
-                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">My Standing</p>
-                                <p className="text-2xl font-black text-primary tabular-nums tracking-tighter">#{liveRank} of {totalCandidates}</p>
-                              </div>
-                              <Button asChild className="w-full h-11 bg-primary hover:bg-blue-700 text-white font-bold rounded-lg shadow-xl border-none active:scale-95 transition-all text-xs">
-                                <Link href={`/leaderboard?id=${mockId}`}>Full rankings <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                              </Button>
+                  {/* 3. SIDEBAR INSIGHTS */}
+                  <div className="lg:col-span-4 space-y-8">
+                      <Card className="border-none shadow-xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden h-full">
+                          <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-64 w-64 text-primary" /></div>
+                          <div className="relative z-10 space-y-8 text-left">
+                             <div className="space-y-1">
+                                <h3 className="text-2xl font-black tracking-tight leading-tight uppercase">Smart Insights</h3>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">AI Performance Audit</p>
+                             </div>
+                             <div className="space-y-6">
+                                <InsightItem text={`You attempted ${metrics.attemptRate.toFixed(1)}% questions. ${metrics.attemptRate < 50 ? 'Your attempt rate is very low. Focus on attempting more.' : 'Good attempt volume.'}`} />
+                                <InsightItem text={`Attempt accuracy is ${metrics.attemptAccuracy.toFixed(1)}%. ${metrics.attemptAccuracy < 60 ? 'High error rate detected. Reduce guesswork.' : 'Strong precision.'}`} />
+                                <InsightItem text={metrics.isQualified ? 'You have met the institutional cutoff. Maintain consistency.' : 'Performance is below cutoff. Intensive revision required.'} />
+                             </div>
+                             <div className="pt-8 border-t border-white/5">
+                                <Button asChild variant="ghost" className="w-full text-primary hover:text-white hover:bg-white/5 font-black uppercase text-[10px] tracking-widest gap-2">
+                                   <Link href="/leaderboard">Merit rankings <ArrowRight className="h-3.5 w-3.5" /></Link>
+                                </Button>
+                             </div>
                           </div>
                       </Card>
                   </div>
                 </div>
+
+                {/* 4. SUBJECT BREAKDOWN */}
+                <section className="space-y-8">
+                   <h3 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tighter px-1 flex items-center gap-4">
+                      <Layers className="h-8 w-8 text-blue-500" /> Subject level audit
+                   </h3>
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                      {activeSession.subjectAnalysis?.map((sub: any, i: number) => (
+                         <Card key={i} className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 flex flex-col gap-6 text-left group hover:-translate-y-1 transition-all">
+                            <div className="flex justify-between items-start">
+                               <h4 className="text-lg font-black text-[#0F172A] line-clamp-1">{sub.name}</h4>
+                               <Badge className={cn(
+                                  "border-none text-[8px] font-black uppercase",
+                                  sub.accuracy >= 70 ? "bg-emerald-50 text-emerald-600" : sub.accuracy >= 40 ? "bg-blue-50 text-blue-600" : "bg-rose-50 text-rose-600"
+                               )}>{sub.accuracy}% Mastery</Badge>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                               <SubjectMetric label="Correct" val={sub.correct} color="text-emerald-600" />
+                               <SubjectMetric label="Wrong" val={sub.wrong} color="text-rose-600" />
+                               <SubjectMetric label="Skipped" val={sub.total - (sub.correct + sub.wrong)} color="text-slate-400" />
+                               <SubjectMetric label="Net Score" val={sub.score.toFixed(1)} color="text-primary" />
+                            </div>
+                            <div className="h-1 w-full bg-slate-50 rounded-full overflow-hidden mt-2">
+                               <motion.div initial={{ width: 0 }} animate={{ width: `${sub.accuracy}%` }} className={cn("h-full", sub.accuracy >= 70 ? "bg-emerald-500" : "bg-blue-500")} />
+                            </div>
+                         </Card>
+                      ))}
+                   </div>
+                </section>
             </TabsContent>
 
-            <TabsContent value="REVIEW" className="space-y-8 animate-in fade-in duration-500">
-                <div className="max-w-4xl mx-auto space-y-8">
-                <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
-                    <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
+            <TabsContent value="REVIEW" className="space-y-10 animate-in fade-in duration-500">
+                <div className="max-w-4xl mx-auto space-y-10">
+                <div className="flex items-center gap-1.5 bg-white p-1 rounded-2xl shadow-xl border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
+                    <FilterButton active={activeReviewFilter === 'ALL'} label="All Items" onClick={() => setActiveReviewFilter('ALL')} />
                     <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                     <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                     <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skipped" onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-8">
                     {filteredQuestions.map((q) => {
                         const rawAns = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
                         const isAttempted = rawAns !== null && rawAns !== undefined && String(rawAns) !== "";
                         return (
-                            <Card key={q.id} className="border border-slate-100 shadow-xl rounded-1.5rem md:rounded-[2rem] overflow-hidden bg-white text-left group">
-                            <div className="p-6 md:p-10 space-y-6">
-                                <Badge variant="outline" className="px-3 py-0.5 rounded-full border-slate-100 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
-                                    Question {q.originalIndex + 1}
+                            <Card key={q.id} className="border border-slate-100 shadow-2xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-white text-left group">
+                            <div className="p-8 md:p-14 space-y-8">
+                                <Badge variant="outline" className="px-4 py-1 rounded-full border-slate-100 text-slate-400 font-black text-[9px] uppercase tracking-widest">
+                                    Node #{q.originalIndex + 1}
                                 </Badge>
                                 <QuestionRenderer 
                                     question={q} 
@@ -529,19 +630,19 @@ export default function ResultClient() {
                     <ResultCard 
                         studentName={activeSession.userName || profile?.name || "Aspirant"} 
                         examTitle={activeSession.mockTitle || "Mock Test"} 
-                        score={activeSession.score?.toFixed(1)} 
+                        score={metrics.score.toFixed(1)} 
                         rank={liveRank} 
-                        accuracy={activeSession.accuracy} 
+                        accuracy={metrics.overallAccuracy.toFixed(1)} 
                         timeTaken={formatTimeStr(activeSession.timeTaken)} 
                         correct={activeSession.correctCount} 
                         wrong={activeSession.wrongCount} 
                         total={questions.length} 
                         date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')} 
                         resultId={activeSession.id || "REGISTRY_NODE"} 
-                        percentile={percentile} 
+                        percentile={metrics.percentile} 
                         branding={branding}
                         subjects={activeSession.subjectAnalysis}
-                        grade={activeSession.grade}
+                        grade={metrics.grade}
                     />
                 </div>
                 </div>
@@ -553,26 +654,53 @@ export default function ResultClient() {
   )
 }
 
-function StatCard({ label, val, icon, highlight }: any) {
+function StatCard({ label, val, sub, icon, highlight }: any) {
   return (
     <Card className={cn(
-       "border border-slate-100 shadow-md bg-white p-4 md:p-6 rounded-xl md:rounded-[1.5rem] text-left relative overflow-hidden h-full flex flex-col justify-center transition-all hover:translate-y-[-2px]",
-       highlight && "ring-2 ring-primary/5 bg-primary/[0.01]"
+       "border border-slate-100 shadow-md bg-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] text-left relative overflow-hidden h-full flex flex-col justify-center transition-all hover:translate-y-[-4px]",
+       highlight && "ring-4 ring-primary/5 border-primary/20"
     )}>
-       <div className="absolute top-0 right-0 p-3 opacity-5">{icon}</div>
-       <div className="space-y-0.5 relative z-10">
-          <p className="text-[8px] md:text-[10px] font-bold text-slate-400 truncate uppercase tracking-widest">{label}</p>
-          <p className={cn("text-lg md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
+       <div className="absolute top-0 right-0 p-4 opacity-5">{icon}</div>
+       <div className="space-y-1 relative z-10">
+          <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{label}</p>
+          <p className={cn("text-xl md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none", highlight && "text-primary")}>{val}</p>
+          {sub && <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-tight">{sub}</p>}
        </div>
     </Card>
   )
 }
 
-function HubTab({ value, label }: { value: string, label: string }) {
+function ComparisonPill({ label, val, color }: any) {
    return (
-      <TabsTrigger value={value} className="flex-1 rounded-lg px-2 md:px-8 font-bold text-[9px] md:text-[11px] tracking-tight data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all h-full">
-         {label}
-      </TabsTrigger>
+      <div className="space-y-3">
+         <div className="flex justify-between text-[10px] font-black uppercase text-slate-400 tracking-widest">
+            <span>{label}</span>
+            <span className="text-[#0F172A] tabular-nums">{val}</span>
+         </div>
+         <div className="h-3 w-full bg-slate-50 rounded-lg overflow-hidden border border-slate-100 shadow-inner">
+            <motion.div initial={{ width: 0 }} whileInView={{ width: `${(val / 100) * 100}%` }} className={cn("h-full shadow-lg", color)} />
+         </div>
+      </div>
+   )
+}
+
+function InsightItem({ text }: { text: string }) {
+   return (
+      <div className="flex items-start gap-4 group">
+         <div className="h-6 w-6 rounded-lg bg-white/5 flex items-center justify-center shrink-0 mt-0.5 shadow-inner group-hover:bg-primary/20 transition-all">
+            <Zap className="h-3 w-3 text-primary" />
+         </div>
+         <p className="text-[11px] md:text-[13px] font-medium text-slate-400 leading-relaxed group-hover:text-white transition-colors">{text}</p>
+      </div>
+   )
+}
+
+function SubjectMetric({ label, val, color }: any) {
+   return (
+      <div className="space-y-1">
+         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+         <p className={cn("text-sm md:text-lg font-black tabular-nums leading-none", color)}>{val}</p>
+      </div>
    )
 }
 
@@ -581,7 +709,7 @@ function FilterButton({ active, label, onClick, color = "primary" }: any) {
       <button 
         onClick={onClick} 
         className={cn(
-          "px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-bold tracking-tight transition-all active:scale-95 whitespace-nowrap border border-transparent uppercase",
+          "px-4 md:px-8 py-2.5 rounded-xl text-[9px] md:text-[11px] font-black tracking-widest transition-all active:scale-95 whitespace-nowrap border border-transparent uppercase",
           active 
             ? color === 'rose' ? "bg-rose-600 text-white shadow-lg" : 
               color === 'emerald' ? "bg-emerald-600 text-white shadow-lg" :
@@ -591,5 +719,13 @@ function FilterButton({ active, label, onClick, color = "primary" }: any) {
       >
          {label}
       </button>
+   )
+}
+
+function HubTab({ value, label }: { value: string, label: string }) {
+   return (
+      <TabsTrigger value={value} className="flex-1 rounded-lg px-2 md:px-8 font-black text-[9px] md:text-[11px] uppercase tracking-widest data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all h-full">
+         {label}
+      </TabsTrigger>
    )
 }
