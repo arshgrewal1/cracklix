@@ -6,9 +6,8 @@ import ResultClient from "@/components/results/ResultClient"
 import { Loader2 } from "lucide-react"
 
 /**
- * @fileOverview Universal Result Hub Viewer v9.0.
- * FIXED: Removed the blocking 'Registry Handshake' screen to provide one-click response.
- * Logic: ResultClient now handles its own loading state and ID resolution.
+ * @fileOverview Universal Result Hub Viewer v9.1.
+ * FIXED: Suspense boundary ensures Next.js 15 pre-rendering compatibility.
  */
 
 export default function ResultViewPage() {

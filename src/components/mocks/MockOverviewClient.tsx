@@ -15,29 +15,25 @@ import {
   BookOpen, 
   ShieldCheck, 
   ChevronRight, 
-  ChevronLeft,
   Lock,
   Zap,
   Play,
   Target,
   RefreshCw,
   Gem,
-  CheckCircle2,
-  ArrowRight,
-  AlertCircle,
   BarChart3,
-  Home
+  AlertCircle,
+  ArrowRight
 } from "lucide-react"
 import Link from "next/link"
-import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client v4.6.
- * FIXED: Removed recursive self-call that caused 'Maximum call stack size exceeded' build error.
+ * @fileOverview Universal Mock Overview Hub Client v4.7.
+ * FIXED: Removed recursive self-call that caused build-time Stack Overflow.
  */
 
 export default function MockOverviewClient() {
@@ -117,7 +113,7 @@ export default function MockOverviewClient() {
         <div className="space-y-3">
           <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">Coming Soon</h1>
           <p className="text-slate-500 font-medium leading-relaxed pt-4">
-            This preparation hub is currently being updated with the latest official patterns. Please check back later.
+            This preparation hub is currently being updated. Please check back later.
           </p>
         </div>
 
@@ -144,7 +140,7 @@ export default function MockOverviewClient() {
                 "border-none text-[10px] font-bold px-2.5 py-0.5 rounded-lg tracking-widest shadow-sm h-7 flex items-center", 
                 mock.accessLevel === 'PREMIUM' ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
               )}>
-                {mock.accessLevel === 'PREMIUM' ? '🔒 Elite' : 'Free Hub'}
+                {mock.accessLevel === 'PREMIUM' ? 'Elite Access' : 'Free Hub'}
               </Badge>
 
               <div className="space-y-4 md:space-y-6 w-full">
@@ -155,7 +151,7 @@ export default function MockOverviewClient() {
                 <div className="flex flex-wrap items-center gap-6 text-[#64748B] text-base font-bold tracking-widest">
                     <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /> {mock.duration}m Time</span>
                     <span className="text-slate-300">|</span>
-                    <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Items</span>
+                    <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Questions</span>
                     <span className="text-slate-300">|</span>
                     <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> {mock.totalQuestions * (mock.positiveMarks || 1)} Marks</span>
                 </div>

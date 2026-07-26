@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -15,27 +15,15 @@ import {
   getDocs, 
   where,
   limit,
-  orderBy,
   getCountFromServer,
-  serverTimestamp,
-  increment,
-  runTransaction
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
   Zap, 
   Loader2, 
   Download,
-  RotateCcw,
   ChevronRight,
   AlertCircle,
-  BarChart3,
-  History,
-  TrendingUp,
-  Target,
-  Award,
-  Clock,
-  BookOpen
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -52,8 +40,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v41.0 [Parallelized Data Handshake].
- * FIXED: Implemented robust attempt resolution and PDF frame safety.
+ * @fileOverview Institutional Result Hub v42.0 [Index-Less Resolution].
+ * FIXED: Removed 'orderBy' from Firestore query to bypass index requirement.
  */
 
 export default function ResultClient() {
@@ -94,13 +82,8 @@ export default function ResultClient() {
         if (typeof window === 'undefined') return;
         const screenWidth = window.innerWidth;
         const targetWidth = 794; 
-        const padding = 2; 
-        const available = screenWidth - padding;
-        if (available < targetWidth) {
-          setPreviewScale(available / targetWidth);
-        } else {
-          setPreviewScale(1);
-        }
+        const available = screenWidth - 2;
+        setPreviewScale(available < targetWidth ? available / targetWidth : 1);
       };
       calculateScale();
       window.addEventListener('resize', calculateScale);
@@ -128,6 +111,7 @@ export default function ResultClient() {
        }
 
        try {
+          // Index-less query: Fetch by userId + mockId and sort client-side
           const resQuery = query(
              collection(db, "results"), 
              where("userId", "==", user.uid), 
@@ -180,38 +164,21 @@ export default function ResultClient() {
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
-           
            const [countSnap, superiorCountSnap] = await Promise.all([
              getCountFromServer(entriesRef),
              getCountFromServer(query(entriesRef, where("highestScore", ">", activeSession.score)))
            ]);
-
            const displayTotal = countSnap.data().count;
            setTotalCandidates(displayTotal);
-           
-           let superiorCount = superiorCountSnap.data().count;
-
-           if (user) {
-              const myEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
-              const myEntrySnap = await getDoc(myEntryRef);
-              if (myEntrySnap.exists()) {
-                 const myBest = myEntrySnap.data().highestScore;
-                 if (myBest > activeSession.score) {
-                    superiorCount = Math.max(0, superiorCount - 1);
-                 }
-              }
-           }
-
-           const calculatedRank = superiorCount + 1;
-           setLiveRank(Math.max(1, Math.min(calculatedRank, displayTotal)));
+           setLiveRank(superiorCountSnap.data().count + 1);
         } catch (e) {}
      }
      fetchRankingMetrics();
-  }, [db, mockId, activeSession, user]);
+  }, [db, mockId, activeSession]);
 
   useEffect(() => {
     async function loadQuestions() {
-      if (!db || !mockId) { setLoadingQuestions(false); return; }
+      if (!db || !mockId) return;
       try {
         setLoadingQuestions(true);
         const mockRef = doc(db, "mocks", mockId);
@@ -226,12 +193,11 @@ export default function ResultClient() {
           if (questionIds.length > 0) {
             const chunks = [];
             for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
-            
             const chunkPromises = chunks.map(async (chunk) => {
-              const [mcqSnap, legacySnap, usedSnap] = await Promise.all([
+              const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
                  getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-                 getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk))),
-                 getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
+                 getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
+                 getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
               ]);
               const localResults: any[] = [];
               mcqSnap.docs.forEach(d => localResults.push({ ...d.data(), id: d.id }));
@@ -239,7 +205,6 @@ export default function ResultClient() {
               legacySnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
               return localResults;
             });
-
             const allBatches = await Promise.all(chunkPromises);
             const fetchedQuestions = allBatches.flat();
             setQuestions(questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean));
@@ -256,42 +221,25 @@ export default function ResultClient() {
     const totalQ = Number(activeSession.totalQuestions) || 0;
     const maxMarks = Number(activeSession.maxMarks) || totalQ;
     const percentage = Number(((score / maxMarks) * 100).toFixed(1));
-    const attemptAccuracy = Number(activeSession.attemptAccuracy) || 0;
-    const grade = activeSession.grade || "F";
     const isQualified = activeSession.isQualified || percentage >= 40;
     const percentile = totalCandidates > 1 ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1)) : 100;
-    return { score, maxMarks, percentage, attemptAccuracy, grade, isQualified, percentile };
+    return { score, maxMarks, percentage, attemptAccuracy: Number(activeSession.attemptAccuracy) || 0, grade: activeSession.grade || "F", isQualified, percentile };
   }, [activeSession, totalCandidates, liveRank]);
 
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Syncing report node" });
-
+    toast({ title: "Synchronizing report node" });
     try {
-      await document.fonts.ready;
-      await new Promise(r => setTimeout(r, 1000));
-
       const container = document.getElementById('pdf-report-container');
       if (!container) throw new Error("Capture node missing");
-
-      const canvas = await html2canvas(container, {
-        scale: 2, 
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        width: 794,
-        windowWidth: 794
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.90); 
+      const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: "#ffffff", width: 794 });
+      const imgData = canvas.toDataURL('image/jpeg', 0.9);
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
-      pdf.save(`Cracklix_Report_${activeSession.userName?.replace(/\s+/g, '_') || 'Student'}.pdf`);
-      toast({ title: "Report Downloaded" });
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Export failed" });
-    } finally { setIsExporting(false); }
+      pdf.save(`Report_${activeSession.userName || 'Student'}.pdf`);
+      toast({ title: "Report downloaded" });
+    } catch (e) { toast({ variant: "destructive", title: "Export failed" }); } finally { setIsExporting(false); }
   };
 
   const reviewNodes = useMemo(() => {
@@ -300,8 +248,7 @@ export default function ResultClient() {
     const correct: any[] = [], wrong: any[] = [], skipped: any[] = [];
     all.forEach((q) => {
       const ans = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
-      const isAttempted = ans !== null && ans !== undefined && String(ans) !== "";
-      if (!isAttempted) skipped.push(q);
+      if (ans === null || ans === undefined || String(ans) === "") skipped.push(q);
       else {
         const userSelectedLabel = ['A', 'B', 'C', 'D'][Number(ans)];
         if (userSelectedLabel === q.correctAnswer) correct.push(q); else wrong.push(q);
@@ -332,13 +279,8 @@ export default function ResultClient() {
            <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
               <AlertCircle className="h-10 w-10" />
            </div>
-           <div className="space-y-3">
-              <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Result not found</h2>
-              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This attempt record has been archived or is unavailable.</p>
-           </div>
-           <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold text-sm shadow-3xl border-none">
-              <Link href="/dashboard"><ChevronRight className="h-4 w-4 mr-2" /> Back to Dashboard</Link>
-           </Button>
+           <h2 className="text-2xl font-black text-[#0F172A]">Result not found</h2>
+           <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold"><Link href="/dashboard">Back to Dashboard</Link></Button>
         </Card>
      </div>
   );
@@ -346,20 +288,18 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body">
       <Navbar />
-      <main className="container mx-auto max-w-7xl px-0 md:px-8 py-6 md:py-12 space-y-4 md:space-y-10 pb-32">
+      <main className="container mx-auto max-w-7xl px-4 md:px-8 py-6 md:py-12 space-y-10 pb-32 text-left">
         
         {activeSession && finalMetrics && (
-           <div className="space-y-4 md:space-y-10 animate-in fade-in duration-500">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-6 px-4 md:px-0">
+           <div className="space-y-10 animate-in fade-in duration-500">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                  <div className="flex items-center gap-6 text-left w-full md:w-auto">
                     <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-14 w-14 md:h-20 md:w-20 rounded-2xl shadow-xl bg-white border-none" />
                     <div className="space-y-1 flex-1 min-w-0">
-                       <h1 className="text-xl md:text-4xl font-black tracking-tight text-[#0F172A] truncate">
-                         {activeSession?.mockTitle}
-                       </h1>
+                       <h1 className="text-xl md:text-4xl font-black tracking-tight text-[#0F172A] truncate">{activeSession?.mockTitle}</h1>
                        <div className="flex items-center gap-4">
-                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[10px] font-black px-4 py-1.5 rounded-full shadow-sm uppercase tracking-widest">Verified Hub</Badge>
-                          <span className="text-[10px] md:text-sm font-black text-primary uppercase tracking-tight">Attempt #{activeSession.attemptNumber || userAttemptCount || 1}</span>
+                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[10px] font-black px-4 py-1.5 rounded-full shadow-sm uppercase">Verified Hub</Badge>
+                          <span className="text-[10px] md:text-sm font-black text-primary uppercase">Attempt #{activeSession.attemptNumber || 1}</span>
                        </div>
                     </div>
                  </div>
@@ -373,17 +313,15 @@ export default function ResultClient() {
               </div>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                  <div className="py-1.5 -mx-4 px-4 bg-transparent border-none">
-                     <div className="flex justify-center w-full max-w-2xl mx-auto">
-                        <TabsList className="bg-white border border-slate-200 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center overflow-x-auto no-scrollbar">
-                           <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all uppercase tracking-widest">Analysis</TabsTrigger>
-                           <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all uppercase tracking-widest">Review</TabsTrigger>
-                           <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all uppercase tracking-widest">Report</TabsTrigger>
-                        </TabsList>
-                     </div>
+                  <div className="flex justify-center w-full max-w-2xl mx-auto mb-10">
+                     <TabsList className="bg-white border border-slate-200 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center">
+                        <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all uppercase tracking-widest">Analysis</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all uppercase tracking-widest">Review</TabsTrigger>
+                        <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all uppercase tracking-widest">Report</TabsTrigger>
+                     </TabsList>
                   </div>
 
-                  <TabsContent value="OVERVIEW" className="px-0 pt-6">
+                  <TabsContent value="OVERVIEW">
                       <ReportScreen 
                          {...activeSession} 
                          resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
@@ -406,27 +344,22 @@ export default function ResultClient() {
                          subjects={activeSession.subjectAnalysis}
                          duration={mockData?.duration}
                          boardId={activeSession?.boardId}
-                         attemptNumber={activeSession.attemptNumber || userAttemptCount || 1}
+                         attemptNumber={activeSession.attemptNumber || 1}
                       />
                   </TabsContent>
 
-                  <TabsContent value="REVIEW" className="space-y-4 max-w-5xl mx-auto px-4 pt-6">
-                      <div className="py-2 -mx-4 px-4 mb-6 bg-transparent border-none">
-                         <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-lg border border-slate-200 w-full max-w-2xl mx-auto h-12 md:h-14">
-                             <FilterButton active={activeReviewFilter === 'ALL'} label="All Items" onClick={() => setActiveReviewFilter('ALL')} />
-                             <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
-                             <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
-                         </div>
+                  <TabsContent value="REVIEW" className="space-y-6 max-w-5xl mx-auto">
+                      <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-lg border border-slate-200 w-full max-w-2xl mx-auto h-12 md:h-14">
+                          <FilterButton active={activeReviewFilter === 'ALL'} label="All Items" onClick={() => setActiveReviewFilter('ALL')} />
+                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                          <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                       </div>
-                      
-                      <div className="grid grid-cols-1 gap-6 md:gap-10">
+                      <div className="grid grid-cols-1 gap-6 md:gap-10 pt-4">
                           {filteredQuestions.map((q) => (
-                              <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-white text-left transition-all duration-300 hover:shadow-2xl">
-                                  <div className="p-8 md:p-14 space-y-8 md:space-y-12">
+                              <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white text-left p-8 md:p-14 transition-all duration-300 hover:shadow-2xl">
+                                  <div className="space-y-8">
                                       <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                                         <Badge variant="outline" className="px-4 py-1.5 rounded-full border-slate-200 text-slate-400 font-black text-[9px] uppercase tracking-widest">
-                                             Question #{q.originalIndex + 1}
-                                         </Badge>
+                                         <Badge variant="outline" className="px-4 py-1.5 rounded-full border-slate-200 text-slate-400 font-black text-[9px] uppercase tracking-widest">Question #{q.originalIndex + 1}</Badge>
                                          <Badge className="bg-primary/5 text-primary border-none text-[9px] font-black uppercase tracking-widest">{q.subjectId || 'General'}</Badge>
                                       </div>
                                       <QuestionRenderer 
@@ -443,15 +376,7 @@ export default function ResultClient() {
                   </TabsContent>
 
                   <TabsContent value="REPORT" className="px-0 pb-40 pt-10 flex flex-col items-center">
-                      <div 
-                        style={{ 
-                          width: '794px',
-                          transform: `scale(${previewScale})`,
-                          transformOrigin: 'top center',
-                          marginBottom: `${(1123 * previewScale) - 1123}px`
-                        }}
-                        className="bg-white p-0 shadow-4xl border border-slate-200 origin-top rounded-lg overflow-hidden"
-                      >
+                      <div style={{ width: '794px', transform: `scale(${previewScale})`, transformOrigin: 'top center', marginBottom: `${(1123 * previewScale) - 1123}px` }} className="bg-white p-0 shadow-4xl border border-slate-200 origin-top rounded-lg overflow-hidden">
                          <ReportPDF 
                             {...activeSession}
                             resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
@@ -472,7 +397,7 @@ export default function ResultClient() {
                             grade={finalMetrics.grade}
                             subjects={activeSession.subjectAnalysis}
                             duration={mockData?.duration}
-                            attemptNumber={activeSession.attemptNumber || userAttemptCount || 1}
+                            attemptNumber={activeSession.attemptNumber || 1}
                          />
                       </div>
                   </TabsContent>
@@ -503,7 +428,7 @@ export default function ResultClient() {
                  grade={finalMetrics.grade}
                  subjects={activeSession.subjectAnalysis}
                  duration={mockData?.duration}
-                 attemptNumber={activeSession.attemptNumber || userAttemptCount || 1}
+                 attemptNumber={activeSession.attemptNumber || 1}
               />
             )}
           </div>
@@ -528,4 +453,3 @@ function formatTimeStr(seconds: number) {
   const s = Math.floor(seconds % 60);
   return `${m}m ${s}s`;
 }
-
