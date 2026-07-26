@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -29,8 +28,9 @@ interface ReportPDFProps {
 }
 
 /**
- * @fileOverview Institutional Portrait PDF Layout Hub v25.0.
- * FIXED: Extreme vertical compacting to ensure footer safety on A4 frame.
+ * @fileOverview Institutional Portrait PDF Layout Hub v26.0.
+ * FIXED: Boxed identity hub and aggressive rank spacing to resolve text overlap.
+ * TERMINOLOGY: Using "Wrong" for errors as per standard.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
@@ -59,15 +59,15 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
          </div>
          <div className="text-right space-y-1">
-            <p className="text-xs font-black text-[#0F172A] uppercase">Performance Report</p>
+            <p className="text-xs font-black text-[#0F172A] uppercase">Performance report</p>
             <p className="text-[8px] font-bold text-slate-400 tabular-nums uppercase">Ref: {resultId?.slice(0, 15)}</p>
          </div>
       </div>
 
-      <div className="w-full flex-1 p-8 space-y-5 flex flex-col items-center overflow-hidden">
+      <div className="w-full flex-1 p-8 space-y-4 flex flex-col items-center overflow-hidden">
          
-         {/* 2. CANDIDATE IDENTITY BOX - COMPACTED */}
-         <div className="w-full bg-white rounded-[2.5rem] p-6 border border-slate-100 flex flex-col items-center justify-center shadow-sm relative overflow-hidden text-center min-h-[140px]">
+         {/* 2. BOXED IDENTITY HUB */}
+         <div className="w-full bg-white rounded-[2.5rem] p-8 border border-slate-100 flex flex-col items-center justify-center shadow-sm relative overflow-hidden text-center min-h-[160px]">
             <div className="space-y-3 w-full">
                <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Candidate Identity</p>
                <h1 className="text-4xl font-black text-[#0F172A] leading-normal antialiased">
@@ -76,7 +76,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                <p className="text-base font-bold text-slate-500 line-clamp-1">{examTitle}</p>
             </div>
             
-            <div className="pt-5 border-t border-slate-100 mt-5 w-full max-w-2xl mx-auto grid grid-cols-3 gap-6">
+            <div className="pt-6 border-t border-slate-100 mt-6 w-full max-w-2xl mx-auto grid grid-cols-3 gap-6">
                <div className="flex flex-col items-center gap-1">
                   <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Attempt Date</p>
                   <p className="text-sm font-black text-[#0F172A] tabular-nums leading-none">{date}</p>
@@ -92,24 +92,24 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
          </div>
 
-         {/* 3. MERIT STANDING - COMPACTED TO PREVENT BOTTOM CUT */}
-         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-8 text-white text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden min-h-[220px]">
+         {/* 3. MERIT STANDING - HARDENED VERTICAL SPACING */}
+         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden min-h-[260px]">
             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-40 w-40 text-primary" /></div>
             
             <div className="relative z-10 flex flex-col items-center w-full">
-               <p className="text-[12px] font-black text-primary uppercase tracking-[0.4em] mb-2">Punjab Rank</p>
+               <p className="text-[12px] font-black text-primary uppercase tracking-[0.4em] mb-4">Punjab Rank</p>
                
-               <div className="flex flex-col items-center gap-1">
-                  <span className="text-[90px] font-[900] tabular-nums tracking-tighter leading-none block drop-shadow-[0_15px_30px_rgba(37,99,235,0.4)]">
+               <div className="flex flex-col items-center justify-center gap-6">
+                  <span className="text-[100px] font-[900] tabular-nums tracking-tighter leading-none block drop-shadow-[0_15px_30px_rgba(37,99,235,0.4)]">
                      #{rank}
                   </span>
-                  <span className="text-[18px] font-black text-slate-500 tabular-nums uppercase tracking-[0.2em] mt-2">
+                  <span className="text-[20px] font-black text-slate-500 tabular-nums uppercase tracking-[0.2em]">
                      / {totalCandidates.toLocaleString()} Candidates
                   </span>
                </div>
                
-               <div className="pt-5">
-                  <Badge className="bg-emerald-500 text-white border-none font-black text-[9px] px-8 py-2 rounded-full shadow-4xl uppercase tracking-widest">
+               <div className="pt-8">
+                  <Badge className="bg-emerald-500 text-white border-none font-black text-[10px] px-10 py-2.5 rounded-full shadow-4xl uppercase tracking-widest">
                      Verified Standing
                   </Badge>
                </div>
@@ -121,7 +121,7 @@ export default function ReportPDF(props: ReportPDFProps) {
             <KPIBox label="Net Score" val={score} color="text-primary" />
             <KPIBox label="Percentile" val={`${percentile}%`} color="text-purple-600" />
             <KPIBox label="Accuracy" val={`${attemptAccuracy}%`} color="text-emerald-600" />
-            <KPIBox label="Overall Grade" val={grade} color="text-amber-600" />
+            <KPIBox label="Pass Grade" val={grade} color="text-amber-600" />
          </div>
 
          {/* 5. COUNT SUMMARY */}
@@ -135,13 +135,13 @@ export default function ReportPDF(props: ReportPDFProps) {
          {/* 6. SUBJECT ANALYSIS */}
          {subjects.length > 0 && (
             <div className="w-full space-y-3">
-               <p className="text-[10px] font-black text-slate-400 text-center uppercase tracking-widest">Subject Mastery Hub</p>
+               <p className="text-[10px] font-black text-slate-400 text-center uppercase tracking-widest">Subject Mastery Analysis</p>
                <div className="border border-slate-100 rounded-[1.5rem] overflow-hidden bg-white shadow-sm">
                   <table className="w-full text-center">
                      <thead>
                         <tr className="bg-slate-50 border-b border-slate-100 h-10">
-                           <th className="px-10 font-black text-[10px] text-slate-500 uppercase tracking-widest text-left">Subject hub</th>
-                           <th className="px-4 font-black text-[10px] text-center text-slate-500 uppercase tracking-widest">Net score</th>
+                           <th className="px-10 font-black text-[10px] text-slate-500 uppercase tracking-widest text-left">Subject Hub</th>
+                           <th className="px-4 font-black text-[10px] text-center text-slate-500 uppercase tracking-widest">Score</th>
                            <th className="px-10 font-black text-[10px] text-right text-slate-500 uppercase tracking-widest">Accuracy</th>
                         </tr>
                      </thead>
@@ -161,8 +161,8 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
          )}
 
-         {/* 7. FOOTER HUB - REINFORCED UPTICK */}
-         <div className="pt-6 border-t border-slate-100 flex items-center justify-between mt-auto w-full pb-6">
+         {/* 7. FOOTER HUB - REINFORCED FOR BOTTOM VISIBILITY */}
+         <div className="pt-6 border-t border-slate-100 flex items-center justify-between mt-auto w-full pb-8">
             <div className="flex items-center gap-5">
                <div className="h-16 w-16 bg-white border-2 border-slate-100 p-2 rounded-2xl shadow-lg relative overflow-hidden">
                   <img src={qrUrl} alt="Verify" className="h-full w-full object-contain" crossOrigin="anonymous" />
@@ -188,17 +188,17 @@ export default function ReportPDF(props: ReportPDFProps) {
 
 function KPIBox({ label, val, color }: any) {
    return (
-      <div className="bg-white border border-slate-100 p-3 rounded-2xl flex flex-col items-center justify-center gap-0.5 shadow-sm text-center h-20 flex-1">
+      <div className="bg-white border border-slate-100 p-3 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm text-center h-24 flex-1">
          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-         <p className={cn("text-xl font-black tabular-nums tracking-tighter leading-none", color)}>{val}</p>
+         <p className={cn("text-2xl font-black tabular-nums tracking-tighter leading-none", color)}>{val}</p>
       </div>
    )
 }
 
 function CountPill({ label, val, color }: any) {
    return (
-      <div className={cn("p-3 rounded-2xl flex flex-col items-center justify-center gap-0.5 h-14 flex-1 shadow-sm", color)}>
-         <span className="text-lg font-black tabular-nums leading-none">{val}</span>
+      <div className={cn("p-3 rounded-2xl flex flex-col items-center justify-center gap-0.5 h-16 flex-1 shadow-sm", color)}>
+         <span className="text-xl font-black tabular-nums leading-none">{val}</span>
          <span className="text-[8px] font-black uppercase tracking-widest opacity-70">{label}</span>
       </div>
    )

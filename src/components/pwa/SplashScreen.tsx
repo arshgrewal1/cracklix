@@ -6,9 +6,9 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v6.1.
- * UPDATED: Minimized gap between icon and brand text using aggressive negative margins.
- * AESTHETIC: High-fidelity SaaS startup launch experience (Spotify/Linear style).
+ * @fileOverview Premium PWA Splash Hub v7.0.
+ * FIXED: Syntax stability and vertical centering.
+ * AESTHETIC: High-fidelity SaaS startup launch experience.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -62,37 +62,27 @@ export default function SplashScreen() {
           key="cracklix-premium-splash"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
           className="fixed inset-0 z-[9999] bg-[#05070B] flex flex-col items-center justify-start overflow-hidden pointer-events-none select-none pt-[6dvh] md:pt-[10dvh]"
         >
-          {/* AMBIENT BACKGROUND LAYER */}
           <div className="absolute top-[-10%] left-[-10%] w-full h-[70%] bg-primary/10 blur-[140px] rounded-full" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[50%] bg-blue-600/5 blur-[120px] rounded-full" />
           
           <div className="relative z-10 flex flex-col items-center w-full px-8 max-w-lg">
-             
-             {/* HERO LOGO HUB - MAXIMIZED SCALE */}
              <motion.div
                initial={{ opacity: 0, scale: 0.7, y: 30 }}
                animate={{ opacity: 1, scale: 1, y: 0 }}
-               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+               transition={{ duration: 1.2, ease: "easeOut" }}
                className="relative mb-0"
              >
                 <div className="relative flex items-center justify-center">
-                   {/* Pulsing Orbit Glow */}
                    <motion.div 
                      animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
                      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                      className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full scale-90"
                    />
-                   
                    <div 
                      className="relative"
-                     style={{ 
-                        width: 'clamp(260px, 50vw, 420px)', 
-                        height: 'auto', 
-                        aspectRatio: '1/1' 
-                     }}
+                     style={{ width: 'clamp(260px, 50vw, 420px)', height: 'auto', aspectRatio: '1/1' }}
                    >
                       <Image 
                         src="/logo/cracklix-icon.png" 
@@ -105,7 +95,6 @@ export default function SplashScreen() {
                 </div>
              </motion.div>
 
-             {/* BRANDING UNIT - MINIMUM GAP */}
              <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
@@ -121,7 +110,6 @@ export default function SplashScreen() {
                    </p>
                 </div>
 
-                {/* LOADING HUB - COMPACT SPACING */}
                 <div className="pt-16 md:pt-24 w-full max-w-[200px] md:max-w-[260px] mx-auto space-y-6">
                    <div className="flex flex-col items-center gap-5">
                       <div className="relative h-[2px] w-full bg-white/5 rounded-full overflow-hidden shadow-inner">

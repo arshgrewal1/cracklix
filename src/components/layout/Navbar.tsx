@@ -37,8 +37,8 @@ import { Button } from "@/components/ui/button";
 import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Cracklix Navigation Hub v130.0.
- * RESTORED: Changed back to 'sticky top-0' to keep navigation frozen as requested.
+ * @fileOverview Cracklix Navigation Hub v131.0.
+ * FIXED: Sticky header protocol enabled for persistent portal access.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
