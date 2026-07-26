@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -20,7 +21,6 @@ import { useToast } from "@/hooks/use-toast"
 import { 
   Zap, 
   Loader2, 
-  Share2,
   ChevronRight,
   RefreshCw,
   BarChart3,
@@ -29,7 +29,8 @@ import {
   Target,
   FileText,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  RotateCcw
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -42,8 +43,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Engine v96.1 [Import Fix].
- * FIXED: Added missing AlertCircle import from lucide-react.
+ * @fileOverview Universal Result Hub Engine v97.0 [Guest & Sync Hardened].
+ * FIXED: Integrated localStorage fallback for guest attempts.
+ * FIXED: Implemented resilient polling for high-speed retrieval.
  */
 
 export default function ResultClient() {
@@ -60,6 +62,7 @@ export default function ResultClient() {
   
   const [sessionData, setSessionData] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(true);
+  const [pollCount, setPollCount] = useState(0);
   
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
@@ -69,48 +72,73 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptId = searchParams.get('attemptId')
 
-  // DATA POLLING: Aggressive search for the unique attempt node
-  useEffect(() => {
-    if (!db || !mockId || !attemptId) {
-       if (!attemptId && !userLoading) setIsSearching(false);
-       return;
-    }
-    
-    let pollCount = 0;
-    const maxPolls = 20;
+  const fetchResultNode = useCallback(async () => {
+    if (!db || !attemptId) return false;
 
-    async function fetchLatestResult() {
-       try {
-          // ATOMIC FIX: results are now stored strictly by attemptId
-          const snap = await getDoc(doc(db, "results", attemptId));
-          
-          if (snap.exists()) {
-             setSessionData({ ...snap.data(), id: snap.id });
+    try {
+       // 1. Primary Check: Firestore Registry
+       const snap = await getDoc(doc(db, "results", attemptId));
+       
+       if (snap.exists()) {
+          setSessionData({ ...snap.data(), id: snap.id });
+          setIsSearching(false);
+          return true;
+       }
+
+       // 2. Secondary Check: Local Registry (Guest Fallback)
+       if (typeof window !== 'undefined') {
+          const guestKey = `cracklix_guest_result_${attemptId}`;
+          const localData = localStorage.getItem(guestKey);
+          if (localData) {
+             const parsed = JSON.parse(localData);
+             setSessionData({ ...parsed, isGuestNode: true });
              setIsSearching(false);
              return true;
           }
-          return false;
-       } catch (e) { return false; }
-    }
-
-    const interval = setInterval(async () => {
-       const found = await fetchLatestResult();
-       pollCount++;
-       if (found || pollCount >= maxPolls) {
-          clearInterval(interval);
-          setIsSearching(false);
        }
-    }, 1000);
+       
+       return false;
+    } catch (e) {
+       return false;
+    }
+  }, [db, attemptId]);
 
-    fetchLatestResult();
-    return () => clearInterval(interval);
-  }, [db, mockId, attemptId, userLoading]);
+  // Orchestrate Resilient Data Fetching
+  useEffect(() => {
+    if (userLoading || !attemptId) return;
 
-  // Ranking & Questions Loading (Parallel)
+    let isSubscribed = true;
+    let timer: NodeJS.Timeout;
+
+    const runPoll = async () => {
+       const found = await fetchResultNode();
+       if (!found && isSubscribed) {
+          setPollCount(prev => {
+             if (prev < 20) {
+                timer = setTimeout(runPoll, 1500);
+                return prev + 1;
+             } else {
+                setIsSearching(false);
+                return prev;
+             }
+          });
+       }
+    };
+
+    runPoll();
+
+    return () => {
+       isSubscribed = false;
+       clearTimeout(timer);
+    };
+  }, [attemptId, fetchResultNode, userLoading]);
+
+  // Secondary Data Loading (Metrics & Questions)
   useEffect(() => {
      if (!db || !mockId || !sessionData) return;
      
      const loadMetrics = async () => {
+        if (sessionData.isGuestNode) return; // Ranks not available for local nodes
         try {
            const lbRef = collection(db, "leaderboards", mockId, "entries");
            const lbSnap = await getDocs(query(lbRef, orderBy("highestScore", "desc")));
@@ -127,15 +155,16 @@ export default function ResultClient() {
         try {
            const mRef = doc(db, "mocks", mockId);
            const dRef = doc(db, "daily_quizzes", mockId);
-           
            const [mSnap, dSnap] = await Promise.all([getDoc(mRef), getDoc(dRef)]);
            const targetSnap = mSnap.exists() ? mSnap : dSnap;
 
            if (targetSnap?.exists()) {
               const mData = targetSnap.data();
               setMockData(mData);
-              const chunks = [];
               const qIds = mData.questionIds || [];
+              if (qIds.length === 0) return;
+
+              const chunks = [];
               for (let i=0; i<qIds.length; i+=30) chunks.push(qIds.slice(i, i+30));
               
               const promises = chunks.map(async c => {
@@ -174,17 +203,26 @@ export default function ResultClient() {
                  activeReviewFilter === 'WRONG' ? reviewNodes.wrong : 
                  activeReviewFilter === 'SKIPPED' ? reviewNodes.skipped : reviewNodes.all;
 
+  const handleManualSync = () => {
+     setIsSearching(true);
+     setPollCount(0);
+     fetchResultNode().then(found => {
+        if (found) toast({ title: "Sync successful" });
+        else toast({ variant: "destructive", title: "Still not found", description: "The registry node has not propagated yet." });
+     });
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
       <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-8 md:py-16 space-y-10">
         
-        {isSearching ? (
+        {(isSearching || userLoading) ? (
            <div className="py-40 flex flex-col items-center justify-center space-y-6">
               <Loader2 className="h-12 w-12 text-primary animate-spin" />
               <div className="text-center space-y-1">
                  <p className="font-black uppercase tracking-[0.4em] text-primary text-xs">Generating your report</p>
-                 <p className="text-slate-400 font-bold text-[10px] uppercase">Registry nodes are synchronizing...</p>
+                 <p className="text-slate-400 font-bold text-[10px] uppercase">Attempt ID: {attemptId?.slice(0, 12)}...</p>
               </div>
            </div>
         ) : sessionData ? (
@@ -194,19 +232,19 @@ export default function ResultClient() {
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-24 md:w-24 shadow-xl border border-slate-100 rounded-2xl" />
                     <div className="text-left space-y-2 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 font-bold text-[9px] rounded-lg">Official result</Badge>
-                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-3 font-bold text-[9px] rounded-lg">ID: {sessionData.attemptId?.slice(0,10)}</Badge>
+                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 font-bold text-[9px] rounded-lg">Verified Result</Badge>
+                          {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-3 font-bold text-[9px] rounded-lg">Guest Mode</Badge>}
                        </div>
                        <h1 className="text-xl md:text-4xl font-bold text-[#0F172A] tracking-tight truncate">{sessionData.mockTitle}</h1>
                        <div className="flex items-center gap-4 text-xs font-semibold text-slate-400">
                           <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
-                          <span className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4" /> {Math.round(sessionData.timeTaken / 60)}m</span>
+                          <span className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4" /> {Math.round((sessionData.timeTaken || 0) / 60)}m</span>
                        </div>
                     </div>
                  </div>
                  <div className="flex items-center gap-3 w-full lg:w-auto">
                     <Button onClick={() => router.refresh()} className="flex-1 lg:flex-none h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-xs">
-                       <RefreshCw className="h-4 w-4" /> Sync Report
+                       <RefreshCw className="h-4 w-4" /> Sync Hub
                     </Button>
                     <Button asChild variant="outline" className="flex-1 lg:flex-none h-12 px-8 border-slate-200 text-[#0F172A] font-bold rounded-full text-xs">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}>Retake Test</Link>
@@ -222,7 +260,16 @@ export default function ResultClient() {
                      </TabsList>
                   </div>
 
-                  <TabsContent value="OVERVIEW" className="m-0"><ReportScreen {...sessionData} rank={liveRank} totalCandidates={totalCandidates} topScore={topScore} avgScore={avgScore} percentile={Math.max(0, Math.round(((totalCandidates-Number(liveRank))/(totalCandidates||1))*100))} /></TabsContent>
+                  <TabsContent value="OVERVIEW" className="m-0">
+                    <ReportScreen 
+                      {...sessionData} 
+                      rank={liveRank} 
+                      totalCandidates={totalCandidates} 
+                      topScore={topScore} 
+                      avgScore={avgScore} 
+                      percentile={totalCandidates > 0 ? Math.max(0, Math.round(((totalCandidates-Number(liveRank))/(totalCandidates||1))*100)) : 0} 
+                    />
+                  </TabsContent>
                   <TabsContent value="REVIEW" className="m-0 space-y-10">
                       <div className="bg-white p-2 md:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
                           <div className="grid grid-cols-4 gap-2">
@@ -235,8 +282,17 @@ export default function ResultClient() {
                       <div className="grid grid-cols-1 gap-6">
                           {filtered.map(q => (
                               <Card key={q.id} className="border border-slate-100 shadow-sm rounded-[2rem] bg-white p-6 md:p-12 space-y-8 text-left">
-                                  <div className="flex items-center gap-3 border-b border-slate-50 pb-6"><div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black">#{q.originalIndex+1}</div><Badge variant="outline" className="text-[9px] font-bold">Subject: {q.subjectId}</Badge></div>
-                                  <QuestionRenderer question={q} language={sessionData.languageMode || 'ENGLISH_PUNJABI'} showSolution={true} selectedAnswer={sessionData.answers?.[q.originalIndex]} className="p-0 shadow-none border-none bg-transparent" />
+                                  <div className="flex items-center gap-3 border-b border-slate-50 pb-6">
+                                     <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black">#{q.originalIndex+1}</div>
+                                     <Badge variant="outline" className="text-[9px] font-bold">Subject: {q.subjectId}</Badge>
+                                  </div>
+                                  <QuestionRenderer 
+                                    question={q} 
+                                    language={sessionData.languageMode || 'ENGLISH_PUNJABI'} 
+                                    showSolution={true} 
+                                    selectedAnswer={sessionData.answers?.[q.originalIndex]} 
+                                    className="p-0 shadow-none border-none bg-transparent" 
+                                  />
                               </Card>
                           ))}
                       </div>
@@ -244,11 +300,25 @@ export default function ResultClient() {
               </Tabs>
            </>
         ) : (
-           <div className="py-40 text-center space-y-6">
-              <AlertCircle className="h-16 w-16 mx-auto text-slate-200" />
-              <h2 className="text-2xl font-black text-[#0F172A]">Result audit not found</h2>
-              <p className="text-slate-500 font-medium max-w-sm mx-auto">No synchronized attempt records were found for this test vertical.</p>
-              <Button asChild className="rounded-full px-10"><Link href="/mocks">Explore test bank</Link></Button>
+           <div className="py-40 text-center space-y-10">
+              <div className="relative mx-auto w-24 h-24">
+                 <AlertCircle className="h-24 w-24 text-slate-100" />
+                 <div className="absolute inset-0 flex items-center justify-center">
+                    <AlertCircle className="h-12 w-12 text-slate-300" />
+                 </div>
+              </div>
+              <div className="space-y-3">
+                 <h2 className="text-2xl md:text-3xl font-black text-[#0F172A]">Result audit not found</h2>
+                 <p className="text-slate-500 font-medium max-w-sm mx-auto">No synchronized attempt records were found for this ID in the registry.</p>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                 <Button onClick={handleManualSync} className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3">
+                    <RotateCcw className="h-4 w-4" /> Force Sync
+                 </Button>
+                 <Button asChild variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-2xl border-2">
+                    <Link href="/mocks">Explore Tests</Link>
+                 </Button>
+              </div>
            </div>
         )}
       </main>
@@ -259,7 +329,7 @@ export default function ResultClient() {
 
 function FilterNode({ active, label, count, onClick, color }: any) {
   return (
-    <button onClick={onClick} className={cn("flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 h-12 md:h-14 rounded-xl transition-all border", active ? "bg-[#0F172A] border-[#0F172A] text-white" : "bg-white border-transparent text-slate-400 hover:bg-slate-50")}>
+    <button onClick={onClick} className={cn("flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 h-12 md:h-14 rounded-xl transition-all border", active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-transparent text-slate-400 hover:bg-slate-50")}>
        <span className="text-[9px] md:text-[11px] font-bold">{label}</span>
        <span className="text-[9px] md:text-xs font-bold opacity-40 tabular-nums">{count}</span>
     </button>

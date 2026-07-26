@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -41,8 +42,9 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Hub v91.0 [Atomic Document Lock].
- * FIXED: Uses unique attemptId as the primary key for result documents for 100% stable retrieval.
+ * @fileOverview Institutional Attempt Hub v92.0 [Stability Hardened].
+ * FIXED: Promise.all syntax for loadExam.
+ * FIXED: Added error handling and visual feedback for submission failures.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -106,7 +108,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const mockRef = doc(db, "mocks", mockId);
       const dailyRef = doc(db, "daily_quizzes", mockId);
       
-      const [mSnap, dSnap] = await Promise.all([getDoc(mockRef), dSnap = getDoc(dailyRef)]);
+      const [mSnap, dSnap] = await Promise.all([getDoc(mockRef), getDoc(dailyRef)]);
       const targetSnap = mSnap.exists() ? mSnap : dSnap;
       
       if (!targetSnap.exists()) throw new Error("Test not found in registry.");
@@ -167,7 +169,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
     
-    console.log("[CRACKLIX] Submission Started...");
     setShowSubmitModal(false);
     setIsSubmittingFinal(true);
     
@@ -222,10 +223,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const timeTaken = Math.max(1, elapsedSeconds);
     const attemptAccuracy = attemptedCount > 0 ? Number(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
     
-    console.log("[CRACKLIX] Analysis Generated.");
-
     // 2. ATOMIC REGISTRY COMMIT
-    // Use attemptId as the primary unique key for 100% fetch reliability.
     const resultDocId = attemptId;
 
     if (user) {
@@ -236,7 +234,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
           const globalMeritRef = doc(db, "leaderboard", user.uid);
 
-          // Commit Unique Result Node
           transaction.set(resultRef, {
              id: resultDocId,
              attemptId, mockId, mockTitle: mockData.title, userId: user.uid,
@@ -250,12 +247,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
              answers: studentAnswers 
           });
 
-          // Update latest attempt pointer for quick lookup
           transaction.set(attemptPtrRef, { 
              attemptId, status: 'COMPLETED', updatedAt: serverTimestamp() 
           }, { merge: true });
 
-          // Update Merit nodes (Simplified Best Attempt logic)
           transaction.set(lbEntryRef, {
              userId: user.uid, userName: profile?.name || 'Aspirant',
              photoURL: profile?.photoURL || "", mockId, highestScore: score,
@@ -268,26 +263,24 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           }, { merge: true });
         });
         
-        console.log("[CRACKLIX] Firestore Completed.");
         stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
       } catch (e) {
          console.error("[SYNC_ERROR]:", e);
+         toast({ variant: "destructive", title: "Sync failed", description: "Could not securing results to cloud." });
+         setIsSubmittingFinal(false);
+         return;
       }
     } else {
-       // Guest Support: Local Persistence
+       // Guest Mode
        const guestPayload = {
-          attemptId, mockId, mockTitle: mockData.title, score, totalQuestions, accuracy: attemptAccuracy, timestamp: new Date().toISOString(), answers: studentAnswers
+          attemptId, mockId, mockTitle: mockData.title, score, totalQuestions, accuracy: attemptAccuracy, timestamp: new Date().toISOString(), answers: studentAnswers, timeTaken, languageMode: language
        };
        localStorage.setItem(`cracklix_guest_result_${attemptId}`, JSON.stringify(guestPayload));
     }
 
-    console.log("[CRACKLIX] Redirecting...");
-    // Force clean navigation with only the NEW attemptId
     router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
-    
-    // Hard reset of store happens after navigation to prevent jitter
     setTimeout(() => resetStore(), 800);
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language, toast]);
 
   if (isInitializing || isSubmittingFinal) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8 z-[2000] fixed inset-0">
@@ -304,6 +297,15 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           </p>
        </div>
     </div>
+  );
+
+  if (initError) return (
+     <div className="h-screen flex flex-col items-center justify-center p-6 text-center space-y-6">
+        <AlertCircle className="h-16 w-16 text-rose-500" />
+        <h2 className="text-2xl font-black">Initialization failed</h2>
+        <p className="text-slate-500 max-w-sm">{initError}</p>
+        <Button onClick={() => window.location.reload()} className="rounded-xl h-12 px-8">Retry Sync</Button>
+     </div>
   );
 
   return (
