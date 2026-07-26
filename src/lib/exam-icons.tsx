@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v38.0 (Global Focal Overhaul).
+ * @fileOverview Institutional Branding Engine v39.0 (Focal Zoom Hardened).
  * FIXED: Removed internal padding to allow icons to fill the container (Zoom Effect).
- * UPDATED: Standardized XL size for Report focal nodes.
+ * UPDATED: Standardized XL size to match the new Report requirements (h-40/w-40).
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {

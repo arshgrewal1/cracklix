@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -64,7 +65,9 @@ import { BrandingSettings } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Result Hub v2.4 [Import Fixed].
+ * @fileOverview Official Result Hub v2.5 [Registry Hardened].
+ * FIXED: TypeError by adding activeSession existence check before rendering.
+ * SYNC: Updated 'Items' to 'Questions' terminology.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -210,7 +213,22 @@ export default function ResultClient() {
      return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
   };
 
-  if (!mounted || (resultLoading && user)) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-spin" /></div>;
+  if (!mounted || (resultLoading && user)) {
+     return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-spin" /></div>;
+  }
+
+  // CRITICAL FIX: Safety check for activeSession before render
+  if (!activeSession) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
+        <Zap className="h-10 w-10 text-primary animate-pulse" />
+        <div className="text-center space-y-1">
+           <p className="text-[10px] font-black uppercase text-[#0F172A] tracking-[0.3em]">Resolving attempt node</p>
+           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Synchronizing registry data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
@@ -228,10 +246,15 @@ export default function ResultClient() {
                  <h1 className="text-2xl md:text-5xl font-black tracking-tighter text-[#0F172A] leading-tight truncate">
                    {activeSession.mockTitle}
                  </h1>
-                 <div className="flex flex-wrap items-center gap-4 text-slate-500 font-bold text-[10px] md:sm uppercase tracking-tight">
-                    <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-200" />
-                    <span className="flex items-center gap-1.5 text-primary"><Trophy className="h-4 w-4" /> Score: {activeSession.score.toFixed(1)}</span>
+                 <div className="flex flex-wrap items-center gap-4 text-slate-50 font-bold text-[10px] md:sm tracking-tight">
+                    <div className="flex items-center gap-1.5 bg-white border border-slate-100 px-3 py-1.5 rounded-lg text-slate-500">
+                       <Clock className="h-4 w-4" /> 
+                       <span>{new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg text-primary">
+                       <Trophy className="h-4 w-4" /> 
+                       <span>Score: {activeSession.score.toFixed(1)}</span>
+                    </div>
                  </div>
               </div>
            </div>
@@ -247,10 +270,10 @@ export default function ResultClient() {
                  </Tabs>
               </div>
               <div className="flex gap-3">
-                 <Button onClick={handleRetake} disabled={isSyncing} variant="outline" className="flex-1 h-12 rounded-xl font-bold border-slate-200 bg-white gap-2">
+                 <Button onClick={handleRetake} disabled={isSyncing} variant="outline" className="flex-1 h-12 rounded-xl font-bold border-slate-200 bg-white gap-2 text-xs">
                     {isSyncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />} Retake
                  </Button>
-                 <Button onClick={handleDownloadPDF} className="flex-1 h-12 rounded-xl font-bold bg-[#0F172A] text-white gap-2">
+                 <Button onClick={handleDownloadPDF} className="flex-1 h-12 rounded-xl font-bold bg-[#0F172A] text-white gap-2 text-xs">
                     <Download className="h-3.5 w-3.5" /> Download PDF
                  </Button>
               </div>
