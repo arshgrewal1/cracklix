@@ -24,6 +24,7 @@ import {
   Download,
   ChevronRight,
   AlertCircle,
+  RefreshCw
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -40,9 +41,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v44.2 [Hardened Index-Less].
- * FIXED: Removed server-side orderBy to bypass Firestore Index requirement.
- * FIXED: Implemented client-side sorting for attempt history.
+ * @fileOverview Institutional Result Hub v50.0 [Testbook-Style Hardening].
+ * FIXED: Implemented fixed-width 794px buffer for PDF export to prevent layout breakage.
  */
 
 export default function ResultClient() {
@@ -68,7 +68,6 @@ export default function ResultClient() {
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
   const [previewScale, setPreviewScale] = useState(1);
-  const [userAttemptCount, setUserAttemptCount] = useState<number>(1);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -112,13 +111,9 @@ export default function ResultClient() {
        }
 
        try {
-          const resQuery = query(
-             collection(db, "results"), 
-             where("userId", "==", user.uid), 
-             where("mockId", "==", mockId)
-          );
-          
-          const querySnap = await getDocs(resQuery);
+          const resultsRef = collection(db, "results");
+          let q = query(resultsRef, where("userId", "==", user.uid), where("mockId", "==", mockId));
+          const querySnap = await getDocs(q);
           
           if (querySnap.empty) {
              setErrorNotFound(true);
@@ -126,28 +121,18 @@ export default function ResultClient() {
              return;
           }
 
-          const resultsList = querySnap.docs
-            .map(d => ({ ...d.data(), id: d.id }))
-            .sort((a: any, b: any) => {
-              const timeA = new Date(a.timestamp || 0).getTime();
-              const timeB = new Date(b.timestamp || 0).getTime();
-              return timeB - timeA;
-            });
+          const resultsList = querySnap.docs.map(d => ({ ...d.data(), id: d.id }));
           
-          setUserAttemptCount(resultsList.length);
-
           if (attemptIdFromUrl) {
              const target = resultsList.find(r => r.attemptId === attemptIdFromUrl || r.id.endsWith(attemptIdFromUrl));
              if (target) {
-                const nth = resultsList.length - resultsList.findIndex(r => r.id === target.id);
-                setSessionData({ ...target, attemptNumber: nth });
+                setSessionData(target);
                 setIsSearching(false);
                 return;
              }
           }
 
-          const latest = resultsList[0];
-          setSessionData({ ...latest, attemptNumber: resultsList.length });
+          setSessionData(resultsList[resultsList.length - 1]);
           setIsSearching(false);
 
        } catch (e) { 
@@ -194,11 +179,9 @@ export default function ResultClient() {
             const chunks = [];
             for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
             const chunkPromises = chunks.map(async (chunk) => {
-              const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
-                 getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-                 getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
-                 getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
-              ]);
+              const mcqSnap = await getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk)));
+              const usedSnap = await getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)));
+              const legacySnap = await getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)));
               const localResults: any[] = [];
               mcqSnap.docs.forEach(d => localResults.push({ ...d.data(), id: d.id }));
               usedSnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
@@ -229,16 +212,16 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Syncing report hub" });
+    toast({ title: "Synchronizing report nodes" });
     try {
       const container = document.getElementById('pdf-report-container');
       if (!container) throw new Error("Capture node missing");
-      const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: "#ffffff", width: 794 });
+      const canvas = await html2canvas(container, { scale: 3, useCORS: true, backgroundColor: "#ffffff", width: 794 });
       const imgData = canvas.toDataURL('image/jpeg', 0.9);
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
-      pdf.save(`Report_${activeSession.userName || 'Student'}.pdf`);
-      toast({ title: "Report downloaded" });
+      pdf.save(`Cracklix_Report_${activeSession.userName || 'Student'}.pdf`);
+      toast({ title: "Analysis downloaded" });
     } catch (e) { toast({ variant: "destructive", title: "Export failed" }); } finally { setIsExporting(false); }
   };
 
@@ -269,7 +252,7 @@ export default function ResultClient() {
   if (isSearching) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
         <Zap className="h-12 w-12 text-primary animate-pulse" />
-        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Resolving analysis...</p>
+        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Synchronizing analytical registry...</p>
      </div>
   );
 
@@ -279,7 +262,7 @@ export default function ResultClient() {
            <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
               <AlertCircle className="h-10 w-10" />
            </div>
-           <h2 className="text-2xl font-black text-[#0F172A]">Result not found</h2>
+           <h2 className="text-2xl font-black text-[#0F172A]">Result node not found</h2>
            <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold"><Link href="/dashboard">Back to Dashboard</Link></Button>
         </Card>
      </div>
@@ -299,7 +282,7 @@ export default function ResultClient() {
                        <h1 className="text-xl md:text-4xl font-black tracking-tight text-[#0F172A] truncate">{activeSession?.mockTitle}</h1>
                        <div className="flex items-center gap-4">
                           <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[10px] font-black px-4 py-1.5 rounded-full shadow-sm uppercase">Verified Hub</Badge>
-                          <span className="text-[10px] md:text-sm font-black text-primary uppercase">Attempt #{activeSession.attemptNumber || 1}</span>
+                          <span className="text-[10px] md:text-sm font-black text-primary uppercase">Attempt #{profile?.totalTests || 1}</span>
                        </div>
                     </div>
                  </div>
@@ -344,14 +327,13 @@ export default function ResultClient() {
                          subjects={activeSession.subjectAnalysis}
                          duration={mockData?.duration}
                          boardId={activeSession?.boardId}
-                         attemptNumber={activeSession.attemptNumber || 1}
                       />
                   </TabsContent>
 
                   <TabsContent value="REVIEW" className="space-y-6 max-w-5xl mx-auto">
                       <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-lg border border-slate-200 w-full max-w-2xl mx-auto h-12 md:h-14">
                           <FilterButton active={activeReviewFilter === 'ALL'} label="All Items" onClick={() => setActiveReviewFilter('ALL')} />
-                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Fix Errors (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                           <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                       </div>
                       <div className="grid grid-cols-1 gap-6 md:gap-10 pt-4">
@@ -397,7 +379,6 @@ export default function ResultClient() {
                             grade={finalMetrics.grade}
                             subjects={activeSession.subjectAnalysis}
                             duration={mockData?.duration}
-                            attemptNumber={activeSession.attemptNumber || 1}
                          />
                       </div>
                   </TabsContent>
@@ -428,7 +409,6 @@ export default function ResultClient() {
                  grade={finalMetrics.grade}
                  subjects={activeSession.subjectAnalysis}
                  duration={mockData?.duration}
-                 attemptNumber={activeSession.attemptNumber || 1}
               />
             )}
           </div>

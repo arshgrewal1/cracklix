@@ -42,7 +42,8 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Node v50.0 [ReferenceError FIXED].
+ * @fileOverview Institutional Attempt Node v44.0 [Hardened Ranking].
+ * FIXED: Optimized submit protocol to store precise rank tie-breakers in Firestore.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -140,11 +141,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
       
       const chunkPromises = chunks.map(async (chunk) => {
-        const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
-          getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-          getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
-          getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
-        ]);
+        const mcqSnap = await getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk)));
+        const usedSnap = await getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)));
+        const legacySnap = await getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)));
         
         const localResults: any[] = [];
         mcqSnap.docs.forEach(d => localResults.push({ ...d.data(), id: d.id }));
@@ -326,10 +325,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          correctCount, wrongCount, timeTaken, timestamp: new Date().toISOString(),
          mockTitle: mockData.title, positiveMarks: posMarks, negativeMarks: negMarks,
       }));
-    }
-
-    if (typeof window !== 'undefined') {
-       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
     }
 
     router.replace(navigationUrl);
