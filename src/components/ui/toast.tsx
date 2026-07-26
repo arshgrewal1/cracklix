@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -9,7 +8,7 @@ import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Notification Node v4.6.
+ * @fileOverview Hardened Notification Node v5.0.
  * FIXED: Re-positioned ToastViewport to top-center with extreme z-index for visibility over fixed headers.
  */
 

@@ -19,8 +19,9 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v2.3 [Fixed Icon Imports].
- * FIXED: Added missing icon imports to resolve runtime crashes.
+ * @fileOverview Premium Analysis Screen v3.0.
+ * FIXED: Globally removed uppercase text.
+ * FIXED: Unified box alignment for a professional SaaS feel.
  */
 
 interface ReportScreenProps {
@@ -92,7 +93,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                <Trophy className="h-6 w-6 md:h-8 md:w-8" />
             </div>
             <div className="text-left">
-               <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Your Punjab rank</p>
+               <p className="text-[10px] md:text-xs font-bold text-slate-400">Your Punjab rank</p>
                <div className="flex items-baseline gap-2">
                   <span className="text-3xl md:text-5xl font-black text-[#1677FF] tabular-nums">#{rank}</span>
                   <span className="text-[10px] md:text-sm font-bold text-slate-300">/ {totalCandidates} Candidates</span>
@@ -103,7 +104,7 @@ export default function ReportScreen(props: ReportScreenProps) {
             <ShieldCheck className="h-5 w-5 text-[#1677FF]" />
             <div className="text-left">
                <p className="text-[10px] md:text-xs font-black text-[#1677FF] leading-none">Verified standing</p>
-               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1 uppercase">Top ranked hub</p>
+               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1">Top ranked hub</p>
             </div>
          </div>
       </Card>
@@ -204,7 +205,7 @@ function SummaryMiniCard({ label, val, color, bg }: any) {
    return (
       <Card className={cn("min-w-[110px] md:flex-1 h-36 md:h-44 rounded-[24px] border-none shadow-sm flex flex-col items-center justify-center p-4 snap-start shrink-0", bg)}>
          <span className={cn("text-2xl md:text-4xl font-black tabular-nums", color)}>{val}</span>
-         <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">{label}</span>
+         <span className="text-[10px] md:text-xs font-bold text-slate-400 mt-2">{label}</span>
       </Card>
    )
 }
@@ -212,7 +213,7 @@ function SummaryMiniCard({ label, val, color, bg }: any) {
 function StatsBox({ label, val, sub, color }: any) {
    return (
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 text-center space-y-3">
-         <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</p>
+         <p className="text-[10px] md:text-xs font-bold text-slate-400 leading-none">{label}</p>
          <p className={cn("text-2xl md:text-4xl font-black tabular-nums tracking-tighter leading-none", color || "text-[#071B4D]")}>{val}</p>
          <p className="text-[10px] font-bold text-slate-300 leading-none">{sub}</p>
       </Card>
@@ -224,9 +225,10 @@ function ComparisonNode({ label, val, icon }: any) {
       <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-[#E5EAF2] shadow-sm">
          <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center shrink-0">{icon}</div>
          <div className="min-w-0">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight truncate">{label}</p>
+            <p className="text-[9px] font-bold text-slate-400 truncate">{label}</p>
             <p className="text-base md:text-lg font-black text-[#071B4D] tabular-nums leading-none mt-1">{val}</p>
          </div>
       </div>
    )
 }
+

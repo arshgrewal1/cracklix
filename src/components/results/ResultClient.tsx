@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -42,8 +41,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v12.6.
- * FIXED: Strictly defined header height offset and Title Case labels for premium SaaS feel.
+ * @fileOverview Universal Result Hub Viewer v13.0.
+ * FIXED: Globally removed uppercase text.
+ * FIXED: Unified box alignment for a professional SaaS feel.
  */
 
 export default function ResultClient() {
@@ -228,7 +228,7 @@ export default function ResultClient() {
     return { all, correct, wrong, skipped };
   }, [questions, sessionData]);
 
-  if (isSearching) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6"><Zap className="h-12 w-12 text-primary animate-pulse" /><p className="text-[10px] font-bold text-slate-300 uppercase">Synchronizing Analysis Hub...</p></div>;
+  if (isSearching) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6"><Zap className="h-12 w-12 text-primary animate-pulse" /><p className="text-[10px] font-bold text-slate-300 uppercase">Synchronizing analysis hub...</p></div>;
 
   const filteredQuestions = activeReviewFilter === 'CORRECT' ? reviewNodes.correct : 
                            activeReviewFilter === 'WRONG' ? reviewNodes.wrong : 
@@ -251,11 +251,11 @@ export default function ResultClient() {
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-20 md:w-20 bg-white shadow-xl border border-slate-100" />
                     <div className="text-left space-y-2">
                        <div className="flex flex-wrap items-center gap-3">
-                          <Badge className="bg-[#10B981] text-white border-none px-3 py-1 font-bold text-[9px] uppercase tracking-widest">Verified Hub</Badge>
-                          <Badge className="bg-[#1677FF] text-white border-none px-3 py-1 font-bold text-[9px] uppercase tracking-widest">Attempt #{profile?.totalTests || 1}</Badge>
+                          <Badge className="bg-[#10B981] text-white border-none px-3 py-1 font-bold text-[9px]">Verified hub</Badge>
+                          <Badge className="bg-[#1677FF] text-white border-none px-3 py-1 font-bold text-[9px]">Attempt #{profile?.totalTests || 1}</Badge>
                        </div>
-                       <h1 className="text-xl md:text-3xl font-black text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
-                       <div className="flex items-center gap-6 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">
+                       <h1 className="text-xl md:text-3xl font-[800] text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
+                       <div className="flex items-center gap-6 text-[10px] md:text-xs font-bold text-slate-400">
                           <HeaderMiniNode icon={<Clock className="h-3.5 w-3.5" />} label="Date" val={new Date(sessionData.timestamp).toLocaleDateString('en-GB')} />
                           <HeaderMiniNode icon={<Clock className="h-3.5 w-3.5" />} label="Duration" val={`${mockData?.duration || 120}m`} />
                           <HeaderMiniNode icon={<Users className="h-3.5 w-3.5" />} label="Candidates" val={totalCandidates.toLocaleString()} />
@@ -267,7 +267,7 @@ export default function ResultClient() {
                        {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download PDF
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
-                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
+                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake test</Link>
                     </Button>
                  </div>
               </Card>
@@ -276,8 +276,8 @@ export default function ResultClient() {
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-10">
                   <div className="flex justify-center">
                      <TabsList className="bg-slate-100 p-1 rounded-3xl border border-[#E5EAF2] shadow-inner flex w-fit gap-1 mx-auto lg:mx-0 h-auto">
-                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis Hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review Portal</TabsTrigger>
+                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review portal</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -309,7 +309,7 @@ export default function ResultClient() {
                                   <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                                      <div className="flex items-center gap-3">
                                         <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-[#0F172A] shadow-inner">#{q.originalIndex + 1}</div>
-                                        <Badge variant="outline" className="border-slate-100 text-slate-400 font-bold text-[9px] uppercase">{q.subjectId || 'General'}</Badge>
+                                        <Badge variant="outline" className="border-slate-100 text-slate-400 font-bold text-[9px]">{q.subjectId || 'General'}</Badge>
                                      </div>
                                   </div>
                                   <QuestionRenderer 
@@ -352,3 +352,4 @@ function FilterButton({ active, label, count, onClick, color = "primary" }: any)
     </button>
   )
 }
+
