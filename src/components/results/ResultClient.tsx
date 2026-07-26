@@ -5,7 +5,7 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useUser, useFirestore } from "@/firebase"
+import { useUser, useFirestore, useCollection } from "@/firebase"
 import { 
   collection, 
   query, 
@@ -47,8 +47,8 @@ import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 
 /**
- * @fileOverview Universal Result Hub Viewer v60.0.
- * FIXED: Implemented professional PNG share and A4 PDF download.
+ * @fileOverview Universal Result Hub Viewer v61.0.
+ * FIXED: ReferenceError 'results is not defined' in header logic.
  */
 
 export default function ResultClient() {
@@ -80,6 +80,13 @@ export default function ResultClient() {
 
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams?.get('attemptId')
+
+  const resultsQuery = useMemo(() => {
+    if (!db || !user || !mockId) return null;
+    return query(collection(db, "results"), where("mockId", "==", mockId), where("userId", "==", user.uid));
+  }, [db, user, mockId]);
+
+  const { data: results, loading: resultsListLoading } = useCollection<any>(resultsQuery);
 
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
