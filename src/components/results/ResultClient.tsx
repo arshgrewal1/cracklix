@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -51,8 +52,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v25.0.
- * FIXED: Centered all text nodes and compacted sub-filter navigation.
+ * @fileOverview Institutional Result Hub v26.0.
+ * FIXED: Removed all sticky headers for natural scrolling real estate.
+ * FIXED: Domain synchronized to cracklix.in.
  */
 
 export default function ResultClient() {
