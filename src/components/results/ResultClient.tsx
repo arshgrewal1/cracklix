@@ -51,10 +51,11 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result System v19.0.
- * FIXED: Alignment for navigation tabs and filters.
+ * @fileOverview Institutional Result System v20.0.
+ * FIXED: Alignment for navigation tabs and filters - now frozen at top.
  * FIXED: Domain updated to cracklix.in.
  * FIXED: Ranking bug (Self-exclusion logic).
+ * TERMINOLOGY: Nodes -> Questions.
  */
 
 export default function ResultClient() {
@@ -304,7 +305,7 @@ export default function ResultClient() {
                  <h2 className="text-2xl font-black text-[#0F172A]">Result entry missing</h2>
                  <p className="text-slate-500 max-w-sm mx-auto">This attempt record could not be located in the primary registry.</p>
               </div>
-              <Button asChild variant="outline" className="rounded-xl h-14 px-10"><Link href="/dashboard">Return to hub</Link></Button>
+              <Button asChild variant="outline" className="rounded-xl h-14 px-10"><Link href="/dashboard">Return to Hub</Link></Button>
            </div>
         )}
 
@@ -314,33 +315,35 @@ export default function ResultClient() {
                  <div className="flex items-center gap-6 text-left w-full md:w-auto">
                     <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-16 md:w-16 rounded-2xl shadow-xl bg-white border-2 border-slate-50" />
                     <div className="space-y-1 flex-1 min-w-0">
-                       <h1 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A] truncate uppercase">
+                       <h1 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A] truncate">
                          {activeSession?.mockTitle}
                        </h1>
                        <div className="flex items-center gap-3">
-                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Verified Attempt</Badge>
+                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[9px] font-bold px-3 py-1 rounded-full shadow-sm">Verified Attempt</Badge>
                        </div>
                     </div>
                  </div>
                  
                  <div className="flex gap-4 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 px-8 rounded-2xl border-2 font-bold text-[11px] uppercase tracking-widest">Retake</Button>
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-12 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-black text-[11px] uppercase tracking-widest">
+                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 px-8 rounded-2xl border-2 font-bold text-[11px]">Retake</Button>
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-12 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-bold text-[11px]">
                        {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Download Report
                     </Button>
                  </div>
               </div>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                  <div className="flex justify-center mb-10 px-4">
-                     <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl shadow-xl h-14 md:h-16 w-full md:w-auto max-w-2xl overflow-x-auto no-scrollbar">
-                        <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
-                        <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
-                     </TabsList>
+                  <div className="sticky top-[84px] md:top-[116px] z-[46] bg-[#F8FAFC]/95 backdrop-blur-md py-4 -mx-4 px-4 border-b border-slate-100">
+                     <div className="flex justify-center w-full max-w-2xl mx-auto">
+                        <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center overflow-x-auto no-scrollbar">
+                           <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
+                           <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
+                           <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
+                        </TabsList>
+                     </div>
                   </div>
 
-                  <TabsContent value="OVERVIEW" className="px-0">
+                  <TabsContent value="OVERVIEW" className="px-0 pt-6">
                       <ReportScreen 
                          {...activeSession} 
                          resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
@@ -366,21 +369,24 @@ export default function ResultClient() {
                       />
                   </TabsContent>
 
-                  <TabsContent value="REVIEW" className="space-y-8 max-w-5xl mx-auto px-4">
-                      <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl shadow-xl border border-slate-100 w-full max-w-2xl mx-auto sticky top-[180px] z-[40]">
-                          <FilterButton active={activeReviewFilter === 'ALL'} label="All Questions" onClick={() => setActiveReviewFilter('ALL')} />
-                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Mistakes (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
-                          <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
+                  <TabsContent value="REVIEW" className="space-y-8 max-w-5xl mx-auto px-4 pt-6">
+                      <div className="sticky top-[160px] md:top-[192px] z-[45] py-4 bg-[#F8FAFC]/95 backdrop-blur-md -mx-4 px-4 border-b border-slate-100 mb-6">
+                         <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl shadow-xl border border-slate-100 w-full max-w-2xl mx-auto">
+                             <FilterButton active={activeReviewFilter === 'ALL'} label="All Questions" onClick={() => setActiveReviewFilter('ALL')} />
+                             <FilterButton active={activeReviewFilter === 'WRONG'} label={`Mistakes (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                             <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
+                         </div>
                       </div>
+                      
                       <div className="space-y-6 md:space-y-10">
                           {filteredQuestions.map((q) => (
                               <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-white text-left">
                                   <div className="p-8 md:p-14 space-y-8">
                                       <div className="flex items-center justify-between">
-                                         <Badge variant="outline" className="px-4 py-1.5 rounded-xl border-slate-200 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
+                                         <Badge variant="outline" className="px-4 py-1.5 rounded-xl border-slate-200 text-slate-400 font-bold text-[9px]">
                                              Question #{q.originalIndex + 1}
                                          </Badge>
-                                         <Badge className="bg-primary/5 text-primary border-none text-[8px] font-black uppercase tracking-widest">{q.subjectId || 'GENERAL'}</Badge>
+                                         <Badge className="bg-primary/5 text-primary border-none text-[8px] font-bold">{q.subjectId || 'General'}</Badge>
                                       </div>
                                       <QuestionRenderer 
                                           question={q} 
@@ -395,7 +401,7 @@ export default function ResultClient() {
                       </div>
                   </TabsContent>
 
-                  <TabsContent value="REPORT" className="px-4 pb-40">
+                  <TabsContent value="REPORT" className="px-4 pb-40 pt-6">
                       <div className="flex flex-col items-center pt-6 md:pt-10 overflow-hidden w-full">
                          <div 
                             style={{ 
@@ -404,7 +410,7 @@ export default function ResultClient() {
                               transformOrigin: 'top center',
                               marginBottom: `${(1123 * previewScale) - 1123}px`
                             }}
-                            className="bg-white p-0 shadow-4xl border border-slate-200 origin-top rounded-lg"
+                            className="bg-white p-0 shadow-4xl border border-slate-200 origin-top rounded-lg overflow-hidden"
                          >
                             <ReportPDF 
                                {...activeSession}
@@ -470,7 +476,7 @@ export default function ResultClient() {
 
 function FilterButton({ active, label, onClick, color = "primary" }: any) {
   return (
-    <button onClick={onClick} className={cn("flex-1 px-4 py-3 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
+    <button onClick={onClick} className={cn("flex-1 px-4 py-3 rounded-xl text-[10px] md:text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
        {label}
     </button>
   )
@@ -482,4 +488,3 @@ function formatTimeStr(seconds: number) {
   const s = Math.floor(seconds % 60);
   return `${m}m ${s}s`;
 }
-

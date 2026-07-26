@@ -39,8 +39,9 @@ interface ReportScreenProps {
 }
 
 /**
- * @fileOverview Responsive Screen Layout for Browser Viewing v7.0.
+ * @fileOverview Responsive Screen Layout for Browser Viewing v8.0.
  * FIXED: Updated domain to cracklix.in.
+ * FIXED: Removed all uppercase styling.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
@@ -51,7 +52,7 @@ export default function ReportScreen(props: ReportScreenProps) {
   } = props;
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden space-y-6 animate-in fade-in duration-500 text-left">
+    <div className="w-full max-w-full overflow-x-hidden space-y-6 animate-in fade-in duration-500 text-left px-4">
       
       {/* 1. Header Node */}
       <div className="bg-white rounded-2xl md:rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-sm space-y-8">
@@ -59,13 +60,13 @@ export default function ReportScreen(props: ReportScreenProps) {
             <div className="flex items-center gap-5 md:gap-8 min-w-0 flex-1">
                <AuthorityLogo boardId={boardId || "GENERAL"} size="md" className="h-14 w-14 md:h-20 md:w-20 rounded-2xl shadow-xl border-4 border-slate-50 bg-slate-50" />
                <div className="space-y-1 min-w-0 flex-1">
-                  <p className="text-[10px] md:text-xs font-bold text-primary tracking-tight">Performance Report</p>
+                  <p className="text-[10px] md:text-xs font-bold text-primary">Performance Report</p>
                   <h1 className="text-xl md:text-4xl font-black text-[#0F172A] leading-tight break-words">{studentName}</h1>
                   <p className="text-sm md:text-xl font-bold text-slate-500 line-clamp-1">{examTitle}</p>
                </div>
             </div>
             <div className="text-left md:text-right shrink-0">
-               <Badge className={cn("border-none px-4 py-1.5 rounded-full text-[10px] md:text-xs font-black", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+               <Badge className={cn("border-none px-4 py-1.5 rounded-full text-[10px] md:text-xs font-bold", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
                   {isQualified ? 'Qualified' : 'Attempted'}
                </Badge>
                <p className="text-[10px] font-bold text-slate-300 mt-2">Registry ID: {resultId?.slice(0, 15) || "Syncing"}</p>
@@ -84,13 +85,13 @@ export default function ReportScreen(props: ReportScreenProps) {
       <div className="bg-[#0F172A] rounded-[2rem] md:rounded-[3rem] p-10 md:p-16 text-white text-center relative overflow-hidden shadow-2xl">
          <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-48 md:h-72 w-48 md:w-72 text-primary" /></div>
          <div className="relative z-10 space-y-4">
-            <p className="text-[11px] md:text-sm font-bold text-primary tracking-tight">Your Punjab Rank</p>
+            <p className="text-[11px] md:text-sm font-bold text-primary">Your Punjab Rank</p>
             <div className="flex items-baseline justify-center gap-3 md:gap-4">
                <span className="text-6xl md:text-[120px] font-black tracking-tighter text-white tabular-nums leading-none">#{rank}</span>
                <span className="text-xl md:text-5xl font-bold text-slate-500 tabular-nums">/ {totalCandidates}</span>
             </div>
             <div className="pt-4">
-               <Badge className="bg-emerald-500 text-white border-none px-6 py-2 rounded-full font-black text-[10px] md:text-sm shadow-2xl">
+               <Badge className="bg-emerald-500 text-white border-none px-6 py-2 rounded-full font-bold text-[10px] md:text-sm shadow-2xl">
                   Verified Result Standing
                </Badge>
             </div>
@@ -117,9 +118,9 @@ export default function ReportScreen(props: ReportScreenProps) {
                   <table className="w-full text-left border-collapse">
                      <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                           <th className="px-8 py-5 font-bold text-[10px] md:text-[11px] text-slate-500 uppercase tracking-tight">Subject Vertical</th>
-                           <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500 uppercase tracking-tight">Score</th>
-                           <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500 uppercase tracking-tight">Accuracy</th>
+                           <th className="px-8 py-5 font-bold text-[10px] md:text-[11px] text-slate-500">Subject Vertical</th>
+                           <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500">Score</th>
+                           <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500">Accuracy</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
@@ -154,7 +155,7 @@ export default function ReportScreen(props: ReportScreenProps) {
 function DataMiniNode({ label, val }: { label: string, val: string }) {
    return (
       <div className="space-y-1 text-left">
-         <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-tight">{label}</p>
+         <p className="text-[8px] md:text-[10px] font-bold text-slate-400">{label}</p>
          <p className="text-[12px] md:text-lg font-black text-[#0F172A] tabular-nums truncate leading-none">{val}</p>
       </div>
    )
@@ -163,7 +164,7 @@ function DataMiniNode({ label, val }: { label: string, val: string }) {
 function MetricBox({ label, val, color, bg }: any) {
    return (
       <Card className="border-none shadow-xl bg-white p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] flex flex-col items-center justify-center gap-3 transition-all border border-slate-50 h-32 md:h-48 text-center group hover:-translate-y-1">
-         <p className="text-[9px] md:sm font-bold text-slate-400 uppercase tracking-tight leading-none">{label}</p>
+         <p className="text-[9px] md:sm font-bold text-slate-400 leading-none">{label}</p>
          <p className={cn("text-2xl md:text-5xl font-black tabular-nums tracking-tighter leading-none antialiased", color)}>{val}</p>
       </Card>
    )
@@ -173,7 +174,7 @@ function CountCard({ label, val, color }: any) {
    return (
       <div className={cn("p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] flex flex-col items-center justify-center text-center gap-1 shadow-sm border border-transparent", color)}>
          <span className="text-2xl md:text-5xl font-black tabular-nums tracking-tighter leading-none">{val}</span>
-         <span className="text-[9px] md:text-[11px] font-bold tracking-widest opacity-60 uppercase mt-2">{label}</span>
+         <span className="text-[9px] md:text-[11px] font-bold opacity-60 mt-2">{label}</span>
       </div>
    )
 }

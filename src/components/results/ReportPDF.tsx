@@ -27,9 +27,9 @@ interface ReportPDFProps {
 }
 
 /**
- * @fileOverview Institutional Portrait PDF Layout Hub v8.0.
+ * @fileOverview Institutional Portrait PDF Layout Hub v9.0.
  * FIXED: Updated domain to cracklix.in.
- * TYPOGRAPHY: Title Case only.
+ * TYPOGRAPHY: Removed all uppercase.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
@@ -54,11 +54,11 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
             <div className="space-y-0.5">
                <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter leading-none">Cracklix</h2>
-               <p className="text-[11px] font-bold text-primary tracking-tight">Smart Preparation Portal</p>
+               <p className="text-[11px] font-bold text-primary">Smart Preparation Portal</p>
             </div>
          </div>
          <div className="text-right space-y-1">
-            <p className="text-base font-black text-[#0F172A] tracking-tight">Performance Report</p>
+            <p className="text-base font-black text-[#0F172A]">Performance Report</p>
             <p className="text-[9px] font-bold text-slate-400 tabular-nums">Ref ID: {resultId?.slice(0, 15) || "Registry"}</p>
          </div>
       </div>
@@ -71,7 +71,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />
                <div className="space-y-4">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Candidate Identity</p>
+                    <p className="text-[10px] font-bold text-primary">Candidate Identity</p>
                     <h1 className="text-2xl font-black text-[#0F172A] leading-tight break-words pr-2 line-clamp-1">{studentName}</h1>
                     <p className="text-base font-bold text-slate-500 leading-tight line-clamp-1">{examTitle}</p>
                   </div>
@@ -81,11 +81,11 @@ export default function ReportPDF(props: ReportPDFProps) {
                         <tbody>
                            <tr>
                               <td className="py-1 w-1/2">
-                                 <p className="text-[8px] font-bold text-slate-300 uppercase tracking-tight">Attempt Date</p>
+                                 <p className="text-[8px] font-bold text-slate-300">Attempt Date</p>
                                  <p className="text-[11px] font-black text-[#0F172A]">{date}</p>
                               </td>
                               <td className="py-1 w-1/2">
-                                 <p className="text-[8px] font-bold text-slate-300 uppercase tracking-tight">Time Taken</p>
+                                 <p className="text-[8px] font-bold text-slate-300">Time Taken</p>
                                  <p className="text-[11px] font-black text-[#0F172A]">{timeTaken}</p>
                               </td>
                            </tr>
@@ -96,13 +96,13 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
 
             <div className="bg-[#0F172A] rounded-[1.5rem] p-6 text-white text-center flex flex-col justify-center gap-2 shadow-xl h-40">
-               <p className="text-[10px] font-bold text-primary tracking-tight">Your Punjab Rank</p>
+               <p className="text-[10px] font-bold text-primary">Your Punjab Rank</p>
                <div className="py-1">
                   <p className="text-6xl font-black tabular-nums tracking-tighter">#{rank}</p>
                   <p className="text-[11px] font-bold text-slate-500 tabular-nums">/ {totalCandidates.toLocaleString()} Candidates</p>
                </div>
                <div className="pt-1">
-                 <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[9px] px-4 py-1 rounded-full uppercase tracking-tight">
+                 <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[9px] px-4 py-1 rounded-full shadow-sm">
                     Verified Standing
                  </Badge>
                </div>
@@ -128,14 +128,14 @@ export default function ReportPDF(props: ReportPDFProps) {
          {/* 5. Subject Mastery Hub */}
          {subjects.length > 0 && (
             <div className="space-y-3">
-               <p className="text-[11px] font-black text-[#0F172A] tracking-widest uppercase ml-1">Subject Analysis</p>
+               <p className="text-[11px] font-black text-[#0F172A] ml-1">Subject Analysis</p>
                <div className="border border-slate-100 rounded-[1.5rem] overflow-hidden bg-white shadow-sm">
                   <table className="w-full text-left">
                      <thead>
                         <tr className="bg-slate-50 border-b border-slate-100 h-12">
-                           <th className="px-8 font-bold text-[10px] text-slate-500 uppercase tracking-tight">Subject Hub</th>
-                           <th className="px-6 font-bold text-[10px] text-center text-slate-500 uppercase tracking-tight">Score</th>
-                           <th className="px-6 font-bold text-[10px] text-center text-slate-500 uppercase tracking-tight">Accuracy</th>
+                           <th className="px-8 font-bold text-[10px] text-slate-500">Subject Hub</th>
+                           <th className="px-6 font-bold text-[10px] text-center text-slate-500">Score</th>
+                           <th className="px-6 font-bold text-[10px] text-center text-slate-500">Accuracy</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
@@ -144,7 +144,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                               <td className="px-8 font-bold text-[14px] text-[#0F172A]">{s.name}</td>
                               <td className="px-6 text-center font-black text-primary text-base tabular-nums">{Number(s.score).toFixed(1)}</td>
                               <td className="px-6 text-center">
-                                 <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[11px] tabular-nums px-3 py-1 rounded-lg">{s.accuracy}%</Badge>
+                                 <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[11px] tabular-nums px-3 py-1 rounded-lg shadow-sm">{s.accuracy}%</Badge>
                               </td>
                            </tr>
                         ))}
@@ -182,7 +182,7 @@ export default function ReportPDF(props: ReportPDFProps) {
 function KPIBox({ label, val, color }: any) {
    return (
       <div className="bg-white border border-slate-100 p-5 rounded-[1.5rem] flex flex-col items-center justify-center gap-1.5 shadow-sm text-center h-28">
-         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{label}</p>
+         <p className="text-[9px] font-bold text-slate-400">{label}</p>
          <p className={cn("text-3xl font-black tabular-nums tracking-tighter", color)}>{val}</p>
       </div>
    )
@@ -192,7 +192,7 @@ function CountPill({ label, val, color }: any) {
    return (
       <div className={cn("p-3 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-xs h-20", color)}>
          <span className="text-2xl font-black tabular-nums">{val}</span>
-         <span className="text-[8px] font-black tracking-widest opacity-70 uppercase">{label}</span>
+         <span className="text-[8px] font-black opacity-70">{label}</span>
       </div>
    )
 }
