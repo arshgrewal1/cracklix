@@ -20,9 +20,8 @@ import {
 } from 'lucide-react';
 
 /**
- * @fileOverview World-Class Institutional Share Card v2.0.
- * Resolution: 1080 x 1350 (Instagram/WhatsApp Optimized).
- * Features high-fidelity glass-morphic nodes and mobile mockup.
+ * @fileOverview World-Class Institutional Share Card v3.0.
+ * UPDATED: Increased Logo size to h-44 w-44 for prominent branding on social exports.
  */
 export default function AppShareCard() {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent('https://cracklix.vercel.app/install')}`;
@@ -40,27 +39,27 @@ export default function AppShareCard() {
       {/* 2. HEADER HUB */}
       <div className="relative z-10 px-20 pt-20 flex justify-between items-start">
          <div className="space-y-6">
-            <div className="flex items-center gap-6">
-               <div className="h-24 w-24 bg-[#2563EB] rounded-[2.5rem] flex items-center justify-center shadow-2xl border-4 border-white/10">
-                  <ShieldCheck className="h-14 w-14 text-white" />
+            <div className="flex items-center gap-10">
+               <div className="h-44 w-44 bg-white rounded-[3rem] flex items-center justify-center shadow-2xl border-[6px] border-white/10 overflow-hidden shrink-0">
+                  <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain p-4" />
                </div>
                <div>
-                  <h1 className="text-6xl font-black tracking-tighter uppercase leading-none">Cracklix</h1>
-                  <div className="flex items-center gap-3 mt-3">
-                     <span className="text-xl font-bold text-[#60A5FA] tracking-[0.4em] uppercase">Verified Portal</span>
-                     <div className="h-6 w-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg"><CheckCircle2 className="h-4 w-4 text-white" /></div>
+                  <h1 className="text-7xl font-black tracking-tighter uppercase leading-none">Cracklix</h1>
+                  <div className="flex items-center gap-3 mt-4">
+                     <span className="text-2xl font-bold text-[#60A5FA] tracking-[0.4em] uppercase">Verified Portal</span>
+                     <div className="h-8 w-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg"><CheckCircle2 className="h-5 w-5 text-white" /></div>
                   </div>
                </div>
             </div>
-            <div className="inline-flex items-center gap-4 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
-               <span className="text-2xl">🇮🇳</span>
-               <p className="text-xl font-black uppercase tracking-[0.2em] text-[#60A5FA]">Punjab Government Exam Practice</p>
+            <div className="inline-flex items-center gap-6 px-8 py-4 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl">
+               <span className="text-3xl">🇮🇳</span>
+               <p className="text-2xl font-black uppercase tracking-[0.2em] text-[#60A5FA]">Punjab Government Exam Practice</p>
             </div>
          </div>
       </div>
 
       {/* 3. MAIN CONTENT: MOCKUP & FEATURES */}
-      <div className="relative z-10 px-20 mt-12 flex gap-12 items-start">
+      <div className="relative z-10 px-20 mt-16 flex gap-16 items-start">
          
          {/* MOBILE MOCKUP HUB */}
          <div className="w-[440px] shrink-0">

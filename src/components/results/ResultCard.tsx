@@ -47,8 +47,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Result Card v7.0.
- * Rebuild: Redesigned for Professional Printable Output with High-Fidelity Branding.
+ * @fileOverview Official Institutional Result Card v8.0.
+ * UPDATED: Increased logo container to h-32 (128px) and reduced padding for maximum focal impact.
  */
 export default function ResultCard({
   studentName,
@@ -79,10 +79,10 @@ export default function ResultCard({
       <div className="h-3 w-full bg-primary" />
       
       <div className="p-16 space-y-12">
-        {/* Institutional Header */}
+        {/* Institutional Header - Large Focal Logo */}
         <div className="flex justify-between items-start border-b border-slate-100 pb-12">
-          <div className="flex items-center gap-8">
-            <div className="h-24 w-24 bg-slate-50 rounded-[2rem] flex items-center justify-center p-3 border border-slate-100 shadow-inner">
+          <div className="flex items-center gap-10">
+            <div className="h-32 w-32 bg-white rounded-[2.5rem] flex items-center justify-center p-2 border border-slate-100 shadow-2xl overflow-hidden shrink-0">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
               ) : (

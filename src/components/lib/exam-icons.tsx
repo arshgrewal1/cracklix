@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v35.0 (Spatial Fix).
- * FIXED: Reduced logo sizes and switched to object-contain to prevent clipping.
+ * @fileOverview Institutional Branding Engine v36.0 (Global Scale Refinement).
+ * FIXED: Standardized XL size to match the new Report focal requirements (h-32/w-32).
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -67,7 +67,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     sm: "h-11 w-11 md:h-12 md:w-12",
     md: "h-14 w-14 md:h-20 md:w-20",
     lg: "h-20 w-20 md:h-28 md:w-28",
-    xl: "h-28 w-28 md:h-40 md:w-40"
+    xl: "h-32 w-32 md:h-40 md:w-40"
   };
 
   const containerSize = sizeClasses[size];
