@@ -1,8 +1,8 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useFirestore, useDoc } from "@/firebase"
@@ -60,7 +60,7 @@ import { BrandingSettings } from "@/types"
 
 /**
  * @fileOverview Official Result Hub 2.0 [Hardened Analytics].
- * FIXED: Implemented Array.isArray checks for analytical mappings to prevent TypeErrors.
+ * FIXED: Added missing Link import and implemented defensive array checks.
  */
 export default function ResultClient() {
   const db = useFirestore()
