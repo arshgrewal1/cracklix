@@ -6,8 +6,8 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v6.0.
- * UPDATED: Moved composition significantly higher (pt-[6dvh]) for better vertical flow.
+ * @fileOverview Premium PWA Splash Hub v6.1.
+ * UPDATED: Minimized gap between icon and brand text using aggressive negative margins.
  * AESTHETIC: High-fidelity SaaS startup launch experience (Spotify/Linear style).
  */
 export default function SplashScreen() {
@@ -105,12 +105,12 @@ export default function SplashScreen() {
                 </div>
              </motion.div>
 
-             {/* BRANDING UNIT - ZERO GAP */}
+             {/* BRANDING UNIT - MINIMUM GAP */}
              <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 1, delay: 0.5 }}
-               className="text-center space-y-2 w-full -mt-6 md:-mt-10"
+               className="text-center space-y-2 w-full -mt-20 md:-mt-32"
              >
                 <div className="space-y-1">
                    <h1 className="text-[56px] md:text-[88px] font-[900] tracking-tighter text-white leading-none antialiased">
@@ -121,8 +121,8 @@ export default function SplashScreen() {
                    </p>
                 </div>
 
-                {/* LOADING HUB - PULLED UP */}
-                <div className="pt-12 md:pt-20 w-full max-w-[200px] md:max-w-[260px] mx-auto space-y-6">
+                {/* LOADING HUB - COMPACT SPACING */}
+                <div className="pt-16 md:pt-24 w-full max-w-[200px] md:max-w-[260px] mx-auto space-y-6">
                    <div className="flex flex-col items-center gap-5">
                       <div className="relative h-[2px] w-full bg-white/5 rounded-full overflow-hidden shadow-inner">
                          <motion.div 
