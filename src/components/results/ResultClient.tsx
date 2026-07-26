@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -39,7 +40,8 @@ import {
   HelpCircle,
   ArrowRight,
   BookOpen,
-  Search
+  Search,
+  Download
 } from "lucide-react"
 import { 
   Card, 
@@ -58,7 +60,7 @@ import { BrandingSettings } from "@/types"
 
 /**
  * @fileOverview Official Result Hub 2.0 [Hardened Analytics].
- * FIXED: Added missing BookOpen import.
+ * FIXED: Implemented Array.isArray checks for analytical mappings to prevent TypeErrors.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -182,7 +184,7 @@ export default function ResultClient() {
      return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
   };
 
-  if (!mounted || (resultLoading && user)) return <div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
+  if (!mounted || (resultLoading && user)) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-spin" /></div>;
 
   if (!activeSession) return (
      <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
@@ -247,7 +249,7 @@ export default function ResultClient() {
                           <Badge variant="outline" className="border-slate-100 text-slate-400 font-bold text-[9px] uppercase tracking-widest">Registry Sync</Badge>
                        </div>
                        <div className="space-y-12">
-                          {activeSession.subjectAnalysis?.map((sub: any, i: number) => (
+                          {Array.isArray(activeSession.subjectAnalysis) && activeSession.subjectAnalysis.map((sub: any, i: number) => (
                              <div key={i} className="space-y-3">
                                 <div className="flex justify-between items-center text-[10px] md:text-sm font-bold text-slate-500 uppercase tracking-widest">
                                    <div className="flex items-center gap-3"><BookOpen className="h-4 w-4 text-primary" /> {sub.name}</div>
@@ -292,7 +294,7 @@ export default function ResultClient() {
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performance by complexity</p>
                        </div>
                        <div className="space-y-8">
-                          {activeSession.complexityAnalysis?.map((diff: any, i: number) => (
+                          {Array.isArray(activeSession.complexityAnalysis) && activeSession.complexityAnalysis.map((diff: any, i: number) => (
                              <div key={i} className="space-y-2.5">
                                 <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">
                                    <span>{diff.name} items</span>
