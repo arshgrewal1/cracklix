@@ -27,7 +27,7 @@ import {
   Briefcase,
   GraduationCap
 } from "lucide-react"
-import { CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AuthorityLogo } from "@/lib/exam-icons"
@@ -37,8 +37,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Professional Vacancy Detail Hub v4.1.
- * UPDATED: Removed Share and Bookmark icons as requested.
+ * @fileOverview Professional Vacancy Detail Hub v4.2.
+ * FIXED: Back button hidden in standalone PWA mode.
  */
 
 export default function VacancyDetailPage() {
@@ -48,9 +48,13 @@ export default function VacancyDetailPage() {
   const router = useRouter()
   const { user } = useUser()
   const [mounted, setMounted] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== 'undefined') {
+       setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true);
+    }
     if (db && id) {
        updateDoc(doc(db, "vacancies", id), { views: increment(1) }).catch(() => {})
     }
@@ -84,9 +88,11 @@ export default function VacancyDetailPage() {
       
       <main className="container mx-auto px-4 md:px-8 py-6 md:py-16 max-w-[1440px] space-y-12">
          
-         <div className="flex items-center justify-start">
-            <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90"><ArrowLeft className="h-5 w-5 md:h-6 md:w-6" /></button>
-         </div>
+         {!isStandalone && (
+            <div className="flex items-center justify-start">
+               <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90"><ArrowLeft className="h-5 w-5 md:h-6 md:w-6" /></button>
+            </div>
+         )}
 
          <section className="bg-white rounded-[3rem] md:rounded-[4rem] shadow-5xl border border-slate-100 overflow-hidden relative group">
             <div className="h-2 w-full bg-primary" />
@@ -155,7 +161,7 @@ export default function VacancyDetailPage() {
             </div>
 
             <div className="lg:col-span-4 space-y-12">
-               <div className="border-none shadow-5xl rounded-[2.5rem] md:rounded-[3.5rem] bg-[#0F172A] text-white p-8 md:p-12 space-y-12 relative overflow-hidden group">
+               <Card className="border-none shadow-5xl rounded-[2.5rem] md:rounded-[3.5rem] bg-[#0F172A] text-white p-8 md:p-12 space-y-12 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Calendar className="h-64 w-64 text-primary" /></div>
                   <div className="relative z-10 space-y-12 text-left">
                      <div className="space-y-2">
@@ -175,7 +181,7 @@ export default function VacancyDetailPage() {
                         </Button>
                      </div>
                   </div>
-               </div>
+               </Card>
 
                <div className="p-8 md:p-12 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl space-y-8 text-left group hover:translate-y-[-4px] transition-all duration-500">
                   <div className="flex items-center gap-4">

@@ -15,17 +15,21 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Punjab Exam Calendar Hub v3.1.
- * UPDATED: Replaced "Registry" with "List".
+ * @fileOverview Official Punjab Exam Calendar Hub v3.2.
+ * FIXED: UI Back button hidden in standalone PWA mode.
  */
 
 export default function ExamCalendarPage() {
   const db = useFirestore()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== 'undefined') {
+       setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true);
+    }
   }, [])
   
   const calendarQuery = useMemo(() => (db ? query(
@@ -53,9 +57,11 @@ export default function ExamCalendarPage() {
            <div className="space-y-6 md:space-y-10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                  <div className="flex items-center gap-4">
-                    <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm">
-                       <ArrowLeft className="h-5 w-5" />
-                    </button>
+                    {!isStandalone && (
+                       <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0">
+                          <ArrowLeft className="h-5 w-5" />
+                       </button>
+                    )}
                     <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary shadow-inner shrink-0">
                        <CalendarIcon className="h-5 w-5 md:h-6 md:w-6" />
                     </div>

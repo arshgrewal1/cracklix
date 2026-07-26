@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Card, CardContent } from "@/components/ui/card"
@@ -32,8 +32,8 @@ import { HelpArticle } from "@/types"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Official Institutional Help Hub v6.1.
- * UPDATED: Reduced header height offset to top-[84px] md:top-[116px].
+ * @fileOverview Official Institutional Help Hub v6.2.
+ * FIXED: UI Back button hidden in standalone PWA mode.
  */
 
 const HELP_CATEGORIES = [
@@ -49,6 +49,15 @@ export default function HelpCenterPage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    if (typeof window !== 'undefined') {
+       setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true);
+    }
+  }, [])
 
   const helpQuery = useMemo(() => (db ? query(
     collection(db, "help_articles"), 
@@ -74,6 +83,8 @@ export default function HelpCenterPage() {
     })
   }, [articles, searchTerm, selectedCategory])
 
+  if (!mounted) return null;
+
   return (
     <div className="min-h-screen bg-slate-50/50 text-left font-body selection:bg-primary/10">
       <Navbar />
@@ -84,9 +95,11 @@ export default function HelpCenterPage() {
         <div className="text-left space-y-10 md:space-y-16 max-w-5xl">
            <div className="space-y-6 md:space-y-10">
               <div className="flex items-center gap-4">
-                 <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm">
-                    <ArrowLeft className="h-5 w-5" />
-                 </button>
+                 {!isStandalone && (
+                    <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0">
+                       <ArrowLeft className="h-5 w-5" />
+                    </button>
+                 )}
                  <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary shadow-inner">
                     <HelpCircle className="h-5 w-5 md:h-6 md:w-6" />
                  </div>
@@ -203,7 +216,7 @@ export default function HelpCenterPage() {
                        <h3 className="text-3xl md:text-5xl font-black leading-none text-white tracking-tight uppercase">Audit <br/> Support</h3>
                        <p className="text-slate-400 text-sm md:text-xl font-medium leading-snug">Raise a support ticket and our management node will audit your issue within 24 hours.</p>
                     </div>
-                    <Button asChild className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-2xl md:rounded-3xl shadow-4xl gap-3 border-none transition-all active:scale-95">
+                    <Button asChild className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-xs tracking-[0.2em] group shadow-4xl border-none transition-all active:scale-95">
                        <Link href="/support">Open Support Hub <ChevronRight className="h-4 w-4 md:h-5 md:w-5 group-hover:translate-x-2 transition-transform" /></Link>
                     </Button>
                  </div>

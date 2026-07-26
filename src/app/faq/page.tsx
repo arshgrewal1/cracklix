@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -18,8 +17,8 @@ import { HelpArticle } from "@/types"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Official Institutional FAQ Hub v6.1.
- * UPDATED: Extracted content to FAQContent for section re-use.
+ * @fileOverview Official Institutional FAQ Hub v6.2.
+ * FIXED: UI Back button hidden in standalone PWA mode.
  */
 
 export function FAQContent() {
@@ -68,9 +67,13 @@ export function FAQContent() {
 export default function FAQPage() {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== 'undefined') {
+       setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true);
+    }
   }, [])
 
   if (!mounted) return null
@@ -82,9 +85,11 @@ export default function FAQPage() {
         
         <div className="text-left space-y-6 md:space-y-10 max-w-4xl">
            <div className="flex items-center gap-4">
-              <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm">
-                 <ArrowLeft className="h-5 w-5" />
-              </button>
+              {!isStandalone && (
+                 <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0">
+                    <ArrowLeft className="h-5 w-5" />
+                 </button>
+              )}
               <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary shadow-2xl shrink-0">
                  <HelpCircle className="h-5 w-5 md:h-6 md:w-6" />
               </div>

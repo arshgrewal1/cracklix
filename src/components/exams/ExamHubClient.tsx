@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -49,8 +48,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v7.9 [Sticky Removed].
- * FIXED: Removed sticky navigation bar to prevent mobile Android WebView positioning errors.
+ * @fileOverview Premium Exam Detail Hub v8.0.
+ * FIXED: UI Back button hidden in standalone PWA mode.
  */
 
 export default function ExamHubClient() {
@@ -63,9 +62,13 @@ export default function ExamHubClient() {
 
   const [mounted, setMounted] = useState(false);
   const [isPinning, setIsPinning] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== 'undefined') {
+       setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true);
+    }
   }, []);
 
   const examId = useMemo(() => {
@@ -275,7 +278,7 @@ export default function ExamHubClient() {
       <section className="bg-white border-b border-slate-100 pt-10 pb-12 md:pt-16 md:pb-24 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
-         <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
+         <div className="container mx-auto px-4 md:px-12 max-getDocs w-7xl relative z-10 space-y-10">
             <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs">
                <Link href="/exams" className="hover:text-[#0F172A] transition-colors">Exams</Link>
                <ChevronRight className="h-3 w-3" />
@@ -284,6 +287,11 @@ export default function ExamHubClient() {
 
             <div className="flex flex-col lg:flex-row items-center justify-between gap-10 md:gap-14">
                <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 flex-1 min-w-0">
+                  {!isStandalone && (
+                     <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
+                        <ChevronLeft className="h-5 w-5" />
+                     </button>
+                  )}
                   <div className="relative shrink-0 group-hover:scale-105 transition-transform duration-500">
                     <AuthorityLogo boardId={exam.boardId} size="lg" className="h-24 w-24 md:h-40 md:w-40 border-[6px] border-white shadow-2xl bg-slate-50" />
                     <div className="absolute -bottom-2 -right-2 bg-emerald-500 h-10 w-10 rounded-xl border-4 border-white flex items-center justify-center shadow-xl">

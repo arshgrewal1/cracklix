@@ -1,10 +1,10 @@
-
 'use client';
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 interface BackButtonProps {
   label?: string;
@@ -13,9 +13,8 @@ interface BackButtonProps {
 }
 
 /**
- * @fileOverview Universal Institutional Navigation Node.
- * FIXED: Reduced mobile padding to prevent header overflow.
- * TOUCH TARGET: Optimized for mobile ergonomics.
+ * @fileOverview Universal Institutional Navigation Node v2.0.
+ * FIXED: Hidden in standalone PWA mode to match native app standards.
  */
 export default function BackButton({ 
   label = 'Back', 
@@ -23,6 +22,16 @@ export default function BackButton({
   className = '' 
 }: BackButtonProps) {
   const router = useRouter();
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+      setIsStandalone(standalone);
+    }
+  }, []);
+
+  if (isStandalone) return null;
 
   const handleBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) {
