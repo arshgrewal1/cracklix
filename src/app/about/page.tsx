@@ -23,8 +23,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional About Center v25.0.
- * UPDATED: Conditional founder image visibility node based on security settings.
+ * @fileOverview Institutional About Center v26.0.
+ * UPDATED: Normalized typography to Title Case.
  */
 
 interface Stats {
@@ -83,17 +83,17 @@ export default function AboutPage() {
                     className="inline-flex items-center gap-3 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl mb-1"
                  >
                     <Sparkles className="h-3 w-3 text-primary animate-pulse" />
-                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-primary">The Visionary Origin</span>
+                    <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-primary">The Visionary Origin</span>
                  </motion.div>
 
                  <motion.h1 
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="text-2xl sm:text-5xl md:text-7xl font-black leading-[1] tracking-tight uppercase"
+                    className="text-2xl sm:text-5xl md:text-7xl font-black leading-[1] tracking-tight"
                  >
-                    A Student&apos;s Dream <br/>
-                    <span className="text-primary italic">To A Nation of Learners</span>
+                    A student's dream <br/>
+                    <span className="text-primary italic">to a nation of learners</span>
                  </motion.h1>
 
                  <motion.p 
@@ -138,14 +138,14 @@ export default function AboutPage() {
                               <ShieldCheck className="h-12 w-12 text-primary animate-pulse" />
                            </div>
                            <div className="space-y-1">
-                              <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Identity Secured</p>
+                              <p className="text-[10px] font-bold text-primary tracking-widest">Identity Secured</p>
                               <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-tight">Institutional protection active</p>
                            </div>
                         </div>
                       )}
                        <div className="absolute bottom-6 left-6 right-6 z-10">
-                          <p className="text-lg md:text-2xl font-black uppercase tracking-tight">Arsh Grewal</p>
-                          <p className="text-primary font-black uppercase text-[7px] md:text-[8px] tracking-[0.4em]">Founder</p>
+                          <p className="text-lg md:text-2xl font-black tracking-tight">Arsh Grewal</p>
+                          <p className="text-primary font-bold text-[7px] md:text-[8px] tracking-widest uppercase">Founder</p>
                        </div>
                     </div>
                  </motion.div>
@@ -157,14 +157,14 @@ export default function AboutPage() {
                     className="lg:col-span-7 space-y-6 md:space-y-8 text-left"
                  >
                     <div className="space-y-2">
-                       <h2 className="text-xl md:text-4xl font-headline font-black uppercase tracking-tight leading-none">
+                       <h2 className="text-xl md:text-4xl font-headline font-black tracking-tight leading-none">
                           The <span className="text-primary">Journey</span>
                        </h2>
                        <div className="h-1 w-12 bg-primary rounded-full" />
                     </div>
 
                     <div className="space-y-4 text-slate-300 text-[12px] md:text-base font-medium leading-relaxed">
-                       <p>Founded by <span className="text-white font-bold">Arshdeep Singh Grewal</span>, Cracklix was born from a student&apos;s struggle to find quality resources.</p>
+                       <p>Founded by <span className="text-white font-bold">Arshdeep Singh Grewal</span>, Cracklix was born from a student's struggle to find quality resources.</p>
                        <p>Driven by the belief that every student deserves equal access, he simplified the path to government careers across Punjab.</p>
                     </div>
 
@@ -185,8 +185,8 @@ export default function AboutPage() {
                     <Trophy className="h-32 w-32 text-white" />
                  </div>
                  <div className="relative z-10 space-y-4 md:space-y-6">
-                    <h2 className="text-2xl md:text-5xl font-headline font-black uppercase text-white tracking-tight leading-none">Ready to start <br/> your journey?</h2>
-                    <Button asChild className="h-12 md:h-16 px-8 md:px-14 bg-white text-[#0B1528] hover:bg-slate-100 font-black uppercase text-[9px] md:text-[11px] tracking-widest rounded-xl md:rounded-2xl shadow-3xl gap-2 border-none">
+                    <h2 className="text-2xl md:text-5xl font-headline font-black text-white tracking-tight leading-none">Ready to start <br/> your journey?</h2>
+                    <Button asChild className="h-12 md:h-16 px-8 md:px-14 bg-white text-[#0B1528] hover:bg-slate-100 font-bold uppercase text-[9px] md:text-[11px] tracking-widest rounded-xl md:rounded-2xl shadow-3xl gap-2 border-none">
                        <Link href="/login">Join the Cracklix Hub <ChevronRight className="h-4 w-4" /></Link>
                     </Button>
                  </div>
@@ -212,7 +212,7 @@ function ImpactNode({ label, val, icon: Icon, loading }: { label: string, val: s
             ) : (
                <p className="text-sm md:text-xl font-headline font-black text-white leading-none truncate">{val}</p>
             )}
-            <p className="text-[7px] font-black uppercase text-slate-500 tracking-widest mt-1 truncate">{label}</p>
+            <p className="text-[7px] font-bold text-slate-500 tracking-widest mt-1 truncate uppercase">{label}</p>
          </div>
       </div>
    )

@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v39.0 (Focal Zoom Hardened).
- * FIXED: Removed internal padding to allow icons to fill the container (Zoom Effect).
- * UPDATED: Standardized XL size to match the new Report requirements (h-40/w-40).
+ * @fileOverview Institutional Branding Engine v40.0 (Global Scale Refinement).
+ * FIXED: Balanced XL size (h-32) and added small padding to prevent overlap with border.
+ * UPDATED: Icons fill the container with proper containment.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -16,7 +16,7 @@ const CANONICAL_BOARD_LOGOS: Record<string, string> = {
   'punjab-police': '/logos/boards/punjab-police.png',
   'teaching-hub': '/logos/boards/education-board.png',
   'pscl': '/logos/boards/pscb.png',
-  'pspcl': '/logos/boards/pscl.png',
+  'pspcl': '/logos/boards/pspcl.png',
   'pstcl': '/logos/boards/pstcl.png',
   'bfuhs': '/logos/boards/bfuhs.png',
   'banking-hub': '/logos/boards/pscb.png',
@@ -69,7 +69,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     sm: "h-11 w-11 md:h-12 md:w-12",
     md: "h-14 w-14 md:h-20 md:w-20",
     lg: "h-20 w-20 md:h-28 md:w-28",
-    xl: "h-40 w-40 md:h-48 md:w-48"
+    xl: "h-32 w-32 md:h-40 md:w-40"
   };
 
   const containerSize = sizeClasses[size];
@@ -86,7 +86,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           alt="Authority" 
           fill
           sizes="256px"
-          className="object-contain p-0"
+          className="object-contain p-1"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -112,7 +112,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
       containerSize, 
       className
     )}>
-      <div className="h-full w-full p-0">
+      <div className="h-full w-full p-2">
         {getFallbackIcon()}
       </div>
     </div>

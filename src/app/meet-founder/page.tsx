@@ -27,8 +27,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Official Meet the Founder Page v3.1.
- * UPDATED: Respecting showFounderImage security toggle.
+ * @fileOverview Official Meet the Founder Page v3.2.
+ * UPDATED: Normalized typography to Title Case.
  */
 export default function MeetFounderPage() {
   const db = useFirestore();
@@ -77,8 +77,8 @@ export default function MeetFounderPage() {
                        <div className="h-32 w-32 rounded-[2.5rem] bg-primary/10 flex items-center justify-center border border-primary/20 shadow-2xl">
                           <ShieldCheck className="h-16 w-16 text-primary animate-pulse" />
                        </div>
-                       <div className="space-y-2">
-                          <h3 className="text-xl font-black text-white uppercase tracking-tighter">Security Node Active</h3>
+                       <div className="space-y-1">
+                          <h3 className="text-xl font-black text-white tracking-tight">Security Node Active</h3>
                           <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Founder identity protected</p>
                        </div>
                     </div>
@@ -128,7 +128,7 @@ export default function MeetFounderPage() {
               
               <div className="bg-[#0F172A] p-10 md:p-16 rounded-[3rem] text-white space-y-6 relative overflow-hidden not-prose shadow-2xl">
                  <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Star className="h-48 w-48 text-primary fill-primary" /></div>
-                 <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">My Commitment</h2>
+                 <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">My commitment</h2>
                  <p className="text-slate-400">
                     {founder.commitment}
                  </p>
@@ -136,7 +136,7 @@ export default function MeetFounderPage() {
                     <div className="h-12 w-12 rounded-full border-2 border-primary p-1">
                        <div className="h-full w-full rounded-full bg-primary flex items-center justify-center text-white"><Check className="h-6 w-6" /></div>
                     </div>
-                    <p className="font-black uppercase text-xs tracking-widest text-primary">Verified Founder Milestone</p>
+                    <p className="font-bold text-xs tracking-widest text-primary uppercase">Verified Founder Milestone</p>
                  </div>
               </div>
               <p>
@@ -146,10 +146,10 @@ export default function MeetFounderPage() {
 
             <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8">
                <div className="text-center md:text-left space-y-1">
-                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em]">Connect Directly</p>
+                  <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Connect directly</p>
                   <p className="text-xl md:text-2xl font-bold text-[#0F172A]">{founder.email}</p>
                </div>
-               <Button asChild className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[11px] tracking-widest rounded-2xl shadow-xl border-none active:scale-95 transition-all">
+               <Button asChild className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold uppercase text-[11px] tracking-widest rounded-2xl shadow-xl border-none active:scale-95 transition-all">
                   <Link href="/contact">Get in Touch <MessageCircle className="ml-2 h-4 w-4" /></Link>
                </Button>
             </div>
@@ -161,9 +161,9 @@ export default function MeetFounderPage() {
            <div className="container mx-auto px-4 max-w-6xl">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
                  <MinimalStat value={(settings?.trustBadgeCount || 10000).toLocaleString() + "+"} label="Aspirants" icon={Target} />
-                 <MinimalStat value={(settings?.totalMocks || 450).toLocaleString() + "+"} label="Mock Series" icon={Zap} />
-                 <MinimalStat value={(settings?.totalQuestions || 12000).toLocaleString() + "+"} label="MCQ Bank" icon={ShieldCheck} />
-                 <MinimalStat value={founder.buildingSince} label="Building Since" icon={Briefcase} />
+                 <MinimalStat value={(settings?.totalMocks || 450).toLocaleString() + "+"} label="Mock series" icon={Zap} />
+                 <MinimalStat value={(settings?.totalQuestions || 12000).toLocaleString() + "+"} label="MCQ bank" icon={ShieldCheck} />
+                 <MinimalStat value={founder.buildingSince} label="Building since" icon={Briefcase} />
               </div>
            </div>
         </section>
@@ -176,7 +176,7 @@ export default function MeetFounderPage() {
 
 function Badge({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] md:text-xs font-black uppercase tracking-widest text-primary">
+    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] md:text-xs font-bold tracking-tight text-primary">
        <Zap className="h-3 w-3 fill-current" /> {label}
     </span>
   );
@@ -186,7 +186,7 @@ function FeatureChip({ icon: Icon, label }: { icon: any, label: string }) {
   return (
     <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm">
        <Icon className="h-4 w-4 text-primary" />
-       <span className="text-[10px] md:text-xs font-bold text-[#0F172A] uppercase tracking-tight">{label}</span>
+       <span className="text-[10px] md:text-xs font-bold text-[#0F172A] tracking-tight">{label}</span>
     </div>
   );
 }
@@ -201,7 +201,7 @@ function MinimalStat({ value, label, icon: Icon }: { value: string, label: strin
           <p className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">
             {value}
           </p>
-          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+          <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">{label}</p>
        </div>
     </div>
   );

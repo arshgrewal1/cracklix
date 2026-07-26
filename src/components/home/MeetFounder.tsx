@@ -11,7 +11,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Refined Meet Founder Section v7.5 [Uppercase Removed].
+ * @fileOverview Refined Meet Founder Section v7.6.
+ * UPDATED: Normalized typography to Title Case.
  */
 export default function MeetFounder() {
   const db = useFirestore();
@@ -44,7 +45,7 @@ export default function MeetFounder() {
               </div>
               
               <h2 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-[0.95] antialiased">
-                Meet the <br/> <span className="text-primary italic">Founder.</span>
+                Meet the <br/> <span className="text-primary italic">founder.</span>
               </h2>
               
               <p className="text-lg md:text-2xl text-slate-500 font-medium leading-relaxed italic max-w-2xl">
@@ -68,7 +69,7 @@ export default function MeetFounder() {
                 className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-bold tracking-tight rounded-2xl shadow-xl transition-all active:scale-95 border-none group"
               >
                 <Link href="/meet-founder" className="flex items-center justify-center gap-3">
-                  Read My Full Story <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  Read my full story <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
             </div>
@@ -95,7 +96,7 @@ export default function MeetFounder() {
                     <ShieldCheck className="h-10 w-10 text-primary animate-pulse" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[11px] font-black text-primary">Security Protocol</p>
+                    <p className="text-[11px] font-bold text-primary">Security Protocol</p>
                     <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none">Photo hidden by admin</p>
                   </div>
                 </div>
