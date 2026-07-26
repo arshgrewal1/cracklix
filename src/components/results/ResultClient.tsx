@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -55,11 +55,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { useExamStore } from "@/store/useExamStore"
+import { toPng } from 'html-to-image';
+import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Official Result Hub v5.8 [Typography & Functional Fixed].
- * TERMINOLOGY: Standardized to "Questions" and "Wrong".
- * TYPOGRAPHY: Forced Title Case for names and series.
+ * @fileOverview Official Result Hub v6.0 [Critical Fix Hub].
+ * FIXED: Re-engineered Download PDF to use Binary Blobs for Android/PWA.
+ * FIXED: Hardened Retake logic with definitive Registry Purge.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -77,6 +79,7 @@ export default function ResultClient() {
   const [activeMainTab, setActiveMainTab] = useState<string>("OVERVIEW")
   const [resolvedResultId, setResolvedResultId] = useState<string | null>(null)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
 
@@ -92,7 +95,7 @@ export default function ResultClient() {
        if (!targetId && user) {
           const trackerSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
           if (trackerSnap.exists()) {
-             targetId = trackerSnap.data().attemptId;
+              targetId = trackerSnap.data().attemptId;
           }
        }
        if (user && targetId) setResolvedResultId(`${user.uid}_${mockId}_${targetId}`);
@@ -178,30 +181,78 @@ export default function ResultClient() {
 
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
-    if (!confirm("Are you sure? This will delete your current progress for this test so you can start fresh.")) return;
+    if (!confirm("Start new attempt? Your current progress will be reset, but this result will remain in history.")) return;
     
     setIsSyncing(true);
     try {
-      // Definitive registry purge
+      // 1. Clear Firestore attempt tracker to bypass resume logic
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
+      
+      // 2. Wipe Local Store
       resetStore();
       
-      toast({ title: "Test Reset Successful", description: "Identity sync active. Redirecting to start node." });
+      // 3. Clear Guest Cache if any
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
+        localStorage.removeItem(`cracklix_guest_result_${mockId}`);
+      }
+
+      toast({ title: "Session Reset", description: "Identity sync active. Redirecting to start node." });
       
-      // Delay redirection to ensure store resets
-      setTimeout(() => {
-         router.push(`/mocks/instructions?id=${mockId}&retake=true`);
-      }, 500);
+      // 4. Force direct jump to attempt node
+      router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
     } catch (e) { 
       toast({ variant: "destructive", title: "Sync failure", description: "Please refresh and try again." }); 
       setIsSyncing(false);
     }
   };
 
-  const handleDownloadPDF = () => { 
-    setActiveMainTab("REPORT"); 
-    toast({ title: "Preparing Report", description: "Generating lightweight PDF..." });
-    setTimeout(() => { if (typeof window !== 'undefined') window.print(); }, 800); 
+  const handleDownloadPDF = async () => { 
+    if (isExporting) return;
+    setIsExporting(true);
+    
+    try {
+      // 1. Direct tab jump for capture
+      setActiveMainTab("REPORT"); 
+      toast({ title: "Generating PDF", description: "Preparing your professional report..." });
+      
+      // 2. Allow DOM to settle for fonts/images
+      await new Promise(r => setTimeout(r, 1000));
+      
+      const element = document.getElementById('cracklix-result-card');
+      if (!element) throw new Error("Capture node not found.");
+
+      // 3. High-Res Capture
+      const dataUrl = await toPng(element, { 
+        quality: 0.95,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff'
+      });
+
+      // 4. PDF Assembler
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      
+      const fileName = `Cracklix_${activeSession.mockTitle.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.pdf`;
+      
+      // 5. Binary Trigger (Safe for Android/PWA)
+      pdf.save(fileName);
+      
+      toast({ title: "Download Successful", description: "Check your device's downloads folder." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Export Failed", description: "Please try again or use Chrome." });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const reviewNodes = useMemo(() => {
@@ -293,9 +344,10 @@ export default function ResultClient() {
                  </Button>
                  <Button 
                    onClick={handleDownloadPDF} 
+                   disabled={isExporting}
                    className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight shadow-xl border-none"
                  >
-                    <Download className="h-3.5 w-3.5" /> 
+                    {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} 
                     Download PDF
                  </Button>
               </div>
@@ -455,7 +507,7 @@ export default function ResultClient() {
 
            <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 pb-20">
               <div className="flex flex-col items-center">
-                 <div className="transform scale-[0.45] sm:scale-[0.6] md:scale-[0.85] lg:scale-100 origin-top bg-white p-0 rounded-none shadow-5xl border border-slate-100">
+                 <div className="bg-white p-0 rounded-none shadow-5xl border border-slate-100 overflow-hidden">
                     <ResultCard 
                        studentName={activeSession.userName || profile?.name || "Aspirant"} 
                        examTitle={activeSession.mockTitle || "Mock Test"} 
@@ -476,7 +528,14 @@ export default function ResultClient() {
                  </div>
                  <div className="mt-12 text-center space-y-4 print:hidden">
                     <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Official Institutional Report Card.</p>
-                    <Button onClick={handleDownloadPDF} className="h-14 px-12 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-[11px] rounded-xl shadow-xl border-none active:scale-95">Download Report</Button>
+                    <Button 
+                      onClick={handleDownloadPDF} 
+                      disabled={isExporting}
+                      className="h-14 px-12 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-[11px] rounded-xl shadow-xl border-none active:scale-95"
+                    >
+                      {isExporting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                      Download High-Quality PDF
+                    </Button>
                  </div>
               </div>
            </TabsContent>

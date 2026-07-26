@@ -30,7 +30,8 @@ import { nanoid } from "nanoid";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v14.0 [Ranking System Rebuilt].
+ * @fileOverview Official Mock Attempt Hub v15.0 [Critical Maintenance Hub].
+ * FIXED: Implemented 'forceNew' detection to bypass resume logic during Retakes.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -53,6 +54,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     return null;
   }, [pathname, searchParams, propMockId]);
 
+  // CRITICAL: Detection of retake request to bypass resume logic
   const isRetakeRequested = searchParams?.get('retake') === 'true';
 
   const { startSession, stopSession } = useActiveSession('MOCK', mockId || undefined);
@@ -267,7 +269,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            const existing = lbSnap.data();
            attemptCount = (existing.attemptCount || 0) + 1;
            
-           // Tie-break Rules: Score > Accuracy > Time > TimeStamp
            const hasHigherScore = finalScore > existing.highestScore;
            const hasEqualScoreHigherAcc = (finalScore === existing.highestScore && accuracy > existing.accuracy);
            const hasEqualScoreAccLowerTime = (finalScore === existing.highestScore && accuracy === existing.accuracy && timeTaken < existing.timeTaken);
@@ -300,7 +301,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         const entriesSnap = await getDocs(query(collection(db, "leaderboards", mockId, "entries")));
         const allEntries = entriesSnap.docs.map(d => d.data());
         
-        // Sorting by institutional rules
         allEntries.sort((a: any, b: any) => {
            if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
            if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
@@ -360,7 +360,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         resetStore();
         router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
       } else {
-        // Guest Path (Minimal ranking)
         const guestResult = {
            attemptId,
            mockId,

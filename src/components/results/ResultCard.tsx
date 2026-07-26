@@ -43,8 +43,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v16.0 [Title Case Standard].
- * FIXED: Typography reset for names and titles.
+ * @fileOverview Official Institutional Report Card v17.0 [A4 Optimized Hub].
+ * FIXED: Precise dimensions and margin layout for perfect PDF generation.
  */
 export default function ResultCard({
   studentName,
@@ -71,14 +71,14 @@ export default function ResultCard({
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullVerifyUrl)}`;
 
   return (
-    <div id="cracklix-result-card" className="w-[794px] min-h-[1123px] bg-white border border-slate-200 shadow-2xl rounded-none overflow-hidden text-left font-body relative p-0 mx-auto">
+    <div id="cracklix-result-card" className="w-[210mm] min-h-[297mm] bg-white border border-slate-200 shadow-none overflow-hidden text-left font-body relative p-0 mx-auto box-border">
       <div className="h-4 w-full bg-[#0F172A]" />
       
       <div className="px-12 py-12 space-y-10">
         {/* HEADER HUB */}
         <div className="flex justify-between items-start border-b-2 border-slate-100 pb-10">
           <div className="flex items-center gap-8">
-            <div className="h-28 w-28 md:h-40 md:w-40 bg-white rounded-2xl flex items-center justify-center p-0 border-2 border-slate-50 shadow-xl overflow-hidden shrink-0">
+            <div className="h-32 w-32 md:h-40 md:w-40 bg-white rounded-2xl flex items-center justify-center p-0 border-2 border-slate-50 shadow-xl overflow-hidden shrink-0">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
               ) : (
@@ -100,8 +100,8 @@ export default function ResultCard({
         <div className="grid grid-cols-12 gap-10 items-center">
            <div className="col-span-8 space-y-4">
               <div className="space-y-1 text-left">
-                 <h1 className="text-4xl font-[800] text-[#0F172A] tracking-tight leading-none">{studentName}</h1>
-                 <p className="text-primary font-bold text-xl tracking-tight mt-1">{examTitle}</p>
+                 <h1 className="text-4xl font-[800] text-[#0F172A] tracking-tight leading-none uppercase">{studentName}</h1>
+                 <p className="text-primary font-bold text-xl tracking-tight mt-1 uppercase">{examTitle}</p>
               </div>
               <div className="flex items-center gap-8 pt-2">
                  <div className="flex items-center gap-2 text-slate-400 font-bold text-[11px] tracking-widest uppercase">
@@ -159,7 +159,7 @@ export default function ResultCard({
                 <tbody className="divide-y divide-slate-50">
                   {subjects.map((s, i) => (
                     <tr key={i} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-8 py-5 font-bold text-[#0F172A] text-lg tracking-tight text-left">{s.name}</td>
+                      <td className="px-8 py-5 font-bold text-[#0F172A] text-lg tracking-tight text-left uppercase">{s.name}</td>
                       <td className="px-4 py-5 text-center font-black text-primary tabular-nums text-2xl">{s.score.toFixed(1)}</td>
                       <td className="px-8 py-5 text-right">
                         <Badge className={cn(
@@ -216,7 +216,7 @@ function AnalyticNode({ label, val, icon, highlight }: any) {
       </div>
       <div className="space-y-0.5">
         <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase leading-none mb-1">{label}</p>
-        <p className="text-xl md:text-2xl font-black text-[#0F172A] leading-none tabular-nums tracking-tighter">{val}</p>
+        <p className="text-xl md:text-2xl font-black text-[#0F172A] leading-none tabular-nums tracking-tighter uppercase">{val}</p>
       </div>
     </div>
   );

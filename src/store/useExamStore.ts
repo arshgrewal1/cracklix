@@ -54,8 +54,7 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v9.0 [Strict Attempt Isolation].
- * Every initialization performs a total memory purge to prevent data leakage.
+ * @fileOverview Hardened Test Store v10.0 [State Isolation Hub].
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -99,7 +98,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   }),
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode, forceNew = false) => {
-    // 1. CRITICAL: Total memory purge before every new attempt
+    // 1. CRITICAL: Total memory purge
     get().resetStore();
 
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
@@ -123,7 +122,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const now = Date.now();
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
     
-    // 2. Generate a cryptographically unique ID for the attempt
+    // 2. Generate a unique ID for the attempt
     const attemptId = isResuming ? (effectiveResume.attemptId || nanoid(12)) : nanoid(12);
 
     set({
