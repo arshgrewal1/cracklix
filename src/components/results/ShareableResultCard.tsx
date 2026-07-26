@@ -25,9 +25,9 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview High-Fidelity Social Share Certificate v1.8.
- * FIXED: Explicitly defined icons and uses official logo node for capture.
- * FIXED: Added missing lucide-react imports to prevent ReferenceErrors.
+ * @fileOverview High-Fidelity Social Share Certificate v2.0.
+ * FIXED: Explicitly imported all lucide-react nodes to prevent background capture crashes.
+ * FIXED: Uses official /logo.png for institutional branding.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
@@ -35,17 +35,12 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
   useEffect(() => {
     if (!data?.mockId || !data?.attemptId) return;
     const url = `https://cracklix.in/results/view?id=${data.mockId}&attemptId=${data.attemptId}`;
-    QRCode.toDataURL(url, { margin: 1, width: 200, color: { dark: '#071B4D', light: '#ffffff' } })
-      .then(setQrUrl)
-      .catch(() => console.warn("[QR_SYNC] Failed to generate code."));
+    QRCode.toDataURL(url, { 
+      margin: 1, 
+      width: 200, 
+      color: { dark: '#071B4D', light: '#ffffff' } 
+    }).then(setQrUrl).catch(() => {});
   }, [data]);
-
-  const formatTime = (seconds: number) => {
-     if (!seconds || seconds <= 0) return "0m";
-     const m = Math.floor(seconds / 60);
-     const s = seconds % 60;
-     return `${m}m ${s}s`;
-  }
 
   if (!data) return null;
 
@@ -55,14 +50,15 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
       className="w-[1080px] h-[1350px] bg-gradient-to-br from-[#0B5FFF] via-[#4F46E5] to-[#7C3AED] flex flex-col relative overflow-hidden"
       style={{ fontFamily: 'Inter, sans-serif' }}
     >
-      {/* GLOW DECORATIONS */}
+      {/* 1. AMBIENT GLOW NODES */}
       <div className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-white/10 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-100px] right-[-100px] w-[600px] h-[600px] bg-primary/20 blur-[150px] rounded-full" />
       
       <div className="relative z-10 flex-1 flex flex-col p-16 space-y-12">
          
-         <div className="flex flex-col items-center text-center space-y-4">
-            <div className="h-[120px] w-auto flex items-center justify-center">
+         {/* 2. HEADER HUB */}
+         <div className="flex flex-col items-center text-center space-y-6">
+            <div className="h-[140px] w-auto flex items-center justify-center">
                <img src="/logo.png" alt="Cracklix" className="h-full object-contain filter drop-shadow-2xl" />
             </div>
             <div className="space-y-1">
@@ -73,6 +69,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             </div>
          </div>
 
+         {/* 3. RANK HUB */}
          <div className="relative">
             <div className="bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-600 p-1.5 rounded-[4rem] shadow-5xl">
                <div className="bg-[#071B4D] rounded-[3.8rem] p-12 text-center relative overflow-hidden">
@@ -93,10 +90,11 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             </div>
             <div className="absolute -bottom-6 -right-6 h-40 w-40 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[3rem] flex flex-col items-center justify-center shadow-4xl">
                <Star className="h-10 w-10 text-amber-400 fill-current mb-2" />
-               <span className="text-[10px] font-black text-white uppercase tracking-widest text-center">Verified<br/>Attempt</span>
+               <span className="text-[10px] font-black text-white uppercase tracking-widest text-center leading-tight">Verified<br/>Attempt</span>
             </div>
          </div>
 
+         {/* 4. CANDIDATE HUB */}
          <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 flex items-center justify-between backdrop-blur-md">
             <div className="space-y-2">
                <p className="text-sm font-black text-primary uppercase tracking-[0.3em]">Candidate Name</p>
@@ -108,25 +106,58 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             </div>
          </div>
 
+         {/* 5. METRIC GRID */}
          <div className="grid grid-cols-4 gap-6">
-            <ResultMetric label="Score" val={`${data.score}/${data.totalQuestions}`} color="bg-emerald-500" />
-            <ResultMetric label="Accuracy" val={`${data.attemptAccuracy}%`} color="bg-indigo-500" />
-            <ResultMetric label="Percentile" val={`${Math.max(0, Math.round(((totalCandidates - Number(rank)) / (totalCandidates || 1)) * 100))}%`} color="bg-orange-500" />
-            <ResultMetric label="Grade" val={data.grade || "A+"} color="bg-blue-500" />
+            <div className="p-6 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-2xl bg-emerald-500">
+               <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Score</span>
+               <span className="text-3xl font-[900] text-white tabular-nums leading-none">{data.score}/{data.totalQuestions}</span>
+            </div>
+            <div className="p-6 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-2xl bg-indigo-500">
+               <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Accuracy</span>
+               <span className="text-3xl font-[900] text-white tabular-nums leading-none">{data.attemptAccuracy}%</span>
+            </div>
+            <div className="p-6 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-2xl bg-orange-500">
+               <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Percentile</span>
+               <span className="text-3xl font-[900] text-white tabular-nums leading-none">{Math.max(0, Math.round(((totalCandidates - Number(rank)) / (totalCandidates || 1)) * 100))}%</span>
+            </div>
+            <div className="p-6 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-2xl bg-blue-500">
+               <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Grade</span>
+               <span className="text-3xl font-[900] text-white tabular-nums leading-none">{data.grade || "A+"}</span>
+            </div>
          </div>
 
+         {/* 6. STATS LINE */}
          <div className="grid grid-cols-3 gap-6 pt-4">
-            <MiniStat icon={<CheckCircle2 className="text-emerald-400" />} label="Correct" val={data.correctCount} />
-            <MiniStat icon={<X className="text-rose-400" />} label="Wrong" val={data.wrongCount} />
-            <MiniStat icon={<Zap className="text-slate-400" />} label="Skipped" val={data.skippedCount} />
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
+               <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shadow-inner"><CheckCircle2 className="h-5 w-5 text-emerald-400" /></div>
+               <div className="text-left">
+                  <p className="text-[8px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Correct</p>
+                  <p className="text-xl font-black text-white tabular-nums leading-none">{data.correctCount}</p>
+               </div>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
+               <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shadow-inner"><X className="h-5 w-5 text-rose-400" /></div>
+               <div className="text-left">
+                  <p className="text-[8px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Wrong</p>
+                  <p className="text-xl font-black text-white tabular-nums leading-none">{data.wrongCount}</p>
+               </div>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
+               <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shadow-inner"><Zap className="h-5 w-5 text-slate-400" /></div>
+               <div className="text-left">
+                  <p className="text-[8px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Skipped</p>
+                  <p className="text-xl font-black text-white tabular-nums leading-none">{data.skippedCount}</p>
+               </div>
+            </div>
          </div>
 
+         {/* 7. FOOTER AUDIT */}
          <div className="mt-auto pt-10 border-t border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-8">
                <div className="bg-white p-3 rounded-2xl shadow-2xl">
                   {qrUrl ? <img src={qrUrl} alt="Verify" className="h-24 w-24" /> : <div className="h-24 w-24 bg-slate-100 animate-pulse rounded-lg" />}
                </div>
-               <div className="space-y-1">
+               <div className="space-y-1 text-left">
                   <p className="text-xl font-black text-white uppercase tracking-tight">Verify Result</p>
                   <p className="text-sm font-bold text-white/50 tracking-widest uppercase">WWW.CRACKLIX.IN</p>
                </div>
@@ -139,25 +170,4 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
       </div>
     </div>
   );
-}
-
-function ResultMetric({ label, val, color }: any) {
-   return (
-      <div className={cn("p-6 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-2xl", color)}>
-         <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">{label}</span>
-         <span className="text-3xl font-[900] text-white tabular-nums leading-none">{val}</span>
-      </div>
-   )
-}
-
-function MiniStat({ icon, label, val }: any) {
-   return (
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-         <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shadow-inner">{icon}</div>
-         <div className="text-left">
-            <p className="text-[8px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">{label}</p>
-            <p className="text-xl font-black text-white tabular-nums leading-none">{val}</p>
-         </div>
-      </div>
-   )
 }

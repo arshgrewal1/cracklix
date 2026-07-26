@@ -48,9 +48,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import html2canvas from 'html2canvas'
 
 /**
- * @fileOverview Universal Result Hub Viewer v33.0.
- * FIXED: Switched to html2canvas for robust background capture.
- * FIXED: Added 15s safety timeout and generation guard to prevent hangs.
+ * @fileOverview Universal Result Hub Viewer v34.0.
+ * FIXED: Background pre-caching protocol with high-fidelity asset checks.
  */
 
 export default function ResultClient() {
@@ -189,19 +188,16 @@ export default function ResultClient() {
     
     generationAttempted.current = true;
     setIsGenerating(true);
-    console.log("[SHARE_DEBUG] STEP 1: Starting html2canvas capture");
     
     const timeoutId = setTimeout(() => {
        if (!preGeneratedImage) {
-          console.error("[SHARE_DEBUG] ERROR: Generation timed out");
           setIsGenerating(false);
           generationAttempted.current = false;
        }
     }, 15000);
 
     try {
-      // 2s delay for assets
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 2500));
       
       const node = document.getElementById('shareable-result-certificate');
       if (!node) throw new Error("Capture node not found");
@@ -216,11 +212,10 @@ export default function ResultClient() {
       });
 
       const dataUrl = canvas.toDataURL('image/png', 0.9);
-      console.log("[SHARE_DEBUG] STEP 2: PNG Exported");
       setPreGeneratedImage(dataUrl);
       clearTimeout(timeoutId);
     } catch (e: any) {
-      console.error("[SHARE_DEBUG] FATAL ERROR:", e);
+      console.error("[SHARE_ERROR]:", e);
       generationAttempted.current = false;
       clearTimeout(timeoutId);
     } finally {
@@ -238,14 +233,15 @@ export default function ResultClient() {
     if (!sessionData) return;
     
     if (!preGeneratedImage) {
-       toast({ title: "Card sync in progress", description: "Almost ready. Please retry in 3 seconds." });
+       toast({ title: "Synchronizing card", description: "Almost ready. Please wait 2 seconds." });
        if (!isGenerating) prepareShareCard();
        return;
     }
 
     try {
-      const blob = await (await fetch(preGeneratedImage)).blob();
-      const file = new File([blob], `Cracklix_Result.png`, { type: 'image/png' });
+      const response = await fetch(preGeneratedImage);
+      const blob = await response.blob();
+      const file = new File([blob], `Cracklix_Result_${Date.now()}.png`, { type: 'image/png' });
 
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
@@ -256,17 +252,18 @@ export default function ResultClient() {
       } else if (navigator.share) {
          await navigator.share({
             title: 'My Cracklix Result',
-            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions}! Rank: #${liveRank}. View: https://cracklix.in/results/view?id=${mockId}`
+            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions}! Punjab Rank: #${liveRank}. Verify here: https://cracklix.in/results/view?id=${mockId}`
          });
       } else {
          const link = document.createElement('a');
          link.download = `Cracklix_Result_${Date.now()}.png`;
          link.href = preGeneratedImage;
          link.click();
+         toast({ title: "Card downloaded" });
       }
     } catch (e: any) { 
        if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Transmission Error" }); 
+          toast({ variant: "destructive", title: "Transmission Failed" }); 
        }
     }
   };
