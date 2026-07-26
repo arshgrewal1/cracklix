@@ -13,7 +13,8 @@ import {
   documentId, 
   getDocs, 
   where,
-  limit
+  limit,
+  orderBy
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -40,8 +41,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Engine v95.0 [Strict Sync].
- * FIXED: Implemented polling logic for report generation.
+ * @fileOverview Universal Result Hub Engine v96.0 [ID Lock Fix].
+ * FIXED: Strictly lookups results by the unique attemptId provided in the URL.
  */
 
 export default function ResultClient() {
@@ -63,33 +64,26 @@ export default function ResultClient() {
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
   const [topScore, setTopScore] = useState<number>(0)
   const [avgScore, setAvgScore] = useState<number>(0)
-  const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
 
   const mockId = searchParams.get('id')
   const attemptId = searchParams.get('attemptId')
 
-  // DATA POLLING: Strict search for the NEW attempt node
+  // DATA POLLING: Aggressive search for the unique attempt node
   useEffect(() => {
-    if (userLoading || !db || !mockId) return;
+    if (!db || !mockId || !attemptId) {
+       if (!attemptId && !userLoading) setIsSearching(false);
+       return;
+    }
     
     let pollCount = 0;
-    const maxPolls = 15;
+    const maxPolls = 20;
 
     async function fetchLatestResult() {
        try {
-          const targetId = attemptId ? `${user?.uid || 'guest'}_${mockId}_${attemptId}` : null;
-          let snap = null;
-
-          if (targetId) {
-             snap = await getDoc(doc(db, "results", targetId));
-          } else {
-             // Fallback search for latest if no attemptId in URL
-             const q = query(collection(db, "results"), where("userId", "==", user?.uid || 'guest'), where("mockId", "==", mockId), limit(1));
-             const qSnap = await getDocs(q);
-             if (!qSnap.empty) snap = qSnap.docs[0];
-          }
+          // ATOMIC FIX: results are now stored strictly by attemptId
+          const snap = await getDoc(doc(db, "results", attemptId));
           
-          if (snap?.exists()) {
+          if (snap.exists()) {
              setSessionData({ ...snap.data(), id: snap.id });
              setIsSearching(false);
              return true;
@@ -109,35 +103,50 @@ export default function ResultClient() {
 
     fetchLatestResult();
     return () => clearInterval(interval);
-  }, [user, userLoading, db, mockId, attemptId]);
+  }, [db, mockId, attemptId, userLoading]);
 
   // Ranking & Questions Loading (Parallel)
   useEffect(() => {
      if (!db || !mockId || !sessionData) return;
      
      const loadMetrics = async () => {
-        const lbRef = collection(db, "leaderboards", mockId, "entries");
-        const lbSnap = await getDocs(query(lbRef, orderBy("highestScore", "desc")));
-        const entries = lbSnap.docs.map(d => d.data());
-        const myRank = entries.findIndex(e => e.userId === sessionData.userId) + 1;
-        setLiveRank(myRank || "---");
-        setTotalCandidates(lbSnap.size);
-        setTopScore(entries[0]?.highestScore || 0);
-        setAvgScore(entries.length ? entries.reduce((a,e) => a+(e.highestScore||0),0)/entries.length : 0);
+        try {
+           const lbRef = collection(db, "leaderboards", mockId, "entries");
+           const lbSnap = await getDocs(query(lbRef, orderBy("highestScore", "desc")));
+           const entries = lbSnap.docs.map(d => d.data());
+           const myRank = entries.findIndex(e => e.userId === sessionData.userId) + 1;
+           setLiveRank(myRank || "---");
+           setTotalCandidates(lbSnap.size);
+           setTopScore(entries[0]?.highestScore || 0);
+           setAvgScore(entries.length ? entries.reduce((a,e) => a+(e.highestScore||0),0)/entries.length : 0);
+        } catch (e) {}
      };
 
      const loadQuestions = async () => {
-        const mSnap = await getDoc(doc(db, "mocks", mockId));
-        if (mSnap.exists()) {
-           const mData = mSnap.data();
-           setMockData(mData);
-           const chunks = [];
-           const qIds = mData.questionIds || [];
-           for (let i=0; i<qIds.length; i+=30) chunks.push(qIds.slice(i, i+30));
-           const promises = chunks.map(async c => (await getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", c)))).docs.map(d => d.data()));
-           const all = (await Promise.all(promises)).flat();
-           setQuestions(qIds.map(id => all.find((q:any) => q.id === id)).filter(Boolean));
-        }
+        try {
+           const mSnap = await getDoc(doc(db, "mocks", mockId));
+           const dailySnap = !mSnap.exists() ? await getDoc(doc(db, "daily_quizzes", mockId)) : null;
+           const targetSnap = mSnap.exists() ? mSnap : dailySnap;
+
+           if (targetSnap?.exists()) {
+              const mData = targetSnap.data();
+              setMockData(mData);
+              const chunks = [];
+              const qIds = mData.questionIds || [];
+              for (let i=0; i<qIds.length; i+=30) chunks.push(qIds.slice(i, i+30));
+              
+              const promises = chunks.map(async c => {
+                const [qSnap, uSnap] = await Promise.all([
+                   getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", c))),
+                   getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", c)))
+                ]);
+                return [...qSnap.docs, ...uSnap.docs].map(d => d.data());
+              });
+
+              const all = (await Promise.all(promises)).flat();
+              setQuestions(qIds.map(id => all.find((q:any) => q.id === id)).filter(Boolean));
+           }
+        } catch (e) {}
      };
 
      loadMetrics(); loadQuestions();
@@ -178,12 +187,12 @@ export default function ResultClient() {
         ) : sessionData ? (
            <>
               <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-12 flex flex-col lg:flex-row justify-between items-center gap-6">
-                 <div className="flex items-center gap-6 md:gap-10 w-full min-w-0">
+                 <div className="flex items-center gap-6 md:gap-10 w-full min-w-0 text-left">
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-24 md:w-24 shadow-xl border border-slate-100 rounded-2xl" />
                     <div className="text-left space-y-2 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
                           <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 font-bold text-[9px] rounded-lg">Official result</Badge>
-                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-3 font-bold text-[9px] rounded-lg">ID: {sessionData.attemptId?.slice(0,8)}</Badge>
+                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-3 font-bold text-[9px] rounded-lg">ID: {sessionData.attemptId?.slice(0,10)}</Badge>
                        </div>
                        <h1 className="text-xl md:text-4xl font-bold text-[#0F172A] tracking-tight truncate">{sessionData.mockTitle}</h1>
                        <div className="flex items-center gap-4 text-xs font-semibold text-slate-400">
@@ -235,7 +244,8 @@ export default function ResultClient() {
            <div className="py-40 text-center space-y-6">
               <AlertCircle className="h-16 w-16 mx-auto text-slate-200" />
               <h2 className="text-2xl font-black text-[#0F172A]">Result audit not found</h2>
-              <Button asChild className="rounded-full px-10"><Link href="/mocks">Back to hub</Link></Button>
+              <p className="text-slate-500 font-medium max-w-sm mx-auto">No synchronized attempt records were found for this test vertical.</p>
+              <Button asChild className="rounded-full px-10"><Link href="/mocks">Explore test bank</Link></Button>
            </div>
         )}
       </main>

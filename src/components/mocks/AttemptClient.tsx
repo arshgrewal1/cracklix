@@ -41,8 +41,8 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Hub v90.0 [Atomic Submit Lock].
- * FIXED: High-speed atomic submission pipeline with write-gated navigation.
+ * @fileOverview Institutional Attempt Hub v91.0 [Atomic Document Lock].
+ * FIXED: Uses unique attemptId as the primary key for result documents for 100% stable retrieval.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -106,7 +106,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const mockRef = doc(db, "mocks", mockId);
       const dailyRef = doc(db, "daily_quizzes", mockId);
       
-      const [mSnap, dSnap] = await Promise.all([getDoc(mockRef), getDoc(dailyRef)]);
+      const [mSnap, dSnap] = await Promise.all([getDoc(mockRef), dSnap = getDoc(dailyRef)]);
       const targetSnap = mSnap.exists() ? mSnap : dSnap;
       
       if (!targetSnap.exists()) throw new Error("Test not found in registry.");
@@ -225,7 +225,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     console.log("[CRACKLIX] Analysis Generated.");
 
     // 2. ATOMIC REGISTRY COMMIT
-    const resultDocId = user ? `${user.uid}_${mockId}_${attemptId}` : `guest_${mockId}_${attemptId}`;
+    // Use attemptId as the primary unique key for 100% fetch reliability.
+    const resultDocId = attemptId;
 
     if (user) {
       try {
@@ -237,6 +238,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
           // Commit Unique Result Node
           transaction.set(resultRef, {
+             id: resultDocId,
              attemptId, mockId, mockTitle: mockData.title, userId: user.uid,
              userName: profile?.name || 'Aspirant', userEmail: user.email || "", 
              score, maxMarks, percentage, 
@@ -248,7 +250,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
              answers: studentAnswers 
           });
 
-          // Update latest attempt pointer
+          // Update latest attempt pointer for quick lookup
           transaction.set(attemptPtrRef, { 
              attemptId, status: 'COMPLETED', updatedAt: serverTimestamp() 
           }, { merge: true });
@@ -271,11 +273,20 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       } catch (e) {
          console.error("[SYNC_ERROR]:", e);
       }
+    } else {
+       // Guest Support: Local Persistence
+       const guestPayload = {
+          attemptId, mockId, mockTitle: mockData.title, score, totalQuestions, accuracy: attemptAccuracy, timestamp: new Date().toISOString(), answers: studentAnswers
+       };
+       localStorage.setItem(`cracklix_guest_result_${attemptId}`, JSON.stringify(guestPayload));
     }
 
     console.log("[CRACKLIX] Redirecting...");
+    // Force clean navigation with only the NEW attemptId
     router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
-    setTimeout(() => resetStore(), 500);
+    
+    // Hard reset of store happens after navigation to prevent jitter
+    setTimeout(() => resetStore(), 800);
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language]);
 
   if (isInitializing || isSubmittingFinal) return (
@@ -310,7 +321,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
                     language={language} 
                     question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
                     selectedAnswer={answers?.[currentIdx] ?? null} 
-                    onSelect={(idx: number) => setAnswer(currentIdx, idx, db)} 
+                    onSelect={(idx: number) => !isSubmittingFinal && setAnswer(currentIdx, idx, db)} 
                     className="shadow-md border-none p-6 md:p-12 rounded-[2.5rem]" 
                   />
                 </motion.div>
@@ -318,7 +329,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             </div>
           </div>
         </div>
-        <TacticalFooter onSubmit={() => setShowSubmitModal(true)} />
+        <TacticalFooter onSubmit={() => !isSubmittingFinal && setShowSubmitModal(true)} />
       </main>
 
       <Sheet open={isPaletteOpen} onOpenChange={setIsPaletteOpen}>
