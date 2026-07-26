@@ -16,7 +16,9 @@ import {
   documentId, 
   getDocs, 
   limit, 
-  serverTimestamp 
+  serverTimestamp,
+  increment,
+  runTransaction
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -60,8 +62,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 
 /**
- * @fileOverview Official Result Hub 2.1 [Verification Hardened].
- * FIXED: Implemented strict comparison logic for Review correctness.
+ * @fileOverview Official Result Hub 2.1 [Redesigned Logo Focus].
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -185,7 +186,6 @@ export default function ResultClient() {
      return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
   };
 
-  // Data Integrity Hub
   const integrity = useMemo(() => {
      if (!activeSession) return { isValid: false };
      const { correctCount = 0, wrongCount = 0, skippedCount = 0, totalQuestions = 0 } = activeSession;
@@ -214,14 +214,21 @@ export default function ResultClient() {
       <Navbar />
       <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-16 pb-40">
         
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 px-1">
-           <div className="space-y-4 text-left">
-              <div className="flex items-center gap-3">
-                 <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Official performance report</span>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 px-1">
+           <div className="flex items-center gap-6 md:gap-10 text-left w-full md:w-auto">
+              <div className="h-20 w-20 md:h-32 md:w-32 rounded-3xl bg-white border border-slate-100 shadow-2xl flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                 {branding?.logoUrl ? (
+                    <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" />
+                 ) : (
+                    <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain" />
+                 )}
               </div>
-              <div className="space-y-2">
-                 <h1 className="text-3xl md:text-6xl font-black tracking-tighter text-[#0F172A] leading-tight antialiased">
+              <div className="space-y-2 flex-1 min-w-0">
+                 <div className="flex items-center gap-3">
+                    <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Official Performance Report</span>
+                 </div>
+                 <h1 className="text-2xl md:text-5xl font-black tracking-tighter text-[#0F172A] leading-tight truncate">
                    {activeSession.mockTitle}
                  </h1>
                  <div className="flex flex-wrap items-center gap-4 text-slate-500 font-bold text-[10px] md:sm uppercase tracking-tight">
@@ -232,12 +239,12 @@ export default function ResultClient() {
               </div>
            </div>
            
-           <div className="flex bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm w-full md:w-auto">
+           <div className="flex bg-white border border-slate-100 p-1.5 rounded-2xl shadow-sm w-full md:w-auto shrink-0 overflow-hidden">
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
                  <TabsList className="bg-transparent border-none p-0 flex h-12 w-full gap-1">
                     <HubTab value="OVERVIEW" label="Summary" />
-                    <HubTab value="REVIEW" label="Review Answers" />
-                    <HubTab value="REPORT" label="Report Card" />
+                    <HubTab value="REVIEW" label="Review" />
+                    <HubTab value="REPORT" label="Report" />
                  </TabsList>
               </Tabs>
            </div>
@@ -281,7 +288,7 @@ export default function ResultClient() {
                                       initial={{ width: 0 }} 
                                       animate={{ width: `${sub.accuracy}%` }} 
                                       transition={{ duration: 1.2, delay: i * 0.1 }} 
-                                      className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : sub.accuracy > 40 ? "bg-amber-500" : "bg-rose-500")} 
+                                      className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : sub.accuracy > 40 ? "bg-blue-500" : "bg-rose-500")} 
                                    />
                                 </div>
                                 <div className="flex justify-between items-center text-[9px] font-bold text-slate-300">
@@ -482,4 +489,3 @@ function FilterButton({ active, label, onClick, color = "primary" }: any) {
       </button>
    )
 }
-

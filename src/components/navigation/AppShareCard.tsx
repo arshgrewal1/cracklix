@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -20,8 +21,8 @@ import {
 } from 'lucide-react';
 
 /**
- * @fileOverview World-Class Institutional Share Card v3.0.
- * UPDATED: Increased Logo size to h-44 w-44 for prominent branding on social exports.
+ * @fileOverview World-Class Institutional Share Card v3.1.
+ * UPDATED: Optimized logo sizing to h-56 w-56 for premium brand prominence.
  */
 export default function AppShareCard() {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent('https://cracklix.vercel.app/install')}`;
@@ -36,23 +37,23 @@ export default function AppShareCard() {
       <div className="absolute top-0 right-0 w-[900px] h-[900px] bg-[#2563EB]/20 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-[#60A5FA]/10 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2" />
       
-      {/* 2. HEADER HUB */}
+      {/* 2. HEADER HUB - RESIZED LOGO */}
       <div className="relative z-10 px-20 pt-20 flex justify-between items-start">
          <div className="space-y-6">
             <div className="flex items-center gap-10">
-               <div className="h-44 w-44 bg-white rounded-[3rem] flex items-center justify-center shadow-2xl border-[6px] border-white/10 overflow-hidden shrink-0">
-                  <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain p-4" />
+               <div className="h-56 w-56 bg-white rounded-[3rem] flex items-center justify-center shadow-2xl border-[8px] border-white/10 overflow-hidden shrink-0 p-2">
+                  <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain" />
                </div>
                <div>
-                  <h1 className="text-7xl font-black tracking-tighter uppercase leading-none">Cracklix</h1>
-                  <div className="flex items-center gap-3 mt-4">
-                     <span className="text-2xl font-bold text-[#60A5FA] tracking-[0.4em] uppercase">Verified Portal</span>
-                     <div className="h-8 w-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg"><CheckCircle2 className="h-5 w-5 text-white" /></div>
+                  <h1 className="text-8xl font-black tracking-tighter uppercase leading-none">Cracklix</h1>
+                  <div className="flex items-center gap-3 mt-6">
+                     <span className="text-3xl font-bold text-[#60A5FA] tracking-[0.4em] uppercase">Verified Portal</span>
+                     <div className="h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg"><CheckCircle2 className="h-6 w-6 text-white" /></div>
                   </div>
                </div>
             </div>
-            <div className="inline-flex items-center gap-6 px-8 py-4 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl">
-               <span className="text-3xl">🇮🇳</span>
+            <div className="inline-flex items-center gap-6 px-10 py-5 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl mt-8">
+               <span className="text-4xl">🇮🇳</span>
                <p className="text-2xl font-black uppercase tracking-[0.2em] text-[#60A5FA]">Punjab Government Exam Practice</p>
             </div>
          </div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -47,8 +48,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Result Card v8.0.
- * UPDATED: Increased logo container to h-32 (128px) and reduced padding for maximum focal impact.
+ * @fileOverview Official Institutional Result Card v8.1 [Premium Branding].
+ * UPDATED: Increased logo container for maximum visual focus and scannability.
  */
 export default function ResultCard({
   studentName,
@@ -72,17 +73,17 @@ export default function ResultCard({
   const webUrlRaw = branding?.websiteUrl || "https://cracklix.vercel.app";
   const verifyBase = branding?.verificationUrl || `${webUrlRaw}/results/view?id=`;
   const fullVerifyUrl = verifyBase + resultId;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(fullVerifyUrl)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(fullVerifyUrl)}`;
 
   return (
     <div className="w-[800px] bg-white border border-slate-200 shadow-2xl rounded-[3rem] overflow-hidden text-left font-body relative">
       <div className="h-3 w-full bg-primary" />
       
       <div className="p-16 space-y-12">
-        {/* Institutional Header - Large Focal Logo */}
+        {/* Institutional Header - Large Focal Logo [RESIZED] */}
         <div className="flex justify-between items-start border-b border-slate-100 pb-12">
           <div className="flex items-center gap-10">
-            <div className="h-32 w-32 bg-white rounded-[2.5rem] flex items-center justify-center p-2 border border-slate-100 shadow-2xl overflow-hidden shrink-0">
+            <div className="h-40 w-40 bg-white rounded-[2.5rem] flex items-center justify-center p-1 border border-slate-100 shadow-2xl overflow-hidden shrink-0">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
               ) : (
@@ -109,7 +110,7 @@ export default function ResultCard({
               </div>
               <div className="flex items-center gap-6">
                  <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
-                    <ShieldCheck className="h-5 w-5 text-emerald-500" /> Authorized Registry Ingestion
+                    <ShieldCheck className="h-5 w-5 text-emerald-500" /> Authorized Identity Registry
                  </div>
                  <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
                     <Target className="h-5 w-5 text-primary" /> Attempt ID: {resultId.slice(-8).toUpperCase()}
@@ -196,9 +197,9 @@ export default function ResultCard({
                This performance report is derived from official recruitment patterns. Authenticity can be verified via the QR node or by accessing the master registry at {webUrlRaw}.
             </p>
           </div>
-          <div className="h-36 w-32 bg-white border-2 border-slate-50 p-2 rounded-[2rem] shadow-2xl shrink-0 group hover:scale-105 transition-transform duration-500 flex flex-col items-center justify-center gap-2">
-            <img src={qrUrl} alt="Verification QR" className="h-24 w-24 object-contain" crossOrigin="anonymous" />
-            <span className="text-[8px] font-black uppercase text-primary">Verify Hub</span>
+          <div className="h-44 w-36 bg-white border-2 border-slate-50 p-2 rounded-[2rem] shadow-2xl shrink-0 group hover:scale-105 transition-transform duration-500 flex flex-col items-center justify-center gap-3">
+            <img src={qrUrl} alt="Verification QR" className="h-32 w-32 object-contain" crossOrigin="anonymous" />
+            <span className="text-[8px] font-black uppercase text-primary">Verify Registry</span>
           </div>
         </div>
       </div>
@@ -209,12 +210,12 @@ export default function ResultCard({
 function AnalyticNode({ label, val, icon }: any) {
   return (
     <div className="p-8 bg-slate-50/50 rounded-[2rem] border border-slate-100 flex flex-col items-start gap-5 hover:bg-white hover:shadow-2xl transition-all duration-500 group">
-      <div className="h-14 w-14 rounded-2xl bg-white shadow-sm flex items-center justify-center shrink-0 border border-slate-100 group-hover:scale-110 transition-transform">
+      <div className="h-12 w-12 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0 border border-slate-50 group-hover:scale-110 transition-transform">
         {icon}
       </div>
       <div className="space-y-1">
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1 truncate">{label}</p>
-        <p className="text-3xl font-black text-[#0F172A] leading-none tabular-nums tracking-tighter truncate">{val}</p>
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1 truncate">{label}</p>
+        <p className="text-2xl font-black text-[#0F172A] leading-none tabular-nums tracking-tighter truncate">{val}</p>
       </div>
     </div>
   );
@@ -223,7 +224,7 @@ function AnalyticNode({ label, val, icon }: any) {
 function MetricNode({ label, val, color }: any) {
   return (
     <div className="text-center space-y-2">
-       <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
+       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
        <p className={cn("text-5xl font-black tabular-nums tracking-tighter", color)}>{val}</p>
     </div>
   );
