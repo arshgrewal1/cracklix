@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useMemo, useEffect, useState } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Clock, Zap, Lock, ChevronRight, Star, Activity, UserPlus, Layers } from "lucide-react"
+import { BookOpen, Clock, Zap, Lock, ChevronRight, Layers, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Latest Tests Hub v42.4.
- * RESTORED: Removed 'truncate' from StatPill to fix UI clipping.
+ * @fileOverview Standardized Latest Tests Hub v43.0.
+ * STANDARDIZED: Heading font sizes and icon containers normalized.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -40,22 +40,23 @@ export default function LatestMocks() {
   }, [profile]);
 
   return (
-    <section className="py-10 md:py-24 bg-slate-50/50 border-y border-slate-100">
+    <section className="py-12 md:py-20 bg-slate-50/50 border-y border-slate-100">
       <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
+        {/* Standardized Header */}
         <div className="flex items-center justify-between px-1">
-           <div className="flex items-center gap-4 text-left">
-              <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner shrink-0">
-                <Zap className="h-5 w-5 md:h-6 md:w-6 fill-current" />
-              </div>
-              <div className="text-left">
-                 <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Latest mock tests</h2>
-                 <p className="text-[11px] md:text-sm font-medium text-slate-500">Newly added high-fidelity series with official patterns.</p>
-              </div>
-           </div>
-           <Link href="/mocks" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline">
-              View all <ChevronRight className="h-4 w-4" />
-           </Link>
+          <div className="flex items-center gap-4">
+             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner shrink-0">
+               <Zap className="h-5 w-5 md:h-6 md:w-6 fill-current" />
+             </div>
+             <div className="text-left">
+                <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Latest mock tests</h2>
+                <p className="text-[11px] md:text-sm font-medium text-slate-500">Newly added high-fidelity series.</p>
+             </div>
+          </div>
+          <Link href="/mocks" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline group">
+            View all <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -75,7 +76,7 @@ export default function LatestMocks() {
                 transition={{ delay: i * 0.05 }}
                 className="flex flex-col h-full"
               >
-                <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white p-8 flex flex-col group h-full relative overflow-hidden text-left flex-1">
+                <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white p-6 md:p-8 flex flex-col group h-full relative overflow-hidden text-left flex-1">
                   
                   <div className="flex justify-between items-start mb-6">
                     <AuthorityLogo boardId={boardId} size="md" className="shadow-xl" />
@@ -89,7 +90,7 @@ export default function LatestMocks() {
                   <div className="flex-1 space-y-4">
                     <div className="space-y-1.5">
                        <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">{mock.difficulty || 'Mixed'} level</p>
-                       <h3 className="text-xl md:text-2xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
+                       <h3 className="text-lg md:text-xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2 uppercase">
                            {mock.title}
                        </h3>
                     </div>
@@ -128,7 +129,7 @@ function StatPill({ icon: Icon, label }: any) {
    return (
       <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
          <Icon className="h-3.5 w-3.5 text-slate-300" />
-         <span className="leading-none">{label}</span>
+         <span className="leading-none uppercase tracking-tight">{label}</span>
       </div>
    )
 }

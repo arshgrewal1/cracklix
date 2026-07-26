@@ -5,20 +5,14 @@ import { motion } from "framer-motion";
 import { 
   ChevronRight, 
   Zap, 
-  Users,
-  FileText,
-  BookOpen,
-  Bookmark,
-  Lock,
-  ShieldCheck,
-  RefreshCw,
-  Landmark,
-  Star,
-  CheckCircle2
+  ShieldCheck, 
+  RefreshCw, 
+  Star, 
+  CheckCircle2,
+  TrendingUp
 } from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useCollection, useFirestore, useUser } from "@/firebase";
 import { collection, query, where, limit, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,8 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v53.0.
- * FIXED: Removed overlapping background watermark for better visual balance.
+ * @fileOverview Standardized Popular Exams Hub v54.0.
+ * STANDARDIZED: Heading font sizes and icon containers matched to Home Page registry.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -105,21 +99,23 @@ export default function PopularExams() {
   };
 
   return (
-    <section className="py-12 md:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-12 text-left">
+    <section className="py-12 md:py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-10">
         
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
-           <div className="space-y-2 text-left">
-              <h2 className="text-2xl md:text-4xl font-bold tracking-tighter text-[#0F172A] antialiased">
-                Trending hubs
-              </h2>
-              <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
-                Popular recruitment verticals selected by the audit team.
-              </p>
-           </div>
-           <Link href="/exams" className="text-primary font-bold text-xs md:text-sm tracking-tight hover:underline flex items-center gap-2 group shrink-0">
-              View all <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-           </Link>
+        {/* Standardized Header */}
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-4">
+             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500 shadow-inner shrink-0">
+               <TrendingUp className="h-5 w-5 md:h-6 md:w-6" />
+             </div>
+             <div className="text-left">
+                <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Trending hubs</h2>
+                <p className="text-[11px] md:text-sm font-medium text-slate-500">Popular recruitment verticals.</p>
+             </div>
+          </div>
+          <Link href="/exams" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline group">
+            View all <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
@@ -166,7 +162,7 @@ export default function PopularExams() {
                           </div>
 
                           <div className="space-y-4 flex-1 text-left relative z-10">
-                             <h3 className="text-lg md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                             <h3 className="text-lg md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 uppercase">
                                 {exam.name}
                              </h3>
                              

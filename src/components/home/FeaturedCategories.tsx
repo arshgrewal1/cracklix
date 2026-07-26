@@ -5,7 +5,6 @@ import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { Layers, ChevronRight, BookOpen, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
@@ -13,8 +12,8 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Filtered Institutional Categories Hub v41.3.
- * UPDATED: Removed uppercase from headings for better PWA sizing.
+ * @fileOverview Standardized Institutional Categories Hub v42.0.
+ * STANDARDIZED: Font sizes and icon containers normalized to match site-wide registry.
  */
 
 const TARGET_IDS = [
@@ -37,25 +36,26 @@ export default function FeaturedCategories() {
   }, [rawCategories]);
 
   return (
-    <section className="py-10 md:py-16 bg-slate-50/50 border-t border-slate-100">
-      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <section className="py-12 md:py-20 bg-slate-50/50 border-t border-slate-100">
+      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
+        {/* Standardized Header */}
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-4">
              <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
                <Layers className="h-5 w-5 md:h-6 md:w-6" />
              </div>
              <div className="text-left">
-                <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Quick categories</h2>
-                <p className="text-[11px] md:text-sm font-medium text-slate-500">Find tests by your target recruitment vertical.</p>
+                <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Quick categories</h2>
+                <p className="text-[11px] md:text-sm font-medium text-slate-500">Target your recruitment vertical hub.</p>
              </div>
           </div>
-          <Link href="/exams" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline">
-            View all <ChevronRight className="h-4 w-4" />
+          <Link href="/exams" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline group">
+            View all <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {loading ? (
              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-[2rem] bg-white border border-slate-100" />)
           ) : categories.map((cat, idx) => (
@@ -67,10 +67,10 @@ export default function FeaturedCategories() {
                transition={{ delay: idx * 0.05 }}
              >
                 <Link href={`/exams/category/${cat.id}`}>
-                  <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-10 flex flex-col group h-full relative overflow-hidden text-left">
+                  <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-10 flex flex-col group h-full relative overflow-hidden text-left">
                      <div className="flex justify-between items-start mb-8">
                         <AuthorityLogo category={cat} size="md" />
-                        <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all">
+                        <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
                            <ChevronRight className="h-5 w-5" />
                         </div>
                      </div>
@@ -97,7 +97,7 @@ export default function FeaturedCategories() {
 
 function MiniBadge({ icon: Icon, label, color }: any) {
    return (
-      <div className={cn("px-2.5 py-1 rounded-lg flex items-center gap-1.5 font-semibold text-[9px] tracking-tight", color)}>
+      <div className={cn("px-2.5 py-1 rounded-lg flex items-center gap-1.5 font-semibold text-[9px] tracking-tight uppercase", color)}>
          <Icon className="h-3 w-3" />
          {label}
       </div>

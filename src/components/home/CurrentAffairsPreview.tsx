@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, where, limit } from 'firebase/firestore';
-import { Calendar, ChevronRight, Zap } from 'lucide-react';
+import { Calendar, ChevronRight, Newspaper } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,8 +13,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Current Affairs Preview Hub v22.3.
- * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
+ * @fileOverview Standardized Current Affairs Preview v23.0.
+ * STANDARDIZED: Heading font sizes and icon containers normalized.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -31,20 +31,23 @@ export default function CurrentAffairsPreview() {
   const { data: items, loading } = useCollection<any>(hubQuery);
 
   return (
-    <section className="py-10 md:py-24 bg-slate-50/50 border-t border-slate-100">
-      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12">
+    <section className="py-12 md:py-20 bg-slate-50/50 border-t border-slate-100">
+      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 text-left px-1">
-           <div className="space-y-1">
-              <div className="flex items-center gap-3 md:gap-5">
-                 <AuthorityLogo boardId="current-affairs" size="md" className="p-0 shadow-none bg-transparent" />
-                 <h2 className="text-2xl md:text-4xl font-black tracking-tight text-[#0F172A]">Current affairs</h2>
-              </div>
-              <p className="max-w-2xl text-[14px] md:text-[clamp(13px,1.5vw,18px)] font-medium text-slate-500">Stay updated with daily verified news and tests.</p>
-           </div>
-           <Link href="/current-affairs" className="text-primary font-bold text-[13px] md:text-[15px] tracking-tight hover:underline flex items-center gap-2 group shrink-0">
-              View all <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-           </Link>
+        {/* Standardized Header */}
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-4">
+             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
+               <Newspaper className="h-5 w-5 md:h-6 md:w-6" />
+             </div>
+             <div className="text-left">
+                <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Current affairs</h2>
+                <p className="text-[11px] md:text-sm font-medium text-slate-500">Stay updated with daily verified news.</p>
+             </div>
+          </div>
+          <Link href="/current-affairs" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline group">
+            View all <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10">
@@ -60,14 +63,14 @@ export default function CurrentAffairsPreview() {
                 className="flex flex-col h-full"
               >
                  <Link href="/current-affairs" className="h-full block">
-                    <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white p-4 md:p-10 flex flex-col group h-full relative overflow-hidden flex-1">
+                    <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white p-4 md:p-8 flex flex-col group h-full relative overflow-hidden flex-1">
                        
                        <div className="flex justify-center mb-4 md:mb-10 shrink-0">
-                          <AuthorityLogo boardId="current-affairs" size="lg" className="p-0 shadow-lg" />
+                          <AuthorityLogo boardId="current-affairs" size="md" className="p-0 shadow-lg" />
                        </div>
 
                        <div className="flex-1 flex flex-col justify-start text-center min-w-0">
-                          <h3 className="text-[15px] md:text-xl font-bold leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors mb-2 md:mb-6">
+                          <h3 className="text-[15px] md:text-lg font-bold leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors mb-2 md:mb-6 uppercase">
                              {item.title}
                           </h3>
                           
@@ -81,7 +84,7 @@ export default function CurrentAffairsPreview() {
                        </div>
 
                        <div className="mt-auto pt-4 md:pt-8 shrink-0">
-                          <Button variant="ghost" className="w-full h-12 md:h-14 lg:h-16 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[14px] md:text-[15px] tracking-tight shadow-lg border-none active:scale-95 gap-2 uppercase">
+                          <Button variant="ghost" className="w-full h-11 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[12px] md:text-[13px] tracking-tight shadow-lg border-none active:scale-95 gap-2 uppercase">
                              Start test
                              <ChevronRight className="h-4 w-4" />
                           </Button>
