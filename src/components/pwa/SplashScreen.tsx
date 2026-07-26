@@ -6,8 +6,8 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v5.0.
- * REDESIGNED: Massive hero icon, zero-gap branding, and optimized vertical centering.
+ * @fileOverview Premium PWA Splash Hub v6.0.
+ * UPDATED: Moved composition significantly higher (pt-[6dvh]) for better vertical flow.
  * AESTHETIC: High-fidelity SaaS startup launch experience (Spotify/Linear style).
  */
 export default function SplashScreen() {
@@ -27,7 +27,7 @@ export default function SplashScreen() {
     
     const safetyTimer = setTimeout(() => {
       if (isDataReady) setIsVisible(false);
-    }, 3200);
+    }, 3500);
 
     const progressInterval = setInterval(() => {
       setProgress(prev => {
@@ -48,7 +48,7 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (isDataReady && progress >= 100) {
-      const exitTimer = setTimeout(() => setIsVisible(false), 400);
+      const exitTimer = setTimeout(() => setIsVisible(false), 500);
       return () => clearTimeout(exitTimer);
     }
   }, [isDataReady, progress]);
@@ -63,7 +63,7 @@ export default function SplashScreen() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 z-[9999] bg-[#05070B] flex flex-col items-center justify-start overflow-hidden pointer-events-none select-none pt-[15dvh]"
+          className="fixed inset-0 z-[9999] bg-[#05070B] flex flex-col items-center justify-start overflow-hidden pointer-events-none select-none pt-[6dvh] md:pt-[10dvh]"
         >
           {/* AMBIENT BACKGROUND LAYER */}
           <div className="absolute top-[-10%] left-[-10%] w-full h-[70%] bg-primary/10 blur-[140px] rounded-full" />
@@ -110,19 +110,19 @@ export default function SplashScreen() {
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 1, delay: 0.5 }}
-               className="text-center space-y-2 w-full -mt-4"
+               className="text-center space-y-2 w-full -mt-6 md:-mt-10"
              >
                 <div className="space-y-1">
                    <h1 className="text-[56px] md:text-[88px] font-[900] tracking-tighter text-white leading-none antialiased">
                       Cracklix
                    </h1>
-                   <p className="text-[16px] md:text-[24px] font-medium text-slate-400 tracking-tight leading-none opacity-90 italic">
+                   <p className="text-[14px] md:text-[20px] font-medium text-slate-400 tracking-tight leading-none opacity-90 italic">
                       Punjab's Smart Mock Test Platform
                    </p>
                 </div>
 
-                {/* LOADING HUB */}
-                <div className="pt-28 md:pt-36 w-full max-w-[220px] md:max-w-[300px] mx-auto space-y-6">
+                {/* LOADING HUB - PULLED UP */}
+                <div className="pt-12 md:pt-20 w-full max-w-[200px] md:max-w-[260px] mx-auto space-y-6">
                    <div className="flex flex-col items-center gap-5">
                       <div className="relative h-[2px] w-full bg-white/5 rounded-full overflow-hidden shadow-inner">
                          <motion.div 
@@ -131,7 +131,7 @@ export default function SplashScreen() {
                             className="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-500 shadow-[0_0_10px_rgba(37,99,235,0.8)]"
                          />
                       </div>
-                      <p className="text-[11px] md:text-sm font-bold text-slate-500 tracking-tight uppercase opacity-50">
+                      <p className="text-[10px] md:text-xs font-bold text-slate-500 tracking-tight uppercase opacity-40">
                          Loading your learning journey...
                       </p>
                    </div>

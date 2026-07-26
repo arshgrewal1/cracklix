@@ -51,9 +51,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v37.0.
- * FIXED: Replaced "Fix Error" with "Wrong" and added Attempt Tracker.
- * OPTIMIZED: High-speed PDF rendering at scale 2.
+ * @fileOverview Institutional Result Hub v39.0.
+ * FIXED: Integrated accurate attempt counting for the "Attempt #X" node.
+ * OPTIMIZED: High-speed PDF rendering at scale 2 for instant registry feedback.
  */
 
 export default function ResultClient() {
@@ -128,7 +128,7 @@ export default function ResultClient() {
        }
 
        try {
-          // Index-less query for high reliability
+          // Fetch attempts for the user/mock combination
           const resQuery = query(
              collection(db, "results"), 
              where("userId", "==", user.uid), 
@@ -150,7 +150,7 @@ export default function ResultClient() {
               return tA - tB;
             });
           
-          setUserAttemptCount(resultsList.length || 1);
+          setUserAttemptCount(resultsList.length);
 
           if (attemptIdFromUrl) {
              const target = resultsList.find(r => r.attemptId === attemptIdFromUrl || r.id.endsWith(attemptIdFromUrl));
@@ -167,7 +167,6 @@ export default function ResultClient() {
           setIsSearching(false);
 
        } catch (e) { 
-          console.error("[Registry_Resolution_Failure]:", e);
           setErrorNotFound(true); 
        } finally { 
           setIsSearching(false); 
@@ -256,11 +255,11 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Optimizing report" });
+    toast({ title: "Synchronizing report node" });
 
     try {
       await document.fonts.ready;
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise(r => setTimeout(r, 1500));
 
       const container = document.getElementById('pdf-report-container');
       if (!container) throw new Error("Capture node missing");
@@ -274,11 +273,11 @@ export default function ResultClient() {
         windowWidth: 794
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.9); 
+      const imgData = canvas.toDataURL('image/jpeg', 0.95); 
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
       pdf.save(`Cracklix_Report_${activeSession.userName?.replace(/\s+/g, '_') || 'Student'}.pdf`);
-      toast({ title: "Download ready" });
+      toast({ title: "Report Downloaded" });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Export failed" });
     } finally { setIsExporting(false); }
