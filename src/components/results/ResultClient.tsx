@@ -15,8 +15,7 @@ import {
   getDocs, 
   where,
   limit,
-  orderBy,
-  QueryConstraint
+  orderBy
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -31,7 +30,8 @@ import {
   FileText,
   Calendar,
   AlertCircle,
-  RotateCcw
+  RotateCcw,
+  X
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -44,9 +44,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Engine v98.0 [Atomic Recovery].
- * FIXED: Implemented 'Latest Attempt' discovery when attemptId is missing.
- * FIXED: Optimized Firestore polling for production propagation.
+ * @fileOverview Universal Result Hub Engine v99.0 [REGISTRY SYNC].
+ * FIXED: Implemented high-frequency polling to handle Firestore write propagation delays.
+ * FIXED: Added missing icon imports.
  */
 
 export default function ResultClient() {
@@ -77,10 +77,13 @@ export default function ResultClient() {
     if (!db) return false;
 
     try {
+       console.log(`[Result_Hub] Audit initiated for attempt node: ${attemptIdFromUrl || mockId}`);
+
        // 1. PRIMARY: DIRECT ATTEMPT ID LOOKUP
        if (attemptIdFromUrl) {
           const snap = await getDoc(doc(db, "results", attemptIdFromUrl));
           if (snap.exists()) {
+             console.log("[Result_Hub] Result document verified in cloud.");
              setSessionData({ ...snap.data(), id: snap.id });
              setIsSearching(false);
              return true;
@@ -100,6 +103,7 @@ export default function ResultClient() {
           const snap = await getDocs(q);
           if (!snap.empty) {
              const data = snap.docs[0].data();
+             console.log("[Result_Hub] Discovered latest attempt via registry lookup.");
              setSessionData({ ...data, id: snap.docs[0].id });
              setIsSearching(false);
              return true;
@@ -113,6 +117,7 @@ export default function ResultClient() {
           const localData = localStorage.getItem(guestKey);
           if (localData) {
              const parsed = JSON.parse(localData);
+             console.log("[Result_Hub] Retrieval successful via guest storage fallback.");
              setSessionData({ ...parsed, isGuestNode: true });
              setIsSearching(false);
              return true;
@@ -120,8 +125,8 @@ export default function ResultClient() {
        }
        
        return false;
-    } catch (e) {
-       console.error("[Registry_Lookup_Error]:", e);
+    } catch (e: any) {
+       console.error("[Result_Hub_Error]:", e.message);
        return false;
     }
   }, [db, attemptIdFromUrl, user, mockId]);
@@ -136,10 +141,11 @@ export default function ResultClient() {
        const found = await fetchResultNode();
        if (!found && isSubscribed) {
           setPollCount(prev => {
-             if (prev < 15) { // 15 attempts (~22 seconds total)
+             if (prev < 20) { // 20 attempts (~30 seconds total)
                 timer = setTimeout(runPoll, 1500);
                 return prev + 1;
              } else {
+                console.warn("[Result_Hub] Discovery timeout. Node not propagated.");
                 setIsSearching(false);
                 return prev;
              }
@@ -194,9 +200,13 @@ export default function ResultClient() {
               const promises = chunks.map(async c => {
                 const [qSnap, uSnap] = await Promise.all([
                    getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", c))),
-                   getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", c)))
+                   getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", c))),
+                   getDocs(query(collection(db, "questions"), where(documentId(), "in", c)))
                 ]);
-                return [...qSnap.docs, ...uSnap.docs].map(d => d.data());
+                const qDocs = qSnap.docs.map(d => d.data());
+                const uDocs = uSnap.docs.map(d => d.data());
+                const lDocs = legacySnap.docs.map(d => d.data());
+                return [...qDocs, ...uDocs, ...lDocs];
               });
 
               const all = (await Promise.all(promises)).flat();

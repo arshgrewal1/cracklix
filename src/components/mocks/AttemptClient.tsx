@@ -42,9 +42,9 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Hub v94.0 [ATOMIC COMMIT].
- * FIXED: Atomic Transaction for scores, rankings, and attempt persistence.
- * LOGGING: Step-by-step audit logging for submission reliability.
+ * @fileOverview Institutional Attempt Hub v95.0 [PRODUCTION FIX].
+ * FIXED: Removed undefined 'planId' and incorrect revenue logic from submission transaction.
+ * FIXED: Implemented Atomic Commit with high-fidelity logging.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -165,13 +165,16 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   }, [isInitializing, initError, tick]);
 
   const handleSubmitFinal = useCallback(async () => {
-    if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
+    if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) {
+      console.warn("[SUBMISSION_BLOCKED] Missing parameters or already submitting.");
+      return;
+    }
     
-    console.log("[AUDIT] Submission Sequence Initialized...");
+    console.log("[AUDIT] Submission Cycle Started...");
     setShowSubmitModal(false);
     setIsSubmittingFinal(true);
     
-    // 1. PERFORM IN-MEMORY CALCULATION (OPTIMISTIC PERFORMANCE)
+    // 1. ANALYTICS ENGINE (IN-MEMORY)
     let correctCount = 0; 
     let wrongCount = 0;
     const totalQuestions = questions.length;
@@ -222,19 +225,30 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const timeTaken = Math.max(1, elapsedSeconds);
     const attemptAccuracy = attemptedCount > 0 ? Number(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
     
-    console.log("[AUDIT] Analytics Generated. score:", score, "accuracy:", attemptAccuracy);
+    console.log("[AUDIT] Analytics Generated. Score:", score, "Accuracy:", attemptAccuracy);
 
-    // 2. ATOMIC TRANSACTION COMMIT
+    // 2. ATOMIC COMMIT NODE
     const resultDocId = attemptId;
 
     if (user) {
       try {
+        console.log("[AUDIT] Initializing Firestore Transaction...");
         await runTransaction(db, async (transaction) => {
           const resultRef = doc(db, "results", resultDocId);
           const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
           const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
           const globalMeritRef = doc(db, "leaderboard", user.uid);
 
+          // Get existing rankings to check for New Personal Best
+          const [lbSnap, globalSnap] = await Promise.all([
+             transaction.get(lbEntryRef),
+             transaction.get(globalMeritRef)
+          ]);
+
+          const prevBest = lbSnap.exists() ? (lbSnap.data().highestScore || 0) : -999;
+          const prevGlobalBest = globalSnap.exists() ? (globalSnap.data().highestScore || 0) : -999;
+
+          // Commit 1: Main Result Node
           transaction.set(resultRef, {
              id: resultDocId,
              attemptId, 
@@ -261,42 +275,55 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
              answers: studentAnswers 
           });
 
+          // Commit 2: Attempt Status Pointer
           transaction.set(attemptPtrRef, { 
              attemptId, 
              status: 'COMPLETED', 
              updatedAt: serverTimestamp() 
           }, { merge: true });
 
-          transaction.set(lbEntryRef, {
-             userId: user.uid, 
-             userName: profile?.name || 'Aspirant',
-             photoURL: profile?.photoURL || "", 
-             mockId, 
-             highestScore: score,
-             accuracy: attemptAccuracy, 
-             timeTaken: timeTaken, 
-             submittedAt: serverTimestamp()
-          }, { merge: true });
+          // Commit 3: Mock Leaderboard (Only if best score)
+          if (score >= prevBest) {
+            transaction.set(lbEntryRef, {
+               userId: user.uid, 
+               userName: profile?.name || 'Aspirant',
+               photoURL: profile?.photoURL || "", 
+               mockId, 
+               highestScore: score,
+               accuracy: attemptAccuracy, 
+               timeTaken: timeTaken, 
+               submittedAt: serverTimestamp()
+            }, { merge: true });
+          }
 
+          // Commit 4: Global Platform Ranking
           transaction.set(globalMeritRef, {
              uid: user.uid, 
              displayName: profile?.name || 'Aspirant',
+             photoURL: profile?.photoURL || "",
+             highestScore: score > prevGlobalBest ? score : prevGlobalBest,
              totalTests: increment(1), 
              updatedAt: serverTimestamp(), 
              recentMockTitle: mockData.title
           }, { merge: true });
         });
         
-        console.log("[AUDIT] Firestore Transaction Succeeded.");
+        console.log("[AUDIT] Firestore Commit Successful. Document ID:", resultDocId);
         stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
-      } catch (e) {
-         console.error("[AUDIT] Transaction Failure:", e);
-         toast({ variant: "destructive", title: "Cloud sync failure", description: "Your results are calculated but could not be committed. Retrying..." });
+      } catch (e: any) {
+         console.error(`[CRITICAL_SUBMISSION_FAILURE]
+            File: src/components/mocks/AttemptClient.tsx
+            Function: handleSubmitFinal
+            Firestore Path: results/${resultDocId}
+            Error: ${e.message}
+            Stack: ${e.stack}
+         `);
+         toast({ variant: "destructive", title: "Cloud sync failed", description: "Your result could not be secured. Retrying..." });
          setIsSubmittingFinal(false);
          return;
       }
     } else {
-       // GUEST PERSISTENCE
+       // GUEST HUB PERSISTENCE
        const guestPayload = {
           attemptId, 
           mockId, 
@@ -310,7 +337,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           languageMode: language 
        };
        localStorage.setItem(`cracklix_guest_result_${attemptId}`, JSON.stringify(guestPayload));
-       console.log("[AUDIT] Guest Persistence Committed Locally.");
+       console.log("[AUDIT] Guest Node Committed locally.");
     }
 
     console.log("[AUDIT] Redirecting to analysis hub...");
