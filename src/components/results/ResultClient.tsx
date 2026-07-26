@@ -62,7 +62,6 @@ import { jsPDF } from 'jspdf';
 /**
  * @fileOverview Institutional Result Hub V4.5.
  * FIXED: Implemented a robust 'Hidden Rendering Node' for PDF capture to resolve blank/cut pages.
- * FIXED: Ensured images in the card use crossOrigin="anonymous".
  */
 
 export default function ResultClient() {
@@ -274,11 +273,9 @@ export default function ResultClient() {
     try {
       toast({ title: "Preparing report..." });
       
-      // Wait for fonts and all images to be ready
       await new Promise(r => setTimeout(r, 1000));
       if (typeof window !== 'undefined' && 'fonts' in document) await (document as any).fonts.ready;
       
-      // Target the hidden export node which is always at 210mm
       const element = document.getElementById('cracklix-export-node');
       if (!element) throw new Error("Report container not matched.");
 
@@ -287,7 +284,7 @@ export default function ResultClient() {
         useCORS: true, 
         backgroundColor: "#FFFFFF", 
         logging: false, 
-        windowWidth: 1080 // Ensure consistent rendering width
+        windowWidth: 1080 
       });
 
       if (!canvas || canvas.width === 0) throw new Error("Capture failed.");
@@ -329,162 +326,180 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden w-full">
       <Navbar />
-      <main className="flex-1 w-full max-w-full md:max-w-[1440px] mx-auto p-4 md:p-10 space-y-6 md:space-y-10 pb-40">
+      <main className="flex-1 w-full max-w-full md:max-w-[1440px] mx-auto p-4 md:p-10 space-y-6 md:gap-10 pb-40">
         
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1 print:hidden text-left">
-           <div className="flex items-center gap-4 md:gap-8 text-left w-full lg:w-auto min-w-0">
-              <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-10 w-10 md:h-14 md:w-14 rounded-xl shadow-lg bg-white border-2 border-slate-50 shrink-0" />
-              <div className="space-y-0.5 flex-1 min-w-0">
-                 <div className="flex items-center gap-2">
-                    <Badge className={cn("border-none text-[7px] font-bold px-1.5 py-0.5 rounded-full shadow-sm", finalMetrics?.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                       {finalMetrics?.isQualified ? "Qualified" : "Failed"}
-                    </Badge>
+        {isSearching ? (
+           <div className="h-96 flex flex-col items-center justify-center space-y-6 text-center">
+              <div className="h-16 w-16 rounded-full border-4 border-slate-100 border-t-primary animate-spin" />
+              <p className="font-bold text-slate-400">Auditing registry...</p>
+           </div>
+        ) : errorNotFound ? (
+           <div className="h-96 flex flex-col items-center justify-center space-y-6 text-center">
+              <AlertCircle className="h-16 w-16 text-rose-500" />
+              <div className="space-y-2">
+                 <h2 className="text-2xl font-black">Record Not Found</h2>
+                 <p className="text-slate-500">This attempt record may have been archived.</p>
+              </div>
+              <Button asChild><Link href="/mocks">Back to Hub</Link></Button>
+           </div>
+        ) : (
+           <>
+              <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1 print:hidden text-left">
+                 <div className="flex items-center gap-4 md:gap-8 text-left w-full lg:w-auto min-w-0">
+                    <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-10 w-10 md:h-14 md:w-14 rounded-xl shadow-lg bg-white border-2 border-slate-50 shrink-0" />
+                    <div className="space-y-0.5 flex-1 min-w-0">
+                       <div className="flex items-center gap-2">
+                          <Badge className={cn("border-none text-[7px] font-bold px-1.5 py-0.5 rounded-full shadow-sm", finalMetrics?.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+                             {finalMetrics?.isQualified ? "Qualified" : "Failed"}
+                          </Badge>
+                       </div>
+                       <h1 className="text-sm md:text-xl font-bold tracking-tight text-[#0F172A] leading-tight truncate w-full">
+                         {activeSession?.mockTitle}
+                       </h1>
+                    </div>
                  </div>
-                 <h1 className="text-sm md:text-xl font-[800] tracking-tight text-[#0F172A] leading-tight truncate w-full">
-                   {activeSession?.mockTitle}
-                 </h1>
+                 
+                 <div className="flex flex-col gap-2 w-full lg:w-auto shrink-0">
+                    <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="bg-white border border-slate-100 p-1 rounded-xl shadow-sm w-full">
+                       <TabsList className="bg-transparent border-none p-0 flex h-9 w-full gap-1">
+                          <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-2 font-bold text-[9px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Overview</TabsTrigger>
+                          <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-2 font-bold text-[9px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review</TabsTrigger>
+                          <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-2 font-bold text-[9px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Report</TabsTrigger>
+                       </TabsList>
+                    </Tabs>
+                    <div className="flex gap-2 w-full">
+                       <Button variant="outline" onClick={handleRetake} className="flex-1 h-9 border-2 font-bold text-[9px] rounded-xl active:scale-95"><RotateCcw className="h-3 w-3 mr-1" /> Retake</Button>
+                       <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-9 bg-primary text-white font-bold text-[9px] rounded-xl shadow-md active:scale-95">
+                          {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-1" />} PDF Report
+                       </Button>
+                    </div>
+                 </div>
               </div>
-           </div>
-           
-           <div className="flex flex-col gap-2 w-full lg:w-auto shrink-0">
-              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="bg-white border border-slate-100 p-1 rounded-xl shadow-sm w-full">
-                 <TabsList className="bg-transparent border-none p-0 flex h-9 w-full gap-1">
-                    <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-2 font-bold text-[9px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Overview</TabsTrigger>
-                    <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-2 font-bold text-[9px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review</TabsTrigger>
-                    <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-2 font-bold text-[9px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Report</TabsTrigger>
-                 </TabsList>
-              </Tabs>
-              <div className="flex gap-2 w-full">
-                 <Button variant="outline" onClick={handleRetake} className="flex-1 h-9 border-2 font-bold text-[9px] rounded-xl active:scale-95"><RotateCcw className="h-3 w-3 mr-1" /> Retake</Button>
-                 <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-9 bg-primary text-white font-bold text-[9px] rounded-xl shadow-md active:scale-95">
-                    {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-1" />} PDF Report
-                 </Button>
-              </div>
-           </div>
-        </div>
 
-        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
-            <TabsContent value="OVERVIEW" className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
-                <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-                  <StatCard label="Net Score" val={`${finalMetrics?.score} / ${finalMetrics?.maxMarks}`} sub={`${finalMetrics?.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
-                  <StatCard label="Punjab Rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
-                  <StatCard label="Percentile" val={`${finalMetrics?.percentile}%`} sub="Verified" icon={<TrendingUp className="text-blue-500" />} />
-                  <StatCard label="Accuracy" val={`${finalMetrics?.attemptAccuracy.toFixed(1)}%`} sub="Precision" icon={<Target className="text-emerald-500" />} />
-                  <StatCard label="Attempt Rate" val={`${finalMetrics?.attemptRate.toFixed(1)}%`} sub="Volume" icon={<Activity className="text-indigo-500" />} />
-                  <StatCard label="Grade" val={finalMetrics?.grade} sub="Audit" icon={<Award className="text-purple-500" />} />
-                </section>
+              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
+                  <TabsContent value="OVERVIEW" className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
+                      <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+                        <StatCard label="Net Score" val={`${finalMetrics?.score} / ${finalMetrics?.maxMarks}`} sub={`${finalMetrics?.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
+                        <StatCard label="Punjab Rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
+                        <StatCard label="Percentile" val={`${finalMetrics?.percentile}%`} sub="Verified" icon={<TrendingUp className="text-blue-500" />} />
+                        <StatCard label="Accuracy" val={`${finalMetrics?.attemptAccuracy.toFixed(1)}%`} sub="Precision" icon={<Target className="text-emerald-500" />} />
+                        <StatCard label="Attempt Rate" val={`${finalMetrics?.attemptRate.toFixed(1)}%`} sub="Volume" icon={<Activity className="text-indigo-500" />} />
+                        <StatCard label="Grade" val={finalMetrics?.grade} sub="Audit" icon={<Award className="text-purple-500" />} />
+                      </section>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
-                  <div className="lg:col-span-8 space-y-6 md:space-y-10">
-                      <Card className="border border-slate-100 shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] bg-white p-6 md:p-10 text-left">
-                          <h3 className="text-xs md:text-xl font-bold text-[#0F172A] mb-8 flex items-center gap-3">
-                             <TrendingUp className="h-4 w-4 text-primary" /> Competition Audit
-                          </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                             <div className="space-y-6">
-                                <ComparisonPill label="Your Score" val={finalMetrics?.score || 0} max={finalMetrics?.maxMarks || 1} color="bg-primary" />
-                                <ComparisonPill label="Average Score" val={Number(avgScore.toFixed(1))} max={finalMetrics?.maxMarks || 1} color="bg-slate-200" />
-                                <ComparisonPill label="Topper Score" val={topperScore} max={finalMetrics?.maxMarks || 1} color="bg-amber-400" />
-                             </div>
-                             <div className="bg-slate-50 rounded-[1.5rem] p-6 flex flex-col items-center justify-center text-center space-y-3 border border-slate-100 shadow-inner">
-                                <Target className="h-6 w-6 text-rose-500" />
-                                <div>
-                                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Topper Gap</p>
-                                   <p className="text-2xl font-black text-[#0F172A] tabular-nums mt-1">-{finalMetrics?.topperGap.toFixed(1)}</p>
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
+                        <div className="lg:col-span-8 space-y-6 md:space-y-10">
+                            <Card className="border border-slate-100 shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] bg-white p-6 md:p-10 text-left">
+                                <h3 className="text-xs md:text-xl font-bold text-[#0F172A] mb-8 flex items-center gap-3">
+                                   <TrendingUp className="h-4 w-4 text-primary" /> Competition Audit
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                   <div className="space-y-6">
+                                      <ComparisonPill label="Your Score" val={finalMetrics?.score || 0} max={finalMetrics?.maxMarks || 1} color="bg-primary" />
+                                      <ComparisonPill label="Average Score" val={Number(avgScore.toFixed(1))} max={finalMetrics?.maxMarks || 1} color="bg-slate-200" />
+                                      <ComparisonPill label="Topper Score" val={topperScore} max={finalMetrics?.maxMarks || 1} color="bg-amber-400" />
+                                   </div>
+                                   <div className="bg-slate-50 rounded-[1.5rem] p-6 flex flex-col items-center justify-center text-center space-y-3 border border-slate-100 shadow-inner">
+                                      <Target className="h-6 w-6 text-rose-500" />
+                                      <div>
+                                         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Topper Gap</p>
+                                         <p className="text-2xl font-black text-[#0F172A] tabular-nums mt-1">-{finalMetrics?.topperGap.toFixed(1)}</p>
+                                      </div>
+                                   </div>
                                 </div>
-                             </div>
-                          </div>
-                      </Card>
-                  </div>
+                            </Card>
+                        </div>
 
-                  <div className="lg:col-span-4 space-y-6">
-                      <Card className="border-none shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden h-full flex flex-col justify-center">
-                          <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-48 w-48 text-primary" /></div>
-                          <div className="relative z-10 space-y-8 text-left">
-                             <div className="space-y-1">
-                                <h3 className="text-xl font-black tracking-tight uppercase">Smart Insights</h3>
-                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Analytics Audit</p>
-                             </div>
-                             <div className="space-y-6">
-                                <InsightItem text={`Attempt rate is ${finalMetrics?.attemptRate.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptRate < 50 ? 'Low volume.' : 'Consistent.'}`} />
-                                <InsightItem text={`Accuracy is ${finalMetrics?.attemptAccuracy.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptAccuracy < 60 ? 'Reduce guesswork.' : 'Strong.'}`} />
-                                <InsightItem text={finalMetrics?.isQualified ? 'Target cutoff met.' : 'Target cutoff missed.'} />
-                             </div>
-                          </div>
-                      </Card>
-                  </div>
-                </div>
-            </TabsContent>
+                        <div className="lg:col-span-4 space-y-6">
+                            <Card className="border-none shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden h-full flex flex-col justify-center">
+                                <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-48 w-48 text-primary" /></div>
+                                <div className="relative z-10 space-y-8 text-left">
+                                   <div className="space-y-1">
+                                      <h3 className="text-xl font-black tracking-tight uppercase">Smart Insights</h3>
+                                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Analytics Audit</p>
+                                   </div>
+                                   <div className="space-y-6">
+                                      <InsightItem text={`Attempt rate is ${finalMetrics?.attemptRate.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptRate < 50 ? 'Low volume.' : 'Consistent.'}`} />
+                                      <InsightItem text={`Accuracy is ${finalMetrics?.attemptAccuracy.toFixed(1)}%. ${finalMetrics && finalMetrics.attemptAccuracy < 60 ? 'Reduce guesswork.' : 'Strong.'}`} />
+                                      <InsightItem text={finalMetrics?.isQualified ? 'Target cutoff met.' : 'Target cutoff missed.'} />
+                                   </div>
+                                </div>
+                            </Card>
+                        </div>
+                      </div>
+                  </TabsContent>
 
-            <TabsContent value="REVIEW" className="space-y-8 animate-in fade-in duration-500">
-                <div className="max-w-4xl mx-auto space-y-8">
-                   <div className="flex items-center gap-1 bg-white p-1 rounded-xl shadow-md border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
-                       <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
-                       <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
-                       <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
-                       <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skipped" onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
-                   </div>
-                   <div className="space-y-6">
-                       {filteredQuestions.map((q) => {
-                           const rawAns = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
-                           const isAttempted = rawAns !== null && rawAns !== undefined && String(rawAns) !== "";
-                           return (
-                               <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-white text-left">
-                               <div className="p-6 md:p-10 space-y-6">
-                                   <Badge variant="outline" className="px-3 py-0.5 rounded-lg border-slate-200 text-slate-400 font-bold text-[8px]">
-                                       Question #{q.originalIndex + 1}
-                                   </Badge>
-                                   <QuestionRenderer 
-                                       question={q} 
-                                       language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
-                                       showSolution={true} 
-                                       selectedAnswer={isAttempted ? Number(rawAns) : null} 
-                                       className="p-0 shadow-none border-none bg-transparent" 
-                                   />
-                               </div>
-                               </Card>
-                           )
-                       })}
-                   </div>
-                </div>
-            </TabsContent>
+                  <TabsContent value="REVIEW" className="space-y-8 animate-in fade-in duration-500">
+                      <div className="max-w-4xl mx-auto space-y-8">
+                         <div className="flex items-center gap-1 bg-white p-1 rounded-xl shadow-md border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
+                             <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
+                             <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                             <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
+                             <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skipped" onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
+                         </div>
+                         <div className="space-y-6">
+                             {filteredQuestions.map((q) => {
+                                 const rawAns = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
+                                 const isAttempted = rawAns !== null && rawAns !== undefined && String(rawAns) !== "";
+                                 return (
+                                     <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-white text-left">
+                                     <div className="p-6 md:p-10 space-y-6">
+                                         <Badge variant="outline" className="px-3 py-0.5 rounded-lg border-slate-200 text-slate-400 font-bold text-[8px]">
+                                             Question #{q.originalIndex + 1}
+                                         </Badge>
+                                         <QuestionRenderer 
+                                             question={q} 
+                                             language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
+                                             showSolution={true} 
+                                             selectedAnswer={isAttempted ? Number(rawAns) : null} 
+                                             className="p-0 shadow-none border-none bg-transparent" 
+                                         />
+                                     </div>
+                                     </Card>
+                                 )
+                             })}
+                         </div>
+                      </div>
+                  </TabsContent>
 
-            <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 pb-20 overflow-x-auto no-scrollbar">
-                <div className="flex flex-col items-center pt-6 md:pt-10 w-full">
-                   <div className="bg-white p-0 rounded-none shadow-5xl border border-slate-200 overflow-hidden w-full max-w-[210mm]">
-                       {finalMetrics && (
-                          <ResultCard 
-                              studentName={activeSession.userName || profile?.name || "Aspirant"} 
-                              examTitle={activeSession.mockTitle || "Mock test"} 
-                              score={finalMetrics.score.toFixed(2)} 
-                              rank={liveRank} 
-                              totalCandidates={totalCandidates}
-                              accuracy={finalMetrics.overallAccuracy.toFixed(1)} 
-                              attemptAccuracy={finalMetrics.attemptAccuracy.toFixed(1)}
-                              attemptRate={finalMetrics.attemptRate.toFixed(1)}
-                              timeTaken={formatTimeStr(activeSession.timeTaken)} 
-                              correct={activeSession.correctCount} 
-                              wrong={activeSession.wrongCount} 
-                              skipped={activeSession.skippedCount}
-                              total={activeSession.totalQuestions} 
-                              date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')} 
-                              resultId={activeSession.attemptId || activeSession.id} 
-                              percentile={finalMetrics.percentile} 
-                              branding={branding}
-                              subjects={activeSession.subjectAnalysis}
-                              grade={finalMetrics.grade}
-                              isQualified={finalMetrics.isQualified}
-                              readiness={finalMetrics.readiness}
-                              readinessLevel={finalMetrics.readinessLevel}
-                              topperScore={topperScore}
-                              avgScore={avgScore}
-                              duration={activeSession.duration || mockData?.duration}
-                          />
-                       )}
-                   </div>
-                </div>
-            </TabsContent>
-        </Tabs>
+                  <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 pb-20 overflow-x-auto no-scrollbar">
+                      <div className="flex flex-col items-center pt-6 md:pt-10 w-full">
+                         <div className="bg-white p-0 rounded-none shadow-5xl border border-slate-200 overflow-hidden w-full max-w-[210mm]">
+                             {finalMetrics && (
+                                <ResultCard 
+                                    studentName={activeSession.userName || profile?.name || "Aspirant"} 
+                                    examTitle={activeSession.mockTitle || "Mock test"} 
+                                    score={finalMetrics.score.toFixed(2)} 
+                                    rank={liveRank} 
+                                    totalCandidates={totalCandidates}
+                                    accuracy={finalMetrics.overallAccuracy.toFixed(1)} 
+                                    attemptAccuracy={finalMetrics.attemptAccuracy.toFixed(1)}
+                                    attemptRate={finalMetrics.attemptRate.toFixed(1)}
+                                    timeTaken={formatTimeStr(activeSession.timeTaken)} 
+                                    correct={activeSession.correctCount} 
+                                    wrong={activeSession.wrongCount} 
+                                    skipped={activeSession.skippedCount}
+                                    total={activeSession.totalQuestions} 
+                                    date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')} 
+                                    resultId={activeSession.attemptId || activeSession.id} 
+                                    percentile={finalMetrics.percentile} 
+                                    branding={branding}
+                                    subjects={activeSession.subjectAnalysis}
+                                    grade={finalMetrics.grade}
+                                    isQualified={finalMetrics.isQualified}
+                                    readiness={finalMetrics.readiness}
+                                    readinessLevel={finalMetrics.readinessLevel}
+                                    topperScore={topperScore}
+                                    avgScore={avgScore}
+                                    duration={activeSession.duration || mockData?.duration}
+                                />
+                             )}
+                         </div>
+                      </div>
+                  </TabsContent>
+              </Tabs>
+           </>
+        )}
 
         {/* HIDDEN EXPORT BUFFER: Fixed A4 210mm container */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
@@ -580,3 +595,4 @@ function formatTimeStr(seconds: number) {
   const s = seconds % 60;
   return `${m}m ${s}s`;
 }
+
