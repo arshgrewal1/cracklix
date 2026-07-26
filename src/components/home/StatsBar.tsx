@@ -11,15 +11,15 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 function Counter({ value, suffix = "+" }: { value: number | string; suffix?: string }) {
-  const [displayValue, setDisplayValue] = useState(0);
+  const [displayValue, setDisplayValue] = useState<number>(0);
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const isNonNumeric = typeof value === 'string' && (value.includes('x') || value.includes(':') || isNaN(Number(value.replace(/\D/g, ''))));
-  const numericValue = typeof value === 'string' ? parseInt(value.replace(/\D/g, '')) || 0 : value;
+  const isNonNumeric = typeof value === 'string' && isNaN(Number(value.replace(/\D/g, '')));
+  const numericValue = typeof value === 'string' ? parseInt(value.replace(/\D/g, '')) || 0 : Number(value);
 
   useEffect(() => {
     if (!mounted || isNonNumeric) return;
@@ -30,7 +30,7 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
-      setDisplayValue(Math.floor(progress * (numericValue as number)));
+      setDisplayValue(Math.floor(progress * numericValue));
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
@@ -46,8 +46,8 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 }
 
 /**
- * @fileOverview Institutional Stats Bar v1.3 [STRICT REAL DATA].
- * FIXED: Removed all random increments and hardcoded trend fallbacks.
+ * @fileOverview Institutional Stats Bar v1.4 [STRICT REAL DATA].
+ * FIXED: Removed all random increments and hardcoded trend fallbacks to ensure production fidelity.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -88,14 +88,14 @@ export default function StatsBar() {
       : s.showStudents;
 
     const pool = [];
-    if (s.showQuestions) pool.push({ label: "Practice questions", val: stats?.totalQuestions || 0, trend: trends.questions, icon: <Zap />, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20", href: "/exams" });
-    if (s.showMocks) pool.push({ label: "Mock tests", val: stats?.totalMocks || 0, trend: trends.mocks, icon: <ClipboardList />, color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20", href: "/mocks" });
-    if (s.showCategories) pool.push({ label: "Exam categories", val: stats?.totalCategories || 0, trend: trends.categories, icon: <ShieldCheck />, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20", href: "/exams" });
+    if (s.showQuestions) pool.push({ label: "Practice questions", val: stats?.totalQuestions || 0, trend: trends.questions, icon: <Zap />, color: "text-blue-50", bg: "bg-blue-600", href: "/exams" });
+    if (s.showMocks) pool.push({ label: "Mock tests", val: stats?.totalMocks || 0, trend: trends.mocks, icon: <ClipboardList />, color: "text-purple-50", bg: "bg-purple-600", href: "/mocks" });
+    if (s.showCategories) pool.push({ label: "Exam categories", val: stats?.totalCategories || 0, trend: trends.categories, icon: <ShieldCheck />, color: "text-emerald-50", bg: "bg-emerald-600", href: "/exams" });
     
     if (shouldShowStudents) {
-      pool.push({ label: "Verified students", val: totalUsers, trend: trends.students, icon: <Users />, color: "text-blue-600", bg: "bg-blue-600/10", border: "border-blue-600/20", href: "/leaderboard" });
+      pool.push({ label: "Verified students", val: totalUsers, trend: trends.students, icon: <Users />, color: "text-blue-50", bg: "bg-blue-700", href: "/leaderboard" });
     } else if (s.showSupport) {
-      pool.push({ label: "Student support", val: "24x7", trend: trends.support, icon: <Headset />, color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", noSuffix: true, href: "/support" });
+      pool.push({ label: "Student support", val: "24x7", trend: trends.support, icon: <Headset />, color: "text-orange-50", bg: "bg-orange-600", noSuffix: true, href: "/support" });
     }
 
     return pool.slice(0, 4);
@@ -123,12 +123,9 @@ export default function StatsBar() {
                   <Card className={cn(
                     "relative group h-[130px] md:h-[150px] border border-slate-100 bg-white shadow-sm hover:shadow-2xl transition-all duration-300 rounded-[22px] p-4 md:p-6 flex flex-col items-center justify-center gap-2 overflow-hidden hover:-translate-y-1 active:scale-95 cursor-pointer"
                   )}>
-                    <div className={cn("absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-3xl opacity-20", item.bg)} />
-                    
                     <div className={cn(
-                      "h-10 w-10 md:h-12 md:w-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform duration-500 group-hover:scale-110 shadow-inner z-10",
+                      "h-10 w-10 md:h-12 md:w-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 shadow-inner z-10",
                       item.bg,
-                      item.border,
                       item.color
                     )}>
                       {React.isValidElement(item.icon) ? React.cloneElement(item.icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" }) : null}

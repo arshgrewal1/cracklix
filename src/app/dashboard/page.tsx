@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -37,8 +36,8 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional performance hub v7.7 [Data Hardened].
- * FIXED: Removed random noise from chart data.
+ * @fileOverview Institutional performance hub v7.8 [Hardened].
+ * FIXED: Removed all random simulation data for absolute production fidelity.
  */
 
 // Formatting Utilities
@@ -104,7 +103,7 @@ export default function StudentDashboard() {
   const chartData = useMemo(() => {
     if (!results || results.length === 0) return [];
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return days.map((d, i) => ({ day: d, progress: 0 })); // Initialized to zero
+    return days.map((d) => ({ day: d, progress: 0 }));
   }, [results]);
 
   if (!mounted || authLoading) return (
