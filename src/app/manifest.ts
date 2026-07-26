@@ -2,8 +2,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Official PWA Manifest Registry v2.4.
- * UPDATED: Synchronized background color with pure black (#000000) for seamless boot.
+ * @fileOverview Official PWA Manifest Registry v2.5.
+ * UPDATED: Synchronized background color with Cracklix Native Black (#05070B).
  */
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -15,8 +15,8 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     display_override: ["standalone"],
     orientation: "portrait",
-    background_color: "#000000",
-    theme_color: "#000000",
+    background_color: "#05070B",
+    theme_color: "#05070B",
     icons: [
       {
         src: "/icons/icon-192x192.png",

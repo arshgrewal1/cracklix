@@ -60,7 +60,7 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
-    background-color: #000000;
+    background-color: #05070B; /* Hardened PWA Black */
   }
   
   body {
@@ -73,7 +73,7 @@
     -webkit-overflow-scrolling: touch;
     padding: 0;
     padding-bottom: env(safe-area-inset-bottom);
-    background-color: #000000;
+    background-color: #05070B; /* Hardened PWA Black */
   }
 
   [data-hydrating="true"] {
@@ -128,10 +128,6 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
 }
 
-/* 
- * A4 PRINT STYLES 
- * Optimized for professional institutional reports
- */
 @media print {
   body {
     background: white !important;
@@ -149,7 +145,6 @@
     margin: 0 !important;
   }
 
-  /* Force single page A4 scaling */
   @page {
     size: A4;
     margin: 0;

@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#05070B",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -75,7 +76,7 @@ export default function RootLayout({
       lang="en" 
       suppressHydrationWarning 
       className="scroll-smooth"
-      style={{ backgroundColor: '#000000' }}
+      style={{ backgroundColor: '#05070B' }}
     >
       <body
         className={`
@@ -88,7 +89,7 @@ export default function RootLayout({
           min-h-screen
           overflow-x-hidden
         `}
-        style={{ backgroundColor: '#000000' }} 
+        style={{ backgroundColor: '#05070B' }} 
       >
         <ThemeProvider
           attribute="class"
