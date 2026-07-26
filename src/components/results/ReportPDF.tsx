@@ -27,9 +27,9 @@ interface ReportPDFProps {
 }
 
 /**
- * @fileOverview Institutional Portrait PDF Layout Hub v7.0.
- * FIXED: Strictly locked to A4 Portrait proportions (794px x 1123px).
- * TYPOGRAPHY: Title Case only. Removed icons from Grade hub.
+ * @fileOverview Institutional Portrait PDF Layout Hub v8.0.
+ * FIXED: Updated domain to cracklix.in.
+ * TYPOGRAPHY: Title Case only.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
@@ -39,7 +39,7 @@ export default function ReportPDF(props: ReportPDFProps) {
     isQualified, duration
   } = props;
 
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent('https://cracklix.com/results/view?id=' + resultId)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent('https://cracklix.in/results/view?id=' + resultId)}`;
 
   return (
     <div 
@@ -102,14 +102,14 @@ export default function ReportPDF(props: ReportPDFProps) {
                   <p className="text-[11px] font-bold text-slate-500 tabular-nums">/ {totalCandidates.toLocaleString()} Candidates</p>
                </div>
                <div className="pt-1">
-                 <Badge className="bg-emerald-500 text-white border-none font-bold text-[9px] px-4 py-1 rounded-full uppercase tracking-tight">
+                 <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[9px] px-4 py-1 rounded-full uppercase tracking-tight">
                     Verified Standing
                  </Badge>
                </div>
             </div>
          </div>
 
-         {/* 3. KPI Matrix - Portrait Proportions */}
+         {/* 3. KPI Matrix */}
          <div className="grid grid-cols-4 gap-4">
             <KPIBox label="Net Score" val={score} color="text-primary" />
             <KPIBox label="Percentile" val={`${percentile}%`} color="text-purple-600" />
@@ -125,7 +125,7 @@ export default function ReportPDF(props: ReportPDFProps) {
             <CountPill label="Total Questions" val={total} color="bg-blue-50 text-blue-600" />
          </div>
 
-         {/* 5. Subject Mastery Hub - Portrait Optimized Table */}
+         {/* 5. Subject Mastery Hub */}
          {subjects.length > 0 && (
             <div className="space-y-3">
                <p className="text-[11px] font-black text-[#0F172A] tracking-widest uppercase ml-1">Subject Analysis</p>
@@ -171,7 +171,7 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
             <div className="text-right space-y-2">
                <img src="/logo/cracklix-logo-dark.png" alt="Cracklix" className="h-8 w-auto opacity-30 grayscale ml-auto" crossOrigin="anonymous" />
-               <p className="text-[9px] font-black tracking-[0.4em] text-slate-300 uppercase">www.cracklix.com</p>
+               <p className="text-[9px] font-black tracking-[0.4em] text-slate-300 uppercase">www.cracklix.in</p>
             </div>
          </div>
       </div>

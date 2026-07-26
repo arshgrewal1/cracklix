@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useUser, useFirestore, useDoc, useCollection } from "@/firebase"
+import { useUser, useFirestore, useDoc } from "@/firebase"
 import { 
   collection, 
   query, 
@@ -51,9 +51,10 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result System v18.0 [Portrait Scale Fix].
- * FIXED: Dynamic Preview Scaling for Report Hub to ensure perfect Portrait Fit on PWA.
- * FIXED: Ranking bug - Rank never exceeds participants.
+ * @fileOverview Institutional Result System v19.0.
+ * FIXED: Alignment for navigation tabs and filters.
+ * FIXED: Domain updated to cracklix.in.
+ * FIXED: Ranking bug (Self-exclusion logic).
  */
 
 export default function ResultClient() {
@@ -93,7 +94,7 @@ export default function ResultClient() {
       const calculateScale = () => {
         if (typeof window === 'undefined') return;
         const screenWidth = window.innerWidth;
-        const targetWidth = 794; // Explicit A4 Portrait px width
+        const targetWidth = 794; 
         const padding = 32; 
         const available = screenWidth - padding;
         if (available < targetWidth) {
@@ -227,7 +228,7 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Audit in progress..." });
+    toast({ title: "Processing report..." });
 
     try {
       await document.fonts.ready;
@@ -290,7 +291,7 @@ export default function ResultClient() {
         {isSearching && (
            <div className="py-32 text-center flex flex-col items-center gap-6">
               <Loader2 className="h-12 w-12 text-primary animate-spin" />
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Resolving Result Node...</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Resolving result node...</p>
            </div>
         )}
 
@@ -300,10 +301,10 @@ export default function ResultClient() {
                  <AlertCircle className="h-10 w-10" />
               </div>
               <div className="space-y-2">
-                 <h2 className="text-2xl font-black text-[#0F172A]">Result Entry Missing</h2>
+                 <h2 className="text-2xl font-black text-[#0F172A]">Result entry missing</h2>
                  <p className="text-slate-500 max-w-sm mx-auto">This attempt record could not be located in the primary registry.</p>
               </div>
-              <Button asChild variant="outline" className="rounded-xl h-14 px-10"><Link href="/dashboard">Return to Hub</Link></Button>
+              <Button asChild variant="outline" className="rounded-xl h-14 px-10"><Link href="/dashboard">Return to hub</Link></Button>
            </div>
         )}
 
@@ -332,10 +333,10 @@ export default function ResultClient() {
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
                   <div className="flex justify-center mb-10 px-4">
-                     <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl shadow-xl h-14 md:h-16 w-full md:w-auto overflow-x-auto no-scrollbar">
-                        <TabsTrigger value="OVERVIEW" className="flex-1 md:flex-none rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="flex-1 md:flex-none rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
-                        <TabsTrigger value="REPORT" className="flex-1 md:flex-none rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
+                     <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl shadow-xl h-14 md:h-16 w-full md:w-auto max-w-2xl overflow-x-auto no-scrollbar">
+                        <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
+                        <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-12 font-black text-[10px] md:text-[11px] uppercase h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -366,9 +367,9 @@ export default function ResultClient() {
                   </TabsContent>
 
                   <TabsContent value="REVIEW" className="space-y-8 max-w-5xl mx-auto px-4">
-                      <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl shadow-xl border border-slate-100 w-fit mx-auto sticky top-[180px] z-[40]">
+                      <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl shadow-xl border border-slate-100 w-full max-w-2xl mx-auto sticky top-[180px] z-[40]">
                           <FilterButton active={activeReviewFilter === 'ALL'} label="All Questions" onClick={() => setActiveReviewFilter('ALL')} />
-                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Fix Errors (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Mistakes (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                           <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                       </div>
                       <div className="space-y-6 md:space-y-10">
@@ -376,7 +377,7 @@ export default function ResultClient() {
                               <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-white text-left">
                                   <div className="p-8 md:p-14 space-y-8">
                                       <div className="flex items-center justify-between">
-                                         <Badge variant="outline" className="px-4 py-1.5 rounded-xl border-slate-200 text-slate-400 font-black text-[9px] uppercase tracking-widest">
+                                         <Badge variant="outline" className="px-4 py-1.5 rounded-xl border-slate-200 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
                                              Question #{q.originalIndex + 1}
                                          </Badge>
                                          <Badge className="bg-primary/5 text-primary border-none text-[8px] font-black uppercase tracking-widest">{q.subjectId || 'GENERAL'}</Badge>
@@ -469,7 +470,7 @@ export default function ResultClient() {
 
 function FilterButton({ active, label, onClick, color = "primary" }: any) {
   return (
-    <button onClick={onClick} className={cn("px-5 md:px-10 py-3 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
+    <button onClick={onClick} className={cn("flex-1 px-4 py-3 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
        {label}
     </button>
   )

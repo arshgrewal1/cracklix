@@ -39,8 +39,8 @@ interface ReportScreenProps {
 }
 
 /**
- * @fileOverview Responsive Screen Layout for Browser Viewing v6.0.
- * TYPOGRAPHY: Enforced Title Case. Removed all icons from Grade/Score metrics for a clean look.
+ * @fileOverview Responsive Screen Layout for Browser Viewing v7.0.
+ * FIXED: Updated domain to cracklix.in.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
@@ -53,7 +53,7 @@ export default function ReportScreen(props: ReportScreenProps) {
   return (
     <div className="w-full max-w-full overflow-x-hidden space-y-6 animate-in fade-in duration-500 text-left">
       
-      {/* 1. Portrait Friendly Header */}
+      {/* 1. Header Node */}
       <div className="bg-white rounded-2xl md:rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-sm space-y-8">
          <div className="flex flex-col md:flex-row justify-between items-start gap-6">
             <div className="flex items-center gap-5 md:gap-8 min-w-0 flex-1">
@@ -68,7 +68,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                <Badge className={cn("border-none px-4 py-1.5 rounded-full text-[10px] md:text-xs font-black", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
                   {isQualified ? 'Qualified' : 'Attempted'}
                </Badge>
-               <p className="text-[9px] font-bold text-slate-300 mt-2">Registry ID: {resultId?.slice(0, 15) || "Syncing"}</p>
+               <p className="text-[10px] font-bold text-slate-300 mt-2">Registry ID: {resultId?.slice(0, 15) || "Syncing"}</p>
             </div>
          </div>
          
@@ -80,7 +80,7 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       </div>
 
-      {/* 2. Merit Shield - Portrait Centered */}
+      {/* 2. Merit Shield */}
       <div className="bg-[#0F172A] rounded-[2rem] md:rounded-[3rem] p-10 md:p-16 text-white text-center relative overflow-hidden shadow-2xl">
          <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-48 md:h-72 w-48 md:w-72 text-primary" /></div>
          <div className="relative z-10 space-y-4">
@@ -97,12 +97,12 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       </div>
 
-      {/* 3. Main Stats Grid - Clean Metric View */}
+      {/* 3. Main Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-         <MetricCard label="Net Score" val={score} color="text-primary" bg="bg-blue-50" />
-         <MetricCard label="Percentile" val={`${percentile}%`} color="text-purple-600" bg="bg-purple-50" />
-         <MetricCard label="Accuracy" val={`${attemptAccuracy}%`} color="text-emerald-600" bg="bg-emerald-50" />
-         <MetricCard label="Grade Hub" val={grade} color="text-amber-600" bg="bg-amber-50" />
+         <MetricBox label="Net Score" val={score} color="text-primary" bg="bg-blue-50" />
+         <MetricBox label="Percentile" val={`${percentile}%`} color="text-purple-600" bg="bg-purple-50" />
+         <MetricBox label="Accuracy" val={`${attemptAccuracy}%`} color="text-emerald-600" bg="bg-emerald-50" />
+         <MetricBox label="Grade Hub" val={grade} color="text-amber-600" bg="bg-amber-50" />
       </div>
 
       {/* 4. Subject Mastery Hub */}
@@ -160,10 +160,10 @@ function DataMiniNode({ label, val }: { label: string, val: string }) {
    )
 }
 
-function MetricCard({ label, val, color, bg }: any) {
+function MetricBox({ label, val, color, bg }: any) {
    return (
       <Card className="border-none shadow-xl bg-white p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] flex flex-col items-center justify-center gap-3 transition-all border border-slate-50 h-32 md:h-48 text-center group hover:-translate-y-1">
-         <p className="text-[9px] md:text-sm font-bold text-slate-400 uppercase tracking-tight leading-none">{label}</p>
+         <p className="text-[9px] md:sm font-bold text-slate-400 uppercase tracking-tight leading-none">{label}</p>
          <p className={cn("text-2xl md:text-5xl font-black tabular-nums tracking-tighter leading-none antialiased", color)}>{val}</p>
       </Card>
    )
