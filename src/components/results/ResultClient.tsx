@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -59,8 +60,9 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v14.0 [One-Click Retake Hardened].
+ * @fileOverview Premium Result Analysis Hub v15.0 [One-Click Retake Hardened].
  * FIXED: handleRetake is now functional for all users with immediate registry purge.
+ * FIXED: Removed uppercase from dashboard headers for professional SaaS aesthetic.
  */
 
 export default function ResultClient() {

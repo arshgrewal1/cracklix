@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -43,8 +44,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v23.0 [Alignment Hardened].
- * FIXED: Footer alignment strictly left-anchored for institutional symmetry.
+ * @fileOverview Official Institutional Report Card v23.1 [Alignment Fixed].
+ * FIXED: Alignment of Registry ID and verification text to match professional margins.
  */
 export default function ResultCard({
   studentName,
@@ -73,7 +74,7 @@ export default function ResultCard({
   return (
     <div 
       id="cracklix-result-card" 
-      className="w-full max-w-[800px] print:w-[210mm] min-h-auto print:min-h-[297mm] bg-white border border-slate-200 shadow-none overflow-hidden text-left font-body relative p-0 mx-auto box-border"
+      className="w-full max-w-full print:w-[210mm] min-h-auto print:min-h-[297mm] bg-white border border-slate-200 shadow-none overflow-hidden text-left font-body relative p-0 mx-auto box-border"
     >
       <div className="h-2 md:h-4 w-full bg-[#0F172A]" />
       
@@ -193,7 +194,7 @@ export default function ResultCard({
                   <ShieldCheck className="h-6 w-6 md:h-8 md:w-8 text-emerald-500 shrink-0" />
                   <p className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tighter leading-none">Institutional Precision Verified</p>
                </div>
-               <div className="pl-9 md:pl-11 min-w-0">
+               <div className="pl-0 md:pl-11 min-w-0">
                   <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest">Registry ID:</p>
                   <p className="text-[9px] md:text-[10px] font-mono font-black text-primary break-all leading-tight mt-1">{resultId}</p>
                </div>

@@ -6,7 +6,7 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser, useDoc } from "@/firebase"
 import { collection, query, orderBy, limit, doc, getDocs } from "firebase/firestore"
-import { Trophy, ShieldCheck, Search, Activity, Zap, Star, Medal, Target, ChevronRight, X, Filter, BarChart3, Users, Layout } from "lucide-react"
+import { Trophy, ShieldCheck, Search, Activity, Zap, Star, Medal, Target, ChevronRight, X, Filter, BarChart3, Users, Layout, Timer } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,8 +19,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Punjab Merit Registry v4.1 [Resilient Sorting Hub].
- * FIXED: Implemented hybrid sorting to bypass missing Firestore indexes.
+ * @fileOverview Official Punjab Merit Registry v4.2 [Reference Fixed].
+ * FIXED: Added missing Timer import.
  */
 
 export default function LeaderboardPage() {
@@ -329,4 +329,3 @@ function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any)
 function Loader2({ className }: any) {
   return <Zap className={cn("animate-pulse", className)} />
 }
-
