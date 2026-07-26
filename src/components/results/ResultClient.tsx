@@ -65,8 +65,8 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Institutional Result Engine v50.0 [ReferenceError Fixed].
- * FIXED: Defined mockData state to resolve 'mock is not defined' crash.
+ * @fileOverview Institutional Result Engine v51.0 [Hoisting Error Fixed].
+ * FIXED: Moved activeSession declaration above the effect that uses it to resolve initialization crash.
  */
 
 export default function ResultClient() {
@@ -176,6 +176,9 @@ export default function ResultClient() {
     return () => { isSubscribed = false; };
   }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
 
+  // Derived activeSession defined BEFORE the effects that depend on it
+  const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
+
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
      async function fetchRankingMetrics() {
@@ -199,9 +202,7 @@ export default function ResultClient() {
         } catch (e) {}
      }
      fetchRankingMetrics();
-  }, [db, mockId, sessionData, guestResult, activeSession]);
-
-  const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
+  }, [db, mockId, activeSession]);
 
   const finalMetrics = useMemo(() => {
     if (!activeSession) return null;
@@ -222,7 +223,7 @@ export default function ResultClient() {
 
     return { 
       score, maxMarks, percentage, attemptAccuracy, overallAccuracy, 
-      attemptRate, readiness, readinessLevel: activeSession.readinessLevel || "Audit Pending", 
+      attemptRate, readiness, readinessLevel: activeSession.readinessLevel || "Average", 
       grade, isQualified, percentile, topperGap: Math.max(0, topperScore - score) 
     };
   }, [activeSession, totalCandidates, liveRank, topperScore]);
@@ -332,6 +333,24 @@ export default function ResultClient() {
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
       <Zap className="h-8 w-8 text-primary animate-spin" />
       <p className="text-[10px] font-bold text-slate-400">Syncing analysis...</p>
+    </div>
+  );
+
+  if (errorNotFound) return (
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
+       <Card className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-14 shadow-5xl border-none space-y-10 animate-in fade-in zoom-in-95">
+          <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-inner border border-rose-100">
+             <AlertCircle className="h-10 w-10" />
+          </div>
+          <div className="space-y-3">
+             <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Record Not Found</h2>
+             <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">We couldn't synchronize your result node from the registry. Please try again or contact support.</p>
+          </div>
+          <div className="flex flex-col gap-3">
+             <Button onClick={() => window.location.reload()} className="w-full h-14 bg-primary text-white rounded-2xl font-bold shadow-xl border-none active:scale-95"><RefreshCw className="h-4 w-4 mr-2" /> Re-sync Registry</Button>
+             <Button asChild variant="ghost" className="w-full h-12 text-slate-400 font-bold uppercase text-[10px]"><Link href="/dashboard">Return Home</Link></Button>
+          </div>
+       </Card>
     </div>
   );
 
@@ -474,11 +493,11 @@ export default function ResultClient() {
                       <Layers className="h-5 w-5 text-blue-500" /> Subject Level Audit
                    </h3>
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                      {activeSession.subjectAnalysis?.map((sub: any, i: number) => (
+                      {activeSession?.subjectAnalysis?.map((sub: any, i: number) => (
                          <Card key={i} className="border border-slate-50 shadow-md rounded-[1.5rem] md:rounded-[2rem] bg-white p-6 flex flex-col gap-4 text-left group hover:-translate-y-1 transition-all">
                             <div className="flex justify-between items-start">
                                <h4 className="text-sm font-bold text-[#0F172A] line-clamp-1">{sub.name}</h4>
-                               <Badge className={cn("border-none text-[7px] font-bold", sub.accuracy >= 70 ? "bg-emerald-50 text-emerald-600" : sub.accuracy >= 40 ? "bg-blue-50 text-blue-600" : "bg-rose-50 text-rose-600")}>{sub.accuracy}%</Badge>
+                               <Badge className={cn("border-none text-[8px] font-bold", sub.accuracy >= 70 ? "bg-emerald-50 text-emerald-600" : sub.accuracy >= 40 ? "bg-blue-50 text-blue-600" : "bg-rose-50 text-rose-600")}>{sub.accuracy}%</Badge>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                <SubjectMetric label="Correct" val={sub.correct} color="text-emerald-600" />
