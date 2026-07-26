@@ -31,7 +31,8 @@ import {
   Download,
   Calendar,
   Newspaper,
-  TrendingUp
+  TrendingUp,
+  X
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -46,8 +47,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v25.1.
- * FIXED: Renamed Timer icon to TimerIcon to resolve naming conflicts.
+ * @fileOverview Universal Result Hub Viewer v25.2.
+ * FIXED: Renamed Timer icon to TimerIcon and added missing X icon import.
  */
 
 export default function ResultClient() {

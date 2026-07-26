@@ -11,7 +11,8 @@ import {
   Clock, 
   Users, 
   Star,
-  Timer
+  Timer,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import QRCode from 'qrcode';
