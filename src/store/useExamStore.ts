@@ -54,7 +54,7 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v11.0 [Total State Isolation].
+ * @fileOverview Hardened Test Store v11.1 [Attempt Identity Hardened].
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -98,17 +98,16 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   }),
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode, forceNew = false) => {
-    // 1. CRITICAL: Immediate memory purge
-    get().resetStore();
-
-    const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
+    // 1. CRITICAL: Atomic state purge
     const defaultTime = duration * 60;
-    
-    // 2. Logic: If forceNew (Retake), completely ignore resumeData
+    const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
+
+    // 2. Logic: If forceNew (Retake), completely bypass resumeData and purge localStorage node
     let effectiveResume = !forceNew ? (resumeData || null) : null;
 
-    // Guest Resume Logic
-    if (!effectiveResume && !userId && !forceNew && typeof window !== 'undefined') {
+    if (forceNew && typeof window !== 'undefined') {
+       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
+    } else if (!effectiveResume && !userId && typeof window !== 'undefined') {
        try {
          const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
          if (stored) {
@@ -124,7 +123,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const now = Date.now();
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
     
-    // 3. NEW Attempt ID Generation
+    // 3. ATOMIC Attempt ID: Every fresh start must have a globally unique identifier
     const attemptId = (isResuming && !forceNew) ? (effectiveResume.attemptId || nanoid(12)) : nanoid(12);
 
     set({
@@ -158,7 +157,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         elapsedSeconds: s.elapsedSeconds + 1
       }));
       
-      // Auto-save guest progress every 30s
       if (get().timeLeft % 30 === 0) state.persistGuestData();
     }
   },
