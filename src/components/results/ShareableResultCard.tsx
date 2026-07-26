@@ -37,8 +37,8 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Result Report v2.9 [Domain Updated].
- * UPDATED: Domain synchronized to cracklix.in.
+ * @fileOverview Official Platform Result Report v3.0.
+ * UPDATED: Replaced "Registry" with "Database".
  */
 
 const toTitleCase = (str: string) => {
@@ -91,7 +91,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
     }
 
     if (list.length === 0) {
-       list.push({ type: 'STRENGTH', label: 'Insight', text: 'Verified attempt synchronized', color: 'text-blue-600', bg: 'bg-blue-50' });
+       list.push({ type: 'STRENGTH', label: 'Insight', text: 'Verified attempt completed', color: 'text-blue-600', bg: 'bg-blue-50' });
     }
 
     return list.slice(0, 2);
@@ -253,7 +253,7 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
                <ShieldCheck className="h-6 w-6 text-emerald-500" />
                <div className="space-y-0.5">
                   <p className="text-base font-bold tracking-tight text-[#0F172A]">Official report hub</p>
-                  <p className="text-[10px] font-medium text-slate-400">Digitally verified by Arsh Grewal Management registry</p>
+                  <p className="text-[10px] font-medium text-slate-400">Digitally verified by Cracklix Official Database</p>
                </div>
             </div>
             <div className="space-y-0.5 pt-1">
@@ -263,11 +263,11 @@ const ShareableResultCard = forwardRef<HTMLDivElement, ShareableResultCardProps>
          </div>
          <div className="flex items-center gap-8">
             <div className="text-right space-y-0.5">
-               <p className="text-base font-bold text-[#0F172A]">Verify registry</p>
-               <p className="text-[9px] font-bold text-slate-400">Scan to validate node</p>
+               <p className="text-base font-bold text-[#0F172A]">Verify result</p>
+               <p className="text-[9px] font-bold text-slate-400">Scan to validate attempt</p>
             </div>
             <div className="bg-white p-2 rounded-[14px] border border-slate-100 shadow-xl">
-               <img src={qrUrl} alt="QR Node" className="h-20 w-24" />
+               <img src={qrUrl} alt="QR Result" className="h-20 w-24" />
             </div>
          </div>
       </div>

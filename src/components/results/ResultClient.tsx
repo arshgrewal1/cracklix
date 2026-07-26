@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useMemo, useEffect, useCallback } from "react"
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -31,7 +31,9 @@ import {
   Calendar,
   AlertCircle,
   RotateCcw,
-  X
+  X,
+  Share2,
+  Download
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -42,11 +44,13 @@ import ReportScreen from "./ReportScreen"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
+import ShareableResultCard from "./ShareableResultCard"
+import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v101.0.
- * FIXED: Time display showing 0M for short sessions.
- * UPDATED: Purged uppercase styling and reduced font scales.
+ * @fileOverview Universal Result Hub Engine v102.0.
+ * FIXED: Replaced "Registry" with "Database" and "Node" with "Item".
+ * RESTORED: Share Performance functionality.
  */
 
 export default function ResultClient() {
@@ -64,11 +68,14 @@ export default function ResultClient() {
   const [sessionData, setSessionData] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(true);
   const [pollCount, setPollCount] = useState(0);
+  const [isSharing, setIsSharing] = useState(false);
   
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
   const [topScore, setTopScore] = useState<number>(0)
   const [avgScore, setAvgScore] = useState<number>(0)
+
+  const shareRef = useRef<HTMLDivElement>(null);
 
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams.get('attemptId')
@@ -244,8 +251,35 @@ export default function ResultClient() {
      setPollCount(0);
      fetchResultNode().then(found => {
         if (found) toast({ title: "Sync successful" });
-        else toast({ variant: "destructive", title: "Record not found", description: "The registry has not propagated yet." });
+        else toast({ variant: "destructive", title: "Record not found", description: "The database has not updated yet." });
      });
+  };
+
+  const handleShare = async () => {
+    if (!shareRef.current || isSharing) return;
+    setIsSharing(true);
+    try {
+      const dataUrl = await toPng(shareRef.current, { quality: 0.95, pixelRatio: 2 });
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], `cracklix-report-${sessionData.attemptId}.png`, { type: 'image/png' });
+      
+      if (navigator.share) {
+        await navigator.share({
+          files: [file],
+          title: 'My Cracklix Performance',
+          text: `Check out my score on ${sessionData.mockTitle}!`
+        });
+      } else {
+        const link = document.createElement('a');
+        link.download = `cracklix-result.png`;
+        link.href = dataUrl;
+        link.click();
+      }
+    } catch (e) {
+      toast({ variant: "destructive", title: "Share failed" });
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -261,7 +295,7 @@ export default function ResultClient() {
               </div>
               <div className="text-center space-y-2">
                  <p className="font-black tracking-[0.4em] text-[#0F172A] text-sm uppercase">Generating your report</p>
-                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Registry synchronization in progress...</p>
+                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Database synchronization in progress...</p>
               </div>
            </div>
         ) : sessionData ? (
@@ -282,10 +316,13 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex items-center gap-3 w-full lg:w-auto">
-                    <Button onClick={() => router.refresh()} className="flex-1 lg:flex-none h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-xs transition-all active:scale-95 border-none shadow-lg">
-                       <RefreshCw className="h-4 w-4" /> Refresh analysis
+                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-12 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-xs border-none shadow-lg">
+                       {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} Share result
                     </Button>
-                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-12 px-8 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-xs transition-all active:scale-95 shadow-sm">
+                    <Button onClick={() => router.refresh()} className="flex-1 lg:flex-none h-12 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-xs border-none shadow-lg">
+                       <RefreshCw className="h-4 w-4" /> Refresh
+                    </Button>
+                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-12 px-6 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-xs shadow-sm">
                        <Link href={`/mocks/instructions?id=${mockId || sessionData.mockId}&retake=true`}>Retake test</Link>
                     </Button>
                  </div>
@@ -346,12 +383,12 @@ export default function ResultClient() {
                  </div>
               </div>
               <div className="space-y-3 px-4">
-                 <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tighter">Result audit not found</h2>
-                 <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">No synchronized attempt records were found for this ID in the registry. Try forcing a sync or return to the bank.</p>
+                 <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tighter">Result record not found</h2>
+                 <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">No synchronized attempt records were found for this ID in the database. Try refreshing or return to the bank.</p>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
                  <Button onClick={handleManualSync} className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 shadow-xl border-none active:scale-95 transition-all">
-                    <RotateCcw className="h-4 w-4" /> Force sync hub
+                    <RotateCcw className="h-4 w-4" /> Force sync
                  </Button>
                  <Button asChild variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-2xl border-2 border-slate-200 font-bold active:scale-95 transition-all">
                     <Link href="/mocks">Explore tests</Link>
@@ -359,6 +396,20 @@ export default function ResultClient() {
               </div>
            </div>
         )}
+
+        {/* Hidden Share Card for Export */}
+        <div className="fixed left-[-9999px] top-0 pointer-events-none">
+           <div ref={shareRef}>
+              <ShareableResultCard 
+                data={sessionData} 
+                rank={liveRank} 
+                totalCandidates={totalCandidates} 
+                topScore={topScore}
+                avgScore={avgScore}
+                duration={mockData?.duration}
+              />
+           </div>
+        </div>
       </main>
       <Footer />
     </div>

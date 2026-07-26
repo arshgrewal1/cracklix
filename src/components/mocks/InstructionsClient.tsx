@@ -24,9 +24,8 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v6.6 [INDEX ERROR FIXED].
- * FIXED: Removed orderBy from latest attempt discovery to bypass composite index requirement.
- * Logic: Fetches attempts for the user/mock vertical and sorts client-side.
+ * @fileOverview Official Test Rules Hub v6.7.
+ * FIXED: Replaced "Registry" with "Database" and ensured Title Case.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -88,7 +87,6 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
         if (user) {
           const resultsRef = collection(db, "results");
-          // FIXED: Query without orderBy to avoid index requirement error
           const q = query(
             resultsRef, 
             where("userId", "==", user.uid), 
@@ -96,7 +94,6 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
           );
           const snap = await getDocs(q);
           if (!snap.empty) {
-            // Sort client-side to find latest
             const attempts = snap.docs.map(d => ({ ...d.data(), id: d.id }));
             const latest = attempts.sort((a: any, b: any) => {
                const tA = new Date(a.timestamp).getTime();
@@ -106,7 +103,8 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
             setLatestAttemptId(latest.id);
           }
         } else {
-          const guestResult = localStorage.getItem(`cracklix_guest_result_${activeId}`);
+          const lookupId = activeId;
+          const guestResult = localStorage.getItem(`cracklix_guest_result_${lookupId}`);
           if (guestResult) {
              const parsed = JSON.parse(guestResult);
              setLatestAttemptId(parsed.attemptId || activeId);
@@ -145,7 +143,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
       } catch (err: any) {
         console.error("[INSTRUCTIONS_SYNC_ERROR]:", err);
-        setAccessError("Registry sync failed. Please refresh.");
+        setAccessError("Database sync failed. Please refresh.");
       } finally {
         setIsLoading(false);
       }
@@ -185,7 +183,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
            </div>
            <div className="space-y-3 text-center">
               <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Test not found</h2>
-              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This test is unavailable or the registry link has expired.</p>
+              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This test is unavailable or the database link has expired.</p>
            </div>
            <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold text-sm shadow-xl">
               <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to hub</Link>
@@ -242,7 +240,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
                  <div className="flex flex-col gap-6 items-center w-full max-w-2xl mx-auto pt-4">
                    {latestAttemptId ? (
-                      <div className="w-full space-y-4">
+                      <div className="w-full space-y-4 text-center">
                         <Button 
                           onClick={handleViewAnalysis}
                           className="w-full h-16 md:h-20 bg-emerald-600 hover:bg-emerald-700 text-white font-black tracking-widest text-[12px] md:text-sm rounded-[18px] md:rounded-[2rem] shadow-xl transition-all active:scale-95 border-none flex items-center justify-center gap-3"
@@ -253,7 +251,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                           onClick={handleRetake}
                           disabled={isResetting}
                           variant="outline"
-                          className="w-full h-14 border-2 border-slate-100 text-[#0F172A] font-black text-[10px] rounded-2xl shadow-sm hover:bg-slate-50 active:scale-95 gap-3"
+                          className="w-full h-14 border-2 border-slate-100 text-[#0F172A] font-black text-[10px] rounded-2xl shadow-sm hover:bg-slate-50 active:scale-95 gap-3 flex items-center justify-center text-center"
                         >
                            {isResetting ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} 
                            Retake test
@@ -263,7 +261,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                       <Button 
                         disabled={!!accessError}
                         onClick={() => router.push(`/mocks/attempt?id=${activeId}`)}
-                        className="relative overflow-hidden w-full h-16 md:h-24 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black tracking-[0.2em] text-[12px] md:text-xl rounded-[20px] md:rounded-[3rem] shadow-[0_20px_50px_rgba(37,99,235,0.3)] transition-all active:scale-95 border-none group"
+                        className="relative overflow-hidden w-full h-16 md:h-24 bg-gradient-to-r from-blue-600 to-cyan-500 hover:brightness-110 text-white font-black tracking-[0.2em] text-[12px] md:text-xl rounded-[20px] md:rounded-[3rem] shadow-[0_20px_50px_rgba(37,99,235,0.3)] transition-all active:scale-95 border-none group flex items-center justify-center text-center"
                       >
                          <div className="flex items-center justify-center gap-4 relative z-10">
                             <Play className="h-6 w-6 md:h-8 md:w-8 fill-white text-white" />

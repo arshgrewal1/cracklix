@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -40,9 +41,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Institutional Attempt Hub v102.0 [Quota Optimized].
- * FIXED: Replaced runTransaction with parallel setDoc calls to reduce quota usage and latency.
- * FIXED: Centered all dialog and footer text for premium alignment.
+ * @fileOverview Official Attempt Hub v103.0.
+ * FIXED: Replaced "Registry" with "Database" and finalized Title Case navigation.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -107,7 +107,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         targetSnap = await getDoc(dailyRef);
       }
       
-      if (!targetSnap.exists()) throw new Error("Test not found in registry.");
+      if (!targetSnap.exists()) throw new Error("Test not found in database.");
       
       const mData = targetSnap.data();
       setMockData(mData);
@@ -135,7 +135,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const allFetched = (await Promise.all(chunkPromises)).flat();
       const finalQuestions = questionIds.map(id => allFetched.find(fq => fq.id === id)).filter(Boolean);
       
-      if (finalQuestions.length === 0) throw new Error("Registry sync failure.");
+      if (finalQuestions.length === 0) throw new Error("Database sync failure.");
 
       let resumeData = null;
       if (user && !isRetakeRequested) {
@@ -168,7 +168,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     setShowSubmitModal(false);
     setIsSubmittingFinal(true);
     
-    // 1. ANALYTICS ENGINE (IN-MEMORY)
+    // 1. ANALYTICS ENGINE
     let correctCount = 0; 
     let wrongCount = 0;
     const totalQuestions = questions.length;
@@ -219,7 +219,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const timeTaken = Math.max(1, elapsedSeconds);
     const attemptAccuracy = attemptedCount > 0 ? Number(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
     
-    // 2. PARALLELIZED COMMIT NODES (OPTIMIZED FOR QUOTA)
+    // 2. PARALLELIZED COMMIT NODES
     if (user) {
       try {
         const resultRef = doc(db, "results", attemptId);
@@ -254,7 +254,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            answers: studentAnswers 
         };
 
-        // Execute all writes in parallel (Faster than Transaction, bypasses some read costs)
         await Promise.all([
            setDoc(resultRef, resultPayload),
            setDoc(attemptPtrRef, { attemptId, status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true }),
@@ -276,13 +275,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            updateDoc(statsRef, { 
               totalAttempts: increment(1), 
               updatedAt: serverTimestamp() 
-           }).catch(() => {}) // Stats update is non-critical
+           }).catch(() => {}) 
         ]);
 
         stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
       } catch (e: any) {
          if (e.message?.includes('quota') || e.code === 'resource-exhausted') {
-            toast({ variant: "destructive", title: "Daily Limit Reached", description: "The platform has reached its daily data limit. Try again tomorrow." });
+            toast({ variant: "destructive", title: "Daily Limit Reached", description: "The database limit has been reached. Please try again tomorrow." });
          } else {
             console.error("[SUBMISSION_FAILURE]:", e);
             toast({ variant: "destructive", title: "Cloud sync failed", description: "Retrying result synchronization..." });
@@ -321,7 +320,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
              {isSubmittingFinal ? "Submitting your test" : "Synchronizing Hub"}
           </p>
           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
-             {isSubmittingFinal ? "Generating verified result node" : "Loading test patterns"}
+             {isSubmittingFinal ? "Generating report" : "Loading test patterns"}
           </p>
        </div>
     </div>
@@ -331,8 +330,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
      <div className="h-screen flex flex-col items-center justify-center p-6 text-center space-y-6">
         <AlertCircle className="h-16 w-16 text-rose-500" />
         <h2 className="text-2xl font-black">Initialization failed</h2>
-        <p className="text-slate-500 max-sm">{initError}</p>
-        <Button onClick={() => window.location.reload()} className="rounded-xl h-12 px-8">Retry Sync</Button>
+        <p className="text-slate-500">{initError}</p>
+        <Button onClick={() => window.location.reload()} className="rounded-xl h-12 px-8">Retry sync</Button>
      </div>
   );
 
@@ -374,7 +373,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             <ShieldCheck className="h-16 w-16 text-primary mb-6" />
             <DialogHeader className="text-center w-full">
               <DialogTitle className="text-white font-black text-3xl text-center">Submit test</DialogTitle>
-              <DialogDescription className="text-slate-400 mt-2 text-center w-full">Finish your attempt and generate performance report.</DialogDescription>
+              <DialogDescription className="text-slate-400 mt-2 text-center w-full">Finish your attempt and generate report.</DialogDescription>
             </DialogHeader>
             <div className="w-full flex flex-col gap-3 mt-8">
               <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl border-none flex items-center justify-center">Finish attempt</Button>

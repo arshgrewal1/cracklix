@@ -20,8 +20,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v8.1.
- * UPDATED: Purged uppercase styling for Title Case normalization.
+ * @fileOverview Premium Analysis Screen v8.2.
+ * UPDATED: Replaced "Registry" with "Database" and "Node" with "Item".
  */
 
 interface ReportScreenProps {
@@ -67,7 +67,7 @@ export default function ReportScreen(props: ReportScreenProps) {
       const worst = sorted[sorted.length - 1];
 
       if (best.accuracy >= 70) {
-        list.push({ type: 'STRENGTH', text: `High precision in ${toTitleCase(best.name)} node.` });
+        list.push({ type: 'STRENGTH', text: `High precision in ${toTitleCase(best.name)} category.` });
       }
       
       if (worst.accuracy < 50 && worst.total > 0) {
@@ -75,7 +75,7 @@ export default function ReportScreen(props: ReportScreenProps) {
       }
     }
 
-    if (acc >= 90) list.push({ type: 'STRENGTH', text: "Elite accuracy maintained across the attempt vertical." });
+    if (acc >= 90) list.push({ type: 'STRENGTH', text: "Elite accuracy maintained across the attempt." });
     
     if (wrongCount > totalQuestions * 0.25) {
       list.push({ type: 'WEAKNESS', text: "Negative penalty audit: Excessive guesswork detected." });
@@ -91,7 +91,7 @@ export default function ReportScreen(props: ReportScreenProps) {
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-500 pb-20 px-0 md:px-1">
       
-      {/* SCORE GRID - REALTIME NODES */}
+      {/* SCORE GRID - REALTIME UPDATES */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
          <Card className="col-span-1 h-32 md:h-44 rounded-[22px] md:rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-4 md:px-6">
             <p className="text-[9px] md:text-xs font-bold text-slate-500 mb-1">Attempt score</p>
@@ -112,7 +112,7 @@ export default function ReportScreen(props: ReportScreenProps) {
          <SummaryMiniCard label="Skipped" val={skippedCount} color="text-slate-400" bg="bg-slate-50" className="hidden md:flex" />
       </div>
 
-      {/* REGISTRY RANKING NODE */}
+      {/* DATABASE RANKING HUB */}
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 flex items-center justify-between">
          <div className="flex items-center gap-4 md:gap-8 text-left">
             <div className="h-12 w-12 md:h-16 rounded-full bg-[#1677FF] flex items-center justify-center text-white shadow-lg shrink-0">
@@ -122,7 +122,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest">Punjab rank</p>
                <div className="flex items-baseline gap-2">
                   <span className="text-2xl md:text-5xl font-black text-[#1677FF] tabular-nums tracking-tighter">#{rank}</span>
-                  <span className="text-[9px] md:text-sm font-bold text-slate-300 truncate">/ {totalCandidates} Registry nodes</span>
+                  <span className="text-[9px] md:text-sm font-bold text-slate-300 truncate">/ {totalCandidates} Candidates</span>
                </div>
             </div>
          </div>
@@ -130,7 +130,7 @@ export default function ReportScreen(props: ReportScreenProps) {
             <ShieldCheck className="h-5 w-5 text-[#1677FF]" />
             <div className="text-left">
                <p className="text-[10px] font-black text-[#1677FF] leading-none">Verified</p>
-               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1">Attempt lock</p>
+               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1">Attempt record</p>
             </div>
          </div>
       </Card>
@@ -184,7 +184,7 @@ export default function ReportScreen(props: ReportScreenProps) {
             <h3 className="text-lg md:text-2xl font-black text-[#071B4D] tracking-tight">Attempt benchmark</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <ComparisonNode label="Registry top" val={topScore?.toFixed(1)} icon={<Award className="text-amber-500 h-5 w-5" />} />
+            <ComparisonNode label="Top score" val={topScore?.toFixed(1)} icon={<Award className="text-amber-500 h-5 w-5" />} />
             <ComparisonNode label="Avg score" val={avgScore?.toFixed(1)} icon={<Activity className="text-blue-500 h-5 w-5" />} />
             <ComparisonNode label="Avg precision" val={`${avgAccuracy?.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500 h-5 w-5" />} />
             <ComparisonNode label="Score gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500 h-5 w-5" />} />
