@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -51,9 +52,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v23.0.
- * FIXED: Removed sticky freezing to maximize mobile screen space.
- * FIXED: Implemented self-exclusion ranking audit.
+ * @fileOverview Institutional Result Hub v24.0.
+ * FIXED: Replaced "Fix Errors" with "Wrong".
+ * FIXED: Compacted sub-filter sizes and reduced vertical spacing.
  */
 
 export default function ResultClient() {
@@ -67,7 +68,7 @@ export default function ResultClient() {
   const [questions, setQuestions] = useState<any[]>([])
   const [mockData, setMockData] = useState<any>(null)
   const [loadingQuestions, setLoadingQuestions] = useState(true)
-  const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
+  const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'WRONG' | 'CORRECT' | 'SKIPPED'>('ALL')
   const [guestResult, setGuestResult] = useState<any>(null)
   const [activeMainTab, setActiveMainTab] = useState<string>("OVERVIEW")
   const [isExporting, setIsExporting] = useState(false)
@@ -225,14 +226,14 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Syncing registry..." });
+    toast({ title: "Syncing Registry" });
 
     try {
       await document.fonts.ready;
       await new Promise(r => setTimeout(r, 1000));
 
       const container = document.getElementById('pdf-report-container');
-      if (!container) throw new Error("Capture node not found.");
+      if (!container) throw new Error("Capture Node Missing");
 
       const canvas = await html2canvas(container, {
         scale: 3,
@@ -283,30 +284,10 @@ export default function ResultClient() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body">
       <Navbar />
-      <main className="container mx-auto max-w-7xl px-0 md:px-8 py-6 md:py-12 space-y-8 md:space-y-12 pb-32">
+      <main className="container mx-auto max-w-7xl px-0 md:px-8 py-6 md:py-12 space-y-4 md:space-y-10 pb-32">
         
-        {isSearching && (
-           <div className="py-32 text-center flex flex-col items-center gap-6">
-              <Loader2 className="h-12 w-12 text-primary animate-spin" />
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Resolving result node...</p>
-           </div>
-        )}
-
-        {errorNotFound && (
-           <div className="py-32 text-center flex flex-col items-center gap-8">
-              <div className="h-20 w-20 bg-rose-50 rounded-[2.5rem] flex items-center justify-center text-rose-500 shadow-xl">
-                 <AlertCircle className="h-10 w-10" />
-              </div>
-              <div className="space-y-1">
-                 <h2 className="text-2xl font-black text-[#0F172A]">Result entry missing</h2>
-                 <p className="text-slate-500 max-w-sm mx-auto">This attempt record could not be found.</p>
-              </div>
-              <Button asChild variant="outline" className="rounded-xl h-14 px-10"><Link href="/dashboard">Return to Hub</Link></Button>
-           </div>
-        )}
-
         {!isSearching && !errorNotFound && activeSession && finalMetrics && (
-           <div className="space-y-8 md:space-y-12 animate-in fade-in duration-500">
+           <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
               <div className="flex flex-col md:flex-row justify-between items-center gap-6 px-4 md:px-0">
                  <div className="flex items-center gap-6 text-left w-full md:w-auto">
                     <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-14 w-14 md:h-18 md:w-18 rounded-2xl shadow-xl bg-white" />
@@ -327,7 +308,7 @@ export default function ResultClient() {
               </div>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                  <div className="py-4 -mx-4 px-4 border-b border-slate-100 bg-transparent">
+                  <div className="py-2 -mx-4 px-4 border-b border-slate-100 bg-transparent">
                      <div className="flex justify-center w-full max-w-2xl mx-auto">
                         <TabsList className="bg-white border border-slate-100 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center overflow-x-auto no-scrollbar">
                            <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
@@ -337,7 +318,7 @@ export default function ResultClient() {
                      </div>
                   </div>
 
-                  <TabsContent value="OVERVIEW" className="px-0 pt-6">
+                  <TabsContent value="OVERVIEW" className="px-0 pt-4">
                       <ReportScreen 
                          {...activeSession} 
                          resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
@@ -363,24 +344,24 @@ export default function ResultClient() {
                       />
                   </TabsContent>
 
-                  <TabsContent value="REVIEW" className="space-y-8 max-w-5xl mx-auto px-4 pt-6">
-                      <div className="py-4 -mx-4 px-4 border-b border-slate-100 mb-6 bg-transparent">
-                         <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl shadow-xl border border-slate-100 w-full max-w-2xl mx-auto">
+                  <TabsContent value="REVIEW" className="space-y-4 max-w-5xl mx-auto px-4 pt-4">
+                      <div className="py-1 -mx-4 px-4 border-b border-slate-100 mb-2 bg-transparent">
+                         <div className="flex items-center gap-1.5 bg-white p-1 rounded-2xl shadow-xl border border-slate-100 w-full max-w-2xl mx-auto">
                              <FilterButton active={activeReviewFilter === 'ALL'} label="All Questions" onClick={() => setActiveReviewFilter('ALL')} />
-                             <FilterButton active={activeReviewFilter === 'WRONG'} label={`Fix Errors (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                             <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                              <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                          </div>
                       </div>
                       
-                      <div className="space-y-6 md:space-y-10">
+                      <div className="space-y-6 md:space-y-8">
                           {filteredQuestions.map((q) => (
                               <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-white text-left">
-                                  <div className="p-8 md:p-14 space-y-8">
+                                  <div className="p-8 md:p-12 space-y-6 md:space-y-8">
                                       <div className="flex items-center justify-between">
-                                         <Badge variant="outline" className="px-4 py-1.5 rounded-xl border-slate-200 text-slate-400 font-bold text-[9px]">
+                                         <Badge variant="outline" className="px-3 py-1 rounded-xl border-slate-200 text-slate-400 font-bold text-[9px]">
                                              Question #{q.originalIndex + 1}
                                          </Badge>
-                                         <Badge className="bg-primary/5 text-primary border-none text-[8px] font-bold">{q.subjectId || 'General'}</Badge>
+                                         <Badge className="bg-primary/5 text-primary border-none text-[8px] font-bold">{q.subjectId || 'General Hub'}</Badge>
                                       </div>
                                       <QuestionRenderer 
                                           question={q} 
@@ -395,7 +376,7 @@ export default function ResultClient() {
                       </div>
                   </TabsContent>
 
-                  <TabsContent value="REPORT" className="px-0 pb-40 pt-6 flex flex-col items-center">
+                  <TabsContent value="REPORT" className="px-0 pb-40 pt-4 flex flex-col items-center">
                       <div 
                         style={{ 
                           width: '794px',
@@ -468,7 +449,7 @@ export default function ResultClient() {
 
 function FilterButton({ active, label, onClick, color = "primary" }: any) {
   return (
-    <button onClick={onClick} className={cn("flex-1 px-4 py-3 rounded-xl text-[10px] md:text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
+    <button onClick={onClick} className={cn("flex-1 px-3 py-2 md:py-3 rounded-xl text-[9px] md:text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
        {label}
     </button>
   )
