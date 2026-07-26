@@ -12,16 +12,14 @@ import {
   Activity,
   AlertCircle,
   Lightbulb,
-  TrendingDown,
-  LayoutGrid
+  TrendingDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v4.0.
- * FIXED: Globally Transitioned to professional Title Case (removed all forced uppercase).
- * FIXED: Refined alignment to unified boxed architecture.
+ * @fileOverview Premium Analysis Screen v4.1.
+ * FIXED: Standardized typography to Sentence Case and unified alignment.
  */
 
 interface ReportScreenProps {
@@ -70,8 +68,8 @@ export default function ReportScreen(props: ReportScreenProps) {
     <div className="w-full space-y-8 animate-in fade-in duration-500 pb-20">
       
       {/* SCORE SUMMARY ROW */}
-      <div className="flex overflow-x-auto no-scrollbar -mx-4 px-4 gap-4 snap-x">
-         <Card className="min-w-[160px] md:flex-1 h-36 md:h-44 rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-6 snap-start shrink-0">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 overflow-x-auto no-scrollbar -mx-1 px-1">
+         <Card className="col-span-2 md:col-span-1 h-36 md:h-44 rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-6">
             <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-2">Your score</p>
             <div className="flex items-baseline gap-1">
                <span className="text-2xl md:text-4xl font-black text-[#10B981] tabular-nums">{score}</span>
@@ -203,7 +201,7 @@ export default function ReportScreen(props: ReportScreenProps) {
 
 function SummaryMiniCard({ label, val, color, bg }: any) {
    return (
-      <Card className={cn("min-w-[110px] md:flex-1 h-36 md:h-44 rounded-[24px] border-none shadow-sm flex flex-col items-center justify-center p-4 snap-start shrink-0", bg)}>
+      <Card className={cn("h-36 md:h-44 rounded-[24px] border-none shadow-sm flex flex-col items-center justify-center p-4", bg)}>
          <span className={cn("text-2xl md:text-4xl font-black tabular-nums", color)}>{val}</span>
          <span className="text-[10px] md:text-xs font-bold text-slate-400 mt-2">{label}</span>
       </Card>

@@ -36,8 +36,8 @@ import { canAccessAdmin } from "@/lib/permissions";
 import AnnouncementBar from "./AnnouncementBar";
 
 /**
- * @fileOverview Standard In-Flow Navigation Hub v140.0.
- * UPDATED: Removed all fixed/sticky positioning. Header now scrolls away naturally.
+ * @fileOverview Standard In-Flow Navigation Hub v142.0.
+ * FIXED: Removed all fixed/sticky positioning. Header now sitting relative in the flow.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
