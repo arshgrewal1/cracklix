@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect, Suspense } from "react"
@@ -67,8 +66,9 @@ import { BrandingSettings } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Result Hub v4.1 [PDF & Rank Hardened].
- * FIXED: Standardized 'Wrong' terminology and aligned PDF action.
+ * @fileOverview Official Result Hub v4.5 [PDF & Retake Hardened].
+ * FIXED: Retake logic now properly purges attemptId to prevent resume loops.
+ * FIXED: PDF Download triggers native print engine for minimum file weight.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -167,19 +167,27 @@ export default function ResultClient() {
 
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
-    if (!confirm("Confirm reset? This will purge your current attempt and rank.")) return;
+    if (!confirm("Confirm reset? This will permanently clear your current attempt and rank.")) return;
+    
     setIsSyncing(true);
     try {
+      // PURGE ATTEMPT TRACKER - Essential to prevent 'Resume' loop
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
+      toast({ title: "Reset Complete", description: "Identity node cleared. Starting fresh." });
       router.push(`/mocks/instructions?id=${mockId}&retake=true`);
-    } catch (e) { toast({ variant: "destructive", title: "Sync failure" }); }
-    finally { setIsSyncing(false); }
+    } catch (e) { 
+      toast({ variant: "destructive", title: "Sync failure" }); 
+      setIsSyncing(false);
+    }
   };
 
   const handleDownloadPDF = () => { 
     setActiveMainTab("REPORT"); 
-    toast({ title: "Preparing Report", description: "Standardizing A4 PDF layout..." });
-    setTimeout(() => { window.print(); }, 1000); 
+    toast({ title: "Preparing Report", description: "Generating lightweight A4 document..." });
+    // Minimal delay to ensure tab content mounts before print capture
+    setTimeout(() => { 
+      if (typeof window !== 'undefined') window.print(); 
+    }, 500); 
   };
 
   const reviewNodes = useMemo(() => {
@@ -289,7 +297,7 @@ export default function ResultClient() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                  <div className="lg:col-span-8 space-y-8">
                     <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
-                       <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight mb-12">Subject analysis</h2>
+                       <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight mb-12">Subject Analysis</h2>
                        <div className="space-y-12">
                           {Array.isArray(activeSession.subjectAnalysis) && activeSession.subjectAnalysis.map((sub: any, i: number) => (
                              <div key={i} className="space-y-3">
@@ -316,7 +324,7 @@ export default function ResultClient() {
 
                     <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
                        <h2 className="text-xl md:text-3xl font-black text-[#0F172A] mb-8 flex items-center gap-4">
-                          <Zap className="h-6 w-6 text-primary fill-current" /> Performance insights
+                          <Zap className="h-6 w-6 text-primary fill-current" /> Performance Insights
                        </h2>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {Array.isArray(activeSession.insights) && activeSession.insights.map((ins: string, i: number) => (
@@ -333,7 +341,7 @@ export default function ResultClient() {
                     <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-10 text-left space-y-8">
                        <div className="space-y-1">
                           <h3 className="text-lg md:text-2xl font-black flex items-center gap-3 text-[#0F172A] uppercase tracking-tight"><Layers className="h-5 w-5 text-primary" /> Complexity</h3>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mastery level hub</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mastery Level Hub</p>
                        </div>
                        <div className="space-y-8">
                           {Array.isArray(activeSession.complexityAnalysis) && activeSession.complexityAnalysis.map((diff: any, i: number) => (
@@ -361,10 +369,10 @@ export default function ResultClient() {
                        <div className="relative z-10 space-y-6">
                           <div className="space-y-1">
                              <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight uppercase">Punjab Rank</h3>
-                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global standing node</p>
+                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global Standing Node</p>
                           </div>
                           <div className="p-6 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-2">
-                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Current position</p>
+                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Current Position</p>
                              <p className="text-4xl font-black text-primary tabular-nums tracking-tighter">#{liveRank}</p>
                           </div>
                           <Button asChild className="w-full h-14 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-2xl border-none active:scale-95 transition-all">
@@ -447,7 +455,7 @@ export default function ResultClient() {
                     />
                  </div>
                  <div className="mt-12 text-center space-y-4 print:hidden">
-                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Official institutional report card node.</p>
+                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Official Institutional Report Card Node.</p>
                     <Button onClick={handleDownloadPDF} className="h-16 px-16 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-xs rounded-2xl shadow-xl border-none active:scale-95">Print Report Card</Button>
                  </div>
               </div>

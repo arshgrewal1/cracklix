@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -44,8 +43,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v12.1 [Margin & Rank Hardened].
- * FIXED: Terminology (Wrong) and Rank Integration.
+ * @fileOverview Official Institutional Report Card v12.2 [A4 Margins Hardened].
+ * FIXED: Standardized margins and Terminology (Wrong).
  */
 export default function ResultCard({
   studentName,
@@ -72,10 +71,10 @@ export default function ResultCard({
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(fullVerifyUrl)}`;
 
   return (
-    <div id="cracklix-result-card" className="w-[794px] min-h-[1123px] bg-white border border-slate-200 shadow-2xl rounded-none overflow-hidden text-left font-body relative p-0">
+    <div id="cracklix-result-card" className="w-[794px] min-h-[1123px] bg-white border border-slate-200 shadow-2xl rounded-none overflow-hidden text-left font-body relative p-0 mx-auto">
       <div className="h-4 w-full bg-[#0F172A]" />
       
-      <div className="px-16 py-20 space-y-12">
+      <div className="px-12 py-16 space-y-12">
         {/* HEADER HUB */}
         <div className="flex justify-between items-start border-b-4 border-slate-100 pb-12">
           <div className="flex items-center gap-10">
@@ -86,7 +85,7 @@ export default function ResultCard({
                 <img src="/logo/cracklix-icon.png" alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
               )}
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 text-left">
               <h2 className="text-5xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">{orgName}</h2>
               <p className="text-[14px] font-bold text-slate-400 tracking-[0.4em] uppercase">Official Merit Portal</p>
             </div>
@@ -100,7 +99,7 @@ export default function ResultCard({
         {/* IDENTITY HUB */}
         <div className="grid grid-cols-12 gap-10 items-center">
            <div className="col-span-8 space-y-6">
-              <div className="space-y-2">
+              <div className="space-y-2 text-left">
                  <h1 className="text-5xl font-black text-[#0F172A] tracking-tight leading-none uppercase">{studentName}</h1>
                  <p className="text-primary font-bold text-2xl tracking-tight mt-1 uppercase">{examTitle}</p>
               </div>
@@ -147,7 +146,7 @@ export default function ResultCard({
         {/* SUBJECT AUDIT */}
         {subjects.length > 0 && (
           <div className="space-y-6">
-            <h3 className="text-xs font-bold text-slate-400 tracking-[0.4em] ml-2 uppercase">Subject performance audit</h3>
+            <h3 className="text-xs font-bold text-slate-400 tracking-[0.4em] ml-2 uppercase text-left">Subject Performance Audit</h3>
             <div className="border-4 border-slate-100 rounded-[3rem] overflow-hidden shadow-2xl bg-white">
               <table className="w-full text-sm">
                 <thead>
@@ -160,7 +159,7 @@ export default function ResultCard({
                 <tbody className="divide-y-4 divide-slate-50">
                   {subjects.map((s, i) => (
                     <tr key={i} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-10 py-8 font-bold text-[#0F172A] text-2xl tracking-tight uppercase">{s.name}</td>
+                      <td className="px-10 py-8 font-bold text-[#0F172A] text-2xl tracking-tight uppercase text-left">{s.name}</td>
                       <td className="px-6 py-8 text-center font-black text-primary tabular-nums text-4xl">{s.score.toFixed(1)}</td>
                       <td className="px-10 py-8 text-right">
                         <Badge className={cn(
@@ -178,22 +177,22 @@ export default function ResultCard({
           </div>
         )}
 
-        {/* FOOTER VERIFICATION - ALIGNED MARGINS */}
+        {/* FOOTER VERIFICATION */}
         <div className="pt-20 border-t-4 border-slate-100 flex flex-col md:flex-row items-center justify-between gap-16">
           <div className="h-56 w-52 bg-white border-4 border-slate-100 p-6 rounded-[3rem] shadow-4xl shrink-0 group hover:scale-105 transition-transform duration-500 flex flex-col items-center justify-center gap-4">
             <img src={qrUrl} alt="Verify" className="h-40 w-40 object-contain" crossOrigin="anonymous" />
             <span className="text-[11px] font-bold text-primary tracking-widest uppercase">Verify Hub</span>
           </div>
 
-          <div className="space-y-6 flex-1 text-right md:text-left">
-            <div className="flex items-center justify-end md:justify-start gap-6">
+          <div className="space-y-6 flex-1 text-left">
+            <div className="flex items-center justify-start gap-6">
               <ShieldCheck className="h-14 w-14 text-emerald-500" />
               <div className="text-left">
                  <p className="text-3xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">Institutional Precision Verified</p>
                  <p className="text-[14px] font-bold text-slate-400 mt-2 tracking-widest uppercase">Registry ID: {resultId}</p>
               </div>
             </div>
-            <p className="text-[12px] font-medium text-slate-400 tracking-tight leading-relaxed max-w-xl ml-auto md:ml-0">
+            <p className="text-[12px] font-medium text-slate-400 tracking-tight leading-relaxed max-w-xl">
                This report is generated based on verified recruitment patterns. Authenticity can be audited via the QR node or at {webUrlRaw.toLowerCase()}.
             </p>
           </div>
@@ -206,7 +205,7 @@ export default function ResultCard({
 function AnalyticNode({ label, val, icon, highlight }: any) {
   return (
     <div className={cn(
-       "p-8 rounded-[2.5rem] border-4 flex flex-col items-start gap-6 transition-all duration-500 group",
+       "p-8 rounded-[2.5rem] border-4 flex flex-col items-start gap-6 transition-all duration-500 group text-left",
        highlight ? "bg-primary/5 border-primary shadow-xl" : "bg-slate-50/50 border-slate-100 hover:bg-white hover:shadow-2xl"
     )}>
       <div className="h-14 w-14 rounded-2xl bg-white shadow-lg flex items-center justify-center shrink-0 border-2 border-slate-100 group-hover:scale-110 transition-transform">
