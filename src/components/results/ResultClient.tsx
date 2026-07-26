@@ -27,7 +27,8 @@ import {
   RefreshCw,
   ArrowLeft,
   BarChart3,
-  List
+  List,
+  Timer
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -41,8 +42,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v22.0.
- * FIXED: Standardized all text to professional Title Case.
+ * @fileOverview Universal Result Hub Viewer v23.0.
+ * FIXED: Imported missing Timer icon to resolve ReferenceError.
  */
 
 export default function ResultClient() {
