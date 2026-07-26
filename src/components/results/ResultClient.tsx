@@ -47,8 +47,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v105.0.
- * FIXED: Implemented Real-Time onSnapshot for instant document retrieval.
+ * @fileOverview Universal Result Hub Engine v106.0.
+ * FIXED: Condensed action buttons to prevent PWA overflow and updated terminology.
  */
 
 export default function ResultClient() {
@@ -85,41 +85,35 @@ export default function ResultClient() {
     return `${s}s`;
   };
 
-  // REAL-TIME DOCUMENT LISTENER
   useEffect(() => {
     if (userLoading || !db) return;
 
     let unsubscribe: () => void = () => {};
 
     const initialize = async () => {
-      // 1. Direct ID path (High Speed Real-time)
       if (attemptIdFromUrl) {
         unsubscribe = onSnapshot(doc(db, "results", attemptIdFromUrl), (snap) => {
           if (snap.exists()) {
             setSessionData({ ...snap.data(), id: snap.id });
             setIsSearching(false);
           }
-        }, (err) => {
-           console.error("[Result_Listen_Error]:", err);
+        }, () => {
            setIsSearching(false);
         });
         
-        // Timeout if not found in 10s
         setTimeout(() => {
            setIsSearching(prev => {
               if (prev) {
-                 // Try guest fallback if still searching
                  const guestKey = `cracklix_guest_result_${attemptIdFromUrl}`;
                  const local = localStorage.getItem(guestKey);
                  if (local) setSessionData({ ...JSON.parse(local), isGuestNode: true });
               }
               return false;
            });
-        }, 10000);
+        }, 8000);
         return;
       }
 
-      // 2. Guest path
       if (!user) {
         const guestKey = `cracklix_guest_result_${mockId || attemptIdFromUrl}`;
         const local = localStorage.getItem(guestKey);
@@ -130,7 +124,6 @@ export default function ResultClient() {
         return;
       }
 
-      // 3. Discovery path (Latest Attempt)
       if (user && mockId) {
         const q = query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId));
         const snap = await getDocs(q);
@@ -147,7 +140,6 @@ export default function ResultClient() {
     return () => unsubscribe();
   }, [db, user, userLoading, mockId, attemptIdFromUrl]);
 
-  // LOAD METRICS & QUESTIONS
   useEffect(() => {
      if (!db || !sessionData) return;
      const mId = mockId || sessionData.mockId;
@@ -236,14 +228,14 @@ export default function ResultClient() {
       });
 
       const blob = await (await fetch(dataUrl)).blob();
-      const fileName = `cracklix-report-${sessionData.attemptId || 'result'}.png`;
+      const fileName = `report-${sessionData.attemptId || 'result'}.png`;
       const file = new File([blob], fileName, { type: 'image/png' });
       
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'My Performance Report',
-          text: `Check out my score on ${sessionData.mockTitle}!`
+          title: 'My report',
+          text: `Score: ${sessionData.score} on ${sessionData.mockTitle}!`
         });
       } else {
         const link = document.createElement('a');
@@ -262,54 +254,54 @@ export default function ResultClient() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
-      <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-6 md:py-12 space-y-6 md:space-y-12">
+      <main className="container mx-auto max-w-[1440px] px-3 md:px-12 py-6 md:py-12 space-y-6 md:space-y-12">
         
         {isSearching ? (
-           <div className="py-40 flex flex-col items-center justify-center space-y-8">
+           <div className="py-40 flex flex-col items-center justify-center space-y-6">
               <div className="relative">
-                 <Loader2 className="h-16 w-16 text-primary animate-spin" />
-                 <Zap className="absolute inset-0 m-auto h-6 w-6 text-primary animate-pulse" />
+                 <Loader2 className="h-14 w-14 text-primary animate-spin" />
+                 <Zap className="absolute inset-0 m-auto h-5 w-5 text-primary animate-pulse" />
               </div>
-              <div className="text-center space-y-2">
-                 <p className="font-bold tracking-[0.4em] text-[#0F172A] text-sm uppercase">Generating Report</p>
-                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Database synchronization in progress</p>
+              <div className="text-center space-y-1">
+                 <p className="font-bold text-[#0F172A] text-sm">Generating report</p>
+                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Loading results...</p>
               </div>
            </div>
         ) : sessionData ? (
            <>
-              <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-8 flex flex-col lg:flex-row justify-between items-center gap-6">
-                 <div className="flex items-center gap-4 md:gap-8 w-full min-w-0 text-left">
-                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-16 md:w-16 shadow-lg border border-slate-100 rounded-xl" />
-                    <div className="text-left space-y-1 flex-1 min-w-0">
+              <Card className="border border-slate-100 shadow-sm rounded-[24px] bg-white p-4 md:p-8 flex flex-col lg:flex-row justify-between items-center gap-6">
+                 <div className="flex items-center gap-3 md:gap-8 w-full min-w-0 text-left">
+                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-11 w-11 md:h-16 md:w-16 shadow-lg border border-slate-100 rounded-xl" />
+                    <div className="text-left space-y-0.5 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 py-0.5 rounded-lg font-bold text-[9px] shadow-sm">Verified result</Badge>
-                          {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-0.5 rounded-lg font-bold text-[9px] shadow-sm">Guest mode</Badge>}
+                          <Badge className="bg-emerald-50 text-emerald-600 border-none px-2.5 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Verified result</Badge>
+                          {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-2.5 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Guest</Badge>}
                        </div>
-                       <h1 className="text-lg md:text-2xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
-                       <div className="flex items-center gap-4 text-[10px] md:text-xs font-semibold text-slate-400 tracking-tight">
-                          <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
-                          <span className="flex items-center gap-1.5"><TimerIcon className="h-3.5 w-3.5" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
+                       <h1 className="text-base md:text-2xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
+                       <div className="flex items-center gap-3 text-[9px] md:text-xs font-semibold text-slate-400 tracking-tight">
+                          <span className="flex items-center gap-1.5"><Calendar className="h-3 w-3" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
+                          <span className="flex items-center gap-1.5"><TimerIcon className="h-3 w-3" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
                        </div>
                     </div>
                  </div>
-                 <div className="flex items-center gap-2 md:gap-3 w-full lg:w-auto">
-                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-11 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-[11px] border-none shadow-lg">
+                 <div className="flex items-center gap-2 w-full lg:w-auto">
+                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-11 px-3 md:px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-1.5 text-[10px] md:text-[11px] border-none shadow-lg">
                        {isSharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />} Share
                     </Button>
-                    <Button onClick={handleManualSync} className="flex-1 lg:flex-none h-11 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[11px] border-none shadow-lg">
+                    <Button onClick={handleManualSync} className="flex-1 lg:flex-none h-11 px-3 md:px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-1.5 text-[10px] md:text-[11px] border-none shadow-lg">
                        <RefreshCw className="h-3.5 w-3.5" /> Refresh
                     </Button>
-                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-11 px-6 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[11px] shadow-sm">
+                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-11 px-3 md:px-6 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[10px] md:text-[11px] shadow-sm">
                        <Link href={`/mocks/instructions?id=${mockId || sessionData.mockId}&retake=true`}>Retake test</Link>
                     </Button>
                  </div>
               </Card>
 
-              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-10">
+              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8">
                   <div className="flex justify-center">
                      <TabsList className="bg-slate-100 p-1 rounded-full border border-slate-200 flex w-fit h-auto shadow-inner">
-                        <TabsTrigger value="OVERVIEW" className="rounded-full px-8 md:px-12 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm tracking-tight">Analysis hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-full px-8 md:px-12 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm tracking-tight">Review portal</TabsTrigger>
+                        <TabsTrigger value="OVERVIEW" className="rounded-full px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-10 md:h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm">Analysis hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-full px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-10 md:h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm">Review portal</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -324,8 +316,8 @@ export default function ResultClient() {
                     />
                   </TabsContent>
                   <TabsContent value="REVIEW" className="m-0 space-y-6 md:space-y-10">
-                      <div className="bg-white p-2 md:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
-                          <div className="grid grid-cols-4 gap-2">
+                      <div className="bg-white p-1.5 md:p-8 rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                          <div className="grid grid-cols-4 gap-1.5">
                              <FilterNode active={activeReviewFilter === 'ALL'} label="All" count={reviewNodes.all.length} onClick={() => setActiveReviewFilter('ALL')} />
                              <FilterNode active={activeReviewFilter === 'CORRECT'} label="Correct" count={reviewNodes.correct.length} onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                              <FilterNode active={activeReviewFilter === 'WRONG'} label="Wrong" count={reviewNodes.wrong.length} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
@@ -353,19 +345,19 @@ export default function ResultClient() {
               </Tabs>
            </>
         ) : (
-           <div className="py-40 text-center space-y-10">
-              <div className="relative mx-auto w-24 h-24">
-                 <div className="h-24 w-24 bg-slate-50 rounded-[2rem] flex items-center justify-center text-slate-200 shadow-inner">
-                    <AlertCircle className="h-12 w-12" />
+           <div className="py-40 text-center space-y-8">
+              <div className="relative mx-auto w-20 h-20">
+                 <div className="h-20 w-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-200 shadow-inner">
+                    <AlertCircle className="h-10 w-10" />
                  </div>
               </div>
-              <div className="space-y-3 px-4">
-                 <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tighter">Result record not found</h2>
-                 <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">No attempt records were found in the database. Try refreshing or return to the bank.</p>
+              <div className="space-y-2 px-4">
+                 <h2 className="text-xl md:text-2xl font-black text-[#0F172A]">Result record not found</h2>
+                 <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">No attempt records were found in the database. Try refreshing or return to the bank.</p>
               </div>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 px-6">
                  <Button onClick={handleManualSync} className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 shadow-xl border-none active:scale-95 transition-all">
-                    <RotateCcw className="h-4 w-4" /> Force Sync
+                    <RotateCcw className="h-4 w-4" /> Force sync
                  </Button>
                  <Button asChild variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-2xl border-2 border-slate-200 font-bold active:scale-95 transition-all">
                     <Link href="/mocks">Explore tests</Link>
@@ -374,7 +366,6 @@ export default function ResultClient() {
            </div>
         )}
 
-        {/* Hidden Share Card for Export */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none">
            <div ref={shareRef}>
               <ShareableResultCard 
@@ -396,7 +387,7 @@ export default function ResultClient() {
 function FilterNode({ active, label, count, onClick, color }: any) {
   return (
     <button onClick={onClick} className={cn("flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 h-12 md:h-14 rounded-xl transition-all border group cursor-pointer", active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-transparent text-slate-400 hover:bg-slate-50")}>
-       <span className="text-[9px] md:text-[11px] font-bold tracking-tight">{label}</span>
+       <span className="text-[9px] md:text-[10px] font-bold tracking-tight">{label}</span>
        <span className={cn("text-[9px] md:text-xs font-bold opacity-40 tabular-nums", active && "opacity-60")}>{count}</span>
     </button>
   )

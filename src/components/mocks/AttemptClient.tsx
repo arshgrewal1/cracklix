@@ -41,8 +41,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Official Attempt Hub v104.0.
- * FIXED: Atomic write confirmation before navigation to ensure result availability.
+ * @fileOverview Official Attempt Hub v105.0.
+ * FIXED: Removed detailed console logs to resolve "debug" view issue.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -168,7 +168,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     setShowSubmitModal(false);
     setIsSubmittingFinal(true);
     
-    // 1. ANALYTICS ENGINE
     let correctCount = 0; 
     let wrongCount = 0;
     const totalQuestions = questions.length;
@@ -219,7 +218,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const timeTaken = Math.max(1, elapsedSeconds);
     const attemptAccuracy = attemptedCount > 0 ? Number(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
     
-    // 2. PARALLELIZED COMMIT NODES
     if (user) {
       try {
         const resultRef = doc(db, "results", attemptId);
@@ -280,8 +278,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
         stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
       } catch (e: any) {
-         console.error("[SUBMISSION_FAILURE]:", e);
-         toast({ variant: "destructive", title: "Cloud Sync Failed", description: "Checking daily quota limits." });
+         toast({ variant: "destructive", title: "Submission Failed", description: "Storage quota exceeded or connection lost." });
          setIsSubmittingFinal(false);
          return;
       }
@@ -301,7 +298,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
        localStorage.setItem(`cracklix_guest_result_${attemptId}`, JSON.stringify(guestPayload));
     }
 
-    // Gated Navigation: Using router.push instead of replace for better history stack handling
     router.push(`/results/view?id=${mockId}&attemptId=${attemptId}`);
     setTimeout(() => resetStore(), 1000);
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language, toast]);
@@ -314,7 +310,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
        </div>
        <div className="text-center space-y-2 px-6">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">
-             {isSubmittingFinal ? "Finalizing Report" : "Synchronizing Hub"}
+             {isSubmittingFinal ? "Finalizing report" : "Generating report"}
           </p>
           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
              {isSubmittingFinal ? "Preparing your analysis" : "Loading test patterns"}
