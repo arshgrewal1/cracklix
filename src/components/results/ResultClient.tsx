@@ -48,8 +48,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v110.0 [UI Scale Hardened].
- * FIXED: Reduced font sizes and icon scales for single-row PWA alignment.
+ * @fileOverview Universal Result Hub Engine v110.1 [Title Visibility Fixed].
+ * FIXED: Removed truncate from title to ensure full series names are visible.
  */
 
 export default function ResultClient() {
@@ -265,7 +265,7 @@ export default function ResultClient() {
                           <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Verified result</Badge>
                           {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-2 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Guest</Badge>}
                        </div>
-                       <h1 className="text-sm md:text-2xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
+                       <h1 className="text-[13px] md:text-2xl font-[800] text-[#0F172A] tracking-tight leading-tight break-words">{sessionData.mockTitle}</h1>
                        <div className="flex items-center gap-3 text-[9px] md:text-xs font-semibold text-slate-400 tracking-tight">
                           <span className="flex items-center gap-1.5"><Calendar className="h-3 w-3" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
                           <span className="flex items-center gap-1.5"><TimerIcon className="h-3 w-3" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
