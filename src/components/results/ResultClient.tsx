@@ -57,9 +57,9 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Official Result Hub v5.5 [ReferenceError Fixed].
+ * @fileOverview Official Result Hub v5.8 [Typography & Functional Fixed].
  * TERMINOLOGY: Standardized to "Questions" and "Wrong".
- * TYPOGRAPHY: Normalized to Title Case.
+ * TYPOGRAPHY: Forced Title Case for names and series.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -178,16 +178,22 @@ export default function ResultClient() {
 
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
-    if (!confirm("Start fresh? This will clear your current progress for this test.")) return;
+    if (!confirm("Are you sure? This will delete your current progress for this test so you can start fresh.")) return;
     
     setIsSyncing(true);
     try {
+      // Definitive registry purge
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
       resetStore();
-      toast({ title: "Test Reset", description: "Starting fresh preparation cycle." });
-      router.push(`/mocks/instructions?id=${mockId}&retake=true`);
+      
+      toast({ title: "Test Reset Successful", description: "Identity sync active. Redirecting to start node." });
+      
+      // Delay redirection to ensure store resets
+      setTimeout(() => {
+         router.push(`/mocks/instructions?id=${mockId}&retake=true`);
+      }, 500);
     } catch (e) { 
-      toast({ variant: "destructive", title: "Sync failure" }); 
+      toast({ variant: "destructive", title: "Sync failure", description: "Please refresh and try again." }); 
       setIsSyncing(false);
     }
   };
@@ -195,7 +201,7 @@ export default function ResultClient() {
   const handleDownloadPDF = () => { 
     setActiveMainTab("REPORT"); 
     toast({ title: "Preparing Report", description: "Generating lightweight PDF..." });
-    setTimeout(() => { if (typeof window !== 'undefined') window.print(); }, 500); 
+    setTimeout(() => { if (typeof window !== 'undefined') window.print(); }, 800); 
   };
 
   const reviewNodes = useMemo(() => {
@@ -352,7 +358,7 @@ export default function ResultClient() {
                  </div>
 
                  <div className="lg:col-span-4 space-y-8">
-                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-white p-8 md:p-10 text-left space-y-8">
+                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-8 md:p-10 text-left space-y-8">
                        <div className="space-y-1">
                           <h3 className="text-lg font-bold flex items-center gap-3 text-[#0F172A] uppercase tracking-widest">
                             <Layers className="h-4 w-4 text-primary" /> Mastery level

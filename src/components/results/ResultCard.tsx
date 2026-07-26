@@ -43,9 +43,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v15.0 [A4 Hardened].
- * FIXED: Rebuilt footer with items-start alignment and break-all ID to prevent overlap.
- * TERMINOLOGY: Standardized to Title Case and 'Wrong' node.
+ * @fileOverview Official Institutional Report Card v16.0 [Title Case Standard].
+ * FIXED: Typography reset for names and titles.
  */
 export default function ResultCard({
   studentName,
@@ -79,7 +78,7 @@ export default function ResultCard({
         {/* HEADER HUB */}
         <div className="flex justify-between items-start border-b-2 border-slate-100 pb-10">
           <div className="flex items-center gap-8">
-            <div className="h-28 w-28 md:h-40 md:w-40 bg-white rounded-2xl flex items-center justify-center p-0.5 border-2 border-slate-50 shadow-xl overflow-hidden shrink-0">
+            <div className="h-28 w-28 md:h-40 md:w-40 bg-white rounded-2xl flex items-center justify-center p-0 border-2 border-slate-50 shadow-xl overflow-hidden shrink-0">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
               ) : (
