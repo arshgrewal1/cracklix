@@ -16,7 +16,8 @@ import {
   Globe,
   FileText,
   Calendar,
-  Layers
+  Layers,
+  Trophy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +33,7 @@ interface ShareableResultCardProps {
 /**
  * @fileOverview Official Institutional Scorecard v2.0.
  * Rebuilt as a high-fidelity professional exam report.
- * FIXED: Added missing Calendar and Layers icon imports.
+ * FIXED: Added missing Calendar, Layers, and Trophy icon imports.
  * Optimized for 1080x1350 PNG Sharing with 2x resolution.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
