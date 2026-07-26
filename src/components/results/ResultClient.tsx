@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -15,7 +14,11 @@ import {
   documentId, 
   getDocs, 
   orderBy,
-  deleteDoc
+  deleteDoc,
+  where,
+  limit,
+  increment,
+  updateDoc
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -33,7 +36,8 @@ import {
   XCircle,
   ArrowRight,
   BookOpen,
-  X
+  X,
+  TrendingUp
 } from "lucide-react"
 import { 
   Card, 
@@ -53,8 +57,9 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Official Result Hub v5.2 [Hardened].
- * FIXED: Retake logic and Title Case normalization for all headers.
+ * @fileOverview Official Result Hub v5.5 [ReferenceError Fixed].
+ * TERMINOLOGY: Standardized to "Questions" and "Wrong".
+ * TYPOGRAPHY: Normalized to Title Case.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -173,13 +178,13 @@ export default function ResultClient() {
 
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
-    if (!confirm("Confirm reset? This will permanently clear your current attempt tracker.")) return;
+    if (!confirm("Start fresh? This will clear your current progress for this test.")) return;
     
     setIsSyncing(true);
     try {
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
       resetStore();
-      toast({ title: "Ready for Retake", description: "Identity node cleared. Starting fresh." });
+      toast({ title: "Test Reset", description: "Starting fresh preparation cycle." });
       router.push(`/mocks/instructions?id=${mockId}&retake=true`);
     } catch (e) { 
       toast({ variant: "destructive", title: "Sync failure" }); 
@@ -189,7 +194,7 @@ export default function ResultClient() {
 
   const handleDownloadPDF = () => { 
     setActiveMainTab("REPORT"); 
-    toast({ title: "Preparing Report", description: "Generating lightweight A4 document..." });
+    toast({ title: "Preparing Report", description: "Generating lightweight PDF..." });
     setTimeout(() => { if (typeof window !== 'undefined') window.print(); }, 500); 
   };
 
@@ -247,7 +252,7 @@ export default function ResultClient() {
                  <h1 className="text-xl md:text-4xl font-bold tracking-tight text-[#0F172A] leading-tight truncate">
                    {activeSession.mockTitle}
                  </h1>
-                 <div className="flex flex-wrap items-center gap-3 font-bold text-[10px] md:text-xs tracking-tight">
+                 <div className="flex flex-wrap items-center gap-3 font-bold text-[10px] md:xs tracking-tight">
                     <div className="flex items-center gap-1.5 bg-white border border-slate-100 px-3 py-1.5 rounded-lg text-slate-500 shadow-sm">
                        <Clock className="h-3.5 w-3.5 text-slate-400" /> 
                        <span>{new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
@@ -285,7 +290,7 @@ export default function ResultClient() {
                    className="flex-1 h-11 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-tight shadow-xl border-none"
                  >
                     <Download className="h-3.5 w-3.5" /> 
-                    PDF Report
+                    Download PDF
                  </Button>
               </div>
            </div>
@@ -306,7 +311,7 @@ export default function ResultClient() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                  <div className="lg:col-span-8 space-y-8">
                     <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
-                       <h2 className="text-xl md:text-2xl font-[800] text-[#0F172A] tracking-tight mb-10">Subject performance audit</h2>
+                       <h2 className="text-xl md:text-2xl font-bold text-[#0F172A] tracking-tight mb-10">Subject performance audit</h2>
                        <div className="space-y-10">
                           {Array.isArray(activeSession.subjectAnalysis) && activeSession.subjectAnalysis.map((sub: any, i: number) => (
                              <div key={i} className="space-y-3">
@@ -332,7 +337,7 @@ export default function ResultClient() {
                     </Card>
 
                     <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
-                       <h2 className="text-xl md:text-2xl font-[800] text-[#0F172A] mb-8 flex items-center gap-4">
+                       <h2 className="text-xl md:text-2xl font-bold text-[#0F172A] mb-8 flex items-center gap-4">
                           <Zap className="h-6 w-6 text-primary fill-current" /> Performance insights
                        </h2>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -357,7 +362,7 @@ export default function ResultClient() {
                           {Array.isArray(activeSession.complexityAnalysis) && activeSession.complexityAnalysis.map((diff: any, i: number) => (
                              <div key={i} className="space-y-2.5">
                                 <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">
-                                   <span>{diff.name} items</span>
+                                   <span>{diff.name} Questions</span>
                                    <span className="text-[#0F172A] font-black tabular-nums">{diff.accuracy}%</span>
                                 </div>
                                 <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
@@ -465,7 +470,7 @@ export default function ResultClient() {
                  </div>
                  <div className="mt-12 text-center space-y-4 print:hidden">
                     <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Official Institutional Report Card.</p>
-                    <Button onClick={handleDownloadPDF} className="h-14 px-12 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-[11px] rounded-xl shadow-xl border-none active:scale-95">Print Report Card</Button>
+                    <Button onClick={handleDownloadPDF} className="h-14 px-12 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-[11px] rounded-xl shadow-xl border-none active:scale-95">Download Report</Button>
                  </div>
               </div>
            </TabsContent>

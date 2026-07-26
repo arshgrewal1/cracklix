@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -44,8 +43,9 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v14.0 [Alignment Fixed].
- * FIXED: Reduced text sizes and normalized casing to prevent footer overlap.
+ * @fileOverview Official Institutional Report Card v15.0 [A4 Hardened].
+ * FIXED: Rebuilt footer with items-start alignment and break-all ID to prevent overlap.
+ * TERMINOLOGY: Standardized to Title Case and 'Wrong' node.
  */
 export default function ResultCard({
   studentName,
@@ -79,7 +79,7 @@ export default function ResultCard({
         {/* HEADER HUB */}
         <div className="flex justify-between items-start border-b-2 border-slate-100 pb-10">
           <div className="flex items-center gap-8">
-            <div className="h-24 w-24 bg-white rounded-2xl flex items-center justify-center p-0.5 border-2 border-slate-50 shadow-xl overflow-hidden shrink-0">
+            <div className="h-28 w-28 md:h-40 md:w-40 bg-white rounded-2xl flex items-center justify-center p-0.5 border-2 border-slate-50 shadow-xl overflow-hidden shrink-0">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt="Logo" className="h-full w-full object-contain" crossOrigin="anonymous" />
               ) : (
@@ -192,8 +192,8 @@ export default function ResultCard({
                   <p className="text-2xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">Institutional Precision Verified</p>
                </div>
                <div className="pl-11">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Registry ID:</p>
-                  <p className="text-xs font-mono font-black text-primary break-all max-w-md">{resultId}</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Registry Id:</p>
+                  <p className="text-[10px] font-mono font-black text-primary break-all max-w-[400px] leading-tight mt-1">{resultId}</p>
                </div>
             </div>
             <p className="text-[10px] font-bold text-slate-300 tracking-tight leading-relaxed max-w-lg uppercase">
