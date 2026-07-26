@@ -41,9 +41,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v13.0.
- * FIXED: Globally removed uppercase text.
- * FIXED: Unified box alignment for a professional SaaS feel.
+ * @fileOverview Universal Result Hub Viewer v14.0.
+ * FIXED: Removed all forced uppercase text and tracking.
+ * FIXED: Unified box alignment and corrected card closing tags.
  */
 
 export default function ResultClient() {
@@ -228,7 +228,7 @@ export default function ResultClient() {
     return { all, correct, wrong, skipped };
   }, [questions, sessionData]);
 
-  if (isSearching) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6"><Zap className="h-12 w-12 text-primary animate-pulse" /><p className="text-[10px] font-bold text-slate-300 uppercase">Synchronizing analysis hub...</p></div>;
+  if (isSearching) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6"><Zap className="h-12 w-12 text-primary animate-pulse" /><p className="text-[10px] font-bold text-slate-300">Synchronizing analysis hub...</p></div>;
 
   const filteredQuestions = activeReviewFilter === 'CORRECT' ? reviewNodes.correct : 
                            activeReviewFilter === 'WRONG' ? reviewNodes.wrong : 
@@ -245,7 +245,6 @@ export default function ResultClient() {
         
         {sessionData && (
            <div className="space-y-6 md:space-y-10">
-              {/* SECTION 1: TEST HEADER CARD */}
               <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-6 md:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                  <div className="flex items-center gap-6 md:gap-10">
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-20 md:w-20 bg-white shadow-xl border border-slate-100" />
@@ -272,7 +271,6 @@ export default function ResultClient() {
                  </div>
               </Card>
 
-              {/* SECTION 2: TABS & CONTENT */}
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-10">
                   <div className="flex justify-center">
                      <TabsList className="bg-slate-100 p-1 rounded-3xl border border-[#E5EAF2] shadow-inner flex w-fit gap-1 mx-auto lg:mx-0 h-auto">
@@ -352,4 +350,3 @@ function FilterButton({ active, label, count, onClick, color = "primary" }: any)
     </button>
   )
 }
-

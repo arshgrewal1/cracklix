@@ -6,8 +6,8 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v12.1 [Absolute Center].
- * FIXED: Removed top margin/padding to achieve perfect vertical visual centering.
+ * @fileOverview Premium PWA Splash Hub v12.2 [Top Stacking Fixed].
+ * FIXED: Set Z-index to 10000 to ensure it covers the fixed Navbar during init.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -62,7 +62,7 @@ export default function SplashScreen() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] bg-[#05070B] flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none"
+          className="fixed inset-0 z-[10000] bg-[#05070B] flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none"
         >
           <div className="absolute top-0 left-0 w-full h-full bg-primary/5 blur-[140px] rounded-full" />
           
