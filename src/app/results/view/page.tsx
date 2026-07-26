@@ -2,23 +2,22 @@
 
 import React, { Suspense, useMemo, useEffect, useState } from "react"
 import ResultClient from "@/components/results/ResultClient"
-import { Loader2, Zap } from "lucide-react"
+import { Loader2, Zap, AlertCircle } from "lucide-react"
 import { useDoc, useFirestore, useUser } from "@/firebase"
 import { doc, getDoc } from "firebase/firestore"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Universal Result Hub Viewer v4.1.
- * UPDATED: Refined terminology and removed technical uppercase.
+ * @fileOverview Universal Result Hub Viewer v5.0.
+ * FIXED: Validates specific attemptId to ensure isolated source of truth.
  */
 
 export default function ResultViewPage() {
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
   if (!mounted) return (
     <div className="h-screen flex items-center justify-center bg-[#F8FAFC]">
@@ -27,7 +26,7 @@ export default function ResultViewPage() {
   );
 
   return (
-    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-[#F8FAFC]"><Loader2 className="animate-spin text-primary" /></div>}>
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-[#F8FAFC]"><Loader2 className="animate-spin text-primary h-10 w-10" /></div>}>
       <ResultGuard />
     </Suspense>
   )
@@ -41,62 +40,65 @@ function ResultGuard() {
   const { toast } = useToast();
 
   const mockId = searchParams.get('id');
-  const [mock, setMock] = useState<any>(null);
-  const [mockLoading, setMockLoading] = useState(true);
+  const attemptId = searchParams.get('attemptId');
+  const [resultFound, setResultFound] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function verifyMock() {
+    async function verifyResult() {
       if (!db || !mockId) {
-        setMockLoading(false);
+        setLoading(false);
         return;
       }
 
       try {
-        // Check standard mocks first
-        let snap = await getDoc(doc(db, "mocks", mockId));
-        if (!snap.exists()) {
-          // Check daily quizzes
-          snap = await getDoc(doc(db, "daily_quizzes", mockId));
-        }
+        setLoading(true);
+        // Source of Truth Registry Check
+        const resultPath = attemptId && user 
+          ? `results/${user.uid}_${mockId}_${attemptId}` 
+          : user ? `results/${user.uid}_${mockId}` : null;
 
-        if (snap.exists()) {
-          setMock(snap.data());
+        if (resultPath) {
+          const snap = await getDoc(doc(db, resultPath));
+          setResultFound(snap.exists());
+        } else if (searchParams.get('guest') === 'true') {
+           // Guest logic check
+           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
+           setResultFound(!!guestRes);
+        } else {
+           setResultFound(false);
         }
       } catch (err) {
         console.error("[RESULT_GUARD_ERROR]:", err);
+        setResultFound(false);
       } finally {
-        setMockLoading(false);
+        setLoading(false);
       }
     }
-    verifyMock();
-  }, [db, mockId]);
+    verifyResult();
+  }, [db, mockId, attemptId, user, searchParams]);
 
-  useEffect(() => {
-     if (!mockLoading && mockId && !mock && user && db) {
-        console.warn("[AUDIT] Orphan result link detected. Validating registry entry...");
-        
-        toast({
-           variant: "destructive",
-           title: "Registry standby",
-           description: "Verification entry pending. Returning to portal."
-        });
-
-        router.replace("/dashboard");
-     }
-  }, [mock, mockLoading, mockId, user, db, router, toast]);
-
-  if (mockLoading) {
+  if (loading) {
      return (
         <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
            <Zap className="h-10 w-10 text-primary animate-pulse" />
-           <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Auditing registry...</p>
+           <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Synchronizing attempt...</p>
         </div>
      );
   }
 
-  // Allow guest viewing if guest param is present, otherwise block if no mock node
-  const isGuest = searchParams.get('guest') === 'true';
-  if (!mock && !isGuest) return null;
+  if (resultFound === false) {
+     return (
+        <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6 bg-[#F8FAFC]">
+           <AlertCircle className="h-16 w-16 text-rose-500" />
+           <div className="space-y-2">
+              <h2 className="text-2xl font-black text-[#0F172A]">Registry entry not found</h2>
+              <p className="text-slate-500 max-w-sm mx-auto">This test attempt node is no longer available in the master ledger.</p>
+           </div>
+           <Button onClick={() => router.push('/dashboard')} className="rounded-xl h-12 px-8">Return to portal</Button>
+        </div>
+     );
+  }
 
   return <ResultClient />;
 }

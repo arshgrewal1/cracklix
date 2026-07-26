@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -30,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v9.1 [Leaderboard Registry Hardened].
- * FIXED: Added boardId and examId to leaderboard node for reliable filtering.
+ * @fileOverview Official Mock Attempt Hub v10.0 [Isolated Attempt Engine].
+ * FIXED: Result documents are now immutable and unique per attempt.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -44,16 +43,12 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
   const mockId = useMemo(() => {
     if (propMockId) return propMockId;
-    
     const queryId = searchParams?.get('id');
     if (queryId && queryId !== 'manual') return queryId;
-    
     const segments = pathname.split('/').filter(Boolean);
     if (segments.length >= 2) {
       const idIdx = segments.indexOf('mocks') + 1;
-      if (idIdx > 0 && segments[idIdx] && segments[idIdx] !== 'attempt') {
-        return segments[idIdx];
-      }
+      if (idIdx > 0 && segments[idIdx] && segments[idIdx] !== 'attempt') return segments[idIdx];
     }
     return null;
   }, [pathname, searchParams, propMockId]);
@@ -74,6 +69,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
   const {
     initExam,
+    attemptId,
     tick,
     isPaused,
     setPaused,
@@ -87,29 +83,22 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     timeLeft,
     elapsedSeconds,
     setCurrentIdx,
-    saveAndNext
+    saveAndNext,
+    resetStore
   } = useExamStore();
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStart.current = {
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    };
+    touchStart.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
-    
     const deltaX = touchStart.current.x - touchEndX;
     const deltaY = touchStart.current.y - touchEndY;
-
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 80) {
-      if (deltaX > 0 && currentIdx < questions.length - 1) {
-        setCurrentIdx(currentIdx + 1);
-      } else if (deltaX < 0 && currentIdx > 0) {
-        setCurrentIdx(currentIdx - 1);
-      }
+      if (deltaX > 0 && currentIdx < questions.length - 1) setCurrentIdx(currentIdx + 1);
+      else if (deltaX < 0 && currentIdx > 0) setCurrentIdx(currentIdx - 1);
     }
   };
 
@@ -124,30 +113,21 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const dailyRef = doc(db, "daily_quizzes", mockId);
       
       let targetSnap = await getDoc(mockRef);
-      if (!targetSnap.exists()) {
-        targetSnap = await getDoc(dailyRef);
-      }
-      
-      if (!targetSnap.exists()) {
-         throw new Error("Test entry not found.");
-      }
+      if (!targetSnap.exists()) targetSnap = await getDoc(dailyRef);
+      if (!targetSnap.exists()) throw new Error("Test entry not found.");
       
       const mData = targetSnap.data();
       setMockData(mData);
 
+      // Access Check
       const tier = (mData.accessLevel || 'FREE').toUpperCase();
       if (tier === 'PREMIUM') {
-         if (!user && !userLoading) { 
-            router.replace(`/login?returnUrl=${encodeURIComponent(pathname)}`); 
-            return; 
-         }
+         if (!user && !userLoading) { router.replace(`/login?returnUrl=${encodeURIComponent(pathname)}`); return; }
          if (user && profile) {
             const userEmail = user.email?.toLowerCase();
             const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
             const expiry = profile?.passExpiresAt ? new Date(profile.passExpiresAt) : null;
-            const hasActivePass = isAdmin || (expiry && expiry > new Date());
-            
-            if (!hasActivePass) {
+            if (!isAdmin && (!expiry || expiry <= new Date())) {
                router.replace('/pass');
                toast({ title: "Elite Pass Required" });
                return;
@@ -160,47 +140,28 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       
       const fetchedQuestions: any[] = [];
       const chunks = [];
-      for (let i = 0; i < questionIds.length; i += 30) {
-        chunks.push(questionIds.slice(i, i + 30));
-      }
-      
+      for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
       for (const chunk of chunks) {
          const [mcqSnap, legacySnap, usedSnap] = await Promise.all([
            getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
            getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk))),
            getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
          ]);
-
          mcqSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
-         legacySnap.forEach(d => {
-            if (!fetchedQuestions.find(f => f.id === d.id)) {
-               fetchedQuestions.push({ ...d.data(), id: d.id });
-            }
-         });
-         usedSnap.forEach(d => {
-            if (!fetchedQuestions.find(f => f.id === d.id)) {
-               fetchedQuestions.push({ ...d.data(), id: d.id });
-            }
-         });
+         legacySnap.forEach(d => { if (!fetchedQuestions.find(f => f.id === d.id)) fetchedQuestions.push({ ...d.data(), id: d.id }); });
+         usedSnap.forEach(d => { if (!fetchedQuestions.find(f => f.id === d.id)) fetchedQuestions.push({ ...d.data(), id: d.id }); });
       }
 
       const sectionsConfig = mData.sections || [{ name: 'General', count: questionIds.length }];
       const enrichedQuestions: any[] = [];
       let qPointer = 0;
-
       sectionsConfig.forEach((sec: any) => {
         const count = Number(sec.count) || 0;
         const sectionQIds = questionIds.slice(qPointer, qPointer + count);
         qPointer += count;
-
         sectionQIds.forEach(id => {
           const qNode = fetchedQuestions.find(fq => fq.id === id);
-          if (qNode) {
-            enrichedQuestions.push({
-              ...qNode,
-              sectionId: sec.name
-            });
-          }
+          if (qNode) enrichedQuestions.push({ ...qNode, sectionId: sec.name });
         });
       });
 
@@ -211,38 +172,30 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
          if (attemptSnap.exists()) {
            const aData = attemptSnap.data();
-           if (aData.status === 'COMPLETED') {
-              router.replace(`/results/view?id=${mockId}`);
-              return;
-           }
+           if (aData.status === 'COMPLETED') { router.replace(`/results/view?id=${mockId}&attemptId=${aData.attemptId}`); return; }
            resumeData = aData;
          }
       }
 
-      initExam(mockId, mData.title || "Cracklix Test", user?.uid || null, enrichedQuestions, mData.duration || 120, resumeData, mData.languageMode);
+      initExam(mockId, mData.title || "Cracklix Test", user?.uid || null, enrichedQuestions, mData.duration || 120, resumeData, mData.languageMode, isRetakeRequested);
       startSession(); 
       setIsInitializing(false);
-      
     } catch (err: any) { 
       setInitError(err.message || "Sync failure."); 
       setIsInitializing(false);
     }
   }, [db, mockId, user, userLoading, profile, router, pathname, initExam, startSession, toast, isRetakeRequested]);
 
-  useEffect(() => {
-    loadExam();
-  }, [loadExam]);
+  useEffect(() => { loadExam(); }, [loadExam]);
 
   useEffect(() => {
     if (isInitializing || initError) return;
-    const interval = setInterval(() => {
-      tick();
-    }, 1000);
+    const interval = setInterval(() => { tick(); }, 1000);
     return () => clearInterval(interval);
   }, [isInitializing, initError, tick]);
 
   const handleSubmitFinal = useCallback(async () => {
-    if (!db || isSubmittingFinal || !mockData || !mockId) return;
+    if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
     setIsSubmittingFinal(true);
     
     let correctCount = 0; 
@@ -258,17 +211,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       if (correctOptIdx === studentAnsIdx) correctCount++; else wrongCount++;
     });
 
-    const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
-    const finalScore = Number(parseFloat(rawScore.toFixed(2)));
+    const finalScore = Number(parseFloat(((correctCount * posMarks) - (wrongCount * negMarks)).toFixed(2)));
     const timeTaken = Math.max(1, elapsedSeconds);
     
-    await stopSession({
-      completedQuestions: attemptedCount,
-      correct: correctCount,
-      wrong: wrongCount
-    });
+    await stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
 
     const resultPayload: any = {
+      attemptId,
       mockId, 
       mockTitle: mockData.title || mockTitle, 
       score: finalScore,
@@ -291,14 +240,21 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         resultPayload.userEmail = user.email || ""; 
         resultPayload.createdAt = serverTimestamp();
         
-        await setDoc(doc(db, "results", `${user.uid}_${mockId}`), resultPayload, { merge: true });
-        await setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true });
+        // UNIQUE ATTEMPT DOCUMENT
+        const resDocId = `${user.uid}_${mockId}_${attemptId}`;
+        await setDoc(doc(db, "results", resDocId), resultPayload);
         
-        // --- LEADERBOARD REGISTRY SYNC (PEAK PERFORMANCE ONLY) ---
+        // UPDATE ACTIVE ATTEMPT TRACKER
+        await setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { 
+           attemptId,
+           status: 'COMPLETED', 
+           updatedAt: serverTimestamp() 
+        }, { merge: true });
+        
+        // TRANSACTIONAL LEADERBOARD UPDATE
         const leaderboardRef = doc(db, "leaderboard", user.uid);
         await runTransaction(db, async (transaction) => {
           const lbSnap = await transaction.get(leaderboardRef);
-          
           if (!lbSnap.exists()) {
             transaction.set(leaderboardRef, {
               uid: user.uid,
@@ -315,15 +271,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           } else {
             const data = lbSnap.data();
             const currentHighest = Number(data.highestScore) || 0;
-            const updates: any = {
-              totalTests: increment(1),
-              updatedAt: serverTimestamp()
-            };
+            const updates: any = { totalTests: increment(1), updatedAt: serverTimestamp() };
             if (finalScore > currentHighest) {
               updates.highestScore = finalScore;
               updates.recentMockTitle = mockData.title;
-              updates.displayName = profile?.name || data.displayName;
-              updates.photoURL = profile?.photoURL || data.photoURL;
               updates.boardId = mockData.boardId || data.boardId;
               updates.examId = mockData.examId || data.examId;
             }
@@ -331,16 +282,18 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           }
         });
 
-        router.replace(`/results/view?id=${mockId}`);
+        resetStore();
+        router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
       } else {
         localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify(resultPayload));
-        router.replace(`/results/view?id=${mockId}&guest=true`);
+        resetStore();
+        router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}&guest=true`);
       }
     } catch (e) {
       toast({ variant: "destructive", title: "Submission failed" });
       setIsSubmittingFinal(false);
     }
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, toast]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, toast, attemptId, resetStore]);
 
   useEffect(() => {
      if (!isInitializing && !initError && timeLeft === 0 && !isSubmittingFinal && questions.length > 0) {
@@ -348,21 +301,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
      }
   }, [timeLeft, isInitializing, initError, isSubmittingFinal, handleSubmitFinal, questions.length]);
 
-  const handleSaveAndNext = useCallback(() => {
-    if (!questions || questions.length === 0) return;
-    if (currentIdx >= questions.length - 1) {
-      setShowSubmitModal(true);
-    } else {
-      saveAndNext(db);
-    }
-  }, [currentIdx, questions, saveAndNext, db]);
-
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8">
-       <div className="relative">
-          <Zap className="h-12 w-12 text-primary animate-pulse" />
-          <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-       </div>
+       <Zap className="h-12 w-12 text-primary animate-pulse" />
        <div className="text-center space-y-2">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Synchronizing Hub</p>
           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Loading questions from registry...</p>
@@ -372,19 +313,12 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
   if (initError) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white p-10 text-center space-y-10">
-       <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
-          <AlertCircle className="h-10 w-10" />
-       </div>
+       <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100"><AlertCircle className="h-10 w-10" /></div>
        <div className="space-y-4 max-w-sm mx-auto">
           <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Sync failure</h2>
           <p className="text-slate-500 font-medium leading-relaxed">{initError}</p>
        </div>
-       <div className="flex flex-col gap-4 w-full max-w-xs">
-          <Button onClick={() => window.location.reload()} className="h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl font-bold gap-2">
-             <RefreshCw className="h-4 w-4" /> Retry synchronization
-          </Button>
-          <Button onClick={() => router.replace('/dashboard')} variant="ghost" className="h-12 text-slate-400 font-bold uppercase text-[10px]">Return to portal</Button>
-       </div>
+       <Button onClick={() => window.location.reload()} className="h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl font-bold gap-2"><RefreshCw className="h-4 w-4" /> Retry synchronization</Button>
     </div>
   );
 
@@ -405,28 +339,12 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           )}
         </AnimatePresence>
         
-        <div 
-          className="flex-1 flex flex-col min-h-0 w-full max-w-full overflow-x-hidden" 
-          onTouchStart={handleTouchStart} 
-          onTouchEnd={handleTouchEnd}
-        >
-          <div className="w-full bg-white">
-             <div className="max-w-4xl mx-auto">
-                <SubjectTabs />
-             </div>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 md:px-10 pt-4 pb-12 w-full max-w-full overflow-x-hidden">
+        <div className="flex-1 flex flex-col min-h-0 w-full max-w-full overflow-x-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+          <div className="w-full bg-white"><div className="max-w-4xl mx-auto"><SubjectTabs /></div></div>
+          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 md:px-10 pt-4 pb-12 w-full max-w-full">
             <div className="w-full max-w-4xl">
               {questions.length > 0 && questions[currentIdx] ? (
-                <motion.div 
-                  key={currentIdx} 
-                  initial={{ opacity: 0, x: 20 }} 
-                  animate={{ opacity: 1, x: 0 }} 
-                  exit={{ opacity: 0, x: -20 }} 
-                  transition={{ duration: 0.25, ease: "easeOut" }} 
-                  className="w-full"
-                >
+                <motion.div key={currentIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25, ease: "easeOut" }} className="w-full">
                   <QuestionRenderer 
                     language={language} 
                     question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
@@ -435,27 +353,23 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
                     className="shadow-md border-none p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[3rem] w-full" 
                   />
                 </motion.div>
-              ) : <div className="py-20 text-center opacity-20"><Loader2 className="h-10 w-10 mx-auto mb-4 animate-spin text-primary" /><p className="font-bold text-slate-300">Syncing node...</p></div>}
+              ) : <div className="py-20 text-center opacity-20"><Loader2 className="h-10 w-10 mx-auto mb-4 animate-spin text-primary" /></div>}
             </div>
           </div>
         </div>
-
-        <div className="shrink-0 w-full">
-           <TacticalFooter onSubmit={handleSaveAndNext} />
-        </div>
+        <TacticalFooter onSubmit={() => currentIdx >= questions.length - 1 ? setShowSubmitModal(true) : saveAndNext(db)} />
       </main>
 
       <Sheet open={isPaletteOpen} onOpenChange={isPaletteOpen ? setIsPaletteOpen : undefined}>
-        <SheetContent side="right" className="p-0 border-none w-[280px] md:w-[320px] h-full shadow-5xl z-[1200]">
-          <SheetHeader className="sr-only"><SheetTitle>Navigation Palette</SheetTitle><SheetDescription>Navigate through questions.</SheetDescription></SheetHeader>
+        <SheetContent side="right" className="p-0 border-none w-[280px] md:w-[320px] shadow-5xl z-[1200]">
           <QuestionPalette onSelect={(idx: number) => { setCurrentIdx(idx); setIsPaletteOpen(false); }} onSubmit={() => { setIsPaletteOpen(false); setShowSubmitModal(true); }} />
         </SheetContent>
       </Sheet>
 
       <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
-        <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-white text-center border-none shadow-5xl z-[1300]">
+        <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-white text-center shadow-5xl z-[1300]">
           <div className="flex flex-col items-center">
-            <div className="h-14 w-14 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-6 shadow-inner"><AlertCircle className="h-8 w-8" /></div>
+            <div className="h-14 w-14 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-6"><AlertCircle className="h-8 w-8" /></div>
             <DialogHeader><DialogTitle className="text-2xl font-black text-[#0F172A]">Finish test?</DialogTitle><DialogDescription className="text-slate-500 font-medium mt-2">You still have questions remaining. Would you like to submit now?</DialogDescription></DialogHeader>
             <div className="w-full flex flex-col gap-3 mt-8">
               <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg">Submit test</Button>
@@ -467,7 +381,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       </Dialog>
 
       <Dialog open={showSubmitModal} onOpenChange={!isSubmittingFinal ? setShowSubmitModal : undefined}>
-        <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-[#0F172A] text-white text-center border-none shadow-2xl z-[1300]">
+        <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-[#0F172A] text-white text-center shadow-2xl z-[1300]">
           <div className="flex flex-col items-center">
             <div className="relative mb-6">
               <div className="absolute -inset-2 rounded-full bg-blue-500/30 blur-xl"></div>

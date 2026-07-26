@@ -1,4 +1,3 @@
-
 'use client';
 
 import { create } from "zustand";
@@ -8,9 +7,11 @@ import {
   LanguageDisplayMode 
 } from "@/types";
 import { Firestore, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { nanoid } from "nanoid";
 
 export interface ExamStoreState {
   mockId: string | null;
+  attemptId: string | null;
   mockTitle: string;
   userId: string | null;
   questions: Question[];
@@ -36,7 +37,8 @@ export interface ExamStoreState {
     questions: Question[], 
     duration: number, 
     resumeData?: any,
-    languageMode?: LanguageDisplayMode
+    languageMode?: LanguageDisplayMode,
+    forceNew?: boolean
   ) => void;
   tick: () => void;
   setPaused: (paused: boolean) => void;
@@ -48,14 +50,16 @@ export interface ExamStoreState {
   saveAndNext: (db: Firestore | null) => void;
   addViolation: (db: Firestore | null) => void;
   persistGuestData: (force?: boolean) => void;
+  resetStore: () => void;
 }
 
 /**
- * @fileOverview Hardened Test Store v6.1 [Native Efficiency].
- * FIXED: Optimized tick logic to prevent micro-stuttering during CBT.
+ * @fileOverview Hardened Test Store v7.0 [Data Consistency Guard].
+ * FIXED: Implemented unique attemptId and total memory purge.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
+  attemptId: null,
   mockTitle: "",
   userId: null,
   questions: [],
@@ -74,26 +78,31 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   violations: 0,
   isGuest: false,
 
-  initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
-    // Reset state first to prevent previous test overlap
-    set({
-      mockId: null,
-      questions: [],
-      answers: {},
-      status: {},
-      visited: [0],
-      timeLeft: 0,
-      elapsedSeconds: 0,
-      currentIdx: 0,
-      isPaused: false,
-    });
+  resetStore: () => set({
+    mockId: null,
+    attemptId: null,
+    questions: [],
+    answers: {},
+    status: {},
+    visited: [0],
+    timeLeft: 0,
+    elapsedSeconds: 0,
+    currentIdx: 0,
+    isPaused: false,
+    startTime: 0,
+    violations: 0
+  }),
+
+  initExam: (mockId, title, userId, questions, duration, resumeData, languageMode, forceNew = false) => {
+    // 1. Memory Purge - Essential for preventing data leaks
+    get().resetStore();
 
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     const defaultTime = duration * 60;
     
-    let effectiveResume = resumeData || null;
+    let effectiveResume = !forceNew ? (resumeData || null) : null;
 
-    if (!effectiveResume && !userId && typeof window !== 'undefined') {
+    if (!effectiveResume && !userId && !forceNew && typeof window !== 'undefined') {
        try {
          const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
          if (stored) {
@@ -108,9 +117,13 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const isResuming = !!effectiveResume;
     const now = Date.now();
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
+    
+    // Generate or Restore Unique Attempt ID
+    const attemptId = isResuming ? (effectiveResume.attemptId || nanoid(12)) : nanoid(12);
 
     set({
       mockId,
+      attemptId,
       mockTitle: title,
       userId,
       isGuest: !userId,
@@ -139,7 +152,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         elapsedSeconds: s.elapsedSeconds + 1
       }));
       
-      // Background persistence every 30s
       if (get().timeLeft % 30 === 0) state.persistGuestData();
     }
   },
@@ -167,6 +179,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     if (db && state.userId && state.mockId) {
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
       setDoc(attemptRef, {
+        attemptId: state.attemptId,
         answers: newAnswers,
         statusMap: newStatus,
         visited: state.visited,
@@ -251,6 +264,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const state = get();
     if (!state.userId && state.mockId) {
        const payload = {
+          attemptId: state.attemptId,
           answers: state.answers,
           statusMap: state.status,
           visited: state.visited,
