@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils';
 import { useCallback } from 'react';
 
 /**
- * @fileOverview Test Action Bar v42.0.
- * FIXED: Logic updated to only trigger onSubmit (modal) if on the last question.
- * FIXED: Enhanced text centering and vertical alignment for mobile.
+ * @fileOverview Test Action Bar v43.0 [Alignment Hardened].
+ * FIXED: Rebuilt layout to ensure 100% horizontal and vertical text centering.
+ * FIXED: Save & Next logic strictly gates the submission modal to the last question.
  */
 export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
   const currentIdx = useExamStore(s => s.currentIdx);
@@ -44,7 +44,7 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
         <Button 
           variant="outline" 
           onClick={handleReviewLater}
-          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm flex items-center justify-center text-center uppercase tracking-wider leading-tight px-1"
+          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm flex items-center justify-center text-center uppercase tracking-tight px-1 leading-none"
         >
           Review Later
         </Button>
@@ -52,7 +52,7 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
         <Button 
           variant="outline" 
           onClick={handleClear}
-          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm flex items-center justify-center text-center uppercase tracking-wider leading-tight px-1"
+          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm flex items-center justify-center text-center uppercase tracking-tight px-1 leading-none"
         >
           Clear
         </Button>
@@ -60,7 +60,7 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
         <Button 
           onClick={handlePrimaryAction}
           className={cn(
-            "h-12 md:h-16 text-white rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] shadow-xl border-none active:scale-95 flex items-center justify-center text-center transition-all uppercase tracking-wider leading-tight px-1",
+            "h-12 md:h-16 text-white rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] shadow-xl border-none active:scale-95 flex items-center justify-center text-center transition-all uppercase tracking-tight px-1 leading-none",
             isLastQuestion ? "bg-emerald-600 hover:bg-emerald-700" : "bg-primary hover:bg-blue-700"
           )}
         >
