@@ -20,11 +20,9 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
-import StatsBar from "@/components/home/StatsBar";
 
 /**
- * @fileOverview Institutional Premium Hub v504.0 [UI Restored].
- * FIXED: Removed aggressive height-restricted containers that caused overlapping.
+ * @fileOverview Institutional Premium Hub v505.0 [StatsBar Removed].
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -46,7 +44,6 @@ export default function HomePage() {
       <Hero />
       <GlobalSearch />
       <QuickActions />
-      <StatsBar />
 
       {user && (
         <ContinueLearning />
