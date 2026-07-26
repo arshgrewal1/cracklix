@@ -41,8 +41,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v12.3.
- * UPDATED: Integrated adaptive dark mode support.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v12.4.
+ * UPDATED: Replaced "MCQ Node" with "MCQs" in stats.
  */
 export default function ExamCard({ 
   exam, 
@@ -116,7 +116,7 @@ export default function ExamCard({
   const buttonConfig = useMemo(() => {
     if (stats.completed > 0 && stats.progress === 100) return { label: "View Analysis", icon: BarChart3, variant: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200" };
     if (stats.completed > 0) return { label: "Continue Prep", icon: RefreshCw, variant: "bg-primary hover:bg-blue-700 shadow-blue-200" };
-    return { label: "Start Preparation", icon: Play, variant: "bg-[#0F172A] dark:bg-primary hover:bg-black dark:hover:bg-blue-600 shadow-slate-200" };
+    return { label: "Start Preparation", icon: Play, variant: "bg-[#0F172A] dark:bg-primary hover:bg-black dark:hover:bg-blue-600 text-white" };
   }, [stats]);
 
   if (!exam) return null;
@@ -178,7 +178,7 @@ export default function ExamCard({
                {stats.mocks > 0 && <StatRow label="Full Mocks" val={stats.mocks} icon={Zap} />}
                {stats.subjects > 0 && <StatRow label="Subjects" val={stats.subjects} icon={BookOpen} />}
                {stats.pyqs > 0 && <StatRow label="Archives" val={stats.pyqs} icon={FileStack} />}
-               {stats.questions > 0 && <StatRow label="MCQ Node" val={stats.questions} icon={Layers} />}
+               {stats.questions > 0 && <StatRow label="MCQs" val={stats.questions} icon={Layers} />}
                {user && stats.completed > 0 && <StatRow label="Solved" val={stats.completed} icon={CheckCircle2} color="text-emerald-600" />}
             </div>
 

@@ -18,9 +18,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Manual Question Ingestion Node v20.0.
- * UPDATED: Fixed button responsiveness for PWA.
- * ADDED: Master Hub for trilingual manual typing (EN + PA + HI).
+ * @fileOverview Manual MCQ Ingestion Node v20.1.
+ * UPDATED: Standardized to "Modify MCQ" and "New MCQ".
  */
 
 export default function QuestionEntryPage() {
@@ -105,7 +104,7 @@ function QuestionEntryContent() {
       await addDoc(collection(db, "audit_logs"), {
         user: profile?.name || "Administrator",
         action: isEditing ? "QUESTION_UPDATE" : "QUESTION_CREATE",
-        details: isEditing ? `Question entry ${finalId} modified.` : `New question entry ${finalId} ingested manually.`,
+        details: isEditing ? `MCQ entry ${finalId} modified.` : `New MCQ entry ${finalId} ingested manually.`,
         timestamp: serverTimestamp()
       });
 
@@ -126,7 +125,7 @@ function QuestionEntryContent() {
             <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
           </button>
           <div className="text-left min-w-0">
-            <h1 className="text-xl md:text-3xl font-black font-headline text-[#0F172A] uppercase truncate">{isEditing ? "Modify Question" : "New Question Entry"}</h1>
+            <h1 className="text-xl md:text-3xl font-black font-headline text-[#0F172A] uppercase truncate">{isEditing ? "Modify MCQ" : "New MCQ"}</h1>
             <p className="text-[8px] md:text-[10px] uppercase font-black tracking-widest text-slate-400 mt-1 truncate">Manual Content Ingestion</p>
           </div>
         </div>

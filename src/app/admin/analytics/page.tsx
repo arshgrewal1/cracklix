@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -36,8 +35,8 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Platform Analytics Console v20.1 [Data Hardened].
- * FIXED: Removed hardcoded growth index and trends.
+ * @fileOverview Premium Platform Analytics Console v20.2.
+ * UPDATED: Changed "MCQ Nodes" to "MCQs".
  */
 
 export default function AdminAnalytics() {
@@ -186,7 +185,7 @@ export default function AdminAnalytics() {
             <h3 className="text-xl font-black text-[#0F172A] uppercase tracking-tight">Asset Registry</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            <AnalyticCard label="MCQ Nodes" value={stats?.totalQuestions || 0} trend="Live" icon={<Layers />} color="purple" />
+            <AnalyticCard label="MCQs" value={stats?.totalQuestions || 0} trend="Live" icon={<Layers />} color="purple" />
             <AnalyticCard label="Mock Series" value={stats?.totalMocks || 0} trend="Active" icon={<Zap />} color="orange" />
             <AnalyticCard label="Study Notes" value={stats?.totalNotes || 0} trend="PDF" icon={<FileText />} color="blue" />
             <AnalyticCard label="Paper Archives" value={stats?.totalPYQs || 0} trend="History" icon={<History />} color="emerald" />
