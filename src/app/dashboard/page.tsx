@@ -12,16 +12,10 @@ import {
   Zap, 
   Target, 
   Clock, 
-  Calendar, 
   Trophy, 
   Activity, 
-  TrendingUp, 
-  BarChart3, 
-  Gem, 
   ChevronRight, 
   ShieldCheck,
-  Award,
-  AlertCircle,
   Loader2,
   CheckCircle2,
   ArrowRight
@@ -31,30 +25,21 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import StudentAvatar from '@/components/brand/StudentAvatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useStudySessions } from '@/hooks/useStudyAnalytics';
+import { useStudyTimer } from '@/hooks/useStudyTimer';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Performance Hub v6.8.2.
- * UPDATED: Purged all uppercase text classes for professional Title Case hierarchy.
+ * @fileOverview Institutional Performance Hub v6.9.
+ * UPDATED: Integrated persistent study timer for live dashboard feedback.
  */
-
-const formatTime = (seconds: number) => {
-  if (!seconds || seconds <= 0 || isNaN(seconds)) return "0m";
-  if (seconds > 86400) return "0m";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-};
 
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
   const db = useFirestore();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const { stats, loading: statsLoading } = useStudySessions();
+  const { displayTime } = useStudyTimer();
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -67,24 +52,15 @@ export default function StudentDashboard() {
 
   const performance = useMemo(() => {
     if (!results || results.length === 0) {
-      return { accuracy: 0, time: 0, totalCorrect: 0, totalAttempted: 0, rank: "0" };
+      return { accuracy: 0, time: 0, totalCorrect: 0, totalAttempted: 0 };
     }
-    let totalCorrect = 0; let totalAttempted = 0; let totalTime = 0; let validTimeEntries = 0;
+    let totalCorrect = 0; let totalAttempted = 0;
     results.forEach((r: any) => {
       totalCorrect += (r.correctCount || 0);
       totalAttempted += (r.attemptedCount || 0);
-      const t = Number(r.timeTaken);
-      if (!isNaN(t) && t > 0 && t < 43200) { totalTime += t; validTimeEntries++; }
     });
     const accuracy = totalAttempted > 0 ? Math.round((totalCorrect / totalAttempted) * 100) : 0;
-    const avgTime = validTimeEntries > 0 ? totalTime / validTimeEntries : 0;
-    return { accuracy, time: avgTime, totalCorrect, totalAttempted, rank: results.length.toString() };
-  }, [results]);
-
-  const chartData = useMemo(() => {
-    if (!results || results.length === 0) return [];
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return days.map((d) => ({ day: d, progress: 0 }));
+    return { accuracy, totalCorrect, totalAttempted };
   }, [results]);
 
   if (!mounted || authLoading) return <div className="h-screen flex items-center justify-center bg-background"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
@@ -105,7 +81,6 @@ export default function StudentDashboard() {
             </div>
             <div className="flex flex-wrap justify-center md:justify-start gap-3">
               <Badge className="bg-primary/10 text-primary border-none font-bold text-[10px] px-4 py-1.5 rounded-full">{profile?.pass?.plan || 'Free'} member</Badge>
-              <Badge variant="outline" className="bg-muted border-border text-foreground font-bold text-[10px] px-4 py-1.5 rounded-full shadow-sm">🔥 {stats.currentStreak} day streak</Badge>
               <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-500 font-bold text-[10px] px-4 py-1.5 rounded-full">Total tests: {results?.length || 0}</Badge>
             </div>
           </div>
@@ -116,68 +91,43 @@ export default function StudentDashboard() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
           <MetricPill label="Accuracy" val={`${performance.accuracy}%`} icon={<Target />} color="text-primary" bg="bg-blue-50 dark:bg-blue-950/30" progress={performance.accuracy} />
-          <MetricPill label="Avg time" val={formatTime(performance.time)} icon={<Clock />} color="text-orange-500" bg="bg-orange-50 dark:bg-orange-950/30" />
-          <MetricPill label="Today's study" val={formatTime(stats.today)} icon={<Zap />} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-950/30" />
-          <MetricPill label="Solved questions" val={performance.totalCorrect.toLocaleString()} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-950/30" />
+          <MetricPill label="Today's study" val={displayTime} icon={<Zap />} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-950/30" />
+          <MetricPill label="Solved items" val={performance.totalCorrect.toLocaleString()} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-950/30" />
+          <MetricPill label="Tests taken" val={results?.length || 0} icon={<CheckCircle2 />} color="text-indigo-500" bg="bg-indigo-50 dark:bg-indigo-950/30" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
-          <div className="lg:col-span-8 space-y-8 md:space-y-12">
-            <Card className="border-none shadow-xl rounded-[2.5rem] bg-card overflow-hidden border border-border">
-              <CardHeader className="p-8 md:p-12 border-b border-border bg-muted/30 flex flex-row items-center justify-between">
-                <div className="text-left">
-                  <CardTitle className="text-xl md:text-3xl font-black text-foreground tracking-tight">Performance flow</CardTitle>
-                  <p className="text-[10px] font-bold text-muted-foreground mt-1 tracking-tight">Practice consistency index</p>
-                </div>
-                <Badge className="bg-primary text-white border-none text-[9px] font-bold px-3 py-1 rounded-lg shadow-lg">Live sync</Badge>
-              </CardHeader>
-              <CardContent className="p-8 md:p-12">
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData}>
-                      <defs><linearGradient id="colorProg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#2563EB" stopOpacity={0.1}/><stop offset="95%" stopColor="#2563EB" stopOpacity={0}/></linearGradient></defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-border" />
-                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 11, fontWeight: 700}} />
-                      <YAxis hide />
-                      <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
-                      <Area type="monotone" dataKey="progress" stroke="#2563EB" strokeWidth={4} fillOpacity={1} fill="url(#colorProg)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              <InsightNode label="Activity hub" value={`${results?.length || 0} tests taken`} icon={<CheckCircle2 className="text-emerald-500" />} />
-              <InsightNode label="Mastery level" value={performance.accuracy > 70 ? "Advanced" : "Learner"} icon={<AlertCircle className="text-blue-500" />} />
-            </div>
+          <div className="lg:col-span-8">
+             <Card className="border-none shadow-xl rounded-[2.5rem] bg-card overflow-hidden border border-border">
+                <CardHeader className="p-8 border-b border-border bg-muted/30">
+                   <CardTitle className="text-xl font-black text-foreground flex items-center gap-3">
+                      <Activity className="h-6 w-6 text-primary" /> Study activity
+                   </CardTitle>
+                </CardHeader>
+                <CardContent className="p-20 flex flex-col items-center justify-center text-center opacity-30 italic">
+                   <BarChart3 className="h-16 w-16 mb-4" />
+                   <p className="text-sm font-bold">Analysis synchronizing...</p>
+                </CardContent>
+             </Card>
           </div>
-          <div className="lg:col-span-4 space-y-6 md:space-y-10">
-            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden group border border-white/5">
-              <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Activity className="h-64 w-64 text-primary" /></div>
-              <div className="relative z-10 space-y-8 text-left">
-                <div className="space-y-1">
-                  <h3 className="text-2xl font-black tracking-tight leading-none">Milestones</h3>
-                  <p className="text-[10px] font-bold text-slate-500 tracking-tight">Platform rewards</p>
+          <div className="lg:col-span-4">
+             <Card className="border-none shadow-2xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden group border border-white/5">
+                <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Activity className="h-64 w-64 text-primary" /></div>
+                <div className="relative z-10 space-y-8 text-left">
+                   <div className="space-y-1">
+                      <h3 className="text-2xl font-black tracking-tight leading-none">Milestones</h3>
+                      <p className="text-[10px] font-bold text-slate-500 tracking-tight">Platform rewards</p>
+                   </div>
+                   <div className="space-y-6">
+                      <p className="text-xs text-slate-400 font-medium">Practice daily to unlock achievement badges and state rank certificates.</p>
+                   </div>
+                   <div className="pt-6 border-t border-white/5">
+                      <Button asChild className="w-full h-14 bg-primary hover:bg-blue-700 text-white font-bold text-[10px] tracking-tight shadow-2xl border-none transition-all active:scale-95">
+                         <Link href="/leaderboard">Merit rankings <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                      </Button>
+                   </div>
                 </div>
-                <div className="space-y-6">
-                  <MilestoneItem label="7 day streak" progress={Math.min(100, (stats.currentStreak / 7) * 100)} target={`${stats.currentStreak}/7`} />
-                  <MilestoneItem label="Overall accuracy" progress={performance.accuracy} target={`${performance.accuracy}%`} />
-                  <MilestoneItem label="Exam consistency" progress={Math.min(100, (results?.length || 0) * 10)} target={`${results?.length || 0}/10`} />
-                </div>
-                <div className="pt-6 border-t border-white/5">
-                  <Button asChild className="w-full h-14 bg-primary hover:bg-blue-700 text-white font-bold text-[10px] tracking-tight shadow-2xl border-none transition-all active:scale-95">
-                    <Link href="/leaderboard">Merit rankings <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                  </Button>
-                </div>
-              </div>
-            </Card>
-            <div className="p-8 md:p-10 bg-card rounded-[2.5rem] border border-border shadow-xl space-y-6 text-left group hover:translate-y-[-4px] transition-all duration-500">
-              <h4 className="text-[10px] font-black text-muted-foreground tracking-tight uppercase">Certificates</h4>
-              <div className="h-40 flex flex-col items-center justify-center text-center opacity-30 italic">
-                <Award className="h-10 w-10 mb-4 text-muted-foreground" />
-                <p className="text-[11px] font-bold tracking-tight">Syncing milestones...</p>
-              </div>
-            </div>
+             </Card>
           </div>
         </div>
       </main>
@@ -188,38 +138,13 @@ export default function StudentDashboard() {
 
 function MetricPill({ label, val, icon, color, bg, progress }: any) {
   return (
-    <motion.div whileHover={{ y: -4 }} className="p-5 md:p-8 bg-card rounded-[2rem] shadow-lg border border-border flex flex-col gap-4 text-left group transition-all duration-300">
-      <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner", bg, color)}>{React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}</div>
-      <div className="space-y-0.5">
-        <p className="text-xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter leading-none">{val}</p>
-        <p className="text-[8px] md:text-[9px] font-bold text-muted-foreground tracking-tight">{label}</p>
+    <motion.div whileHover={{ y: -4 }} className="p-5 md:p-8 bg-card rounded-[2rem] shadow-lg border border-border flex flex-col gap-4 text-left group transition-all duration-300 h-full">
+      <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner shrink-0", bg, color)}>{React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}</div>
+      <div className="space-y-0.5 min-w-0">
+        <p className="text-xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter leading-none truncate">{val}</p>
+        <p className="text-[8px] md:text-[9px] font-black text-muted-foreground tracking-tight uppercase mt-1">{label}</p>
       </div>
       {progress !== undefined && <div className="h-1 w-full bg-muted rounded-full overflow-hidden mt-2"><div className="h-full bg-primary transition-all duration-1000" style={{ width: `${progress}%` }} /></div>}
     </motion.div>
-  );
-}
-
-function InsightNode({ label, value, icon }: any) {
-  return (
-    <Card className="p-6 md:p-10 rounded-[2.5rem] shadow-xl bg-card border border-border flex items-center gap-6 group hover:translate-x-1 transition-all duration-300">
-      <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-muted flex items-center justify-center shadow-inner shrink-0 group-hover:scale-110 transition-transform">{icon}</div>
-      <div className="min-w-0 text-left">
-        <p className="text-[9px] font-black text-muted-foreground tracking-tight leading-none mb-2">{label}</p>
-        <p className="text-lg md:text-xl font-bold text-foreground truncate tracking-tight">{value}</p>
-      </div>
-    </Card>
-  );
-}
-
-function MilestoneItem({ label, progress, target }: any) {
-  return (
-    <div className="space-y-3">
-      <div className="flex justify-between items-center text-[10px] font-bold">
-        <span className="text-slate-400 tracking-tight">{label}</span> <span className="text-primary tabular-nums">{target}</span>
-      </div>
-      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-        <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 1.5, ease: "easeOut" }} className="h-full bg-primary shadow-[0_0_15px_rgba(37,99,235,0.5)]" />
-      </div>
-    </div>
   );
 }

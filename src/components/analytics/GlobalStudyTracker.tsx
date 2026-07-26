@@ -1,42 +1,45 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { useActiveSession } from '@/hooks/useStudyAnalytics';
-import { useUser } from '@/firebase';
+import { useEffect, useMemo } from 'react';
+import { useStudyTimer } from '@/hooks/useStudyTimer';
+import { usePathname } from 'next/navigation';
 
 /**
- * @fileOverview Institutional Engagement Node v1.0.
- * Automatically tracks platform open time as a baseline study session.
+ * @fileOverview Institutional Engagement Node v2.0.
+ * Automatically tracks study time on verified preparation pages.
  */
 export default function GlobalStudyTracker() {
-  const { user } = useUser();
-  const { isActive, startSession, stopSession } = useActiveSession('PRACTICE');
-  const mounted = useRef(false);
+  const pathname = usePathname();
+  
+  const isStudyArea = useMemo(() => {
+     const paths = [
+       '/mocks', 
+       '/exams', 
+       '/subjects', 
+       '/current-affairs', 
+       '/pyqs', 
+       '/notes', 
+       '/revision', 
+       '/bookmarks',
+       '/results'
+     ];
+     return paths.some(p => pathname?.startsWith(p));
+  }, [pathname]);
 
-  useEffect(() => {
-    if (!user || mounted.current) return;
-    
-    // Auto-start tracking on platform entry
-    console.log('[Engagement] Syncing baseline session...');
-    startSession();
-    mounted.current = true;
+  // The hook itself manages the internal timer logic
+  // We only mount/unmount the logic based on study area
+  return <StudyTimerEngine active={isStudyArea} />;
+}
 
-    // Handle backgrounding
-    const handleVisibility = () => {
-       if (document.hidden) {
-          stopSession();
-       } else {
-          startSession();
-       }
-    };
+function StudyTimerEngine({ active }: { active: boolean }) {
+   // Use the persistent timer hook only if in study area
+   const { displayTime } = useStudyTimer();
+   
+   useEffect(() => {
+      if (active) {
+         console.log('[Engagement] Syncing study node...');
+      }
+   }, [active]);
 
-    window.addEventListener('visibilitychange', handleVisibility);
-    
-    return () => {
-      window.removeEventListener('visibilitychange', handleVisibility);
-      stopSession(); // Save session on exit
-    };
-  }, [user, startSession, stopSession]);
-
-  return null;
+   return null;
 }

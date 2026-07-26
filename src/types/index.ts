@@ -13,6 +13,16 @@ export type ExamLanguage = 'en' | 'pa' | 'hi' | 'bilingual';
 
 export type LanguageDisplayMode = 'ENGLISH' | 'PUNJABI' | 'HINDI' | 'ENGLISH_PUNJABI' | 'ENGLISH_HINDI';
 
+export interface StudyStats {
+  todayStudyMinutes: number;
+  yesterdayStudyMinutes: number;
+  totalLifetimeStudyMinutes: number;
+  lastActiveTime: any;
+  currentSessionStart: any;
+  lastStudyDate: string;
+  updatedAt: any;
+}
+
 export interface BrandingSettings {
   websiteUrl: string;
   logoUrl: string;
@@ -92,6 +102,7 @@ export interface UserProfile {
   averageAccuracy?: number;
   averageTime?: number;
   bestRank?: number;
+  studyStats?: StudyStats;
   pass?: {
     active: boolean;
     plan: string;
@@ -100,6 +111,18 @@ export interface UserProfile {
     allowedSeries?: string[];
     allowedCategories?: string[];
   };
+}
+
+export interface StudySession {
+  id: string;
+  userId: string;
+  startTime: any;
+  endTime: any;
+  durationSeconds: number;
+  activityType: 'MOCK' | 'PRACTICE' | 'PDF' | 'CA' | 'PYQ';
+  activityId?: string;
+  timezone?: string;
+  createdAt: any;
 }
 
 export interface LeaderboardEntry {
