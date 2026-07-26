@@ -39,8 +39,8 @@ interface ReportScreenProps {
 }
 
 /**
- * @fileOverview Responsive Screen Layout for Browser Viewing v9.0.
- * FIXED: Edge-to-edge mobile presentation with zero margins.
+ * @fileOverview Responsive Screen Layout for Browser Viewing v9.1.
+ * FIXED: Removed all remaining uppercase text.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
@@ -117,9 +117,9 @@ export default function ReportScreen(props: ReportScreenProps) {
                   <table className="w-full text-left border-collapse">
                      <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                           <th className="px-8 py-5 font-bold text-[10px] md:text-[11px] text-slate-500 uppercase tracking-widest">Subject Hub</th>
-                           <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500 uppercase tracking-widest">Score</th>
-                           <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500 uppercase tracking-widest">Accuracy</th>
+                           <th className="px-8 py-5 font-bold text-[10px] md:text-[11px] text-slate-500 tracking-tight">Subject Hub</th>
+                           <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500 tracking-tight">Score</th>
+                           <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500 tracking-tight">Accuracy</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
@@ -154,7 +154,7 @@ export default function ReportScreen(props: ReportScreenProps) {
 function DataMiniNode({ label, val }: { label: string, val: string }) {
    return (
       <div className="space-y-1 text-left">
-         <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-tight">{label}</p>
+         <p className="text-[8px] md:text-[10px] font-bold text-slate-400">{label}</p>
          <p className="text-[12px] md:text-lg font-black text-[#0F172A] tabular-nums truncate leading-none">{val}</p>
       </div>
    )
@@ -163,7 +163,7 @@ function DataMiniNode({ label, val }: { label: string, val: string }) {
 function MetricBox({ label, val, color, bg }: any) {
    return (
       <Card className="border-none shadow-xl bg-white p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] flex flex-col items-center justify-center gap-3 transition-all border border-slate-50 h-32 md:h-44 text-center">
-         <p className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+         <p className="text-[9px] md:text-xs font-bold text-slate-400">{label}</p>
          <p className={cn("text-2xl md:text-5xl font-black tabular-nums tracking-tighter leading-none", color)}>{val}</p>
       </Card>
    )
@@ -173,7 +173,7 @@ function CountCard({ label, val, color }: any) {
    return (
       <div className={cn("p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] flex flex-col items-center justify-center text-center gap-1 shadow-sm", color)}>
          <span className="text-2xl md:text-4xl font-black tabular-nums tracking-tighter leading-none">{val}</span>
-         <span className="text-[9px] font-bold opacity-60 mt-2 uppercase tracking-widest">{label}</span>
+         <span className="text-[9px] font-bold opacity-60 mt-2">{label}</span>
       </div>
    )
 }

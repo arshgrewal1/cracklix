@@ -51,9 +51,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v21.0.
- * FIXED: Edge-to-edge mobile presentation for PWA.
- * FIXED: Domain updated to cracklix.in.
+ * @fileOverview Institutional Result Hub v22.0.
+ * FIXED: Removed sticky freezing to maximize mobile screen space.
+ * FIXED: Standardized Title Case across all UI nodes.
  */
 
 export default function ResultClient() {
@@ -311,7 +311,7 @@ export default function ResultClient() {
                  <div className="flex items-center gap-6 text-left w-full md:w-auto">
                     <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-14 w-14 md:h-18 md:w-18 rounded-2xl shadow-xl bg-white" />
                     <div className="space-y-1 flex-1 min-w-0">
-                       <h1 className="text-xl md:text-4xl font-black tracking-tight text-[#0F172A] truncate uppercase">
+                       <h1 className="text-xl md:text-4xl font-black tracking-tight text-[#0F172A] truncate">
                          {activeSession?.mockTitle}
                        </h1>
                        <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">Verified Attempt</Badge>
@@ -327,7 +327,7 @@ export default function ResultClient() {
               </div>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                  <div className="sticky top-[84px] md:top-[116px] z-[46] bg-[#F8FAFC]/95 backdrop-blur-md py-4 -mx-4 px-4 border-b border-slate-100">
+                  <div className="py-4 -mx-4 px-4 border-b border-slate-100 bg-transparent">
                      <div className="flex justify-center w-full max-w-2xl mx-auto">
                         <TabsList className="bg-white border border-slate-100 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center overflow-x-auto no-scrollbar">
                            <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
@@ -364,10 +364,10 @@ export default function ResultClient() {
                   </TabsContent>
 
                   <TabsContent value="REVIEW" className="space-y-8 max-w-5xl mx-auto px-4 pt-6">
-                      <div className="sticky top-[160px] md:top-[192px] z-[45] py-4 bg-[#F8FAFC]/95 backdrop-blur-md -mx-4 px-4 border-b border-slate-100 mb-6">
+                      <div className="py-4 -mx-4 px-4 border-b border-slate-100 mb-6 bg-transparent">
                          <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl shadow-xl border border-slate-100 w-full max-w-2xl mx-auto">
                              <FilterButton active={activeReviewFilter === 'ALL'} label="All Questions" onClick={() => setActiveReviewFilter('ALL')} />
-                             <FilterButton active={activeReviewFilter === 'WRONG'} label={`Mistakes (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                             <FilterButton active={activeReviewFilter === 'WRONG'} label={`Fix Errors (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                              <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                          </div>
                       </div>
