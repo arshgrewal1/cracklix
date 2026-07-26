@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -43,8 +44,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Subject Selection Hub v5.1.
- * FIXED: Removed uppercase from series titles to respect admin input.
+ * @fileOverview Premium Subject Selection Hub v5.2 [Sticky Removed].
+ * FIXED: Removed sticky search/filter container and purged all uppercase text.
  */
 
 const QUICK_ACTIONS = [
@@ -58,7 +59,7 @@ const QUICK_ACTIONS = [
 const FILTER_CHIPS = [
   { id: "all", label: "All" },
   { id: "completed", label: "Completed" },
-  { id: "in-progress", label: "In Progress" },
+  { id: "in-progress", label: "In progress" },
   { id: "Easy", label: "Easy" },
   { id: "Medium", label: "Medium" },
   { id: "Hard", label: "Hard" },
@@ -123,7 +124,6 @@ export default function SubjectDetailPortal() {
       const attempted = testsInSer.filter(m => (results || []).some((r: any) => r.mockId === m.id)).length;
       const qCount = testsInSer.reduce((acc, m) => acc + (m.totalQuestions || 0), 0);
       
-      // Calculate real average duration for this series
       const totalDuration = testsInSer.reduce((acc, m) => acc + (Number(m.duration) || 0), 0);
       const avgTime = testsInSer.length > 0 ? Math.round(totalDuration / testsInSer.length) : 0;
       
@@ -154,7 +154,10 @@ export default function SubjectDetailPortal() {
   if (!subject) return (
      <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
         <AlertCircle className="h-16 w-16 text-slate-200" />
-        <h2 className="text-2xl font-black text-[#0F172A]">Subject hub not found</h2>
+        <div className="space-y-2">
+           <h2 className="text-2xl font-black text-[#0F172A]">Subject hub not found</h2>
+           <p className="text-slate-500 font-medium max-w-sm mx-auto">This subject hub is currently unavailable.</p>
+        </div>
         <Button onClick={() => router.push('/subjects')} variant="outline">Back to vault</Button>
      </div>
   )
@@ -210,30 +213,32 @@ export default function SubjectDetailPortal() {
          </div>
       </section>
 
-      <div className="sticky top-[80px] z-[45] bg-[#F8FAFC]/80 backdrop-blur-xl border-b border-slate-100 py-4 shadow-sm">
-         <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col md:flex-row items-center gap-4 md:gap-8">
-            <div className="relative group w-full md:max-w-md">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
-               <Input 
-                 value={searchTerm}
-                 onChange={e => setSearchTerm(e.target.value)}
-                 className="h-11 md:h-12 pl-12 rounded-xl bg-white border-slate-200 shadow-sm font-bold text-sm" 
-                 placeholder="Search series or test items..." 
-               />
-            </div>
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-1 md:pb-0">
-               {FILTER_CHIPS.map(chip => (
-                  <button 
-                    key={chip.id} 
-                    onClick={() => setActiveFilter(chip.id)}
-                    className={cn(
-                       "h-9 px-5 rounded-full font-bold text-[10px] md:text-xs uppercase tracking-tight whitespace-nowrap transition-all border",
-                       activeFilter === chip.id ? "bg-[#0F172A] border-[#0F172A] text-white shadow-xl" : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
-                    )}
-                  >
-                     {chip.label}
-                  </button>
-               ))}
+      <div className="bg-[#F8FAFC] border-b border-slate-100 py-6 md:py-8">
+         <div className="container mx-auto px-4 md:px-8 max-w-7xl space-y-6">
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+               <div className="relative group w-full md:max-w-md">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+                  <Input 
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className="h-11 md:h-12 pl-12 rounded-xl bg-white border-slate-200 shadow-sm font-bold text-sm" 
+                    placeholder="Search series or test items..." 
+                  />
+               </div>
+               <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-1 md:pb-0">
+                  {FILTER_CHIPS.map(chip => (
+                     <button 
+                       key={chip.id} 
+                       onClick={() => setActiveFilter(chip.id)}
+                       className={cn(
+                          "h-9 px-5 rounded-full font-bold text-[10px] md:text-xs tracking-tight whitespace-nowrap transition-all border",
+                          activeFilter === chip.id ? "bg-[#0F172A] border-[#0F172A] text-white shadow-xl" : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
+                       )}
+                     >
+                        {chip.label}
+                     </button>
+                  ))}
+               </div>
             </div>
          </div>
       </div>
@@ -243,7 +248,7 @@ export default function SubjectDetailPortal() {
             <div className="flex items-center justify-between px-1">
                <div className="space-y-1">
                   <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tighter">Test series</h2>
-                  <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Targeted practice modules</p>
+                  <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-tight">Targeted practice modules</p>
                </div>
             </div>
 
@@ -317,7 +322,6 @@ export default function SubjectDetailPortal() {
       </main>
 
       <Footer />
-      <div className="h-20 md:h-0" />
     </div>
   )
 }

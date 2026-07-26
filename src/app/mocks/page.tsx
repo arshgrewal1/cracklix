@@ -52,8 +52,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v4.8.
- * FIXED: Refined "Premium tests" filter to include series with locked content.
+ * @fileOverview Institutional Practice Hub v4.9 [Sticky Removed].
+ * FIXED: Removed sticky search bar behavior and purged uppercase styling.
  */
 
 const FILTER_CHIPS = [
@@ -94,10 +94,8 @@ export default function PracticeHub() {
       const attempted = seriesResults.length;
       const progress = testsInSer.length > 0 ? Math.round((attempted / testsInSer.length) * 100) : 0
       
-      // Access Audit
       const accessNode = hasSeriesAccess(profile, ser);
       
-      // Dynamic Content Analysis
       const counts = {
         totalTests: testsInSer.length,
         mock: testsInSer.filter(m => m.mockType === 'FULL').length,
@@ -134,7 +132,6 @@ export default function PracticeHub() {
     let base = processedSeries.filter(s => {
       const search = !searchTerm || s.title?.toLowerCase().includes(searchTerm.toLowerCase())
       
-      // Split the filters into categories
       const isAccessFilter = ['FREE', 'PREMIUM'].includes(activeFilter);
       const isDifficultyFilter = ['Easy', 'Medium', 'Hard'].includes(activeFilter);
 
@@ -188,7 +185,7 @@ export default function PracticeHub() {
            </div>
         </section>
 
-        <div className="sticky top-[84px] md:top-[116px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-xl -mx-4 px-4 py-3 md:py-4 border-b border-slate-100">
+        <div className="bg-[#F8FAFC] -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
            <div className="max-w-6xl mx-auto space-y-4">
               <div className="flex flex-col md:flex-row items-center gap-3">
                  <div className="relative group flex-1 w-full">
@@ -265,13 +262,13 @@ export default function PracticeHub() {
                              </div>
 
                              <div className="space-y-2 mb-2 flex-1">
-                                <div className="space-y-1">
+                                <div className="space-y-1 text-left">
                                    <p className="text-[9px] font-black text-primary uppercase tracking-widest">{ser.difficulty || 'Expert'}</p>
                                    <h3 className="text-[17px] md:text-xl font-[800] text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
                                       {ser.title}
                                    </h3>
                                 </div>
-                                <p className="text-slate-400 font-medium text-[11px] md:text-xs line-clamp-2 leading-relaxed opacity-80">
+                                <p className="text-slate-400 font-medium text-[11px] md:text-xs line-clamp-2 leading-relaxed opacity-80 text-left">
                                    {ser.description || "Official pattern test series verified by institutional mentors."}
                                 </p>
                              </div>
@@ -287,7 +284,7 @@ export default function PracticeHub() {
 
                              <div className="space-y-2 pt-2">
                                 <div className="flex justify-between items-center text-[8px] font-black uppercase text-slate-300 tracking-widest">
-                                   <span>My Progress</span>
+                                   <span>My progress</span>
                                    <span className="text-primary tabular-nums">{ser.progress}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">

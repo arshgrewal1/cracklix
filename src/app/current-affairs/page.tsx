@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -41,8 +42,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Current Affairs Hub v6.0.
- * UPDATED: Removed sticky positioning for search and filter controls.
+ * @fileOverview Premium Current Affairs Hub v6.1 [Sticky Removed].
+ * FIXED: Removed sticky search/filter behaviors and purged uppercase styling.
  */
 
 const CATEGORIES = [
@@ -146,7 +147,7 @@ export default function CurrentAffairsCenter() {
           </div>
         </section>
 
-        <div className="bg-[#F8FAFC] -mx-4 px-4 py-4 border-b border-slate-100">
+        <div className="bg-[#F8FAFC] -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
            <div className="max-w-5xl mx-auto space-y-6">
               <div className="flex flex-col md:flex-row items-center gap-4">
                  <div className="relative group flex-1 w-full">
@@ -157,9 +158,6 @@ export default function CurrentAffairsCenter() {
                       placeholder="Search current affairs..." 
                       className="h-14 rounded-2xl bg-white border-slate-200 shadow-sm text-base font-bold pl-14 pr-12 focus-visible:ring-4 focus-visible:ring-primary/5"
                     />
-                    <button className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-primary transition-all border-none bg-transparent cursor-pointer">
-                       <Filter className="h-5 w-5" />
-                    </button>
                  </div>
 
                  <div className="bg-slate-100 p-1 rounded-2xl flex items-center h-14 w-full md:w-auto shrink-0">

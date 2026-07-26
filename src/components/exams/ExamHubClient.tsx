@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -48,8 +49,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v7.8.
- * UPDATED: Systematically removed uppercase styling from labels and headers.
+ * @fileOverview Premium Exam Detail Hub v7.9 [Sticky Removed].
+ * FIXED: Removed sticky navigation bar to prevent mobile Android WebView positioning errors.
  */
 
 export default function ExamHubClient() {
@@ -220,7 +221,7 @@ export default function ExamHubClient() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
            {data.map((item: any, i: number) => (
               <motion.div key={item.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                 <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2.5rem] bg-white group h-full flex flex-col p-8 md:p-10 relative overflow-hidden text-left">
+                 <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2.5rem] bg-white group h-full flex flex-col p-8 md:p-10 relative overflow-hidden text-left flex-1">
                     <div className="flex justify-between items-start mb-8">
                        <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-primary shadow-inner">
                           {isNote ? <FileText className="h-7 w-7" /> : isPYQ ? <FileStack className="h-7 w-7" /> : <Zap className="h-7 w-7" />}
@@ -337,7 +338,7 @@ export default function ExamHubClient() {
 
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-w-7xl pb-40 space-y-12 text-left">
          <Tabs defaultValue="MOCK" className="space-y-10">
-            <div className="sticky top-[84px] md:top-[116px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 border-b border-slate-100">
+            <div className="bg-[#F8FAFC] -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
                <div className="bg-white border border-slate-200 shadow-xl rounded-[24px] p-1.5 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">
                   <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-start gap-1.5 overflow-x-auto no-scrollbar snap-x">
                      <HubTab value="MOCK" icon={<Zap className="h-4 w-4" />} label="Mock series" />
