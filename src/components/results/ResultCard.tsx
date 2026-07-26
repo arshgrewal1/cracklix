@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -43,9 +44,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v12.0 [Margin Fixed].
- * FIXED: QR Code alignment and side margins to match header alignment.
- * FIXED: Replaced Mistakes with Wrong.
+ * @fileOverview Official Institutional Report Card v12.1 [Margin & Rank Hardened].
+ * FIXED: Terminology (Wrong) and Rank Integration.
  */
 export default function ResultCard({
   studentName,
@@ -87,7 +87,7 @@ export default function ResultCard({
               )}
             </div>
             <div className="space-y-1">
-              <h2 className="text-5xl font-black text-[#0F172A] tracking-tighter leading-none">{orgName}</h2>
+              <h2 className="text-5xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">{orgName}</h2>
               <p className="text-[14px] font-bold text-slate-400 tracking-[0.4em] uppercase">Official Merit Portal</p>
             </div>
           </div>
@@ -101,15 +101,15 @@ export default function ResultCard({
         <div className="grid grid-cols-12 gap-10 items-center">
            <div className="col-span-8 space-y-6">
               <div className="space-y-2">
-                 <h1 className="text-5xl font-black text-[#0F172A] tracking-tight leading-none">{studentName}</h1>
-                 <p className="text-primary font-bold text-2xl tracking-tight mt-1">{examTitle}</p>
+                 <h1 className="text-5xl font-black text-[#0F172A] tracking-tight leading-none uppercase">{studentName}</h1>
+                 <p className="text-primary font-bold text-2xl tracking-tight mt-1 uppercase">{examTitle}</p>
               </div>
               <div className="flex items-center gap-8 pt-2">
                  <div className="flex items-center gap-3 text-slate-400 font-bold text-[12px] tracking-widest uppercase">
                     <ShieldCheck className="h-5 w-5 text-emerald-500" /> Identity Verified
                  </div>
                  <div className="flex items-center gap-3 text-slate-400 font-bold text-[12px] tracking-widest uppercase">
-                    <Target className="h-5 w-5 text-primary" /> Entry ID: {resultId.slice(-8)}
+                    <Target className="h-5 w-5 text-primary" /> Punjab Rank: #{rank}
                  </div>
               </div>
            </div>
@@ -160,7 +160,7 @@ export default function ResultCard({
                 <tbody className="divide-y-4 divide-slate-50">
                   {subjects.map((s, i) => (
                     <tr key={i} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-10 py-8 font-bold text-[#0F172A] text-2xl tracking-tight">{s.name}</td>
+                      <td className="px-10 py-8 font-bold text-[#0F172A] text-2xl tracking-tight uppercase">{s.name}</td>
                       <td className="px-6 py-8 text-center font-black text-primary tabular-nums text-4xl">{s.score.toFixed(1)}</td>
                       <td className="px-10 py-8 text-right">
                         <Badge className={cn(
@@ -189,7 +189,7 @@ export default function ResultCard({
             <div className="flex items-center justify-end md:justify-start gap-6">
               <ShieldCheck className="h-14 w-14 text-emerald-500" />
               <div className="text-left">
-                 <p className="text-3xl font-black text-[#0F172A] tracking-tighter leading-none">Institutional Precision Verified</p>
+                 <p className="text-3xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">Institutional Precision Verified</p>
                  <p className="text-[14px] font-bold text-slate-400 mt-2 tracking-widest uppercase">Registry ID: {resultId}</p>
               </div>
             </div>

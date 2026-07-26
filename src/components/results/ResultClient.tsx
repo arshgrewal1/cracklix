@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, Suspense } from "react"
@@ -66,8 +67,8 @@ import { BrandingSettings } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Result Hub v4.0 [Hardened].
- * FIXED: Terminology (Mistakes -> Wrong), Button/Icon alignment, and Punjab Rank precision.
+ * @fileOverview Official Result Hub v4.1 [PDF & Rank Hardened].
+ * FIXED: Standardized 'Wrong' terminology and aligned PDF action.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -166,7 +167,7 @@ export default function ResultClient() {
 
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
-    if (!confirm("Confirm reset? This will purge your current progress.")) return;
+    if (!confirm("Confirm reset? This will purge your current attempt and rank.")) return;
     setIsSyncing(true);
     try {
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
@@ -175,7 +176,11 @@ export default function ResultClient() {
     finally { setIsSyncing(false); }
   };
 
-  const handleDownloadPDF = () => { setActiveMainTab("REPORT"); setTimeout(() => { window.print(); }, 500); };
+  const handleDownloadPDF = () => { 
+    setActiveMainTab("REPORT"); 
+    toast({ title: "Preparing Report", description: "Standardizing A4 PDF layout..." });
+    setTimeout(() => { window.print(); }, 1000); 
+  };
 
   const reviewNodes = useMemo(() => {
     if (!activeSession || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
@@ -204,7 +209,7 @@ export default function ResultClient() {
      if (!secs || secs <= 0) return "---";
      const m = Math.floor(secs / 60);
      const s = secs % 60;
-     return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
+     return m > 0 ? `${m}m ${s}s` : `${s}s`;
   };
 
   if (!mounted || (resultLoading && user) || !activeSession) {
@@ -228,11 +233,11 @@ export default function ResultClient() {
                    {activeSession.mockTitle}
                  </h1>
                  <div className="flex flex-wrap items-center gap-4 font-bold text-[10px] md:text-sm tracking-tight">
-                    <div className="flex items-center gap-1.5 bg-white border border-slate-100 px-3 py-1.5 rounded-lg text-slate-500">
+                    <div className="flex items-center gap-1.5 bg-white border border-slate-100 px-3 py-1.5 rounded-lg text-slate-500 shadow-sm">
                        <Clock className="h-4 w-4" /> 
                        <span>{new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg text-primary">
+                    <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg text-primary shadow-sm">
                        <Trophy className="h-4 w-4" /> 
                        <span>Score: {activeSession.score.toFixed(1)}</span>
                     </div>
@@ -255,7 +260,7 @@ export default function ResultClient() {
                    onClick={handleRetake} 
                    disabled={isSyncing} 
                    variant="outline"
-                   className="flex-1 h-12 rounded-xl font-bold uppercase border-2 border-slate-100 bg-white text-[#0F172A] gap-2 text-[10px] tracking-widest hover:bg-slate-50 transition-all active:scale-95"
+                   className="flex-1 h-12 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-widest hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
                  >
                     {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} Retake
                  </Button>
@@ -263,7 +268,7 @@ export default function ResultClient() {
                    onClick={handleDownloadPDF} 
                    className="flex-1 h-12 rounded-xl font-bold uppercase bg-[#0F172A] hover:bg-black text-white gap-2 text-[10px] tracking-widest transition-all active:scale-95 border-none shadow-xl"
                  >
-                    <Download className="h-4 w-4" /> PDF
+                    <Download className="h-4 w-4" /> Download PDF
                  </Button>
               </div>
            </div>
@@ -315,7 +320,7 @@ export default function ResultClient() {
                        </h2>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {Array.isArray(activeSession.insights) && activeSession.insights.map((ins: string, i: number) => (
-                             <div key={i} className="p-5 rounded-2xl bg-slate-50/50 border border-slate-100 flex items-start gap-4">
+                             <div key={i} className="p-5 rounded-2xl bg-slate-50/50 border border-slate-100 flex items-start gap-4 shadow-sm">
                                 <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                                 <p className="text-[12px] md:text-sm font-medium text-slate-600 tracking-tight leading-snug">{ins}</p>
                              </div>
@@ -327,15 +332,15 @@ export default function ResultClient() {
                  <div className="lg:col-span-4 space-y-8">
                     <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-10 text-left space-y-8">
                        <div className="space-y-1">
-                          <h3 className="text-lg md:text-2xl font-black flex items-center gap-3"><Layers className="h-5 w-5 text-primary" /> Complexity</h3>
+                          <h3 className="text-lg md:text-2xl font-black flex items-center gap-3 text-[#0F172A] uppercase tracking-tight"><Layers className="h-5 w-5 text-primary" /> Complexity</h3>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mastery level hub</p>
                        </div>
                        <div className="space-y-8">
                           {Array.isArray(activeSession.complexityAnalysis) && activeSession.complexityAnalysis.map((diff: any, i: number) => (
                              <div key={i} className="space-y-2.5">
                                 <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">
-                                   <span>{diff.name} items</span>
-                                   <span className="text-[#0F172A] font-black">{diff.accuracy}%</span>
+                                   <span>{diff.name} Questions</span>
+                                   <span className="text-[#0F172A] font-black tabular-nums">{diff.accuracy}%</span>
                                 </div>
                                 <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
                                    <motion.div 
@@ -355,14 +360,14 @@ export default function ResultClient() {
                        <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-48 w-48 text-primary" /></div>
                        <div className="relative z-10 space-y-6">
                           <div className="space-y-1">
-                             <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight">Punjab Rank</h3>
-                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global ranking node</p>
+                             <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight uppercase">Punjab Rank</h3>
+                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global standing node</p>
                           </div>
                           <div className="p-6 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-2">
                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Current position</p>
                              <p className="text-4xl font-black text-primary tabular-nums tracking-tighter">#{liveRank}</p>
                           </div>
-                          <Button asChild className="w-full h-14 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-2xl border-none">
+                          <Button asChild className="w-full h-14 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-2xl border-none active:scale-95 transition-all">
                              <Link href="/leaderboard">View Leaderboard <ArrowRight className="ml-2 h-4 w-4" /></Link>
                           </Button>
                        </div>
@@ -374,7 +379,7 @@ export default function ResultClient() {
            <TabsContent value="REVIEW" className="space-y-12 animate-in fade-in duration-500">
               <div className="max-w-4xl mx-auto space-y-10">
                  <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
-                    <FilterButton active={activeReviewFilter === 'ALL'} label="All items" onClick={() => setActiveReviewFilter('ALL')} />
+                    <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
                     <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                     <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                     <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skipped" onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
@@ -434,7 +439,7 @@ export default function ResultClient() {
                        wrong={activeSession.wrongCount} 
                        total={questions.length} 
                        date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')} 
-                       resultId={resolvedResultId || "REG"} 
+                       resultId={resolvedResultId || "REGISTRY_NODE"} 
                        percentile={activeSession.accuracy} 
                        branding={branding}
                        subjects={activeSession.subjectAnalysis}
@@ -442,8 +447,8 @@ export default function ResultClient() {
                     />
                  </div>
                  <div className="mt-12 text-center space-y-4 print:hidden">
-                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Print official institutional report card.</p>
-                    <Button onClick={() => window.print()} className="h-16 px-16 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-xs rounded-2xl shadow-xl border-none active:scale-95">Print report card</Button>
+                    <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Official institutional report card node.</p>
+                    <Button onClick={handleDownloadPDF} className="h-16 px-16 bg-[#0F172A] hover:bg-black text-white font-bold uppercase tracking-widest text-xs rounded-2xl shadow-xl border-none active:scale-95">Print Report Card</Button>
                  </div>
               </div>
            </TabsContent>
