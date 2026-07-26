@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, Suspense } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -19,7 +19,8 @@ import {
   increment,
   runTransaction,
   deleteDoc,
-  getCountFromServer
+  getCountFromServer,
+  orderBy
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -47,7 +48,9 @@ import {
   Search,
   Download,
   X,
-  MapPin
+  MapPin,
+  TrendingUp,
+  History
 } from "lucide-react"
 import { 
   Card, 
@@ -66,9 +69,7 @@ import { BrandingSettings } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Result Hub v4.6 [Alignment & Terminology Refined].
- * FIXED: Optimized mobile header spacing and normalized Title Case terminology.
- * FIXED: Integrity gate verification (Correct + Wrong + Skipped == Total).
+ * @fileOverview Official Result Hub v5.0 [Ranking Rebuilt].
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -86,6 +87,7 @@ export default function ResultClient() {
   const [resolvedResultId, setResolvedResultId] = useState<string | null>(null)
   const [isSyncing, setIsSyncing] = useState(false)
   const [liveRank, setLiveRank] = useState<number | string>("---")
+  const [totalCandidates, setTotalCandidates] = useState<number>(0)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -114,15 +116,36 @@ export default function ResultClient() {
 
   useEffect(() => {
      if (!db || !mockId || !sessionData?.score) return;
-     async function calculateRank() {
+     async function fetchRankingMetrics() {
         try {
-           const rankQuery = query(collection(db, "results"), where("mockId", "==", mockId), where("score", ">", sessionData.score));
-           const countSnap = await getCountFromServer(rankQuery);
-           setLiveRank(countSnap.data().count + 1);
-        } catch (e) { setLiveRank("---"); }
+           const entriesRef = collection(db, "leaderboards", mockId, "entries");
+           
+           // Fetch all entries to calculate true percentile-based ranking
+           // Rule: Score DESC, Accuracy DESC, TimeTaken ASC
+           const q = query(
+              entriesRef,
+              orderBy("highestScore", "desc"),
+              orderBy("accuracy", "desc"),
+              orderBy("timeTaken", "asc"),
+              orderBy("submittedAt", "asc")
+           );
+           
+           const snap = await getDocs(q);
+           setTotalCandidates(snap.size);
+           
+           const myIndex = snap.docs.findIndex(d => d.id === user?.uid);
+           if (myIndex !== -1) {
+              setLiveRank(myIndex + 1);
+           } else {
+              setLiveRank(sessionData.rankAtSubmission || "---");
+           }
+        } catch (e) { 
+           setLiveRank(sessionData.rankAtSubmission || "---"); 
+           setTotalCandidates(sessionData.totalCandidatesAtSubmission || 0);
+        }
      }
-     calculateRank();
-  }, [db, mockId, sessionData?.score]);
+     fetchRankingMetrics();
+  }, [db, mockId, sessionData?.score, user?.uid, sessionData?.rankAtSubmission, sessionData?.totalCandidatesAtSubmission]);
 
   useEffect(() => {
      if (!user && !userLoading && mockId) {
@@ -167,12 +190,12 @@ export default function ResultClient() {
 
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
-    if (!confirm("Confirm reset? This will permanently clear your current attempt and rank.")) return;
+    if (!confirm("Confirm reset? This will permanently clear your current attempt tracker.")) return;
     
     setIsSyncing(true);
     try {
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
-      toast({ title: "Reset Complete", description: "Identity node cleared. Starting fresh." });
+      toast({ title: "Ready for Retake", description: "Identity node cleared. Starting fresh." });
       router.push(`/mocks/instructions?id=${mockId}&retake=true`);
     } catch (e) { 
       toast({ variant: "destructive", title: "Sync failure" }); 
@@ -220,8 +243,9 @@ export default function ResultClient() {
      return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
   }
 
-  // DATA INTEGRITY GATE
-  const integrityPass = activeSession.correctCount + activeSession.wrongCount + activeSession.skippedCount === questions.length;
+  const percentile = totalCandidates > 1 
+    ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1))
+    : 100;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
@@ -234,7 +258,7 @@ export default function ResultClient() {
               <div className="space-y-2 flex-1 min-w-0">
                  <div className="flex items-center gap-3">
                     <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performance Hub</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Verified Performance</span>
                  </div>
                  <h1 className="text-2xl md:text-5xl font-black tracking-tight text-[#0F172A] leading-tight truncate">
                    {activeSession.mockTitle}
@@ -246,7 +270,7 @@ export default function ResultClient() {
                     </div>
                     <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg text-primary shadow-sm">
                        <Trophy className="h-4 w-4" /> 
-                       <span>Score: {activeSession.score.toFixed(1)}</span>
+                       <span>Rank #{liveRank} of {totalCandidates || 1} Candidates</span>
                     </div>
                  </div>
               </div>
@@ -290,18 +314,11 @@ export default function ResultClient() {
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-16">
            
            <TabsContent value="OVERVIEW" className="space-y-12 animate-in fade-in duration-500">
-              {!integrityPass && (
-                 <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-4 animate-pulse">
-                    <AlertCircle className="h-5 w-5 text-rose-500" />
-                    <p className="text-xs font-bold text-rose-700 uppercase tracking-tight">Registry Integrity Warning: Data node mismatch detected.</p>
-                 </div>
-              )}
-
               <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
                  <StatCard label="Final Score" val={activeSession.score.toFixed(1)} icon={<Zap className="text-primary" />} />
                  <StatCard label="Punjab Rank" val={`#${liveRank}`} icon={<Trophy className="text-amber-500" />} highlight />
+                 <StatCard label="Percentile" val={`${percentile}%`} icon={<TrendingUp className="text-blue-500" />} />
                  <StatCard label="Accuracy" val={`${activeSession.accuracy}%`} icon={<Target className="text-emerald-500" />} />
-                 <StatCard label="Correct" val={activeSession.correctCount} icon={<CheckCircle2 className="text-emerald-600" />} />
                  <StatCard label="Wrong" val={activeSession.wrongCount} icon={<XCircle className="text-rose-500" />} />
                  <StatCard label="Time Taken" val={formatTimeStr(activeSession.timeTaken)} icon={<Clock className="text-blue-500" />} />
               </section>
@@ -309,7 +326,7 @@ export default function ResultClient() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                  <div className="lg:col-span-8 space-y-8">
                     <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
-                       <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight mb-12">Subject Analysis</h2>
+                       <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight mb-12">Subject Performance Audit</h2>
                        <div className="space-y-12">
                           {Array.isArray(activeSession.subjectAnalysis) && activeSession.subjectAnalysis.map((sub: any, i: number) => (
                              <div key={i} className="space-y-3">
@@ -352,8 +369,8 @@ export default function ResultClient() {
                  <div className="lg:col-span-4 space-y-8">
                     <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-10 text-left space-y-8">
                        <div className="space-y-1">
-                          <h3 className="text-lg md:text-xl font-black flex items-center gap-3 text-[#0F172A] uppercase tracking-tight"><Layers className="h-5 w-5 text-primary" /> Complexity</h3>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mastery Level</p>
+                          <h3 className="text-lg md:text-xl font-black flex items-center gap-3 text-[#0F172A] uppercase tracking-tight"><Layers className="h-5 w-5 text-primary" /> Mastery Level</h3>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Difficulty Breakdown</p>
                        </div>
                        <div className="space-y-8">
                           {Array.isArray(activeSession.complexityAnalysis) && activeSession.complexityAnalysis.map((diff: any, i: number) => (
@@ -380,15 +397,15 @@ export default function ResultClient() {
                        <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-48 w-48 text-primary" /></div>
                        <div className="relative z-10 space-y-6">
                           <div className="space-y-1">
-                             <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight uppercase">Punjab Rank</h3>
-                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global standing</p>
+                             <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight uppercase">Leaderboard</h3>
+                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Test Standings</p>
                           </div>
                           <div className="p-6 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-2 text-left">
-                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Current Position</p>
-                             <p className="text-4xl font-black text-primary tabular-nums tracking-tighter">#{liveRank}</p>
+                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Current Rank</p>
+                             <p className="text-4xl font-black text-primary tabular-nums tracking-tighter">#{liveRank} of {totalCandidates}</p>
                           </div>
                           <Button asChild className="w-full h-14 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-2xl border-none active:scale-95 transition-all">
-                             <Link href="/leaderboard">View Leaderboard <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                             <Link href={`/leaderboard?id=${mockId}`}>View Full Leaderboard <ArrowRight className="ml-2 h-4 w-4" /></Link>
                           </Button>
                        </div>
                     </Card>
@@ -460,7 +477,7 @@ export default function ResultClient() {
                        total={questions.length} 
                        date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')} 
                        resultId={resolvedResultId || "REGISTRY_NODE"} 
-                       percentile={activeSession.accuracy} 
+                       percentile={percentile} 
                        branding={branding}
                        subjects={activeSession.subjectAnalysis}
                        grade={activeSession.grade}

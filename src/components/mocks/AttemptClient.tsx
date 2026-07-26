@@ -1,10 +1,9 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useUser, useAuth, useFirestore } from "@/firebase";
-import { doc, getDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc, runTransaction, increment } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc, updateDoc, increment } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import ExamHeader from "@/components/exam/ExamHeader";
 import TacticalFooter from "@/components/exam/TacticalFooter";
@@ -26,11 +25,12 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
+import { nanoid } from "nanoid";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v12.2 [Optimized Submission].
+ * @fileOverview Official Mock Attempt Hub v14.0 [Ranking System Rebuilt].
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -214,7 +214,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const posMarks = Number(mockData.positiveMarks) || 1;
     const negMarks = Number(mockData.negativeMarks) || 0.25;
 
-    // SUBJECT & COMPLEXITY SNAPSHOT ENGINE
     const subMap: Record<string, any> = {};
     const diffMap: Record<string, any> = { 
       easy: { name: 'Easy', total: 0, correct: 0, wrong: 0, accuracy: 0 }, 
@@ -253,92 +252,133 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const timeTaken = Math.max(1, elapsedSeconds);
     const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
     
-    const insights = [];
-    if (accuracy >= 85) insights.push("Excellent accuracy levels maintained.");
-    else if (accuracy < 50) insights.push("Accuracy needs attention. Focus on core concepts.");
-    if (wrongCount > (correctCount / 2)) insights.push("High error rate detected. Avoid guessing.");
-    
     await stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
-
-    const resultPayload: any = {
-      attemptId,
-      mockId, 
-      mockTitle: mockData.title || mockTitle, 
-      score: finalScore,
-      correctCount, 
-      wrongCount, 
-      skippedCount: questions.length - attemptedCount,
-      attemptedCount, 
-      totalQuestions: questions.length,
-      accuracy,
-      grade: calculateGrade(accuracy),
-      timeTaken, 
-      answers: answers || {}, 
-      timestamp: new Date().toISOString(),
-      languageMode: language,
-      accessLevel: (mockData.accessLevel || 'FREE').toUpperCase(),
-      mockType: mockData.mockType || 'PRACTICE',
-      positiveMarks: posMarks,
-      negativeMarks: negMarks,
-      insights,
-      subjectAnalysis: Object.values(subMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
-      complexityAnalysis: Object.values(diffMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) }))
-    };
 
     try {
       if (user) {
-        resultPayload.userId = user.uid; 
-        resultPayload.userName = profile?.name || 'Aspirant';
-        resultPayload.userEmail = user.email || ""; 
-        resultPayload.createdAt = serverTimestamp();
+        // 1. UPDATE LEADERBOARD (Best Attempt Protocol)
+        const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
+        const lbSnap = await getDoc(lbEntryRef);
         
-        const resDocId = `${user.uid}_${mockId}_${attemptId}`;
-        await setDoc(doc(db, "results", resDocId), resultPayload);
+        let isNewBest = true;
+        let attemptCount = 1;
+
+        if (lbSnap.exists()) {
+           const existing = lbSnap.data();
+           attemptCount = (existing.attemptCount || 0) + 1;
+           
+           // Tie-break Rules: Score > Accuracy > Time > TimeStamp
+           const hasHigherScore = finalScore > existing.highestScore;
+           const hasEqualScoreHigherAcc = (finalScore === existing.highestScore && accuracy > existing.accuracy);
+           const hasEqualScoreAccLowerTime = (finalScore === existing.highestScore && accuracy === existing.accuracy && timeTaken < existing.timeTaken);
+           
+           isNewBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
+        }
+
+        if (isNewBest) {
+           await setDoc(lbEntryRef, {
+              userId: user.uid,
+              userName: profile?.name || 'Aspirant',
+              photoURL: profile?.photoURL || "",
+              gender: profile?.gender || 'Other',
+              mockId,
+              highestScore: finalScore,
+              accuracy,
+              timeTaken,
+              attemptCount,
+              bestAttemptId: attemptId,
+              submittedAt: serverTimestamp()
+           }, { merge: true });
+        } else {
+           await updateDoc(lbEntryRef, {
+              attemptCount: increment(1),
+              updatedAt: serverTimestamp()
+           });
+        }
+
+        // 2. CALCULATE LIVE RANK (Rank at Submission)
+        const entriesSnap = await getDocs(query(collection(db, "leaderboards", mockId, "entries")));
+        const allEntries = entriesSnap.docs.map(d => d.data());
         
+        // Sorting by institutional rules
+        allEntries.sort((a: any, b: any) => {
+           if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
+           if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+           if (a.timeTaken !== b.timeTaken) return a.timeTaken - b.timeTaken;
+           return (a.submittedAt?.seconds || 0) - (b.submittedAt?.seconds || 0);
+        });
+
+        const myRankIndex = allEntries.findIndex(e => e.userId === user.uid);
+        const rankAtSubmission = myRankIndex + 1;
+        const totalCandidates = allEntries.length;
+
+        // 3. SAVE FINAL RESULT
+        const resultPayload = {
+           attemptId,
+           mockId,
+           mockTitle: mockData.title || mockTitle,
+           userId: user.uid,
+           userName: profile?.name || 'Aspirant',
+           userEmail: user.email || "",
+           score: finalScore,
+           correctCount,
+           wrongCount,
+           skippedCount: questions.length - attemptedCount,
+           attemptedCount,
+           totalQuestions: questions.length,
+           accuracy,
+           grade: calculateGrade(accuracy),
+           timeTaken,
+           rankAtSubmission,
+           totalCandidatesAtSubmission: totalCandidates,
+           timestamp: new Date().toISOString(),
+           createdAt: serverTimestamp(),
+           languageMode: language,
+           mockType: mockData.mockType || 'PRACTICE',
+           positiveMarks: posMarks,
+           negativeMarks: negMarks,
+           subjectAnalysis: Object.values(subMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
+           complexityAnalysis: Object.values(diffMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) }))
+        };
+
+        await setDoc(doc(db, "results", `${user.uid}_${mockId}_${attemptId}`), resultPayload);
+        
+        // Update User Profile Aggregates
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+           totalTests: increment(1),
+           updatedAt: serverTimestamp()
+        });
+
+        // 4. SYNC ATTEMPT STATUS
         await setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { 
            attemptId,
            status: 'COMPLETED', 
            updatedAt: serverTimestamp() 
         }, { merge: true });
-        
-        const leaderboardRef = doc(db, "leaderboard", user.uid);
-        await runTransaction(db, async (transaction) => {
-          const lbSnap = await transaction.get(leaderboardRef);
-          if (!lbSnap.exists()) {
-            transaction.set(leaderboardRef, {
-              uid: user.uid,
-              displayName: profile?.name || 'Aspirant',
-              photoURL: profile?.photoURL || "",
-              highestScore: finalScore,
-              totalTests: 1,
-              updatedAt: serverTimestamp(),
-              gender: profile?.gender || 'Other',
-              recentMockTitle: mockData.title,
-              boardId: mockData.boardId || "GENERAL",
-              examId: mockData.examId || "GENERAL"
-            });
-          } else {
-            const data = lbSnap.data();
-            const currentHighest = Number(data.highestScore) || 0;
-            const updates: any = { totalTests: increment(1), updatedAt: serverTimestamp() };
-            if (finalScore > currentHighest) {
-              updates.highestScore = finalScore;
-              updates.recentMockTitle = mockData.title;
-              updates.boardId = mockData.boardId || data.boardId;
-              updates.examId = mockData.examId || data.examId;
-            }
-            transaction.update(leaderboardRef, updates);
-          }
-        });
 
         resetStore();
         router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
       } else {
-        localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify(resultPayload));
+        // Guest Path (Minimal ranking)
+        const guestResult = {
+           attemptId,
+           mockId,
+           mockTitle: mockData.title || mockTitle,
+           score: finalScore,
+           accuracy,
+           totalQuestions: questions.length,
+           correctCount,
+           wrongCount,
+           timeTaken,
+           timestamp: new Date().toISOString()
+        };
+        localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify(guestResult));
         resetStore();
-        router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}&guest=true`);
+        router.replace(`/results/view?id=${mockId}&guest=true`);
       }
     } catch (e) {
+      console.error("[SUBMISSION_FAILURE]:", e);
       setIsSubmittingFinal(false);
     }
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language]);

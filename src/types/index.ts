@@ -97,6 +97,12 @@ export interface UserProfile {
   gender?: Gender;
   pinnedExams?: string[];
   savedVacancies?: string[];
+  // Aggregate Stats
+  totalTests?: number;
+  highestScore?: number;
+  averageAccuracy?: number;
+  averageTime?: number;
+  bestRank?: number;
   pass?: {
     active: boolean;
     plan: string;
@@ -105,6 +111,21 @@ export interface UserProfile {
     allowedSeries?: string[];
     allowedCategories?: string[];
   };
+}
+
+export interface LeaderboardEntry {
+  userId: string;
+  userName: string;
+  photoURL?: string;
+  gender?: Gender;
+  mockId: string;
+  highestScore: number;
+  accuracy: number;
+  timeTaken: number;
+  attemptCount: number;
+  bestAttemptId: string;
+  submittedAt: any;
+  rank: number;
 }
 
 export interface DistributionSettings {

@@ -4,7 +4,7 @@ import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore, useAuth } from "@/firebase"
-import { collection, query, where, doc, updateDoc, serverTimestamp, deleteDoc } from "firebase/firestore"
+import { collection, query, where, doc, updateDoc, serverTimestamp, deleteDoc, getDocs, limit, orderBy } from "firebase/firestore"
 import { deleteUser } from "firebase/auth"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -41,7 +41,9 @@ import {
   LucideIcon,
   Timer,
   AlertCircle,
-  ShieldAlert
+  ShieldAlert,
+  TrendingUp,
+  BarChart3
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -50,9 +52,10 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
+import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v28.0 [Join Date Fixed].
+ * @fileOverview Institutional Profile Hub v30.0 [Ranking Rebuilt].
  */
 
 export default function ProfilePage() {
@@ -66,19 +69,12 @@ export default function ProfilePage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState("")
   const [editForm, setEditForm] = useState<any>({
-    name: "",
-    email: "",
-    phone: "",
-    dob: "",
-    address: "",
-    targetExam: ""
+    name: "", email: "", phone: "", dob: "", address: "", targetExam: ""
   })
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login?returnUrl=/profile")
-    }
+    if (!loading && !user) router.push("/login?returnUrl=/profile")
   }, [user, loading, router])
 
   useEffect(() => {
@@ -97,57 +93,33 @@ export default function ProfilePage() {
 
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid))
+    return query(collection(db, "results"), where("userId", "==", user.uid), orderBy("createdAt", "desc"), limit(10))
   }, [db, user])
 
-  const { data: allResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
+  const { data: results, loading: resultsLoading } = useCollection<any>(resultsQuery)
 
-  const results = useMemo(() => {
-    if (!allResults) return []
-    return [...allResults].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-  }, [allResults])
-
-  const stats = useMemo(() => {
-    if (!results || results.length === 0) return { total: 0, avgAccuracy: 0, rank: "N/A" }
-    const total = results.length
-    const avgAccuracy = Math.round(results.reduce((acc: number, curr: any) => acc + (curr.accuracy || 0), 0) / (total || 1))
-    return { total, avgAccuracy, rank: total > 5 ? "Top 12%" : "Awaiting" }
-  }, [results])
-
-  const passInfo = useMemo(() => {
-     if (!profile?.passExpiresAt) return null;
-     const expiry = new Date(profile.passExpiresAt);
-     const now = new Date();
-     const active = expiry > now;
-     const diffTime = Math.abs(expiry.getTime() - now.getTime());
-     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-     return {
-        active,
-        expiryDate: expiry.toLocaleDateString('en-GB'),
-        daysLeft: diffDays,
-        label: active ? 'Elite Member' : 'Pass Expired',
-        color: active ? '#2563EB' : '#ef4444'
-     }
+  const aggregateStats = useMemo(() => {
+    if (!profile) return { totalTests: 0, highestScore: 0, avgAccuracy: 0, avgTime: 0, bestRank: "---" }
+    
+    // In a real high-scale system, we'd query aggregate collections
+    // For now we use the values updated by AttemptClient
+    return {
+       totalTests: profile.totalTests || 0,
+       highestScore: profile.highestScore || 0,
+       avgAccuracy: profile.averageAccuracy || 0,
+       avgTime: profile.averageTime || 0,
+       bestRank: profile.bestRank ? `#${profile.bestRank}` : "---"
+    }
   }, [profile]);
 
-  // Robust Date Parser for Join Date
   const joinDate = useMemo(() => {
     if (!profile?.createdAt) return "---";
     try {
       const dateNode = profile.createdAt;
-      const date = dateNode?.seconds 
-        ? new Date(dateNode.seconds * 1000) 
-        : new Date(dateNode);
-      
+      const date = dateNode?.seconds ? new Date(dateNode.seconds * 1000) : new Date(dateNode);
       if (isNaN(date.getTime())) return "---";
-      
-      return date.toLocaleDateString('en-GB', { 
-        month: 'short', 
-        year: 'numeric' 
-      });
-    } catch (e) {
-      return "---";
-    }
+      return date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+    } catch (e) { return "---"; }
   }, [profile?.createdAt]);
 
   const handleUpdateProfile = async () => {
@@ -175,13 +147,8 @@ export default function ProfilePage() {
         toast({ title: "Account Purged", description: "All data nodes have been deleted." });
         router.push('/login');
      } catch (e: any) {
-        console.error("[PURGE_FAILURE]:", e);
         if (e.code === 'auth/requires-recent-login') {
-           toast({ 
-             variant: "destructive", 
-             title: "Security Barrier", 
-             description: "Please re-login and try again immediately." 
-           });
+           toast({ variant: "destructive", title: "Security Barrier", description: "Please re-login and try again immediately." });
         } else {
            toast({ variant: "destructive", title: "Deletion Failed" });
         }
@@ -201,7 +168,7 @@ export default function ProfilePage() {
            <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 blur-[120px] rounded-full" />
            <div className="container mx-auto px-4 md:px-12 max-w-6xl pt-6 md:pt-16 pb-10 md:pb-24">
               <div className="flex flex-row items-center md:items-end gap-4 md:gap-12 relative z-10">
-                 <div className="relative group shrink-0">
+                 <div className="relative shrink-0">
                     {profileLoading ? (
                       <Skeleton className="h-16 w-16 md:h-44 md:w-44 rounded-2xl md:rounded-[3rem] bg-white/5" />
                     ) : (
@@ -241,43 +208,51 @@ export default function ProfilePage() {
 
         <div className="container mx-auto px-3 md:px-6 lg:px-12 max-w-6xl -mt-6 md:-mt-12 relative z-20">
            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-12">
-              <div className="lg:col-span-8 space-y-4 md:space-y-12">
-                 {passInfo && (
-                    <Card className="border-none shadow-3xl rounded-2xl md:rounded-[2.5rem] bg-white p-5 md:p-12 overflow-hidden relative group border border-slate-100">
-                       <div className="absolute top-0 left-0 w-1.5 h-full" style={{ backgroundColor: passInfo.color }} />
-                       <div className="flex items-center justify-between">
-                          <div className="space-y-4">
-                             <div className="space-y-0.5">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PASS STATUS</p>
-                                <h3 className="text-xl md:text-4xl font-headline font-black uppercase leading-tight" style={{ color: passInfo.color }}>{passInfo.label}</h3>
-                             </div>
-                             <div className="grid grid-cols-2 gap-4 md:gap-8">
-                                <div className="space-y-0.5">
-                                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">EXPIRES ON</p>
-                                   <p className="text-xs md:lg font-bold text-[#0F172A]">{passInfo.expiryDate}</p>
-                                </div>
-                                <div className="space-y-0.5 text-left">
-                                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">TIME LEFT</p>
-                                   <p className="text-xs md:lg font-bold text-[#0F172A]">{passInfo.active ? `${passInfo.daysLeft} Days` : 'N/A'}</p>
-                                </div>
-                             </div>
-                          </div>
-                          <div className="shrink-0">
-                             <div className="h-12 w-12 md:h-24 md:w-24 rounded-xl flex items-center justify-center shadow-xl border" style={{ backgroundColor: passInfo.color + '10', borderColor: passInfo.color + '20' }}>
-                                <Gem className="h-6 w-6 md:h-12 md:w-12" style={{ color: passInfo.color }} />
-                             </div>
-                          </div>
-                       </div>
-                    </Card>
-                 )}
-
-                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-8">
-                    <StatsCard icon={ClipboardList} label="Tests" value={resultsLoading ? "..." : stats.total} color="text-blue-500" bgColor="bg-blue-50" />
-                    <StatsCard icon={Target} label="Accuracy" value={resultsLoading ? "..." : `${stats.avgAccuracy}%`} color="text-primary" bgColor="bg-primary/10" />
-                    <StatsCard icon={Trophy} label="Rank" value={resultsLoading ? "..." : stats.rank} color="text-emerald-500" bgColor="bg-emerald-50" className="hidden sm:flex" />
+              <div className="lg:col-span-8 space-y-4 md:space-y-10">
+                 
+                 {/* ANALYTICS HUD */}
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+                    <StatsCard icon={<ClipboardList />} label="Tests" value={aggregateStats.totalTests} color="text-blue-500" bgColor="bg-blue-50" />
+                    <StatsCard icon={<Target />} label="Accuracy" value={`${aggregateStats.avgAccuracy}%`} color="text-emerald-500" bgColor="bg-emerald-50" />
+                    <StatsCard icon={<Trophy />} label="Peak Rank" value={aggregateStats.bestRank} color="text-amber-500" bgColor="bg-amber-50" />
+                    <StatsCard icon={<Zap />} label="High Score" value={aggregateStats.highestScore.toFixed(1)} color="text-primary" bgColor="bg-primary/10" />
                  </div>
 
-                 <Card className="border-none shadow-3xl rounded-2xl md:rounded-[3rem] bg-white p-5 md:p-14 space-y-6 md:space-y-12 text-left border border-slate-100">
+                 {/* RECENT ATTEMPTS HUB */}
+                 <Card className="border-none shadow-3xl rounded-[2.5rem] bg-white overflow-hidden border border-slate-100">
+                    <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/30">
+                       <CardTitle className="text-xl font-black text-[#0F172A] flex items-center gap-3">
+                          <History className="h-6 w-6 text-primary" /> Recent Attempts
+                       </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                       <div className="divide-y divide-slate-50">
+                          {resultsLoading ? (
+                             Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full" />)
+                          ) : results && results.length > 0 ? (
+                             results.map((res: any) => (
+                                <Link key={res.id} href={`/results/view?id=${res.mockId}&attemptId=${res.attemptId}`} className="flex items-center justify-between p-6 hover:bg-slate-50 transition-all group">
+                                   <div className="flex items-center gap-4 min-w-0">
+                                      <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:text-primary group-hover:bg-primary/5 transition-all"><Zap className="h-5 w-5" /></div>
+                                      <div className="min-w-0">
+                                         <p className="font-bold text-sm md:text-lg text-[#0F172A] truncate">{res.mockTitle}</p>
+                                         <div className="flex items-center gap-3 mt-0.5">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tabular-nums">{new Date(res.timestamp).toLocaleDateString('en-GB')}</span>
+                                            <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black px-2">Rank #{res.rankAtSubmission || '---'}</Badge>
+                                         </div>
+                                      </div>
+                                   </div>
+                                   <ChevronRight className="h-5 w-5 text-slate-200 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                                </Link>
+                             ))
+                          ) : (
+                             <div className="py-20 text-center opacity-20 italic font-black uppercase text-sm">No attempts recorded</div>
+                          )}
+                       </div>
+                    </CardContent>
+                 </Card>
+
+                 <Card className="border-none shadow-3xl rounded-[2.5rem] bg-white p-5 md:p-14 space-y-6 md:space-y-12 text-left border border-slate-100">
                     <div className="flex items-center justify-between border-b border-slate-50 pb-4 md:pb-10"><h3 className="font-headline font-black text-lg md:text-3xl uppercase flex items-center gap-3 md:gap-6 text-[#0F172A]"><UserIcon className="h-5 w-5 md:h-8 md:w-8 text-primary" /> Profile Details</h3></div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-6 md:gap-y-12">
                       <ProfileDataNode icon={Calendar} label="Date of Birth" value={profile?.dob ? new Date(profile.dob).toLocaleDateString('en-GB') : "Not Added"} />
@@ -288,8 +263,9 @@ export default function ProfilePage() {
                     </div>
                  </Card>
               </div>
+
               <div className="lg:col-span-4 space-y-4 md:space-y-10">
-                 <Card className="border-none shadow-2xl rounded-2xl md:rounded-[3.5rem] bg-white p-5 md:p-12 space-y-6 md:space-y-10 border border-slate-100">
+                 <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-5 md:p-12 space-y-6 md:space-y-10 border border-slate-100">
                     <h3 className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.4em] text-slate-400">Settings Hub</h3>
                     <div className="space-y-3 md:space-y-5">
                        <Button onClick={() => setIsEditing(true)} className="w-full h-12 md:h-18 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-black uppercase text-[9px] md:text-[12px] tracking-widest shadow-xl transition-all active:scale-95 border-none gap-2"><Edit className="h-4 w-4 text-white" /> Edit Profile</Button>
@@ -299,6 +275,20 @@ export default function ProfilePage() {
                     <div className="pt-8 md:pt-12 border-t border-slate-50 space-y-4">
                        <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Persistence</p>
                        <Button onClick={() => setIsDeleting(true)} variant="ghost" className="w-full h-10 text-rose-500 hover:bg-rose-50 rounded-xl font-black uppercase text-[8px] tracking-widest transition-all gap-2"><Trash2 className="h-3.5 w-3.5" /> Delete My Account</Button>
+                    </div>
+                 </Card>
+
+                 <Card className="border-none shadow-xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Award className="h-64 w-64 text-primary" /></div>
+                    <div className="relative z-10 space-y-6">
+                       <div className="space-y-1">
+                          <h3 className="text-xl md:text-2xl font-black tracking-tight leading-tight uppercase">Certificates</h3>
+                          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mastery Records</p>
+                       </div>
+                       <div className="h-40 bg-white/5 rounded-3xl border border-white/10 flex flex-col items-center justify-center text-center p-6 gap-3">
+                          <AlertCircle className="h-8 w-8 text-slate-500" />
+                          <p className="text-xs font-bold text-slate-400 uppercase leading-relaxed">No certificates awarded yet. Reach Rank #1 to earn.</p>
+                       </div>
                     </div>
                  </Card>
               </div>
@@ -373,9 +363,23 @@ export default function ProfilePage() {
 function HeaderInfo({ icon, text }: { icon: React.ReactNode, text: string }) {
    return (<div className="flex items-center gap-2 text-white/60 font-bold text-[9px] md:text-[12px] tracking-tight"><span className="shrink-0">{icon}</span><span className="truncate max-w-[120px] md:max-w-[320px]">{text || 'Not Added'}</span></div>)
 }
-function StatsCard({ icon: Icon, label, value, color, bgColor, className }: { icon: LucideIcon, label: string, value: string | number, color: string, bgColor: string, className?: string }) {
-   return (<Card className={cn("border-none shadow-xl rounded-2xl md:rounded-[3rem] p-4 md:p-12 bg-white group hover:translate-y-[-4px] transition-all duration-500", className)}><div className="flex flex-col gap-3 md:gap-8"><div className={cn("h-8 w-8 md:h-16 md:w-16 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 shadow-inner", bgColor)}><Icon className={cn("h-4 w-4 md:h-8 md:w-8", color)} /></div><div className="space-y-0.5 text-left"><p className="text-[7px] md:text-11px font-black uppercase tracking-widest text-slate-400">{label}</p><p className={cn("text-base md:text-5xl font-headline font-black leading-none tabular-nums", color)}>{value}</p></div></div></Card>)
+
+function StatsCard({ icon: Icon, label, value, color, bgColor, className }: { icon: React.ReactNode, label: string, value: string | number, color: string, bgColor: string, className?: string }) {
+   return (
+    <Card className={cn("border-none shadow-xl rounded-2xl md:rounded-[2rem] p-4 md:p-6 bg-white group hover:translate-y-[-4px] transition-all duration-500 border border-slate-100", className)}>
+      <div className="flex flex-col items-center text-center gap-3">
+        <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 shadow-inner", bgColor)}>
+          {React.cloneElement(Icon as React.ReactElement, { className: cn("h-5 w-5 md:h-6 md:w-6", color) })}
+        </div>
+        <div className="space-y-0.5">
+          <p className="text-[12px] md:text-3xl font-black text-[#0F172A] tabular-nums leading-none">{value}</p>
+          <p className="text-[7px] md:text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">{label}</p>
+        </div>
+      </div>
+    </Card>
+   )
 }
+
 function ProfileDataNode({ icon: Icon, label, value, colSpan = 1 }: { icon: LucideIcon, label: string, value: string, colSpan?: number }) {
    return (<div className={cn("flex items-start gap-4 md:gap-8", colSpan > 1 ? "md:col-span-2" : "")}><div className="h-10 w-10 md:h-16 md:w-16 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-colors"><Icon className="h-4 w-4 md:h-7 md:w-7 text-slate-400" /></div><div className="min-w-0 space-y-0.5 text-left"><p className="text-[8px] md:text-11px font-black uppercase tracking-widest text-slate-400">{label}</p><p className="text-[11px] md:text-xl font-bold text-[#0F172A] leading-relaxed break-words tracking-tight">{value}</p></div></div>)
 }

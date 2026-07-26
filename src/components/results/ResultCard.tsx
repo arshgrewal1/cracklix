@@ -43,9 +43,7 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v12.5 [Alignment Hardened].
- * FIXED: Footer alignment to items-start for consistent top-line registry.
- * FIXED: QR Container safe-area to prevent clipping.
+ * @fileOverview Official Institutional Report Card v13.0 [Rank Hardened].
  */
 export default function ResultCard({
   studentName,
@@ -178,7 +176,7 @@ export default function ResultCard({
           </div>
         )}
 
-        {/* FOOTER VERIFICATION - ALIGNMENT FIXED */}
+        {/* FOOTER VERIFICATION */}
         <div className="pt-16 border-t-4 border-slate-100 flex flex-row items-start justify-between gap-12">
           <div className="h-60 w-52 bg-white border-4 border-slate-100 p-6 rounded-[3rem] shadow-4xl shrink-0 flex flex-col items-center justify-center gap-4">
             <img src={qrUrl} alt="Verify" className="h-40 w-40 object-contain" crossOrigin="anonymous" />
