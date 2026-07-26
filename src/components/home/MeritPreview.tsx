@@ -13,8 +13,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Standardized Institutional Merit Preview v3.2 [Registry Hardened].
- * UPDATED: Consuming dedicated 'leaderboard' collection for highest-score fidelity.
+ * @fileOverview Standardized Institutional Merit Preview v4.0 [Latest Rankers Fixed].
+ * Standardized tie-breaking to favor latest high-scorers.
  */
 
 export default function MeritPreview() {
@@ -28,11 +28,23 @@ export default function MeritPreview() {
     return query(
       collection(db, "leaderboard"), 
       orderBy("highestScore", "desc"), 
-      limit(8)
+      limit(24) // Fetch more to allow client-side tie-breaking
     );
   }, [db]);
 
-  const { data: meritList, loading } = useCollection<any>(meritQuery);
+  const { data: rawList, loading } = useCollection<any>(meritQuery);
+
+  const meritList = useMemo(() => {
+    if (!rawList) return [];
+    
+    return [...rawList].sort((a, b) => {
+       if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
+       // Tie Break: Newest Achiever First
+       const timeA = a.updatedAt?.seconds || 0;
+       const timeB = b.updatedAt?.seconds || 0;
+       return timeB - timeA;
+    }).slice(0, 8);
+  }, [rawList]);
 
   return (
     <section className="py-12 md:py-20 bg-slate-50/50 border-t border-slate-100 overflow-hidden">
@@ -46,7 +58,7 @@ export default function MeritPreview() {
              </div>
              <div className="text-left">
                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Top Rankers</h2>
-                <p className="text-[11px] md:text-sm font-medium text-slate-500">Live merit list of peak performing aspirants.</p>
+                <p className="text-[11px] md:text-sm font-medium text-slate-500">Live merit list of latest peak performing aspirants.</p>
              </div>
           </div>
           <Link href="/leaderboard" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline group">

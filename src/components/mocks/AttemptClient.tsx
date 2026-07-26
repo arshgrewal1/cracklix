@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -42,11 +41,9 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Node v44.0 [Hardened Ranking].
- * FIXED: Optimized submit protocol to store precise rank tie-breakers in Firestore.
+ * @fileOverview Institutional Attempt Node v45.0 [Atomic Ranking Hardened].
+ * FIXED: Implemented database-side peak verification to ensure leaderboard integrity.
  */
-
-const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
   const router = useRouter();
@@ -260,15 +257,16 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       : `/results/view?id=${mockId}`;
 
     if (user) {
-      runTransaction(db, async (transaction) => {
+      await runTransaction(db, async (transaction) => {
         const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
         const globalMeritRef = doc(db, "leaderboard", user.uid);
         const resultRef = doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
         const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
 
         const lbSnap = await transaction.get(lbEntryRef);
+        const globalSnap = await transaction.get(globalMeritRef);
         
-        let isNewBest = true;
+        let isNewMockBest = true;
         let oldAttemptCount = 0;
 
         if (lbSnap.exists()) {
@@ -277,8 +275,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           const hasHigherScore = score > (existing.highestScore || 0);
           const hasEqualScoreHigherAcc = (score === existing.highestScore && attemptAccuracy > existing.accuracy);
           const hasEqualScoreAccLowerTime = (score === existing.highestScore && attemptAccuracy === existing.accuracy && timeTaken < existing.timeTaken);
-          isNewBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
+          isNewMockBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
         }
+
+        const currentGlobalBest = globalSnap.exists() ? (globalSnap.data().highestScore || 0) : 0;
+        const newGlobalBest = Math.max(score, currentGlobalBest);
 
         transaction.set(lbEntryRef, {
           userId: user.uid,
@@ -286,11 +287,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           photoURL: profile?.photoURL || "",
           gender: profile?.gender || 'Other',
           mockId,
-          highestScore: isNewBest ? score : (lbSnap.data()?.highestScore || 0),
-          accuracy: isNewBest ? attemptAccuracy : (lbSnap.data()?.accuracy || 0),
-          timeTaken: isNewBest ? timeTaken : (lbSnap.data()?.timeTaken || 0),
+          highestScore: isNewMockBest ? score : (lbSnap.exists() ? lbSnap.data()?.highestScore : score),
+          accuracy: isNewBest ? attemptAccuracy : (lbSnap.exists() ? lbSnap.data()?.accuracy : attemptAccuracy),
+          timeTaken: isNewBest ? timeTaken : (lbSnap.exists() ? lbSnap.data()?.timeTaken : timeTaken),
           attemptCount: oldAttemptCount + 1,
-          bestAttemptId: isNewBest ? attemptId : (lbSnap.data()?.bestAttemptId || attemptId),
+          bestAttemptId: isNewMockBest ? attemptId : (lbSnap.exists() ? lbSnap.data()?.bestAttemptId : attemptId),
           submittedAt: serverTimestamp()
         }, { merge: true });
 
@@ -298,7 +299,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           uid: user.uid,
           displayName: profile?.name || 'Aspirant',
           photoURL: profile?.photoURL || "",
-          highestScore: increment(score > (profile?.highestScore || 0) ? score - (profile?.highestScore || 0) : 0),
+          gender: profile?.gender || 'Other',
+          highestScore: newGlobalBest,
           totalTests: increment(1),
           updatedAt: serverTimestamp(),
           recentMockTitle: mockData.title
@@ -315,7 +317,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         });
 
         transaction.set(attemptPtrRef, { attemptId, status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true });
-      }).catch(e => console.error("[Sync_Failure]:", e));
+      }).catch(e => console.error("[CRACKLIX_SYNC_FAILURE]:", e));
 
       stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
     } else {

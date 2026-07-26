@@ -18,8 +18,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Merit Registry Hub v11.1.
- * UPDATED: Integrated adaptive dark mode support for podium and list entries.
+ * @fileOverview Official Merit Registry Hub v12.0.
+ * UPDATED: Tie-breaking logic standardized to favor latest achievers (Newest First).
  */
 
 export default function LeaderboardPage() {
@@ -54,14 +54,21 @@ function LeaderboardContent() {
            const q = query(baseRef, orderBy("highestScore", "desc"), limit(200));
            const snap = await getDocs(q);
            const entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+           
            const sorted = entries.sort((a: any, b: any) => {
+              // 1. Primary: Score Desc
               if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
+              // 2. Secondary: Accuracy Desc
               if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+              // 3. Tertiary: Time Asc
               if (a.timeTaken !== b.timeTaken) return a.timeTaken - b.timeTaken;
-              return (a.submittedAt?.seconds || 0) - (b.submittedAt?.seconds || 0);
+              // 4. Final: Latest achiever first (Tie break for Latest Rankers)
+              const timeA = a.submittedAt?.seconds || a.updatedAt?.seconds || 0;
+              const timeB = b.submittedAt?.seconds || b.updatedAt?.seconds || 0;
+              return timeB - timeA;
            });
            setManualList(sorted);
-        } catch (e) { console.error(e); } finally { setLoadingList(false); }
+        } catch (e) { console.error("[LEADERBOARD_FETCH_ERROR]:", e); } finally { setLoadingList(false); }
      }
      fetchAndSort();
   }, [db, mounted, mockId]);
@@ -100,7 +107,7 @@ function LeaderboardContent() {
                   <h1 className="text-3xl md:text-6xl font-black text-foreground tracking-tighter">
                     {mockData?.title || "Merit Registry"}
                   </h1>
-                  <p className="text-muted-foreground font-medium text-sm md:text-xl">Rankings based on the verified best attempts of candidates.</p>
+                  <p className="text-muted-foreground font-medium text-sm md:text-xl">Rankings based on verified best attempts. Ties broken by latest achievement.</p>
                </div>
                <div className="flex items-center gap-4 bg-card border border-border p-4 rounded-2xl shadow-xl shrink-0 mx-auto md:mx-0">
                   <Users className="h-6 w-6 text-primary" />
