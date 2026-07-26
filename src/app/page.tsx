@@ -20,10 +20,11 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
+import StatsBar from "@/components/home/StatsBar";
 
 /**
- * @fileOverview Institutional Premium Hub v503.0 [Startup Experience Hardened].
- * FIXED: Implemented strict stability nodes and reserved height containers for FOUC/CLS prevention.
+ * @fileOverview Institutional Premium Hub v504.0 [UI Restored].
+ * FIXED: Removed aggressive height-restricted containers that caused overlapping.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -42,78 +43,65 @@ export default function HomePage() {
     <main className="min-h-screen bg-background font-body pb-safe text-left overflow-x-hidden">
       <Navbar />
       
-      {/* 1. HERO HUB: RESERVED SPATIAL NODE */}
-      <div className="stability-hero bg-background">
-        <Hero />
-      </div>
+      <Hero />
+      <GlobalSearch />
+      <QuickActions />
+      <StatsBar />
 
-      {/* 2. SEARCH HUB: RESERVED SPATIAL NODE */}
-      <div className="stability-search">
-        <GlobalSearch />
-      </div>
-      
-      {/* 3. QUICK ACTIONS: RESERVED SPATIAL NODE */}
-      <div className="stability-actions">
-        <QuickActions />
-      </div>
-
-      {/* 4. PERFORMANCE HUB: CONDITIONAL WITH HEIGHT GUARD */}
       {user && (
-        <div className="min-h-[200px] md:h-[300px]">
-           <ContinueLearning />
-        </div>
+        <ContinueLearning />
       )}
 
-      {/* 5. TODAY'S CHALLENGE: HARDENED INTERACTIVE HUB */}
-      <section className="py-6 md:py-16 bg-background">
+      {/* TODAY'S CHALLENGE HUB */}
+      <section className="py-12 md:py-24 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
                initial={{ opacity: 0, y: 20 }}
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
                transition={{ duration: 0.5 }}
-               className="bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#1E293B] rounded-[24px] p-[20px] border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.35)] relative overflow-hidden group transition-all duration-500 text-center min-h-[340px] flex flex-col justify-center"
+               className="bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#1E293B] rounded-[32px] p-8 md:p-16 border border-white/10 shadow-5xl relative overflow-hidden group transition-all duration-500 text-center flex flex-col justify-center"
             >
                <div className="absolute top-4 right-4 p-0 opacity-[0.04] pointer-events-none group-hover:scale-110 transition-transform duration-1000">
-                  <Zap className="h-40 w-40 text-primary" />
+                  <Zap className="h-64 w-64 text-primary" />
                </div>
                
-               <div className="relative z-10 w-full pt-[16px]">
-                  <div className="space-y-0">
-                     <div className="flex items-center justify-center gap-2">
-                        <Flame className="h-6 w-6 text-orange-500 fill-current animate-pulse" />
-                        <h2 className="text-[26px] md:text-4xl font-bold tracking-tight text-white antialiased leading-tight">
+               <div className="relative z-10 w-full">
+                  <div className="space-y-4">
+                     <div className="flex items-center justify-center gap-3">
+                        <Flame className="h-8 w-8 text-orange-500 fill-current animate-pulse" />
+                        <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white antialiased leading-tight uppercase">
                            Today's Challenge
                         </h2>
                      </div>
                      {!isMounted || quizLoading ? (
-                        <div className="h-6 w-48 mx-auto bg-white/5 animate-pulse rounded-lg mt-2" />
+                        <div className="h-8 w-64 mx-auto bg-white/5 animate-pulse rounded-lg mt-2" />
                      ) : (
-                        <p className="text-[16px] text-slate-300 font-medium mt-[6px] max-w-lg mx-auto">
-                           {activeQuiz?.title || "Practice Mode"}
+                        <p className="text-lg md:text-2xl text-slate-300 font-medium max-w-2xl mx-auto italic">
+                           "{activeQuiz?.title || "Daily Practice Mode"}"
                         </p>
                      )}
                   </div>
 
                   {!isMounted || quizLoading ? (
-                    <div className="mt-8 flex justify-center">
-                       <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                    <div className="mt-12 flex justify-center">
+                       <Loader2 className="h-10 w-10 text-primary animate-spin" />
                     </div>
                   ) : activeQuiz ? (
-                    <>
-                      <div className="mt-[18px] flex flex-row flex-wrap items-center justify-center gap-[10px]">
-                         <ChallengeChip icon={<Clock className="h-3.5 w-3.5" />} label={`${activeQuiz.duration} min`} />
-                         <ChallengeChip icon={<ShieldCheck className="h-3.5 w-3.5" />} label={`${activeQuiz.totalQuestions} questions`} />
-                         <ChallengeChip icon={<Trophy className="h-3.5 w-3.5" />} label={`${activeQuiz.rewardXP} XP`} />
+                    <div className="space-y-10 mt-10">
+                      <div className="flex flex-row flex-wrap items-center justify-center gap-4">
+                         <ChallengeChip icon={<Clock className="h-4 w-4" />} label={`${activeQuiz.duration} min`} />
+                         <ChallengeChip icon={<ShieldCheck className="h-4 w-4" />} label={`${activeQuiz.totalQuestions} questions`} />
+                         <ChallengeChip icon={<Trophy className="h-4 w-4" />} label={`${activeQuiz.rewardXP} XP`} />
                       </div>
 
-                      <div className="mt-[20px] pb-[18px]">
-                         <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="inline-block w-full max-w-[320px] mx-auto">
-                            <button className="relative overflow-hidden w-full h-[52px] bg-gradient-to-r from-blue-600 to-blue-400 hover:brightness-110 text-white font-bold text-base tracking-tight rounded-[18px] shadow-[0_12px_24px_rgba(37,99,235,0.3)] transition-all duration-300 active:scale-95 border-none group/btn cursor-pointer text-center">
-                               <div className="flex items-center justify-center gap-2 relative z-10">
-                                  <Zap className="h-4 w-4 fill-white text-white" />
+                      <div className="pt-4 flex justify-center">
+                         <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="w-full max-w-md">
+                            <button className="relative overflow-hidden w-full h-16 md:h-20 bg-gradient-to-r from-blue-600 to-blue-400 hover:brightness-110 text-white font-black uppercase tracking-widest text-xs md:text-sm rounded-2xl md:rounded-[3rem] shadow-4xl transition-all duration-300 active:scale-95 border-none group/btn cursor-pointer text-center">
+                               <div className="flex items-center justify-center gap-3 relative z-10">
+                                  <Zap className="h-5 w-5 fill-white text-white" />
                                   <span>Start Challenge</span>
-                                  <ChevronRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                                  <ChevronRight className="h-5 w-5 transition-transform group-hover/btn:translate-x-2" />
                                </div>
                                <motion.div 
                                   animate={{ x: ['-100%', '300%'] }}
@@ -123,23 +111,22 @@ export default function HomePage() {
                             </button>
                          </Link>
                       </div>
-                    </>
+                    </div>
                   ) : (
-                    <div className="py-10 opacity-20"><p className="text-white font-bold">No active challenge found.</p></div>
+                    <div className="py-20 opacity-20"><p className="text-white font-bold text-xl uppercase tracking-widest">No active challenge node found</p></div>
                   )}
                </div>
             </motion.div>
          </div>
       </section>
 
-      {/* DYNAMIC SECTIONS: Wrapped in stability containers */}
-      <div className="min-h-[400px]"><LatestVacancy /></div>
-      <div className="min-h-[300px]"><FeaturedCategories /></div>
-      <div className="min-h-[400px]"><PopularExams /></div>
-      <div className="min-h-[400px]"><LatestMocks /></div>
-      <div className="min-h-[300px]"><CurrentAffairsPreview /></div>
-      <div className="min-h-[400px]"><MeritPreview /></div>
-      <div className="min-h-[400px]"><MeetFounder /></div>
+      <LatestVacancy />
+      <FeaturedCategories />
+      <PopularExams />
+      <LatestMocks />
+      <CurrentAffairsPreview />
+      <MeritPreview />
+      <MeetFounder />
       
       <Footer />
     </main>
@@ -148,9 +135,9 @@ export default function HomePage() {
 
 function ChallengeChip({ icon, label }: { icon: React.ReactNode, label: string }) {
    return (
-      <div className="inline-flex items-center gap-2 h-[36px] px-[14px] bg-white/5 backdrop-blur-md border border-white/10 rounded-full hover:bg-white/10 transition-all duration-300 shadow-sm group/chip">
+      <div className="inline-flex items-center gap-3 h-10 md:h-12 px-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-full hover:bg-white/10 transition-all duration-300 shadow-sm group/chip">
          <span className="shrink-0 text-primary">{icon}</span>
-         <span className="text-[11px] font-bold text-white tracking-tight">{label}</span>
+         <span className="text-[10px] md:text-xs font-black uppercase text-white tracking-widest">{label}</span>
       </div>
    )
 }

@@ -59,7 +59,7 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
-    background-color: #000000; /* FORCE BLACK FOR FOUC PREVENTION */
+    background-color: #000000;
   }
   
   body {
@@ -67,16 +67,14 @@
     font-family: var(--font-poppins), sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
-    /* Native Android Scroll Physics */
     overscroll-behavior-y: contain;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
     padding: 0;
     padding-bottom: env(safe-area-inset-bottom);
-    background-color: #000000; /* SYNC WITH SPLASH SCREEN */
+    background-color: #000000;
   }
 
-  /* RESILIENT FOUC GUARD */
   [data-hydrating="true"] {
     visibility: hidden;
   }
@@ -128,13 +126,3 @@
 .shadow-5xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
 }
-
-/* HARDENED STABILITY NODES */
-.stability-hero { min-height: 400px; }
-@media (min-width: 768px) { .stability-hero { min-height: 600px; } }
-
-.stability-search { min-height: 60px; }
-@media (min-width: 768px) { .stability-search { min-height: 80px; } }
-
-.stability-actions { min-height: 100px; }
-@media (min-width: 768px) { .stability-actions { min-height: 140px; } }

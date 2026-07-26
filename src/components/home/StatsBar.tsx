@@ -46,8 +46,8 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 }
 
 /**
- * @fileOverview Institutional Stats Bar v1.5 [Memoized].
- * FIXED: Wrapped activeStats in useMemo to prevent unnecessary re-calculating on parent renders.
+ * @fileOverview Institutional Stats Bar v1.6 [Restored].
+ * FIXED: Removed fixed height h-[130px] that caused text overflow.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -104,12 +104,12 @@ export default function StatsBar() {
   if (!mounted) return null;
 
   return (
-    <section className="bg-white py-8 md:py-12 border-b border-slate-50">
-      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="bg-white py-8 md:py-16 border-b border-slate-50 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid gap-4 md:gap-8 grid-cols-2 md:grid-cols-4">
           {statsLoading || settingsLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 md:h-36 w-full rounded-[22px] bg-slate-50" />
+              <Skeleton key={i} className="h-32 md:h-40 w-full rounded-[28px] bg-slate-50" />
             ))
           ) : (
             activeStats.map((item, i) => (
@@ -121,27 +121,27 @@ export default function StatsBar() {
               >
                 <Link href={item.href || "#"}>
                   <Card className={cn(
-                    "relative group h-[130px] md:h-[150px] border border-slate-100 bg-white shadow-sm hover:shadow-2xl transition-all duration-300 rounded-[22px] p-4 md:p-6 flex flex-col items-center justify-center gap-2 overflow-hidden hover:-translate-y-1 active:scale-95 cursor-pointer"
+                    "relative group min-h-[140px] md:min-h-[160px] border border-slate-100 bg-white shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[28px] p-5 md:p-8 flex flex-col items-center justify-center gap-3 overflow-hidden hover:-translate-y-1.5 active:scale-95 cursor-pointer h-full"
                   )}>
                     <div className={cn(
-                      "h-10 w-10 md:h-12 md:w-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 shadow-inner z-10",
+                      "h-10 w-10 md:h-14 md:w-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 shadow-inner z-10",
                       item.bg,
                       item.color
                     )}>
-                      {React.isValidElement(item.icon) ? React.cloneElement(item.icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" }) : null}
+                      {React.isValidElement(item.icon) ? React.cloneElement(item.icon as React.ReactElement, { className: "h-5 w-5 md:h-7 md:w-7" }) : null}
                     </div>
 
-                    <div className="text-center space-y-0.5 z-10 w-full">
-                      <div className="text-lg md:text-2xl lg:text-3xl font-bold text-[#0F172A] tracking-tighter leading-none antialiased">
+                    <div className="text-center space-y-1 z-10 w-full">
+                      <div className="text-lg md:text-3xl font-black text-[#0F172A] tracking-tighter leading-none antialiased">
                         <Counter value={item.val} suffix={item.noSuffix ? "" : "+"} />
                       </div>
-                      <p className="text-[10px] md:text-[11px] font-semibold text-slate-400 tracking-tight truncate px-1">
+                      <p className="text-[9px] md:text-[11px] font-black uppercase text-slate-400 tracking-widest truncate px-1">
                         {item.label}
                       </p>
                       
                       {item.trend && (
                         <div className="mt-1 flex items-center justify-center gap-1">
-                           <span className="text-[8px] md:text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50 flex items-center gap-1">
+                           <span className="text-[8px] md:text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50 flex items-center gap-1">
                              <TrendingUp className="h-2 w-2" /> {item.trend}
                            </span>
                         </div>
