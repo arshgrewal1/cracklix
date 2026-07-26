@@ -45,11 +45,11 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import ShareableResultCard from "./ShareableResultCard"
-import html2canvas from 'html2canvas'
+import { toBlob } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v36.0 [Native Direct Share].
- * FIXED: Implemented direct navigator.share with files array.
+ * @fileOverview Universal Result Hub Viewer v45.0.
+ * FIXED: Rebuilt for direct PNG share via html-to-image and Web Share API.
  */
 
 export default function ResultClient() {
@@ -75,9 +75,7 @@ export default function ResultClient() {
   const [avgScore, setAvgScore] = useState<number>(0)
   const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
 
-  const [preGeneratedImage, setPreGeneratedImage] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const generationAttempted = useRef(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -183,71 +181,51 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  const prepareShareCard = useCallback(async () => {
-    if (!mounted || !sessionData || liveRank === "---" || generationAttempted.current) return;
+  const handleShareResult = async () => {
+    if (!sessionData || isSharing) return;
     
-    generationAttempted.current = true;
-    setIsGenerating(true);
-    
-    try {
-      await new Promise(r => setTimeout(r, 2000));
-      const node = document.getElementById('shareable-result-certificate');
-      if (!node) return;
+    setIsSharing(true);
+    toast({ title: "Synchronizing assets", description: "Preparing HD certificate..." });
 
-      const canvas = await html2canvas(node, {
-         useCORS: true,
-         scale: 1, // High-fidelity but sharing-safe size
-         backgroundColor: "#ffffff",
-         logging: false,
-         width: 1080,
-         height: 1350
+    try {
+      const node = document.getElementById('cracklix-result-card-canvas');
+      if (!node) throw new Error("Registry node missing.");
+
+      // Direct Blob generation at 2x quality
+      const blob = await toBlob(node, {
+         pixelRatio: 2,
+         cacheBust: true,
+         backgroundColor: '#ffffff'
       });
 
-      const dataUrl = canvas.toDataURL('image/png', 0.9);
-      setPreGeneratedImage(dataUrl);
-    } catch (e: any) {
-      console.error("[SHARE_ERROR]:", e);
-      generationAttempted.current = false;
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [mounted, sessionData, liveRank]);
+      if (!blob) throw new Error("Image rasterization failed.");
 
-  useEffect(() => {
-     if (sessionData && liveRank !== "---" && !preGeneratedImage && !isGenerating) {
-        prepareShareCard();
-     }
-  }, [sessionData, liveRank, preGeneratedImage, isGenerating, prepareShareCard]);
-
-  const handleShareResult = async () => {
-    if (!sessionData) return;
-    
-    if (!preGeneratedImage) {
-       toast({ title: "Wait a second", description: "Certificate is still synchronizing." });
-       return;
-    }
-
-    try {
-      const blob = await (await fetch(preGeneratedImage)).blob();
       const file = new File([blob], `Cracklix_Rank_${liveRank}.png`, { type: 'image/png' });
 
+      // Native Web Share API
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
-            title: `Cracklix Result: ${sessionData.mockTitle}`,
-            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions} and ranked #${liveRank} in Punjab!`,
+            title: `My Cracklix Result`,
+            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions} and ranked #${liveRank} in Punjab! Check your rank on Cracklix.`,
             files: [file]
          });
       } else {
+         // Fallback: Immediate high-speed download
+         const url = URL.createObjectURL(blob);
          const link = document.createElement('a');
          link.download = `Cracklix_Merit_Card.png`;
-         link.href = preGeneratedImage;
+         link.href = url;
          link.click();
-         toast({ title: "Certificate Downloaded" });
+         URL.revokeObjectURL(url);
+         toast({ title: "Result downloaded" });
       }
     } catch (e: any) {
+       console.error("[SHARE_ERROR]:", e);
        if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Share failed", description: "Transmission interrupted." });
+          toast({ variant: "destructive", title: "Transmission Error", description: "Could not broadcast certificate." });
        }
+    } finally {
+       setIsSharing(false);
     }
   };
 
@@ -294,8 +272,8 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-                    <Button onClick={handleShareResult} disabled={isGenerating && !preGeneratedImage} className="flex-1 lg:flex-none h-12 px-8 bg-[#0B57D0] hover:bg-blue-700 text-white font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
-                       {isGenerating && !preGeneratedImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
+                    <Button onClick={handleShareResult} disabled={isSharing} className="flex-1 lg:flex-none h-12 px-8 bg-[#0B57D0] hover:bg-blue-700 text-white font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
+                       {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
                        Share Merit Card
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
@@ -355,7 +333,8 @@ export default function ResultClient() {
                   </TabsContent>
               </Tabs>
               
-              <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none">
+              {/* HIDDEN CANVAS FOR DIRECT SHARE - FIXED POSITIONED TO AVOID OVERLAP */}
+              <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none opacity-0">
                  <ShareableResultCard data={sessionData} rank={liveRank} totalCandidates={totalCandidates} />
               </div>
            </>
