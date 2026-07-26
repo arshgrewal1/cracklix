@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -51,8 +52,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 
 /**
- * @fileOverview Institutional Result System v16.0 [Title Case Optimized].
- * FIXED: Removed all forced uppercase text and maximized PWA screen utility.
+ * @fileOverview Institutional Result System v17.0.
+ * FIXED: Implemented Dynamic Scaling for Report Tab to ensure PWA Fit.
  */
 
 export default function ResultClient() {
@@ -77,7 +78,7 @@ export default function ResultClient() {
   
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
-  const [topperScore, setTopperScore] = useState<number>(0)
+  const [previewScale, setPreviewScale] = useState(1);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -85,6 +86,26 @@ export default function ResultClient() {
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
+
+  // PWA Preview Scaling Logic
+  useEffect(() => {
+    if (activeMainTab === 'REPORT') {
+      const calculateScale = () => {
+        const screenWidth = window.innerWidth;
+        const targetWidth = 794; // A4 px width
+        const padding = 32; 
+        const available = screenWidth - padding;
+        if (available < targetWidth) {
+          setPreviewScale(available / targetWidth);
+        } else {
+          setPreviewScale(1);
+        }
+      };
+      calculateScale();
+      window.addEventListener('resize', calculateScale);
+      return () => window.removeEventListener('resize', calculateScale);
+    }
+  }, [activeMainTab]);
 
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
@@ -149,10 +170,6 @@ export default function ResultClient() {
 
            const calculatedRank = superiorCount + 1;
            setLiveRank(Math.max(1, Math.min(calculatedRank, displayTotal)));
-
-           const topperQuery = query(entriesRef, orderBy("highestScore", "desc"), limit(1));
-           const topperSnap = await getDocs(topperQuery);
-           if (!topperSnap.empty) setTopperScore(topperSnap.docs[0].data().highestScore);
         } catch (e) {}
      }
      fetchRankingMetrics();
@@ -207,14 +224,14 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Synchronizing with registry..." });
+    toast({ title: "Synchronizing report..." });
 
     try {
       await document.fonts.ready;
       await new Promise(r => setTimeout(r, 1000));
 
       const container = document.getElementById('pdf-report-container');
-      if (!container) throw new Error("Registry Handshake Failure.");
+      if (!container) throw new Error("Registry failure.");
 
       const canvas = await html2canvas(container, {
         scale: 4,
@@ -229,9 +246,9 @@ export default function ResultClient() {
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
       pdf.save(`Cracklix_Report_${activeSession.userName || 'Student'}.pdf`);
-      toast({ title: "Official Report Downloaded" });
+      toast({ title: "Report Downloaded" });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Export Error" });
+      toast({ variant: "destructive", title: "Export failed" });
     } finally { setIsExporting(false); }
   };
 
@@ -270,7 +287,7 @@ export default function ResultClient() {
         {isSearching && (
            <div className="py-24 text-center flex flex-col items-center gap-4">
               <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Resolving attempt data...</p>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Resolving data...</p>
            </div>
         )}
 
@@ -279,11 +296,8 @@ export default function ResultClient() {
               <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-inner">
                  <AlertCircle className="h-8 w-8" />
               </div>
-              <div className="space-y-1">
-                 <h2 className="text-xl font-bold text-[#0F172A]">Registry record missing</h2>
-                 <p className="text-slate-500 text-sm">Attempt could not be found in the live vault.</p>
-              </div>
-              <Button asChild variant="outline" className="rounded-xl px-10"><Link href="/dashboard">Back to Hub</Link></Button>
+              <h2 className="text-xl font-bold text-[#0F172A]">Registry record missing</h2>
+              <Button asChild variant="outline" className="rounded-xl px-10"><Link href="/dashboard">Back to hub</Link></Button>
            </div>
         )}
 
@@ -297,7 +311,7 @@ export default function ResultClient() {
                          {activeSession?.mockTitle}
                        </h1>
                        <div className="flex items-center gap-2">
-                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm">Verified Solution</Badge>
+                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm">Verified result</Badge>
                        </div>
                     </div>
                  </div>
@@ -305,7 +319,7 @@ export default function ResultClient() {
                  <div className="flex gap-3 w-full md:w-auto">
                     <Button variant="outline" onClick={handleRetake} className="flex-1 h-12 px-8 rounded-xl border-2 font-bold text-[10px] uppercase tracking-tight">Retake</Button>
                     <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-12 px-10 bg-[#0F172A] text-white rounded-xl shadow-xl font-bold text-[10px] uppercase tracking-tight">
-                       {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} Get Official Report
+                       {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} Get Report
                     </Button>
                  </div>
               </div>
@@ -371,9 +385,17 @@ export default function ResultClient() {
                       </div>
                   </TabsContent>
 
-                  <TabsContent value="REPORT" className="px-4 overflow-x-auto no-scrollbar pb-20">
-                      <div className="flex flex-col items-center pt-4">
-                         <div className="bg-white p-0 shadow-5xl border border-slate-200 overflow-hidden w-full max-w-[210mm]">
+                  <TabsContent value="REPORT" className="px-4 pb-20">
+                      <div className="flex flex-col items-center pt-2 md:pt-4 overflow-hidden w-full">
+                         <div 
+                            style={{ 
+                              width: '794px',
+                              transform: `scale(${previewScale})`,
+                              transformOrigin: 'top center',
+                              marginBottom: `${(1123 * previewScale) - 1123}px`
+                            }}
+                            className="bg-white p-0 shadow-2xl border border-slate-100 origin-top"
+                         >
                             <ReportPDF 
                                {...activeSession}
                                resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
