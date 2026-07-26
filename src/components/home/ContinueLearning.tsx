@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -28,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview Institutional Performance Hub v6.5.
- * UPDATED: Action label synchronized to "View Analysis".
+ * @fileOverview Institutional Performance Hub v6.6.
+ * FIXED: Pass attemptId to the result view for precise registry mapping.
  */
 
 // Formatting Utilities
@@ -103,13 +102,13 @@ export default function ContinueLearning() {
     return (allExams as any[]).filter((e: any) => profile.pinnedExams?.includes(e.id)).slice(0, 3);
   }, [allExams, profile]);
 
-  const handleReviewAction = (mockId: string) => {
+  const handleReviewAction = (mockId: string, attemptId?: string) => {
      const isValid = combinedMocks?.some(m => m.id === mockId);
      if (!isValid) {
         toast({ variant: "destructive", title: "Record Audit", description: "Test archived silently." });
         return;
      }
-     router.push(`/results/view?id=${mockId}`);
+     router.push(`/results/view?id=${mockId}${attemptId ? `&attemptId=${attemptId}` : ''}`);
   };
 
   if (!mounted || !user) return null;
@@ -193,7 +192,7 @@ export default function ContinueLearning() {
                                     {/* Action Hub */}
                                     <div className="pt-4 md:pt-6">
                                        <Button 
-                                         onClick={() => handleReviewAction(res.mockId)} 
+                                         onClick={() => handleReviewAction(res.mockId, res.attemptId)} 
                                          className="h-12 px-7 md:px-8 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] hover:brightness-110 text-white font-black text-[11px] md:text-xs tracking-widest rounded-full shadow-[0_10px_24px_rgba(37,99,235,0.30)] transition-all hover:scale-[1.04] active:scale-[0.98] border-none flex items-center gap-2 group/btn"
                                        >
                                          View Analysis

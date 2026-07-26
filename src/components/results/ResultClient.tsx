@@ -60,9 +60,8 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v19.1.
- * FIXED: Removed blocking checks for immediate one-click Retake response.
- * FIXED: Added missing AlertCircle icon to imports.
+ * @fileOverview Premium Result Analysis Hub v20.0 [Resilient Recovery].
+ * FIXED: Implemented a fallback query to recover the latest attempt if attemptId is missing.
  */
 
 export default function ResultClient() {
@@ -81,6 +80,7 @@ export default function ResultClient() {
   const [activeMainTab, setActiveMainTab] = useState<string>("OVERVIEW")
   const [resolvedResultId, setResolvedResultId] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
+  const [isResolvingId, setIsResolvingId] = useState(true)
   
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
@@ -90,36 +90,66 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
-  // Immediate ID Resolution
+  // Hardened ID Resolution with Fallback Recovery
   useEffect(() => {
-    if (userLoading || !db || !mockId) return;
+    if (userLoading || !db || !mockId || !mounted) return;
     
     async function resolveId() {
+       setIsResolvingId(true);
+
+       // 1. GUEST RECOVERY
        if (!user) {
           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
           if (guestRes) {
              setGuestResult(JSON.parse(guestRes));
              setResolvedResultId(`guest_${mockId}`);
-             return;
           }
+          setIsResolvingId(false);
+          return;
        }
 
+       // 2. AUTHENTICATED RECOVERY
        let targetId = attemptIdFromUrl;
-       if (!targetId && user) {
-          const trackerSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
-          if (trackerSnap.exists()) {
-              targetId = trackerSnap.data().attemptId;
+
+       // A. Check for Attempt Tracker (Session Pointer)
+       if (!targetId) {
+          try {
+             const trackerSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
+             if (trackerSnap.exists()) {
+                targetId = trackerSnap.data().attemptId;
+             }
+          } catch (e) {}
+       }
+
+       // B. Deep Registry Audit (Fallback to most recent successful result)
+       if (!targetId) {
+          try {
+             const resQuery = query(
+                collection(db, "results"),
+                where("userId", "==", user.uid),
+                where("mockId", "==", mockId),
+                orderBy("timestamp", "desc"),
+                limit(1)
+             );
+             const resSnap = await getDocs(resQuery);
+             if (!resSnap.empty) {
+                setResolvedResultId(resSnap.docs[0].id);
+                setIsResolvingId(false);
+                return;
+             }
+          } catch (e) {
+             console.error("[REGISTRY_AUDIT_FAILURE]:", e);
           }
        }
        
-       const finalId = user 
-          ? (targetId ? `${user.uid}_${mockId}_${targetId}` : `${user.uid}_${mockId}`)
-          : `guest_${mockId}`;
-          
+       // C. Final ID Construction
+       const finalId = targetId ? `${user.uid}_${mockId}_${targetId}` : `${user.uid}_${mockId}`;
        setResolvedResultId(finalId);
+       setIsResolvingId(false);
     }
+
     resolveId();
-  }, [user, userLoading, db, mockId, attemptIdFromUrl]);
+  }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
 
   const resultRef = useMemo(() => (db && user && resolvedResultId ? doc(db, "results", resolvedResultId) : null), [db, user, resolvedResultId]);
   const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
@@ -256,8 +286,11 @@ export default function ResultClient() {
      return m > 0 ? `${m}m ${s}s` : `${s}s`;
   };
 
-  if (!mounted || (resultLoading && user && !activeSession)) {
-     return <div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
+  if (!mounted || isResolvingId || (resultLoading && user && !activeSession)) {
+     return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
+        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+        <p className="text-[10px] font-black uppercase text-slate-300 tracking-widest">Handshaking registry...</p>
+     </div>;
   }
 
   if (!activeSession) {
@@ -265,7 +298,8 @@ export default function ResultClient() {
       <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
         <AlertCircle className="h-12 w-12 text-rose-500" />
         <h2 className="text-xl font-bold text-[#0F172A]">Entry not found</h2>
-        <Button onClick={() => router.push('/dashboard')} className="rounded-xl">Back to dashboard</Button>
+        <p className="text-slate-500 text-sm max-w-xs">We could not locate this attempt node in the official registry.</p>
+        <Button onClick={() => router.push('/dashboard')} className="rounded-xl px-10">Back to dashboard</Button>
       </div>
     );
   }
