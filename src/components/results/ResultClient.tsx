@@ -37,7 +37,9 @@ import {
   Layers,
   XCircle,
   HelpCircle,
-  ArrowRight
+  ArrowRight,
+  BookOpen,
+  Search
 } from "lucide-react"
 import { 
   Card, 
@@ -56,7 +58,7 @@ import { BrandingSettings } from "@/types"
 
 /**
  * @fileOverview Official Result Hub 2.0 [Hardened Analytics].
- * Rebuild: Redesigned Dashboard with Premium Apple-Like Minimalist UI.
+ * FIXED: Added missing BookOpen import.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -86,7 +88,6 @@ export default function ResultClient() {
 
   const attemptIdFromUrl = searchParams?.get('attemptId');
 
-  // RESOLVE ATTEMPT ID
   useEffect(() => {
     if (userLoading || !db || !mockId) return;
 
@@ -197,7 +198,6 @@ export default function ResultClient() {
       <Navbar />
       <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-16 pb-40">
         
-        {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 px-1">
            <div className="space-y-4 text-left">
               <div className="flex items-center gap-3">
@@ -230,7 +230,6 @@ export default function ResultClient() {
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-16">
            
            <TabsContent value="OVERVIEW" className="space-y-12 animate-in fade-in duration-500">
-              {/* PRIMARY STATS GRID */}
               <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
                  <StatCard label="Final Score" val={activeSession.score.toFixed(1)} icon={<Zap className="text-primary" />} />
                  <StatCard label="Grade" val={activeSession.grade || 'F'} icon={<Award className="text-amber-500" />} highlight />
@@ -240,10 +239,7 @@ export default function ResultClient() {
                  <StatCard label="Time Taken" val={formatTimeStr(activeSession.timeTaken)} icon={<Clock className="text-blue-500" />} />
               </section>
 
-              {/* SECONDARY INSIGHTS GRID */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                 
-                 {/* LEFT: INSIGHTS & SUBJECTS */}
                  <div className="lg:col-span-8 space-y-8">
                     <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 text-left">
                        <div className="flex items-center justify-between mb-12">
@@ -285,14 +281,10 @@ export default function ResultClient() {
                                 <p className="text-[13px] font-bold text-slate-600 leading-snug">{ins}</p>
                              </div>
                           ))}
-                          {(!activeSession.insights || activeSession.insights.length === 0) && (
-                             <div className="col-span-full py-10 text-center opacity-30 italic">Calculating behavioral insights...</div>
-                          )}
                        </div>
                     </Card>
                  </div>
 
-                 {/* RIGHT: DIFFICULTY & METRICS */}
                  <div className="lg:col-span-4 space-y-8">
                     <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 md:p-12 text-left space-y-8">
                        <div className="space-y-1">
@@ -340,11 +332,9 @@ export default function ResultClient() {
                        </div>
                     </Card>
                  </div>
-
               </div>
            </TabsContent>
 
-           {/* REVIEW TAB */}
            <TabsContent value="REVIEW" className="space-y-12 animate-in fade-in duration-500">
               <div className="max-w-4xl mx-auto space-y-10">
                  <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100 w-fit mx-auto overflow-x-auto no-scrollbar">
@@ -386,17 +376,10 @@ export default function ResultClient() {
                           </div>
                        </Card>
                     ))}
-                    {filteredQuestions.length === 0 && (
-                       <div className="py-40 text-center opacity-20 italic font-black uppercase text-2xl flex flex-col items-center gap-6">
-                          <Search className="h-16 w-16" />
-                          No nodes found in this category
-                       </div>
-                    )}
                  </div>
               </div>
            </TabsContent>
 
-           {/* REPORT TAB */}
            <TabsContent value="REPORT" className="animate-in zoom-in-95 duration-700 pb-20">
               <div className="flex flex-col items-center">
                  <div className="transform scale-[0.4] sm:scale-[0.6] md:scale-[0.8] lg:scale-100 origin-top bg-white p-4 md:p-20 rounded-[3rem] shadow-5xl">
@@ -404,7 +387,7 @@ export default function ResultClient() {
                        studentName={activeSession.userName || profile?.name || "Aspirant"} 
                        examTitle={activeSession.mockTitle || "Mock Test"} 
                        score={activeSession.score.toFixed(1)} 
-                       rank={merit.rank} 
+                       rank="---" 
                        accuracy={activeSession.accuracy} 
                        timeTaken={formatTimeStr(activeSession.timeTaken)} 
                        correct={activeSession.correctCount} 
