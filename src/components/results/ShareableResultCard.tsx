@@ -24,8 +24,8 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview High-Fidelity Social Share Certificate v1.2.
- * UPDATED: Replaced icon with full official logo as requested.
+ * @fileOverview High-Fidelity Social Share Certificate v1.3.
+ * FIXED: Explicitly defined icons and uses official logo.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
@@ -50,7 +50,6 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
       
       <div className="relative z-10 flex-1 flex flex-col p-16 space-y-12">
          
-         {/* 1. TOP HEADER - UPDATED TO FULL LOGO */}
          <div className="flex flex-col items-center text-center space-y-4">
             <div className="h-[120px] w-auto flex items-center justify-center">
                <img src="/logo.png" alt="Cracklix" className="h-full object-contain filter drop-shadow-2xl" />
@@ -63,7 +62,6 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             </div>
          </div>
 
-         {/* 2. RANK SECTION */}
          <div className="relative">
             <div className="bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-600 p-1.5 rounded-[4rem] shadow-5xl">
                <div className="bg-[#071B4D] rounded-[3.8rem] p-12 text-center relative overflow-hidden">
@@ -88,7 +86,6 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             </div>
          </div>
 
-         {/* 3. TEST & CANDIDATE INFO */}
          <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 flex items-center justify-between backdrop-blur-md">
             <div className="space-y-2">
                <p className="text-sm font-black text-primary uppercase tracking-[0.3em]">Candidate Name</p>
@@ -100,7 +97,6 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             </div>
          </div>
 
-         {/* 4. PERFORMANCE MATRIX */}
          <div className="grid grid-cols-4 gap-6">
             <ResultMetric label="Score" val={`${data.score}/${data.totalQuestions}`} color="bg-emerald-500" />
             <ResultMetric label="Accuracy" val={`${data.attemptAccuracy}%`} color="bg-indigo-500" />
@@ -108,14 +104,12 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             <ResultMetric label="Grade" val={data.grade || "A+"} color="bg-blue-500" />
          </div>
 
-         {/* 5. QUESTION STATS */}
          <div className="grid grid-cols-3 gap-6 pt-4">
             <MiniStat icon={<CheckCircle2 className="text-emerald-400" />} label="Correct" val={data.correctCount} />
             <MiniStat icon={<X className="text-rose-400" />} label="Wrong" val={data.wrongCount} />
             <MiniStat icon={<Zap className="text-slate-400" />} label="Skipped" val={data.skippedCount} />
          </div>
 
-         {/* 6. FOOTER VERIFICATION */}
          <div className="mt-auto pt-10 border-t border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-8">
                <div className="bg-white p-3 rounded-2xl shadow-2xl">
@@ -155,4 +149,8 @@ function MiniStat({ icon, label, val }: any) {
          </div>
       </div>
    )
+}
+
+function Timer({ className }: { className?: string }) {
+   return <Clock className={className} />;
 }

@@ -12,14 +12,15 @@ import {
   Activity,
   AlertCircle,
   Lightbulb,
-  TrendingDown
+  TrendingDown,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v6.6.
- * FIXED: Resolved syntax errors and ensured all icons are imported for stable compilation.
+ * @fileOverview Premium Analysis Screen v6.7.
+ * FIXED: Validated syntax and helper component structure.
  */
 
 interface ReportScreenProps {
@@ -67,7 +68,6 @@ export default function ReportScreen(props: ReportScreenProps) {
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-500 pb-20">
       
-      {/* Score Summary Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 overflow-x-auto no-scrollbar -mx-1 px-1">
          <Card className="col-span-2 md:col-span-1 h-36 md:h-44 rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-6">
             <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-2">Your score</p>
@@ -84,7 +84,6 @@ export default function ReportScreen(props: ReportScreenProps) {
          <SummaryMiniCard label="Total items" val={totalQuestions} color="text-[#1677FF]" bg="bg-blue-50" />
       </div>
 
-      {/* Ranking Node */}
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 flex items-center justify-between">
          <div className="flex items-center gap-4 md:gap-8 text-left">
             <div className="h-12 w-12 md:h-16 md:h-16 rounded-full bg-[#1677FF] flex items-center justify-center text-white shadow-lg">
@@ -107,7 +106,6 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       </Card>
 
-      {/* Performance Matrix */}
       <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <BarChart3 className="h-5 w-5 text-[#1677FF]" />
@@ -121,7 +119,6 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       </div>
 
-      {/* Subject Analytics */}
       {subjectAnalysis.length > 0 && (
          <div className="space-y-6">
             <div className="flex items-center gap-3 px-1">
@@ -159,7 +156,6 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       )}
 
-      {/* Competition Snapshot */}
       <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <TrendingUp className="h-5 w-5 text-[#1677FF]" />
@@ -173,7 +169,6 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       </div>
 
-      {/* Smart Insights */}
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 space-y-6">
          <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
             <Lightbulb className="h-5 w-5 text-[#F59E0B]" />

@@ -47,8 +47,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v27.0.
- * FIXED: Replaced icon with full logo in Shareable Card and hardened sharing logic.
+ * @fileOverview Universal Result Hub Viewer v28.0.
+ * FIXED: Background cache logic and ReferenceError for Timer/X icons.
  */
 
 export default function ResultClient() {
@@ -74,7 +74,6 @@ export default function ResultClient() {
   const [avgScore, setAvgScore] = useState<number>(0)
   const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
 
-  // Pre-caching Logic
   const [preGeneratedImage, setPreGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -182,17 +181,15 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  // AUTO-PREPARATION HUB
   const prepareShareCard = useCallback(async () => {
     if (!mounted || !sessionData || liveRank === "---" || preGeneratedImage || isGenerating) return;
     
     setIsGenerating(true);
-    // Institutional Delay to ensure Gurmukhi and Logo rendering
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(r => setTimeout(r, 2000));
     
     try {
       const node = document.getElementById('shareable-result-certificate');
-      if (!node) throw new Error("DOM Node missing");
+      if (!node) return;
 
       const dataUrl = await toPng(node, {
          quality: 0.95,
@@ -204,7 +201,7 @@ export default function ResultClient() {
 
       setPreGeneratedImage(dataUrl);
     } catch (e) {
-      console.warn("[Registry] Background generation bypassed:", e);
+      console.warn("[Registry] Image generation failed:", e);
     } finally {
       setIsGenerating(false);
     }
@@ -228,9 +225,11 @@ export default function ResultClient() {
          if (node) {
             imageToShare = await toPng(node, { quality: 0.95, pixelRatio: 2, width: 1080, height: 1350 });
             setPreGeneratedImage(imageToShare);
+         } else {
+           throw new Error("Node missing");
          }
        } catch (e) {
-         toast({ variant: "destructive", title: "Sharing Error", description: "Could not generate shareable card." });
+         toast({ variant: "destructive", title: "Sharing Error", description: "Image hub still syncing. Try again." });
          setIsGenerating(false);
          return;
        }
@@ -241,30 +240,26 @@ export default function ResultClient() {
       const blob = await (await fetch(imageToShare!)).blob();
       const file = new File([blob], `Cracklix_Result.png`, { type: 'image/png' });
 
-      // 1. Check for File Sharing Support
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
             title: 'My Cracklix Result',
-            text: `🎯 Just scored ${sessionData.score}/${sessionData.totalQuestions} in ${sessionData.mockTitle}! Ranked #${liveRank} across Punjab.`,
+            text: `🎯 Scored ${sessionData.score}/${sessionData.totalQuestions} in ${sessionData.mockTitle}! Ranked #${liveRank} in Punjab.`,
             files: [file]
          });
       } else if (navigator.share) {
-         // 2. Fallback to Text/URL Share
          await navigator.share({
             title: 'My Cracklix Result',
             text: `🎯 Scored ${sessionData.score}/${sessionData.totalQuestions}! Rank: #${liveRank}. View: https://cracklix.in/results/view?id=${mockId}`
          });
       } else {
-         // 3. Fallback to Direct Download
          const link = document.createElement('a');
          link.download = `Cracklix_Result_${Date.now()}.png`;
          link.href = imageToShare!;
          link.click();
-         toast({ title: "Certificate Downloaded" });
       }
     } catch (e: any) { 
        if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Transmission Error", description: "Sharing failed. Please download instead." }); 
+          toast({ variant: "destructive", title: "Transmission Error" }); 
        }
     }
   };
@@ -376,7 +371,6 @@ export default function ResultClient() {
                   </TabsContent>
               </Tabs>
               
-              {/* HIDDEN SHARE CARD FOR CAPTURE */}
               <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none">
                  <ShareableResultCard data={sessionData} rank={liveRank} totalCandidates={totalCandidates} />
               </div>
