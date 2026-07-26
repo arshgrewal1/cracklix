@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -40,7 +39,9 @@ import {
   CheckCircle2,
   Trophy,
   Target,
-  History
+  History,
+  Timer,
+  BookOpen
 } from "lucide-react"
 import { 
   Card, 
@@ -57,13 +58,15 @@ import ResultCard from "./ResultCard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 import { useExamStore } from "@/store/useExamStore"
+import { AuthorityLogo } from "@/lib/exam-icons"
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
  * @fileOverview Institutional Result Hub V4.
- * FIXED: Terminology normalized to "Questions".
- * FIXED: Reliable high-fidelity PDF capture with 100% asset synchronization.
+ * FIXED: ReferenceError for AuthorityLogo resolved.
+ * TERMINOLOGY: Standardized to 'Questions'.
+ * PDF: Hardened 4x resolution image capture.
  */
 
 export default function ResultClient() {
@@ -98,6 +101,8 @@ export default function ResultClient() {
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
+
+  const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
@@ -172,8 +177,6 @@ export default function ResultClient() {
     resolveId();
     return () => { isSubscribed = false; };
   }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
-
-  const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
@@ -280,7 +283,7 @@ export default function ResultClient() {
     setIsExporting(true);
     try {
       setActiveMainTab("REPORT"); 
-      toast({ title: "Preparing high-fidelity report..." });
+      toast({ title: "Preparing report..." });
       
       await new Promise(r => setTimeout(r, 1500));
       if (typeof window !== 'undefined' && 'fonts' in document) await (document as any).fonts.ready;
@@ -307,7 +310,7 @@ export default function ResultClient() {
       
       toast({ title: "Report downloaded" });
     } catch (e: any) { 
-       toast({ variant: "destructive", title: "Export Failed", description: "Please retry." }); 
+       toast({ variant: "destructive", title: "Export failed", description: "Please retry." }); 
     } finally { setIsExporting(false); }
   };
 
@@ -354,8 +357,8 @@ export default function ResultClient() {
              <AlertCircle className="h-10 w-10" />
           </div>
           <div className="space-y-3 text-left">
-             <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Record Not Found</h2>
-             <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">Could not synchronize your attempt node. Try refreshing.</p>
+             <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Record not found</h2>
+             <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">Could not synchronize your attempt record. Try refreshing.</p>
           </div>
           <Button onClick={() => window.location.reload()} className="w-full h-14 bg-primary text-white rounded-2xl font-bold shadow-xl border-none active:scale-95"><RefreshCw className="h-4 w-4 mr-2" /> Re-sync</Button>
        </Card>
@@ -367,7 +370,7 @@ export default function ResultClient() {
       <Navbar />
       <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-10 space-y-6 md:space-y-10 pb-40">
         
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1 print:hidden">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1 print:hidden text-left">
            <div className="flex items-center gap-4 md:gap-8 text-left w-full lg:w-auto">
               <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-12 w-12 md:h-14 md:w-14 rounded-xl shadow-lg bg-white border-2 border-slate-50" />
               <div className="space-y-1 flex-1 min-w-0">
@@ -398,7 +401,7 @@ export default function ResultClient() {
               <div className="flex gap-2">
                  <Button variant="outline" onClick={handleRetake} className="flex-1 h-10 border-2 font-bold text-[9px] rounded-xl active:scale-95"><RotateCcw className="h-3 w-3 mr-2" /> Retake</Button>
                  <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-10 bg-primary text-white font-bold text-[9px] rounded-xl shadow-md active:scale-95">
-                    {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} PDF Report
+                    {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} PDF report
                  </Button>
               </div>
            </div>
@@ -407,11 +410,11 @@ export default function ResultClient() {
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-10">
             <TabsContent value="OVERVIEW" className="space-y-10 animate-in fade-in duration-500">
                 <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-                  <StatCard label="Net Score" val={`${finalMetrics?.score} / ${finalMetrics?.maxMarks}`} sub={`${finalMetrics?.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
-                  <StatCard label="Punjab Rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
+                  <StatCard label="Net score" val={`${finalMetrics?.score} / ${finalMetrics?.maxMarks}`} sub={`${finalMetrics?.percentage.toFixed(1)}%`} icon={<Zap className="text-primary" />} />
+                  <StatCard label="Punjab rank" val={`#${liveRank}`} sub={`of ${totalCandidates}`} icon={<Trophy className="text-amber-500" />} highlight />
                   <StatCard label="Percentile" val={`${finalMetrics?.percentile}%`} sub="Verified" icon={<TrendingUp className="text-blue-500" />} />
                   <StatCard label="Accuracy" val={`${finalMetrics?.attemptAccuracy.toFixed(1)}%`} sub="Precision" icon={<Target className="text-emerald-500" />} />
-                  <StatCard label="Attempt Rate" val={`${finalMetrics?.attemptRate.toFixed(1)}%`} sub="Volume" icon={<Activity className="text-indigo-500" />} />
+                  <StatCard label="Attempt rate" val={`${finalMetrics?.attemptRate.toFixed(1)}%`} sub="Volume" icon={<Activity className="text-indigo-500" />} />
                   <StatCard label="Grade" val={finalMetrics?.grade} sub="Audit" icon={<Award className="text-purple-500" />} />
                 </section>
 
@@ -419,21 +422,21 @@ export default function ResultClient() {
                   <div className="lg:col-span-8 space-y-6 md:space-y-10">
                       <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 text-left">
                           <h3 className="text-sm md:text-xl font-bold text-[#0F172A] mb-8 flex items-center gap-3">
-                             <TrendingUp className="h-4 w-4 text-primary" /> Competition Audit
+                             <TrendingUp className="h-4 w-4 text-primary" /> Competition audit
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                              <div className="space-y-6">
-                                <ComparisonPill label="Your Score" val={finalMetrics?.score || 0} max={finalMetrics?.maxMarks || 1} color="bg-primary" />
-                                <ComparisonPill label="Average Score" val={Number(avgScore.toFixed(1))} max={finalMetrics?.maxMarks || 1} color="bg-slate-200" />
-                                <ComparisonPill label="Topper Score" val={topperScore} max={finalMetrics?.maxMarks || 1} color="bg-amber-400" />
+                                <ComparisonPill label="Your score" val={finalMetrics?.score || 0} max={finalMetrics?.maxMarks || 1} color="bg-primary" />
+                                <ComparisonPill label="Average score" val={Number(avgScore.toFixed(1))} max={finalMetrics?.maxMarks || 1} color="bg-slate-200" />
+                                <ComparisonPill label="Topper score" val={topperScore} max={finalMetrics?.maxMarks || 1} color="bg-amber-400" />
                              </div>
                              <div className="bg-slate-50 rounded-[1.5rem] p-6 flex flex-col items-center justify-center text-center space-y-3 border border-slate-100 shadow-inner">
                                 <Target className="h-6 w-6 text-rose-500" />
                                 <div>
-                                   <p className="text-[9px] font-bold text-slate-400">Topper Gap</p>
+                                   <p className="text-[9px] font-bold text-slate-400">Topper gap</p>
                                    <p className="text-2xl font-black text-[#0F172A] tabular-nums mt-1">-{finalMetrics?.topperGap.toFixed(1)}</p>
                                 </div>
-                                <p className="text-[10px] font-medium text-slate-500 max-w-[160px] leading-relaxed">Closing this gap requires targeted subject focus.</p>
+                                <p className="text-[10px] font-medium text-slate-500 max-w-[160px] leading-relaxed">Closing this gap requires targeted question focus.</p>
                              </div>
                           </div>
                       </Card>
@@ -441,7 +444,7 @@ export default function ResultClient() {
                       <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-white p-6 md:p-10 text-left">
                           <div className="flex justify-between items-center mb-8">
                              <h3 className="text-sm md:text-xl font-bold text-[#0F172A] flex items-center gap-3">
-                                <ShieldCheck className="h-4 w-4 text-emerald-500" /> Readiness Index
+                                <ShieldCheck className="h-4 w-4 text-emerald-500" /> Readiness index
                              </h3>
                              <Badge className={cn(
                                 "border-none text-[8px] font-black px-3 py-1 rounded-full shadow-lg",
@@ -478,7 +481,7 @@ export default function ResultClient() {
                           <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-48 w-48 text-primary" /></div>
                           <div className="relative z-10 space-y-8 text-left">
                              <div className="space-y-1">
-                                <h3 className="text-xl font-bold tracking-tight leading-tight uppercase">Smart Insights</h3>
+                                <h3 className="text-xl font-bold tracking-tight leading-tight uppercase">Smart insights</h3>
                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Analytics audit</p>
                              </div>
                              <div className="space-y-6">
@@ -488,7 +491,7 @@ export default function ResultClient() {
                              </div>
                              <div className="pt-8 border-t border-white/5">
                                 <Button asChild variant="ghost" className="w-full text-primary hover:text-white hover:bg-white/5 font-bold text-[10px] tracking-tight gap-2 border-none">
-                                   <Link href={`/leaderboard?id=${mockId}`}>Full Rankings Hub <ArrowRight className="h-3" /></Link>
+                                   <Link href={`/leaderboard?id=${mockId}`}>Full rankings hub <ArrowRight className="h-3" /></Link>
                                 </Button>
                              </div>
                           </div>
@@ -498,7 +501,7 @@ export default function ResultClient() {
 
                 <section className="space-y-6 md:space-y-8">
                    <h3 className="text-sm md:text-xl font-bold text-[#0F172A] px-1 flex items-center gap-3">
-                      <Layers className="h-5 w-5 text-blue-500" /> Subject Mastery Hub
+                      <Layers className="h-5 w-5 text-blue-500" /> Subject mastery hub
                    </h3>
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {activeSession?.subjectAnalysis?.map((sub: any, i: number) => (
@@ -561,7 +564,7 @@ export default function ResultClient() {
                        {finalMetrics && (
                           <ResultCard 
                               studentName={activeSession.userName || profile?.name || "Aspirant"} 
-                              examTitle={activeSession.mockTitle || "Mock Test"} 
+                              examTitle={activeSession.mockTitle || "Mock test"} 
                               score={finalMetrics.score.toFixed(2)} 
                               rank={liveRank} 
                               totalCandidates={totalCandidates}
