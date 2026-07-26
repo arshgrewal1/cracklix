@@ -60,8 +60,9 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Institutional Result Hub V4.5.
- * FIXED: Implemented a robust 'Hidden Rendering Node' for PDF capture to resolve blank/cut pages.
+ * @fileOverview Institutional Result Hub V4.6 [Ranking Logic Fixed].
+ * FIXED: Self-competition bug where rank could exceed participant count during retakes.
+ * FIXED: Removed all remaining uppercase headers.
  */
 
 export default function ResultClient() {
@@ -179,11 +180,25 @@ export default function ResultClient() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
            const countSnap = await getCountFromServer(entriesRef);
-           setTotalCandidates(countSnap.data().count);
+           const total = countSnap.data().count;
+           setTotalCandidates(total);
            
            const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
            const superiorCountSnap = await getCountFromServer(superiorQuery);
-           setLiveRank(superiorCountSnap.data().count + 1);
+           let rankValue = superiorCountSnap.data().count + 1;
+
+           // Institutional Logic: Exclude self-inflation in ranking if this is a lower-score retake
+           if (user) {
+              const myEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
+              const myEntrySnap = await getDoc(myEntryRef);
+              if (myEntrySnap.exists() && myEntrySnap.data().highestScore > activeSession.score) {
+                 // My best score is already in the superior count, subtract 1 to get rank relative to OTHERS
+                 rankValue = Math.max(1, rankValue - 1);
+              }
+           }
+
+           // Safety: Rank cannot exceed total pool
+           setLiveRank(Math.min(rankValue, total > 0 ? total : 1));
 
            const topperQuery = query(entriesRef, orderBy("highestScore", "desc"), limit(1));
            const topperSnap = await getDocs(topperQuery);
@@ -196,7 +211,7 @@ export default function ResultClient() {
         } catch (e) {}
      }
      fetchRankingMetrics();
-  }, [db, mockId, activeSession]);
+  }, [db, mockId, activeSession, user]);
 
   const finalMetrics = useMemo(() => {
     if (!activeSession) return null;
@@ -219,7 +234,7 @@ export default function ResultClient() {
 
     const percentile = totalCandidates > 1 
       ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1)) 
-      : 0;
+      : 100;
 
     return { 
       score, maxMarks, percentage, attemptAccuracy, overallAccuracy, 
@@ -415,7 +430,7 @@ export default function ResultClient() {
                                 <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Zap className="h-48 w-48 text-primary" /></div>
                                 <div className="relative z-10 space-y-8 text-left">
                                    <div className="space-y-1">
-                                      <h3 className="text-xl font-black tracking-tight uppercase">Smart Insights</h3>
+                                      <h3 className="text-xl font-black tracking-tight">Smart Insights</h3>
                                       <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Analytics Audit</p>
                                    </div>
                                    <div className="space-y-6">
@@ -501,7 +516,6 @@ export default function ResultClient() {
            </>
         )}
 
-        {/* HIDDEN EXPORT BUFFER: Fixed A4 210mm container */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
           <div id="cracklix-export-node">
             {finalMetrics && activeSession && (
@@ -595,4 +609,3 @@ function formatTimeStr(seconds: number) {
   const s = seconds % 60;
   return `${m}m ${s}s`;
 }
-

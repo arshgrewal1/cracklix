@@ -58,10 +58,9 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Cracklix Performance Report V4 (PWA & PDF Safe).
- * FIXED: Removed all uppercase and decorative blobs.
- * FIXED: Implemented 'Question' terminology.
- * FIXED: Removed icons from grade section.
+ * @fileOverview Cracklix Performance Report V4.2 [Hardened].
+ * FIXED: Ranking display bug where rank exceeded participants.
+ * FIXED: Removed all remaining uppercase labels.
  */
 export default function ResultCard({
   studentName,
@@ -94,11 +93,14 @@ export default function ResultCard({
   
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent('https://cracklix.in')}`;
 
+  // Institutional Logic: Top Performer badge only if there's significant competition
+  const showTopPerformer = Number(rank) <= 10 && totalCandidates >= 5;
+
   return (
     <div 
       className={cn(
         "bg-white shadow-none overflow-hidden text-left font-body relative flex flex-col mx-auto box-border",
-        isForExport ? "w-[210mm] min-h-[297mm] p-0" : "w-full max-w-full border border-slate-100 rounded-[2rem] md:rounded-[3rem]"
+        isForExport ? "w-[210mm] min-h-[297mm] p-0" : "w-full max-w-full border border-slate-100 rounded-[2rem] md:rounded-[3.5rem]"
       )}
     >
       {/* 1. INSTITUTIONAL HEADER */}
@@ -151,7 +153,7 @@ export default function ResultCard({
                     <span className="text-sm md:text-xl font-bold text-slate-500">/ {totalCandidates}</span>
                  </div>
                  <Badge className="bg-emerald-500 text-white border-none px-4 py-1 rounded-full font-bold text-[9px] tracking-tight shadow-lg">
-                   {Number(rank) <= 10 ? 'Top Performer' : 'Verified Attempt'}
+                   {showTopPerformer ? 'Top Performer' : 'Verified Attempt'}
                  </Badge>
               </div>
            </div>
