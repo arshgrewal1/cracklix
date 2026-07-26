@@ -22,7 +22,7 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v506.0 [Uppercase Removed].
+ * @fileOverview Institutional Premium Hub v507.0 [UI Standardized].
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -49,7 +49,7 @@ export default function HomePage() {
         <ContinueLearning />
       )}
 
-      {/* TODAY'S CHALLENGE HUB */}
+      {/* TODAY'S CHALLENGE HUB - STANDARDIZED */}
       <section className="py-12 md:py-24 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
@@ -65,16 +65,18 @@ export default function HomePage() {
                
                <div className="relative z-10 w-full">
                   <div className="space-y-4">
-                     <div className="flex items-center justify-center gap-3">
-                        <Flame className="h-8 w-8 text-orange-500 fill-current animate-pulse" />
-                        <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white antialiased leading-tight">
+                     <div className="flex flex-col items-center justify-center gap-4">
+                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 shadow-inner">
+                           <Flame className="h-5 w-5 md:h-6 md:w-6 fill-current animate-pulse" />
+                        </div>
+                        <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white antialiased leading-tight">
                            Today's Challenge
                         </h2>
                      </div>
                      {!isMounted || quizLoading ? (
                         <div className="h-8 w-64 mx-auto bg-white/5 animate-pulse rounded-lg mt-2" />
                      ) : (
-                        <p className="text-lg md:text-2xl text-slate-300 font-medium max-w-2xl mx-auto italic">
+                        <p className="text-base md:text-xl text-slate-300 font-medium max-w-2xl mx-auto italic">
                            "{activeQuiz?.title || "Daily Practice Mode"}"
                         </p>
                      )}
@@ -87,18 +89,18 @@ export default function HomePage() {
                   ) : activeQuiz ? (
                     <div className="space-y-10 mt-10">
                       <div className="flex flex-row flex-wrap items-center justify-center gap-4">
-                         <ChallengeChip icon={<Clock className="h-4 w-4" />} label={`${activeQuiz.duration} min`} />
-                         <ChallengeChip icon={<ShieldCheck className="h-4 w-4" />} label={`${activeQuiz.totalQuestions} questions`} />
-                         <ChallengeChip icon={<Trophy className="h-4 w-4" />} label={`${activeQuiz.rewardXP} XP`} />
+                         <ChallengeChip icon={<Clock className="h-3.5 w-3.5" />} label={`${activeQuiz.duration} min`} />
+                         <ChallengeChip icon={<ShieldCheck className="h-3.5 w-3.5" />} label={`${activeQuiz.totalQuestions} questions`} />
+                         <ChallengeChip icon={<Trophy className="h-3.5 w-3.5" />} label={`${activeQuiz.rewardXP} XP`} />
                       </div>
 
                       <div className="pt-4 flex justify-center">
                          <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="w-full max-w-md">
-                            <button className="relative overflow-hidden w-full h-16 md:h-20 bg-gradient-to-r from-blue-600 to-blue-400 hover:brightness-110 text-white font-black tracking-tight text-sm rounded-2xl md:rounded-[3rem] shadow-4xl transition-all duration-300 active:scale-95 border-none group/btn cursor-pointer text-center">
-                               <div className="flex items-center justify-center gap-3 relative z-10">
-                                  <Zap className="h-5 w-5 fill-white text-white" />
-                                  <span>Start Challenge</span>
-                                  <ChevronRight className="h-5 w-5 transition-transform group-hover/btn:translate-x-2" />
+                            <button className="relative overflow-hidden w-full h-14 md:h-16 bg-gradient-to-r from-blue-600 to-blue-400 hover:brightness-110 text-white font-bold tracking-tight text-[11px] md:text-xs rounded-xl md:rounded-[2rem] shadow-4xl transition-all duration-300 active:scale-95 border-none group/btn cursor-pointer text-center">
+                               <div className="flex items-center justify-center gap-3 relative z-10 px-8">
+                                  <Zap className="h-4 w-4 fill-white text-white" />
+                                  <span className="uppercase tracking-widest">Start Challenge</span>
+                                  <ChevronRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-2" />
                                </div>
                                <motion.div 
                                   animate={{ x: ['-100%', '300%'] }}
@@ -132,9 +134,9 @@ export default function HomePage() {
 
 function ChallengeChip({ icon, label }: { icon: React.ReactNode, label: string }) {
    return (
-      <div className="inline-flex items-center gap-3 h-10 md:h-12 px-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-full hover:bg-white/10 transition-all duration-300 shadow-sm group/chip">
+      <div className="inline-flex items-center gap-2.5 h-9 md:h-11 px-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300 shadow-sm group/chip">
          <span className="shrink-0 text-primary">{icon}</span>
-         <span className="text-[10px] md:text-xs font-black text-white tracking-tight">{label}</span>
+         <span className="text-[10px] md:text-xs font-bold text-white tracking-tight">{label}</span>
       </div>
    )
 }
