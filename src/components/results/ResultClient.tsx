@@ -20,11 +20,13 @@ import {
   Loader2, 
   Download,
   ChevronRight,
-  AlertCircle,
+  ShieldCheck,
+  RefreshCw,
+  FileText,
+  Bookmark,
   CheckCircle2,
   XCircle,
-  HelpCircle,
-  FileText
+  Clock
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -39,11 +41,6 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
-/**
- * @fileOverview Institutional Result Hub v6.2.
- * FIXED: Syntax error corrected on line 326.
- */
-
 export default function ResultClient() {
   const db = useFirestore()
   const { user, profile, loading: userLoading } = useUser()
@@ -56,7 +53,6 @@ export default function ResultClient() {
   const [mockData, setMockData] = useState<any>(null)
   const [loadingQuestions, setLoadingQuestions] = useState(true)
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'WRONG' | 'CORRECT' | 'SKIPPED'>('ALL')
-  const [guestResult, setGuestResult] = useState<any>(null)
   const [activeMainTab, setActiveMainTab] = useState<string>("OVERVIEW")
   const [isExporting, setIsExporting] = useState(false)
   
@@ -75,32 +71,19 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
-  const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
-
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
     
-    async function resolveId() {
+    async function resolveAttempt() {
        setIsSearching(true);
        setErrorNotFound(false);
 
-       if (!user) {
-          const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
-          if (guestRes) { 
-             setGuestResult(JSON.parse(guestRes)); 
-             setIsSearching(false); 
-          } else { 
-             setErrorNotFound(true); 
-             setIsSearching(false); 
-          }
-          return;
-       }
-
        try {
           const resultsRef = collection(db, "results");
-          let q = query(resultsRef, where("userId", "==", user.uid), where("mockId", "==", mockId));
-          const querySnap = await getDocs(q);
+          let q = query(resultsRef, where("mockId", "==", mockId));
+          if (user) q = query(q, where("userId", "==", user.uid));
           
+          const querySnap = await getDocs(q);
           if (querySnap.empty) {
              setErrorNotFound(true);
              setIsSearching(false);
@@ -108,40 +91,29 @@ export default function ResultClient() {
           }
 
           const resultsList = querySnap.docs.map(d => ({ ...d.data(), id: d.id }));
-          
-          if (attemptIdFromUrl) {
-             const target = resultsList.find(r => r.attemptId === attemptIdFromUrl || r.id.endsWith(attemptIdFromUrl));
-             if (target) {
-                setSessionData(target);
-                setIsSearching(false);
-                return;
-             }
-          }
-
           const sortedResults = resultsList.sort((a, b) => {
              const tA = a.createdAt?.seconds || new Date(a.timestamp || 0).getTime() / 1000;
              const tB = b.createdAt?.seconds || new Date(b.timestamp || 0).getTime() / 1000;
              return tB - tA;
           });
 
-          setSessionData(sortedResults[0]);
+          setSessionData(attemptIdFromUrl ? resultsList.find(r => r.attemptId === attemptIdFromUrl) || sortedResults[0] : sortedResults[0]);
           setIsSearching(false);
 
        } catch (e) { 
           setErrorNotFound(true); 
-       } finally { 
-          setIsSearching(false); 
+          setIsSearching(false);
        }
     }
-    resolveId();
+    resolveAttempt();
   }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
 
   useEffect(() => {
-     if (!db || !mockId || !activeSession) return;
+     if (!db || !mockId || !sessionData) return;
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
-           const snap = await getDocs(query(entriesRef, where("mockId", "==", mockId)));
+           const snap = await getDocs(entriesRef);
            
            const entries = snap.docs.map(d => d.data());
            const sorted = [...entries].sort((a: any, b: any) => {
@@ -151,7 +123,7 @@ export default function ResultClient() {
            });
 
            const totalCount = sorted.length;
-           const myIndex = sorted.findIndex(e => e.userId === activeSession.userId || e.uid === activeSession.userId);
+           const myIndex = sorted.findIndex(e => e.userId === sessionData.userId);
            const rank = myIndex === -1 ? totalCount : myIndex + 1;
 
            const totalS = entries.reduce((acc, e) => acc + (e.highestScore || 0), 0);
@@ -166,16 +138,14 @@ export default function ResultClient() {
         } catch (e) {}
      }
      fetchRankingMetrics();
-  }, [db, mockId, activeSession]);
+  }, [db, mockId, sessionData]);
 
   useEffect(() => {
     async function loadQuestions() {
       if (!db || !mockId) return;
       try {
         setLoadingQuestions(true);
-        const mockRef = doc(db, "mocks", mockId);
-        const dailyRef = doc(db, "daily_quizzes", mockId);
-        const [mSnap, dSnap] = await Promise.all([getDoc(mockRef), getDoc(dailyRef)]);
+        const [mSnap, dSnap] = await Promise.all([getDoc(doc(db, "mocks", mockId)), getDoc(doc(db, "daily_quizzes", mockId))]);
         const mockSnap = mSnap.exists() ? mSnap : dSnap;
 
         if (mockSnap.exists()) {
@@ -186,49 +156,28 @@ export default function ResultClient() {
             const chunks = [];
             for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
             const chunkPromises = chunks.map(async (chunk) => {
-              const mcqSnap = await getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk)));
-              const usedSnap = await getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)));
-              const legacySnap = await getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)));
-              const localResults: any[] = [];
-              mcqSnap.docs.forEach(d => localResults.push({ ...d.data(), id: d.id }));
-              usedSnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
-              legacySnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
-              return localResults;
+              const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
+                getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
+                getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
+                getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+              ]);
+              const batch: any[] = [];
+              mcqSnap.docs.forEach(d => batch.push({ ...d.data(), id: d.id }));
+              usedSnap.forEach(d => { if (!batch.find(f => f.id === d.id)) batch.push({ ...d.data(), id: d.id }); });
+              legacySnap.forEach(d => { if (!batch.find(f => f.id === d.id)) batch.push({ ...d.data(), id: d.id }); });
+              return batch;
             });
-            const allBatches = await Promise.all(chunkPromises);
-            const fetchedQuestions = allBatches.flat();
-            setQuestions(questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean));
+            const all = (await Promise.all(chunkPromises)).flat();
+            setQuestions(questionIds.map((id: string) => all.find((q: any) => q.id === id)).filter(Boolean));
           }
         }
-      } catch (e) {} finally { setLoadingQuestions(false) }
+      } finally { setLoadingQuestions(false) }
     }
     loadQuestions()
   }, [db, mockId]);
 
-  const finalMetrics = useMemo(() => {
-    if (!activeSession) return null;
-    const score = Number(activeSession.score) || 0;
-    const totalQ = Number(activeSession.totalQuestions) || 0;
-    const maxMarks = Number(activeSession.maxMarks) || totalQ;
-    const percentage = Number(((score / maxMarks) * 100).toFixed(1));
-    const isQualified = activeSession.isQualified || percentage >= 40;
-    
-    const belowCount = Math.max(0, totalCandidates - Number(liveRank));
-    const percentile = totalCandidates > 1 ? Number(((belowCount / totalCandidates) * 100).toFixed(1)) : 100;
-    
-    let grade = "F";
-    if (percentage >= 90) grade = "A+";
-    else if (percentage >= 80) grade = "A";
-    else if (percentage >= 70) grade = "B+";
-    else if (percentage >= 60) grade = "B";
-    else if (percentage >= 50) grade = "C";
-    else if (percentage >= 40) grade = "D";
-
-    return { score, maxMarks, percentage, attemptAccuracy: Number(activeSession.attemptAccuracy) || 0, grade, isQualified, percentile };
-  }, [activeSession, totalCandidates, liveRank]);
-
   const handleDownloadPDF = async () => {
-    if (isExporting || !activeSession || !finalMetrics) return;
+    if (isExporting || !sessionData) return;
     setIsExporting(true);
     toast({ title: "Syncing report registry" });
     
@@ -236,36 +185,23 @@ export default function ResultClient() {
       const container = document.getElementById('pdf-export-buffer');
       if (!container) throw new Error("Capture node missing");
       
-      const canvas = await html2canvas(container, {
-        scale: 3,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        width: 794,
-        onclone: (clonedDoc) => {
-           const el = clonedDoc.getElementById('pdf-export-buffer');
-           if (el) el.style.display = 'block';
-        }
-      });
-      
+      const canvas = await html2canvas(container, { scale: 3, useCORS: true, backgroundColor: "#F8FAFC" });
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
-      pdf.save(`Report_${activeSession.userName || 'Student'}_${mockId}.pdf`);
-      toast({ title: "Analysis downloaded" });
+      pdf.save(`Analysis_${sessionData.userName || 'Student'}.pdf`);
+      toast({ title: "Report downloaded" });
     } catch (e) { 
-       console.error(e);
        toast({ variant: "destructive", title: "Export failed" }); 
-    } finally { 
-       setIsExporting(false); 
-    }
+    } finally { setIsExporting(false); }
   };
 
   const reviewNodes = useMemo(() => {
-    if (!activeSession || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
+    if (!sessionData || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
     const all = questions.map((q, i) => ({ ...q, originalIndex: i }));
     const correct: any[] = [], wrong: any[] = [], skipped: any[] = [];
     all.forEach((q) => {
-      const ans = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
+      const ans = sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)];
       if (ans === null || ans === undefined || String(ans) === "") skipped.push(q);
       else {
         const userSelectedLabel = ['A', 'B', 'C', 'D'][Number(ans)];
@@ -273,169 +209,119 @@ export default function ResultClient() {
       }
     });
     return { all, correct, wrong, skipped };
-  }, [questions, activeSession]);
+  }, [questions, sessionData]);
 
-  const filteredQuestions = useMemo(() => {
-    if (activeReviewFilter === 'CORRECT') return reviewNodes.correct;
-    if (activeReviewFilter === 'WRONG') return reviewNodes.wrong;
-    if (activeReviewFilter === 'SKIPPED') return reviewNodes.skipped;
-    return reviewNodes.all;
-  }, [activeReviewFilter, reviewNodes]);
+  if (isSearching) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6"><Zap className="h-12 w-12 text-primary animate-pulse" /><p className="text-[10px] font-bold text-slate-300">Synchronizing Analysis Hub...</p></div>;
 
-  if (isSearching) return (
-     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6">
-        <Zap className="h-12 w-12 text-primary animate-pulse" />
-        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Syncing Analysis Registry...</p>
-     </div>
-  );
-
-  if (errorNotFound) return (
-     <div className="h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center">
-        <Card className="max-w-md w-full bg-white rounded-[2rem] p-10 md:p-14 shadow-5xl border border-slate-100 space-y-10">
-           <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
-              <AlertCircle className="h-10 w-10" />
-           </div>
-           <h2 className="text-2xl font-black text-[#0F172A]">Report Node Not Found</h2>
-           <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold"><Link href="/dashboard">Return to Dashboard</Link></Button>
-        </Card>
-     </div>
-  );
+  const filteredQuestions = activeReviewFilter === 'CORRECT' ? reviewNodes.correct : 
+                           activeReviewFilter === 'WRONG' ? reviewNodes.wrong : 
+                           activeReviewFilter === 'SKIPPED' ? reviewNodes.skipped : reviewNodes.all;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
-      <main className="container mx-auto max-w-[480px] px-4 py-6 space-y-6 pb-40">
+      <main className="container mx-auto max-w-[1400px] px-4 md:px-12 py-6 md:py-12 space-y-8 pb-40">
         
-        {activeSession && finalMetrics && (
-           <div className="space-y-6 animate-in fade-in duration-500">
-              <Card className="border-none shadow-sm rounded-[32px] bg-white p-6 space-y-6">
-                 <div className="flex flex-col items-center gap-4">
-                    <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-14 w-auto object-contain" />
-                    <div className="text-center space-y-1.5">
-                       <h1 className="text-xl font-[800] text-[#071B4D] leading-tight">{activeSession.mockTitle}</h1>
-                       <div className="flex flex-wrap justify-center items-center gap-2">
-                          <Badge className="bg-primary/5 text-primary border-none text-[9px] font-bold px-3 py-1 rounded-full">Verified Attempt #{profile?.totalTests || 1}</Badge>
+        {sessionData && (
+           <div className="space-y-10">
+              {/* TEST HEADER */}
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                 <div className="flex items-center gap-6 md:gap-10">
+                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-24 md:w-24 bg-white shadow-xl border-4 border-slate-100" />
+                    <div className="text-left space-y-4">
+                       <div className="flex flex-wrap items-center gap-3">
+                          <Badge className="bg-[#10B981] text-white border-none px-3 py-1 font-bold text-[9px] uppercase tracking-widest">Verified Hub</Badge>
+                          <Badge className="bg-[#1677FF] text-white border-none px-3 py-1 font-bold text-[9px] uppercase tracking-widest">Attempt #{profile?.totalTests || 1}</Badge>
+                       </div>
+                       <h1 className="text-2xl md:text-5xl font-[900] text-[#071B4D] tracking-tighter leading-tight uppercase">{sessionData.mockTitle}</h1>
+                       <div className="flex items-center gap-6 text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-widest">
+                          <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
+                          <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> {mockData?.duration || 120}m Duration</span>
+                          <span className="flex items-center gap-2"><Users className="h-4 w-4" /> {totalCandidates} Candidates</span>
                        </div>
                     </div>
                  </div>
-                 
-                 <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-50">
-                    <HeaderMiniNode label="Date" val={new Date(activeSession.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} />
-                    <HeaderMiniNode label="Duration" val={`${mockData?.duration || 120}m`} />
-                    <HeaderMiniNode label="Candidates" val={totalCandidates.toLocaleString()} />
+                 <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 lg:flex-none h-14 px-8 bg-white border border-slate-200 text-[#071B4D] hover:bg-slate-50 font-bold rounded-2xl gap-3">
+                       {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />} Download PDF
+                    </Button>
+                    <Button asChild className="flex-1 lg:flex-none h-14 px-8 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl gap-3">
+                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-5 w-5" /> Retake Test</Link>
+                    </Button>
                  </div>
-              </Card>
+              </div>
 
-              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                  <div className="flex justify-center mb-6">
-                     <TabsList className="bg-slate-100 p-1 rounded-2xl h-12 w-full flex items-center shadow-inner">
-                        <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl font-bold text-[11px] h-full data-[state=active]:bg-white data-[state=active]:text-[#071B4D] transition-all">Overview</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="flex-1 rounded-xl font-bold text-[11px] h-full data-[state=active]:bg-white data-[state=active]:text-[#071B4D] transition-all">Review</TabsTrigger>
-                        <TabsTrigger value="REPORT" className="flex-1 rounded-xl font-bold text-[11px] h-full data-[state=active]:bg-white data-[state=active]:text-[#071B4D] transition-all">Report</TabsTrigger>
-                     </TabsList>
+              <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-12">
+                  <div className="bg-white p-1.5 rounded-3xl border border-slate-200 shadow-sm flex w-fit gap-2 mx-auto lg:mx-0">
+                     <TabsTrigger value="OVERVIEW" className="rounded-2xl px-12 font-black uppercase text-[10px] h-12 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis Hub</TabsTrigger>
+                     <TabsTrigger value="REVIEW" className="rounded-2xl px-12 font-black uppercase text-[10px] h-12 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review Portal</TabsTrigger>
                   </div>
 
-                  <TabsContent value="OVERVIEW" className="space-y-6 m-0">
+                  <TabsContent value="OVERVIEW" className="m-0 max-w-4xl mx-auto">
                       <ReportScreen 
-                         {...activeSession} 
-                         resultId={activeSession.id || activeSession.attemptId || "GUEST"}
-                         studentName={activeSession.userName || profile?.name || "Aspirant"}
+                         {...sessionData} 
                          rank={liveRank} 
                          totalCandidates={totalCandidates}
-                         timeTaken={formatTimeStr(activeSession.timeTaken)}
-                         correct={activeSession.correctCount}
-                         wrong={activeSession.wrongCount}
-                         skipped={activeSession.skippedCount}
-                         total={activeSession.totalQuestions}
-                         date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')}
-                         percentile={finalMetrics.percentile}
-                         score={finalMetrics.score.toFixed(2)}
-                         accuracy={finalMetrics.percentage}
-                         attemptAccuracy={finalMetrics.attemptAccuracy}
-                         isQualified={finalMetrics.isQualified}
-                         grade={finalMetrics.grade}
-                         subjects={activeSession.subjectAnalysis}
-                         duration={mockData?.duration}
-                         boardId={activeSession?.boardId}
+                         timeTaken={`${Math.floor(sessionData.timeTaken / 60)}m ${sessionData.timeTaken % 60}s`}
+                         percentile={Math.max(0, Math.round(((totalCandidates - Number(liveRank)) / (totalCandidates || 1)) * 100))}
                          topScore={topScore}
                          avgScore={avgScore}
                          avgAccuracy={avgAccuracy}
                       />
                   </TabsContent>
 
-                  <TabsContent value="REVIEW" className="space-y-4 m-0">
-                      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl h-11 w-full shadow-inner mb-4 overflow-x-auto no-scrollbar">
-                          <FilterButton active={activeReviewFilter === 'ALL'} label="All questions" onClick={() => setActiveReviewFilter('ALL')} />
-                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
-                          <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
+                  <TabsContent value="REVIEW" className="m-0 max-w-5xl mx-auto space-y-8">
+                      <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 flex items-center justify-between gap-6 shadow-sm">
+                          <div className="flex items-center gap-2 md:gap-4 overflow-x-auto no-scrollbar">
+                             <FilterButton active={activeReviewFilter === 'ALL'} label="All questions" count={reviewNodes.all.length} onClick={() => setActiveReviewFilter('ALL')} />
+                             <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" count={reviewNodes.correct.length} onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
+                             <FilterButton active={activeReviewFilter === 'WRONG'} label="Wrong" count={reviewNodes.wrong.length} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                             <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skipped" count={reviewNodes.skipped.length} onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
+                          </div>
                       </div>
-                      <div className="space-y-4 pt-2">
+                      <div className="grid grid-cols-1 gap-6">
                           {filteredQuestions.map((q) => (
-                              <Card key={q.id} className="border-none shadow-sm rounded-[24px] bg-white p-6 space-y-6">
-                                  <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                                     <Badge variant="outline" className="px-3 py-1 rounded-lg border-slate-100 text-slate-400 font-bold text-[9px]">Question #{q.originalIndex + 1}</Badge>
-                                     <Badge className="bg-primary/5 text-primary border-none text-[8px] font-bold">{q.subjectId || 'General'}</Badge>
+                              <Card key={q.id} className="border border-slate-100 shadow-sm rounded-[2.5rem] bg-white p-6 md:p-12 space-y-8 text-left">
+                                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
+                                     <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-[#0F172A] shadow-inner">#{q.originalIndex + 1}</div>
+                                        <Badge variant="outline" className="border-slate-100 text-slate-400 font-bold text-[9px] uppercase">{q.subjectId || 'General'}</Badge>
+                                     </div>
                                   </div>
                                   <QuestionRenderer 
                                       question={q} 
-                                      language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
+                                      language={sessionData.languageMode || 'ENGLISH_PUNJABI'} 
                                       showSolution={true} 
-                                      selectedAnswer={activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)]} 
+                                      selectedAnswer={sessionData.answers?.[q.originalIndex] ?? sessionData.answers?.[String(q.originalIndex)]} 
                                       className="p-0 shadow-none border-none bg-transparent" 
                                   />
                               </Card>
                           ))}
                       </div>
                   </TabsContent>
-
-                  <TabsContent value="REPORT" className="space-y-6 m-0">
-                      <Card className="border-none shadow-lg rounded-[32px] bg-white p-6 text-center space-y-8">
-                         <div className="space-y-2">
-                            <h3 className="text-xl font-[800] text-[#071B4D]">Performance Report</h3>
-                            <p className="text-sm text-slate-500 font-medium">Download your verified assessment certificate.</p>
-                         </div>
-                         <Button onClick={handleDownloadPDF} disabled={isExporting} className="w-full h-16 bg-[#071B4D] hover:bg-black text-white rounded-2xl shadow-xl font-bold gap-3">
-                            {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />} Download PDF Report
-                         </Button>
-                      </Card>
-                  </TabsContent>
               </Tabs>
-
-              <div className="flex gap-4">
-                 <Button asChild variant="outline" className="flex-1 h-14 rounded-2xl border-slate-200 font-bold text-sm bg-white shadow-sm">
-                    <Link href={`/mocks/instructions?id=${mockId}&retake=true`}>Retake Test</Link>
-                 </Button>
-                 <Button asChild className="flex-1 h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl shadow-lg font-bold text-sm">
-                    <Link href="/dashboard">Exit Hub</Link>
-                 </Button>
-              </div>
            </div>
         )}
 
-        {/* HIDDEN PDF BUFFER - FIXED WIDTH 794px */}
-        <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
-          <div id="pdf-export-buffer" style={{ width: '794px', backgroundColor: '#ffffff' }}>
-            {finalMetrics && activeSession && (
+        {/* PORTRAIT REPORT BUFFER (FIXED WIDTH 794px) */}
+        <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0" aria-hidden="true">
+          <div id="pdf-export-buffer" style={{ width: '794px' }}>
+            {sessionData && (
               <ReportPDF 
-                 {...activeSession}
-                 resultId={activeSession.id || activeSession.attemptId || "GUEST"}
-                 studentName={activeSession.userName || profile?.name || "Aspirant"}
-                 rank={liveRank} 
+                 studentName={sessionData.userName || profile?.name || "Aspirant"}
+                 examTitle={sessionData.mockTitle}
+                 score={sessionData.score.toFixed(1)}
+                 rank={liveRank}
                  totalCandidates={totalCandidates}
-                 timeTaken={formatTimeStr(activeSession.timeTaken)}
-                 correct={activeSession.correctCount}
-                 wrong={activeSession.wrongCount}
-                 skipped={activeSession.skippedCount}
-                 total={activeSession.totalQuestions}
-                 date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')}
-                 percentile={finalMetrics.percentile}
-                 score={finalMetrics.score.toFixed(2)}
-                 accuracy={finalMetrics.percentage}
-                 attemptAccuracy={finalMetrics.attemptAccuracy}
-                 isQualified={finalMetrics.isQualified}
-                 grade={finalMetrics.grade}
-                 subjects={activeSession.subjectAnalysis}
-                 duration={mockData?.duration}
+                 attemptAccuracy={sessionData.attemptAccuracy}
+                 timeTaken={`${Math.floor(sessionData.timeTaken / 60)}m ${sessionData.timeTaken % 60}s`}
+                 correctCount={sessionData.correctCount}
+                 wrongCount={sessionData.wrongCount}
+                 skippedCount={sessionData.skippedCount}
+                 totalQuestions={sessionData.totalQuestions}
+                 date={new Date(sessionData.timestamp).toLocaleDateString('en-GB')}
+                 resultId={sessionData.id}
+                 percentile={Math.max(0, Math.round(((totalCandidates - Number(liveRank)) / (totalCandidates || 1)) * 100))}
               />
             )}
           </div>
@@ -448,24 +334,20 @@ export default function ResultClient() {
 
 function HeaderMiniNode({ label, val }: { label: string, val: string }) {
    return (
-      <div className="text-center space-y-0.5">
-         <p className="text-[8px] font-black text-slate-400 uppercase tracking-tight">{label}</p>
-         <p className="text-[13px] font-bold text-[#071B4D] tabular-nums">{val}</p>
+      <div className="text-center md:text-left space-y-1 px-4 border-r border-slate-100 last:border-0">
+         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
+         <p className="text-sm font-bold text-[#071B4D] tabular-nums leading-none">{val}</p>
       </div>
    )
 }
 
-function FilterButton({ active, label, onClick, color = "primary" }: any) {
+function FilterButton({ active, label, count, onClick, color = "primary" }: any) {
   return (
-    <button onClick={onClick} className={cn("flex-1 px-4 h-full rounded-lg text-[10px] font-bold transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-50 text-rose-600 shadow-sm" : color === 'emerald' ? "bg-emerald-50 text-emerald-600 shadow-sm" : "bg-white text-[#071B4D] shadow-sm" : "text-slate-400 hover:text-slate-600")}>
-       {label}
+    <button onClick={onClick} className={cn(
+      "flex items-center gap-3 px-6 h-10 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all active:scale-95 border",
+      active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-slate-50 border-transparent text-slate-400 hover:bg-slate-100"
+    )}>
+       {label} <span className="opacity-40">{count}</span>
     </button>
   )
-}
-
-function formatTimeStr(seconds: number) {
-  if (!seconds || isNaN(seconds)) return "0m 0s";
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}m ${s}s`;
 }

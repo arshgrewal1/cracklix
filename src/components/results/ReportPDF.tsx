@@ -1,9 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Trophy, ShieldCheck, Target, Zap, Clock, BookOpen, Award } from 'lucide-react';
+import { Trophy, ShieldCheck, CheckCircle2, Target, Zap, Clock, BookOpen, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
 
 interface ReportPDFProps {
   studentName: string;
@@ -13,133 +12,106 @@ interface ReportPDFProps {
   totalCandidates: number;
   attemptAccuracy: string | number;
   timeTaken: string;
-  correct: number;
-  wrong: number;
-  skipped: number;
-  total: number;
+  correctCount: number;
+  wrongCount: number;
+  skippedCount: number;
+  totalQuestions: number;
   date: string;
   resultId: string;
   percentile: number;
-  subjects?: any[];
   grade?: string;
-  isQualified?: boolean;
 }
 
 /**
- * @fileOverview Hardened Portrait PDF Hub v40.1.
- * FIXED: Vertical overlap nodes re-engineered with rigid spacing buffers.
+ * Hardened PDF Report Template v5.0.
+ * Designed for 794px width fixed rendering to prevent text overlap.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
     studentName, examTitle, score, rank, totalCandidates,
-    attemptAccuracy, timeTaken, correct, wrong, skipped,
-    total, date, resultId, percentile, subjects = [], grade = "F"
+    attemptAccuracy, timeTaken, correctCount, wrongCount, skippedCount,
+    totalQuestions, date, resultId, percentile, grade = "F"
   } = props;
 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent('https://cracklix.in/results/view?id=' + resultId)}`;
 
   return (
     <div 
-      className="bg-white p-0 m-0 box-border text-center font-body flex flex-col items-center"
-      style={{ width: '794px', height: '1123px', minHeight: '1123px', maxHeight: '1123px' }}
+      className="bg-[#F8FAFC] p-0 m-0 box-border text-center font-body flex flex-col items-center"
+      style={{ width: '794px', height: '1123px', position: 'relative' }}
     >
-      {/* 1. CORPORATE HEADER */}
-      <div className="w-full flex items-center justify-between px-16 py-10 bg-slate-50/40 border-b border-slate-100 shrink-0">
+      {/* HEADER NODES - NO ABSOLUTE POS */}
+      <div className="w-full flex items-center justify-between px-16 py-12 bg-white border-b border-slate-100 shrink-0">
          <div className="flex items-center gap-8">
-            <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-16 w-auto object-contain" />
-            <div className="h-px w-8 bg-slate-200 rotate-90" />
-            <div className="text-left space-y-1">
-               <h2 className="text-2xl font-[900] text-[#071B4D] tracking-tighter leading-none">Cracklix</h2>
-               <p className="text-[10px] font-bold text-primary uppercase tracking-[0.3em]">Performance Report</p>
+            <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-16 w-auto" />
+            <div className="h-12 w-px bg-slate-200" />
+            <div className="text-left">
+               <h2 className="text-2xl font-black text-[#071B4D] tracking-tight">Cracklix</h2>
+               <p className="text-[10px] font-black text-[#1677FF] uppercase tracking-[0.3em]">Performance Registry</p>
             </div>
          </div>
-         <div className="text-right">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assessment Node</p>
-            <p className="text-xs font-black text-[#071B4D] tabular-nums mt-1">{resultId?.slice(0, 18)}</p>
+         <div className="text-right space-y-1">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assessment ID</p>
+            <p className="text-xs font-bold text-[#071B4D] tabular-nums">{resultId?.slice(0, 20)}</p>
          </div>
       </div>
 
-      <div className="w-full flex-1 p-16 flex flex-col items-center overflow-hidden">
+      <div className="w-full flex-1 p-16 flex flex-col items-center space-y-12">
          
-         {/* 2. IDENTITY CENTER - GRID BASED NO OVERLAP */}
-         <div className="w-full text-center mb-10 pt-4">
+         {/* CANDIDATE BOX */}
+         <div className="w-full p-10 bg-white rounded-[40px] border border-slate-100 shadow-sm text-center space-y-8">
+            <div className="space-y-2">
+               <p className="text-xs font-black text-[#1677FF] uppercase tracking-[0.5em]">Official Result</p>
+               <h1 className="text-5xl font-black text-[#071B4D] tracking-tight">{studentName}</h1>
+               <p className="text-xl font-bold text-slate-400 uppercase tracking-tighter">{examTitle}</p>
+            </div>
+            
+            <div className="flex justify-center gap-12 pt-4">
+               <PDFMeta label="Attempt Date" val={date} />
+               <PDFMeta label="Time Taken" val={timeTaken} />
+               <PDFMeta label="Final Grade" val={grade} color="text-amber-500" />
+            </div>
+         </div>
+
+         {/* RANKING HUB */}
+         <div className="w-full bg-[#1677FF] rounded-[48px] p-16 text-white text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center">
+            <p className="text-[14px] font-black uppercase tracking-[0.6em] mb-12 opacity-80">Punjab Merit Standing</p>
+            
             <div className="space-y-4">
-               <p className="text-xs font-bold text-primary uppercase tracking-[0.5em]">Verified Candidate</p>
-               <h1 className="text-[52px] font-[900] text-[#071B4D] tracking-tight leading-none antialiased">
-                  {studentName}
-               </h1>
-            </div>
-            <div className="mt-4">
-              <p className="text-xl font-bold text-slate-500 uppercase tracking-tight">{examTitle}</p>
-            </div>
-            
-            <div className="flex justify-center gap-12 mt-10 p-6 bg-slate-50/50 rounded-[32px] border border-slate-100">
-               <PDFMeta label="Attempt date" val={date} />
-               <div className="w-px h-10 bg-slate-200" />
-               <PDFMeta label="Time taken" val={timeTaken} />
-               <div className="w-px h-10 bg-slate-200" />
-               <PDFMeta label="Pass grade" val={grade} color="text-amber-500" />
+               <span className="text-[120px] font-black tabular-nums tracking-tighter leading-none">#{rank}</span>
+               <div className="h-[60px]" /> {/* Rigid spacer to prevent overlap */}
+               <p className="text-2xl font-bold text-white/60 tabular-nums uppercase tracking-widest">
+                  Out of {totalCandidates.toLocaleString()} Candidates
+               </p>
             </div>
          </div>
 
-         {/* 3. MERIT SECTION - RIGID SPACING */}
-         <div className="w-full bg-[#071B4D] rounded-[48px] p-12 text-white text-center shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[320px] mb-10">
-            <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-64 w-64" /></div>
-            
-            <div className="relative z-10 w-full">
-               <p className="text-[14px] font-bold text-primary uppercase tracking-[0.6em] mb-10">Punjab Merit Rank</p>
-               
-               <div className="flex flex-col items-center">
-                  <span className="text-[140px] font-[900] tabular-nums tracking-tighter leading-none block drop-shadow-2xl">
-                     #{rank}
-                  </span>
-                  
-                  {/* RIGID BUFFER BLOCK */}
-                  <div className="h-[60px] w-full" /> 
-
-                  <div>
-                    <p className="text-2xl font-black text-slate-500 tabular-nums uppercase tracking-widest">
-                       / {totalCandidates.toLocaleString()} Total Candidates
-                    </p>
-                  </div>
-               </div>
-            </div>
+         {/* STATS GRID */}
+         <div className="grid grid-cols-2 gap-8 w-full">
+            <PDFKPIBox label="Net Score" val={score} sub={`/ ${totalQuestions}`} color="text-[#1677FF]" />
+            <PDFKPIBox label="Accuracy" val={`${attemptAccuracy}%`} sub="Candidate Index" color="text-emerald-500" />
+            <PDFKPIBox label="Percentile" val={`${percentile}%`} sub="Verified" color="text-blue-600" />
+            <PDFKPIBox label="Status" val={Number(score) >= (totalQuestions/2) ? 'Qualified' : 'Attempted'} sub="Assessment" color="text-[#071B4D]" />
          </div>
 
-         {/* 4. KPIS 2x2 */}
-         <div className="grid grid-cols-2 gap-8 w-full mb-10">
-            <KPIBox label="Net score" val={score} color="text-[#071B4D]" />
-            <KPIBox label="Accuracy index" val={`${attemptAccuracy}%`} color="text-emerald-600" />
-            <KPIBox label="Percentile" val={`${percentile}%`} color="text-[#0A84FF]" />
-            <KPIBox label="Status" val={Number(score) >= (total/2) ? 'Qualified' : 'Attempted'} color="text-[#071B4D]" />
-         </div>
-
-         {/* 5. SUMMARY ROW */}
-         <div className="grid grid-cols-4 gap-6 w-full mb-10">
-            <CountPill label="Correct" val={correct} color="bg-emerald-50 text-emerald-600" />
-            <CountPill label="Wrong" val={wrong} color="bg-rose-50 text-rose-600" />
-            <CountPill label="Skipped" val={skipped} color="bg-slate-50 text-slate-400" />
-            <CountPill label="Items" val={total} color="bg-blue-50 text-blue-600" />
-         </div>
-
-         {/* 6. FOOTER - PUSHED UP FOR ZERO CLIPPING */}
-         <div className="pt-10 border-t border-slate-100 flex items-center justify-between w-full mt-auto mb-6 shrink-0">
+         {/* VERIFICATION FOOTER */}
+         <div className="w-full pt-12 border-t border-slate-100 flex items-center justify-between mt-auto">
             <div className="flex items-center gap-10">
-               <div className="h-28 w-28 bg-white border-2 border-slate-100 p-2 rounded-[24px] shadow-xl relative overflow-hidden flex items-center justify-center">
+               <div className="h-28 w-28 bg-white border border-slate-100 p-2 rounded-[20px] shadow-lg flex items-center justify-center">
                   <img src={qrUrl} alt="Verify" className="h-full w-full object-contain" />
                </div>
-               <div className="space-y-2 text-left">
-                  <p className="text-[#071B4D] font-[900] text-lg flex items-center gap-3 leading-none uppercase">
-                     <ShieldCheck className="h-6 w-6 text-emerald-500" /> Digitally verified report
+               <div className="text-left space-y-2">
+                  <p className="text-[#071B4D] font-black text-lg flex items-center gap-3">
+                     <ShieldCheck className="h-6 w-6 text-emerald-500" /> Digitally Verified Report
                   </p>
                   <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-[400px]">
-                     Generated by Cracklix Assessment Engine. Authenticate this node at cracklix.in. Institutional sync: v1.05.
+                     This assessment node is synchronized with the Cracklix master registry. Authenticate at cracklix.in.
                   </p>
                </div>
             </div>
-            <div className="text-right space-y-3">
-               <img src="/logo/cracklix-logo-dark.png" alt="Cracklix" className="h-10 w-auto opacity-20 grayscale ml-auto" />
-               <p className="text-[12px] font-black tracking-[0.6em] text-slate-300 uppercase">www.cracklix.in</p>
+            <div className="text-right">
+               <img src="/logo/cracklix-logo-dark.png" alt="Cracklix" className="h-8 w-auto opacity-10 grayscale mb-3" />
+               <p className="text-[12px] font-black tracking-[0.4em] text-slate-300 uppercase">www.cracklix.in</p>
             </div>
          </div>
       </div>
@@ -149,27 +121,19 @@ export default function ReportPDF(props: ReportPDFProps) {
 
 function PDFMeta({ label, val, color = "text-[#071B4D]" }: any) {
    return (
-      <div className="text-center space-y-1">
-         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-         <p className={cn("text-xl font-black tabular-nums tracking-tight", color)}>{val}</p>
+      <div className="text-center">
+         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+         <p className={cn("text-xl font-black tabular-nums", color)}>{val}</p>
       </div>
    )
 }
 
-function KPIBox({ label, val, color }: any) {
+function PDFKPIBox({ label, val, sub, color }: any) {
    return (
-      <div className="bg-white border border-slate-100 p-8 rounded-[40px] flex flex-col items-center justify-center gap-3 shadow-sm h-36 flex-1">
+      <div className="bg-white border border-slate-100 p-10 rounded-[32px] flex flex-col items-center justify-center gap-2 shadow-sm h-40">
          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-         <p className={cn("text-[44px] font-[900] tabular-nums tracking-tighter leading-none", color)}>{val}</p>
-      </div>
-   )
-}
-
-function CountPill({ label, val, color }: any) {
-   return (
-      <div className={cn("p-6 rounded-[28px] flex flex-col items-center justify-center gap-1.5 h-24 flex-1 shadow-sm", color)}>
-         <span className="text-3xl font-[900] tabular-nums leading-none">{val}</span>
-         <span className="text-[11px] font-bold uppercase tracking-widest opacity-60 mt-1">{label}</span>
+         <p className={cn("text-4xl font-black tabular-nums tracking-tighter", color)}>{val}</p>
+         <p className="text-[10px] font-bold text-slate-300 uppercase">{sub}</p>
       </div>
    )
 }
