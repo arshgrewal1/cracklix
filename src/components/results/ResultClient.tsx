@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast"
 import { 
   Zap, 
   Loader2, 
-  Download,
+  Share2,
   ChevronRight,
   ShieldCheck,
   Clock,
@@ -28,22 +28,24 @@ import {
   ArrowLeft,
   BarChart3,
   List,
-  Timer
+  Timer,
+  Download
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { generateReport } from "@/lib/pdf/generateReport"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import ReportScreen from "./ReportScreen"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
+import ShareableResultCard from "./ShareableResultCard"
+import { toPng } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v24.0.
- * FIXED: Tabs layout structure to satisfy Radix UI roving focus group requirements and added missing Timer import.
+ * @fileOverview Universal Result Hub Viewer v25.0.
+ * UPDATED: Replaced PDF Flow with a Premium Social Share Result Card (PNG).
  */
 
 export default function ResultClient() {
@@ -174,34 +176,41 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  const handleDownloadPDF = async () => {
-    if (isExporting || !sessionData) return;
+  const handleShareResult = async () => {
+    if (isExporting) return;
     setIsExporting(true);
-    toast({ title: "Initializing report hub..." });
+    toast({ title: "Crafting certificate hub..." });
     
     try {
-      await generateReport({
-        studentName: sessionData.userName || profile?.name || "Aspirant",
-        examTitle: sessionData.mockTitle,
-        score: sessionData.score,
-        rank: liveRank,
-        totalCandidates,
-        accuracy: sessionData.attemptAccuracy,
-        correct: sessionData.correctCount,
-        wrong: sessionData.wrongCount,
-        skipped: sessionData.skippedCount,
-        total: sessionData.totalQuestions,
-        grade: sessionData.grade || "F",
-        percentile: Math.max(0, Math.round(((totalCandidates - Number(liveRank)) / (totalCandidates || 1)) * 100)),
-        subjectAnalysis: sessionData.subjectAnalysis || [],
-        date: new Date(sessionData.timestamp).toLocaleDateString('en-GB'),
-        attemptId: sessionData.attemptId,
-        duration: `${mockData?.duration || 120}m`
+      const node = document.getElementById('shareable-result-certificate');
+      if (!node) throw new Error("Canvas node not ready.");
+
+      const dataUrl = await toPng(node, {
+         quality: 0.95,
+         pixelRatio: 2,
+         width: 1080,
+         height: 1350
       });
 
-      toast({ title: "Report downloaded" });
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], `Cracklix_Achievement_${Date.now()}.png`, { type: 'image/png' });
+
+      if (navigator.share) {
+         await navigator.share({
+            title: 'My Cracklix Result',
+            text: `🎯 Just scored ${sessionData.score}/${sessionData.totalQuestions} in ${sessionData.mockTitle}! Ranked #${liveRank} across Punjab.`,
+            files: [file]
+         });
+      } else {
+         const link = document.createElement('a');
+         link.download = `Cracklix_Result_${Date.now()}.png`;
+         link.href = dataUrl;
+         link.click();
+      }
+
+      toast({ title: "Result Shared Successfully" });
     } catch (e: any) { 
-       toast({ variant: "destructive", title: "Report Generation Error", description: "The PDF engine timed out. Please check your connection and try again." }); 
+       toast({ variant: "destructive", title: "Sharing Error", description: "Could not generate shareable card. Please try again." }); 
     } finally { setIsExporting(false); }
   };
 
@@ -233,7 +242,7 @@ export default function ResultClient() {
       <main className="container mx-auto max-w-[1440px] px-4 md:px-12 py-8 md:py-16 space-y-6 md:space-y-10">
         
         {sessionData && (
-           <div className="space-y-6 md:space-y-10">
+           <>
               <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-6 md:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                  <div className="flex items-center gap-6 md:gap-10">
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-20 md:w-20 bg-white shadow-xl border border-slate-100" />
@@ -251,8 +260,8 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 lg:flex-none h-12 px-6 bg-white border border-slate-200 text-[#071B4D] hover:bg-slate-50 font-bold rounded-xl gap-3 text-xs shadow-sm">
-                       {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download PDF
+                    <Button onClick={handleShareResult} disabled={isExporting} className="flex-1 lg:flex-none h-12 px-8 bg-gradient-to-r from-[#2563EB] to-[#4F46E5] text-white hover:brightness-110 font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
+                       {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} Share Result Card
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake test</Link>
@@ -310,7 +319,12 @@ export default function ResultClient() {
                       </div>
                   </TabsContent>
               </Tabs>
-           </div>
+              
+              {/* HIDDEN SHARE CARD FOR CAPTURE */}
+              <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none">
+                 <ShareableResultCard data={sessionData} rank={liveRank} totalCandidates={totalCandidates} />
+              </div>
+           </>
         )}
       </main>
       <Footer />
