@@ -19,8 +19,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Bookmarks Hub v8.1.
- * UPDATED: Integrated adaptive dark mode support for cards and search.
+ * @fileOverview Official Bookmarks Hub v8.2.
+ * UPDATED: Systematically removed uppercase styling for refined typography.
  */
 
 const FILTER_CHIPS = [
@@ -109,7 +109,7 @@ export default function BookmarksPage() {
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-background space-y-4">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Syncing identity...</p>
+       <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Syncing identity...</p>
     </div>
   );
 
@@ -127,9 +127,9 @@ export default function BookmarksPage() {
           >
             <div className="flex items-center gap-3">
                <Bookmark className="h-5 w-5 text-primary" />
-               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Personal registry</span>
+               <span className="text-[10px] font-bold text-muted-foreground">Personal registry</span>
             </div>
-            <h1 className="text-3xl md:text-6xl font-black text-foreground tracking-tighter leading-none antialiased uppercase">
+            <h1 className="text-3xl md:text-6xl font-black text-foreground tracking-tighter leading-none antialiased">
               Saved <span className="text-primary italic">items.</span>
             </h1>
             <p className="text-muted-foreground font-medium text-sm md:text-lg max-w-xl leading-snug">
@@ -147,7 +147,7 @@ export default function BookmarksPage() {
                  <Input 
                    value={searchTerm}
                    onChange={e => setSearchTerm(e.target.value)}
-                   placeholder="Search saved statements..." 
+                   placeholder="Search saved statements" 
                    className="h-14 md:h-16 pl-14 pr-14 rounded-2xl bg-card border-border shadow-xl text-base md:text-lg font-bold placeholder:text-muted-foreground focus:ring-4 focus:ring-primary/5 transition-all"
                  />
                  {searchTerm && (
@@ -163,7 +163,7 @@ export default function BookmarksPage() {
                       key={chip.id} 
                       onClick={() => setActiveFilter(chip.id)}
                       className={cn(
-                         "h-9 px-6 rounded-full font-bold text-[10px] md:text-[11px] tracking-tight transition-all border active:scale-95 shadow-sm whitespace-nowrap flex items-center gap-2 uppercase tracking-widest",
+                         "h-9 px-6 rounded-full font-bold text-[10px] md:text-[11px] tracking-tight transition-all border active:scale-95 shadow-sm whitespace-nowrap flex items-center gap-2",
                          activeFilter === chip.id 
                             ? "bg-primary border-primary text-white shadow-lg shadow-primary/20" 
                             : "bg-card border-border text-muted-foreground hover:border-slate-300"
@@ -201,10 +201,10 @@ export default function BookmarksPage() {
                     <CardContent className="p-6 md:p-10 space-y-6 text-left">
                       <div className="flex items-center justify-between">
                          <div className="flex items-center gap-4">
-                            <Badge className="bg-primary/5 text-primary border-none text-[9px] font-bold px-3 py-1 shadow-sm uppercase">
+                            <Badge className="bg-primary/5 text-primary border-none text-[9px] font-bold px-3 py-1 shadow-sm">
                                {b.subject || 'Registry hub'}
                             </Badge>
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest tabular-nums">
+                            <span className="text-[10px] font-bold text-muted-foreground tabular-nums">
                                Saved: {new Date(b.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                             </span>
                          </div>
@@ -217,7 +217,7 @@ export default function BookmarksPage() {
                       </div>
                       
                       <div className="space-y-4">
-                        <h3 className="text-xl md:text-2xl font-bold text-foreground leading-tight line-clamp-2 tracking-tight uppercase">
+                        <h3 className="text-xl md:text-2xl font-bold text-foreground leading-tight line-clamp-2 tracking-tight">
                            {b.questionText || b.title}
                         </h3>
 
@@ -233,7 +233,7 @@ export default function BookmarksPage() {
                             <Button 
                               onClick={() => handleViewSolution(b.questionId)} 
                               variant="outline" 
-                              className="flex-1 sm:flex-none h-11 px-8 rounded-xl border-2 border-border font-bold text-[10px] hover:bg-primary/5 hover:text-primary transition-all active:scale-95 gap-2 uppercase tracking-widest"
+                              className="flex-1 sm:flex-none h-11 px-8 rounded-xl border-2 border-border font-bold text-[10px] hover:bg-primary/5 hover:text-primary transition-all active:scale-95 gap-2 tracking-tight"
                             >
                                {loadingItem ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} 
                                View rationale
@@ -262,10 +262,10 @@ export default function BookmarksPage() {
                    </div>
                 </div>
                 <div className="space-y-4 max-w-sm px-6">
-                   <h2 className="text-3xl font-black text-foreground tracking-tighter uppercase">No saved items</h2>
+                   <h2 className="text-3xl font-black text-foreground tracking-tighter">No saved items</h2>
                    <p className="text-muted-foreground font-bold text-sm md:text-base tracking-tight leading-relaxed">Bookmark important questions and notes for quick revision.</p>
                 </div>
-                <Button asChild className="h-16 px-12 bg-primary hover:bg-blue-700 text-white font-bold text-[10px] tracking-widest rounded-2xl shadow-xl border-none transition-all active:scale-95 uppercase">
+                <Button asChild className="h-16 px-12 bg-primary hover:bg-blue-700 text-white font-bold text-[10px] tracking-widest rounded-2xl shadow-xl border-none transition-all active:scale-95">
                    <Link href="/mocks">Explore practice hub</Link>
                 </Button>
               </motion.div>
@@ -280,8 +280,8 @@ export default function BookmarksPage() {
         <DialogContent className="sm:max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto rounded-[2.5rem] md:rounded-[3.5rem] bg-card p-0 border-none shadow-5xl text-left flex flex-col">
           <div className="h-2 w-full bg-primary shrink-0" />
           <DialogHeader className="px-8 md:px-12 py-8 border-b border-border shrink-0 text-left">
-             <DialogTitle className="text-2xl md:text-4xl font-black text-foreground tracking-tighter uppercase">Official solution</DialogTitle>
-             <DialogDescription className="text-[10px] font-bold text-muted-foreground mt-2 uppercase tracking-widest">Verified institutional rationale</DialogDescription>
+             <DialogTitle className="text-2xl md:text-4xl font-black text-foreground tracking-tighter">Official solution</DialogTitle>
+             <DialogDescription className="text-[10px] font-bold text-muted-foreground mt-2 tracking-tight">Verified institutional rationale</DialogDescription>
           </DialogHeader>
           <div className="px-6 md:px-12 py-10 flex-1">
              {selectedQuestion && (
@@ -294,7 +294,7 @@ export default function BookmarksPage() {
              )}
           </div>
           <div className="p-8 bg-muted/30 border-t border-border flex justify-center shrink-0">
-             <Button onClick={() => setIsViewing(false)} className="rounded-full px-12 h-14 bg-foreground text-background hover:opacity-90 font-black uppercase text-[10px] tracking-widest">
+             <Button onClick={() => setIsViewing(false)} className="rounded-full px-12 h-14 bg-foreground text-background hover:opacity-90 font-black text-[10px] tracking-widest">
                 Close
              </Button>
           </div>
@@ -306,7 +306,7 @@ export default function BookmarksPage() {
 
 function MetaNode({ icon: Icon, text }: { icon: any, text: string }) {
    return (
-      <div className="flex items-center gap-2 text-muted-foreground font-bold text-[9px] tracking-tight bg-muted/50 px-3 py-1.5 rounded-lg border border-border uppercase tracking-widest">
+      <div className="flex items-center gap-2 text-muted-foreground font-bold text-[9px] tracking-tight bg-muted/50 px-3 py-1.5 rounded-lg border border-border tracking-tight">
          <Icon className="h-3.5 w-3.5 text-primary" />
          <span>{text}</span>
       </div>
