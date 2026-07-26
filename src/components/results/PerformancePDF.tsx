@@ -4,17 +4,17 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
 /**
- * @fileOverview Institutional Performance PDF Template Engine v2.0.
- * FIXED: Updated font registry to use high-availability stable TTF nodes.
+ * @fileOverview Institutional Performance PDF Template Engine v2.1.
+ * FIXED: Updated font registry to use stable, versioned OTF nodes from RSMS Inter repository.
  */
 
-// Register professional typography with high-availability TTF sources
+// Register professional typography with stable versioned sources
 Font.register({
   family: 'Inter',
   fonts: [
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Regular.ttf', fontWeight: 400 },
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Bold.ttf', fontWeight: 700 },
-    { src: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/static/Inter-Black.ttf', fontWeight: 900 },
+    { src: 'https://cdn.jsdelivr.net/gh/rsms/inter@v3.19.3/docs/font-files/Inter-Regular.otf', fontWeight: 400 },
+    { src: 'https://cdn.jsdelivr.net/gh/rsms/inter@v3.19.3/docs/font-files/Inter-Bold.otf', fontWeight: 700 },
+    { src: 'https://cdn.jsdelivr.net/gh/rsms/inter@v3.19.3/docs/font-files/Inter-Black.otf', fontWeight: 900 },
   ],
 });
 
@@ -276,7 +276,7 @@ export default function PerformancePDF({ data, qrData }: Props) {
             </View>
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Attempt ID</Text>
-              <Text style={styles.infoValue}>#{attemptId.slice(0, 8)}</Text>
+              <Text style={styles.infoValue}>#{attemptId?.slice(0, 8)}</Text>
             </View>
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Registry Status</Text>
@@ -292,7 +292,7 @@ export default function PerformancePDF({ data, qrData }: Props) {
             <View style={styles.rankValueContainer}>
                <Text style={styles.rankValue}>#{rank}</Text>
             </View>
-            <Text style={styles.rankTotal}>Out of {totalCandidates.toLocaleString()} Candidates</Text>
+            <Text style={styles.rankTotal}>Out of {totalCandidates?.toLocaleString()} Candidates</Text>
           </View>
           <View style={styles.badge}>
             <Text>Verified Standing</Text>
