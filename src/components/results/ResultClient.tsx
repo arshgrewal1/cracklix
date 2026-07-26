@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -47,8 +47,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v25.2.
- * FIXED: Renamed Timer icon to TimerIcon and added missing X icon import.
+ * @fileOverview Universal Result Hub Viewer v26.0.
+ * FIXED: Implemented background PNG pre-caching for instantaneous sharing.
  */
 
 export default function ResultClient() {
@@ -64,7 +64,6 @@ export default function ResultClient() {
   const [loadingQuestions, setLoadingQuestions] = useState(true)
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'WRONG' | 'CORRECT' | 'SKIPPED'>('ALL')
   const [activeMainTab, setActiveMainTab] = useState<string>("OVERVIEW")
-  const [isExporting, setIsExporting] = useState(false)
   
   const [sessionData, setSessionData] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(true);
@@ -74,6 +73,10 @@ export default function ResultClient() {
   const [topScore, setTopScore] = useState<number>(0)
   const [avgScore, setAvgScore] = useState<number>(0)
   const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
+
+  // Pre-caching Logic
+  const [preGeneratedImage, setPreGeneratedImage] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -179,24 +182,66 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  const handleShareResult = async () => {
-    if (isExporting) return;
-    setIsExporting(true);
-    toast({ title: "Crafting certificate hub..." });
+  // AUTO-PREPARATION HUB
+  const prepareShareCard = useCallback(async () => {
+    if (!mounted || !sessionData || liveRank === "---" || preGeneratedImage || isGenerating) return;
+    
+    setIsGenerating(true);
+    // Give DOM a small buffer to settle
+    await new Promise(r => setTimeout(r, 1000));
     
     try {
       const node = document.getElementById('shareable-result-certificate');
-      if (!node) throw new Error("Canvas node not ready.");
+      if (!node) throw new Error("DOM Node missing");
 
       const dataUrl = await toPng(node, {
          quality: 0.95,
          pixelRatio: 2,
          width: 1080,
-         height: 1350
+         height: 1350,
+         cacheBust: true,
       });
 
-      const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], `Cracklix_Achievement_${Date.now()}.png`, { type: 'image/png' });
+      setPreGeneratedImage(dataUrl);
+      console.log("[Registry] Share card pre-cached successfully.");
+    } catch (e) {
+      console.warn("[Registry] Background generation bypassed:", e);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [mounted, sessionData, liveRank, preGeneratedImage, isGenerating]);
+
+  useEffect(() => {
+     if (sessionData && liveRank !== "---") {
+        prepareShareCard();
+     }
+  }, [sessionData, liveRank, prepareShareCard]);
+
+  const handleShareResult = async () => {
+    if (!sessionData) return;
+    
+    // If not ready, try one last immediate generation
+    let imageToShare = preGeneratedImage;
+    
+    if (!imageToShare) {
+       setIsGenerating(true);
+       try {
+         const node = document.getElementById('shareable-result-certificate');
+         if (node) {
+            imageToShare = await toPng(node, { quality: 0.95, pixelRatio: 2, width: 1080, height: 1350 });
+            setPreGeneratedImage(imageToShare);
+         }
+       } catch (e) {
+         toast({ variant: "destructive", title: "Sharing Error", description: "Could not generate shareable card. Please try again." });
+         setIsGenerating(false);
+         return;
+       }
+       setIsGenerating(false);
+    }
+
+    try {
+      const blob = await (await fetch(imageToShare!)).blob();
+      const file = new File([blob], `Cracklix_Result_${sessionData.attemptId}.png`, { type: 'image/png' });
 
       if (navigator.share) {
          await navigator.share({
@@ -207,14 +252,12 @@ export default function ResultClient() {
       } else {
          const link = document.createElement('a');
          link.download = `Cracklix_Result_${Date.now()}.png`;
-         link.href = dataUrl;
+         link.href = imageToShare!;
          link.click();
       }
-
-      toast({ title: "Result Shared Successfully" });
     } catch (e: any) { 
-       toast({ variant: "destructive", title: "Sharing Error", description: "Could not generate shareable card. Please try again." }); 
-    } finally { setIsExporting(false); }
+       toast({ variant: "destructive", title: "Transmission Error", description: "Sharing cancelled or failed." }); 
+    }
   };
 
   const reviewNodes = useMemo(() => {
@@ -263,8 +306,9 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-                    <Button onClick={handleShareResult} disabled={isExporting} className="flex-1 lg:flex-none h-12 px-8 bg-gradient-to-r from-[#2563EB] to-[#4F46E5] text-white hover:brightness-110 font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
-                       {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} Share Result Card
+                    <Button onClick={handleShareResult} disabled={isGenerating} className="flex-1 lg:flex-none h-12 px-8 bg-gradient-to-r from-[#2563EB] to-[#4F46E5] text-white hover:brightness-110 font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
+                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
+                       {preGeneratedImage ? "Direct share card" : "Preparing card..."}
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake test</Link>

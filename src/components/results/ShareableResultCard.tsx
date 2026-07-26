@@ -24,13 +24,15 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview High-Fidelity Social Share Certificate v1.0.
+ * @fileOverview High-Fidelity Social Share Certificate v1.1.
  * Designed for 1080x1350 resolution (Instagram/WhatsApp Portrait).
+ * FIXED: Added missing icon imports (X, Timer) to resolve runtime crashes.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
 
   useEffect(() => {
+    if (!data?.mockId || !data?.attemptId) return;
     const url = `https://cracklix.in/results/view?id=${data.mockId}&attemptId=${data.attemptId}`;
     QRCode.toDataURL(url, { margin: 1, width: 200 }).then(setQrUrl);
   }, [data]);
