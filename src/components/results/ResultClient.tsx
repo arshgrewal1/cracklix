@@ -48,8 +48,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toBlob } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v45.0.
- * FIXED: Rebuilt for direct PNG share via html-to-image and Web Share API.
+ * @fileOverview Universal Result Hub Viewer v46.0 [Institutional Sync].
+ * FIXED: Direct PNG share optimized for scorecard layout.
  */
 
 export default function ResultClient() {
@@ -76,6 +76,7 @@ export default function ResultClient() {
   const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
 
   const [isSharing, setIsSharing] = useState(false);
+  const [shareImageBlob, setShareImageBlob] = useState<Blob | null>(null);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -185,13 +186,13 @@ export default function ResultClient() {
     if (!sessionData || isSharing) return;
     
     setIsSharing(true);
-    toast({ title: "Synchronizing assets", description: "Preparing HD certificate..." });
+    toast({ title: "Synchronizing registry", description: "Generating official scorecard..." });
 
     try {
       const node = document.getElementById('cracklix-result-card-canvas');
       if (!node) throw new Error("Registry node missing.");
 
-      // Direct Blob generation at 2x quality
+      // High-Fidelity capture at 2x resolution
       const blob = await toBlob(node, {
          pixelRatio: 2,
          cacheBust: true,
@@ -200,29 +201,29 @@ export default function ResultClient() {
 
       if (!blob) throw new Error("Image rasterization failed.");
 
-      const file = new File([blob], `Cracklix_Rank_${liveRank}.png`, { type: 'image/png' });
+      const file = new File([blob], `Cracklix_Scorecard_${sessionData.mockTitle}.png`, { type: 'image/png' });
 
-      // Native Web Share API
+      // Trigger Native Device Share Sheet
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
-            title: `My Cracklix Result`,
-            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions} and ranked #${liveRank} in Punjab! Check your rank on Cracklix.`,
+            title: `My Cracklix Scorecard`,
+            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions} in the ${sessionData.mockTitle}. Check your official standing on Cracklix!`,
             files: [file]
          });
       } else {
-         // Fallback: Immediate high-speed download
+         // Direct Download Fallback
          const url = URL.createObjectURL(blob);
          const link = document.createElement('a');
-         link.download = `Cracklix_Merit_Card.png`;
+         link.download = `Cracklix_Scorecard.png`;
          link.href = url;
          link.click();
          URL.revokeObjectURL(url);
-         toast({ title: "Result downloaded" });
+         toast({ title: "Scorecard downloaded" });
       }
     } catch (e: any) {
        console.error("[SHARE_ERROR]:", e);
        if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Transmission Error", description: "Could not broadcast certificate." });
+          toast({ variant: "destructive", title: "Audit Error", description: "Could not broadcast scorecard." });
        }
     } finally {
        setIsSharing(false);
@@ -261,7 +262,7 @@ export default function ResultClient() {
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-20 md:w-20 bg-white shadow-xl border border-slate-100" />
                     <div className="text-left space-y-2">
                        <div className="flex flex-wrap items-center gap-3">
-                          <Badge className="bg-[#0B57D0] text-white border-none px-3 py-1 font-bold text-[9px]">Verified hub</Badge>
+                          <Badge className="bg-[#0B57D0] text-white border-none px-3 py-1 font-bold text-[9px]">Official Scorecard</Badge>
                           <Badge className="bg-slate-100 text-slate-500 border-none px-3 py-1 font-bold text-[9px]">Rank #{liveRank}</Badge>
                        </div>
                        <h1 className="text-xl md:text-3xl font-[800] text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
@@ -274,7 +275,7 @@ export default function ResultClient() {
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
                     <Button onClick={handleShareResult} disabled={isSharing} className="flex-1 lg:flex-none h-12 px-8 bg-[#0B57D0] hover:bg-blue-700 text-white font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
                        {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
-                       Share Merit Card
+                       Share scorecard
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
@@ -333,7 +334,7 @@ export default function ResultClient() {
                   </TabsContent>
               </Tabs>
               
-              {/* HIDDEN CANVAS FOR DIRECT SHARE - FIXED POSITIONED TO AVOID OVERLAP */}
+              {/* HIDDEN SCORECARD FOR CAPTURE */}
               <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none opacity-0">
                  <ShareableResultCard data={sessionData} rank={liveRank} totalCandidates={totalCandidates} />
               </div>

@@ -3,20 +3,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { 
-  Trophy, 
-  Target, 
-  Zap, 
-  Award, 
-  CheckCircle2, 
   ShieldCheck, 
+  Target, 
+  CheckCircle2, 
+  X, 
   Clock, 
   Users, 
   Timer,
-  X,
-  FileText,
   BarChart3,
-  TrendingUp,
-  Check
+  Award,
+  Zap,
+  Globe,
+  FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -29,8 +27,9 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Professional Institutional Result Certificate v1.0.
- * Designed for Social Sharing (1080x1350).
+ * @fileOverview Institutional Official Scorecard v1.0.
+ * Rebuilt as a professional exam report (Testbook/Adda247 style).
+ * Optimized for 1080x1350 PNG Sharing.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
@@ -40,8 +39,8 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
     const url = `https://cracklix.in/results/view?id=${data.mockId}&attemptId=${data.attemptId}`;
     QRCode.toDataURL(url, { 
       margin: 1, 
-      width: 240, 
-      color: { dark: '#0B57D0', light: '#ffffff' } 
+      width: 200, 
+      color: { dark: '#0F172A', light: '#ffffff' } 
     }).then(setQrUrl).catch(() => {});
   }, [data]);
 
@@ -53,15 +52,16 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
       className="w-[1080px] h-[1350px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden"
       style={{ fontFamily: 'Inter, sans-serif' }}
     >
-      {/* INSTITUTIONAL BORDERS */}
-      <div className="absolute inset-0 border-[32px] border-slate-50 pointer-events-none" />
-      
-      <div className="relative z-10 flex-1 flex flex-col p-24 space-y-12">
+      {/* PROFESSIONAL BACKGROUND PATTERN */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(#0B57D0 1px, transparent 1px)`, backgroundSize: '30px 30px' }} />
+      <div className="absolute top-0 left-0 w-full h-3 bg-[#0B57D0]" />
+
+      <div className="relative z-10 flex-1 flex flex-col p-16 space-y-10">
          
-         {/* 1. HEADER HUB */}
-         <div className="flex justify-between items-start border-b-2 border-slate-100 pb-12">
-            <div className="space-y-6">
-               <div className="h-[100px] w-auto flex items-start justify-start">
+         {/* 1. MASTER HEADER: LOGO 3X LARGER */}
+         <div className="flex justify-between items-center border-b-2 border-slate-100 pb-10">
+            <div className="space-y-4">
+               <div className="h-[120px] w-auto">
                   <img 
                     src="/logo/cracklix-logo-dark.png" 
                     alt="Cracklix" 
@@ -69,98 +69,133 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
                     className="h-full object-contain" 
                   />
                </div>
+               <p className="text-sm font-black text-slate-400 uppercase tracking-[0.4em] ml-2">Official Score Report</p>
+            </div>
+            <div className="text-right space-y-3">
                <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-6 py-2 rounded-full font-black text-sm uppercase tracking-widest flex items-center gap-3">
                   <ShieldCheck className="h-5 w-5" /> Verified Result
                </Badge>
-            </div>
-            <div className="text-right space-y-2">
-               <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Candidate</p>
-               <p className="text-5xl font-black text-[#0B57D0] tracking-tight">{data.userName || 'Aspirant'}</p>
+               <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Entry: {data.attemptId?.slice(0, 16).toUpperCase()}</p>
             </div>
          </div>
 
-         {/* 2. TEST TITLE PILL */}
-         <div className="space-y-2">
-            <p className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Mock test series</p>
-            <h2 className="text-4xl font-[800] text-[#0F172A] tracking-tight leading-tight">{data.mockTitle}</h2>
+         {/* 2. CANDIDATE & TEST DETAILS HUB */}
+         <div className="bg-slate-50 rounded-[2rem] p-10 flex justify-between items-center border border-slate-100 shadow-inner">
+            <div className="space-y-4 flex-1">
+               <div className="space-y-1">
+                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Candidate</p>
+                  <h2 className="text-5xl font-black text-[#0F172A] tracking-tight">{data.userName || 'Aspirant'}</h2>
+               </div>
+               <div className="flex items-center gap-6">
+                  <DetailNode icon={Zap} label="Attempt No" val={data.attemptCount || "01"} />
+                  <div className="w-px h-8 bg-slate-200" />
+                  <DetailNode icon={Calendar} label="Exam Date" val={new Date(data.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} />
+               </div>
+            </div>
+            <div className="text-right space-y-2 max-w-[400px]">
+               <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Test Title</p>
+               <h3 className="text-2xl font-bold text-[#0B57D0] leading-tight line-clamp-2">{data.mockTitle}</h3>
+            </div>
          </div>
 
-         {/* 3. RANK HERO SECTION - CENTERPIECE */}
-         <div className="relative py-4">
-            <div className="bg-[#0B57D0] rounded-[4rem] p-1 shadow-2xl">
-               <div className="bg-white rounded-[3.8rem] p-12 text-center relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-64 w-64 text-[#0B57D0]" /></div>
-                  <div className="space-y-2 relative z-10">
-                     <p className="text-2xl font-black text-[#0B57D0] uppercase tracking-[0.5em]">Punjab state rank</p>
-                     <div className="flex flex-col items-center">
-                        <span className="text-[240px] font-black text-[#0F172A] leading-none tracking-tighter tabular-nums antialiased">
-                           #{rank}
-                        </span>
-                        <div className="inline-flex items-center gap-4 bg-slate-50 px-12 py-5 rounded-full border border-slate-100 shadow-inner">
-                           <Users className="h-8 w-8 text-[#0B57D0]" />
-                           <span className="text-3xl font-bold text-slate-600">Out of {totalCandidates.toLocaleString()} Candidates</span>
-                        </div>
-                     </div>
+         {/* 3. PRIMARY METRICS: SCORE HUB (THE CENTERPIECE) */}
+         <div className="grid grid-cols-12 gap-8">
+            {/* NET SCORE: THE BIGGEST ELEMENT */}
+            <div className="col-span-6">
+               <Card className="h-full border-none bg-[#0B57D0] text-white rounded-[3rem] p-12 shadow-2xl flex flex-col items-center justify-center text-center relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 opacity-5"><Zap className="h-44 w-44" /></div>
+                  <p className="text-xl font-black uppercase tracking-[0.4em] mb-4 opacity-60">Net Score</p>
+                  <div className="flex items-baseline gap-2">
+                     <span className="text-[140px] font-black leading-none tabular-nums tracking-tighter">
+                        {data.score}
+                     </span>
+                     <span className="text-4xl font-bold opacity-30">/ {data.totalQuestions}</span>
                   </div>
+                  <div className="mt-8 px-8 py-3 bg-white/10 rounded-2xl border border-white/10">
+                     <p className="text-xl font-bold">Grade: {data.grade || 'A'}</p>
+                  </div>
+               </Card>
+            </div>
+
+            <div className="col-span-6 grid grid-cols-1 gap-6">
+               <div className="grid grid-cols-2 gap-6">
+                  <SecondaryMetric label="Accuracy" val={`${data.attemptAccuracy}%`} color="text-emerald-500" bg="bg-emerald-50" />
+                  <SecondaryMetric label="Percentile" val={`${Math.max(0, Math.round(((totalCandidates - Number(rank)) / (totalCandidates || 1)) * 100))}%`} color="text-purple-600" bg="bg-purple-50" />
                </div>
+               {/* RANK: SMALLER SECONDARY CARD */}
+               <Card className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white p-8 flex items-center justify-between group overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:rotate-12 transition-transform duration-700">
+                     <Trophy className="h-24 w-24" />
+                  </div>
+                  <div className="text-left space-y-1">
+                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Punjab State Rank</p>
+                     <p className="text-6xl font-black text-[#0F172A] tabular-nums tracking-tighter">#{rank}</p>
+                  </div>
+                  <div className="text-right">
+                     <p className="text-[10px] font-bold text-slate-300 uppercase tracking-tight">Out of</p>
+                     <p className="text-xl font-black text-slate-500 tabular-nums">{totalCandidates.toLocaleString()}</p>
+                  </div>
+               </Card>
             </div>
          </div>
 
-         {/* 4. PERFORMANCE GRID */}
+         {/* 4. PERFORMANCE ANALYSIS TABLE */}
          <div className="grid grid-cols-4 gap-6">
-            <MetricBox label="Score" val={`${data.score}/${data.totalQuestions}`} color="text-[#0B57D0]" bg="bg-blue-50" />
-            <MetricBox label="Accuracy" val={`${data.attemptAccuracy}%`} color="text-emerald-600" bg="bg-emerald-50" />
-            <MetricBox label="Percentile" val={`${Math.max(0, Math.round(((totalCandidates - Number(rank)) / (totalCandidates || 1)) * 100))}%`} color="text-purple-600" bg="bg-purple-50" />
-            <MetricBox label="Grade" val={data.grade || "A+"} color="text-amber-600" bg="bg-amber-50" />
+            <AuditCell label="Correct" val={data.correctCount} icon={<CheckCircle2 className="text-emerald-500" />} />
+            <AuditCell label="Incorrect" val={data.wrongCount} icon={<X className="text-rose-500" />} />
+            <AuditCell label="Skipped" val={data.skippedCount} icon={<Clock className="text-slate-300" />} />
+            <AuditCell label="Total Items" val={data.totalQuestions} icon={<Layers className="text-primary" />} />
          </div>
 
-         {/* 5. ITEM STATS */}
-         <div className="grid grid-cols-4 gap-6">
-            <MiniPillar icon={<CheckCircle2 className="text-emerald-500" />} label="Correct" val={data.correctCount} />
-            <MiniPillar icon={<X className="text-rose-500" />} label="Wrong" val={data.wrongCount} />
-            <MiniPillar icon={<Clock className="text-slate-400" />} label="Skipped" val={data.skippedCount} />
-            <MiniPillar icon={<BarChart3 className="text-blue-500" />} label="Total" val={data.totalQuestions} />
-         </div>
-
-         {/* 6. SUBJECT WISE SNAPSHOT */}
+         {/* 5. SUBJECT BREAKDOWN (OFFICIAL STYLE) */}
          {data.subjectAnalysis && (
-            <div className="bg-slate-50/50 rounded-3xl p-8 border border-slate-100">
-               <div className="flex items-center gap-3 mb-6">
-                  <Target className="h-5 w-5 text-[#0B57D0]" />
-                  <h4 className="text-sm font-black uppercase tracking-widest text-slate-500">Subject mastery snapshot</h4>
-               </div>
-               <div className="grid grid-cols-3 gap-10">
-                  {data.subjectAnalysis.slice(0, 3).map((s: any, i: number) => (
-                     <div key={i} className="space-y-2">
-                        <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
-                           <span className="truncate pr-2">{s.name}</span>
-                           <span>{s.accuracy}%</span>
-                        </div>
-                        <div className="h-2 w-full bg-white rounded-full overflow-hidden border border-slate-100">
-                           <div className="h-full bg-[#0B57D0]" style={{ width: `${s.accuracy}%` }} />
-                        </div>
-                     </div>
-                  ))}
+            <div className="space-y-4">
+               <p className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Subject Mastery Audit</p>
+               <div className="bg-white border-2 border-slate-50 rounded-[2rem] overflow-hidden shadow-sm">
+                  <table className="w-full border-collapse">
+                     <thead className="bg-slate-50">
+                        <tr className="h-14">
+                           <th className="px-10 text-left font-black text-xs text-slate-400 uppercase">Subject Hub</th>
+                           <th className="px-10 text-center font-black text-xs text-slate-400 uppercase">Mastery</th>
+                           <th className="px-10 text-right font-black text-xs text-slate-400 uppercase">Audit Score</th>
+                        </tr>
+                     </thead>
+                     <tbody className="divide-y divide-slate-50">
+                        {data.subjectAnalysis.slice(0, 4).map((s: any, i: number) => (
+                           <tr key={i} className="h-16">
+                              <td className="px-10 font-bold text-[#0F172A]">{s.name}</td>
+                              <td className="px-10">
+                                 <div className="w-40 mx-auto h-2 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-[#0B57D0]" style={{ width: `${s.accuracy}%` }} />
+                                 </div>
+                              </td>
+                              <td className="px-10 text-right font-black text-[#0F172A] tabular-nums">
+                                 {s.score} <span className="text-slate-300 font-bold">/ {s.total}</span>
+                              </td>
+                           </tr>
+                        ))}
+                     </tbody>
+                  </table>
                </div>
             </div>
          )}
 
-         {/* 7. FOOTER AUDIT */}
+         {/* 6. FOOTER AUDIT HUB */}
          <div className="mt-auto pt-10 border-t-2 border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-10">
-               <div className="bg-white p-2 rounded-2xl shadow-xl border border-slate-100">
-                  {qrUrl ? <img src={qrUrl} alt="Verify" className="h-32 w-32" /> : <div className="h-32 w-32 bg-slate-50 animate-pulse rounded-lg" />}
+               <div className="bg-white p-3 rounded-2xl shadow-xl border border-slate-100">
+                  {qrUrl ? <img src={qrUrl} alt="Verify" className="h-28 w-28" /> : <div className="h-28 w-28 bg-slate-50 rounded-lg animate-pulse" />}
                </div>
                <div className="space-y-1 text-left">
-                  <p className="text-3xl font-black text-[#0B57D0] uppercase tracking-tight">Verify result</p>
+                  <p className="text-2xl font-black text-[#0B57D0] uppercase tracking-tight">Verify Result</p>
                   <p className="text-sm font-bold text-slate-400 tracking-widest uppercase">www.cracklix.in</p>
                </div>
             </div>
             <div className="text-right">
-               <p className="text-xs font-black text-slate-200 uppercase tracking-[0.5em] mb-4">Registry entry: {data.attemptId?.slice(0, 16).toUpperCase()}</p>
+               <p className="text-sm font-bold text-slate-400 tracking-tight mb-4">Official Preparation Registry Node</p>
                <div className="inline-flex items-center gap-3 text-[#0B57D0]">
                   <ShieldCheck className="h-6 w-6" />
-                  <span className="text-sm font-black uppercase tracking-widest">Institutional merit record</span>
+                  <span className="text-base font-black uppercase tracking-[0.2em]">Institutional Merit Record</span>
                </div>
             </div>
          </div>
@@ -170,24 +205,35 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
   );
 }
 
-function MetricBox({ label, val, color, bg }: any) {
+function DetailNode({ icon: Icon, label, val }: any) {
    return (
-      <div className={cn("p-8 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-sm border border-slate-50", bg)}>
-         <span className="text-xs font-black uppercase text-slate-400 tracking-widest">{label}</span>
-         <span className={cn("text-4xl font-[900] tabular-nums leading-none tracking-tighter", color)}>{val}</span>
-      </div>
-   )
-}
-
-function MiniPillar({ icon, label, val }: any) {
-   return (
-      <div className="flex items-center gap-5 p-6 bg-white border border-slate-100 rounded-3xl shadow-sm">
-         <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">{icon}</div>
+      <div className="flex items-center gap-3">
+         <Icon className="h-4 w-4 text-primary" />
          <div className="text-left">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{label}</p>
-            <p className="text-2xl font-black text-[#0F172A] tabular-nums leading-none">{val}</p>
+            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
+            <p className="text-sm font-bold text-[#0F172A] mt-1">{val}</p>
          </div>
       </div>
    )
 }
 
+function SecondaryMetric({ label, val, color, bg }: any) {
+   return (
+      <Card className={cn("p-8 rounded-[2rem] border-none shadow-sm flex flex-col items-center justify-center text-center space-y-2", bg)}>
+         <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
+         <span className={cn("text-4xl font-black tabular-nums tracking-tighter", color)}>{val}</span>
+      </Card>
+   )
+}
+
+function AuditCell({ label, val, icon }: any) {
+   return (
+      <div className="flex items-center gap-4 p-6 bg-slate-50 border border-slate-100 rounded-3xl shadow-inner">
+         <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">{icon}</div>
+         <div className="text-left">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{label}</p>
+            <p className="text-2xl font-black text-[#0F172A] tabular-nums leading-none">{val}</p>
+         </div>
+      </div>
+   )
+}
