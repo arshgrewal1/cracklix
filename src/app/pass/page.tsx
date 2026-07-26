@@ -39,8 +39,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Elite Pass Portal v450.4.
- * UPDATED: Integrated high-fidelity adaptive dark mode for plan cards and hero elements.
+ * @fileOverview Institutional Elite Pass Portal v450.5.
+ * UPDATED: Systematically removed 'uppercase' styling for refined PWA presentation.
  */
 
 const BENEFITS = [
@@ -140,12 +140,12 @@ export default function PassPage() {
            >
               <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-primary/5 border border-primary/20 shadow-sm mx-auto">
                  <Crown className="h-4 w-4 text-primary fill-primary animate-pulse" />
-                 <span className="text-[10px] md:text-xs font-bold text-primary tracking-widest uppercase">
+                 <span className="text-[10px] md:text-xs font-bold text-primary tracking-tight">
                    Institutional elite portal
                  </span>
               </div>
 
-              <h1 className="text-3xl md:text-7xl font-black tracking-tighter text-foreground leading-[0.95] antialiased uppercase">
+              <h1 className="text-3xl md:text-7xl font-black tracking-tighter text-foreground leading-[0.95] antialiased">
                 Cracklix <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Elite Pass</span>
               </h1>
 
@@ -183,25 +183,25 @@ export default function PassPage() {
                              </svg>
                              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                                 <span className="text-2xl md:text-4xl font-black text-foreground tabular-nums tracking-tighter leading-none">{timeLeftStr.split(' ')[0]}</span>
-                                <span className="text-[7px] md:text-[8px] font-bold text-muted-foreground tracking-widest uppercase mt-1">{timeLeftStr.split(' ').slice(1).join(' ')}</span>
+                                <span className="text-[7px] md:text-[8px] font-bold text-muted-foreground tracking-tight mt-1">{timeLeftStr.split(' ').slice(1).join(' ')}</span>
                              </div>
                           </div>
 
                           <div className="flex-1 text-center md:text-left space-y-4 md:space-y-6">
                              <div className="space-y-2">
-                                <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border-none font-bold text-[9px] px-4 py-1 rounded-full shadow-sm flex w-fit mx-auto md:mx-0 items-center gap-2 uppercase tracking-widest">
+                                <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border-none font-bold text-[9px] px-4 py-1 rounded-full shadow-sm flex w-fit mx-auto md:mx-0 items-center gap-2 tracking-tight">
                                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active membership
                                 </Badge>
-                                <h3 className="text-2xl md:text-4xl font-black text-foreground tracking-tighter uppercase">{profile?.pass?.plan || 'Pro Pass'}</h3>
+                                <h3 className="text-2xl md:text-4xl font-black text-foreground tracking-tighter">{profile?.pass?.plan || 'Pro Pass'}</h3>
                              </div>
                              
                              <div className="grid grid-cols-2 gap-6 pt-2">
-                                <div><p className="text-[9px] font-bold text-muted-foreground tracking-widest uppercase">Activated</p><p className="font-black text-foreground text-sm md:text-lg">{new Date(profile?.pass?.purchaseDate || Date.now()).toLocaleDateString('en-GB')}</p></div>
-                                <div><p className="text-[9px] font-bold text-muted-foreground tracking-widest uppercase">Next billing</p><p className="font-black text-foreground text-sm md:text-lg">{new Date(profile?.pass?.expiryDate || Date.now()).toLocaleDateString('en-GB')}</p></div>
+                                <div><p className="text-[9px] font-bold text-muted-foreground tracking-tight">Activated</p><p className="font-black text-foreground text-sm md:text-lg">{new Date(profile?.pass?.purchaseDate || Date.now()).toLocaleDateString('en-GB')}</p></div>
+                                <div><p className="text-[9px] font-bold text-muted-foreground tracking-tight">Next billing</p><p className="font-black text-foreground text-sm md:text-lg">{new Date(profile?.pass?.expiryDate || Date.now()).toLocaleDateString('en-GB')}</p></div>
                              </div>
 
                              <div className="pt-2">
-                                <Button asChild className="h-12 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl transition-all border-none">
+                                <Button asChild className="h-12 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-black text-[10px] tracking-tight rounded-2xl shadow-xl transition-all border-none">
                                    <Link href="#plans">Renew membership <ArrowRight className="ml-2 h-4 w-4" /></Link>
                                 </Button>
                              </div>
@@ -216,7 +216,7 @@ export default function PassPage() {
         {/* PRICING PLANS */}
         <section id="plans" className="space-y-12">
            <div className="text-center space-y-2">
-              <h2 className="text-2xl md:text-4xl font-black text-foreground tracking-tighter uppercase">Select your access</h2>
+              <h2 className="text-2xl md:text-4xl font-black text-foreground tracking-tighter">Select your access</h2>
               <p className="text-muted-foreground font-medium text-sm md:text-lg">Institutional-grade preparation starting at zero cost.</p>
            </div>
 
@@ -240,7 +240,7 @@ export default function PassPage() {
                          isElite ? "ring-4 ring-primary ring-offset-background scale-[1.03] z-10" : ""
                        )}>
                           {isElite && (
-                             <div className="absolute top-0 left-0 right-0 bg-primary text-white py-3 text-center text-[10px] font-black uppercase tracking-widest shadow-lg">
+                             <div className="absolute top-0 left-0 right-0 bg-primary text-white py-3 text-center text-[10px] font-black shadow-lg">
                                Most recommended hub
                              </div>
                           )}
@@ -249,10 +249,10 @@ export default function PassPage() {
                                 {isFree ? <Zap className="h-8 w-8" /> : isElite ? <Crown className="h-8 w-8 fill-current" /> : <Gem className="h-8 w-8" />}
                              </div>
                              <div className="space-y-1">
-                                <CardTitle className="text-2xl md:text-3xl font-black text-foreground tracking-tighter uppercase">{plan.name}</CardTitle>
+                                <CardTitle className="text-2xl md:text-3xl font-black text-foreground tracking-tighter">{plan.name}</CardTitle>
                                 <div className="flex items-baseline justify-center gap-1.5 pt-2">
                                    <span className="text-4xl md:text-5xl font-black text-foreground tabular-nums tracking-tighter">₹{plan.price}</span>
-                                   <span className="text-[10px] md:text-xs font-bold text-muted-foreground tracking-widest uppercase">/ {plan.durationDays} Days</span>
+                                   <span className="text-[10px] md:text-xs font-bold text-muted-foreground tracking-tight">/ {plan.durationDays} Days</span>
                                 </div>
                              </div>
                           </CardHeader>
@@ -265,7 +265,7 @@ export default function PassPage() {
                                       <div className={cn("h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 shadow-inner", isElite ? "bg-primary text-white" : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500")}>
                                          <Check className="h-3 w-3 stroke-[4px]" />
                                       </div>
-                                      <span className="text-[13px] font-bold text-muted-foreground leading-tight tracking-tight uppercase">{f}</span>
+                                      <span className="text-[13px] font-bold text-muted-foreground leading-tight tracking-tight">{f}</span>
                                    </li>
                                 ))}
                              </ul>
@@ -273,7 +273,7 @@ export default function PassPage() {
 
                           <CardFooter className="p-10 pt-0">
                              <Button asChild className={cn(
-                               "w-full h-16 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl transition-all active:scale-95 border-none",
+                               "w-full h-16 rounded-2xl font-black tracking-tight text-[10px] shadow-2xl transition-all active:scale-95 border-none",
                                isElite ? "bg-primary hover:bg-blue-700 text-white" : "bg-foreground text-background hover:opacity-90"
                              )}>
                                 <Link href={`/checkout?plan=${plan.id}`}>
@@ -291,7 +291,7 @@ export default function PassPage() {
         {/* BENEFITS MATRIX */}
         <section className="space-y-16">
            <div className="text-center space-y-4">
-              <h2 className="text-2xl md:text-4xl font-black text-foreground tracking-tighter uppercase">Platform benefits</h2>
+              <h2 className="text-2xl md:text-4xl font-black text-foreground tracking-tighter">Platform benefits</h2>
               <div className="h-1.5 w-24 bg-primary mx-auto rounded-full" />
            </div>
 
@@ -305,8 +305,8 @@ export default function PassPage() {
                     <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center shadow-inner mb-8 transition-transform group-hover:scale-110 group-hover:rotate-6", b.bg, b.color)}>
                        <b.icon className="h-7 w-7" />
                     </div>
-                    <h4 className="text-xl md:text-2xl font-black text-foreground mb-3 uppercase tracking-tighter">{b.label}</h4>
-                    <p className="text-sm md:text-base text-muted-foreground font-medium leading-relaxed uppercase tracking-tight">{b.desc}</p>
+                    <h4 className="text-xl md:text-2xl font-black text-foreground mb-3 tracking-tighter">{b.label}</h4>
+                    <p className="text-sm md:text-base text-muted-foreground font-medium leading-relaxed tracking-tight">{b.desc}</p>
                  </motion.div>
               ))}
            </div>
