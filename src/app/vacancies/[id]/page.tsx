@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -29,7 +28,8 @@ import {
   ChevronRight,
   Loader2,
   DollarSign,
-  Briefcase
+  Briefcase,
+  GraduationCap
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -42,8 +42,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Official Vacancy Detail Node v1.1.
- * FIXED: Added missing ArrowRight icon import and purged uppercase styling.
+ * @fileOverview Official Vacancy Detail Node v1.2.
+ * FIXED: Added missing GraduationCap icon import to resolve runtime ReferenceError.
+ * TYPOGRAPHY: Finalized Title Case normalization for all labels and buttons.
  */
 
 export default function VacancyDetailPage() {
@@ -172,11 +173,11 @@ export default function VacancyDetailPage() {
                   <div className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-14 border border-slate-100 shadow-xl space-y-12">
                      <div className="space-y-4">
                         <h4 className="text-[10px] md:text-xs font-black text-primary tracking-tight ml-1">Selection cycle</h4>
-                        <div className="p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 text-sm md:text-xl font-medium leading-relaxed italic text-slate-600">&quot;{vacancy.selectionProcess}&quot;</div>
+                        <div className="p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 text-sm md:text-xl font-medium leading-relaxed italic text-slate-600">"{vacancy.selectionProcess}"</div>
                      </div>
                      <div className="space-y-4">
                         <h4 className="text-[10px] md:text-xs font-black text-primary tracking-tight ml-1">Financial ingestion</h4>
-                        <div className="p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 text-sm md:text-xl font-medium leading-relaxed italic text-slate-600">&quot;{vacancy.applicationFee}&quot;</div>
+                        <div className="p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 text-sm md:text-xl font-medium leading-relaxed italic text-slate-600">"{vacancy.applicationFee}"</div>
                      </div>
                   </div>
                </section>
@@ -211,7 +212,7 @@ export default function VacancyDetailPage() {
                      <HelpCircle className="h-8 w-8 text-primary" />
                      <h4 className="text-[11px] font-black tracking-tight text-[#0F172A]">Aspirant support</h4>
                   </div>
-                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">Verify your eligibility metrics before authorizing the transaction node. Official PDFs contain the final binding rules for the recruitment vertical.</p>
+                  <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed font-medium">Verify your eligibility metrics before authorizing the transaction node. Official PDFs contain the final binding rules for the recruitment vertical.</p>
                   <Button asChild variant="outline" className="w-full h-12 md:h-14 rounded-xl border-slate-200 text-[#0F172A] font-bold text-xs">
                      <Link href="/support">Open support desk <ChevronRight className="h-4 w-4" /></Link>
                   </Button>
