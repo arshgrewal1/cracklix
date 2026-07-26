@@ -29,7 +29,8 @@ import {
   Download,
   ShieldCheck,
   Target,
-  X
+  X,
+  FileText
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -42,10 +43,12 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import ShareableResultCard from "./ShareableResultCard"
 import { toBlob } from 'html-to-image'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
 /**
- * @fileOverview Universal Result Hub Viewer v55.0 [PWA Row Fix].
- * FIXED: Replaced scrolling review filters with a fixed 4-column grid.
+ * @fileOverview Universal Result Hub Viewer v60.0.
+ * FIXED: Implemented professional PNG share and A4 PDF download.
  */
 
 export default function ResultClient() {
@@ -71,10 +74,7 @@ export default function ResultClient() {
   const [avgScore, setAvgScore] = useState<number>(0)
   const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
 
-  // Share Caching Store
-  const [isSharing, setIsSharing] = useState(false);
-  const [cachedResultBlob, setCachedResultBlob] = useState<Blob | null>(null);
-  const generationAttempted = useRef(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -144,74 +144,77 @@ export default function ResultClient() {
      fetchRankingMetrics();
   }, [db, mockId, sessionData]);
 
-  const prepareShareCard = useCallback(async () => {
-    if (!sessionData || generationAttempted.current || cachedResultBlob) return;
-    generationAttempted.current = true;
-
-    await new Promise(r => setTimeout(r, 3000));
+  const handleShareResult = async () => {
+    if (!sessionData || isGenerating) return;
+    setIsGenerating(true);
 
     try {
       const node = document.getElementById('cracklix-result-card-canvas');
-      if (!node) return;
+      if (!node) throw new Error("Capture node not found");
 
       const blob = await toBlob(node, {
         pixelRatio: 2,
         cacheBust: true,
-        backgroundColor: '#ffffff'
       });
-      
-      if (blob) {
-         setCachedResultBlob(blob);
-         console.log('[SHARE_HUB] Professional scorecard synchronized.');
-      }
-    } catch (e) {
-      generationAttempted.current = false;
-    }
-  }, [sessionData, cachedResultBlob]);
 
-  useEffect(() => {
-     if (sessionData && liveRank !== "---") {
-        prepareShareCard();
-     }
-  }, [sessionData, liveRank, prepareShareCard]);
+      if (!blob) throw new Error("Blob generation failed");
 
-  const handleShareResult = async () => {
-    if (!sessionData || isSharing) return;
-    
-    if (!cachedResultBlob) {
-       toast({ title: "Registry Audit", description: "Finalizing scorecard. Please wait 2 seconds." });
-       await prepareShareCard();
-       return;
-    }
+      const file = new File(
+        [blob],
+        `Cracklix_Result_${sessionData.mockTitle.replace(/\s+/g, '_')}.png`,
+        { type: "image/png" }
+      );
 
-    setIsSharing(true);
-
-    try {
-      const fileName = `Cracklix_Report_${sessionData.mockTitle.replace(/\s+/g, '_')}.png`;
-      const file = new File([cachedResultBlob], fileName, { type: 'image/png' });
-
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-         await navigator.share({
-            title: `My Cracklix Result`,
-            text: `🎯 Check my official scorecard for ${sessionData.mockTitle}. Verified standing on Cracklix!`,
-            files: [file]
-         });
+      if (navigator.share) {
+        await navigator.share({
+          title: "My Cracklix Result",
+          text: `Check my verified result for ${sessionData.mockTitle} on Cracklix!`,
+          files: [file]
+        });
       } else {
-         const url = URL.createObjectURL(cachedResultBlob);
-         const link = document.createElement('a');
-         link.download = fileName;
-         link.href = url;
-         link.click();
-         URL.revokeObjectURL(url);
-         toast({ title: "Report Ready", description: "Scorecard downloaded to device." });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = file.name;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast({ title: "Result Downloaded" });
       }
     } catch (e: any) {
-       if (e.name !== 'AbortError') {
-          toast({ variant: "destructive", title: "Transmission Error", description: "Try again in a moment." });
-       }
+      if (e.name !== 'AbortError') {
+        toast({ variant: "destructive", title: "Share Failed", description: "Could not generate share image." });
+      }
     } finally {
-       setIsSharing(true); 
-       setTimeout(() => setIsSharing(false), 2000);
+      setIsGenerating(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!sessionData || isGenerating) return;
+    setIsGenerating(true);
+
+    try {
+      const node = document.getElementById('cracklix-result-card-canvas');
+      if (!node) throw new Error("Capture node not found");
+
+      const canvas = await html2canvas(node, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Cracklix_Scorecard_${sessionData.mockTitle.replace(/\s+/g, '_')}.pdf`);
+      toast({ title: "PDF Generated" });
+    } catch (e: any) {
+       toast({ variant: "destructive", title: "PDF Failed", description: "Could not generate document." });
+    } finally {
+       setIsGenerating(false);
     }
   };
 
@@ -278,27 +281,29 @@ export default function ResultClient() {
         
         {sessionData ? (
            <>
-              <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-6 md:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+              <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white overflow-hidden p-6 md:p-12 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                  <div className="flex items-center gap-6 md:gap-10">
-                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-20 md:w-20 bg-white shadow-xl border border-slate-100" />
-                    <div className="text-left space-y-2">
+                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-20 w-20 md:h-28 md:w-28 bg-white shadow-xl border border-slate-100 rounded-3xl" />
+                    <div className="text-left space-y-3">
                        <div className="flex flex-wrap items-center gap-3">
-                          <Badge className="bg-[#0B57D0] text-white border-none px-3 py-1 font-bold text-[9px]">Official Scorecard</Badge>
-                          <Badge className="bg-slate-100 text-slate-500 border-none px-3 py-1 font-bold text-[9px]">Rank #{liveRank}</Badge>
+                          <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-4 py-1 font-bold text-[10px] rounded-lg">VERIFIED HUB</Badge>
+                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-4 py-1 font-bold text-[10px] rounded-lg uppercase">ATTEMPT #{results?.length || 1}</Badge>
                        </div>
-                       <h1 className="text-xl md:text-3xl font-[800] text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
-                       <div className="flex flex-wrap items-center gap-6 text-[10px] md:xs font-bold text-slate-400 uppercase tracking-widest">
-                          <div className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span></div>
-                          <div className="flex items-center gap-2"><TimerIcon className="h-3.5 w-3.5" /> <span>{mockData?.duration || 120}m</span></div>
+                       <h1 className="text-2xl md:text-5xl font-bold text-[#0F172A] tracking-tight leading-none">{sessionData.mockTitle}</h1>
+                       <div className="flex flex-wrap items-center gap-6 text-[12px] md:text-lg font-semibold text-slate-400">
+                          <div className="flex items-center gap-2"><Calendar className="h-5 w-5 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</span></div>
+                          <div className="flex items-center gap-2"><TimerIcon className="h-5 w-5 text-slate-300" /> <span>Duration: {mockData?.duration || 120}:00</span></div>
                        </div>
                     </div>
                  </div>
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-                    <Button onClick={handleShareResult} disabled={isSharing} className="flex-1 lg:flex-none h-12 px-8 bg-[#0B57D0] hover:bg-blue-700 text-white font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
-                       {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
-                       {cachedResultBlob ? 'Direct Share Card' : 'Preparing Card...'}
+                    <Button onClick={handleDownloadPDF} disabled={isGenerating} className="flex-1 lg:flex-none h-14 px-8 bg-white border-2 border-slate-100 text-slate-600 font-bold rounded-2xl gap-3 text-sm shadow-sm active:scale-95 transition-all">
+                       {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />} Download PDF
                     </Button>
-                    <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
+                    <Button onClick={handleShareResult} disabled={isGenerating} className="flex-1 lg:flex-none h-14 px-8 bg-[#2563EB] hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 text-sm shadow-lg active:scale-95 transition-all border-none">
+                       {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Share2 className="h-5 w-5" />} Share Result
+                    </Button>
+                    <Button asChild className="flex-1 lg:flex-none h-14 px-8 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl gap-3 text-sm shadow-md">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
                     </Button>
                  </div>
@@ -307,12 +312,12 @@ export default function ResultClient() {
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-10">
                   <div className="flex justify-center">
                      <TabsList className="bg-slate-100 p-1 rounded-3xl border border-[#E5EAF2] shadow-inner flex w-fit gap-1 h-auto">
-                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis Hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review Portal</TabsTrigger>
+                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-12 font-bold text-[12px] h-12 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis Hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-2xl px-12 font-bold text-[12px] h-12 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review Portal</TabsTrigger>
                      </TabsList>
                   </div>
 
-                  <TabsContent value="OVERVIEW" className="m-0 max-w-4xl mx-auto">
+                  <TabsContent value="OVERVIEW" className="m-0 max-w-5xl mx-auto">
                       <ReportScreen 
                          {...sessionData} 
                          rank={liveRank} 
@@ -355,8 +360,13 @@ export default function ResultClient() {
                   </TabsContent>
               </Tabs>
               
+              {/* HIDDEN CAPTURE NODE */}
               <div className="fixed top-[-9999px] left-[-9999px] pointer-events-none opacity-0">
-                 <ShareableResultCard data={sessionData} rank={liveRank} totalCandidates={totalCandidates} />
+                 <ShareableResultCard 
+                   data={sessionData} 
+                   rank={liveRank} 
+                   totalCandidates={totalCandidates} 
+                 />
               </div>
            </>
         ) : isSearching ? (
