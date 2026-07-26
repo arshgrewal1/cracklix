@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -62,9 +61,8 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v22.0 [One-Click Response].
- * FIXED: Imported missing Link component.
- * OPTIMIZED: Direct ID resolution to eliminate "Entry Not Found" race conditions.
+ * @fileOverview Premium Result Analysis Hub v25.0 [Production Hardened].
+ * FIXED: One-Click Retake responsiveness and Resilient ID Resolution.
  */
 
 export default function ResultClient() {
@@ -93,14 +91,14 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
-  // One-Click ID Resolution
+  // AGGRESSIVE ID RESOLUTION PROTOCOL
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
     
     async function resolveId() {
        setIsResolvingId(true);
 
-       // 1. GUEST RESOLUTION
+       // 1. GUEST RECOVERY
        if (!user) {
           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
           if (guestRes) {
@@ -111,27 +109,32 @@ export default function ResultClient() {
           return;
        }
 
-       // 2. DIRECT URL HANDSHAKE (Fastest)
+       // 2. DIRECT URL HANDSHAKE (Highest Priority)
        if (attemptIdFromUrl) {
           setResolvedResultId(`${user.uid}_${mockId}_${attemptIdFromUrl}`);
           setIsResolvingId(false);
           return;
        }
 
-       // 3. REGISTRY AUDIT (Fallback)
+       // 3. REGISTRY AUDIT (Recovery for 'View Analysis' buttons)
        try {
+          // Check operational tracker first
           const trackerSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
           if (trackerSnap.exists()) {
              const tid = trackerSnap.data().attemptId;
-             setResolvedResultId(`${user.uid}_${mockId}_${tid}`);
-             setIsResolvingId(false);
-             return;
+             if (tid) {
+                setResolvedResultId(`${user.uid}_${mockId}_${tid}`);
+                setIsResolvingId(false);
+                return;
+             }
           }
 
+          // Fallback: Query results collection for newest entry
           const resQuery = query(
              collection(db, "results"),
              where("userId", "==", user.uid),
-             where("mockId", "==", mockId)
+             where("mockId", "==", mockId),
+             limit(5)
           );
           
           const resSnap = await getDocs(resQuery);
@@ -142,7 +145,7 @@ export default function ResultClient() {
              
              setResolvedResultId(sorted[0].id);
           } else {
-             // Hard Fallback to default path
+             // Hard Fallback to default expected path
              setResolvedResultId(`${user.uid}_${mockId}`);
           }
        } catch (e) {
@@ -226,18 +229,23 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  const handleRetake = () => {
-    if (!db || !mockId) return;
-    if (user) {
-      deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {});
+  const handleRetake = useCallback(() => {
+    if (!mockId) return;
+    
+    // Optimistic Reset
+    if (user && db) {
+       deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {});
     }
-    resetStore();
+    
     if (typeof window !== 'undefined') {
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
       localStorage.removeItem(`cracklix_guest_result_${mockId}`);
     }
-    router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
-  };
+
+    resetStore();
+    router.push(`/mocks/attempt?id=${mockId}&retake=true`);
+    toast({ title: "Test reset", description: "Starting a fresh preparation node." });
+  }, [db, mockId, user, router, resetStore, toast]);
 
   const handleDownloadPDF = async () => { 
     if (isExporting) return;
