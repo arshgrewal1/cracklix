@@ -46,8 +46,8 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 }
 
 /**
- * @fileOverview Institutional Stats Bar v1.6 [Restored].
- * FIXED: Removed fixed height h-[130px] that caused text overflow.
+ * @fileOverview Institutional Stats Bar v1.7.
+ * RESTORED: Removed 'truncate' from labels to fix text clipping.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -135,7 +135,7 @@ export default function StatsBar() {
                       <div className="text-lg md:text-3xl font-black text-[#0F172A] tracking-tighter leading-none antialiased">
                         <Counter value={item.val} suffix={item.noSuffix ? "" : "+"} />
                       </div>
-                      <p className="text-[9px] md:text-[11px] font-black uppercase text-slate-400 tracking-widest truncate px-1">
+                      <p className="text-[9px] md:text-[11px] font-black uppercase text-slate-400 tracking-widest px-1">
                         {item.label}
                       </p>
                       

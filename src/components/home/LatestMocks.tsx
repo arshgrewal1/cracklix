@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Latest Tests Hub v42.3.
- * UPDATED: Removed all uppercase styling from headings and labels for better PWA sizing.
+ * @fileOverview Premium Latest Tests Hub v42.4.
+ * RESTORED: Removed 'truncate' from StatPill to fix UI clipping.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -128,7 +128,7 @@ function StatPill({ icon: Icon, label }: any) {
    return (
       <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
          <Icon className="h-3.5 w-3.5 text-slate-300" />
-         <span className="truncate">{label}</span>
+         <span className="leading-none">{label}</span>
       </div>
    )
 }

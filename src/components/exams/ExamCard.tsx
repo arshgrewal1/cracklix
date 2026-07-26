@@ -41,8 +41,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v12.1 [Restored].
- * FIXED: Removed rigid min-height that caused container overlap and text overflow.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v12.2.
+ * RESTORED: Removed 'truncate' from sub-labels to fix UI clipping.
  */
 export default function ExamCard({ 
   exam, 
