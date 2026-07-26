@@ -40,6 +40,11 @@ import {
 } from "@/components/ui/dialog";
 import { nanoid } from "nanoid";
 
+/**
+ * @fileOverview Institutional Attempt Node v46.0 [Handshake Optimized].
+ * UPDATED: Explicitly passes attemptId during navigation to ensure immediate resolution.
+ */
+
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -179,8 +184,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
     setIsSubmittingFinal(true);
     
-    console.log(`[REGISTRY] FINALIZING SUBMISSION: ${attemptId}`);
-    
     let correctCount = 0; 
     let wrongCount = 0;
     const attemptedCount = Object.keys(answers || {}).length;
@@ -230,7 +233,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         await runTransaction(db, async (transaction) => {
           const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
           const globalMeritRef = doc(db, "leaderboard", user.uid);
-          const userRef = doc(db, "users", user.uid);
           const resultRef = doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
           const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
 
@@ -303,7 +305,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         });
 
         await stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
-        console.log(`[REGISTRY] SUBMISSION SYNCED: ${attemptId}`);
         router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
         resetStore();
       } else {
