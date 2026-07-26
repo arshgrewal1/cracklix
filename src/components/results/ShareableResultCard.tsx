@@ -26,8 +26,8 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Institutional Scorecard Node v9.0.
- * Strictly follows the "Official Exam Report" design language.
+ * @fileOverview Institutional Scorecard Node v10.0.
+ * UPDATED: Increased logo size to 180px and hardened icon imports.
  * Dimensions: 1080x1350 for Ultra-HD Social Sharing.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
@@ -47,7 +47,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
             <img 
               src="/logo/cracklix-logo-dark.png" 
               alt="Cracklix" 
-              className="h-[140px] w-auto object-contain -ml-4" 
+              className="h-[180px] w-auto object-contain -ml-4" 
             />
             <div className="flex items-center gap-4">
                <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-6 py-2 rounded-full font-black text-sm uppercase tracking-widest flex items-center gap-2">
@@ -70,11 +70,11 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
          <div className="space-y-4 relative z-10">
             <h2 className="text-4xl font-black tracking-tight leading-tight uppercase text-[#0F172A]">{data.mockTitle}</h2>
             <div className="flex items-center gap-8">
-               <DetailNode icon={Zap} label="Attempt No" val="01" />
+               <DetailNode icon={Zap} label="Attempt No" val={data.attemptCount || "01"} />
                <div className="w-px h-8 bg-slate-200" />
                <DetailNode icon={Calendar} label="Date" val={new Date(data.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} />
                <div className="w-px h-8 bg-slate-200" />
-               <DetailNode icon={Clock} label="Time Taken" val="25:40" />
+               <DetailNode icon={Clock} label="Time Taken" val={data.timeTaken ? `${Math.floor(data.timeTaken/60)}m ${data.timeTaken%60}s` : "---"} />
             </div>
          </div>
       </div>
@@ -98,7 +98,7 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
          {/* SECONDARY METRICS COLUMN */}
          <div className="col-span-4 flex flex-col gap-8">
             <MetricCard label="Accuracy" val={`${data.attemptAccuracy}%`} icon={Target} color="text-emerald-500" />
-            <MetricCard label="Percentile" val="--" icon={Activity} color="text-blue-500" />
+            <MetricCard label="Percentile" val={`${Math.max(0, Math.round(((totalCandidates - Number(rank)) / (totalCandidates || 1)) * 100))}%`} icon={Activity} color="text-blue-500" />
          </div>
       </div>
 

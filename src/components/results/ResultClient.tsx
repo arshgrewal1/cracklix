@@ -30,7 +30,8 @@ import {
   ShieldCheck,
   Target,
   X,
-  FileText
+  FileText,
+  Calendar
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -47,8 +48,8 @@ import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 
 /**
- * @fileOverview Universal Result Hub Viewer v61.0.
- * FIXED: ReferenceError 'results is not defined' in header logic.
+ * @fileOverview Universal Result Hub Viewer v62.0.
+ * FIXED: ReferenceError for Calendar icon and synchronized results data node.
  */
 
 export default function ResultClient() {
