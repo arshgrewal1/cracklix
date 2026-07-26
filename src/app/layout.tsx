@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -28,14 +27,14 @@ export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
   description: "Punjab's most trusted government exam preparation platform. Practice Unlimited Mock Tests for PSSSB, PPSC, Punjab Police.",
   keywords: "Punjab Government Exams, PSSSB, PPSC, Punjab Police, Mock Test, Previous Year Papers, Current Affairs, Cracklix",
-  metadataBase: new URL("https://cracklix.com"),
+  metadataBase: new URL("https://cracklix.in"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Cracklix | Punjab's Smart Mock Test Platform",
     description: "Prepare for Punjab Government Exams with Cracklix.",
-    url: "https://cracklix.com",
+    url: "https://cracklix.in",
     siteName: "Cracklix",
     locale: "en_IN",
     type: "website",

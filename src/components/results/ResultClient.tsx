@@ -45,8 +45,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v10.1 [Production Hardened].
- * FIXED: TabsTrigger now correctly used within TabsList to resolve RovingFocusGroup error.
+ * @fileOverview Universal Result Hub Viewer v10.2 [Hardened].
+ * FIXED: Tabs architecture satisfies RovingFocusGroup requirements.
  */
 
 export default function ResultClient() {

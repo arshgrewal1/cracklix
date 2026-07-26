@@ -19,8 +19,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v2.1 [Production Hardened].
- * FIXED: Added missing Award, Activity, ShieldCheck, and TrendingDown to import registry.
+ * @fileOverview Premium Analysis Screen v2.2 [Hardened].
+ * FIXED: Standardized Title Case throughout the reporting module.
  */
 
 interface ReportScreenProps {

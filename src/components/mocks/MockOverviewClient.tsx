@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -31,8 +30,7 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client v5.2 [RECURSION REMOVED].
- * FIXED: Removed infinite self-call and implemented stable UI logic.
+ * @fileOverview Universal Mock Overview Hub Client v5.3 [RECURSION FIXED].
  */
 export default function MockOverviewClient() {
   const router = useRouter()
@@ -114,7 +112,7 @@ export default function MockOverviewClient() {
           </p>
         </div>
         <div className="pt-4">
-           <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-bold text-sm shadow-3xl border-none transition-all active:scale-95">
+           <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white font-bold text-sm shadow-3xl border-none transition-all active:scale-95">
               <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to Hub</Link>
            </Button>
         </div>
@@ -174,7 +172,7 @@ export default function MockOverviewClient() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                  <FeatureNode icon={ShieldCheck} title="Official Pattern" desc="Curated according to latest board notifications." />
                  <FeatureNode icon={Zap} title="Expert Solutions" desc="Detailed explanations for every question." />
-                 <TargetNode icon={Target} title="State Rankings" desc="Compare performance with toppers across Punjab." />
+                 <FeatureNode icon={Target} title="State Rankings" desc="Compare performance with toppers across Punjab." />
               </div>
            </div>
         </section>
@@ -197,17 +195,3 @@ function FeatureNode({ icon: Icon, title, desc }: any) {
     </div>
   );
 }
-
-function TargetNode({ icon: Icon, title, desc }: any) {
-   return (
-     <div className="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 space-y-6 text-left group hover:bg-white hover:shadow-4xl transition-all duration-500">
-       <div className="h-14 w-14 bg-white rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-         <Icon className="h-6 w-6 text-primary" />
-       </div>
-       <div className="space-y-1">
-          <h3 className="text-xl font-bold text-[#0F172A] leading-tight uppercase">{title}</h3>
-          <p className="text-slate-400 font-bold text-[10px] tracking-widest leading-relaxed uppercase">{desc}</p>
-       </div>
-     </div>
-   );
- }

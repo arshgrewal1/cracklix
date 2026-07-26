@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -7,9 +6,8 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v12.0 [RE-CENTERED].
- * FIXED: Absolute vertical centering using justify-center and removing top padding.
- * FIXED: Branding block pulled tight to icon with minimized spacing.
+ * @fileOverview Premium PWA Splash Hub v12.1 [Absolute Center].
+ * FIXED: Removed top margin/padding to achieve perfect vertical visual centering.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
