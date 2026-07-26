@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo } from "react"
@@ -13,8 +14,8 @@ import { AdminPageHeader, AdminTableSkeleton } from "@/components/admin"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Daily Challenge Merit Registry v1.1.
- * UPDATED: Integrated Users collection for verified student names.
+ * @fileOverview Daily Challenge Merit Registry v2.0 [Logic Hardened].
+ * FIXED: Implemented server-side orderBy to ensure accurate real-time ranking.
  */
 
 export default function DailyQuizLeaderboard() {
@@ -22,7 +23,11 @@ export default function DailyQuizLeaderboard() {
 
   const resultsQuery = useMemo(() => {
     if (!db) return null;
-    return query(collection(db, "results"), limit(1000));
+    return query(
+      collection(db, "results"), 
+      orderBy("score", "desc"), // High scores first
+      limit(1000)
+    );
   }, [db]);
 
   const usersQuery = useMemo(() => (db ? collection(db, "users") : null), [db]);
@@ -41,7 +46,8 @@ export default function DailyQuizLeaderboard() {
       if (!isDaily) return;
 
       const existing = uniqueRankers.get(r.userId);
-      if (!existing || existing.score < r.score) {
+      // Keep only the highest score per user for the daily quiz pool
+      if (!existing || Number(r.score) > Number(existing.score)) {
         const userProfile = users.find((u: any) => u.id === r.userId);
         const displayName = userProfile?.name || r.userName || r.userEmail?.split('@')[0] || "Aspirant";
         
@@ -109,7 +115,7 @@ export default function DailyQuizLeaderboard() {
                 <TableRow className="h-16 md:h-24 border-slate-100">
                   <TableHead className="px-8 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Rank & Aspirant</TableHead>
                   <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Recent Node</TableHead>
-                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Accuracy</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-center text-slate-400">Accuracy</TableHead>
                   <TableHead className="text-right px-8 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Total Score</TableHead>
                 </TableRow>
               </TableHeader>
@@ -123,7 +129,7 @@ export default function DailyQuizLeaderboard() {
                           <span className="font-black text-slate-200 text-xl md:text-3xl tabular-nums group-hover:text-primary transition-colors">#{i + 4}</span>
                           <div className="flex items-center gap-4">
                              <StudentAvatar profile={r.userProfile || r} className="h-10 w-10 md:h-14 md:w-14 rounded-xl shadow-inner bg-slate-50" />
-                             <div>
+                             <div className="min-w-0">
                                 <p className="font-black text-[#0F172A] text-sm md:text-lg leading-none">{r.displayName}</p>
                                 <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{r.userEmail}</p>
                              </div>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -18,8 +19,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Daily Challenge Merit Registry v1.2.
- * FIXED: Mobile ordering for podium cards (1st always first).
+ * @fileOverview Official Punjab Merit Registry v2.0 [Logic Hardened].
+ * FIXED: Implemented server-side orderBy to ensure real-time ranking accuracy.
+ * FIXED: Unique User grouping logic to keep only the highest score across all mocks.
  */
 
 const CATEGORY_CHIPS = [
@@ -46,7 +48,13 @@ export default function LeaderboardPage() {
     setMounted(true)
   }, []);
 
-  const meritQuery = useMemo(() => (db && mounted ? query(collection(db, "results"), limit(500)) : null), [db, mounted])
+  // Server-side sorted query is CRITICAL for leaderboard integrity
+  const meritQuery = useMemo(() => (db && mounted ? query(
+    collection(db, "results"), 
+    orderBy("score", "desc"), // High scores first
+    limit(1000) // Fetch large enough sample to group unique users
+  ) : null), [db, mounted])
+
   const usersQuery = useMemo(() => (db && mounted ? query(collection(db, "users"), limit(500)) : null), [db, mounted])
 
   const { data: results, loading: resultsLoading } = useCollection<any>(meritQuery)
@@ -56,11 +64,14 @@ export default function LeaderboardPage() {
     if (!results || !mounted) return []
     const term = searchTerm.toLowerCase().trim();
     
+    // Logic: Group by UserID and keep only the HIGHEST score achieved across any mock
     const uniqueRankers = new Map<string, any>();
     
     [...results].forEach((r: any) => {
       const existing = uniqueRankers.get(r.userId);
-      if (!existing || existing.score < r.score) {
+      
+      // If user not in map OR this score is higher than their previously recorded one
+      if (!existing || Number(r.score) > Number(existing.score)) {
         const userProfile = users?.find((u: any) => u.id === r.userId);
         
         const rawName = userProfile?.name || 
@@ -93,6 +104,7 @@ export default function LeaderboardPage() {
       }
     });
 
+    // Re-sort the unique map results to ensure rank integrity
     return Array.from(uniqueRankers.values()).sort((a, b) => b.score - a.score);
   }, [results, users, searchTerm, activeBoard, mounted]);
 
@@ -158,9 +170,11 @@ export default function LeaderboardPage() {
 
          {!searchTerm && finalSortedList.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 pt-8">
-               {/* DOM order changed to 1, 2, 3 for mobile, arranged via order classes for desktop */}
+               {/* 1st Place */}
                <PodiumCard rank={1} data={podium[0]} order="order-1 md:order-2" isMain />
+               {/* 2nd Place */}
                <PodiumCard rank={2} data={podium[1]} order="order-2 md:order-1" />
+               {/* 3rd Place */}
                <PodiumCard rank={3} data={podium[2]} order="order-3 md:order-3" />
             </div>
          )}
@@ -194,7 +208,7 @@ export default function LeaderboardPage() {
                                     profile={entry.profile || entry} 
                                     className="h-10 w-10 md:h-12 md:w-12 rounded-xl shrink-0 shadow-inner bg-slate-50" 
                                  />
-                                 <div className="min-w-0 flex-1">
+                                 <div className="min-w-0 flex-1 text-left">
                                     <h4 className="font-bold text-sm md:text-lg text-[#0F172A] truncate leading-tight group-hover:text-primary transition-colors">
                                        {entry.name}
                                     </h4>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -29,8 +30,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v8.5.
- * FIXED: Enriched question nodes with section names to display correct subject labels in tabs and palette.
+ * @fileOverview Official Mock Attempt Hub v8.6 [Leaderboard Fixed].
+ * FIXED: Ensured results are written with numerical score and accurate metadata for the Merit Registry.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -260,7 +261,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
     const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
     
-    // Using the store's high-fidelity active elapsedSeconds for accurate reporting
     const timeTaken = Math.max(1, elapsedSeconds);
     
     await stopSession({
@@ -272,7 +272,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const resultPayload: any = {
       mockId, 
       mockTitle: mockData.title || mockTitle, 
-      score: parseFloat(rawScore.toFixed(2)),
+      score: Number(parseFloat(rawScore.toFixed(2))),
       correctCount, 
       wrongCount, 
       attemptedCount, 
