@@ -10,8 +10,7 @@ import {
   collection, 
   query, 
   doc, 
-  getDoc, 
-  documentId, 
+  onSnapshot,
   getDocs, 
   where,
   limit,
@@ -48,8 +47,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v104.1.
- * UPDATED: Final terminology simplification and font scale balancing.
+ * @fileOverview Universal Result Hub Engine v105.0.
+ * FIXED: Implemented Real-Time onSnapshot for instant document retrieval.
  */
 
 export default function ResultClient() {
@@ -66,7 +65,6 @@ export default function ResultClient() {
   
   const [sessionData, setSessionData] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(true);
-  const [pollCount, setPollCount] = useState(0);
   const [isSharing, setIsSharing] = useState(false);
   
   const [liveRank, setLiveRank] = useState<number | string>("---")
@@ -87,88 +85,69 @@ export default function ResultClient() {
     return `${s}s`;
   };
 
-  const fetchResultNode = useCallback(async () => {
-    if (!db) return false;
-
-    try {
-       if (attemptIdFromUrl) {
-          const snap = await getDoc(doc(db, "results", attemptIdFromUrl));
-          if (snap.exists()) {
-             setSessionData({ ...snap.data(), id: snap.id });
-             setIsSearching(false);
-             return true;
-          }
-       }
-
-       if (user && mockId && !attemptIdFromUrl) {
-          const resultsRef = collection(db, "results");
-          const q = query(
-            resultsRef, 
-            where("userId", "==", user.uid), 
-            where("mockId", "==", mockId)
-          );
-          const snap = await getDocs(q);
-          if (!snap.empty) {
-             const allAttempts = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-             const latest = allAttempts.sort((a: any, b: any) => {
-                const tA = new Date(a.timestamp).getTime();
-                const tB = new Date(b.timestamp).getTime();
-                return tB - tA;
-             })[0];
-
-             setSessionData(latest);
-             setIsSearching(false);
-             return true;
-          }
-       }
-
-       if (typeof window !== 'undefined' && mockId) {
-          const lookupId = attemptIdFromUrl || mockId;
-          const guestKey = `cracklix_guest_result_${lookupId}`;
-          const localData = localStorage.getItem(guestKey);
-          if (localData) {
-             const parsed = JSON.parse(localData);
-             setSessionData({ ...parsed, isGuestNode: true });
-             setIsSearching(false);
-             return true;
-          }
-       }
-       
-       return false;
-    } catch (e: any) {
-       return false;
-    }
-  }, [db, attemptIdFromUrl, user, mockId]);
-
+  // REAL-TIME DOCUMENT LISTENER
   useEffect(() => {
-    if (userLoading) return;
+    if (userLoading || !db) return;
 
-    let isSubscribed = true;
-    let timer: NodeJS.Timeout;
+    let unsubscribe: () => void = () => {};
 
-    const runPoll = async () => {
-       const found = await fetchResultNode();
-       if (!found && isSubscribed) {
-          setPollCount(prev => {
-             if (prev < 15) {
-                timer = setTimeout(runPoll, 1500);
-                return prev + 1;
-             } else {
-                setIsSearching(false);
-                return prev;
-             }
-          });
-       }
+    const initialize = async () => {
+      // 1. Direct ID path (High Speed Real-time)
+      if (attemptIdFromUrl) {
+        unsubscribe = onSnapshot(doc(db, "results", attemptIdFromUrl), (snap) => {
+          if (snap.exists()) {
+            setSessionData({ ...snap.data(), id: snap.id });
+            setIsSearching(false);
+          }
+        }, (err) => {
+           console.error("[Result_Listen_Error]:", err);
+           setIsSearching(false);
+        });
+        
+        // Timeout if not found in 10s
+        setTimeout(() => {
+           setIsSearching(prev => {
+              if (prev) {
+                 // Try guest fallback if still searching
+                 const guestKey = `cracklix_guest_result_${attemptIdFromUrl}`;
+                 const local = localStorage.getItem(guestKey);
+                 if (local) setSessionData({ ...JSON.parse(local), isGuestNode: true });
+              }
+              return false;
+           });
+        }, 10000);
+        return;
+      }
+
+      // 2. Guest path
+      if (!user) {
+        const guestKey = `cracklix_guest_result_${mockId || attemptIdFromUrl}`;
+        const local = localStorage.getItem(guestKey);
+        if (local) {
+          setSessionData({ ...JSON.parse(local), isGuestNode: true });
+        }
+        setIsSearching(false);
+        return;
+      }
+
+      // 3. Discovery path (Latest Attempt)
+      if (user && mockId) {
+        const q = query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const latest = snap.docs.map(d => ({ ...d.data(), id: d.id }))
+            .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+          setSessionData(latest);
+        }
+        setIsSearching(false);
+      }
     };
 
-    runPoll();
+    initialize();
+    return () => unsubscribe();
+  }, [db, user, userLoading, mockId, attemptIdFromUrl]);
 
-    return () => {
-       isSubscribed = false;
-       clearTimeout(timer);
-    };
-  }, [fetchResultNode, userLoading]);
-
+  // LOAD METRICS & QUESTIONS
   useEffect(() => {
      if (!db || !sessionData) return;
      const mId = mockId || sessionData.mockId;
@@ -201,23 +180,21 @@ export default function ResultClient() {
               const qIds = mData.questionIds || [];
               if (qIds.length === 0) return;
 
+              const fetched: any[] = [];
               const chunks = [];
               for (let i=0; i<qIds.length; i+=30) chunks.push(qIds.slice(i, i+30));
               
-              const promises = chunks.map(async c => {
+              for (const c of chunks) {
                 const [qSnap, uSnap, lSnap] = await Promise.all([
-                   getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", c))),
-                   getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", c))),
-                   getDocs(query(collection(db, "questions"), where(documentId(), "in", c)))
+                   getDocs(query(collection(db, "mcqBank"), where("__name__", "in", c))),
+                   getDocs(query(collection(db, "usedQuestions"), where("__name__", "in", c))),
+                   getDocs(query(collection(db, "questions"), where("__name__", "in", c)))
                 ]);
-                const qDocs = qSnap.docs.map(d => d.data());
-                const uDocs = uSnap.docs.map(d => d.data());
-                const lDocs = lSnap.docs.map(d => d.data());
-                return [...qDocs, ...uDocs, ...lDocs];
-              });
-
-              const all = (await Promise.all(promises)).flat();
-              setQuestions(qIds.map(id => all.find((q:any) => q.id === id)).filter(Boolean));
+                qSnap.docs.forEach(d => fetched.push({...d.data(), id: d.id}));
+                uSnap.docs.forEach(d => { if(!fetched.find(f => f.id === d.id)) fetched.push({...d.data(), id: d.id})});
+                lSnap.docs.forEach(d => { if(!fetched.find(f => f.id === d.id)) fetched.push({...d.data(), id: d.id})});
+              }
+              setQuestions(qIds.map(id => fetched.find((q:any) => q.id === id)).filter(Boolean));
            }
         } catch (e) {}
      };
@@ -245,12 +222,7 @@ export default function ResultClient() {
                  activeReviewFilter === 'SKIPPED' ? reviewNodes.skipped : reviewNodes.all;
 
   const handleManualSync = () => {
-     setIsSearching(true);
-     setPollCount(0);
-     fetchResultNode().then(found => {
-        if (found) toast({ title: "Analysis updated" });
-        else toast({ variant: "destructive", title: "Record not found", description: "Database has not updated yet." });
-     });
+     window.location.reload();
   };
 
   const handleShare = async () => {
@@ -299,7 +271,7 @@ export default function ResultClient() {
                  <Zap className="absolute inset-0 m-auto h-6 w-6 text-primary animate-pulse" />
               </div>
               <div className="text-center space-y-2">
-                 <p className="font-bold tracking-[0.4em] text-[#0F172A] text-sm uppercase">Generating report</p>
+                 <p className="font-bold tracking-[0.4em] text-[#0F172A] text-sm uppercase">Generating Report</p>
                  <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Database synchronization in progress</p>
               </div>
            </div>
@@ -313,7 +285,7 @@ export default function ResultClient() {
                           <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 py-0.5 rounded-lg font-bold text-[9px] shadow-sm">Verified result</Badge>
                           {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-0.5 rounded-lg font-bold text-[9px] shadow-sm">Guest mode</Badge>}
                        </div>
-                       <h1 className="text-lg md:text-xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
+                       <h1 className="text-lg md:text-2xl font-bold text-[#0F172A] tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
                        <div className="flex items-center gap-4 text-[10px] md:text-xs font-semibold text-slate-400 tracking-tight">
                           <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
                           <span className="flex items-center gap-1.5"><TimerIcon className="h-3.5 w-3.5" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
@@ -324,7 +296,7 @@ export default function ResultClient() {
                     <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-11 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-[11px] border-none shadow-lg">
                        {isSharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />} Share
                     </Button>
-                    <Button onClick={() => router.refresh()} className="flex-1 lg:flex-none h-11 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[11px] border-none shadow-lg">
+                    <Button onClick={handleManualSync} className="flex-1 lg:flex-none h-11 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[11px] border-none shadow-lg">
                        <RefreshCw className="h-3.5 w-3.5" /> Refresh
                     </Button>
                     <Button asChild variant="outline" className="flex-1 lg:flex-none h-11 px-6 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[11px] shadow-sm">
@@ -393,7 +365,7 @@ export default function ResultClient() {
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
                  <Button onClick={handleManualSync} className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 shadow-xl border-none active:scale-95 transition-all">
-                    <RotateCcw className="h-4 w-4" /> Force sync
+                    <RotateCcw className="h-4 w-4" /> Force Sync
                  </Button>
                  <Button asChild variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-2xl border-2 border-slate-200 font-bold active:scale-95 transition-all">
                     <Link href="/mocks">Explore tests</Link>

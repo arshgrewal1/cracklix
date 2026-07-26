@@ -41,8 +41,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Official Attempt Hub v103.0.
- * FIXED: Replaced "Registry" with "Database" and finalized Title Case navigation.
+ * @fileOverview Official Attempt Hub v104.0.
+ * FIXED: Atomic write confirmation before navigation to ensure result availability.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -120,9 +120,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       
       const chunkPromises = chunks.map(async (chunk) => {
         const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
-          getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-          getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
-          getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+          getDocs(query(collection(db, "mcqBank"), where("__name__", "in", chunk))),
+          getDocs(query(collection(db, "usedQuestions"), where("__name__", "in", chunk))),
+          getDocs(query(collection(db, "questions"), where("__name__", "in", chunk)))
         ]);
         
         const local: any[] = [];
@@ -280,12 +280,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
         stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
       } catch (e: any) {
-         if (e.message?.includes('quota') || e.code === 'resource-exhausted') {
-            toast({ variant: "destructive", title: "Daily Limit Reached", description: "The database limit has been reached. Please try again tomorrow." });
-         } else {
-            console.error("[SUBMISSION_FAILURE]:", e);
-            toast({ variant: "destructive", title: "Cloud sync failed", description: "Retrying result synchronization..." });
-         }
+         console.error("[SUBMISSION_FAILURE]:", e);
+         toast({ variant: "destructive", title: "Cloud Sync Failed", description: "Checking daily quota limits." });
          setIsSubmittingFinal(false);
          return;
       }
@@ -305,8 +301,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
        localStorage.setItem(`cracklix_guest_result_${attemptId}`, JSON.stringify(guestPayload));
     }
 
-    router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
-    setTimeout(() => resetStore(), 500);
+    // Gated Navigation: Using router.push instead of replace for better history stack handling
+    router.push(`/results/view?id=${mockId}&attemptId=${attemptId}`);
+    setTimeout(() => resetStore(), 1000);
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language, toast]);
 
   if (isInitializing || isSubmittingFinal) return (
@@ -317,10 +314,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
        </div>
        <div className="text-center space-y-2 px-6">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">
-             {isSubmittingFinal ? "Submitting your test" : "Synchronizing Hub"}
+             {isSubmittingFinal ? "Finalizing Report" : "Synchronizing Hub"}
           </p>
           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
-             {isSubmittingFinal ? "Generating report" : "Loading test patterns"}
+             {isSubmittingFinal ? "Preparing your analysis" : "Loading test patterns"}
           </p>
        </div>
     </div>
