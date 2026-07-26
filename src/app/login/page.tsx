@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, Suspense, useEffect, useMemo, useCallback, useRef } from "react"
@@ -42,8 +41,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Login Hub v1.5.1.
- * UPDATED: Purged all uppercase classes.
+ * @fileOverview Login Hub v1.5.2.
+ * UPDATED: Purged all uppercase text for professional Title Case normalization.
  */
 export default function LoginPage() {
   return (
@@ -90,7 +89,7 @@ function LoginContent() {
      const resultKeys = keys.filter(k => k.startsWith('cracklix_guest_result_'));
      
      if (resultKeys.length > 0) {
-        toast({ title: "Syncing Data", description: "Transferring guest attempts to your account." });
+        toast({ title: "Syncing data", description: "Transferring guest attempts to your account." });
         
         for (const key of resultKeys) {
            try {
@@ -165,7 +164,7 @@ function LoginContent() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     if (mode === 'register' && password !== confirmPassword) {
-      toast({ variant: "destructive", title: "Passwords Mismatch", description: "Passwords must match." })
+      toast({ variant: "destructive", title: "Passwords mismatch", description: "Passwords must match." })
       return
     }
 
@@ -200,7 +199,7 @@ function LoginContent() {
         }).catch(() => {});
       }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Authentication Failed", description: error.message })
+      toast({ variant: "destructive", title: "Authentication failed", description: error.message })
       setLoading(false)
     }
   }
@@ -208,7 +207,7 @@ function LoginContent() {
   const handleGoogleSignIn = async () => {
     if (loading) return;
     if (Capacitor.isNativePlatform()) {
-       toast({ title: "Mobile Login", description: "Use email/password on the Android app.", variant: "destructive" });
+       toast({ title: "Mobile login", description: "Use email/password on the Android app.", variant: "destructive" });
        return;
     }
 
@@ -245,20 +244,20 @@ function LoginContent() {
         }).catch(() => {});
       }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Social Login Error", description: error.message })
+      toast({ variant: "destructive", title: "Social login error", description: error.message })
       setLoading(false)
     }
   }
 
   const handleResetPassword = async () => {
     if (!resetEmail) {
-      toast({ variant: "destructive", title: "Email Required" })
+      toast({ variant: "destructive", title: "Email required" })
       return
     }
     setResetLoading(true)
     try {
       await sendPasswordResetEmail(auth, resetEmail)
-      toast({ title: "Reset Link Sent" })
+      toast({ title: "Reset link sent" })
       setIsResetDialogOpen(false)
     } catch (error: any) {
       toast({ variant: "destructive", title: "Error", description: error.message })
@@ -281,9 +280,9 @@ function LoginContent() {
           <Logo variant="dark" align="left" className="my-0" imgClassName="h-24 md:h-40" />
           <div className="space-y-8">
             <h1 className="text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.05]">
-              Punjab's Smart <br/> 
+              Punjab's smart <br/> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-300">
-                Exam Platform
+                exam platform
               </span>
             </h1>
             <p className="text-base xl:text-xl text-slate-300 font-medium leading-relaxed">
@@ -308,7 +307,7 @@ function LoginContent() {
                </div>
                <div className="space-y-1">
                   <h2 className="text-2xl md:text-3xl font-black tracking-tight text-[#0F172A]">
-                    {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+                    {mode === 'login' ? 'Welcome back' : 'Create account'}
                   </h2>
                   <p className="text-slate-400 font-bold text-[10px] md:text-[11px] tracking-tight">
                     {mode === 'login' ? 'Access your portal' : 'Join the preparation portal'}
@@ -319,7 +318,7 @@ function LoginContent() {
             <form onSubmit={handleEmailAuth} className="space-y-6">
               {mode === 'register' && (
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-bold text-slate-400 ml-1">Full Name</Label>
+                  <Label className="text-[10px] font-bold text-slate-400 ml-1">Full name</Label>
                   <div className="relative group">
                     <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                     <Input value={name} onChange={(e) => setName(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="e.g. Arsh Grewal" />
@@ -328,7 +327,7 @@ function LoginContent() {
               )}
               
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold text-slate-400 ml-1">Email Address</Label>
+                <Label className="text-[10px] font-bold text-slate-400 ml-1">Email address</Label>
                 <div className="relative group">
                   <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                   <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="name@domain.com" />
@@ -379,7 +378,7 @@ function LoginContent() {
                <p className="text-[11px] md:text-[13px] font-bold text-slate-400">
                 {mode === 'login' ? "Don't have an account?" : "Already registered?"}
                 <button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} className="text-primary font-black ml-2 hover:underline">
-                  {mode === 'login' ? 'Create Account' : 'Login portal'}
+                  {mode === 'login' ? 'Create account' : 'Login portal'}
                 </button>
                </p>
             </div>

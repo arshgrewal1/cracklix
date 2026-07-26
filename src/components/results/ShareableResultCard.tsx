@@ -36,8 +36,9 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Result Report v2.7.
- * FIXED: Removed all uppercase styling for professional clarity.
+ * @fileOverview Official Institutional Result Report v2.8.
+ * FIXED: Systematically removed all uppercase text styling for professional clarity.
+ * UPDATED: Optimized spacing to prevent footer clipping.
  */
 
 const toTitleCase = (str: string) => {

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -37,8 +36,8 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Performance Hub v6.8.1.
- * UPDATED: Purged all uppercase classes.
+ * @fileOverview Institutional Performance Hub v6.8.2.
+ * UPDATED: Purged all uppercase text classes for professional Title Case hierarchy.
  */
 
 const formatTime = (seconds: number) => {

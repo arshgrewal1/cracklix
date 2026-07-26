@@ -22,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v508.2.
- * UPDATED: Systematically removed all uppercase text classes.
+ * @fileOverview Institutional Premium Hub v508.3.
+ * UPDATED: Systematically removed all uppercase text classes for Title Case normalization.
  */
 export default function HomePage() {
   const { user } = useUser();

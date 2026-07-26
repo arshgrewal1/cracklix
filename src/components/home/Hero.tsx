@@ -8,8 +8,9 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v64.2.
- * FIXED: Added missing icon imports (ShieldCheck, Zap, Layers) and purged uppercase styling.
+ * @fileOverview Premium Mobile-First PWA Hero v64.3.
+ * FIXED: Resolved ReferenceError by adding missing icon imports.
+ * UPDATED: Purged all uppercase styling for institutional clarity.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);

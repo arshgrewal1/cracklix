@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -32,8 +31,8 @@ import { Button } from "@/components/ui/button";
 import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Mobile Sidebar v92.1.
- * UPDATED: Purged all uppercase classes.
+ * @fileOverview Mobile Sidebar v92.2.
+ * UPDATED: Purged all uppercase text classes for professional Title Case hierarchy.
  */
 export default function MobileSidebar({
   onClose,
