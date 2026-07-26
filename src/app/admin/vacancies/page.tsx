@@ -181,7 +181,7 @@ function StatNode({ label, val, color, bg }: any) {
    return (
       <div className={cn("p-5 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center space-y-1 transition-all hover:translate-y-[-2px] bg-white")}>
          <span className={cn("text-xl md:text-3xl font-black tabular-nums", color)}>{val}</span>
-         <span className="text-[8px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none">{label}</span>
+         <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest leading-none">{label}</span>
       </div>
    )
 }
