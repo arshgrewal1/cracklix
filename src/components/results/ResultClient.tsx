@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -21,32 +22,27 @@ import {
   Download,
   ChevronRight,
   ShieldCheck,
-  RefreshCw,
   Clock,
   Users,
   CheckCircle2,
-  XCircle,
-  Bookmark,
-  Award,
-  Activity,
-  TrendingDown
+  RefreshCw
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+import { pdf } from '@react-pdf/renderer'
+import { saveAs } from 'file-saver'
+import QRCode from 'qrcode'
 import { AuthorityLogo } from "@/lib/exam-icons"
 import ReportScreen from "./ReportScreen"
-import ReportPDF from "./ReportPDF"
+import PerformancePDF from "./PerformancePDF"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v10.2 [Hardened].
- * FIXED: Tabs architecture satisfies RovingFocusGroup requirements.
+ * @fileOverview Universal Result Hub Viewer v11.0 [Hardened PDF].
  */
 
 export default function ResultClient() {
@@ -183,16 +179,41 @@ export default function ResultClient() {
     toast({ title: "Syncing report registry" });
     
     try {
-      const container = document.getElementById('pdf-export-buffer');
-      if (!container) throw new Error("Capture node missing");
+      // 1. Generate QR Code
+      const qrData = await QRCode.toDataURL(`https://cracklix.in/results/view?id=${sessionData.mockId}&attemptId=${sessionData.attemptId}`);
       
-      const canvas = await html2canvas(container, { scale: 3, useCORS: true, backgroundColor: "#F8FAFC" });
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
-      pdf.save(`Analysis_${sessionData.userName || 'Student'}.pdf`);
+      // 2. Prepare Data
+      const pdfData = {
+        studentName: sessionData.userName || profile?.name || "Aspirant",
+        examTitle: sessionData.mockTitle,
+        score: sessionData.score.toFixed(1),
+        rank: liveRank,
+        totalCandidates,
+        accuracy: sessionData.attemptAccuracy,
+        correct: sessionData.correctCount,
+        wrong: sessionData.wrongCount,
+        skipped: sessionData.skippedCount,
+        total: sessionData.totalQuestions,
+        grade: sessionData.grade || "F",
+        percentile: Math.max(0, Math.round(((totalCandidates - Number(liveRank)) / (totalCandidates || 1)) * 100)),
+        topScore,
+        avgScore,
+        avgAccuracy,
+        subjectAnalysis: sessionData.subjectAnalysis || [],
+        date: new Date(sessionData.timestamp).toLocaleDateString('en-GB'),
+        attemptId: sessionData.attemptId,
+        duration: `${mockData?.duration || 120}m`
+      };
+
+      // 3. Generate Blob using template
+      const blob = await pdf(<PerformancePDF data={pdfData} qrData={qrData} />).toBlob();
+      
+      // 4. Trigger Download
+      saveAs(blob, `Report_${pdfData.studentName.replace(/\s+/g, '_')}.pdf`);
+      
       toast({ title: "Report downloaded" });
     } catch (e) { 
+       console.error(e);
        toast({ variant: "destructive", title: "Export failed" }); 
     } finally { setIsExporting(false); }
   };
@@ -304,29 +325,6 @@ export default function ResultClient() {
               </Tabs>
            </div>
         )}
-
-        <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0" aria-hidden="true">
-          <div id="pdf-export-buffer" style={{ width: '794px' }}>
-            {sessionData && (
-              <ReportPDF 
-                 studentName={sessionData.userName || profile?.name || "Aspirant"}
-                 examTitle={sessionData.mockTitle}
-                 score={sessionData.score.toFixed(1)}
-                 rank={liveRank}
-                 totalCandidates={totalCandidates}
-                 attemptAccuracy={sessionData.attemptAccuracy}
-                 timeTaken={`${Math.floor(sessionData.timeTaken / 60)}m ${sessionData.timeTaken % 60}s`}
-                 correctCount={sessionData.correctCount}
-                 wrongCount={sessionData.wrongCount}
-                 skippedCount={sessionData.skippedCount}
-                 totalQuestions={sessionData.totalQuestions}
-                 date={new Date(sessionData.timestamp).toLocaleDateString('en-GB')}
-                 resultId={sessionData.id}
-                 percentile={Math.max(0, Math.round(((totalCandidates - Number(liveRank)) / (totalCandidates || 1)) * 100))}
-              />
-            )}
-          </div>
-        </div>
       </main>
       <Footer />
     </div>
