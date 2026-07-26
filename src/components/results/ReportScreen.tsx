@@ -40,8 +40,8 @@ interface ReportScreenProps {
 }
 
 /**
- * @fileOverview Responsive Screen Layout for Browser Viewing v11.0.
- * FIXED: Displays attempt count and normalized Title Case labels.
+ * @fileOverview Responsive Screen Layout for Browser Viewing v11.1.
+ * FIXED: Removed all uppercase shouting and centered text nodes.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
@@ -52,35 +52,30 @@ export default function ReportScreen(props: ReportScreenProps) {
   } = props;
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden space-y-6 animate-in fade-in duration-500 text-left">
+    <div className="w-full max-w-full overflow-x-hidden space-y-6 animate-in fade-in duration-500 text-center">
       
       {/* 1. Header Node */}
-      <div className="bg-white rounded-2xl md:rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-sm space-y-8">
-         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-            <div className="flex items-center gap-5 md:gap-8 min-w-0 flex-1">
-               <AuthorityLogo boardId={boardId || "GENERAL"} size="md" className="h-14 w-14 md:h-20 md:w-20 rounded-2xl shadow-xl border-4 border-slate-50 bg-slate-50" />
-               <div className="space-y-1 min-w-0 flex-1">
-                  <p className="text-[10px] md:text-xs font-bold text-primary">Performance report</p>
-                  <h1 className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight break-words">{studentName}</h1>
-                  <p className="text-sm md:text-lg font-bold text-slate-500 line-clamp-1">{examTitle}</p>
-               </div>
+      <div className="bg-white rounded-2xl md:rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-sm space-y-8 flex flex-col items-center">
+         <div className="flex flex-col items-center gap-6 w-full">
+            <AuthorityLogo boardId={boardId || "GENERAL"} size="md" className="h-16 w-16 md:h-24 md:w-24 rounded-2xl shadow-xl border-4 border-slate-50 bg-slate-50" />
+            <div className="space-y-2 w-full">
+               <p className="text-[10px] md:text-xs font-bold text-primary">Performance report</p>
+               <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] leading-tight break-words">{studentName}</h1>
+               <p className="text-sm md:text-lg font-bold text-slate-500 line-clamp-1">{examTitle}</p>
             </div>
-            <div className="text-left md:text-right shrink-0">
-               <Badge className={cn("border-none px-4 py-1.5 rounded-full text-[10px] md:text-xs font-bold", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+            <div className="flex flex-col items-center gap-2">
+               <Badge className={cn("border-none px-6 py-2 rounded-full text-[10px] md:text-xs font-bold shadow-sm", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
                   {isQualified ? 'Qualified' : 'Attempted'}
                </Badge>
-               <p className="text-[10px] font-bold text-slate-300 mt-2 truncate max-w-[120px]">Ref: {resultId?.slice(0, 15)}</p>
+               <p className="text-[9px] font-bold text-slate-300 mt-1">Ref ID: {resultId?.slice(0, 15)}</p>
             </div>
          </div>
          
-         <div className="grid grid-cols-2 md:grid-cols-5 gap-6 pt-6 border-t border-slate-50">
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-slate-50 w-full">
             <DataMiniNode label="Attempt date" val={date} />
             <DataMiniNode label="Time taken" val={timeTaken} />
             <DataMiniNode label="Duration" val={duration ? `${duration}m` : 'Self'} />
             <DataMiniNode label="Attempt #" val={String(attemptNumber)} />
-            <div className="hidden md:block">
-              <DataMiniNode label="Total pool" val={totalCandidates.toLocaleString()} />
-            </div>
          </div>
       </div>
 
@@ -94,7 +89,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                <span className="text-lg md:text-3xl font-bold text-slate-500 tabular-nums mt-4">/ {totalCandidates} Candidates</span>
             </div>
             <div className="pt-6">
-               <Badge className="bg-emerald-500 text-white border-none px-6 py-2 rounded-full font-bold text-[10px] md:text-sm shadow-2xl">
+               <Badge className="bg-emerald-500 text-white border-none px-8 py-3 rounded-full font-bold text-[10px] md:text-sm shadow-2xl">
                   Verified Result Standing
                </Badge>
             </div>
@@ -112,16 +107,16 @@ export default function ReportScreen(props: ReportScreenProps) {
       {/* 4. Subject Analytics */}
       {subjects.length > 0 && (
          <section className="space-y-6">
-            <div className="flex items-center gap-3 px-2">
+            <div className="flex items-center justify-center gap-3 px-2">
                <BarChart3 className="h-6 w-6 text-primary" />
-               <h3 className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Subject mastery</h3>
+               <h3 className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Subject Mastery</h3>
             </div>
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
                <div className="overflow-x-auto no-scrollbar">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-center border-collapse">
                      <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                           <th className="px-8 py-5 font-bold text-[10px] md:text-[11px] text-slate-500 tracking-tight">Subject hub</th>
+                           <th className="px-8 py-5 font-bold text-[10px] md:text-[11px] text-slate-500 tracking-tight text-left">Subject hub</th>
                            <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500 tracking-tight">Score</th>
                            <th className="px-4 py-5 font-bold text-[10px] md:text-[11px] text-center text-slate-500 tracking-tight">Accuracy</th>
                         </tr>
@@ -129,7 +124,7 @@ export default function ReportScreen(props: ReportScreenProps) {
                      <tbody className="divide-y divide-slate-50">
                         {subjects.map((s, i) => (
                            <tr key={i} className="hover:bg-slate-50 transition-colors h-16">
-                              <td className="px-8 font-bold text-[14px] md:text-lg text-[#0F172A]">{s.name}</td>
+                              <td className="px-8 font-bold text-[14px] md:text-lg text-[#0F172A] text-left">{s.name}</td>
                               <td className="px-4 text-center font-black text-primary text-base md:text-xl tabular-nums">{Number(s.score).toFixed(1)}</td>
                               <td className="px-4 text-center">
                                  <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[10px] md:text-sm tabular-nums px-3 py-1 rounded-lg shadow-sm">{s.accuracy}%</Badge>
@@ -157,7 +152,7 @@ export default function ReportScreen(props: ReportScreenProps) {
 
 function DataMiniNode({ label, val }: { label: string, val: string }) {
    return (
-      <div className="space-y-1 text-left">
+      <div className="space-y-1 text-center">
          <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
          <p className="text-[12px] md:text-lg font-black text-[#0F172A] tabular-nums truncate leading-none">{val}</p>
       </div>

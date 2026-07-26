@@ -51,9 +51,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v31.0.
- * FIXED: Removed all sticky positioning for natural scrolling.
- * ADDED: Attempt counter visibility in all sub-views.
+ * @fileOverview Institutional Result Hub v32.0.
+ * FIXED: Re-stabilized attempt resolution to prevent blank pages.
+ * UPDATED: Integrated attempt number tracking in header.
  */
 
 export default function ResultClient() {
@@ -117,18 +117,27 @@ export default function ResultClient() {
 
        if (!user) {
           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
-          if (guestRes) { setGuestResult(JSON.parse(guestRes)); setIsSearching(false); }
-          else { setErrorNotFound(true); setIsSearching(false); }
+          if (guestRes) { 
+             setGuestResult(JSON.parse(guestRes)); 
+             setIsSearching(false); 
+          } else { 
+             setErrorNotFound(true); 
+             setIsSearching(false); 
+          }
           return;
        }
 
-       const targetId = attemptIdFromUrl ? `${user.uid}_${mockId}_${attemptIdFromUrl}` : `${user.uid}_${mockId}`;
-       
        try {
+          const targetId = attemptIdFromUrl ? `${user.uid}_${mockId}_${attemptIdFromUrl}` : `${user.uid}_${mockId}`;
           const docRef = doc(db, "results", targetId);
           const snap = await getDoc(docRef);
           
-          const resQuery = query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId), orderBy("timestamp", "asc"));
+          const resQuery = query(
+             collection(db, "results"), 
+             where("userId", "==", user.uid), 
+             where("mockId", "==", mockId), 
+             orderBy("timestamp", "asc")
+          );
           const querySnap = await getDocs(resQuery);
           const resultsList = querySnap.docs.map(d => ({ ...d.data(), id: d.id }));
           
@@ -149,7 +158,11 @@ export default function ResultClient() {
              return;
           }
           setErrorNotFound(true);
-       } catch (e) { setErrorNotFound(true); } finally { setIsSearching(false); }
+       } catch (e) { 
+          setErrorNotFound(true); 
+       } finally { 
+          setIsSearching(false); 
+       }
     }
     resolveId();
   }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
@@ -287,14 +300,36 @@ export default function ResultClient() {
 
   const handleRetake = () => mockId && router.push(`/mocks/attempt?id=${mockId}&retake=true`);
 
-  if (userLoading || !mounted) return null;
+  if (isSearching) return (
+     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
+        <Zap className="h-12 w-12 text-primary animate-pulse" />
+        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Syncing result hub...</p>
+     </div>
+  );
+
+  if (errorNotFound) return (
+     <div className="h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center">
+        <Card className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-14 shadow-5xl border border-slate-100 space-y-10">
+           <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
+              <AlertCircle className="h-10 w-10" />
+           </div>
+           <div className="space-y-3">
+              <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Result not found</h2>
+              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This attempt record has been archived or is unavailable.</p>
+           </div>
+           <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold text-sm shadow-3xl border-none">
+              <Link href="/dashboard"><ChevronRight className="h-4 w-4 mr-2" /> Back to Dashboard</Link>
+           </Button>
+        </Card>
+     </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body">
       <Navbar />
       <main className="container mx-auto max-w-7xl px-0 md:px-8 py-6 md:py-12 space-y-4 md:space-y-10 pb-32">
         
-        {!isSearching && !errorNotFound && activeSession && finalMetrics && (
+        {activeSession && finalMetrics && (
            <div className="space-y-4 md:space-y-8 animate-in fade-in duration-500">
               <div className="flex flex-col md:flex-row justify-between items-center gap-6 px-4 md:px-0">
                  <div className="flex items-center gap-6 text-left w-full md:w-auto">
@@ -305,14 +340,14 @@ export default function ResultClient() {
                        </h1>
                        <div className="flex items-center gap-3">
                           <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">Verified Attempt</Badge>
-                          <span className="text-[10px] md:text-[11px] font-bold text-primary">Attempt #{activeSession.attemptNumber || 1}</span>
+                          <span className="text-[10px] md:text-[11px] font-bold text-primary">Attempt #{activeSession.attemptNumber || userAttemptCount || 1}</span>
                        </div>
                     </div>
                  </div>
                  
                  <div className="flex gap-4 w-full md:w-auto">
                     <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 px-8 rounded-2xl border-2 font-bold text-[11px] bg-white transition-all active:scale-95">Retake</Button>
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-10 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-bold text-[11px] transition-all active:scale-95">
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-10 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-bold text-[11px] transition-all active:scale-95 border-none">
                        {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Download PDF
                     </Button>
                  </div>
@@ -352,7 +387,7 @@ export default function ResultClient() {
                          subjects={activeSession.subjectAnalysis}
                          duration={mockData?.duration}
                          boardId={activeSession?.boardId}
-                         attemptNumber={activeSession.attemptNumber || 1}
+                         attemptNumber={activeSession.attemptNumber || userAttemptCount || 1}
                       />
                   </TabsContent>
 
@@ -418,7 +453,7 @@ export default function ResultClient() {
                             grade={finalMetrics.grade}
                             subjects={activeSession.subjectAnalysis}
                             duration={mockData?.duration}
-                            attemptNumber={activeSession.attemptNumber || 1}
+                            attemptNumber={activeSession.attemptNumber || userAttemptCount || 1}
                          />
                       </div>
                   </TabsContent>
@@ -449,7 +484,7 @@ export default function ResultClient() {
                  grade={finalMetrics.grade}
                  subjects={activeSession.subjectAnalysis}
                  duration={mockData?.duration}
-                 attemptNumber={activeSession.attemptNumber || 1}
+                 attemptNumber={activeSession.attemptNumber || userAttemptCount || 1}
               />
             )}
           </div>

@@ -28,9 +28,10 @@ interface ReportPDFProps {
 }
 
 /**
- * @fileOverview Institutional Portrait PDF Layout Hub v18.0.
- * FIXED: Explicit vertical spacing between Rank and Total Candidates to resolve overlap.
+ * @fileOverview Institutional Portrait PDF Layout Hub v18.1.
+ * FIXED: Explicit vertical spacing between Rank and Total Candidates.
  * UPDATED: Domain strictly synchronized to cracklix.in.
+ * TYPOGRAPHY: Strict Title Case across all nodes.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
@@ -100,12 +101,13 @@ export default function ReportPDF(props: ReportPDFProps) {
             
             <div className="flex flex-col items-center justify-center relative z-10 w-full py-4 gap-4">
                <span className="text-8xl font-black tabular-nums tracking-tighter leading-tight h-[110px]">#{rank}</span>
-               <span className="text-[14px] font-bold text-slate-400 tabular-nums mt-2">/ {totalCandidates.toLocaleString()} Candidates</span>
+               <div className="h-10" /> {/* Explicit spacer to prevent overlap */}
+               <span className="text-[14px] font-bold text-slate-400 tabular-nums">/ {totalCandidates.toLocaleString()} Candidates</span>
             </div>
 
             <div className="pt-4 relative z-10">
               <Badge className="bg-emerald-500 text-white border-none font-black text-[10px] px-8 py-2.5 rounded-full shadow-2xl uppercase tracking-widest">
-                 Verified Standing
+                 Verified Result Standing
               </Badge>
             </div>
          </div>

@@ -37,7 +37,7 @@ import { Button } from "@/components/ui/button";
 import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Cracklix Navigation Hub v128.0.
+ * @fileOverview Cracklix Navigation Hub v129.0.
  * UPDATED: Changed from 'sticky' to 'relative' to allow header to scroll away naturally.
  */
 export default function Navbar() {
