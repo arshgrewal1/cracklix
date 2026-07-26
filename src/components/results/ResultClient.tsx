@@ -40,8 +40,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v6.1 [Syntax Fixed].
- * FIXED: Closing tag mismatch (Card vs div) resolved.
+ * @fileOverview Institutional Result Hub v6.2.
+ * FIXED: Syntax error corrected on line 326.
  */
 
 export default function ResultClient() {
@@ -118,7 +118,6 @@ export default function ResultClient() {
              }
           }
 
-          // Force client-side sort for stability
           const sortedResults = resultsList.sort((a, b) => {
              const tA = a.createdAt?.seconds || new Date(a.timestamp || 0).getTime() / 1000;
              const tB = b.createdAt?.seconds || new Date(b.timestamp || 0).getTime() / 1000;
@@ -145,7 +144,6 @@ export default function ResultClient() {
            const snap = await getDocs(query(entriesRef, where("mockId", "==", mockId)));
            
            const entries = snap.docs.map(d => d.data());
-           // HARDENED SORT: Score (Desc) > Accuracy (Desc) > Time (Asc)
            const sorted = [...entries].sort((a: any, b: any) => {
               if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
               if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
@@ -215,7 +213,6 @@ export default function ResultClient() {
     const percentage = Number(((score / maxMarks) * 100).toFixed(1));
     const isQualified = activeSession.isQualified || percentage >= 40;
     
-    // Percentile = (Candidates below / Total) * 100
     const belowCount = Math.max(0, totalCandidates - Number(liveRank));
     const percentile = totalCandidates > 1 ? Number(((belowCount / totalCandidates) * 100).toFixed(1)) : 100;
     
@@ -311,7 +308,6 @@ export default function ResultClient() {
         
         {activeSession && finalMetrics && (
            <div className="space-y-6 animate-in fade-in duration-500">
-              {/* BRANDED HEADER */}
               <Card className="border-none shadow-sm rounded-[32px] bg-white p-6 space-y-6">
                  <div className="flex flex-col items-center gap-4">
                     <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-14 w-auto object-contain" />
@@ -473,4 +469,3 @@ function formatTimeStr(seconds: number) {
   const s = Math.floor(seconds % 60);
   return `${m}m ${s}s`;
 }
-

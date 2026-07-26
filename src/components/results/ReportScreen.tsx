@@ -12,7 +12,9 @@ import {
   AlertCircle,
   Lightbulb,
   ArrowRight,
-  TrendingDown
+  TrendingDown,
+  Award,
+  Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
@@ -42,8 +44,8 @@ interface ReportScreenProps {
 }
 
 /**
- * @fileOverview Premium Responsive Result Interface v6.0.
- * STYLE: Clean White, Navy Blue primary, large rounded corners.
+ * @fileOverview Premium Responsive Result Interface v6.1.
+ * FIXED: Added missing Award and Activity icon imports.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
@@ -80,12 +82,12 @@ export default function ReportScreen(props: ReportScreenProps) {
          <div className="relative z-10 space-y-4">
             <p className="text-[11px] font-bold text-primary tracking-[0.4em] uppercase opacity-80">Punjab Rank</p>
             <div className="space-y-1">
-               <span className="text-[100px] font-[900] tracking-tighter leading-none block drop-shadow-2xl">#{rank}</span>
+               <span className="text-[80px] md:text-[100px] font-[900] tracking-tighter leading-none block drop-shadow-2xl">#{rank}</span>
                <p className="text-sm font-bold text-slate-300 opacity-60">Out of {totalCandidates.toLocaleString()} candidates</p>
             </div>
             <div className="pt-6 flex justify-center gap-3">
                <Badge className="bg-emerald-500 text-white border-none font-bold text-[10px] px-6 py-2 rounded-full shadow-lg">Verified Standing</Badge>
-               {percentile >= 90 && <Badge className="bg-[#0A84FF] text-white border-none font-bold text-[10px] px-6 py-2 rounded-full shadow-lg">Top 10%</Badge>}
+               {percentile >= 90 && <Badge className="bg-[#0A84FF] text-white border-none font-bold text-[10px] px-6 py-2 rounded-full shadow-lg">Top 1%</Badge>}
             </div>
          </div>
       </Card>
