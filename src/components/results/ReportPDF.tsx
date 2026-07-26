@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Trophy, ShieldCheck, CheckCircle2, Target, Zap, Clock, BookOpen, Award } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ReportPDFProps {
@@ -23,14 +23,14 @@ interface ReportPDFProps {
 }
 
 /**
- * Hardened PDF Report Template v6.0.
- * FIXED: Removed absolute positioning and implemented rigid vertical buffers to prevent text overlap.
+ * Hardened PDF Report Template v6.1.
+ * FIXED: Removed all absolute positioning and implemented rigid vertical buffers to prevent text overlap.
+ * FIXED: Standardized Title Case.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
     studentName, examTitle, score, rank, totalCandidates,
-    attemptAccuracy, timeTaken, correctCount, wrongCount, skippedCount,
-    totalQuestions, date, resultId, percentile, grade = "F"
+    attemptAccuracy, timeTaken, totalQuestions, date, resultId, percentile, grade = "F"
   } = props;
 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent('https://cracklix.in/results/view?id=' + resultId)}`;

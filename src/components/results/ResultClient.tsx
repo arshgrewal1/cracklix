@@ -26,7 +26,10 @@ import {
   Users,
   CheckCircle2,
   XCircle,
-  Bookmark
+  Bookmark,
+  Award,
+  Activity,
+  TrendingDown
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -42,8 +45,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v10.0 [Premium Redesign].
- * FIXED: Imported missing 'Users' icon and resolved Card/Div tag mismatch.
+ * @fileOverview Universal Result Hub Viewer v10.1 [Production Hardened].
+ * FIXED: TabsTrigger now correctly used within TabsList to resolve RovingFocusGroup error.
  */
 
 export default function ResultClient() {
@@ -63,7 +66,6 @@ export default function ResultClient() {
   
   const [sessionData, setSessionData] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(true);
-  const [errorNotFound, setErrorNotFound] = useState(false);
   
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
@@ -81,8 +83,6 @@ export default function ResultClient() {
     
     async function resolveAttempt() {
        setIsSearching(true);
-       setErrorNotFound(false);
-
        try {
           const resultsRef = collection(db, "results");
           let q = query(resultsRef, where("mockId", "==", mockId));
@@ -90,7 +90,6 @@ export default function ResultClient() {
           
           const querySnap = await getDocs(q);
           if (querySnap.empty) {
-             setErrorNotFound(true);
              setIsSearching(false);
              return;
           }
@@ -104,9 +103,7 @@ export default function ResultClient() {
 
           setSessionData(attemptIdFromUrl ? resultsList.find(r => r.attemptId === attemptIdFromUrl) || sortedResults[0] : sortedResults[0]);
           setIsSearching(false);
-
        } catch (e) { 
-          setErrorNotFound(true); 
           setIsSearching(false);
        }
     }
@@ -139,7 +136,6 @@ export default function ResultClient() {
            setTopScore(sorted[0]?.highestScore || 0);
            setAvgScore(totalCount > 0 ? totalS / totalCount : 0);
            setAvgAccuracy(totalCount > 0 ? totalAcc / totalCount : 0);
-
         } catch (e) {}
      }
      fetchRankingMetrics();
@@ -246,19 +242,21 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 lg:flex-none h-12 px-6 bg-white border border-slate-200 text-[#071B4D] hover:bg-slate-50 font-bold rounded-xl gap-3 text-xs">
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 lg:flex-none h-12 px-6 bg-white border border-slate-200 text-[#071B4D] hover:bg-slate-50 font-bold rounded-xl gap-3 text-xs shadow-sm">
                        {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download PDF
                     </Button>
-                    <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs">
+                    <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
                        <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
                     </Button>
                  </div>
               </Card>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-12">
-                  <div className="bg-white p-1 rounded-3xl border border-[#E5EAF2] shadow-sm flex w-fit gap-1 mx-auto lg:mx-0">
-                     <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-10 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Analysis hub</TabsTrigger>
-                     <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-10 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review portal</TabsTrigger>
+                  <div className="flex justify-center">
+                     <TabsList className="bg-white p-1 rounded-3xl border border-[#E5EAF2] shadow-sm flex w-fit gap-1 mx-auto lg:mx-0 h-auto">
+                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-10 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Analysis hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-10 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review portal</TabsTrigger>
+                     </TabsList>
                   </div>
 
                   <TabsContent value="OVERVIEW" className="m-0 max-w-4xl mx-auto">
@@ -307,7 +305,6 @@ export default function ResultClient() {
            </div>
         )}
 
-        {/* PORTRAIT REPORT BUFFER (FIXED WIDTH 794px) */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0" aria-hidden="true">
           <div id="pdf-export-buffer" style={{ width: '794px' }}>
             {sessionData && (

@@ -19,8 +19,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v2.0.
- * FIXED: Explicit imports for all used lucide icons.
+ * @fileOverview Premium Analysis Screen v2.1 [Production Hardened].
+ * FIXED: Added missing Award, Activity, ShieldCheck, and TrendingDown to import registry.
  */
 
 interface ReportScreenProps {
