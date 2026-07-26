@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -11,8 +10,6 @@ import { doc, updateDoc, increment, collection, query, where, limit } from "fire
 import { 
   ArrowLeft, 
   ArrowRight,
-  Share2, 
-  Bookmark, 
   Calendar, 
   Clock, 
   MapPin, 
@@ -30,20 +27,18 @@ import {
   Briefcase,
   GraduationCap
 } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { cn } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
 import { Vacancy } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Professional Vacancy Detail Hub v4.0.
- * FIXED: Bullet alignment to match high-fidelity "line start" logic.
- * TYPOGRAPHY: Strict Title Case and Sentence Case enforcement.
+ * @fileOverview Professional Vacancy Detail Hub v4.1.
+ * UPDATED: Removed Share and Bookmark icons as requested.
  */
 
 export default function VacancyDetailPage() {
@@ -51,8 +46,7 @@ export default function VacancyDetailPage() {
   const id = params?.id as string
   const db = useFirestore()
   const router = useRouter()
-  const { toast } = useToast()
-  const { user, profile } = useUser()
+  const { user } = useUser()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -70,23 +64,6 @@ export default function VacancyDetailPage() {
   }, [db, vacancy])
 
   const { data: relatedVacancies } = useCollection<Vacancy>(relatedQuery as any)
-
-  const isSaved = profile?.savedVacancies?.includes(id || "")
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: vacancy?.title,
-          text: `Latest recruitment for ${vacancy?.department} active on Cracklix.`,
-          url: window.location.href,
-        })
-      } catch (e) {}
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      toast({ title: "Link copied" })
-    }
-  }
 
   if (loading || !mounted) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>
 
@@ -107,12 +84,8 @@ export default function VacancyDetailPage() {
       
       <main className="container mx-auto px-4 md:px-8 py-6 md:py-16 max-w-[1440px] space-y-12">
          
-         <div className="flex items-center justify-between">
+         <div className="flex items-center justify-start">
             <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90"><ArrowLeft className="h-5 w-5 md:h-6 md:w-6" /></button>
-            <div className="flex items-center gap-3">
-               <button onClick={handleShare} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-95"><Share2 className="h-5 w-5" /></button>
-               <button className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all shadow-sm active:scale-95", isSaved ? "bg-primary border-primary text-white shadow-xl" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}><Bookmark className={cn("h-5 w-5", isSaved && "fill-current")} /></button>
-            </div>
          </div>
 
          <section className="bg-white rounded-[3rem] md:rounded-[4rem] shadow-5xl border border-slate-100 overflow-hidden relative group">
@@ -182,7 +155,7 @@ export default function VacancyDetailPage() {
             </div>
 
             <div className="lg:col-span-4 space-y-12">
-               <Card className="border-none shadow-5xl rounded-[2.5rem] md:rounded-[3.5rem] bg-[#0F172A] text-white p-8 md:p-12 space-y-12 relative overflow-hidden group">
+               <div className="border-none shadow-5xl rounded-[2.5rem] md:rounded-[3.5rem] bg-[#0F172A] text-white p-8 md:p-12 space-y-12 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Calendar className="h-64 w-64 text-primary" /></div>
                   <div className="relative z-10 space-y-12 text-left">
                      <div className="space-y-2">
@@ -202,7 +175,7 @@ export default function VacancyDetailPage() {
                         </Button>
                      </div>
                   </div>
-               </Card>
+               </div>
 
                <div className="p-8 md:p-12 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl space-y-8 text-left group hover:translate-y-[-4px] transition-all duration-500">
                   <div className="flex items-center gap-4">
@@ -228,14 +201,14 @@ export default function VacancyDetailPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10">
                   {relatedVacancies.filter(v => v.id !== id).map((v) => (
                      <Link key={v.id} href={`/vacancies/${v.id}`}>
-                        <Card className="border border-slate-100 shadow-lg hover:shadow-4xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-10 text-center space-y-6 group h-full flex flex-col">
+                        <div className="border border-slate-100 shadow-lg hover:shadow-4xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-10 text-center space-y-6 group h-full flex flex-col">
                            <div className="h-16 w-16 md:h-24 md:w-24 mx-auto group-hover:scale-110 transition-transform duration-500"><AuthorityLogo boardId={v.board} size="md" /></div>
                            <div className="flex-1 space-y-3">
                               <h4 className="text-sm md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">{v.title}</h4>
                               <p className="text-[10px] font-bold text-slate-400">{v.department}</p>
                            </div>
                            <Badge variant="secondary" className="bg-slate-50 text-slate-400 font-bold mx-auto">{v.totalPosts} Posts</Badge>
-                        </Card>
+                        </div>
                      </Link>
                   ))}
                </div>
