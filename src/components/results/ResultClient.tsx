@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -60,9 +59,8 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v13.0 [Hardened Debug].
- * FIXED: Atomic Rank Engine ensures Rank #1 is correctly displayed.
- * FIXED: Retake Button performs definitive Registry Purge.
+ * @fileOverview Premium Result Analysis Hub v14.0 [One-Click Retake Hardened].
+ * FIXED: handleRetake is now functional for all users with immediate registry purge.
  */
 
 export default function ResultClient() {
@@ -103,11 +101,12 @@ export default function ResultClient() {
        }
        if (user && targetId) setResolvedResultId(`${user.uid}_${mockId}_${targetId}`);
        else if (user) setResolvedResultId(`${user.uid}_${mockId}`);
+       else setResolvedResultId(`guest_${mockId}`);
     }
     resolveId();
   }, [user, userLoading, db, mockId, attemptIdFromUrl]);
 
-  const resultRef = useMemo(() => (db && resolvedResultId ? doc(db, "results", resolvedResultId) : null), [db, resolvedResultId]);
+  const resultRef = useMemo(() => (db && user && resolvedResultId ? doc(db, "results", resolvedResultId) : null), [db, user, resolvedResultId]);
   const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
@@ -184,20 +183,26 @@ export default function ResultClient() {
   }, [db, mockId]);
 
   const handleRetake = async () => {
-    if (!db || isSyncing || !mockId || !user) return;
+    if (!db || isSyncing || !mockId) return;
     setIsSyncing(true);
     try {
-      console.log(`[REGISTRY] Purging Attempt Node: ${user.uid}_${mockId}`);
-      await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
+      if (user) {
+        console.log(`[REGISTRY] Purging Attempt Node: ${user.uid}_${mockId}`);
+        await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
+      }
+      
       resetStore();
+      
       if (typeof window !== 'undefined') {
         localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
         localStorage.removeItem(`cracklix_guest_result_${mockId}`);
       }
+
       toast({ title: "Starting New Attempt" });
       router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
     } catch (e) { 
-      toast({ variant: "destructive", title: "Retake initialization failed." }); 
+      console.error("[RETAKE_FAILURE]:", e);
+      toast({ variant: "destructive", title: "Retake failed. Please refresh." }); 
       setIsSyncing(false);
     }
   };
@@ -208,7 +213,7 @@ export default function ResultClient() {
     try {
       setActiveMainTab("REPORT"); 
       toast({ title: "Generating Report", description: "This will take a few seconds..." });
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 1200));
       const element = document.getElementById('cracklix-result-card');
       if (!element) throw new Error("Capture node not found.");
       const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2, backgroundColor: '#ffffff' });
@@ -392,7 +397,7 @@ export default function ResultClient() {
                        const isAttempted = rawAns !== null && rawAns !== undefined && String(rawAns) !== "";
                        const userSelectedLabel = isAttempted ? ['A', 'B', 'C', 'D'][Number(rawAns)] : null;
                        return (
-                          <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white text-left group">
+                          <Card key={q.id} className="border border-slate-100 shadow-xl rounded-1.5rem md:rounded-[2rem] overflow-hidden bg-white text-left group">
                              <div className="p-6 md:p-10 space-y-6">
                                 <Badge variant="outline" className="px-3 py-0.5 rounded-full border-slate-100 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
                                    Question {q.originalIndex + 1}

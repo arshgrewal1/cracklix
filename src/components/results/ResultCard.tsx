@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -44,8 +43,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v22.0 [Hardened Alignment].
- * FIXED: Footnote Registry ID uses break-all to prevent overlap.
+ * @fileOverview Official Institutional Report Card v23.0 [Alignment Hardened].
+ * FIXED: Footer alignment strictly left-anchored for institutional symmetry.
  */
 export default function ResultCard({
   studentName,
