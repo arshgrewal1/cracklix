@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useUser, useAuth, useFirestore } from "@/firebase";
-import { doc, getDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc, runTransaction, increment } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import ExamHeader from "@/components/exam/ExamHeader";
 import TacticalFooter from "@/components/exam/TacticalFooter";
@@ -30,8 +30,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v8.6 [Leaderboard Fixed].
- * FIXED: Ensured results are written with numerical score and accurate metadata for the Merit Registry.
+ * @fileOverview Official Mock Attempt Hub v9.0 [Leaderboard Registry Hardened].
+ * FIXED: Implemented Peak Score Transactional logic for global leaderboard.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -184,7 +184,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          });
       }
 
-      // Enrichment Logic: Associate questions with their parent section names
       const sectionsConfig = mData.sections || [{ name: 'General', count: questionIds.length }];
       const enrichedQuestions: any[] = [];
       let qPointer = 0;
@@ -199,7 +198,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           if (qNode) {
             enrichedQuestions.push({
               ...qNode,
-              sectionId: sec.name // Injecting correct subject name
+              sectionId: sec.name
             });
           }
         });
@@ -260,7 +259,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     });
 
     const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
-    
+    const finalScore = Number(parseFloat(rawScore.toFixed(2)));
     const timeTaken = Math.max(1, elapsedSeconds);
     
     await stopSession({
@@ -272,7 +271,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const resultPayload: any = {
       mockId, 
       mockTitle: mockData.title || mockTitle, 
-      score: Number(parseFloat(rawScore.toFixed(2))),
+      score: finalScore,
       correctCount, 
       wrongCount, 
       attemptedCount, 
@@ -295,6 +294,39 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         await setDoc(doc(db, "results", `${user.uid}_${mockId}`), resultPayload, { merge: true });
         await setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true });
         
+        // --- LEADERBOARD REGISTRY SYNC (PEAK PERFORMANCE ONLY) ---
+        const leaderboardRef = doc(db, "leaderboard", user.uid);
+        await runTransaction(db, async (transaction) => {
+          const lbSnap = await transaction.get(leaderboardRef);
+          
+          if (!lbSnap.exists()) {
+            transaction.set(leaderboardRef, {
+              uid: user.uid,
+              displayName: profile?.name || 'Aspirant',
+              photoURL: profile?.photoURL || "",
+              highestScore: finalScore,
+              totalTests: 1,
+              updatedAt: serverTimestamp(),
+              gender: profile?.gender || 'Other',
+              recentMockTitle: mockData.title
+            });
+          } else {
+            const data = lbSnap.data();
+            const currentHighest = Number(data.highestScore) || 0;
+            const updates: any = {
+              totalTests: increment(1),
+              updatedAt: serverTimestamp()
+            };
+            if (finalScore > currentHighest) {
+              updates.highestScore = finalScore;
+              updates.recentMockTitle = mockData.title;
+              updates.displayName = profile?.name || data.displayName;
+              updates.photoURL = profile?.photoURL || data.photoURL;
+            }
+            transaction.update(leaderboardRef, updates);
+          }
+        });
+
         router.replace(`/results/view?id=${mockId}`);
       } else {
         localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify(resultPayload));
@@ -448,3 +480,4 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     </div>
   );
 }
+

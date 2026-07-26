@@ -19,9 +19,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Punjab Merit Registry v2.0 [Logic Hardened].
- * FIXED: Implemented server-side orderBy to ensure real-time ranking accuracy.
- * FIXED: Unique User grouping logic to keep only the highest score across all mocks.
+ * @fileOverview Official Punjab Merit Registry v3.0 [Database Hardened].
+ * FIXED: Consumers peak performance data from dedicated 'leaderboard' collection.
+ * REAL-TIME: Automated updates on peak score achievement.
  */
 
 const CATEGORY_CHIPS = [
@@ -48,68 +48,30 @@ export default function LeaderboardPage() {
     setMounted(true)
   }, []);
 
-  // Server-side sorted query is CRITICAL for leaderboard integrity
-  const meritQuery = useMemo(() => (db && mounted ? query(
-    collection(db, "results"), 
-    orderBy("score", "desc"), // High scores first
-    limit(1000) // Fetch large enough sample to group unique users
+  // Registry Node: Dedicated Leaderboard Collection (Peak performance only)
+  const lbQuery = useMemo(() => (db && mounted ? query(
+    collection(db, "leaderboard"), 
+    orderBy("highestScore", "desc"),
+    orderBy("updatedAt", "asc"),
+    limit(100)
   ) : null), [db, mounted])
 
-  const usersQuery = useMemo(() => (db && mounted ? query(collection(db, "users"), limit(500)) : null), [db, mounted])
+  const { data: meritList, loading } = useCollection<any>(lbQuery)
 
-  const { data: results, loading: resultsLoading } = useCollection<any>(meritQuery)
-  const { data: users, loading: usersLoading } = useCollection<any>(usersQuery)
-
-  const finalSortedList = useMemo(() => {
-    if (!results || !mounted) return []
+  const filteredList = useMemo(() => {
+    if (!meritList) return []
     const term = searchTerm.toLowerCase().trim();
     
-    // Logic: Group by UserID and keep only the HIGHEST score achieved across any mock
-    const uniqueRankers = new Map<string, any>();
-    
-    [...results].forEach((r: any) => {
-      const existing = uniqueRankers.get(r.userId);
-      
-      // If user not in map OR this score is higher than their previously recorded one
-      if (!existing || Number(r.score) > Number(existing.score)) {
-        const userProfile = users?.find((u: any) => u.id === r.userId);
-        
-        const rawName = userProfile?.name || 
-                     (r.userName && r.userName !== 'Aspirant' && r.userName !== 'Student' && !r.userName.includes('@') ? r.userName : null) || 
-                     userProfile?.email || 
-                     r.userEmail || 
-                     "Aspirant";
-        
-        const name = rawName.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-
-        const matchesSearch = !term || 
-          name.toLowerCase().includes(term) || 
-          (r.mockTitle || "").toLowerCase().includes(term);
-
-        const matchesBoard = activeBoard === 'all' || 
-          (r.mockTitle || "").toLowerCase().includes(activeBoard.toLowerCase());
-
-        if (matchesSearch && matchesBoard) {
-          uniqueRankers.set(r.userId, {
-            id: r.userId,
-            name,
-            profile: userProfile,
-            score: Number(r.score) || 0,
-            accuracy: r.accuracy || 0,
-            mockTitle: r.mockTitle || "Practice Mock",
-            timestamp: r.timestamp,
-            gender: r.gender || userProfile?.gender
-          });
-        }
-      }
+    return meritList.filter((r: any) => {
+        const name = (r.displayName || "Aspirant").toLowerCase();
+        const matchesSearch = !term || name.includes(term) || (r.recentMockTitle || "").toLowerCase().includes(term);
+        const matchesBoard = activeBoard === 'all' || (r.recentMockTitle || "").toLowerCase().includes(activeBoard.toLowerCase());
+        return matchesSearch && matchesBoard;
     });
+  }, [meritList, searchTerm, activeBoard]);
 
-    // Re-sort the unique map results to ensure rank integrity
-    return Array.from(uniqueRankers.values()).sort((a, b) => b.score - a.score);
-  }, [results, users, searchTerm, activeBoard, mounted]);
-
-  const podium = useMemo(() => finalSortedList.slice(0, 3), [finalSortedList]);
-  const listItems = useMemo(() => finalSortedList.slice(3), [finalSortedList]);
+  const podium = useMemo(() => filteredList.slice(0, 3), [filteredList]);
+  const listItems = useMemo(() => filteredList.slice(3), [filteredList]);
 
   if (!mounted) return null;
 
@@ -123,11 +85,11 @@ export default function LeaderboardPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                <div className="space-y-1">
                   <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Top Rankers</h1>
-                  <p className="text-slate-500 font-medium text-sm md:text-lg">Highest performing students across all Punjab Government exams.</p>
+                  <p className="text-slate-500 font-medium text-sm md:text-lg">Peak performance registry of aspirants across Punjab.</p>
                </div>
                <div className="flex items-center gap-3 shrink-0">
                   <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] font-bold text-slate-400 tracking-tight">Registry Sync Live</span>
+                  <span className="text-[10px] font-bold text-slate-400 tracking-tight">Real-time Merit Registry</span>
                </div>
             </div>
          </section>
@@ -139,7 +101,7 @@ export default function LeaderboardPage() {
                   <Input 
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    placeholder="Search student or exam vertical..." 
+                    placeholder="Search student name..." 
                     className="h-14 md:h-16 pl-14 pr-12 rounded-2xl bg-white border-slate-200 shadow-xl text-base md:text-lg font-bold placeholder:text-slate-200 focus-visible:ring-4 focus-visible:ring-primary/5 transition-all"
                   />
                   {searchTerm && (
@@ -168,27 +130,24 @@ export default function LeaderboardPage() {
             </div>
          </div>
 
-         {!searchTerm && finalSortedList.length > 0 && (
+         {!searchTerm && filteredList.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 pt-8">
-               {/* 1st Place */}
                <PodiumCard rank={1} data={podium[0]} order="order-1 md:order-2" isMain />
-               {/* 2nd Place */}
                <PodiumCard rank={2} data={podium[1]} order="order-2 md:order-1" />
-               {/* 3rd Place */}
                <PodiumCard rank={3} data={podium[2]} order="order-3 md:order-3" />
             </div>
          )}
 
          <div className="max-w-4xl mx-auto space-y-3">
             <AnimatePresence mode="popLayout">
-               {resultsLoading || usersLoading ? (
+               {loading ? (
                   Array.from({ length: 8 }).map((_, i) => (
                      <div key={i} className="h-20 w-full bg-white rounded-2xl border border-slate-50 animate-pulse" />
                   ))
-               ) : finalSortedList.length > 0 ? (
-                  (searchTerm ? finalSortedList : listItems).map((entry, idx) => (
+               ) : filteredList.length > 0 ? (
+                  (searchTerm ? filteredList : listItems).map((entry, idx) => (
                      <motion.div 
-                        key={entry.id}
+                        key={entry.uid}
                         layout
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -205,19 +164,19 @@ export default function LeaderboardPage() {
 
                               <div className="flex-1 flex items-center gap-4 min-w-0 pr-4">
                                  <StudentAvatar 
-                                    profile={entry.profile || entry} 
+                                    profile={{ name: entry.displayName, photoURL: entry.photoURL, gender: entry.gender }} 
                                     className="h-10 w-10 md:h-12 md:w-12 rounded-xl shrink-0 shadow-inner bg-slate-50" 
                                  />
                                  <div className="min-w-0 flex-1 text-left">
                                     <h4 className="font-bold text-sm md:text-lg text-[#0F172A] truncate leading-tight group-hover:text-primary transition-colors">
-                                       {entry.name}
+                                       {entry.displayName}
                                     </h4>
                                     <div className="flex items-center gap-2 mt-0.5">
                                        <Badge variant="outline" className="text-[7px] md:text-[8px] font-bold border-slate-100 text-slate-400 uppercase tracking-widest px-1.5 h-4">
-                                          {entry.mockTitle?.split(' ')[0] || 'State'} Hub
+                                          Peak Performance
                                        </Badge>
                                        <span className="text-[9px] md:text-[10px] font-bold text-slate-300 uppercase truncate max-w-[120px]">
-                                          {entry.mockTitle}
+                                          {entry.recentMockTitle || "Practice Hub"}
                                        </span>
                                     </div>
                                  </div>
@@ -225,15 +184,15 @@ export default function LeaderboardPage() {
 
                               <div className="flex items-center gap-4 md:gap-10 px-4 md:px-8 shrink-0">
                                  <div className="text-right hidden sm:block">
-                                    <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Accuracy</p>
-                                    <p className={cn("text-xs md:text-sm font-black tabular-nums", entry.accuracy > 70 ? "text-emerald-500" : "text-amber-500")}>
-                                       {entry.accuracy}%
+                                    <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Tests</p>
+                                    <p className="text-xs md:sm font-black tabular-nums text-slate-600">
+                                       {entry.totalTests}
                                     </p>
                                  </div>
                                  <div className="text-right">
-                                    <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Total score</p>
+                                    <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">High Score</p>
                                     <p className="text-base md:text-2xl font-black text-[#0F172A] tabular-nums tracking-tighter">
-                                       {entry.score.toFixed(1)}
+                                       {(entry.highestScore || 0).toFixed(1)}
                                     </p>
                                  </div>
                                  <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
@@ -252,8 +211,8 @@ export default function LeaderboardPage() {
                         <Trophy className="h-10 w-10" />
                      </div>
                      <div className="space-y-1">
-                        <h2 className="text-xl font-bold text-[#0F172A]">No rankings available yet</h2>
-                        <p className="text-slate-400 font-medium text-sm">Complete mock tests to appear on the merit list.</p>
+                        <h2 className="text-xl font-bold text-[#0F172A]">No rankings available</h2>
+                        <p className="text-slate-400 font-medium text-sm">Be the first topper by completing a mock test.</p>
                      </div>
                      <Button asChild className="rounded-full bg-primary hover:bg-blue-700 px-8 shadow-xl border-none font-bold text-xs uppercase tracking-widest h-12">
                         <Link href="/mocks">Explore Practice Hub</Link>
@@ -300,7 +259,7 @@ function PodiumCard({ rank, data, order, isMain }: any) {
             <div className="space-y-6 relative z-10">
                <div className="relative inline-block">
                   <StudentAvatar 
-                    profile={data.profile || data} 
+                    profile={{ name: data.displayName, photoURL: data.photoURL, gender: data.gender }} 
                     className={cn(
                       "rounded-[2rem] border-4 shadow-2xl transition-all group-hover:scale-105", 
                       isMain ? "h-24 w-24 md:h-32 md:w-32 border-primary/20" : "h-20 w-20 md:h-24 md:w-24 border-white"
@@ -314,9 +273,9 @@ function PodiumCard({ rank, data, order, isMain }: any) {
                </div>
 
                <div className="space-y-1">
-                  <h3 className="text-base md:text-xl font-black truncate max-w-[160px] md:max-w-[200px] leading-tight tracking-tight">{data.name}</h3>
+                  <h3 className="text-base md:text-xl font-black truncate max-w-[160px] md:max-w-[200px] leading-tight tracking-tight">{data.displayName}</h3>
                   <p className={cn("text-[9px] font-bold uppercase tracking-widest", isMain ? "text-primary" : "text-slate-400")}>
-                    {data.mockTitle?.split(' ')[0] || 'Top'} Hub
+                    {data.recentMockTitle?.split(' ')[0] || 'Top'} Performer
                   </p>
                </div>
 
@@ -324,15 +283,15 @@ function PodiumCard({ rank, data, order, isMain }: any) {
 
                <div className="grid grid-cols-2 gap-6">
                   <div className="text-center">
-                     <p className={cn("text-[8px] font-bold uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Score</p>
+                     <p className={cn("text-[8px] font-bold uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Peak Score</p>
                      <p className={cn("text-lg md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-white" : "text-primary")}>
-                        {data.score.toFixed(1)}
+                        {(data.highestScore || 0).toFixed(1)}
                      </p>
                   </div>
                   <div className="text-center">
-                     <p className={cn("text-[8px] font-bold uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Accuracy</p>
-                     <p className={cn("text-lg md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-emerald-400" : "text-emerald-600")}>
-                        {data.accuracy}%
+                     <p className={cn("text-[8px] font-bold uppercase tracking-widest", isMain ? "text-slate-400" : "text-slate-400")}>Total Tests</p>
+                     <p className={cn("text-lg md:text-2xl font-black tabular-nums tracking-tighter", isMain ? "text-emerald-400" : "text-[#0F172A]")}>
+                        {data.totalTests}
                      </p>
                   </div>
                </div>

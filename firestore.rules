@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -34,14 +35,19 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isAuthenticated();
-      // Only Super Admin can change roles or permissions
       allow create: if isAuthenticated() && (isSuperAdmin() || isOwner(userId));
       allow update: if isSuperAdmin() || (isOwner(userId) && 
                       !request.resource.data.diff(resource.data).affectedKeys()
                         .hasAny(['role', 'permissions', 'status']));
     }
 
-    // --- 3. CONTENT PERMISSIONS ---
+    // --- 3. LEADERBOARD REGISTRY ---
+    match /leaderboard/{userId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // --- 4. CONTENT PERMISSIONS ---
 
     match /categories/{id} { allow read: if true; allow write: if hasPermission('manageCategories'); }
     match /boards/{id} { allow read: if true; allow write: if hasPermission('manageCategories'); }
@@ -87,7 +93,17 @@ service cloud.firestore {
       allow delete: if hasPermission('deletePYQs');
     }
 
-    // --- 4. SYSTEM & FINANCIALS ---
+    // --- 5. SYSTEM & FINANCIALS ---
+
+    match /results/{id} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /attempts/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
 
     match /passes/{id} {
       allow read: if true;

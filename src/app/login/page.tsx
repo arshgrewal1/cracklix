@@ -42,8 +42,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Login Hub v1.3.
- * UPDATED: Removed uppercase transforms for a cleaner look.
+ * @fileOverview Login Hub v1.5 [Registry Hardened].
+ * FIXED: Guest Data Sync now correctly updates the peak performance leaderboard registry.
  */
 export default function LoginPage() {
   return (
@@ -100,6 +100,9 @@ function LoginContent() {
 
               const resultRef = doc(db, "results", `${uid}_${mockId}`);
               const attemptRef = doc(db, "attempts", `${uid}_${mockId}`);
+              const leaderboardRef = doc(db, "leaderboard", uid);
+
+              const score = Number(data.score) || 0;
 
               await setDoc(resultRef, {
                  ...data,
@@ -113,6 +116,31 @@ function LoginContent() {
                  status: 'COMPLETED',
                  updatedAt: serverTimestamp()
               }, { merge: true });
+
+              // Sync Peak Score to Leaderboard Registry
+              const lbSnap = await getDoc(leaderboardRef);
+              if (!lbSnap.exists()) {
+                await setDoc(leaderboardRef, {
+                  uid,
+                  displayName: userName,
+                  photoURL: "",
+                  highestScore: score,
+                  totalTests: 1,
+                  updatedAt: serverTimestamp(),
+                  recentMockTitle: data.mockTitle || "Guest Test"
+                });
+              } else {
+                const lbData = lbSnap.data();
+                const updates: any = {
+                  totalTests: increment(1),
+                  updatedAt: serverTimestamp()
+                };
+                if (score > (lbData.highestScore || 0)) {
+                  updates.highestScore = score;
+                  updates.recentMockTitle = data.mockTitle || lbData.recentMockTitle;
+                }
+                await updateDoc(leaderboardRef, updates);
+              }
 
               localStorage.removeItem(key);
            } catch (e) {
@@ -393,3 +421,4 @@ function HeroStat({ icon: Icon, label }: { icon: any, label: string }) {
     </div>
   )
 }
+
