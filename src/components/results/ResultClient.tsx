@@ -41,8 +41,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Card } from "@/components/ui/card"
 
 /**
- * @fileOverview Institutional Result System v11.0 [Rank Calculation Fixed].
- * FIXED: Implemented Self-Exclusion logic to prevent rank exceeding participants.
+ * @fileOverview Institutional Result System v12.0 [PWA Full-Width FIXED].
+ * FIXED: Reduced main container padding on mobile for 100% screen utility.
  */
 
 export default function ResultClient() {
@@ -116,53 +116,37 @@ export default function ResultClient() {
     resolveId();
   }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
 
-  // 2. Fetch Ranking Metrics - HARDENED SELF-EXCLUSION
+  // 2. Fetch Ranking Metrics
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
-           
-           // Fetch total unique participants
            const countSnap = await getCountFromServer(entriesRef);
            const dbCount = countSnap.data().count;
-           
-           // If Guest, they aren't in the DB count yet, so we represent them as +1
            const displayTotal = user ? Math.max(dbCount, 1) : dbCount + 1;
            setTotalCandidates(displayTotal);
            
-           // Count users with strictly better scores
            const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
            const superiorCountSnap = await getCountFromServer(superiorQuery);
            let superiorCount = superiorCountSnap.data().count;
 
-           // AUDIT: If logged in, check if our own previous record was counted as 'superior'
            if (user) {
               const myEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
               const myEntrySnap = await getDoc(myEntryRef);
               if (myEntrySnap.exists()) {
                  const myBest = myEntrySnap.data().highestScore;
-                 // If my previous best > current score, it was counted in 'superiorCount'
-                 // We subtract it so I am not ranked against my own ghost
-                 if (myBest > activeSession.score) {
-                    superiorCount = Math.max(0, superiorCount - 1);
-                 }
+                 if (myBest > activeSession.score) superiorCount = Math.max(0, superiorCount - 1);
               }
            }
 
            const calculatedRank = superiorCount + 1;
-           // Hard Constraint: Rank cannot exceed total candidates
-           const finalRank = Math.max(1, Math.min(calculatedRank, displayTotal));
-           setLiveRank(finalRank);
+           setLiveRank(Math.max(1, Math.min(calculatedRank, displayTotal)));
 
-           // Topper Reference
            const topperQuery = query(entriesRef, orderBy("highestScore", "desc"), limit(1));
            const topperSnap = await getDocs(topperQuery);
            if (!topperSnap.empty) setTopperScore(topperSnap.docs[0].data().highestScore);
-           
-        } catch (e) {
-           console.error("[RANK_AUDIT_FAILURE]:", e);
-        }
+        } catch (e) {}
      }
      fetchRankingMetrics();
   }, [db, mockId, activeSession, user]);
@@ -208,12 +192,10 @@ export default function ResultClient() {
     const maxMarks = Number(activeSession.maxMarks) || totalQ;
     const percentage = Number(((score / maxMarks) * 100).toFixed(1));
     const attemptAccuracy = Number(activeSession.attemptAccuracy) || 0;
-    const overallAccuracy = Number(activeSession.overallAccuracy) || 0;
-    const attemptRate = Number(activeSession.attemptRate) || 0;
     const grade = activeSession.grade || "F";
     const isQualified = activeSession.isQualified || percentage >= 40;
     const percentile = totalCandidates > 1 ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1)) : 100;
-    return { score, maxMarks, percentage, attemptAccuracy, overallAccuracy, attemptRate, grade, isQualified, percentile };
+    return { score, maxMarks, percentage, attemptAccuracy, grade, isQualified, percentile };
   }, [activeSession, totalCandidates, liveRank]);
 
   const handleDownloadPDF = async () => {
@@ -229,7 +211,7 @@ export default function ResultClient() {
       if (!container) throw new Error("Registry Handshake Failure.");
 
       const canvas = await html2canvas(container, {
-        scale: 3,
+        scale: 4,
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
@@ -242,18 +224,10 @@ export default function ResultClient() {
       const pdfWidth = 210;
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      let heightLeft = pdfHeight;
-      let position = 0;
-      const pageHeight = 297;
-
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight, undefined, 'FAST');
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight, undefined, 'FAST');
-        heightLeft -= pageHeight;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, Math.min(297, pdfHeight), undefined, 'FAST');
+      if (pdfHeight > 297) {
+         pdf.addPage();
+         pdf.addImage(imgData, 'PNG', 0, -297, pdfWidth, pdfHeight, undefined, 'FAST');
       }
 
       pdf.save(`Cracklix_Report_${activeSession.userName || 'Student'}.pdf`);
@@ -281,55 +255,45 @@ export default function ResultClient() {
     return { all, correct, wrong, skipped };
   }, [questions, activeSession]);
 
-  const filteredQuestions = useMemo(() => {
-    if (activeReviewFilter === 'CORRECT') return reviewNodes.correct;
-    if (activeReviewFilter === 'WRONG') return reviewNodes.wrong;
-    if (activeReviewFilter === 'SKIPPED') return reviewNodes.skipped;
-    return reviewNodes.all;
-  }, [activeReviewFilter, reviewNodes]);
-
   if (userLoading || !mounted) return null;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body">
       <Navbar />
-      <main className="container mx-auto max-w-[1440px] px-4 md:px-10 py-6 md:py-10 space-y-8 pb-32">
+      <main className="container mx-auto max-w-[1440px] px-1 md:px-10 py-6 md:py-10 space-y-8 pb-32">
         
         {!isSearching && !errorNotFound && activeSession && finalMetrics && (
            <>
               <div className="flex flex-col lg:flex-row justify-between items-center gap-6 px-1">
-                 <div className="flex items-center gap-4 md:gap-8 text-left w-full lg:w-auto">
-                    <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="md" className="h-12 w-12 md:h-16 md:w-16 rounded-xl shadow-lg bg-white border-2 border-slate-50" />
+                 <div className="flex items-center gap-4 text-left w-full lg:w-auto">
+                    <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-11 w-11 md:h-16 md:w-16 rounded-xl shadow-lg bg-white border-2 border-slate-50" />
                     <div className="space-y-1 flex-1 min-w-0">
-                       <div className="flex items-center gap-2">
-                          <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm", finalMetrics?.isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                             {finalMetrics?.isQualified ? "Qualified" : "Attempted"}
-                          </Badge>
-                       </div>
-                       <h1 className="text-sm md:text-2xl font-bold tracking-tight text-[#0F172A] truncate">
+                       <h1 className="text-base md:text-2xl font-bold tracking-tight text-[#0F172A] truncate">
                          {activeSession?.mockTitle}
                        </h1>
+                       <div className="flex items-center gap-2">
+                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold px-2 py-0.5 rounded-full shadow-sm">Verified Attempt</Badge>
+                       </div>
                     </div>
                  </div>
                  
-                 <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                    <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="bg-white border border-slate-100 p-1 rounded-xl shadow-sm">
-                       <TabsList className="bg-transparent border-none h-10 flex gap-1">
-                          <TabsTrigger value="OVERVIEW" className="flex-1 rounded-lg px-6 font-bold text-[10px] md:text-[11px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Overview</TabsTrigger>
-                          <TabsTrigger value="REVIEW" className="flex-1 rounded-lg px-6 font-bold text-[10px] md:text-[11px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review</TabsTrigger>
-                          <TabsTrigger value="REPORT" className="flex-1 rounded-lg px-6 font-bold text-[10px] md:text-[11px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Report</TabsTrigger>
-                       </TabsList>
-                    </Tabs>
-                    <div className="flex gap-2">
-                       <Button variant="outline" onClick={handleRetake} className="flex-1 h-12 px-6 rounded-xl border-2 font-bold text-[10px] uppercase tracking-tight"><RotateCcw className="h-3 w-3 mr-2" /> Retake</Button>
-                       <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-12 px-6 bg-primary text-white rounded-xl shadow-lg font-bold text-[10px] uppercase tracking-tight">
-                          {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} PDF
-                       </Button>
-                    </div>
+                 <div className="flex gap-3 w-full lg:w-auto">
+                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-12 px-6 rounded-xl border-2 font-bold text-[10px] uppercase tracking-tight"><RotateCcw className="h-3 w-3 mr-2" /> Retake</Button>
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-1 h-12 px-6 bg-[#0F172A] text-white rounded-xl shadow-lg font-bold text-[10px] uppercase tracking-tight">
+                       {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-2" />} Export PDF
+                    </Button>
                  </div>
               </div>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
+                  <div className="flex justify-center mb-10">
+                     <TabsList className="bg-white border border-slate-100 p-1.5 rounded-2xl shadow-xl h-14 md:h-16">
+                        <TabsTrigger value="OVERVIEW" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Overview</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
+                        <TabsTrigger value="REPORT" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Official Report</TabsTrigger>
+                     </TabsList>
+                  </div>
+
                   <TabsContent value="OVERVIEW" className="animate-in fade-in duration-500">
                       <ReportScreen 
                          {...activeSession} 
@@ -352,6 +316,7 @@ export default function ResultClient() {
                          grade={finalMetrics.grade}
                          subjects={activeSession.subjectAnalysis}
                          duration={mockData?.duration}
+                         boardId={activeSession?.boardId}
                       />
                   </TabsContent>
 
@@ -360,11 +325,10 @@ export default function ResultClient() {
                           <FilterButton active={activeReviewFilter === 'ALL'} label="All" onClick={() => setActiveReviewFilter('ALL')} />
                           <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                           <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
-                          <FilterButton active={activeReviewFilter === 'SKIPPED'} label="Skipped" onClick={() => setActiveReviewFilter('SKIPPED')} color="slate" />
                       </div>
                       <div className="space-y-6">
                           {filteredQuestions.map((q) => (
-                              <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-white text-left">
+                              <Card key={q.id} className="border border-slate-100 shadow-lg rounded-[2.5rem] overflow-hidden bg-white text-left">
                                   <div className="p-6 md:p-10 space-y-6">
                                       <Badge variant="outline" className="px-3 py-0.5 rounded-lg border-slate-200 text-slate-400 font-bold text-[8px]">
                                           Question #{q.originalIndex + 1}
@@ -401,7 +365,6 @@ export default function ResultClient() {
                                score={finalMetrics.score.toFixed(2)}
                                accuracy={finalMetrics.overallAccuracy}
                                attemptAccuracy={finalMetrics.attemptAccuracy}
-                               attemptRate={finalMetrics.attemptRate}
                                isQualified={finalMetrics.isQualified}
                                grade={finalMetrics.grade}
                                subjects={activeSession.subjectAnalysis}
@@ -414,6 +377,7 @@ export default function ResultClient() {
            </>
         )}
 
+        {/* Hidden Render Hub for PDF Capture */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
           <div id="pdf-report-container">
             {finalMetrics && activeSession && (
@@ -431,9 +395,8 @@ export default function ResultClient() {
                  date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')}
                  percentile={finalMetrics.percentile}
                  score={finalMetrics.score.toFixed(2)}
-                 accuracy={finalMetrics.overallAccuracy}
+                 accuracy={finalMetrics.attemptAccuracy}
                  attemptAccuracy={finalMetrics.attemptAccuracy}
-                 attemptRate={finalMetrics.attemptRate}
                  isQualified={finalMetrics.isQualified}
                  grade={finalMetrics.grade}
                  subjects={activeSession.subjectAnalysis}

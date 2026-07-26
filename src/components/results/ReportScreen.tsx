@@ -7,11 +7,13 @@ import {
   Target,
   Trophy,
   TrendingUp,
-  Zap
+  Zap,
+  Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { AuthorityLogo } from "@/lib/exam-icons";
 
 interface ReportScreenProps {
   studentName: string;
@@ -34,30 +36,35 @@ interface ReportScreenProps {
   grade?: string;
   isQualified?: boolean;
   duration?: number | string;
+  boardId?: string;
 }
 
 /**
- * @fileOverview Responsive Screen Layout for Browser Viewing v1.2.
+ * @fileOverview Responsive Screen Layout for Browser Viewing v2.0.
  * FIXED: Optimized for PWA mode with zero-horizontal-overflow and high-density typography.
+ * UPDATED: Logo scaled and Title Case enforced.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
     studentName, examTitle, score, rank, totalCandidates, 
     attemptAccuracy, timeTaken, correct, wrong, skipped,
     total, date, resultId, percentile, subjects = [], grade = "F",
-    isQualified, duration
+    isQualified, duration, boardId
   } = props;
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden space-y-6 md:space-y-10 animate-in fade-in duration-500 text-left px-1">
+    <div className="w-full max-w-full overflow-x-hidden space-y-6 animate-in fade-in duration-500 text-left">
       
-      {/* 1. Header Info - Optimized for PWA */}
-      <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-10 border border-slate-100 shadow-sm space-y-6">
+      {/* 1. Header Info - Optimized for PWA full-width */}
+      <div className="bg-white rounded-2xl md:rounded-[2.5rem] p-5 md:p-10 border border-slate-100 shadow-sm space-y-6">
          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-            <div className="space-y-1.5 min-w-0 flex-1">
-               <p className="text-[10px] font-bold text-primary tracking-tight">Performance Report</p>
-               <h1 className="text-xl md:text-4xl font-[900] text-[#0F172A] leading-tight truncate">{studentName}</h1>
-               <p className="text-sm md:text-xl font-bold text-slate-500 line-clamp-1">{examTitle}</p>
+            <div className="flex items-center gap-4 md:gap-6 min-w-0 flex-1">
+               <AuthorityLogo boardId={boardId || "GENERAL"} size="md" className="h-14 w-14 md:h-20 md:w-20 rounded-xl" />
+               <div className="space-y-1 min-w-0 flex-1">
+                  <p className="text-[10px] font-bold text-primary tracking-tight uppercase">Performance Report</p>
+                  <h1 className="text-xl md:text-3xl font-[900] text-[#0F172A] leading-tight break-words">{studentName}</h1>
+                  <p className="text-sm md:text-xl font-bold text-slate-500 line-clamp-1">{examTitle}</p>
+               </div>
             </div>
             <div className="text-left md:text-right shrink-0">
                <Badge className={cn("border-none px-4 py-1 rounded-full text-[10px] font-black", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
@@ -70,18 +77,18 @@ export default function ReportScreen(props: ReportScreenProps) {
          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 pt-4 border-t border-slate-50">
             <DataMiniNode label="Attempt Date" val={date} />
             <DataMiniNode label="Time Taken" val={timeTaken} />
-            <DataMiniNode label="Duration" val={duration ? `${duration}m` : 'Timed'} />
-            <DataMiniNode label="Participants" val={totalCandidates.toLocaleString()} />
+            <DataMiniNode label="Test Duration" val={duration ? `${duration}m` : 'Timed'} />
+            <DataMiniNode label="Total Candidates" val={totalCandidates.toLocaleString()} />
          </div>
       </div>
 
-      {/* 2. Rank Hero - Responsive Scaling */}
-      <div className="bg-[#0F172A] rounded-[1.5rem] md:rounded-[3rem] p-6 md:p-14 text-white text-center relative overflow-hidden shadow-2xl border border-white/5 mx-0">
+      {/* 2. Rank Hero */}
+      <div className="bg-[#0F172A] rounded-2xl md:rounded-[3rem] p-6 md:p-14 text-white text-center relative overflow-hidden shadow-2xl border border-white/5">
          <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-44 md:h-64 w-44 md:w-64 text-primary" /></div>
          <div className="relative z-10 space-y-4">
             <p className="text-[10px] md:text-sm font-bold text-primary tracking-tight">Your Punjab Rank</p>
             <div className="flex items-baseline justify-center gap-2 md:gap-3">
-               <span className="text-5xl md:text-[120px] font-black tracking-tighter text-white tabular-nums">#{rank}</span>
+               <span className="text-5xl md:text-[100px] font-black tracking-tighter text-white tabular-nums">#{rank}</span>
                <span className="text-base md:text-4xl font-bold text-slate-500 tabular-nums">/ {totalCandidates}</span>
             </div>
             <Badge className="bg-emerald-500 text-white border-none px-5 py-1.5 rounded-full font-black text-[9px] md:text-sm shadow-xl">
@@ -91,21 +98,21 @@ export default function ReportScreen(props: ReportScreenProps) {
       </div>
 
       {/* 3. Main Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
          <MetricBox label="Net Score" val={score} sub="Actual pts" icon={<Zap />} color="text-primary" bg="bg-blue-50" />
          <MetricBox label="Percentile" val={`${percentile}%`} sub="Standing" icon={<TrendingUp />} color="text-purple-600" bg="bg-purple-50" />
          <MetricBox label="Accuracy" val={`${attemptAccuracy}%`} sub="Precision" icon={<Target />} color="text-emerald-600" bg="bg-emerald-50" />
-         <MetricBox label="Status" val={`Grade ${grade}`} sub="Audit level" icon={null} color="text-amber-600" bg="bg-amber-50" />
+         <MetricBox label="Grade Hub" val={grade} sub="Audit level" color="text-amber-600" bg="bg-amber-50" />
       </div>
 
-      {/* 4. Subject Mastery Hub - Compact Table */}
+      {/* 4. Subject Mastery Hub */}
       {subjects.length > 0 && (
-         <section className="space-y-5">
+         <section className="space-y-4">
             <div className="flex items-center gap-3 px-1">
                <BarChart3 className="h-5 w-5 text-primary" />
                <h3 className="text-lg md:text-2xl font-black text-[#0F172A] tracking-tight">Subject Mastery</h3>
             </div>
-            <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
+            <div className="bg-white rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
                <div className="overflow-x-auto no-scrollbar">
                   <table className="w-full text-left">
                      <thead className="bg-slate-50 border-b border-slate-100">
@@ -131,11 +138,11 @@ export default function ReportScreen(props: ReportScreenProps) {
       )}
 
       {/* 5. Item Analysis Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
          <CountNode label="Correct" val={correct} color="text-emerald-600 bg-emerald-50" />
          <CountNode label="Wrong" val={wrong} color="text-rose-600 bg-rose-50" />
          <CountNode label="Skipped" val={skipped} color="text-slate-400 bg-slate-50" />
-         <CountNode label="Total Questions" val={total} color="text-blue-600 bg-blue-50" />
+         <CountNode label="Total Items" val={total} color="text-blue-600 bg-blue-50" />
       </div>
 
     </div>
@@ -153,7 +160,7 @@ function DataMiniNode({ label, val }: { label: string, val: string }) {
 
 function MetricBox({ label, val, icon, color, bg }: any) {
    return (
-      <Card className="border-none shadow-md bg-white p-4 md:p-8 rounded-[1.25rem] md:rounded-[2rem] flex flex-col items-start gap-3 md:gap-4 hover:translate-y-[-2px] transition-all border border-slate-50">
+      <Card className="border-none shadow-md bg-white p-4 md:p-8 rounded-2xl flex flex-col items-start gap-3 hover:translate-y-[-2px] transition-all border border-slate-50">
          {icon && (
             <div className={cn("h-8 w-8 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner", bg, color)}>
                {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-4 w-4 md:h-6 md:w-6" }) : icon}
