@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -60,8 +61,9 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v20.0 [Resilient Recovery].
- * FIXED: Implemented a fallback query to recover the latest attempt if attemptId is missing.
+ * @fileOverview Premium Result Analysis Hub v21.0 [Zero-Index Recovery].
+ * FIXED: Removed server-side orderBy on 'results' query to bypass index requirement.
+ * OPTIMIZED: Immediate ID resolution for one-click response.
  */
 
 export default function ResultClient() {
@@ -90,7 +92,7 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
-  // Hardened ID Resolution with Fallback Recovery
+  // Hardened ID Resolution with Zero-Index Fallback
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
     
@@ -121,19 +123,28 @@ export default function ResultClient() {
           } catch (e) {}
        }
 
-       // B. Deep Registry Audit (Fallback to most recent successful result)
+       // B. Deep Registry Audit (Index-Free Fallback)
        if (!targetId) {
           try {
+             // Querying by filters but without orderBy to avoid index requirement
              const resQuery = query(
                 collection(db, "results"),
                 where("userId", "==", user.uid),
-                where("mockId", "==", mockId),
-                orderBy("timestamp", "desc"),
-                limit(1)
+                where("mockId", "==", mockId)
              );
+             
              const resSnap = await getDocs(resQuery);
              if (!resSnap.empty) {
-                setResolvedResultId(resSnap.docs[0].id);
+                // Perform sort in memory (usually 1-5 docs max per user per mock)
+                const sorted = resSnap.docs
+                  .map(d => ({ ...d.data(), id: d.id }))
+                  .sort((a: any, b: any) => {
+                     const tA = new Date(a.timestamp).getTime();
+                     const tB = new Date(b.timestamp).getTime();
+                     return tB - tA;
+                  });
+                
+                setResolvedResultId(sorted[0].id);
                 setIsResolvingId(false);
                 return;
              }
