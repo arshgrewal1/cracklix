@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -41,8 +42,8 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Node v47.0 [Analytics V2 Logic Hardened].
- * FIXED: Implemented deterministic result calculation during submission.
+ * @fileOverview Institutional Attempt Node v48.0 [Speed Hardened].
+ * FIXED: Parallelized question loading and non-blocking submission for instant UI response.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -125,8 +126,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const mockRef = doc(db, "mocks", mockId);
       const dailyRef = doc(db, "daily_quizzes", mockId);
       
-      let targetSnap = await getDoc(mockRef);
-      if (!targetSnap.exists()) targetSnap = await getDoc(dailyRef);
+      // Parallel fetch for test metadata
+      const [mSnap, dSnap] = await Promise.all([getDoc(mockRef), getDoc(dailyRef)]);
+      const targetSnap = mSnap.exists() ? mSnap : dSnap;
+      
       if (!targetSnap.exists()) throw new Error("Test entry not found.");
       
       const mData = targetSnap.data();
@@ -135,19 +138,26 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const questionIds: string[] = mData.questionIds || [];
       if (questionIds.length === 0) throw new Error("No questions configured.");
       
-      const fetchedQuestions: any[] = [];
+      // ⚡ Parallel Question Fetching Protocol
       const chunks = [];
       for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
-      for (const chunk of chunks) {
-         const [mcqSnap, legacySnap, usedSnap] = await Promise.all([
-           getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-           getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk))),
-           getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
-         ]);
-         mcqSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
-         legacySnap.forEach(d => { if (!fetchedQuestions.find(f => f.id === d.id)) fetchedQuestions.push({ ...d.data(), id: d.id }); });
-         usedSnap.forEach(d => { if (!fetchedQuestions.find(f => f.id === d.id)) fetchedQuestions.push({ ...d.data(), id: d.id }); });
-      }
+      
+      const chunkPromises = chunks.map(async (chunk) => {
+        const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
+          getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
+          getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
+          getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+        ]);
+        
+        const localResults: any[] = [];
+        mcqSnap.docs.forEach(d => localResults.push({ ...d.data(), id: d.id }));
+        usedSnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
+        legacySnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
+        return localResults;
+      });
+
+      const allFetchedBatches = await Promise.all(chunkPromises);
+      const fetchedQuestions = allFetchedBatches.flat();
 
       const enrichedQuestions = questionIds.map(id => fetchedQuestions.find(fq => fq.id === id)).filter(Boolean);
       if (enrichedQuestions.length === 0) throw new Error("Question sync failure.");
@@ -229,21 +239,15 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }
     });
 
-    // Score Calculations
     const score = Number(parseFloat(((correctCount * posMarks) - (wrongCount * negMarks)).toFixed(2)));
     const maxMarks = totalQuestions * posMarks;
     const percentage = Number(((score / maxMarks) * 100).toFixed(1));
     const timeTaken = Math.max(1, elapsedSeconds);
-
-    // Accuracy Metrics
     const attemptAccuracy = attemptedCount > 0 ? Number(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
     const overallAccuracy = Number(((correctCount / totalQuestions) * 100).toFixed(1));
     const attemptRate = Number(((attemptedCount / totalQuestions) * 100).toFixed(1));
-
-    // Readiness Score (V2 Formula)
     const readiness = (percentage + attemptAccuracy + attemptRate) / 3;
 
-    // Grade System
     let grade = "F";
     if (percentage >= 90) grade = "A+";
     else if (percentage >= 80) grade = "A";
@@ -255,120 +259,83 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
     const isQualified = percentage >= 40;
 
-    console.log('[Cracklix_Audit] Finalizing attempt:', {
-       candidateId: user?.uid || 'guest',
-       correct: correctCount,
-       wrong: wrongCount,
-       score,
-       accuracy: attemptAccuracy,
-       rate: attemptRate
-    });
-    
-    try {
-      if (user) {
-        await runTransaction(db, async (transaction) => {
-          const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
-          const globalMeritRef = doc(db, "leaderboard", user.uid);
-          const resultRef = doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
-          const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
+    // ✨ Non-Blocking Navigation Strategy
+    // We navigate immediately, the database logic runs in the background.
+    const navigationUrl = user 
+      ? `/results/view?id=${mockId}&attemptId=${attemptId}` 
+      : `/results/view?id=${mockId}`;
 
-          const lbSnap = await transaction.get(lbEntryRef);
-          
-          let isNewBest = true;
-          let oldAttemptCount = 0;
+    if (user) {
+      // Initiate background writes
+      runTransaction(db, async (transaction) => {
+        const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
+        const globalMeritRef = doc(db, "leaderboard", user.uid);
+        const resultRef = doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
+        const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
 
-          if (lbSnap.exists()) {
-            const existing = lbSnap.data();
-            oldAttemptCount = existing.attemptCount || 0;
-            const hasHigherScore = score > (existing.highestScore || 0);
-            const hasEqualScoreHigherAcc = (score === existing.highestScore && attemptAccuracy > existing.accuracy);
-            const hasEqualScoreAccLowerTime = (score === existing.highestScore && attemptAccuracy === existing.accuracy && timeTaken < existing.timeTaken);
-            isNewBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
-          }
+        const lbSnap = await transaction.get(lbEntryRef);
+        
+        let isNewBest = true;
+        let oldAttemptCount = 0;
 
-          transaction.set(lbEntryRef, {
-            userId: user.uid,
-            userName: profile?.name || 'Aspirant',
-            photoURL: profile?.photoURL || "",
-            gender: profile?.gender || 'Other',
-            mockId,
-            highestScore: isNewBest ? score : (lbSnap.data()?.highestScore || 0),
-            accuracy: isNewBest ? attemptAccuracy : (lbSnap.data()?.accuracy || 0),
-            timeTaken: isNewBest ? timeTaken : (lbSnap.data()?.timeTaken || 0),
-            attemptCount: oldAttemptCount + 1,
-            bestAttemptId: isNewBest ? attemptId : (lbSnap.data()?.bestAttemptId || attemptId),
-            submittedAt: serverTimestamp()
-          }, { merge: true });
+        if (lbSnap.exists()) {
+          const existing = lbSnap.data();
+          oldAttemptCount = existing.attemptCount || 0;
+          const hasHigherScore = score > (existing.highestScore || 0);
+          const hasEqualScoreHigherAcc = (score === existing.highestScore && attemptAccuracy > existing.accuracy);
+          const hasEqualScoreAccLowerTime = (score === existing.highestScore && attemptAccuracy === existing.accuracy && timeTaken < existing.timeTaken);
+          isNewBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
+        }
 
-          transaction.set(globalMeritRef, {
-            uid: user.uid,
-            displayName: profile?.name || 'Aspirant',
-            photoURL: profile?.photoURL || "",
-            highestScore: increment(score > (profile?.highestScore || 0) ? score - (profile?.highestScore || 0) : 0),
-            totalTests: increment(1),
-            updatedAt: serverTimestamp(),
-            recentMockTitle: mockData.title
-          }, { merge: true });
+        transaction.set(lbEntryRef, {
+          userId: user.uid,
+          userName: profile?.name || 'Aspirant',
+          photoURL: profile?.photoURL || "",
+          gender: profile?.gender || 'Other',
+          mockId,
+          highestScore: isNewBest ? score : (lbSnap.data()?.highestScore || 0),
+          accuracy: isNewBest ? attemptAccuracy : (lbSnap.data()?.accuracy || 0),
+          timeTaken: isNewBest ? timeTaken : (lbSnap.data()?.timeTaken || 0),
+          attemptCount: oldAttemptCount + 1,
+          bestAttemptId: isNewBest ? attemptId : (lbSnap.data()?.bestAttemptId || attemptId),
+          submittedAt: serverTimestamp()
+        }, { merge: true });
 
-          transaction.set(resultRef, {
-             attemptId,
-             mockId,
-             mockTitle: mockData.title || mockTitle,
-             userId: user.uid,
-             userName: profile?.name || 'Aspirant',
-             userEmail: user.email || "",
-             score,
-             maxMarks,
-             percentage,
-             grade,
-             isQualified,
-             positiveMarks: posMarks,
-             negativeMarks: negMarks,
-             correctCount,
-             wrongCount,
-             skippedCount,
-             attemptedCount,
-             totalQuestions,
-             attemptAccuracy,
-             overallAccuracy,
-             attemptRate,
-             readiness,
-             timeTaken,
-             timestamp: new Date().toISOString(),
-             createdAt: serverTimestamp(),
-             languageMode: language,
-             subjectAnalysis: Object.values(subjectMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
-             complexityAnalysis: Object.values(complexityMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) })),
-             answers: studentAnswers 
-          });
+        transaction.set(globalMeritRef, {
+          uid: user.uid,
+          displayName: profile?.name || 'Aspirant',
+          photoURL: profile?.photoURL || "",
+          highestScore: increment(score > (profile?.highestScore || 0) ? score - (profile?.highestScore || 0) : 0),
+          totalTests: increment(1),
+          updatedAt: serverTimestamp(),
+          recentMockTitle: mockData.title
+        }, { merge: true });
 
-          transaction.set(attemptPtrRef, { 
-             attemptId,
-             status: 'COMPLETED', 
-             updatedAt: serverTimestamp() 
-          }, { merge: true });
+        transaction.set(resultRef, {
+           attemptId, mockId, mockTitle: mockData.title || mockTitle, userId: user.uid,
+           userName: profile?.name || 'Aspirant', userEmail: user.email || "", score, maxMarks, percentage, grade, isQualified,
+           positiveMarks: posMarks, negativeMarks: negMarks, correctCount, wrongCount, skippedCount, attemptedCount, totalQuestions,
+           attemptAccuracy, overallAccuracy, attemptRate, readiness, timeTaken, timestamp: new Date().toISOString(), createdAt: serverTimestamp(), languageMode: language,
+           subjectAnalysis: Object.values(subjectMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
+           complexityAnalysis: Object.values(complexityMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) })),
+           answers: studentAnswers 
         });
 
-        await stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
-        router.replace(`/results/view?id=${mockId}&attemptId=${attemptId}`);
-        resetStore();
-      } else {
-        // GUEST MODE PERSISTENCE
-        localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify({
-           attemptId, mockId, score, maxMarks, percentage, grade, isQualified,
-           attemptAccuracy, overallAccuracy, attemptRate, totalQuestions,
-           correctCount, wrongCount, timeTaken, timestamp: new Date().toISOString(),
-           mockTitle: mockData.title,
-           positiveMarks: posMarks,
-           negativeMarks: negMarks,
-        }));
-        router.replace(`/results/view?id=${mockId}`);
-        resetStore();
-      }
-    } catch (e) {
-      console.error("[SUBMISSION_FAILURE]:", e);
-      setIsSubmittingFinal(false);
+        transaction.set(attemptPtrRef, { attemptId, status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true });
+      }).catch(e => console.error("[Sync_Failure]:", e));
+
+      stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
+    } else {
+      localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify({
+         attemptId, mockId, score, maxMarks, percentage, grade, isQualified,
+         attemptAccuracy, overallAccuracy, attemptRate, totalQuestions,
+         correctCount, wrongCount, timeTaken, timestamp: new Date().toISOString(),
+         mockTitle: mockData.title, positiveMarks: posMarks, negativeMarks: negMarks,
+      }));
     }
+
+    router.replace(navigationUrl);
+    resetStore();
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language]);
 
   useEffect(() => {

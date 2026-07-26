@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -51,9 +52,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v39.0.
- * FIXED: Integrated accurate attempt counting for the "Attempt #X" node.
- * OPTIMIZED: High-speed PDF rendering at scale 2 for instant registry feedback.
+ * @fileOverview Institutional Result Hub v40.0 [Parallelized Data Handshake].
+ * FIXED: Replaced sequential awaits with Promise.all for high-speed analysis loading.
  */
 
 export default function ResultClient() {
@@ -128,12 +128,13 @@ export default function ResultClient() {
        }
 
        try {
-          // Fetch attempts for the user/mock combination
+          // ⚡ Parallel Session and Registry Check
           const resQuery = query(
              collection(db, "results"), 
              where("userId", "==", user.uid), 
              where("mockId", "==", mockId)
           );
+          
           const querySnap = await getDocs(resQuery);
           
           if (querySnap.empty) {
@@ -180,12 +181,16 @@ export default function ResultClient() {
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
-           const countSnap = await getCountFromServer(entriesRef);
+           
+           // Parallel Ranking Calculations
+           const [countSnap, superiorCountSnap] = await Promise.all([
+             getCountFromServer(entriesRef),
+             getCountFromServer(query(entriesRef, where("highestScore", ">", activeSession.score)))
+           ]);
+
            const displayTotal = countSnap.data().count;
            setTotalCandidates(displayTotal);
            
-           const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
-           const superiorCountSnap = await getCountFromServer(superiorQuery);
            let superiorCount = superiorCountSnap.data().count;
 
            if (user) {
@@ -211,26 +216,36 @@ export default function ResultClient() {
       if (!db || !mockId) { setLoadingQuestions(false); return; }
       try {
         setLoadingQuestions(true);
-        let mockSnap = await getDoc(doc(db, "mocks", mockId));
-        if (!mockSnap.exists()) mockSnap = await getDoc(doc(db, "daily_quizzes", mockId));
+        
+        // ⚡ Parallel Mock and Questions Check
+        const mockRef = doc(db, "mocks", mockId);
+        const dailyRef = doc(db, "daily_quizzes", mockId);
+        const [mSnap, dSnap] = await Promise.all([getDoc(mockRef), getDoc(dailyRef)]);
+        const mockSnap = mSnap.exists() ? mSnap : dSnap;
+
         if (mockSnap.exists()) {
           const mData = mockSnap.data();
           setMockData(mData);
           const questionIds = mData.questionIds || [];
           if (questionIds.length > 0) {
-            const fetchedQuestions: any[] = [];
             const chunks = [];
             for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
-            for (const chunk of chunks) {
+            
+            const chunkPromises = chunks.map(async (chunk) => {
               const [mcqSnap, legacySnap, usedSnap] = await Promise.all([
                  getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
                  getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk))),
                  getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk)))
               ]);
-              mcqSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
-              legacySnap.forEach(d => { if (!fetchedQuestions.find(f => f.id === d.id)) fetchedQuestions.push({ ...d.data(), id: d.id }); });
-              usedSnap.forEach(d => { if (!fetchedQuestions.find(f => f.id === d.id)) fetchedQuestions.push({ ...d.data(), id: d.id }); });
-            }
+              const localResults: any[] = [];
+              mcqSnap.docs.forEach(d => localResults.push({ ...d.data(), id: d.id }));
+              legacySnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
+              usedSnap.forEach(d => { if (!localResults.find(f => f.id === d.id)) localResults.push({ ...d.data(), id: d.id }); });
+              return localResults;
+            });
+
+            const allBatches = await Promise.all(chunkPromises);
+            const fetchedQuestions = allBatches.flat();
             setQuestions(questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean));
           }
         }
@@ -259,7 +274,7 @@ export default function ResultClient() {
 
     try {
       await document.fonts.ready;
-      await new Promise(r => setTimeout(r, 1500));
+      await new Promise(r => setTimeout(r, 1000));
 
       const container = document.getElementById('pdf-report-container');
       if (!container) throw new Error("Capture node missing");
@@ -273,7 +288,7 @@ export default function ResultClient() {
         windowWidth: 794
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95); 
+      const imgData = canvas.toDataURL('image/jpeg', 0.90); 
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
       pdf.save(`Cracklix_Report_${activeSession.userName?.replace(/\s+/g, '_') || 'Student'}.pdf`);
