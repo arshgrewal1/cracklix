@@ -1,10 +1,11 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, Suspense } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser, useDoc } from "@/firebase"
-import { collection, query, orderBy, limit, doc } from "firebase/firestore"
+import { collection, query, orderBy, limit, doc, getDocs } from "firebase/firestore"
 import { Trophy, ShieldCheck, Search, Activity, Zap, Star, Medal, Target, ChevronRight, X, Filter, BarChart3, Users, Layout } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -18,12 +19,13 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Punjab Merit Registry v4.0 [Test Specific Rebuilt].
+ * @fileOverview Official Punjab Merit Registry v4.1 [Resilient Sorting Hub].
+ * FIXED: Implemented hybrid sorting to bypass missing Firestore indexes.
  */
 
 export default function LeaderboardPage() {
   return (
-    <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
+    <Suspense fallback={<div className="h-screen w-full flex flex-col items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
       <LeaderboardContent />
     </Suspense>
   )
@@ -37,6 +39,8 @@ function LeaderboardContent() {
   
   const [searchTerm, setSearchTerm] = useState("")
   const [mounted, setMounted] = useState(false)
+  const [manualList, setManualList] = useState<any[]>([])
+  const [loadingList, setLoadingList] = useState(true)
   
   useEffect(() => {
     setMounted(true)
@@ -44,36 +48,56 @@ function LeaderboardContent() {
 
   const mockId = searchParams.get('id');
 
-  // Registry Node: Mock Specific Leaderboard
-  const lbQuery = useMemo(() => {
-    if (!db || !mounted) return null;
-    
-    const baseRef = mockId 
-      ? collection(db, "leaderboards", mockId, "entries")
-      : collection(db, "global_leaderboard"); // Fallback for global if id is missing
+  useEffect(() => {
+     if (!db || !mounted) return;
+     
+     async function fetchAndSort() {
+        setLoadingList(true);
+        try {
+           const baseRef = mockId 
+             ? collection(db, "leaderboards", mockId, "entries")
+             : collection(db, "leaderboard"); // Root merit collection
 
-    return query(
-      baseRef,
-      orderBy("highestScore", "desc"),
-      orderBy("accuracy", "desc"),
-      orderBy("timeTaken", "asc"),
-      orderBy("submittedAt", "asc"),
-      limit(100)
-    );
+           // PRIMARY QUERY: Only sort by one field to avoid index requirement
+           const q = query(
+              baseRef,
+              orderBy("highestScore", "desc"),
+              limit(200)
+           );
+           
+           const snap = await getDocs(q);
+           const entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+           
+           // INSTITUTIONAL TIE-BREAK (Client-Side)
+           const sorted = entries.sort((a: any, b: any) => {
+              if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
+              if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+              if (a.timeTaken !== b.timeTaken) return a.timeTaken - b.timeTaken;
+              const timeA = a.submittedAt?.seconds || 0;
+              const timeB = b.submittedAt?.seconds || 0;
+              return timeA - timeB;
+           });
+
+           setManualList(sorted);
+        } catch (e) {
+           console.error("[Registry_Fetch_Failure]:", e);
+        } finally {
+           setLoadingList(false);
+        }
+     }
+
+     fetchAndSort();
   }, [db, mounted, mockId]);
 
-  const { data: meritList, loading } = useCollection<any>(lbQuery);
   const { data: mockData } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]));
 
   const filteredList = useMemo(() => {
-    if (!meritList) return []
     const term = searchTerm.toLowerCase().trim();
-    
-    return meritList.filter((r: any) => {
-        const name = (r.userName || "Aspirant").toLowerCase();
+    return manualList.filter((r: any) => {
+        const name = (r.userName || r.displayName || "Aspirant").toLowerCase();
         return !term || name.includes(term);
     });
-  }, [meritList, searchTerm]);
+  }, [manualList, searchTerm]);
 
   const podium = useMemo(() => filteredList.slice(0, 3), [filteredList]);
   const listItems = useMemo(() => filteredList.slice(3), [filteredList]);
@@ -100,7 +124,7 @@ function LeaderboardContent() {
                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Official Merit Registry</span>
                   </div>
                   <h1 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter antialiased">
-                    {mockData?.title || "Test Standings"}
+                    {mockData?.title || "Merit Registry"}
                   </h1>
                   <p className="text-slate-500 font-medium text-sm md:text-xl">Rankings based on the verified best attempts of candidates.</p>
                </div>
@@ -109,15 +133,15 @@ function LeaderboardContent() {
                   <Users className="h-6 w-6 text-primary" />
                   <div className="text-left">
                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Candidates</p>
-                     <p className="text-2xl font-black text-[#0F172A] tabular-nums leading-none mt-1">{meritList?.length || 0}</p>
+                     <p className="text-2xl font-black text-[#0F172A] tabular-nums leading-none mt-1">{manualList.length}</p>
                   </div>
                </div>
             </div>
          </section>
 
          <div className="sticky top-[84px] md:top-[116px] z-[45] bg-[#F8FAFC]/95 backdrop-blur-xl -mx-4 px-4 py-6 border-b border-slate-100">
-            <div className="max-w-4xl mx-auto flex gap-4 items-center">
-               <div className="relative group flex-1">
+            <div className="max-w-4xl mx-auto flex flex-col md:flex-row gap-4 items-center">
+               <div className="relative group flex-1 w-full">
                   <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                   <Input 
                     value={searchTerm}
@@ -126,13 +150,13 @@ function LeaderboardContent() {
                     className="h-14 md:h-16 pl-14 pr-12 rounded-2xl bg-white border-slate-200 shadow-xl text-base md:text-lg font-bold placeholder:text-slate-200 focus-visible:ring-4 focus-visible:ring-primary/5 transition-all"
                   />
                   {searchTerm && (
-                    <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all">
+                    <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-50 rounded-full transition-all border-none bg-transparent">
                        <X className="h-4 w-4 text-slate-300" />
                     </button>
                   )}
                </div>
-               <Link href="/mocks">
-                  <Button variant="outline" className="h-14 md:h-16 rounded-2xl px-8 font-black uppercase text-[10px] tracking-widest border-2">
+               <Link href="/mocks" className="w-full md:w-auto">
+                  <Button variant="outline" className="w-full md:w-auto h-14 md:h-16 rounded-2xl px-8 font-black uppercase text-[10px] tracking-widest border-2">
                      All Tests
                   </Button>
                </Link>
@@ -149,16 +173,16 @@ function LeaderboardContent() {
 
          <div className="max-w-5xl mx-auto space-y-3">
             <AnimatePresence mode="popLayout">
-               {loading ? (
+               {loadingList ? (
                   Array.from({ length: 8 }).map((_, i) => (
                      <div key={i} className="h-20 w-full bg-white rounded-2xl border border-slate-50 animate-pulse" />
                   ))
                ) : filteredList.length > 0 ? (
                   (searchTerm ? filteredList : listItems).map((entry, idx) => {
-                     const isCurrent = user?.uid === entry.userId;
+                     const isCurrent = user?.uid === entry.userId || user?.uid === entry.uid;
                      return (
                         <motion.div 
-                           key={entry.userId}
+                           key={entry.userId || entry.uid}
                            layout
                            initial={{ opacity: 0, y: 10 }}
                            animate={{ opacity: 1, y: 0 }}
@@ -178,21 +202,21 @@ function LeaderboardContent() {
 
                                  <div className="flex-1 flex items-center gap-4 min-w-0 pr-4">
                                     <StudentAvatar 
-                                       profile={{ name: entry.userName, photoURL: entry.photoURL, gender: entry.gender }} 
+                                       profile={{ name: entry.userName || entry.displayName, photoURL: entry.photoURL, gender: entry.gender }} 
                                        className="h-10 w-10 md:h-14 md:w-14 rounded-xl shrink-0 shadow-inner bg-slate-50" 
                                     />
                                     <div className="min-w-0 flex-1 text-left">
                                        <h4 className="font-bold text-sm md:text-xl text-[#0F172A] truncate leading-tight group-hover:text-primary transition-colors">
-                                          {entry.userName}
+                                          {entry.userName || entry.displayName}
                                        </h4>
                                        {isCurrent && <Badge className="bg-primary text-white border-none text-[8px] font-black uppercase px-2 py-0 h-4 mt-1">You</Badge>}
                                     </div>
                                  </div>
 
                                  <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12 shrink-0">
-                                    <Metric label="Score" val={entry.highestScore.toFixed(1)} color="text-[#0F172A]" />
-                                    <Metric label="Accuracy" val={`${entry.accuracy}%`} color="text-emerald-600" className="hidden sm:block" />
-                                    <Metric label="Time" val={formatTime(entry.timeTaken)} color="text-slate-400" className="hidden lg:block" />
+                                    <Metric label="Score" val={(entry.highestScore || 0).toFixed(1)} color="text-[#0F172A]" />
+                                    <Metric label="Accuracy" val={`${entry.accuracy || 0}%`} color="text-emerald-600" className="hidden sm:block" />
+                                    <Metric label="Time" val={formatTime(entry.timeTaken || 0)} color="text-slate-400" className="hidden lg:block" />
                                     <ChevronRight className="h-5 w-5 text-slate-200 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
                                  </div>
                               </CardContent>
@@ -230,7 +254,7 @@ function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any)
       </div>
    );
 
-   const isCurrent = currentUser === data.userId;
+   const isCurrent = currentUser === (data.userId || data.uid);
 
    return (
       <motion.div 
@@ -258,7 +282,7 @@ function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any)
             <div className="space-y-8 relative z-10 w-full">
                <div className="relative inline-block">
                   <StudentAvatar 
-                    profile={{ name: data.userName, photoURL: data.photoURL, gender: data.gender }} 
+                    profile={{ name: data.userName || data.displayName, photoURL: data.photoURL, gender: data.gender }} 
                     className={cn(
                       "rounded-[2.5rem] border-[6px] shadow-2xl transition-all group-hover:scale-105", 
                       isMain ? "h-32 w-32 md:h-44 md:w-44 border-primary/20" : "h-24 w-24 md:h-32 md:w-32 border-white"
@@ -272,7 +296,7 @@ function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any)
                </div>
 
                <div className="space-y-2">
-                  <h3 className="text-xl md:text-3xl font-black truncate max-w-[200px] leading-tight tracking-tight">{data.userName}</h3>
+                  <h3 className="text-xl md:text-3xl font-black truncate max-w-[200px] leading-tight tracking-tight">{data.userName || data.displayName}</h3>
                   {isCurrent && <Badge className="bg-primary text-white border-none text-[8px] font-black uppercase px-3 shadow-lg">Candidate Account</Badge>}
                </div>
 
@@ -280,20 +304,20 @@ function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any)
                   <div className="text-center space-y-1">
                      <p className={cn("text-[8px] font-bold uppercase tracking-[0.2em]", isMain ? "text-slate-400" : "text-slate-400")}>Best Score</p>
                      <p className={cn("text-xl md:text-4xl font-black tabular-nums tracking-tighter", isMain ? "text-white" : "text-primary")}>
-                        {data.highestScore.toFixed(1)}
+                        {(data.highestScore || 0).toFixed(1)}
                      </p>
                   </div>
                   <div className="text-center space-y-1">
                      <p className={cn("text-[8px] font-bold uppercase tracking-[0.2em]", isMain ? "text-slate-400" : "text-slate-400")}>Accuracy</p>
                      <p className={cn("text-xl md:text-4xl font-black tabular-nums tracking-tighter", isMain ? "text-emerald-400" : "text-[#0F172A]")}>
-                        {data.accuracy}%
+                        {data.accuracy || 0}%
                      </p>
                   </div>
                </div>
 
                <div className="pt-2">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center justify-center gap-2">
-                     <Timer className="h-3 w-3" /> {formatTime(data.timeTaken)}
+                     <Timer className="h-3 w-3" /> {formatTime(data.timeTaken || 0)}
                   </p>
                </div>
             </div>
@@ -305,3 +329,4 @@ function PodiumCard({ rank, data, order, isMain, formatTime, currentUser }: any)
 function Loader2({ className }: any) {
   return <Zap className={cn("animate-pulse", className)} />
 }
+

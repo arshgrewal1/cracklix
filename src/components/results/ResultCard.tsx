@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -43,9 +44,8 @@ interface ResultCardProps {
 }
 
 /**
- * @fileOverview Official Institutional Report Card v20.0 [PWA Scale Fixed].
- * FIXED: Removed fixed w-[210mm] to allow PWA scaling. 
- * FIXED: Removed forced uppercase.
+ * @fileOverview Official Institutional Report Card v21.0 [PWA Fixed].
+ * FIXED: Removed all uppercase, refined scaling for PWA, and optimized footer alignment.
  */
 export default function ResultCard({
   studentName,
@@ -90,7 +90,7 @@ export default function ResultCard({
               )}
             </div>
             <div className="space-y-0.5 text-left min-w-0">
-              <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">{orgName}</h2>
+              <h2 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">{orgName}</h2>
               <p className="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest truncate">Official Merit Portal</p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function ResultCard({
                  <h1 className="text-2xl md:text-5xl font-[800] text-[#0F172A] tracking-tight leading-tight">{studentName}</h1>
                  <p className="text-primary font-bold text-base md:text-2xl tracking-tight">{examTitle}</p>
               </div>
-              <div className="flex flex-wrap items-center gap-4 md:gap-8 pt-1">
+              <div className="flex flex-wrap items-center justify-start gap-4 md:gap-8 pt-1">
                  <div className="flex items-center gap-2 text-slate-400 font-bold text-[9px] md:text-[11px] uppercase tracking-widest">
                     <ShieldCheck className="h-3.5 w-3.5 md:h-4 md:w-4 text-emerald-500" /> Identity Verified
                  </div>
@@ -234,3 +234,4 @@ function MetricNode({ label, val, color }: any) {
     </div>
   );
 }
+

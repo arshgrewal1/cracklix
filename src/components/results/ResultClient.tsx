@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -18,7 +19,8 @@ import {
   where,
   limit,
   increment,
-  updateDoc
+  updateDoc,
+  Firestore
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -59,8 +61,9 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v10.0 [PWA Fixed].
- * FIXED: Removed forced uppercase. Corrected scaling for mobile view.
+ * @fileOverview Premium Result Analysis Hub v11.0.
+ * FIXED: Implemented Hybrid Ranking to bypass Firestore Index requirements.
+ * FIXED: Normalized typography to Title Case and refined responsive scaling.
  */
 
 export default function ResultClient() {
@@ -113,18 +116,30 @@ export default function ResultClient() {
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
+           
+           // RESILIENT QUERY: Only order by one field to avoid complex index requirements
            const q = query(
               entriesRef,
-              orderBy("highestScore", "desc"),
-              orderBy("accuracy", "desc"),
-              orderBy("timeTaken", "asc"),
-              orderBy("submittedAt", "asc")
+              orderBy("highestScore", "desc")
            );
            
            const snap = await getDocs(q);
            if (isMounted) {
-              setTotalCandidates(snap.size);
-              const myIndex = snap.docs.findIndex(d => d.id === user?.uid);
+              const entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+              
+              // INSTITUTIONAL TIE-BREAK (Client-Side)
+              // Sort by: Score DESC -> Accuracy DESC -> Time Taken ASC -> SubmittedAt ASC
+              const sortedEntries = entries.sort((a: any, b: any) => {
+                 if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
+                 if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+                 if (a.timeTaken !== b.timeTaken) return a.timeTaken - b.timeTaken;
+                 const timeA = a.submittedAt?.seconds || 0;
+                 const timeB = b.submittedAt?.seconds || 0;
+                 return timeA - timeB;
+              });
+
+              setTotalCandidates(sortedEntries.length);
+              const myIndex = sortedEntries.findIndex(d => d.id === user?.uid);
               if (myIndex !== -1) {
                  setLiveRank(myIndex + 1);
               } else {
@@ -132,6 +147,7 @@ export default function ResultClient() {
               }
            }
         } catch (e) { 
+           console.error("[Ranking_Audit_Error]:", e);
            setLiveRank(sessionData.rankAtSubmission || "---"); 
            setTotalCandidates(sessionData.totalCandidatesAtSubmission || 0);
         }
@@ -139,7 +155,7 @@ export default function ResultClient() {
      let isMounted = true;
      fetchRankingMetrics();
      return () => { isMounted = false; };
-  }, [db, mockId, sessionData?.score, user?.uid, sessionData?.rankAtSubmission, sessionData?.totalCandidatesAtSubmission]);
+  }, [db, mockId, sessionData?.score, user?.uid, sessionData?.rankAtSubmission, sessionData?.totalCandidatesAtSubmission, mounted]);
 
   useEffect(() => {
      if (!user && !userLoading && mockId) {
@@ -284,7 +300,7 @@ export default function ResultClient() {
                  <h1 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A] leading-tight truncate">
                    {activeSession.mockTitle}
                  </h1>
-                 <div className="flex flex-wrap items-center gap-2 md:gap-3 font-bold text-[9px] md:text-xs">
+                 <div className="flex flex-wrap items-center justify-start gap-2 md:gap-3 font-bold text-[9px] md:text-xs">
                     <div className="flex items-center gap-1.5 bg-white border border-slate-100 px-3 py-1.5 rounded-lg text-slate-500 shadow-sm">
                        <Clock className="h-3.5 w-3.5 text-slate-400" /> 
                        <span>{new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
@@ -298,7 +314,7 @@ export default function ResultClient() {
            </div>
            
            <div className="flex flex-col gap-3 w-full lg:w-auto shrink-0">
-              <div className="flex bg-white border border-slate-100 p-1 rounded-xl shadow-sm w-full lg:w-auto">
+              <div className="flex bg-white border border-slate-100 p-1 rounded-xl shadow-sm w-full lg:w-auto overflow-x-auto no-scrollbar">
                  <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
                     <TabsList className="bg-transparent border-none p-0 flex h-10 w-full gap-1">
                        <HubTab value="OVERVIEW" label="Summary" />
@@ -491,3 +507,4 @@ function FilterButton({ active, label, onClick, color = "primary" }: any) {
       </button>
    )
 }
+
