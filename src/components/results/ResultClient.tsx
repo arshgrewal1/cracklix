@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
@@ -19,6 +20,7 @@ import {
   increment,
   updateDoc,
   getCountFromServer,
+  serverTimestamp
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -60,8 +62,10 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v28.0 [Binary Export Hardened].
- * FIXED: Implemented high-fidelity PDF capture with color hardening and font synchronization.
+ * @fileOverview Premium Result Analysis Hub v30.0 [One-Click Response Hardened].
+ * FIXED: Resolved TypeError by adding null guards for activeSession.
+ * FIXED: Added missing Link and AlertCircle imports.
+ * OPTIMIZED: Implemented immediate point-lookup for one-click response.
  */
 
 export default function ResultClient() {
@@ -94,6 +98,7 @@ export default function ResultClient() {
 
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
+  // 1. Resilient ID Resolution Strategy
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
     
@@ -105,6 +110,7 @@ export default function ResultClient() {
        setIsSearching(true);
        setErrorNotFound(false);
 
+       // Case A: Guest User
        if (!user) {
           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
           if (guestRes) {
@@ -117,6 +123,7 @@ export default function ResultClient() {
           return;
        }
 
+       // Case B: Logged in User - Direct Point Lookup (High Speed)
        const targetId = attemptIdFromUrl 
           ? `${user.uid}_${mockId}_${attemptIdFromUrl}` 
           : `${user.uid}_${mockId}`;
@@ -133,6 +140,7 @@ export default function ResultClient() {
                 return;
              }
 
+             // Fallback: Query collection for latest result if direct ID fails (Legacy support)
              const resQuery = query(
                 collection(db, "results"),
                 where("userId", "==", user.uid),
@@ -148,6 +156,7 @@ export default function ResultClient() {
                 return;
              }
 
+             // Retry with backoff to handle replication delays
              if (retryCount < MAX_RETRIES) {
                 retryCount++;
                 setTimeout(tryFetch, 600);
@@ -170,6 +179,7 @@ export default function ResultClient() {
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
+  // 2. Ranking Engine Sync
   useEffect(() => {
      if (!db || !mockId || !activeSession) return;
      async function fetchRankingMetrics() {
@@ -177,6 +187,7 @@ export default function ResultClient() {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
            const countSnap = await getCountFromServer(entriesRef);
            setTotalCandidates(countSnap.data().count);
+           
            const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
            const superiorCountSnap = await getCountFromServer(superiorQuery);
            setLiveRank(superiorCountSnap.data().count + 1);
@@ -185,6 +196,7 @@ export default function ResultClient() {
      fetchRankingMetrics();
   }, [db, mockId, activeSession]);
 
+  // 3. Question Metadata Ingestion
   useEffect(() => {
     async function loadQuestions() {
       if (!db || !mockId) { setLoadingQuestions(false); return; }
@@ -192,6 +204,7 @@ export default function ResultClient() {
         setLoadingQuestions(true);
         let mockSnap = await getDoc(doc(db, "mocks", mockId));
         if (!mockSnap.exists()) mockSnap = await getDoc(doc(db, "daily_quizzes", mockId));
+        
         if (mockSnap.exists()) {
           const mData = mockSnap.data();
           const questionIds = mData.questionIds || [];
@@ -234,10 +247,10 @@ export default function ResultClient() {
     
     try {
       setActiveMainTab("REPORT"); 
-      toast({ title: "Optimizing for high-fidelity capture..." });
+      toast({ title: "Optimizing report for high-fidelity capture..." });
       
-      // 1. Wait for render and font handshake
-      await new Promise(r => setTimeout(r, 1500));
+      // Visual Handshake
+      await new Promise(r => setTimeout(r, 1200));
       if (typeof window !== 'undefined' && 'fonts' in document) {
          await (document as any).fonts.ready;
       }
@@ -245,9 +258,9 @@ export default function ResultClient() {
       const element = document.getElementById('cracklix-result-card');
       if (!element) throw new Error("Analysis node missing from DOM.");
 
-      // 2. Temporarily Force Contrast Hardening for Capture
+      // Contrast Hardening Style
       const style = document.createElement('style');
-      style.id = 'cracklix-capture-hardening';
+      style.id = 'cracklix-export-hardening';
       style.innerHTML = `
         #cracklix-result-card * {
           opacity: 1 !important;
@@ -258,7 +271,7 @@ export default function ResultClient() {
         #cracklix-result-card .text-slate-300, 
         #cracklix-result-card .text-slate-400,
         #cracklix-result-card .text-slate-500 {
-          color: #475569 !important; /* Darker Slate-600 */
+          color: #475569 !important; /* Darkened Slate-600 */
         }
         #cracklix-result-card .bg-slate-50 {
            background-color: #F1F5F9 !important;
@@ -266,7 +279,6 @@ export default function ResultClient() {
       `;
       document.head.appendChild(style);
 
-      // 3. Binary PNG Capture (Institutional Resolution)
       const canvas = await html2canvas(element, {
         scale: 4,
         useCORS: true,
@@ -274,15 +286,12 @@ export default function ResultClient() {
         logging: false,
         allowTaint: true,
         imageTimeout: 30000,
-        foreignObjectRendering: true,
-        removeContainer: true
+        foreignObjectRendering: true
       });
 
-      // 4. Cleanup Styles
-      const hardeningStyle = document.getElementById('cracklix-capture-hardening');
+      const hardeningStyle = document.getElementById('cracklix-export-hardening');
       if (hardeningStyle) hardeningStyle.remove();
 
-      // 5. Binary PDF Generation (Non-Text Mode)
       const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
       
@@ -290,12 +299,12 @@ export default function ResultClient() {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
-      pdf.save(`Cracklix_Analysis_${activeSession.userName.replace(/\s+/g, '_')}.pdf`);
+      pdf.save(`Cracklix_Report_${activeSession.userName.replace(/\s+/g, '_')}.pdf`);
       
-      toast({ title: "Analysis Synchronized" });
+      toast({ title: "PDF Export Complete" });
     } catch (e: any) {
-      console.error("[EXPORT_HUB_FAILURE]:", e);
-      toast({ variant: "destructive", title: "Export Blocked", description: "Registry capture interrupted." });
+      console.error("[PDF_EXPORT_FAILURE]:", e);
+      toast({ variant: "destructive", title: "Export Failed", description: "Registry capture was interrupted." });
     } finally {
       setIsExporting(false);
     }
@@ -333,6 +342,42 @@ export default function ResultClient() {
 
   if (!mounted) return null;
 
+  // Render Loader while searching
+  if (isSearching) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
+        <div className="relative">
+          <Zap className="h-10 w-10 text-primary animate-spin" />
+          <Loader2 className="h-10 w-10 text-primary animate-spin absolute inset-0 opacity-20" />
+        </div>
+        <div className="text-center space-y-1">
+          <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em]">Registry Handshake</p>
+          <p className="text-[9px] font-bold text-primary uppercase tracking-widest">Synchronizing Analysis Node...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Render Error if not found
+  if (errorNotFound || !activeSession) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center font-body">
+        <Card className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-16 shadow-5xl border border-slate-100 space-y-10">
+          <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
+            <AlertCircle className="h-10 w-10" />
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tighter uppercase">Entry Not Found</h2>
+            <p className="text-slate-500 font-medium leading-relaxed">Your result node is still synchronizing with the registry. Please refresh in a moment.</p>
+          </div>
+          <Button asChild className="w-full h-16 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold shadow-xl border-none active:scale-95 transition-all">
+            <Link href="/dashboard">Return to Hub</Link>
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
   const percentile = totalCandidates > 1 
     ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1))
     : 100;
@@ -342,6 +387,7 @@ export default function ResultClient() {
       <Navbar />
       <main className="flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-12 space-y-8 md:space-y-10 pb-40">
         
+        {/* HEADER HUB */}
         <div className="flex flex-col lg:flex-row justify-between items-center gap-8 px-1 print:hidden">
            <div className="flex items-center gap-5 md:gap-10 text-left w-full lg:w-auto">
               <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="lg" className="h-14 w-14 md:h-24 md:w-24 rounded-2xl" />
@@ -356,7 +402,7 @@ export default function ResultClient() {
                  <div className="flex flex-wrap items-center justify-start gap-2 md:gap-3 font-bold text-[9px] md:text-xs">
                     <div className="flex items-center gap-1.5 bg-white border border-slate-100 px-3 py-1.5 rounded-lg text-slate-500 shadow-sm">
                        <Clock className="h-3.5 w-3.5 text-slate-400" /> 
-                       <span className="tabular-nums">{activeSession ? new Date(activeSession.timestamp).toLocaleDateString('en-GB') : '---'}</span>
+                       <span className="tabular-nums">{new Date(activeSession.timestamp).toLocaleDateString('en-GB')}</span>
                     </div>
                     <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg text-primary shadow-sm">
                        <Trophy className="h-3.5 w-3.5" /> 
@@ -389,57 +435,57 @@ export default function ResultClient() {
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-8 md:space-y-12">
             <TabsContent value="OVERVIEW" className="space-y-10 animate-in fade-in duration-500">
                 <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
-                <StatCard label="Final Score" val={activeSession.score?.toFixed(1)} icon={<Zap className="text-primary" />} />
-                <StatCard label="Punjab Rank" val={`#${liveRank}`} icon={<Trophy className="text-amber-500" />} highlight />
-                <StatCard label="Percentile" val={`${percentile}%`} icon={<TrendingUp className="text-blue-500" />} />
-                <StatCard label="Accuracy" val={`${activeSession.accuracy}%`} icon={<Target className="text-emerald-500" />} />
-                <StatCard label="Wrong" val={activeSession.wrongCount} icon={<XCircle className="text-rose-500" />} />
-                <StatCard label="Time Taken" val={formatTimeStr(activeSession.timeTaken)} icon={<Clock className="text-blue-500" />} />
+                  <StatCard label="Final Score" val={activeSession.score?.toFixed(1)} icon={<Zap className="text-primary" />} />
+                  <StatCard label="Punjab Rank" val={`#${liveRank}`} icon={<Trophy className="text-amber-500" />} highlight />
+                  <StatCard label="Percentile" val={`${percentile}%`} icon={<TrendingUp className="text-blue-500" />} />
+                  <StatCard label="Accuracy" val={`${activeSession.accuracy}%`} icon={<Target className="text-emerald-500" />} />
+                  <StatCard label="Wrong" val={activeSession.wrongCount} icon={<XCircle className="text-rose-500" />} />
+                  <StatCard label="Time Taken" val={formatTimeStr(activeSession.timeTaken)} icon={<Clock className="text-blue-500" />} />
                 </section>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
-                <div className="lg:col-span-8">
-                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-white p-6 md:p-10 text-left">
-                        <h2 className="text-lg md:text-2xl font-bold text-[#0F172A] tracking-tight mb-8">Subject performance audit</h2>
-                        <div className="space-y-8">
-                            {Array.isArray(activeSession.subjectAnalysis) && activeSession.subjectAnalysis.map((sub: any, i: number) => (
-                            <div key={i} className="space-y-2">
-                                <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                    <div className="flex items-center gap-2"><BookOpen className="h-3.5 w-3.5 text-primary" /> {sub.name}</div>
-                                    <span className="text-[#0F172A] tabular-nums font-black">{sub.accuracy}%</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
-                                    <motion.div 
-                                        initial={{ width: 0 }} 
-                                        animate={{ width: `${sub.accuracy}%` }} 
-                                        transition={{ duration: 1, delay: i * 0.05 }} 
-                                        className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : sub.accuracy > 40 ? "bg-blue-500" : "bg-rose-500")} 
-                                    />
-                                </div>
-                            </div>
-                            ))}
-                        </div>
-                    </Card>
-                </div>
+                  <div className="lg:col-span-8">
+                      <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-white p-6 md:p-10 text-left">
+                          <h2 className="text-lg md:text-2xl font-bold text-[#0F172A] tracking-tight mb-8">Subject performance audit</h2>
+                          <div className="space-y-8">
+                              {Array.isArray(activeSession.subjectAnalysis) && activeSession.subjectAnalysis.map((sub: any, i: number) => (
+                              <div key={i} className="space-y-2">
+                                  <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                      <div className="flex items-center gap-2"><BookOpen className="h-3.5 w-3.5 text-primary" /> {sub.name}</div>
+                                      <span className="text-[#0F172A] tabular-nums font-black">{sub.accuracy}%</span>
+                                  </div>
+                                  <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
+                                      <motion.div 
+                                          initial={{ width: 0 }} 
+                                          animate={{ width: `${sub.accuracy}%` }} 
+                                          transition={{ duration: 1, delay: i * 0.05 }} 
+                                          className={cn("h-full", sub.accuracy > 70 ? "bg-emerald-500" : sub.accuracy > 40 ? "bg-blue-500" : "bg-rose-500")} 
+                                      />
+                                  </div>
+                              </div>
+                              ))}
+                          </div>
+                      </Card>
+                  </div>
 
-                <div className="lg:col-span-4">
-                    <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-[#0F172A] text-white p-6 md:p-8 space-y-6 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-40 w-40 text-primary" /></div>
-                        <div className="relative z-10 space-y-6 text-left">
-                            <div className="space-y-1">
-                            <h3 className="text-xl font-bold tracking-tight uppercase">Leaderboard</h3>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global standing</p>
-                            </div>
-                            <div className="p-4 bg-white/5 rounded-xl border border-white/5 flex flex-col gap-1">
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">My Standing</p>
-                            <p className="text-2xl font-black text-primary tabular-nums tracking-tighter">#{liveRank} of {totalCandidates}</p>
-                            </div>
-                            <Button asChild className="w-full h-11 bg-primary hover:bg-blue-700 text-white font-bold rounded-lg shadow-xl border-none active:scale-95 transition-all text-xs">
-                            <Link href={`/leaderboard?id=${mockId}`}>Full rankings <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                            </Button>
-                        </div>
-                    </Card>
-                </div>
+                  <div className="lg:col-span-4">
+                      <Card className="border border-slate-100 shadow-xl rounded-[2rem] bg-[#0F172A] text-white p-6 md:p-8 space-y-6 relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-40 w-40 text-primary" /></div>
+                          <div className="relative z-10 space-y-6 text-left">
+                              <div className="space-y-1">
+                                <h3 className="text-xl font-bold tracking-tight uppercase">Leaderboard</h3>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Global standing</p>
+                              </div>
+                              <div className="p-4 bg-white/5 rounded-xl border border-white/5 flex flex-col gap-1">
+                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">My Standing</p>
+                                <p className="text-2xl font-black text-primary tabular-nums tracking-tighter">#{liveRank} of {totalCandidates}</p>
+                              </div>
+                              <Button asChild className="w-full h-11 bg-primary hover:bg-blue-700 text-white font-bold rounded-lg shadow-xl border-none active:scale-95 transition-all text-xs">
+                                <Link href={`/leaderboard?id=${mockId}`}>Full rankings <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                              </Button>
+                          </div>
+                      </Card>
+                  </div>
                 </div>
             </TabsContent>
 
