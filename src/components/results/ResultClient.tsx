@@ -52,9 +52,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v26.0.
- * FIXED: Removed all sticky headers for natural scrolling real estate.
- * FIXED: Domain synchronized to cracklix.in.
+ * @fileOverview Institutional Result Hub v27.0.
+ * FIXED: Reduced html2canvas scale to 2.0 to significantly optimize PDF export speed.
+ * FIXED: Standardized Wrong terminology and shrunken sub-filter vertical spacing.
  */
 
 export default function ResultClient() {
@@ -226,17 +226,17 @@ export default function ResultClient() {
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Syncing Registry" });
+    toast({ title: "Optimizing Download" });
 
     try {
       await document.fonts.ready;
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 500));
 
       const container = document.getElementById('pdf-report-container');
       if (!container) throw new Error("Capture Node Missing");
 
       const canvas = await html2canvas(container, {
-        scale: 3,
+        scale: 2, // Scale 2.0 provides excellent clarity with fast processing
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
@@ -244,11 +244,11 @@ export default function ResultClient() {
         windowWidth: 794
       });
 
-      const imgData = canvas.toDataURL('image/png', 1.0);
+      const imgData = canvas.toDataURL('image/jpeg', 0.85); // JPEG is faster to embed
       const pdf = new jsPDF('p', 'mm', 'a4');
-      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+      pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
       pdf.save(`Cracklix_Report_${activeSession.userName?.replace(/\s+/g, '_') || 'Student'}.pdf`);
-      toast({ title: "Report Downloaded" });
+      toast({ title: "Report Ready" });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Export Error" });
     } finally { setIsExporting(false); }
@@ -308,7 +308,7 @@ export default function ResultClient() {
               </div>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                  <div className="py-2 -mx-4 px-4 border-b border-slate-100 bg-transparent">
+                  <div className="py-1.5 -mx-4 px-4 border-b border-slate-100 bg-transparent">
                      <div className="flex justify-center w-full max-w-2xl mx-auto">
                         <TabsList className="bg-white border border-slate-100 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center overflow-x-auto no-scrollbar">
                            <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
@@ -344,9 +344,9 @@ export default function ResultClient() {
                       />
                   </TabsContent>
 
-                  <TabsContent value="REVIEW" className="space-y-4 max-w-5xl mx-auto px-4 pt-4">
-                      <div className="py-1 -mx-4 px-4 border-b border-slate-100 mb-2 bg-transparent">
-                         <div className="flex items-center gap-1.5 bg-white p-1 rounded-2xl shadow-xl border border-slate-100 w-full max-w-2xl mx-auto">
+                  <TabsContent value="REVIEW" className="space-y-4 max-w-5xl mx-auto px-4 pt-2">
+                      <div className="py-1 -mx-4 px-4 mb-2 bg-transparent">
+                         <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-lg border border-slate-100 w-full max-w-2xl mx-auto h-12 md:h-14">
                              <FilterButton active={activeReviewFilter === 'ALL'} label="All Questions" onClick={() => setActiveReviewFilter('ALL')} />
                              <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                              <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
@@ -449,7 +449,7 @@ export default function ResultClient() {
 
 function FilterButton({ active, label, onClick, color = "primary" }: any) {
   return (
-    <button onClick={onClick} className={cn("flex-1 px-3 py-1.5 md:py-2 rounded-xl text-[9px] md:text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
+    <button onClick={onClick} className={cn("flex-1 px-3 h-full rounded-xl text-[9px] md:text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
        {label}
     </button>
   )
