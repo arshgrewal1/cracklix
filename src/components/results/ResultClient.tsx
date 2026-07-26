@@ -41,7 +41,7 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v12.0 [Fixed Tabs & Icons].
+ * @fileOverview Universal Result Hub Viewer v12.1 [Fixed Card Tags & Icons].
  */
 
 export default function ResultClient() {
@@ -255,9 +255,9 @@ export default function ResultClient() {
                        </div>
                        <h1 className="text-xl md:text-3xl font-black text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
                        <div className="flex items-center gap-6 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">
-                          <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
-                          <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> {mockData?.duration || 120}m Duration</span>
-                          <span className="flex items-center gap-2"><Users className="h-4 w-4" /> {totalCandidates} Candidates</span>
+                          <HeaderMiniNode icon={<Clock className="h-3.5 w-3.5" />} label="Date" val={new Date(sessionData.timestamp).toLocaleDateString('en-GB')} />
+                          <HeaderMiniNode icon={<Clock className="h-3.5 w-3.5" />} label="Duration" val={`${mockData?.duration || 120}m`} />
+                          <HeaderMiniNode icon={<Users className="h-3.5 w-3.5" />} label="Candidates" val={totalCandidates.toLocaleString()} />
                        </div>
                     </div>
                  </div>
@@ -330,6 +330,16 @@ export default function ResultClient() {
   )
 }
 
+function HeaderMiniNode({ icon, label, val }: any) {
+  return (
+    <div className="flex items-center gap-2">
+       <span className="shrink-0">{icon}</span>
+       <span className="text-slate-400">{label}:</span>
+       <span className="text-[#071B4D] font-bold">{val}</span>
+    </div>
+  )
+}
+
 function FilterButton({ active, label, count, onClick, color = "primary" }: any) {
   return (
     <button onClick={onClick} className={cn(
@@ -340,3 +350,4 @@ function FilterButton({ active, label, count, onClick, color = "primary" }: any)
     </button>
   )
 }
+

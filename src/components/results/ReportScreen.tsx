@@ -19,8 +19,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v2.2 [Hardened].
- * FIXED: Standardized Title Case throughout the reporting module.
+ * @fileOverview Premium Analysis Screen v2.3 [Fixed Icon Imports].
+ * FIXED: Added missing icon imports to resolve runtime crashes.
  */
 
 interface ReportScreenProps {
@@ -167,10 +167,10 @@ export default function ReportScreen(props: ReportScreenProps) {
             <h3 className="text-lg font-black text-[#071B4D]">Competition snapshot</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <ComparisonPill label="Top score" val={topScore.toFixed(1)} icon={<Award className="text-amber-500" />} />
-            <ComparisonPill label="Avg score" val={avgScore.toFixed(1)} icon={<Activity className="text-blue-500" />} />
-            <ComparisonPill label="Avg accuracy" val={`${avgAccuracy.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500" />} />
-            <ComparisonPill label="Topper gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500" />} />
+            <ComparisonNode label="Top score" val={topScore.toFixed(1)} icon={<Award className="text-amber-500" />} />
+            <ComparisonNode label="Avg score" val={avgScore.toFixed(1)} icon={<Activity className="text-blue-500" />} />
+            <ComparisonNode label="Avg accuracy" val={`${avgAccuracy.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500" />} />
+            <ComparisonNode label="Topper gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500" />} />
          </div>
       </div>
 
@@ -219,7 +219,7 @@ function StatsBox({ label, val, sub, color }: any) {
    )
 }
 
-function ComparisonPill({ label, val, icon }: any) {
+function ComparisonNode({ label, val, icon }: any) {
    return (
       <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-[#E5EAF2] shadow-sm">
          <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center shrink-0">{icon}</div>

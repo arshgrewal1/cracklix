@@ -7,6 +7,11 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Hardened Notification Node v4.0.
+ * UPDATED: Re-positioned ToastViewport to top-center for maximum visibility in the PWA.
+ */
+
 const ToastProvider = ToastPrimitives.Provider
 
 const ToastViewport = React.forwardRef<

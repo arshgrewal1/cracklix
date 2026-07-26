@@ -23,6 +23,11 @@ const poppins = Poppins({
   preload: true,
 });
 
+/**
+ * @fileOverview Global Layout Registry v10.0 [PWA Screening Enabled].
+ * UPDATED: Enforced black-translucent status bar and viewport-fit cover for immersive PWA performance.
+ */
+
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
   description: "Punjab's most trusted government exam preparation platform. Practice Unlimited Mock Tests for PSSSB, PPSC, Punjab Police.",
