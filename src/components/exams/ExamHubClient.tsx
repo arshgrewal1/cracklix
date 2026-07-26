@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -49,8 +48,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v7.7.
- * FIXED: ReferenceError by correcting pyqQuery to pyqsQuery.
+ * @fileOverview Premium Exam Detail Hub v7.8.
+ * UPDATED: Systematically removed uppercase styling from labels and headers.
  */
 
 export default function ExamHubClient() {
@@ -162,15 +161,15 @@ export default function ExamHubClient() {
            </div>
         </div>
         <div className="space-y-3">
-          <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">Coming Soon</h1>
-          <p className="text-primary font-black text-[10px] md:text-xs uppercase tracking-[0.3em]">Mock available nahi hai</p>
+          <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">Coming soon</h2>
+          <p className="text-primary font-black text-[10px] md:text-xs tracking-tight">Mock available nahi hai</p>
           <p className="text-slate-500 font-medium leading-relaxed pt-4">
-            This preparation hub is currently being updated with the latest official patterns. Please check back later.
+            This preparation hub is currently being updated. Please check back later.
           </p>
         </div>
         <div className="pt-4">
            <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-bold text-sm shadow-3xl border-none transition-all active:scale-95">
-              <Link href="/exams"><ChevronRight className="h-4 w-4 mr-2" /> Back to Hub</Link>
+              <Link href="/exams"><ChevronRight className="h-4 w-4 mr-2" /> Back to hub</Link>
            </Button>
         </div>
       </div>
@@ -185,7 +184,7 @@ export default function ExamHubClient() {
          </div>
          <div className="text-center md:text-left space-y-0.5">
             <p className="text-lg md:text-2xl font-black tabular-nums text-[#0F172A]">{val}</p>
-            <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">{label}</p>
+            <p className="text-[9px] font-bold text-slate-400 tracking-tight">{label}</p>
          </div>
       </div>
     )
@@ -213,7 +212,7 @@ export default function ExamHubClient() {
      if (!data || data.length === 0) return (
         <div className="py-40 text-center opacity-20 flex flex-col items-center gap-6">
            <Zap className="h-20 w-20 text-slate-300" />
-           <p className="font-bold text-2xl md:text-4xl tracking-tight text-slate-400">Hub Standby</p>
+           <p className="font-bold text-2xl md:text-4xl tracking-tight text-slate-400">Hub standby</p>
         </div>
      );
 
@@ -221,7 +220,7 @@ export default function ExamHubClient() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
            {data.map((item: any, i: number) => (
               <motion.div key={item.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                 <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2.5rem] bg-white group h-full flex flex-col p-8 md:p-10 relative overflow-hidden">
+                 <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2.5rem] bg-white group h-full flex flex-col p-8 md:p-10 relative overflow-hidden text-left">
                     <div className="flex justify-between items-start mb-8">
                        <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-primary shadow-inner">
                           {isNote ? <FileText className="h-7 w-7" /> : isPYQ ? <FileStack className="h-7 w-7" /> : <Zap className="h-7 w-7" />}
@@ -232,7 +231,7 @@ export default function ExamHubClient() {
                     </div>
                     <div className="space-y-4 flex-1 space-y-4 text-left">
                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-primary tracking-tight">{item.difficulty || 'Standard'} Pattern</p>
+                          <p className="text-[10px] font-bold text-primary tracking-tight">{item.difficulty || 'Standard'} pattern</p>
                           <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight line-clamp-2">{item.title}</h3>
                        </div>
                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
@@ -244,7 +243,7 @@ export default function ExamHubClient() {
                        <Button asChild className="w-full h-14 md:h-16 rounded-2xl font-bold text-[10px] md:text-[11px] tracking-tight shadow-xl border-none active:scale-95 gap-3 bg-[#0F172A] hover:bg-black text-white">
                           <Link href={isNote || isPYQ ? (item.pdfUrl || '#') : `/mocks/instructions?id=${item.id}`}>
                              {isNote || isPYQ ? <Download className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
-                             {isNote || isPYQ ? "Download PDF" : "Start Preparation"}
+                             {isNote || isPYQ ? "Download PDF" : "Start preparation"}
                              <ChevronRight className="h-4 w-4 ml-auto opacity-40" />
                           </Link>
                        </Button>
@@ -276,7 +275,7 @@ export default function ExamHubClient() {
          <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
          
          <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-10 space-y-10">
-            <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs tracking-widest">
+            <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs">
                <Link href="/exams" className="hover:text-[#0F172A] transition-colors">Exams</Link>
                <ChevronRight className="h-3 w-3" />
                <span className="text-primary">{exam.name}</span>
@@ -292,15 +291,15 @@ export default function ExamHubClient() {
                   </div>
                   <div className="space-y-4 text-center md:text-left flex-1 min-w-0">
                     <h1 className="text-2xl sm:text-4xl md:text-5xl font-[800] tracking-tight leading-[1.1] text-[#0F172A] antialiased break-words">
-                       {exam.name} <br className="hidden md:block" /> <span className="text-primary italic">Preparation Hub</span>
+                       {exam.name} <br className="hidden md:block" /> <span className="text-primary italic">Preparation hub</span>
                     </h1>
                     <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl line-clamp-2">
                        {exam.description || "Master the official Punjab recruitment pattern with verified practice series."}
                     </p>
                     <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 pt-2">
-                       <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-tight">Verified Test Hub</Badge>
+                       <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-tight">Verified test hub</Badge>
                        <span className="text-[11px] md:text-sm font-medium text-slate-400 flex items-center gap-2">
-                          <Users className="h-4 w-4 text-primary" /> {platformStats?.totalUsers?.toLocaleString() || "..."}+ Aspirants Active
+                          <Users className="h-4 w-4 text-primary" /> {platformStats?.totalUsers?.toLocaleString() || "..."}+ Aspirants active
                        </span>
                     </div>
                   </div>
@@ -318,7 +317,7 @@ export default function ExamHubClient() {
                       )}
                     >
                        {isPinning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className={cn("h-4 w-4", isPinned && "fill-current")} />}
-                       {isPinned ? "Pinned to My Exams" : "Add to Dashboard"}
+                       {isPinned ? "Pinned to my exams" : "Add to dashboard"}
                     </Button>
                   )}
                   <Button asChild className="h-14 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white rounded-2xl font-bold text-sm tracking-tight gap-3 shadow-2xl border-none active:scale-95 transition-all">
@@ -328,25 +327,25 @@ export default function ExamHubClient() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10 border-t border-slate-100">
-               <HeroStat icon={Zap} label="Tests Available" val={stats.totalTests} />
-               <HeroStat icon={FileStack} label="Old Papers" val={groupedContent.PYQ.length} />
-               <HeroStat icon={Target} label="My Progress" val={user ? `${stats.attempted}` : 'Login'} />
-               <HeroStat icon={Trophy} label="Rank Status" val={stats.attempted > 0 ? "Active" : "Not Active"} />
+               <HeroStat icon={Zap} label="Tests available" val={stats.totalTests} />
+               <HeroStat icon={FileStack} label="Old papers" val={groupedContent.PYQ.length} />
+               <HeroStat icon={Target} label="My progress" val={user ? `${stats.attempted}` : 'Login'} />
+               <HeroStat icon={Trophy} label="Rank status" val={stats.attempted > 0 ? "Active" : "Not active"} />
             </div>
          </div>
       </section>
 
-      <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-w-7xl pb-40 space-y-12">
+      <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-w-7xl pb-40 space-y-12 text-left">
          <Tabs defaultValue="MOCK" className="space-y-10">
             <div className="sticky top-[84px] md:top-[116px] z-[45] bg-[#F8FAFC]/90 backdrop-blur-md -mx-4 px-4 py-4 border-b border-slate-100">
                <div className="bg-white border border-slate-200 shadow-xl rounded-[24px] p-1.5 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">
                   <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-start gap-1.5 overflow-x-auto no-scrollbar snap-x">
-                     <HubTab value="MOCK" icon={<Zap className="h-4 w-4" />} label="Mock Series" />
-                     <HubTab value="SUBJECT" icon={<BookOpen className="h-4 w-4" />} label="Subject Tests" />
-                     <HubTab value="SECTIONAL" icon={<Layers className="h-4 w-4" />} label="Sectional Tests" />
-                     <HubTab value="PYQ" icon={<FileStack className="h-4 w-4" />} label="Old Papers" />
-                     <HubTab value="NOTES" icon={<FileText className="h-4 w-4" />} label="Study Notes" />
-                     <HubTab value="CA" icon={<Newspaper className="h-4 w-4" />} label="Current Affairs" />
+                     <HubTab value="MOCK" icon={<Zap className="h-4 w-4" />} label="Mock series" />
+                     <HubTab value="SUBJECT" icon={<BookOpen className="h-4 w-4" />} label="Subject tests" />
+                     <HubTab value="SECTIONAL" icon={<Layers className="h-4 w-4" />} label="Sectional tests" />
+                     <HubTab value="PYQ" icon={<FileStack className="h-4 w-4" />} label="Old papers" />
+                     <HubTab value="NOTES" icon={<FileText className="h-4 w-4" />} label="Study notes" />
+                     <HubTab value="CA" icon={<Newspaper className="h-4 w-4" />} label="Current affairs" />
                   </TabsList>
                </div>
             </div>
@@ -363,16 +362,16 @@ export default function ExamHubClient() {
                                   <div className="h-16 w-16 md:h-20 md:w-20 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                                     <BookOpen className="h-8 w-8" />
                                   </div>
-                                  <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-bold text-[9px] tracking-widest">Subject Hub</Badge>
+                                  <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-bold text-[9px] tracking-tight">Subject hub</Badge>
                               </div>
                               <div className="space-y-4 flex-1">
                                   <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight tracking-tight">{sub.name}</h3>
-                                  <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest flex items-center gap-2">
-                                    <Zap className="h-3.5 w-3.5 text-primary" /> Multi-series Active
+                                  <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-tight flex items-center gap-2">
+                                    <Zap className="h-3.5 w-3.5 text-primary" /> Multi-series active
                                   </p>
                               </div>
                               <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between text-primary font-bold text-[10px] tracking-tight">
-                                  <span>View Tests</span>
+                                  <span>View tests</span>
                                   <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                               </div>
                             </Card>

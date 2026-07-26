@@ -41,8 +41,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Card v12.4.
- * UPDATED: Replaced "MCQ Node" with "MCQs" in stats.
+ * @fileOverview Premium Enterprise Exam Dashboard Card v12.5.
+ * UPDATED: Removed all uppercase styling and normalized terminology.
  */
 export default function ExamCard({ 
   exam, 
@@ -114,9 +114,9 @@ export default function ExamCard({
   };
 
   const buttonConfig = useMemo(() => {
-    if (stats.completed > 0 && stats.progress === 100) return { label: "View Analysis", icon: BarChart3, variant: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200" };
-    if (stats.completed > 0) return { label: "Continue Prep", icon: RefreshCw, variant: "bg-primary hover:bg-blue-700 shadow-blue-200" };
-    return { label: "Start Preparation", icon: Play, variant: "bg-[#0F172A] dark:bg-primary hover:bg-black dark:hover:bg-blue-600 text-white" };
+    if (stats.completed > 0 && stats.progress === 100) return { label: "View analysis", icon: BarChart3, variant: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200" };
+    if (stats.completed > 0) return { label: "Continue prep", icon: RefreshCw, variant: "bg-primary hover:bg-blue-700 shadow-blue-200" };
+    return { label: "Start preparation", icon: Play, variant: "bg-[#0F172A] dark:bg-primary hover:bg-black dark:hover:bg-blue-600 text-white" };
   }, [stats]);
 
   if (!exam) return null;
@@ -133,11 +133,11 @@ export default function ExamCard({
           
           <div className="p-6 md:p-8 flex justify-between items-center w-full relative z-10">
             <div className="flex items-center gap-2">
-               <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg">
-                 Official Hub
+               <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black px-3 py-1 rounded-lg">
+                 Official hub
                </Badge>
                {exam.isTrending && (
-                  <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border-none text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
+                  <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border-none text-[9px] font-black px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
                     <ShieldCheck className="h-3 w-3" /> Verified
                   </Badge>
                )}
@@ -166,7 +166,7 @@ export default function ExamCard({
             </div>
 
             <div className="space-y-3 mb-8">
-               <h3 className="text-xl md:text-3xl font-black text-foreground leading-tight group-hover:text-primary transition-colors tracking-tight line-clamp-2 min-h-[2.2em] uppercase">
+               <h3 className="text-xl md:text-3xl font-black text-foreground leading-tight group-hover:text-primary transition-colors tracking-tight line-clamp-2 min-h-[2.2em]">
                  {exam.name}
                </h3>
                <p className="text-muted-foreground font-medium text-[13px] md:text-[15px] line-clamp-3 leading-relaxed">
@@ -175,7 +175,7 @@ export default function ExamCard({
             </div>
 
             <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-8 border-t border-border text-left">
-               {stats.mocks > 0 && <StatRow label="Full Mocks" val={stats.mocks} icon={Zap} />}
+               {stats.mocks > 0 && <StatRow label="Full mocks" val={stats.mocks} icon={Zap} />}
                {stats.subjects > 0 && <StatRow label="Subjects" val={stats.subjects} icon={BookOpen} />}
                {stats.pyqs > 0 && <StatRow label="Archives" val={stats.pyqs} icon={FileStack} />}
                {stats.questions > 0 && <StatRow label="MCQs" val={stats.questions} icon={Layers} />}
@@ -184,8 +184,8 @@ export default function ExamCard({
 
             {user && stats.totalTests > 0 && (
                <div className="space-y-3 mt-10 text-left">
-                  <div className="flex justify-between items-center text-[9px] font-black uppercase text-muted-foreground tracking-widest">
-                     <span className="flex items-center gap-2"><Target className="h-3.5 w-3.5 text-primary" /> Mastery Index</span>
+                  <div className="flex justify-between items-center text-[9px] font-black text-muted-foreground">
+                     <span className="flex items-center gap-2"><Target className="h-3.5 w-3.5 text-primary" /> Mastery index</span>
                      <span className="text-primary tabular-nums">{stats.progress}%</span>
                   </div>
                   <div className="h-2 w-full bg-muted rounded-full overflow-hidden shadow-inner">
@@ -201,7 +201,7 @@ export default function ExamCard({
 
             <div className="mt-10 pt-4">
                <Button className={cn(
-                  "w-full h-[64px] rounded-2xl text-white font-black uppercase text-[10px] md:text-[12px] tracking-widest transition-all active:scale-95 border-none shadow-2xl flex items-center justify-between px-8",
+                  "w-full h-[64px] rounded-2xl text-white font-black text-[10px] md:text-[12px] transition-all active:scale-95 border-none shadow-2xl flex items-center justify-between px-8",
                   buttonConfig.variant
                )}>
                   <div className="flex items-center gap-3">
