@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState, useMemo, useEffect, useCallback } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useFirestore } from "@/firebase"
@@ -44,9 +44,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Engine v99.0 [REGISTRY SYNC].
- * FIXED: Implemented high-frequency polling to handle Firestore write propagation delays.
- * FIXED: Added missing icon imports.
+ * @fileOverview Universal Result Hub Engine v100.0 [INDEX ERROR FIXED].
+ * FIXED: Replaced complex Firestore query with client-side sort for 'Discovery Path' 
+ * to bypass the need for composite indexes (mockId + userId + timestamp).
  */
 
 export default function ResultClient() {
@@ -77,34 +77,37 @@ export default function ResultClient() {
     if (!db) return false;
 
     try {
-       console.log(`[Result_Hub] Audit initiated for attempt node: ${attemptIdFromUrl || mockId}`);
-
-       // 1. PRIMARY: DIRECT ATTEMPT ID LOOKUP
+       // 1. PRIMARY: DIRECT ATTEMPT ID LOOKUP (Highest Speed)
        if (attemptIdFromUrl) {
           const snap = await getDoc(doc(db, "results", attemptIdFromUrl));
           if (snap.exists()) {
-             console.log("[Result_Hub] Result document verified in cloud.");
              setSessionData({ ...snap.data(), id: snap.id });
              setIsSearching(false);
              return true;
           }
        }
 
-       // 2. SECONDARY: LATEST ATTEMPT DISCOVERY (FOR LOGGED IN USERS)
+       // 2. SECONDARY: DISCOVERY PATH (FOR LOGGED IN USERS)
+       // FIXED: Removed orderBy('timestamp') to bypass Firebase Index requirement.
+       // We fetch equality results and sort in JS for high-fidelity discovery.
        if (user && mockId && !attemptIdFromUrl) {
           const resultsRef = collection(db, "results");
           const q = query(
             resultsRef, 
             where("userId", "==", user.uid), 
-            where("mockId", "==", mockId),
-            orderBy("timestamp", "desc"),
-            limit(1)
+            where("mockId", "==", mockId)
           );
           const snap = await getDocs(q);
           if (!snap.empty) {
-             const data = snap.docs[0].data();
-             console.log("[Result_Hub] Discovered latest attempt via registry lookup.");
-             setSessionData({ ...data, id: snap.docs[0].id });
+             const allAttempts = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+             // Sort by timestamp descending client-side
+             const latest = allAttempts.sort((a: any, b: any) => {
+                const tA = new Date(a.timestamp).getTime();
+                const tB = new Date(b.timestamp).getTime();
+                return tB - tA;
+             })[0];
+
+             setSessionData(latest);
              setIsSearching(false);
              return true;
           }
@@ -117,7 +120,6 @@ export default function ResultClient() {
           const localData = localStorage.getItem(guestKey);
           if (localData) {
              const parsed = JSON.parse(localData);
-             console.log("[Result_Hub] Retrieval successful via guest storage fallback.");
              setSessionData({ ...parsed, isGuestNode: true });
              setIsSearching(false);
              return true;
@@ -141,11 +143,10 @@ export default function ResultClient() {
        const found = await fetchResultNode();
        if (!found && isSubscribed) {
           setPollCount(prev => {
-             if (prev < 20) { // 20 attempts (~30 seconds total)
+             if (prev < 15) { // 15 attempts (~22 seconds total)
                 timer = setTimeout(runPoll, 1500);
                 return prev + 1;
              } else {
-                console.warn("[Result_Hub] Discovery timeout. Node not propagated.");
                 setIsSearching(false);
                 return prev;
              }
@@ -198,14 +199,14 @@ export default function ResultClient() {
               for (let i=0; i<qIds.length; i+=30) chunks.push(qIds.slice(i, i+30));
               
               const promises = chunks.map(async c => {
-                const [qSnap, uSnap] = await Promise.all([
+                const [qSnap, uSnap, lSnap] = await Promise.all([
                    getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", c))),
                    getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", c))),
                    getDocs(query(collection(db, "questions"), where(documentId(), "in", c)))
                 ]);
                 const qDocs = qSnap.docs.map(d => d.data());
                 const uDocs = uSnap.docs.map(d => d.data());
-                const lDocs = legacySnap.docs.map(d => d.data());
+                const lDocs = lSnap.docs.map(d => d.data());
                 return [...qDocs, ...uDocs, ...lDocs];
               });
 

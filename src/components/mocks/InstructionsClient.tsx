@@ -6,7 +6,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useFirestore, useUser } from "@/firebase";
-import { doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,8 +24,9 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v6.5.
- * FIXED: 'View Analysis' intelligently finds the latest attemptId.
+ * @fileOverview Official Test Rules Hub v6.6 [INDEX ERROR FIXED].
+ * FIXED: Removed orderBy from latest attempt discovery to bypass composite index requirement.
+ * Logic: Fetches attempts for the user/mock vertical and sorts client-side.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -87,16 +88,22 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
         if (user) {
           const resultsRef = collection(db, "results");
+          // FIXED: Query without orderBy to avoid index requirement error
           const q = query(
             resultsRef, 
             where("userId", "==", user.uid), 
-            where("mockId", "==", activeId),
-            orderBy("timestamp", "desc"),
-            limit(1)
+            where("mockId", "==", activeId)
           );
           const snap = await getDocs(q);
           if (!snap.empty) {
-            setLatestAttemptId(snap.docs[0].id);
+            // Sort client-side to find latest
+            const attempts = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+            const latest = attempts.sort((a: any, b: any) => {
+               const tA = new Date(a.timestamp).getTime();
+               const tB = new Date(b.timestamp).getTime();
+               return tB - tA;
+            })[0];
+            setLatestAttemptId(latest.id);
           }
         } else {
           const guestResult = localStorage.getItem(`cracklix_guest_result_${activeId}`);
