@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -11,7 +12,8 @@ import {
   Users,
   Trophy,
   Landmark,
-  LucideIcon
+  LucideIcon,
+  ShieldAlert
 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -21,8 +23,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional About Center v24.0.
- * UPDATED: Replaced picsum with local founder asset for build stability.
+ * @fileOverview Institutional About Center v25.0.
+ * UPDATED: Conditional founder image visibility node based on security settings.
  */
 
 interface Stats {
@@ -40,7 +42,10 @@ export default function AboutPage() {
   }, []);
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") as DocumentReference<Stats> : null), [db]);
+  const settingsRef = useMemo(() => (db ? doc(db, "settings", "global") : null), [db]);
+  
   const { data: stats } = useDoc<Stats>(statsRef);
+  const { data: settings } = useDoc<any>(settingsRef);
 
   const liveStats = useMemo(() => {
     const totalUsers = stats?.totalUsers || 0;
@@ -59,6 +64,8 @@ export default function AboutPage() {
       hubs: totalExams.toString() + "+"
     };
   }, [stats]);
+
+  const showImage = settings?.showFounderImage !== false;
 
   return (
     <div className="min-h-screen bg-[#020817] text-white font-body overflow-x-hidden selection:bg-primary/30 text-left">
@@ -111,18 +118,32 @@ export default function AboutPage() {
                     viewport={{ once: true }}
                     className="lg:col-span-5 relative"
                  >
-                    <div className="relative aspect-[4/5] rounded-[2rem] md:rounded-[3.5rem] overflow-hidden border border-white/10 shadow-5xl group bg-[#0B1528] max-w-[280px] md:max-w-none mx-auto">
-                      <Image
-                        src="/founder.png"
-                        alt="Arsh Grewal"
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
-                        className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
-                        priority
-                        data-ai-hint="professional man"
-                      />
-                       <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent opacity-80" />
-                       <div className="absolute bottom-6 left-6 right-6">
+                    <div className="relative aspect-[4/5] rounded-[2rem] md:rounded-[3.5rem] overflow-hidden border border-white/10 shadow-5xl group bg-[#0B1528] max-w-[280px] md:max-w-none mx-auto flex items-center justify-center">
+                      {showImage ? (
+                        <>
+                          <Image
+                            src="/founder.png"
+                            alt="Arsh Grewal"
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+                            className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+                            priority
+                            data-ai-hint="professional man"
+                          />
+                           <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent opacity-80" />
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-12 text-center space-y-6">
+                           <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
+                              <ShieldCheck className="h-12 w-12 text-primary animate-pulse" />
+                           </div>
+                           <div className="space-y-1">
+                              <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Identity Secured</p>
+                              <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-tight">Institutional protection active</p>
+                           </div>
+                        </div>
+                      )}
+                       <div className="absolute bottom-6 left-6 right-6 z-10">
                           <p className="text-lg md:text-2xl font-black uppercase tracking-tight">Arsh Grewal</p>
                           <p className="text-primary font-black uppercase text-[7px] md:text-[8px] tracking-[0.4em]">Founder</p>
                        </div>
@@ -165,7 +186,7 @@ export default function AboutPage() {
                  </div>
                  <div className="relative z-10 space-y-4 md:space-y-6">
                     <h2 className="text-2xl md:text-5xl font-headline font-black uppercase text-white tracking-tight leading-none">Ready to start <br/> your journey?</h2>
-                    <Button asChild className="h-12 md:h-16 px-8 md:px-14 bg-white text-[#0B1528] hover:bg-slate-100 font-black uppercase text-[9px] md:text-[11px] tracking-gl.2em] rounded-xl md:rounded-2xl shadow-3xl gap-2 border-none">
+                    <Button asChild className="h-12 md:h-16 px-8 md:px-14 bg-white text-[#0B1528] hover:bg-slate-100 font-black uppercase text-[9px] md:text-[11px] tracking-widest rounded-xl md:rounded-2xl shadow-3xl gap-2 border-none">
                        <Link href="/login">Join the Cracklix Hub <ChevronRight className="h-4 w-4" /></Link>
                     </Button>
                  </div>

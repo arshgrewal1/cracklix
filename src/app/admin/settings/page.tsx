@@ -40,11 +40,13 @@ import {
   Heart,
   Loader2,
   ExternalLink,
-  Image as ImageIcon,
+  ImageIcon,
   Stamp,
   FileBadge,
   ClipboardList,
-  Layers
+  Layers,
+  EyeOff,
+  Eye
 } from "lucide-react"
 import { useDoc, useFirestore, useUser } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -134,7 +136,8 @@ export default function AdminSettings() {
     founderMission: "To build Punjab's most trusted exam preparation platform.",
     founderCommitment: "Committed to continuously evolving this platform.",
     founderBuildingSince: "19 July 2026",
-    founderEmail: "cracklixhelp@gmail.com"
+    founderEmail: "cracklixhelp@gmail.com",
+    showFounderImage: true
   });
 
   const [distData, setDistData] = useState<DistributionSettings>(DEFAULT_DISTRIBUTION);
@@ -401,16 +404,25 @@ export default function AdminSettings() {
 
         <TabsContent value="founder" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
            <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-5 md:p-12 space-y-10 border border-slate-50 text-left">
-              <div className="space-y-1">
-                 <h3 className="text-xl md:text-3xl font-black text-[#0F172A]">Founder Identity</h3>
-                 <p className="text-slate-400 font-medium text-xs md:text-base">Manage the visionary profile nodes for the "Meet Founder" hub.</p>
+              <div className="flex items-center justify-between border-b border-slate-50 pb-6">
+                <div className="space-y-1">
+                  <h3 className="text-xl md:text-3xl font-black text-[#0F172A]">Founder Identity</h3>
+                  <p className="text-slate-400 font-medium text-xs md:text-base">Manage the visionary profile nodes for the "Meet Founder" hub.</p>
+                </div>
+                <div className={cn("p-4 rounded-xl border flex items-center gap-4 transition-all", formData.showFounderImage ? "bg-emerald-50 border-emerald-100" : "bg-rose-50 border-rose-100")}>
+                   <div className="space-y-0.5 text-right">
+                      <p className="text-[10px] font-black text-[#0F172A] uppercase">Show Profile Photo</p>
+                      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Security Toggle</p>
+                   </div>
+                   <Switch checked={formData.showFounderImage} onCheckedChange={v => setFormData({...formData, showFounderImage: v})} />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div className="space-y-6">
                     <FormNode label="Founder Name" value={formData.founderName} onChange={v => setFormData({...formData, founderName: v})} />
                     <FormNode label="Institutional Role" value={formData.founderRole} onChange={v => setFormData({...formData, founderRole: v})} />
-                    <FormNode label="Official Email" value={formData.founderEmail} onChange={v => setFormData({...formData, founderEmail: v})} />
+                    <FormNode label="Official Email" value={founder.founderEmail} onChange={v => setFormData({...formData, founderEmail: v})} />
                     <FormNode label="Registry Date" value={formData.founderBuildingSince} onChange={v => setFormData({...formData, founderBuildingSince: v})} />
                  </div>
                  <div className="space-y-6">

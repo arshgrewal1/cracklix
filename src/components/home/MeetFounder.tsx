@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from "react";
@@ -10,7 +11,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Refined Meet Founder Section v7.3 [Uppercase Removed].
+ * @fileOverview Refined Meet Founder Section v7.4.
+ * UPDATED: Conditional visibility for founder image.
  */
 export default function MeetFounder() {
   const db = useFirestore();
@@ -21,6 +23,7 @@ export default function MeetFounder() {
     name: settings?.founderName || "Arsh Grewal",
     bio: settings?.founderBio || "I'm Arsh Grewal, a student from Punjab dedicated to building Punjab's smartest exam preparation platform.",
     quote: settings?.founderQuote || "Empowering every aspirant in Punjab with institutional-grade technology.",
+    showImage: settings?.showFounderImage !== false
   };
 
   return (
@@ -81,18 +84,32 @@ export default function MeetFounder() {
             viewport={{ once: true }}
             className="relative shrink-0"
           >
-            <div className="relative h-64 w-64 md:h-[420px] md:w-[420px] rounded-[3rem] overflow-hidden border-8 border-white shadow-5xl bg-[#0B1528]">
-              <Image
-                src="/founder.png"
-                alt={founder.name}
-                fill
-                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
-                priority
-              />
+            <div className="relative h-64 w-64 md:h-[420px] md:w-[420px] rounded-[3rem] overflow-hidden border-8 border-white shadow-5xl bg-[#0B1528] flex items-center justify-center">
+              {founder.showImage ? (
+                <Image
+                  src="/founder.png"
+                  alt={founder.name}
+                  fill
+                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+                  priority
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center p-12 text-center space-y-6">
+                  <div className="h-20 w-20 rounded-[1.5rem] bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
+                    <ShieldCheck className="h-10 w-10 text-primary animate-pulse" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[11px] font-black text-primary uppercase tracking-[0.2em]">Security Protocol</p>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none">Photo hidden by admin</p>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="absolute -bottom-4 -right-4 h-16 w-16 md:h-20 md:w-20 bg-primary rounded-3xl border-8 border-white shadow-2xl flex items-center justify-center text-white">
-              <Check className="h-8 w-8 md:h-10 md:w-10 stroke-[4px]" />
-            </div>
+            {founder.showImage && (
+              <div className="absolute -bottom-4 -right-4 h-16 w-16 md:h-20 md:w-20 bg-primary rounded-3xl border-8 border-white shadow-2xl flex items-center justify-center text-white">
+                <Check className="h-8 w-8 md:h-10 md:w-10 stroke-[4px]" />
+              </div>
+            )}
           </motion.div>
 
         </div>

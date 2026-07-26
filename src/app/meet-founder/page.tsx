@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from "react";
@@ -16,7 +17,8 @@ import {
   Star,
   Calendar,
   Briefcase,
-  MapPin
+  MapPin,
+  ShieldAlert
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,8 +27,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Official Meet the Founder Page v3.0.
- * UPDATED: Fully synchronized with System Portal data.
+ * @fileOverview Official Meet the Founder Page v3.1.
+ * UPDATED: Respecting showFounderImage security toggle.
  */
 export default function MeetFounderPage() {
   const db = useFirestore();
@@ -41,7 +43,8 @@ export default function MeetFounderPage() {
     mission: settings?.founderMission || "To build Punjab's smartest, most trusted and student-first exam preparation platform where every aspirant gets access to quality mock tests and a premium preparation experience.",
     commitment: settings?.founderCommitment || "I am committed to continuously evolving this platform into Punjab's most trusted learning node. My goal is to ensure that quality preparation is accessible, affordable, and accurate for everyone—from Bathinda to Amritsar.",
     buildingSince: settings?.founderBuildingSince || "19 July 2026",
-    email: settings?.founderEmail || settings?.supportEmail || "cracklixhelp@gmail.com"
+    email: settings?.founderEmail || settings?.supportEmail || "cracklixhelp@gmail.com",
+    showImage: settings?.showFounderImage !== false
   };
 
   return (
@@ -60,18 +63,32 @@ export default function MeetFounderPage() {
                 transition={{ duration: 0.8 }}
                 className="relative shrink-0"
               >
-                <div className="relative h-64 w-64 md:h-[450px] md:w-[450px] rounded-[3rem] overflow-hidden border-8 border-white shadow-5xl bg-[#0B1528]">
-                  <Image
-                    src="/founder.png"
-                    alt={founder.name}
-                    fill
-                    className="object-cover grayscale hover:grayscale-0 transition-all duration-1000"
-                    priority
-                  />
+                <div className="relative h-64 w-64 md:h-[450px] md:w-[450px] rounded-[3rem] overflow-hidden border-8 border-white shadow-5xl bg-[#0B1528] flex items-center justify-center">
+                  {founder.showImage ? (
+                    <Image
+                      src="/founder.png"
+                      alt={founder.name}
+                      fill
+                      className="object-cover grayscale hover:grayscale-0 transition-all duration-1000"
+                      priority
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-12 text-center space-y-8">
+                       <div className="h-32 w-32 rounded-[2.5rem] bg-primary/10 flex items-center justify-center border border-primary/20 shadow-2xl">
+                          <ShieldCheck className="h-16 w-16 text-primary animate-pulse" />
+                       </div>
+                       <div className="space-y-2">
+                          <h3 className="text-xl font-black text-white uppercase tracking-tighter">Security Node Active</h3>
+                          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Founder identity protected</p>
+                       </div>
+                    </div>
+                  )}
                 </div>
-                <div className="absolute -bottom-6 -right-6 h-20 w-20 bg-primary rounded-3xl border-8 border-white shadow-2xl flex items-center justify-center text-white">
-                  <Check className="h-10 w-10 stroke-[3px]" />
-                </div>
+                {founder.showImage && (
+                  <div className="absolute -bottom-6 -right-6 h-20 w-20 bg-primary rounded-3xl border-8 border-white shadow-2xl flex items-center justify-center text-white">
+                    <Check className="h-10 w-10 stroke-[3px]" />
+                  </div>
+                )}
               </motion.div>
 
               <div className="flex-1 space-y-8 text-center lg:text-left">
@@ -184,7 +201,7 @@ function MinimalStat({ value, label, icon: Icon }: { value: string, label: strin
           <p className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">
             {value}
           </p>
-          <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
        </div>
     </div>
   );
