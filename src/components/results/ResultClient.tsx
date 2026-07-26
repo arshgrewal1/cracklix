@@ -44,9 +44,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Engine v100.0 [INDEX ERROR FIXED].
- * FIXED: Replaced complex Firestore query with client-side sort for 'Discovery Path' 
- * to bypass the need for composite indexes (mockId + userId + timestamp).
+ * @fileOverview Universal Result Hub Engine v101.0.
+ * FIXED: Time display showing 0M for short sessions.
+ * UPDATED: Purged uppercase styling and reduced font scales.
  */
 
 export default function ResultClient() {
@@ -73,11 +73,18 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams.get('attemptId')
 
+  const formatTimeTaken = (totalSeconds: number) => {
+    if (!totalSeconds || totalSeconds <= 0) return "0s";
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+  };
+
   const fetchResultNode = useCallback(async () => {
     if (!db) return false;
 
     try {
-       // 1. PRIMARY: DIRECT ATTEMPT ID LOOKUP (Highest Speed)
        if (attemptIdFromUrl) {
           const snap = await getDoc(doc(db, "results", attemptIdFromUrl));
           if (snap.exists()) {
@@ -87,9 +94,6 @@ export default function ResultClient() {
           }
        }
 
-       // 2. SECONDARY: DISCOVERY PATH (FOR LOGGED IN USERS)
-       // FIXED: Removed orderBy('timestamp') to bypass Firebase Index requirement.
-       // We fetch equality results and sort in JS for high-fidelity discovery.
        if (user && mockId && !attemptIdFromUrl) {
           const resultsRef = collection(db, "results");
           const q = query(
@@ -100,7 +104,6 @@ export default function ResultClient() {
           const snap = await getDocs(q);
           if (!snap.empty) {
              const allAttempts = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-             // Sort by timestamp descending client-side
              const latest = allAttempts.sort((a: any, b: any) => {
                 const tA = new Date(a.timestamp).getTime();
                 const tB = new Date(b.timestamp).getTime();
@@ -113,7 +116,6 @@ export default function ResultClient() {
           }
        }
 
-       // 3. TERTIARY: GUEST FALLBACK (LOCAL STORAGE)
        if (typeof window !== 'undefined' && mockId) {
           const lookupId = attemptIdFromUrl || mockId;
           const guestKey = `cracklix_guest_result_${lookupId}`;
@@ -143,7 +145,7 @@ export default function ResultClient() {
        const found = await fetchResultNode();
        if (!found && isSubscribed) {
           setPollCount(prev => {
-             if (prev < 15) { // 15 attempts (~22 seconds total)
+             if (prev < 15) {
                 timer = setTimeout(runPoll, 1500);
                 return prev + 1;
              } else {
@@ -162,7 +164,6 @@ export default function ResultClient() {
     };
   }, [fetchResultNode, userLoading]);
 
-  // Load Metadata once Result Node is Found
   useEffect(() => {
      if (!db || !sessionData) return;
      const mId = mockId || sessionData.mockId;
@@ -259,7 +260,7 @@ export default function ResultClient() {
                  <Zap className="absolute inset-0 m-auto h-6 w-6 text-primary animate-pulse" />
               </div>
               <div className="text-center space-y-2">
-                 <p className="font-black uppercase tracking-[0.4em] text-[#0F172A] text-sm">Generating your report</p>
+                 <p className="font-black tracking-[0.4em] text-[#0F172A] text-sm uppercase">Generating your report</p>
                  <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Registry synchronization in progress...</p>
               </div>
            </div>
@@ -273,19 +274,19 @@ export default function ResultClient() {
                           <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 font-bold text-[9px] rounded-lg shadow-sm">Verified result</Badge>
                           {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-3 font-bold text-[9px] rounded-lg shadow-sm">Guest mode</Badge>}
                        </div>
-                       <h1 className="text-xl md:text-4xl font-bold text-[#0F172A] tracking-tight truncate">{sessionData.mockTitle}</h1>
-                       <div className="flex items-center gap-4 text-xs font-semibold text-slate-400 uppercase tracking-tight">
+                       <h1 className="text-xl md:text-3xl font-bold text-[#0F172A] tracking-tight truncate">{sessionData.mockTitle}</h1>
+                       <div className="flex items-center gap-4 text-xs font-semibold text-slate-400 tracking-tight">
                           <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
-                          <span className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4" /> {Math.round((sessionData.timeTaken || 0) / 60)}m</span>
+                          <span className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
                        </div>
                     </div>
                  </div>
                  <div className="flex items-center gap-3 w-full lg:w-auto">
                     <Button onClick={() => router.refresh()} className="flex-1 lg:flex-none h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-xs transition-all active:scale-95 border-none shadow-lg">
-                       <RefreshCw className="h-4 w-4" /> Sync Hub
+                       <RefreshCw className="h-4 w-4" /> Refresh analysis
                     </Button>
                     <Button asChild variant="outline" className="flex-1 lg:flex-none h-12 px-8 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-xs transition-all active:scale-95 shadow-sm">
-                       <Link href={`/mocks/instructions?id=${mockId || sessionData.mockId}&retake=true`}>Retake Test</Link>
+                       <Link href={`/mocks/instructions?id=${mockId || sessionData.mockId}&retake=true`}>Retake test</Link>
                     </Button>
                  </div>
               </Card>
@@ -293,8 +294,8 @@ export default function ResultClient() {
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-10">
                   <div className="flex justify-center">
                      <TabsList className="bg-slate-100 p-1 rounded-full border border-slate-200 flex w-fit h-auto shadow-inner">
-                        <TabsTrigger value="OVERVIEW" className="rounded-full px-8 md:px-12 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm uppercase tracking-tight">Analysis hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-full px-8 md:px-12 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm uppercase tracking-tight">Review portal</TabsTrigger>
+                        <TabsTrigger value="OVERVIEW" className="rounded-full px-8 md:px-12 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm tracking-tight">Analysis hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-full px-8 md:px-12 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-primary shadow-sm tracking-tight">Review portal</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -322,7 +323,7 @@ export default function ResultClient() {
                               <Card key={q.id} className="border border-slate-100 shadow-sm rounded-[2rem] bg-white p-6 md:p-12 space-y-8 text-left group hover:border-primary/20 transition-all">
                                   <div className="flex items-center gap-3 border-b border-slate-50 pb-6">
                                      <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black group-hover:bg-primary group-hover:text-white transition-all shadow-inner">#{q.originalIndex+1}</div>
-                                     <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest border-slate-200">Subject: {q.subjectId}</Badge>
+                                     <Badge variant="outline" className="text-[9px] font-bold tracking-widest border-slate-200">Subject: {q.subjectId}</Badge>
                                   </div>
                                   <QuestionRenderer 
                                     question={q} 
@@ -350,10 +351,10 @@ export default function ResultClient() {
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-6">
                  <Button onClick={handleManualSync} className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 shadow-xl border-none active:scale-95 transition-all">
-                    <RotateCcw className="h-4 w-4" /> Force Sync Hub
+                    <RotateCcw className="h-4 w-4" /> Force sync hub
                  </Button>
                  <Button asChild variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-2xl border-2 border-slate-200 font-bold active:scale-95 transition-all">
-                    <Link href="/mocks">Explore Tests</Link>
+                    <Link href="/mocks">Explore tests</Link>
                  </Button>
               </div>
            </div>
@@ -367,7 +368,7 @@ export default function ResultClient() {
 function FilterNode({ active, label, count, onClick, color }: any) {
   return (
     <button onClick={onClick} className={cn("flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 h-12 md:h-14 rounded-xl transition-all border group cursor-pointer", active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-transparent text-slate-400 hover:bg-slate-50")}>
-       <span className="text-[9px] md:text-[11px] font-bold uppercase tracking-tight">{label}</span>
+       <span className="text-[9px] md:text-[11px] font-bold tracking-tight">{label}</span>
        <span className={cn("text-[9px] md:text-xs font-bold opacity-40 tabular-nums", active && "opacity-60")}>{count}</span>
     </button>
   )
