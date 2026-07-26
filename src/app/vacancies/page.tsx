@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -37,12 +38,12 @@ import { Vacancy } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Punjab Vacancy Registry v1.5.
- * UPDATED: Removed sticky positioning for search and filter elements.
+ * @fileOverview Official Punjab Vacancy Registry v1.6.
+ * FIXED: Purged remaining uppercase styling and standardized labels.
  */
 
 const CATEGORY_CHIPS = [
-  { label: "All Hubs", id: "all" },
+  { label: "All hubs", id: "all" },
   { label: "PSSSB", id: "PSSSB" },
   { label: "PPSC", id: "PPSC" },
   { label: "Punjab Police", id: "Punjab Police" },
@@ -122,7 +123,7 @@ export default function VacanciesPortal() {
                   <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary shadow-inner shrink-0">
                     <Megaphone className="h-5 w-5 md:h-6 md:w-6" />
                   </div>
-                  <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs tracking-widest uppercase">Official recruitment hub</Badge>
+                  <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs tracking-tight">Official recruitment hub</Badge>
                </motion.div>
                <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased">
                   Latest <br/> <span className="text-primary italic">vacancies.</span>
@@ -156,7 +157,7 @@ export default function VacanciesPortal() {
                     key={chip.id} 
                     onClick={() => setActiveBoard(chip.id)}
                     className={cn(
-                      "h-11 px-8 rounded-full font-black text-[10px] uppercase tracking-widest whitespace-nowrap transition-all border shadow-sm",
+                      "h-11 px-8 rounded-full font-bold text-[10px] tracking-tight whitespace-nowrap transition-all border shadow-sm",
                       activeBoard === chip.id ? "bg-[#0F172A] border-[#0F172A] text-white shadow-xl" : "bg-white border-slate-100 text-slate-400 hover:border-slate-300"
                     )}
                   >
@@ -181,8 +182,8 @@ export default function VacanciesPortal() {
                                        <div className="flex items-center gap-6">
                                           <AuthorityLogo boardId={v.board} size="md" className="h-16 w-16 md:h-20 md:w-20 shadow-2xl bg-slate-50 border-4 border-white" />
                                           <div className="space-y-1.5">
-                                             <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[10px] font-black uppercase tracking-widest px-3 py-0.5 rounded-lg">{v.department} hub</Badge>
-                                             <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight uppercase">{v.title}</h3>
+                                             <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[10px] font-bold px-3 py-0.5 rounded-lg">{v.department} hub</Badge>
+                                             <h3 className="text-xl md:text-3xl font-bold text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight">{v.title}</h3>
                                           </div>
                                        </div>
                                        <button onClick={(e) => handleToggleBookmark(e, v.id)} className={cn("h-12 w-12 rounded-2xl border flex items-center justify-center transition-all shadow-sm shrink-0 active:scale-90 border-none bg-transparent cursor-pointer", profile?.savedVacancies?.includes(v.id) ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}>
@@ -198,11 +199,11 @@ export default function VacanciesPortal() {
                                     </div>
 
                                     <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
-                                       <Button className="w-full sm:w-auto h-14 md:h-16 px-10 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-2xl shadow-xl border-none active:scale-95 transition-all">
+                                       <Button className="w-full sm:w-auto h-14 md:h-16 px-10 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] md:text-xs tracking-tight rounded-2xl shadow-xl border-none active:scale-95 transition-all">
                                           Deep audit details <ChevronRight className="h-5 w-5" />
                                        </Button>
                                        {v.notificationPdfUrl && (
-                                          <Button variant="ghost" className="w-full sm:w-auto h-14 text-primary font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-primary/5 transition-all" asChild onClick={e => e.stopPropagation()}>
+                                          <Button variant="ghost" className="w-full sm:w-auto h-14 text-primary font-bold text-[10px] gap-2 hover:bg-primary/5 transition-all" asChild onClick={e => e.stopPropagation()}>
                                              <a href={v.notificationPdfUrl} target="_blank" rel="noopener noreferrer"><FileText className="h-5 w-5" /> Official PDF</a>
                                           </Button>
                                        )}
@@ -214,7 +215,7 @@ export default function VacanciesPortal() {
                      ))}
                   </div>
                ) : (
-                  <div className="py-40 text-center opacity-30 italic font-black uppercase text-xl md:text-3xl tracking-tighter flex flex-col items-center gap-8">
+                  <div className="py-40 text-center opacity-30 italic font-bold text-xl md:text-3xl tracking-tighter flex flex-col items-center gap-8">
                      <AlertCircle className="h-16 w-16 md:h-24 md:w-24 text-slate-300" />
                      Registry standby
                   </div>
@@ -226,8 +227,8 @@ export default function VacanciesPortal() {
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><TrendingUp className="h-64 w-64 text-primary" /></div>
                   <div className="relative z-10 space-y-10 text-left">
                      <div className="space-y-2">
-                        <h3 className="text-3xl font-black tracking-tight leading-none uppercase">Analytics</h3>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Network demand index</p>
+                        <h3 className="text-3xl font-black tracking-tight leading-none">Analytics</h3>
+                        <p className="text-[10px] font-bold text-slate-500 tracking-tight">Network demand index</p>
                      </div>
                      <div className="space-y-10">
                         <MetricNode label="Active Vacancies" val={loading ? "..." : rawVacancies?.length} icon={<Megaphone className="text-primary" />} />
@@ -235,7 +236,7 @@ export default function VacanciesPortal() {
                         <MetricNode label="Verified Boards" val="12" icon={<ShieldCheck className="text-blue-500" />} />
                      </div>
                      <div className="pt-10 border-t border-white/5">
-                        <Button asChild variant="ghost" className="w-full text-slate-400 hover:text-white group font-black uppercase text-[10px] tracking-widest gap-2">
+                        <Button asChild variant="ghost" className="w-full text-slate-400 hover:text-white group font-bold text-[10px] tracking-tight gap-2">
                            <Link href="/leaderboard">Full merit index <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-all" /></Link>
                         </Button>
                      </div>
@@ -245,9 +246,9 @@ export default function VacanciesPortal() {
                <div className="p-10 bg-white rounded-[3rem] border border-slate-100 shadow-xl space-y-8 text-left group hover:translate-y-[-4px] transition-all duration-500">
                   <div className="flex items-center gap-4">
                      <ShieldCheck className="h-8 w-8 text-emerald-500" />
-                     <h4 className="text-[11px] font-black uppercase tracking-widest text-[#0F172A]">Security protocol</h4>
+                     <h4 className="text-[11px] font-black tracking-tight text-[#0F172A]">Security protocol</h4>
                   </div>
-                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">All recruitment notifications are verified against official gazettes before being synchronized with the master registry. Instant push alerts for Last Date reminders are active for Elite Pass holders.</p>
+                  <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">All recruitment notifications are verified against official gazettes before being synchronized with the master registry. Instant push alerts for last date reminders are active for Elite Pass holders.</p>
                </div>
             </div>
          </div>
@@ -261,7 +262,7 @@ export default function VacanciesPortal() {
 function SummaryNode({ icon: Icon, label, val, color = "text-[#0F172A]" }: any) {
    return (
       <div className="space-y-1.5 min-w-0">
-         <div className="flex items-center gap-2 text-[8px] md:text-[9px] font-black uppercase text-slate-400 tracking-widest">
+         <div className="flex items-center gap-2 text-[8px] md:text-[9px] font-bold text-slate-400 tracking-tight">
             <Icon className="h-3 w-3 text-primary" /> {label}
          </div>
          <p className={cn("text-xs md:text-base font-bold truncate leading-none", color)}>{val || 'N/A'}</p>
@@ -276,7 +277,7 @@ function MetricNode({ label, val, icon }: any) {
             <div className="h-11 w-11 rounded-xl bg-white/5 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
                {icon}
             </div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-tight">{label}</span>
+            <span className="text-[11px] font-bold text-slate-400 tracking-tight leading-tight">{label}</span>
          </div>
          <span className="text-2xl md:text-3xl font-black tabular-nums tracking-tighter text-white">{val}</span>
       </div>

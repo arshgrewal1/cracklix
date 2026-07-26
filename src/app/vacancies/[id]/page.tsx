@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -8,6 +9,7 @@ import { useDoc, useFirestore, useUser, useCollection } from "@/firebase"
 import { doc, updateDoc, increment, serverTimestamp, collection, query, where, limit } from "firebase/firestore"
 import { 
   ArrowLeft, 
+  ArrowRight,
   Share2, 
   Bookmark, 
   Calendar, 
@@ -40,8 +42,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Official Vacancy Detail Node v1.0.
- * Premium layout for institutional recruitment auditing.
+ * @fileOverview Official Vacancy Detail Node v1.1.
+ * FIXED: Added missing ArrowRight icon import and purged uppercase styling.
  */
 
 export default function VacancyDetailPage() {
@@ -76,13 +78,13 @@ export default function VacancyDetailPage() {
       try {
         await navigator.share({
           title: vacancy?.title,
-          text: `Latest recruitment node for ${vacancy?.department} active on Cracklix.`,
+          text: `Latest recruitment for ${vacancy?.department} active on Cracklix.`,
           url: window.location.href,
         })
       } catch (e) {}
     } else {
       navigator.clipboard.writeText(window.location.href)
-      toast({ title: "Link Copied" })
+      toast({ title: "Link copied" })
     }
   }
 
@@ -92,10 +94,10 @@ export default function VacancyDetailPage() {
      <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
         <AlertCircle className="h-16 w-16 text-slate-200" />
         <div className="space-y-2">
-           <h2 className="text-2xl font-black text-[#0F172A]">Node Not Found</h2>
+           <h2 className="text-2xl font-black text-[#0F172A]">Entry not found</h2>
            <p className="text-slate-500 font-medium max-w-sm mx-auto">This recruitment listing has been archived or moved by the administrator.</p>
         </div>
-        <Button onClick={() => router.push('/vacancies')} variant="outline" className="rounded-xl h-12 px-8">Return to Registry</Button>
+        <Button onClick={() => router.push('/vacancies')} variant="outline" className="rounded-xl h-12 px-8">Return to registry</Button>
      </div>
   )
 
@@ -113,7 +115,6 @@ export default function VacancyDetailPage() {
             </div>
          </div>
 
-         {/* PREMIUM HERO SECTION */}
          <section className="bg-white rounded-[3rem] md:rounded-[5rem] shadow-5xl border border-slate-100 overflow-hidden relative group">
             <div className="h-2 w-full bg-primary" />
             <CardContent className="p-8 md:p-20 flex flex-col lg:flex-row gap-12 md:gap-20 items-center">
@@ -124,11 +125,11 @@ export default function VacancyDetailPage() {
 
                <div className="flex-1 space-y-8 text-center lg:text-left">
                   <div className="space-y-4">
-                     <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-                        <Badge className="bg-primary text-white border-none px-5 py-2 rounded-full font-black text-[10px] md:text-xs tracking-[0.2em] uppercase shadow-xl">{vacancy.board} Registry</Badge>
-                        <Badge variant="outline" className="bg-white border-slate-200 text-slate-400 px-4 py-1.5 rounded-full font-bold text-[9px] uppercase tracking-widest">{vacancy.category}</Badge>
+                     <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+                        <Badge className="bg-primary text-white border-none px-5 py-2 rounded-full font-bold text-[10px] md:text-xs tracking-tight shadow-xl">{vacancy.board} registry</Badge>
+                        <Badge variant="outline" className="bg-white border-slate-200 text-slate-400 px-4 py-1.5 rounded-full font-bold text-[9px] tracking-tight">{vacancy.category}</Badge>
                      </div>
-                     <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-[#0F172A] tracking-tighter leading-[1] antialiased uppercase">
+                     <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-[#0F172A] tracking-tighter leading-[1] antialiased">
                         {vacancy.title}
                      </h1>
                      <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-4 text-slate-500 font-bold text-sm md:text-xl">
@@ -139,12 +140,12 @@ export default function VacancyDetailPage() {
                   </div>
 
                   <div className="pt-6 flex flex-col sm:flex-row items-center gap-4">
-                     <Button className="w-full sm:w-auto h-16 md:h-20 px-12 md:px-20 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] md:text-sm tracking-[0.3em] rounded-2xl md:rounded-[3rem] shadow-5xl border-none transition-all active:scale-95 group/btn" asChild>
-                        <a href={vacancy.applyLink} target="_blank" rel="noopener noreferrer">Apply Online <ArrowRight className="h-5 w-5 md:h-6 md:w-6 ml-3 group-hover/btn:translate-x-2 transition-transform" /></a>
+                     <Button className="w-full sm:w-auto h-16 md:h-20 px-12 md:px-20 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl md:rounded-[3rem] shadow-5xl border-none transition-all active:scale-95 group/btn" asChild>
+                        <a href={vacancy.applyLink} target="_blank" rel="noopener noreferrer">Apply online <ArrowRight className="h-5 w-5 md:h-6 md:w-6 ml-3 group-hover/btn:translate-x-2 transition-transform" /></a>
                      </Button>
                      {vacancy.notificationPdfUrl && (
-                        <Button variant="ghost" className="w-full sm:w-auto h-16 text-primary font-black uppercase text-[11px] tracking-widest gap-3 hover:bg-primary/5 transition-all" asChild>
-                           <a href={vacancy.notificationPdfUrl} target="_blank" rel="noopener noreferrer"><FileText className="h-6 w-6" /> Official Notification</a>
+                        <Button variant="ghost" className="w-full sm:w-auto h-16 text-primary font-bold gap-3 hover:bg-primary/5 transition-all" asChild>
+                           <a href={vacancy.notificationPdfUrl} target="_blank" rel="noopener noreferrer"><FileText className="h-6 w-6" /> Official notification</a>
                         </Button>
                      )}
                   </div>
@@ -152,30 +153,29 @@ export default function VacancyDetailPage() {
             </CardContent>
          </section>
 
-         {/* DATA GRID HUB */}
          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-14">
             <div className="lg:col-span-8 space-y-12 md:space-y-20">
                
                <section className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-                  <DetailCard icon={Briefcase} label="Post Name" value={vacancy.postName} />
-                  <DetailCard icon={Zap} label="Total Posts" value={vacancy.totalPosts} color="text-primary" />
-                  <DetailCard icon={GraduationCap} label="Educational Hub" value={vacancy.education} colSpan={2} />
+                  <DetailCard icon={Briefcase} label="Post name" value={vacancy.postName} />
+                  <DetailCard icon={Zap} label="Total posts" value={vacancy.totalPosts} color="text-primary" />
+                  <DetailCard icon={GraduationCap} label="Educational hub" value={vacancy.education} colSpan={2} />
                   <DetailCard icon={DollarSign} label="Remuneration" value={vacancy.salary} color="text-emerald-600" />
-                  <DetailCard icon={Clock} label="Age Threshold" value={vacancy.ageLimit} />
+                  <DetailCard icon={Clock} label="Age threshold" value={vacancy.ageLimit} />
                </section>
 
                <section className="space-y-8">
                   <div className="flex items-center gap-4 border-b border-slate-100 pb-6 px-1">
                      <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner shrink-0"><CheckCircle2 className="h-6 w-6" /></div>
-                     <h3 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight uppercase">Audit Guidelines</h3>
+                     <h3 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight">Audit guidelines</h3>
                   </div>
                   <div className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-14 border border-slate-100 shadow-xl space-y-12">
                      <div className="space-y-4">
-                        <h4 className="text-[10px] md:text-xs font-black text-primary uppercase tracking-[0.4em] ml-1">Selection Cycle</h4>
+                        <h4 className="text-[10px] md:text-xs font-black text-primary tracking-tight ml-1">Selection cycle</h4>
                         <div className="p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 text-sm md:text-xl font-medium leading-relaxed italic text-slate-600">&quot;{vacancy.selectionProcess}&quot;</div>
                      </div>
                      <div className="space-y-4">
-                        <h4 className="text-[10px] md:text-xs font-black text-primary uppercase tracking-[0.4em] ml-1">Financial Ingestion</h4>
+                        <h4 className="text-[10px] md:text-xs font-black text-primary tracking-tight ml-1">Financial ingestion</h4>
                         <div className="p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 text-sm md:text-xl font-medium leading-relaxed italic text-slate-600">&quot;{vacancy.applicationFee}&quot;</div>
                      </div>
                   </div>
@@ -187,20 +187,20 @@ export default function VacancyDetailPage() {
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Calendar className="h-64 w-64 text-primary" /></div>
                   <div className="relative z-10 space-y-12 text-left">
                      <div className="space-y-2">
-                        <h3 className="text-3xl font-black tracking-tight leading-none uppercase">Registry Dates</h3>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Temporal Ingestion Node</p>
+                        <h3 className="text-3xl font-black tracking-tight leading-none">Registry dates</h3>
+                        <p className="text-[10px] font-bold text-slate-500 tracking-tight">Temporal ingestion node</p>
                      </div>
                      
                      <div className="space-y-10">
-                        <DatePill label="Registration Opens" val={new Date(vacancy.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} icon={<Zap className="text-emerald-500" />} />
-                        <DatePill label="Closure Node (Last Date)" val={new Date(vacancy.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} icon={<Clock className="text-rose-500" />} highlight />
-                        {vacancy.examDate && <DatePill label="Projected Exam" val={new Date(vacancy.examDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} icon={<Target className="text-blue-500" />} />}
-                        {vacancy.admitCardDate && <DatePill label="Admit Card Hub" val="Update Pending" icon={<FileText className="text-slate-500" />} />}
+                        <DatePill label="Registration opens" val={new Date(vacancy.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} icon={<Zap className="text-emerald-500" />} />
+                        <DatePill label="Closure node" val={new Date(vacancy.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} icon={<Clock className="text-rose-500" />} highlight />
+                        {vacancy.examDate && <DatePill label="Projected exam" val={new Date(vacancy.examDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} icon={<Target className="text-blue-500" />} />}
+                        {vacancy.admitCardDate && <DatePill label="Admit card hub" val="Update pending" icon={<FileText className="text-slate-500" />} />}
                      </div>
 
                      <div className="pt-10 border-t border-white/5">
-                        <Button asChild className="w-full h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl border-none active:scale-95 transition-all">
-                           <a href={vacancy.officialWebsite} target="_blank" rel="noopener noreferrer">Official Portal Hub <ExternalLink className="h-4 w-4 ml-3" /></a>
+                        <Button asChild className="w-full h-16 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl border-none active:scale-95 transition-all">
+                           <a href={vacancy.officialWebsite} target="_blank" rel="noopener noreferrer">Official portal hub <ExternalLink className="h-4 w-4 ml-3" /></a>
                         </Button>
                      </div>
                   </div>
@@ -209,23 +209,22 @@ export default function VacancyDetailPage() {
                <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-xl space-y-8 text-left">
                   <div className="flex items-center gap-4">
                      <HelpCircle className="h-8 w-8 text-primary" />
-                     <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#0F172A]">Aspirant Support</h4>
+                     <h4 className="text-[11px] font-black tracking-tight text-[#0F172A]">Aspirant support</h4>
                   </div>
                   <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">Verify your eligibility metrics before authorizing the transaction node. Official PDFs contain the final binding rules for the recruitment vertical.</p>
-                  <Button asChild variant="outline" className="w-full h-12 md:h-14 rounded-xl border-slate-200 text-[#0F172A] font-black uppercase text-[9px] md:text-[10px] tracking-widest gap-2">
-                     <Link href="/support">Open Support Desk <ChevronRight className="h-4 w-4" /></Link>
+                  <Button asChild variant="outline" className="w-full h-12 md:h-14 rounded-xl border-slate-200 text-[#0F172A] font-bold text-xs">
+                     <Link href="/support">Open support desk <ChevronRight className="h-4 w-4" /></Link>
                   </Button>
                </div>
             </div>
          </div>
 
-         {/* RELATED NODES */}
          {relatedVacancies && relatedVacancies.length > 1 && (
             <section className="space-y-10 md:space-y-16">
                <div className="flex items-center justify-between border-b border-slate-100 pb-6 px-1">
-                  <h3 className="text-xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tighter">Similar Hubs</h3>
-                  <Button asChild variant="ghost" className="text-primary font-black uppercase text-[10px] tracking-widest gap-2">
-                     <Link href="/vacancies">Explore Registry <ArrowRight className="h-4 w-4" /></Link>
+                  <h3 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tighter">Similar hubs</h3>
+                  <Button asChild variant="ghost" className="text-primary font-bold gap-2">
+                     <Link href="/vacancies">Explore registry <ArrowRight className="h-4 w-4" /></Link>
                   </Button>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10">
@@ -234,8 +233,8 @@ export default function VacancyDetailPage() {
                         <Card className="border border-slate-100 shadow-lg hover:shadow-4xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-10 text-center space-y-6 group h-full flex flex-col">
                            <div className="h-16 w-16 md:h-24 md:w-24 mx-auto group-hover:scale-110 transition-transform duration-500"><AuthorityLogo boardId={v.board} size="md" /></div>
                            <div className="flex-1 space-y-3">
-                              <h4 className="text-sm md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors uppercase leading-tight line-clamp-2">{v.title}</h4>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{v.department}</p>
+                              <h4 className="text-sm md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">{v.title}</h4>
+                              <p className="text-[10px] font-bold text-slate-400">{v.department}</p>
                            </div>
                            <Badge variant="secondary" className="bg-slate-50 text-slate-400 font-bold mx-auto">{v.totalPosts} Posts</Badge>
                         </Card>
@@ -258,8 +257,8 @@ function DetailCard({ icon: Icon, label, value, color = "text-[#0F172A]", colSpa
           <Icon className="h-5 w-5 md:h-7 md:w-7" />
        </div>
        <div className="space-y-1">
-          <p className="text-[8px] md:text-[10px] font-black uppercase text-slate-400 tracking-[0.3em]">{label}</p>
-          <p className={cn("text-base md:text-3xl font-bold leading-tight tracking-tight uppercase", color)}>{value || 'N/A'}</p>
+          <p className="text-[8px] md:text-[10px] font-black text-slate-400 tracking-tight">{label}</p>
+          <p className={cn("text-base md:text-3xl font-bold leading-tight tracking-tight", color)}>{value || 'N/A'}</p>
        </div>
     </div>
   )
@@ -272,7 +271,7 @@ function DatePill({ label, val, icon, highlight }: any) {
             <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
                {icon}
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">{label}</span>
+            <span className="text-[10px] font-bold text-slate-400 tracking-tight leading-tight">{label}</span>
          </div>
          <span className="text-xs md:text-lg font-black tabular-nums tracking-tight text-white">{val}</span>
       </div>
