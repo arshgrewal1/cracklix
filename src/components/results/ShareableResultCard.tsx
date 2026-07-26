@@ -24,7 +24,7 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview High-Fidelity Social Share Certificate v1.3.
+ * @fileOverview High-Fidelity Social Share Certificate v1.5.
  * FIXED: Explicitly defined icons and uses official logo.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
@@ -149,8 +149,4 @@ function MiniStat({ icon, label, val }: any) {
          </div>
       </div>
    )
-}
-
-function Timer({ className }: { className?: string }) {
-   return <Clock className={className} />;
 }

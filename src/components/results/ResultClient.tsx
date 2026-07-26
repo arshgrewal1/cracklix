@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from "react"
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -47,8 +47,9 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v28.0.
- * FIXED: Background cache logic and ReferenceError for Timer/X icons.
+ * @fileOverview Universal Result Hub Viewer v30.0.
+ * FIXED: Background generation loop using useRef guard.
+ * FIXED: Standardized Sentence Case for all UI labels.
  */
 
 export default function ResultClient() {
@@ -76,6 +77,7 @@ export default function ResultClient() {
 
   const [preGeneratedImage, setPreGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const generationAttempted = useRef(false);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -182,14 +184,21 @@ export default function ResultClient() {
   }, [db, mockId]);
 
   const prepareShareCard = useCallback(async () => {
-    if (!mounted || !sessionData || liveRank === "---" || preGeneratedImage || isGenerating) return;
+    if (!mounted || !sessionData || liveRank === "---" || generationAttempted.current) return;
     
+    generationAttempted.current = true;
     setIsGenerating(true);
-    await new Promise(r => setTimeout(r, 2000));
+    
+    // Safety delay for final style settling
+    await new Promise(r => setTimeout(r, 2500));
     
     try {
       const node = document.getElementById('shareable-result-certificate');
-      if (!node) return;
+      if (!node) {
+         generationAttempted.current = false;
+         setIsGenerating(false);
+         return;
+      }
 
       const dataUrl = await toPng(node, {
          quality: 0.95,
@@ -202,16 +211,17 @@ export default function ResultClient() {
       setPreGeneratedImage(dataUrl);
     } catch (e) {
       console.warn("[Registry] Image generation failed:", e);
+      generationAttempted.current = false;
     } finally {
       setIsGenerating(false);
     }
-  }, [mounted, sessionData, liveRank, preGeneratedImage, isGenerating]);
+  }, [mounted, sessionData, liveRank]);
 
   useEffect(() => {
-     if (sessionData && liveRank !== "---") {
+     if (sessionData && liveRank !== "---" && !preGeneratedImage && !isGenerating) {
         prepareShareCard();
      }
-  }, [sessionData, liveRank, prepareShareCard]);
+  }, [sessionData, liveRank, preGeneratedImage, isGenerating, prepareShareCard]);
 
   const handleShareResult = async () => {
     if (!sessionData) return;
@@ -219,42 +229,30 @@ export default function ResultClient() {
     let imageToShare = preGeneratedImage;
     
     if (!imageToShare) {
-       setIsGenerating(true);
-       try {
-         const node = document.getElementById('shareable-result-certificate');
-         if (node) {
-            imageToShare = await toPng(node, { quality: 0.95, pixelRatio: 2, width: 1080, height: 1350 });
-            setPreGeneratedImage(imageToShare);
-         } else {
-           throw new Error("Node missing");
-         }
-       } catch (e) {
-         toast({ variant: "destructive", title: "Sharing Error", description: "Image hub still syncing. Try again." });
-         setIsGenerating(false);
-         return;
-       }
-       setIsGenerating(false);
+       toast({ title: "Syncing card", description: "Almost ready. Try again in 2 seconds." });
+       if (!isGenerating) prepareShareCard();
+       return;
     }
 
     try {
-      const blob = await (await fetch(imageToShare!)).blob();
+      const blob = await (await fetch(imageToShare)).blob();
       const file = new File([blob], `Cracklix_Result.png`, { type: 'image/png' });
 
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
             title: 'My Cracklix Result',
-            text: `🎯 Scored ${sessionData.score}/${sessionData.totalQuestions} in ${sessionData.mockTitle}! Ranked #${liveRank} in Punjab.`,
+            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions} in ${sessionData.mockTitle}! Ranked #${liveRank} in Punjab.`,
             files: [file]
          });
       } else if (navigator.share) {
          await navigator.share({
             title: 'My Cracklix Result',
-            text: `🎯 Scored ${sessionData.score}/${sessionData.totalQuestions}! Rank: #${liveRank}. View: https://cracklix.in/results/view?id=${mockId}`
+            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions}! Rank: #${liveRank}. View: https://cracklix.in/results/view?id=${mockId}`
          });
       } else {
          const link = document.createElement('a');
          link.download = `Cracklix_Result_${Date.now()}.png`;
-         link.href = imageToShare!;
+         link.href = imageToShare;
          link.click();
       }
     } catch (e: any) { 
@@ -278,8 +276,6 @@ export default function ResultClient() {
     });
     return { all, correct, wrong, skipped };
   }, [questions, sessionData]);
-
-  if (isSearching) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6"><Zap className="h-12 w-12 text-primary animate-pulse" /><p className="text-[10px] font-bold text-slate-300">Synchronizing analysis hub...</p></div>;
 
   const filteredQuestions = activeReviewFilter === 'CORRECT' ? reviewNodes.correct : 
                            activeReviewFilter === 'WRONG' ? reviewNodes.wrong : 
@@ -310,8 +306,8 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-                    <Button onClick={handleShareResult} disabled={isGenerating} className="flex-1 lg:flex-none h-12 px-8 bg-gradient-to-r from-[#2563EB] to-[#4F46E5] text-white hover:brightness-110 font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
-                       {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
+                    <Button onClick={handleShareResult} disabled={isGenerating && !preGeneratedImage} className="flex-1 lg:flex-none h-12 px-8 bg-gradient-to-r from-[#2563EB] to-[#4F46E5] text-white hover:brightness-110 font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
+                       {isGenerating && !preGeneratedImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
                        {preGeneratedImage ? "Direct share card" : "Preparing card..."}
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">

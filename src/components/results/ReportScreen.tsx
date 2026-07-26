@@ -19,8 +19,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v6.7.
- * FIXED: Validated syntax and helper component structure.
+ * @fileOverview Premium Analysis Screen v6.8.
+ * FIXED: Corrected helper component closures and missing imports.
  */
 
 interface ReportScreenProps {
