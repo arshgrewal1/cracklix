@@ -23,10 +23,6 @@ interface QuestionRendererProps {
   className?: string;
 }
 
-/**
- * @fileOverview Institutional Question Renderer v75.1 [Review Logic Hardened].
- * FIXED: Implemented precise option highlighting for Review mode.
- */
 export default function QuestionRenderer({ 
   question, 
   language = 'ENGLISH_PUNJABI',
@@ -40,86 +36,46 @@ export default function QuestionRenderer({
   className
 }: QuestionRendererProps) {
   const timeLeft = useExamStore(s => s.timeLeft);
-  
   if (!question) return null;
-
   const q = question as any;
   const normalizedLang = (language || 'ENGLISH_PUNJABI').toUpperCase();
-  
   const sectionName = (q.sectionId || "").toUpperCase();
   const subjectId = (q.subjectId || "").toUpperCase();
-  
   let renderLang = normalizedLang;
-  
-  if (sectionName.includes("ENGLISH") || subjectId.includes("ENGLISH")) {
-    renderLang = "ENGLISH";
-  } else if (sectionName.includes("PUNJABI") || sectionName.includes("ਪੰਜਾਬੀ") || subjectId.includes("PUNJABI")) {
-    renderLang = "PUNJABI";
-  } else if (sectionName.includes("HINDI") || sectionName.includes("हिन्दी") || subjectId.includes("HINDI")) {
-    renderLang = "HINDI";
-  }
-  
+  if (sectionName.includes("ENGLISH") || subjectId.includes("ENGLISH")) renderLang = "ENGLISH";
+  else if (sectionName.includes("PUNJABI") || sectionName.includes("ਪੰਜਾਬੀ") || subjectId.includes("PUNJABI")) renderLang = "PUNJABI";
+  else if (sectionName.includes("HINDI") || sectionName.includes("हिन्दी") || subjectId.includes("HINDI")) renderLang = "HINDI";
   const showEn = renderLang.includes('ENGLISH');
   const showLocal = renderLang.includes('PUNJABI') || renderLang.includes('HINDI');
-  
-  const formatTime = (seconds: number) => {
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
-
+  const formatTime = (seconds: number) => { const m = Math.floor((seconds % 3600) / 60); const s = seconds % 60; return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; };
   const OPT_LABELS = ['A', 'B', 'C', 'D'];
 
   return (
-    <div className={cn(
-      "w-full text-left font-body bg-white text-[#0F172A] flex flex-col select-none max-w-full box-border",
-      showSolution ? "p-0" : "p-5 md:p-10 lg:p-12 rounded-[1.5rem] md:rounded-[3rem] shadow-sm",
-      className
-    )}>
-      
+    <div className={cn("w-full text-left font-body bg-white text-[#0F172A] flex flex-col select-none max-w-full box-border", showSolution ? "p-0" : "p-5 md:p-10 lg:p-12 rounded-[1.5rem] md:rounded-[3rem] shadow-sm", className)}>
       {!showSolution && (
         <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-5 w-full">
            <div className="flex items-center gap-2 md:gap-3 shrink-0">
               <span className="font-bold text-[11px] md:text-base text-white bg-[#0F172A] px-3 md:px-5 py-2 rounded-full shadow-lg shrink-0">Question {q.displayId || '1'}</span>
               <div className="flex items-center gap-1.5 text-[#0F172A] font-bold text-[9px] md:xs tabular-nums bg-slate-50 px-2 md:px-3 py-1.5 rounded-lg border border-slate-100">
-                 <Clock className="h-3 md:h-3.5 w-3 md:w-3.5 text-primary" />
-                 <span>{formatTime(timeLeft)}</span>
+                 <Clock className="h-3 md:h-3.5 w-3 md:w-3.5 text-primary" /> <span>{formatTime(timeLeft)}</span>
               </div>
            </div>
            <div className="flex items-center gap-1 md:gap-2">
-              <button 
-                onClick={onBookmark}
-                className={cn("p-1.5 transition-all active:scale-90", isBookmarked ? "text-primary" : "text-slate-300 hover:text-primary")}
-              >
-                <Bookmark className={cn("h-5 w-5", isBookmarked && "fill-current")} />
-              </button>
-              <button 
-                onClick={onReport}
-                className="p-1.5 text-slate-300 hover:text-rose-500 transition-all active:scale-90"
-              >
-                <AlertTriangle className="h-5 w-5" />
-              </button>
+              <button onClick={onBookmark} className={cn("p-1.5 transition-all active:scale-90", isBookmarked ? "text-primary" : "text-slate-300 hover:text-primary")}><Bookmark className={cn("h-5 w-5", isBookmarked && "fill-current")} /></button>
+              <button onClick={onReport} className="p-1.5 text-slate-300 hover:text-rose-500 transition-all active:scale-90"><AlertTriangle className="h-5 w-5" /></button>
            </div>
         </div>
       )}
 
-      <div className={cn(
-         "space-y-6 px-0 w-full", 
-         showSolution ? "mb-6" : "mb-10"
-      )}>
-         {/* STRUCTURED TABLE CONTENT RENDERING */}
+      <div className={cn("space-y-6 px-0 w-full", showSolution ? "mb-6" : "mb-10")}>
          {q.tableContent?.rows?.length > 0 && (
             <div className="my-8 overflow-x-auto rounded-[1.5rem] border-2 border-slate-100 bg-white shadow-2xl relative group w-full">
-               <div className="absolute top-2 right-4 opacity-5 pointer-events-none text-[8px] font-black tracking-widest flex items-center gap-2">
-                  <LayoutGrid className="h-3 w-3" /> Data hub
-               </div>
+               <div className="absolute top-2 right-4 opacity-5 pointer-events-none text-[8px] font-black flex items-center gap-2"><LayoutGrid className="h-3 w-3" /> Data hub</div>
                <Table className="w-full border-collapse min-w-[300px]">
                   <TableHeader className="bg-[#0F172A]">
                      <TableRow className="border-none h-14 md:h-16">
                         {q.tableContent.headers.map((h: string, hi: number) => (
-                           <TableHead key={hi} className="px-4 md:px-10 font-black text-[10px] md:text-sm text-white tracking-widest uppercase border-r border-white/10 last:border-r-0">
-                              {h}
-                           </TableHead>
+                           <TableHead key={hi} className="px-4 md:px-10 font-black text-[10px] md:text-sm text-white uppercase border-r border-white/10 last:border-r-0">{h}</TableHead>
                         ))}
                      </TableRow>
                   </TableHeader>
@@ -127,9 +83,7 @@ export default function QuestionRenderer({
                      {q.tableContent.rows.map((row: string[], ri: number) => (
                         <TableRow key={ri} className="border-b border-slate-50 hover:bg-slate-50 transition-colors last:border-0 h-12 md:h-16">
                            {row.map((cell, ci) => (
-                              <TableCell key={ci} className="px-4 md:px-10 font-bold text-xs md:text-lg text-[#0F172A] border-r border-slate-50 last:border-r-0">
-                                 {cell}
-                              </TableCell>
+                              <TableCell key={ci} className="px-4 md:px-10 font-bold text-xs md:text-lg text-[#0F172A] border-r border-slate-50 last:border-r-0">{cell}</TableCell>
                            ))}
                         </TableRow>
                      ))}
@@ -138,52 +92,20 @@ export default function QuestionRenderer({
             </div>
          )}
 
-         {/* ASSERTION & REASON INTERLEAVED HUB */}
          {q.questionType === 'ASSERTION_REASON' && (
             <div className="space-y-6 w-full p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner relative overflow-hidden">
-               <div className="absolute top-2 right-4 opacity-5 pointer-events-none text-[8px] font-black tracking-widest flex items-center gap-2">
-                  <Zap className="h-3 w-3" /> Logic hub
-               </div>
-               
-               {showEn && (q.englishAssertion || q.englishQuestion) && (
-                  <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
-                     <MathText text={`Assertion: ${q.englishAssertion || q.englishQuestion}`} />
-                  </div>
-               )}
-
-               {showLocal && (q.punjabiAssertion || q.punjabiQuestion) && (
-                  <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
-                     <MathText text={`ਕਥਨ: ${q.punjabiAssertion || q.punjabiQuestion}`} />
-                  </div>
-               )}
-
-               {showEn && q.englishReason && (
-                  <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed pt-2 border-t border-slate-200/50">
-                     <MathText text={`Reason: ${q.englishReason}`} />
-                  </div>
-               )}
-
-               {showLocal && q.punjabiReason && (
-                  <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
-                     <MathText text={`ਕਾਰਨ: ${q.punjabiReason}`} />
-                  </div>
-               )}
+               <div className="absolute top-2 right-4 opacity-5 pointer-events-none text-[8px] font-black flex items-center gap-2"><Zap className="h-3 w-3" /> Logic hub</div>
+               {showEn && (q.englishAssertion || q.englishQuestion) && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed"><MathText text={`Assertion: ${q.englishAssertion || q.englishQuestion}`} /></div>}
+               {showLocal && (q.punjabiAssertion || q.punjabiQuestion) && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed"><MathText text={`ਕਥਨ: ${q.punjabiAssertion || q.punjabiQuestion}`} /></div>}
+               {showEn && q.englishReason && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed pt-2 border-t border-slate-200/50"><MathText text={`Reason: ${q.englishReason}`} /></div>}
+               {showLocal && q.punjabiReason && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed"><MathText text={`ਕਾਰਨ: ${q.punjabiReason}`} /></div>}
             </div>
          )}
 
-         {/* STANDARD INTRO BLOCKS (FOR NON-AR TYPES) */}
          {q.questionType !== 'ASSERTION_REASON' && (
             <div className="w-full space-y-4">
-               {showEn && q.englishQuestion && (
-                  <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words w-full", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
-                     <MathText text={q.englishQuestion} />
-                  </div>
-               )}
-               {showLocal && q.punjabiQuestion && (
-                  <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4 border-t border-slate-100 pt-4 w-full", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
-                     <MathText text={q.punjabiQuestion} />
-                  </div>
-               )}
+               {showEn && q.englishQuestion && <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words w-full", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}><MathText text={q.englishQuestion} /></div>}
+               {showLocal && q.punjabiQuestion && <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4 border-t border-slate-100 pt-4 w-full", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}><MathText text={q.punjabiQuestion} /></div>}
             </div>
          )}
       </div>
@@ -191,44 +113,15 @@ export default function QuestionRenderer({
       {!hideOptions && (
         <div className={cn("flex flex-col w-full", showSolution ? "space-y-3" : "space-y-3 md:space-y-5")}>
           {OPT_LABELS.map((key, idx) => {
-            const en = q[`option${key}English`];
-            const pa = q[`option${key}Punjabi`];
-            const hi = q[`option${key}Hindi`];
-            const localText = pa || hi;
-            const isSelected = selectedAnswer === idx;
-            const hideLocal = localText?.trim() === en?.trim();
-            
-            const isCorrect = q.correctAnswer === key;
-            const isWrongSelected = isSelected && !isCorrect;
-
+            const en = q[`option${key}English`]; const pa = q[`option${key}Punjabi`]; const hi = q[`option${key}Hindi`];
+            const localText = pa || hi; const isSelected = selectedAnswer === idx; const hideLocal = localText?.trim() === en?.trim();
+            const isCorrect = q.correctAnswer === key; const isWrongSelected = isSelected && !isCorrect;
             return (
-              <div 
-                key={key} 
-                onClick={() => !showSolution && onSelect?.(idx)} 
-                className={cn(
-                  "flex items-center gap-3 md:gap-6 transition-all border w-full box-border",
-                  showSolution 
-                    ? `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2rem] ${isCorrect ? "bg-emerald-50 border-emerald-500 shadow-sm" : isWrongSelected ? "bg-rose-50 border-rose-500" : "bg-white border-slate-100"}`
-                    : `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2.5rem] cursor-pointer group/opt active:scale-[0.98] ${isSelected ? "bg-blue-50/50 border-primary ring-2 ring-primary/5 shadow-xl" : "bg-white border-slate-100 hover:border-slate-300 shadow-sm"}`
-                )}
-              >
-                <span className={cn(
-                  "font-black shrink-0 w-6 md:w-12 text-center transition-colors",
-                  showSolution ? "text-base md:text-xl" : "text-sm md:text-3xl",
-                  isSelected ? "text-primary" : "text-slate-300 group-hover/opt:text-slate-400"
-                )}>{key}</span>
-                
+              <div key={key} onClick={() => !showSolution && onSelect?.(idx)} className={cn("flex items-center gap-3 md:gap-6 transition-all border w-full box-border", showSolution ? `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2rem] ${isCorrect ? "bg-emerald-50 border-emerald-500 shadow-sm" : isWrongSelected ? "bg-rose-50 border-rose-500" : "bg-white border-slate-100"}` : `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2.5rem] cursor-pointer group/opt active:scale-[0.98] ${isSelected ? "bg-blue-50/50 border-primary ring-2 ring-primary/5 shadow-xl" : "bg-white border-slate-100 hover:border-slate-300 shadow-sm"}`)}>
+                <span className={cn("font-black shrink-0 w-6 md:w-12 text-center transition-colors", showSolution ? "text-base md:text-xl" : "text-sm md:text-3xl", isSelected ? "text-primary" : "text-slate-300 group-hover/opt:text-slate-400")}>{key}</span>
                 <div className="flex flex-col flex-1 min-w-0 space-y-1">
-                  {showEn && en && (
-                    <div className={cn("font-bold leading-tight break-words w-full", showSolution ? "text-sm md:text-base" : "text-[15px] md:text-2xl", isSelected ? "text-primary" : "text-[#0F172A]")}>
-                      <MathText text={en} />
-                    </div>
-                  )}
-                  {showLocal && localText && !hideLocal && (
-                    <div className={cn("font-[800] leading-tight break-words text-[#0F172A] w-full", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
-                      <MathText text={localText} />
-                    </div>
-                  )}
+                  {showEn && en && <div className={cn("font-bold leading-tight break-words w-full", showSolution ? "text-sm md:text-base" : "text-[15px] md:text-2xl", isSelected ? "text-primary" : "text-[#0F172A]")}>{en}</div>}
+                  {showLocal && localText && !hideLocal && <div className={cn("font-[800] leading-tight break-words text-[#0F172A] w-full", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>{localText}</div>}
                 </div>
               </div>
             )
@@ -239,43 +132,17 @@ export default function QuestionRenderer({
       {showSolution && (
         <div className="mt-10 border border-slate-100 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-slate-50/50 shadow-2xl relative w-full">
            <div className="absolute top-0 left-0 w-2 md:w-3 h-full bg-emerald-500" />
-           
            <div className="p-8 md:p-14 space-y-10">
               <div className="space-y-4">
-                 <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-emerald-600 tracking-tight">
-                    <ShieldCheck className="h-5 w-5" /> Verified answer
-                 </div>
-                 <div className="pl-0 md:pl-8 space-y-2">
-                    <p className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight">
-                       Option {q.correctAnswer}: {q[`option${q.correctAnswer}English`]}
-                    </p>
-                 </div>
+                 <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-emerald-600 tracking-tight"><ShieldCheck className="h-5 w-5" /> Verified answer</div>
+                 <div className="pl-0 md:pl-8 space-y-2"><p className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight">Option {q.correctAnswer}: {q[`option${q.correctAnswer}English`]}</p></div>
               </div>
-
               <div className="h-px w-full bg-slate-200/50" />
-
               <div className="space-y-6">
-                 <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-slate-400 tracking-tight">
-                    <Info className="h-5 w-5" /> Explanation
-                 </div>
-                 
+                 <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-slate-400 tracking-tight"><Info className="h-5 w-5" /> Explanation</div>
                  <div className="pl-0 md:pl-8 space-y-8">
-                    {q.englishExplanation && (
-                       <div className="space-y-2">
-                          <p className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest">English rationale</p>
-                          <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
-                             <MathText text={q.englishExplanation} className="text-inherit" />
-                          </div>
-                       </div>
-                    )}
-                    {q.punjabiExplanation && (
-                       <div className="space-y-2">
-                          <p className="text-[10px] md:text-[11px] font-black text-primary uppercase tracking-widest">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p>
-                          <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
-                             <MathText text={q.punjabiExplanation} className="text-inherit" />
-                          </div>
-                       </div>
-                    )}
+                    {q.englishExplanation && <div className="space-y-2"><p className="text-[10px] md:text-[11px] font-black text-slate-400">English rationale</p><div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl"><MathText text={q.englishExplanation} className="text-inherit" /></div></div>}
+                    {q.punjabiExplanation && <div className="space-y-2"><p className="text-[10px] md:text-[11px] font-black text-primary">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p><div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl"><MathText text={q.punjabiExplanation} className="text-inherit" /></div></div>}
                  </div>
               </div>
            </div>
@@ -284,4 +151,3 @@ export default function QuestionRenderer({
     </div>
   );
 }
-

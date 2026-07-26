@@ -54,11 +54,6 @@ import { cn } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 
-/**
- * @fileOverview Master MCQ Bank Hub v3.3 [Row Selection Enabled].
- * UPDATED: Implemented row-click selection for improved administrative efficiency.
- */
-
 export default function MCQBankPage() {
   const db = useFirestore()
   const { toast } = useToast()
@@ -85,15 +80,12 @@ export default function MCQBankPage() {
   const { data: subjects } = useCollection<any>(subjectsQuery)
   const { data: boards } = useCollection<any>(boardsQuery)
 
-  // Duplicate Analysis Logic
   const duplicateAnalysis = useMemo(() => {
     const hashes = new Map<string, string[]>();
     const duplicateIds = new Set<string>();
-
     questions.forEach(q => {
       const text = (q.englishQuestion || "").trim().toLowerCase();
       if (!text) return;
-      
       if (hashes.has(text)) {
         const ids = hashes.get(text)!;
         ids.push(q.id);
@@ -102,101 +94,73 @@ export default function MCQBankPage() {
         hashes.set(text, [q.id]);
       }
     });
-
-    return {
-      count: duplicateIds.size,
-      ids: duplicateIds
-    };
+    return { count: duplicateIds.size, ids: duplicateIds };
   }, [questions]);
 
   const fetchQuestions = useCallback(async (isLoadMore = false) => {
     if (!db) return
     setLoading(true)
-    
     try {
-      const result = await mcqEngine.fetch(
-        db, 
-        { ...filters, searchTerm }, 
-        50, 
-        isLoadMore ? lastDoc : undefined
-      )
-
-      if (isLoadMore) {
-        setQuestions(prev => [...prev, ...result.data])
-      } else {
-        setQuestions(result.data)
-      }
-
-      setLastDoc(result.lastVisible)
-      setHasMore(result.hasMore)
-      setDiagnostic(result.diagnostic)
-
+      const result = await mcqEngine.fetch(db, { ...filters, searchTerm }, 50, isLoadMore ? lastDoc : undefined)
+      if (isLoadMore) setQuestions(prev => [...prev, ...result.data])
+      else { setQuestions(result.data); setSelectedIds([]); }
+      setLastDoc(result.lastVisible);
+      setHasMore(result.hasMore);
+      setDiagnostic(result.diagnostic);
     } catch (e: any) {
       toast({ variant: "destructive", title: "Database Standby", description: e.message })
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }, [db, filters, searchTerm, lastDoc, toast])
 
-  useEffect(() => {
-    fetchQuestions(false)
-  }, [filters, searchTerm])
+  useEffect(() => { fetchQuestions(false) }, [filters, searchTerm])
 
   const toggleSelection = (id: string) => {
-    setSelectedIds(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
   const handleBulkAction = async (action: string) => {
     if (!db || selectedIds.length === 0) return;
     setIsBulkProcessing(true);
     const batch = writeBatch(db);
-    
     selectedIds.forEach(id => {
       const ref = doc(db, "mcqBank", id);
       if (action === 'DELETE') batch.delete(ref);
       else if (action === 'PUBLISH') batch.update(ref, { status: 'PUBLISHED', updatedAt: serverTimestamp() });
       else if (action === 'ARCHIVE') batch.update(ref, { status: 'ARCHIVED', updatedAt: serverTimestamp() });
     });
-
     try {
       await batch.commit();
-      toast({ title: "Database Updated", description: `${selectedIds.length} questions synced.` });
+      toast({ title: "Database updated", description: `${selectedIds.length} questions synced.` });
       fetchQuestions(false);
       setSelectedIds([]);
     } finally { setIsBulkProcessing(false); }
   }
 
   const displayedQuestions = useMemo(() => {
-    if (filters.status === 'DUPLICATE') {
-      return questions.filter(q => duplicateAnalysis.ids.has(q.id));
-    }
+    if (filters.status === 'DUPLICATE') return questions.filter(q => duplicateAnalysis.ids.has(q.id));
     return questions;
   }, [questions, filters.status, duplicateAnalysis.ids]);
 
   return (
     <div className="space-y-6 md:space-y-12 text-left pb-32 animate-in fade-in duration-700 pt-2 px-1">
-      
       <AdminPageHeader
         icon={Database}
-        label="Central Question Database"
-        title="Question Bank"
-        subtitle="Manage practice items with duplicate detection and auto-recovery."
-        actionLabel="Add Question"
+        label="Central question database"
+        title="Question bank"
+        subtitle="Manage practice questions with duplicate detection."
+        actionLabel="Add question"
         actionIcon={Plus}
         actionHref="/admin/mcq-bank/add"
       >
         <div className="flex gap-3">
            <Button asChild variant="outline" className="h-11 md:h-14 rounded-full font-bold px-8 shadow-sm">
-              <Link href="/admin/bulk-import"><UploadCloud className="h-4 w-4 mr-2" /> Bulk Upload</Link>
+              <Link href="/admin/bulk-import"><UploadCloud className="h-4 w-4 mr-2" /> Bulk upload</Link>
            </Button>
         </div>
       </AdminPageHeader>
 
-      {/* METRIC COUNTERS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-1">
-         <MetricCard label="Total in bank" value={questions.length} icon={<Database className="text-primary" />} />
+         <MetricCard label="Total questions" value={questions.length} icon={<Database className="text-primary" />} />
          <MetricCard label="Unused questions" value={questions.filter(q => q.status === 'UNUSED').length} icon={<Zap className="text-orange-500" />} />
          <MetricCard label="Used pool" value={questions.filter(q => q.status === 'USED').length} icon={<CheckCircle2 className="text-emerald-500" />} />
          <MetricCard label="Duplicates" value={duplicateAnalysis.count} icon={<Copy className="text-rose-500" />} highlight={duplicateAnalysis.count > 0} />
@@ -204,62 +168,13 @@ export default function MCQBankPage() {
 
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white border border-slate-50 p-6 md:p-10 space-y-6">
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <FilterSelect 
-              label="Board" 
-              value={filters.boardId} 
-              onChange={v => setFilters({...filters, boardId: v})}
-              options={boards?.map(b => ({ label: b.abbreviation, value: b.id })) || []}
-            />
-            <FilterSelect 
-              label="Subject" 
-              value={filters.subjectId} 
-              onChange={v => setFilters({...filters, subjectId: v})}
-              options={subjects?.map(s => ({ label: s.name, value: s.id })) || []}
-            />
-            <FilterSelect 
-              label="Level" 
-              value={filters.difficulty} 
-              onChange={v => setFilters({...filters, difficulty: v})}
-              options={['Easy', 'Medium', 'Hard', 'Expert'].map(d => ({ label: d, value: d }))}
-            />
-            <FilterSelect 
-              label="Status & Integrity" 
-              value={filters.status} 
-              onChange={v => setFilters({...filters, status: v})}
-              options={[
-                { label: 'PUBLISHED', value: 'PUBLISHED' },
-                { label: 'DRAFT', value: 'DRAFT' },
-                { label: 'ARCHIVED', value: 'ARCHIVED' },
-                { label: 'UNUSED', value: 'UNUSED' },
-                { label: 'USED', value: 'USED' },
-                { label: 'SHOW DUPLICATES', value: 'DUPLICATE' }
-              ]}
-            />
+            <FilterSelect label="Board" value={filters.boardId} onChange={v => setFilters({...filters, boardId: v})} options={boards?.map(b => ({ label: b.abbreviation, value: b.id })) || []} />
+            <FilterSelect label="Subject" value={filters.subjectId} onChange={v => setFilters({...filters, subjectId: v})} options={subjects?.map(s => ({ label: s.name, value: s.id })) || []} />
+            <FilterSelect label="Level" value={filters.difficulty} onChange={v => setFilters({...filters, difficulty: v})} options={['Easy', 'Medium', 'Hard', 'Expert'].map(d => ({ label: d, value: d }))} />
+            <FilterSelect label="Status" value={filters.status} onChange={v => setFilters({...filters, status: v})} options={[{ label: 'PUBLISHED', value: 'PUBLISHED' }, { label: 'DRAFT', value: 'DRAFT' }, { label: 'ARCHIVED', value: 'ARCHIVED' }, { label: 'UNUSED', value: 'UNUSED' }, { label: 'USED', value: 'USED' }, { label: 'DUPLICATES', value: 'DUPLICATE' }]} />
          </div>
-         <AdminSearchInput
-           value={searchTerm}
-           onChange={setSearchTerm}
-           placeholder="Search statement, ID, or keywords..."
-         />
+         <AdminSearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search statements, IDs, or keywords..." />
       </Card>
-
-      {duplicateAnalysis.count > 0 && filters.status !== 'DUPLICATE' && (
-        <Card className="bg-rose-50 border border-rose-100 p-6 rounded-2xl flex items-center justify-between animate-in slide-in-from-top-2">
-           <div className="flex items-center gap-4">
-              <AlertCircle className="h-6 w-6 text-rose-500" />
-              <div className="text-left">
-                 <p className="text-sm font-black text-rose-600 uppercase">Redundancy detected</p>
-                 <p className="text-xs font-bold text-rose-400">Found {duplicateAnalysis.count} questions with identical statements.</p>
-              </div>
-           </div>
-           <button 
-             onClick={() => setFilters({...filters, status: 'DUPLICATE'})}
-             className="h-10 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-[10px] uppercase border-none cursor-pointer"
-           >
-              Filter Duplicates
-           </button>
-        </Card>
-      )}
 
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
@@ -267,45 +182,35 @@ export default function MCQBankPage() {
             <TableHeader className="bg-slate-50/50">
               <TableRow className="h-14 border-slate-100">
                 <TableHead className="w-16 px-6 text-center">
-                  <Checkbox 
-                    checked={selectedIds.length === displayedQuestions.length && displayedQuestions.length > 0} 
-                    onCheckedChange={(checked) => setSelectedIds(checked ? displayedQuestions.map(q => q.id) : [])} 
-                  />
+                  <Checkbox checked={selectedIds.length === displayedQuestions.length && displayedQuestions.length > 0} onCheckedChange={(checked) => setSelectedIds(checked ? displayedQuestions.map(q => q.id) : [])} />
                 </TableHead>
-                <TableHead className="px-6 text-[9px] font-black uppercase tracking-widest text-slate-400">Node ID</TableHead>
-                <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-400">Statement</TableHead>
-                <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-center">Status</TableHead>
-                <TableHead className="text-right px-10 text-[9px] font-black uppercase tracking-widest text-slate-400">Actions</TableHead>
+                <TableHead className="px-6 text-[9px] font-bold text-slate-400 tracking-tight">Question ID</TableHead>
+                <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight">Statement</TableHead>
+                <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight text-center">Status</TableHead>
+                <TableHead className="text-right px-10 text-[9px] font-bold text-slate-400 tracking-tight">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading && questions.length === 0 ? (
                 <AdminTableSkeleton rows={8} columns={5} />
               ) : displayedQuestions.length > 0 ? displayedQuestions.map((q) => (
-                <TableRow 
-                  key={q.id} 
-                  onClick={() => toggleSelection(q.id)}
-                  className={cn("hover:bg-slate-50 transition-all border-slate-50 group cursor-pointer", selectedIds.includes(q.id) && "bg-primary/5")}
-                >
+                <TableRow key={q.id} onClick={() => toggleSelection(q.id)} className={cn("hover:bg-slate-50 transition-all border-slate-50 group cursor-pointer", selectedIds.includes(q.id) && "bg-primary/5")}>
                   <TableCell className="px-6 text-center" onClick={(e) => e.stopPropagation()}>
                     <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={() => toggleSelection(q.id)} />
                   </TableCell>
                   <TableCell className="px-6 py-6 text-left max-w-[140px]">
                      <div className="space-y-1.5">
-                        <code className="text-[10px] font-mono text-primary font-black">ID: {q.id.slice(-8)}</code>
+                        <code className="text-[10px] font-mono text-primary font-bold">ID: {q.id.slice(-8)}</code>
                         <div className="flex gap-2">
-                           <Badge variant="outline" className="border-slate-100 text-slate-300 font-bold uppercase">{q.boardId || 'GOVT'}</Badge>
+                           <Badge variant="outline" className="border-slate-100 text-slate-300 font-bold">{q.boardId || 'GOVT'}</Badge>
                         </div>
-                        {duplicateAnalysis.ids.has(q.id) && (
-                          <Badge className="bg-rose-500 text-white border-none text-[7px] font-black uppercase px-2 py-0.5 animate-pulse">Duplicate</Badge>
-                        )}
                      </div>
                   </TableCell>
                   <TableCell className="max-w-md">
                      <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
                   </TableCell>
                   <TableCell className="text-center">
-                     <Badge className={cn("border-none text-[8px] font-black uppercase px-2 py-0.5 shadow-sm", q.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}>{q.status}</Badge>
+                     <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5", q.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}>{q.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right px-10" onClick={(e) => e.stopPropagation()}>
                      <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
@@ -323,7 +228,7 @@ export default function MCQBankPage() {
                    <TableCell colSpan={5} className="h-96 text-center">
                       <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
                          <Layers className="h-20 w-20 text-slate-400" />
-                         <p className="font-black text-2xl uppercase tracking-[0.4em]">No matching questions</p>
+                         <p className="font-bold text-2xl">No matching questions</p>
                       </div>
                    </TableCell>
                 </TableRow>
@@ -335,8 +240,8 @@ export default function MCQBankPage() {
       
       {hasMore && questions.length > 0 && (
         <div className="flex justify-center mt-10">
-           <Button variant="outline" onClick={() => fetchQuestions(true)} disabled={loading} className="rounded-full px-12 h-14 font-black uppercase text-[10px] tracking-widest border-slate-200 gap-3">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Load More Questions
+           <Button variant="outline" onClick={() => fetchQuestions(true)} disabled={loading} className="rounded-full px-12 h-14 font-bold text-[11px] border-slate-200 gap-3">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4 text-primary" />} Load more questions
            </Button>
         </div>
       )}
@@ -345,14 +250,14 @@ export default function MCQBankPage() {
          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500 w-[95vw] max-w-3xl">
             <div className="bg-[#0F172A] text-white px-8 py-5 rounded-[2.5rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl">
                <div className="flex items-center gap-5">
-                  <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black text-lg">{selectedIds.length}</div>
+                  <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-bold text-lg">{selectedIds.length}</div>
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-widest leading-none">Questions Selected</p>
-                    <p className="text-[8px] font-bold text-slate-500 uppercase mt-1.5 tracking-widest">Database Sync Active</p>
+                    <p className="text-[11px] font-bold leading-none">Questions selected</p>
+                    <p className="text-[8px] font-bold text-slate-500 mt-1.5">Batch management active</p>
                   </div>
                </div>
                <div className="flex items-center gap-3">
-                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-all font-black text-[10px] uppercase shadow-lg border-none cursor-pointer"><CheckCircle2 className="h-4 w-4" /> Publish</button>
+                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-all font-bold text-[10px] shadow-lg border-none cursor-pointer"><CheckCircle2 className="h-4 w-4" /> Publish</button>
                   <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90 shadow-sm border-none cursor-pointer"><Trash2 className="h-4 w-4" /></button>
                   <div className="w-px h-10 bg-white/10 mx-2" />
                   <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-white p-1 bg-transparent border-none cursor-pointer"><X className="h-6 w-6" /></button>
@@ -363,7 +268,7 @@ export default function MCQBankPage() {
 
       <div className="flex items-center justify-center gap-4 text-slate-300 py-10 opacity-50">
         <ShieldCheck className="h-5 w-5" />
-        <span className="text-[9px] font-black uppercase tracking-[0.5em]">Institutional Filtering Engine Verified</span>
+        <span className="text-[9px] font-bold">Institutional filtering engine verified</span>
       </div>
     </div>
   )
@@ -380,7 +285,7 @@ function MetricCard({ label, value, icon, highlight }: any) {
        </div>
        <div className="space-y-0.5">
           <p className="text-[14px] md:text-3xl font-black text-[#0F172A] tabular-nums leading-none">{value}</p>
-          <p className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+          <p className="text-[7px] md:text-[9px] font-bold text-slate-400">{label}</p>
        </div>
     </Card>
   )
@@ -389,13 +294,9 @@ function MetricCard({ label, value, icon, highlight }: any) {
 function FilterSelect({ label, value, onChange, options }: any) {
   return (
     <div className="space-y-1.5 text-left">
-       <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-widest">{label}</label>
-       <select 
-          value={value} 
-          onChange={e => onChange(e.target.value)} 
-          className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none shadow-inner appearance-none cursor-pointer hover:bg-slate-100 transition-colors"
-       >
-          <option value="all">All {label === 'Board' ? 'Authority' : label === 'Level' ? 'Difficulty' : label}</option>
+       <label className="text-[9px] font-bold text-slate-400 ml-1">{label}</label>
+       <select value={value} onChange={e => onChange(e.target.value)} className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none shadow-inner appearance-none cursor-pointer hover:bg-slate-100 transition-colors">
+          <option value="all">All {label === 'Board' ? 'Authorities' : label}</option>
           {options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
        </select>
     </div>
