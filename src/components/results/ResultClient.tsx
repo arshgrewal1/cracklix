@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
@@ -45,11 +44,11 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import ShareableResultCard from "./ShareableResultCard"
 import { toJpeg } from 'html-to-image'
-import jsPDF from 'jspdf'
 
 /**
- * @fileOverview Universal Result Hub Viewer v78.0.
- * FIXED: Removed back button from header as requested.
+ * @fileOverview Universal Result Hub Engine v85.0 [Strict Attempt Lock].
+ * FIXED: Strictly loads by attemptId. Disable all cached attempt fallbacks.
+ * FIXED: Review portal syncs perfectly with selectedOptions from specific attemptId.
  */
 
 export default function ResultClient() {
@@ -81,47 +80,60 @@ export default function ResultClient() {
   useEffect(() => { setMounted(true) }, [])
 
   const mockId = searchParams.get('id')
-  const attemptIdFromUrl = searchParams?.get('attemptId')
+  const attemptId = searchParams.get('attemptId')
 
-  const resultsQuery = useMemo(() => {
-    if (!db || !user || !mockId) return null;
-    return query(collection(db, "results"), where("mockId", "==", mockId), where("userId", "==", user.uid));
-  }, [db, user, mockId]);
-
-  const { data: userResults } = useCollection<any>(resultsQuery);
-
+  // 1. DATA RESOLUTION (STRICT ATTEMPT ID)
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
     
     async function resolveAttempt() {
        setIsSearching(true);
        try {
-          const resultsRef = collection(db, "results");
-          let q = query(resultsRef, where("mockId", "==", mockId));
-          if (user) q = query(q, where("userId", "==", user.uid));
-          
-          const querySnap = await getDocs(q);
-          if (querySnap.empty) {
-             setIsSearching(false);
-             return;
+          if (attemptId) {
+             // PRIMARY: Fetch exact document by composite key or attemptId query
+             const resultRef = doc(db, "results", `${user?.uid || 'guest'}_${mockId}_${attemptId}`);
+             const snap = await getDoc(resultRef);
+             
+             if (snap.exists()) {
+                setSessionData({ ...snap.data(), id: snap.id });
+                setIsSearching(false);
+                return;
+             }
+             
+             // SECONDARY: Fallback query for specific attemptId in collection
+             const q = query(collection(db, "results"), where("attemptId", "==", attemptId));
+             const qSnap = await getDocs(q);
+             if (!qSnap.empty) {
+                setSessionData({ ...qSnap.docs[0].data(), id: qSnap.docs[0].id });
+                setIsSearching(false);
+                return;
+             }
           }
 
-          const resultsList = querySnap.docs.map(d => ({ ...d.data(), id: d.id }));
-          const sortedResults = resultsList.sort((a, b) => {
-             const tA = a.createdAt?.seconds || new Date(a.timestamp || 0).getTime() / 1000;
-             const tB = b.createdAt?.seconds || new Date(b.timestamp || 0).getTime() / 1000;
-             return tB - tA;
-          });
-
-          setSessionData(attemptIdFromUrl ? resultsList.find(r => r.attemptId === attemptIdFromUrl) || sortedResults[0] : sortedResults[0]);
+          // TERTIARY (GUEST/LATEST): Only if no attemptId in URL
+          if (!attemptId) {
+             const q = query(
+                collection(db, "results"), 
+                where("mockId", "==", mockId), 
+                where("userId", "==", user?.uid || 'guest')
+             );
+             const qSnap = await getDocs(q);
+             if (!qSnap.empty) {
+                const results = qSnap.docs.map(d => d.data()).sort((a,b) => b.createdAt?.seconds - a.createdAt?.seconds);
+                setSessionData(results[0]);
+             }
+          }
+          
           setIsSearching(false);
        } catch (e) { 
+          console.error("[RESULT_RESOLVE_FAILURE]:", e);
           setIsSearching(false);
        }
     }
     resolveAttempt();
-  }, [user, userLoading, db, mockId, attemptIdFromUrl, mounted]);
+  }, [user, userLoading, db, mockId, attemptId, mounted]);
 
+  // 2. LIVE RANKING HUB
   useEffect(() => {
      if (!db || !mockId || !sessionData) return;
      async function fetchRankingMetrics() {
@@ -154,6 +166,43 @@ export default function ResultClient() {
      }
      fetchRankingMetrics();
   }, [db, mockId, sessionData]);
+
+  // 3. ASSET HUB (QUESTIONS)
+  useEffect(() => {
+    async function loadQuestions() {
+      if (!db || !mockId) return;
+      try {
+        setLoadingQuestions(true);
+        const [mSnap, dSnap] = await Promise.all([getDoc(doc(db, "mocks", mockId)), getDoc(doc(db, "daily_quizzes", mockId))]);
+        const mockSnap = mSnap.exists() ? mSnap : dSnap;
+
+        if (mockSnap.exists()) {
+          const mData = mockSnap.data();
+          setMockData(mData);
+          const questionIds = mData.questionIds || [];
+          if (questionIds.length > 0) {
+            const chunks = [];
+            for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
+            const chunkPromises = chunks.map(async (chunk) => {
+              const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
+                getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
+                getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
+                getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+              ]);
+              const batch: any[] = [];
+              mcqSnap.docs.forEach(d => batch.push({ ...d.data(), id: d.id }));
+              usedSnap.forEach(d => { if (!batch.find(f => f.id === d.id)) batch.push({ ...d.data(), id: d.id }); });
+              legacySnap.forEach(d => { if (!batch.find(f => f.id === d.id)) batch.push({ ...d.data(), id: d.id }); });
+              return batch;
+            });
+            const all = (await Promise.all(chunkPromises)).flat();
+            setQuestions(questionIds.map((id: string) => all.find((q: any) => q.id === id)).filter(Boolean));
+          }
+        }
+      } finally { setLoadingQuestions(false) }
+    }
+    loadQuestions()
+  }, [db, mockId]);
 
   const handleShareOfficialReport = async () => {
     if (!sessionData || isGenerating) return;
@@ -201,42 +250,6 @@ export default function ResultClient() {
     }
   };
 
-  useEffect(() => {
-    async function loadQuestions() {
-      if (!db || !mockId) return;
-      try {
-        setLoadingQuestions(true);
-        const [mSnap, dSnap] = await Promise.all([getDoc(doc(db, "mocks", mockId)), getDoc(doc(db, "daily_quizzes", mockId))]);
-        const mockSnap = mSnap.exists() ? mSnap : dSnap;
-
-        if (mockSnap.exists()) {
-          const mData = mockSnap.data();
-          setMockData(mData);
-          const questionIds = mData.questionIds || [];
-          if (questionIds.length > 0) {
-            const chunks = [];
-            for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
-            const chunkPromises = chunks.map(async (chunk) => {
-              const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
-                getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-                getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
-                getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
-              ]);
-              const batch: any[] = [];
-              mcqSnap.docs.forEach(d => batch.push({ ...d.data(), id: d.id }));
-              usedSnap.forEach(d => { if (!batch.find(f => f.id === d.id)) batch.push({ ...d.data(), id: d.id }); });
-              legacySnap.forEach(d => { if (!batch.find(f => f.id === d.id)) batch.push({ ...d.data(), id: d.id }); });
-              return batch;
-            });
-            const all = (await Promise.all(chunkPromises)).flat();
-            setQuestions(questionIds.map((id: string) => all.find((q: any) => q.id === id)).filter(Boolean));
-          }
-        }
-      } finally { setLoadingQuestions(false) }
-    }
-    loadQuestions()
-  }, [db, mockId]);
-
   const reviewNodes = useMemo(() => {
     if (!sessionData || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
     const all = questions.map((q, i) => ({ ...q, originalIndex: i }));
@@ -270,12 +283,12 @@ export default function ResultClient() {
                     <div className="text-left space-y-2 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
                           <Badge className="bg-[#E6F9F3] text-[#10B981] border-none px-3 py-0.5 font-bold text-[9px] rounded-lg">Verified report</Badge>
-                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-3 py-0.5 font-bold text-[9px] rounded-lg">Attempt #{userResults?.length || 1}</Badge>
+                          <Badge className="bg-[#EBF2FF] text-[#2563EB] border-none px-3 py-0.5 font-bold text-[9px] rounded-lg">Attempt node: {sessionData.attemptId?.slice(0,8)}</Badge>
                        </div>
                        <h1 className="text-[17px] md:text-4xl font-bold text-[#0F172A] tracking-tight leading-tight">{sessionData.mockTitle}</h1>
                        <div className="flex flex-wrap items-center gap-4 text-[10px] md:text-base font-semibold text-slate-400">
-                          <div className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span></div>
-                          <div className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4 text-slate-300" /> <span>{mockData?.duration || 120}:00</span></div>
+                          <div className="flex items-center gap-1.5"><Calendar className="h-4 w-4 text-slate-300" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span></div>
+                          <div className="flex items-center gap-1.5"><TimerIcon className="h-4 w-4 text-slate-300" /> <span>Attempt duration: {Math.round(sessionData.timeTaken / 60)}m</span></div>
                        </div>
                     </div>
                  </div>

@@ -6,7 +6,7 @@ import {
   QuestionStatus, 
   LanguageDisplayMode 
 } from "@/types";
-import { Firestore, doc, deleteDoc } from 'firebase/firestore';
+import { Firestore } from 'firebase/firestore';
 import { nanoid } from "nanoid";
 
 export interface ExamStoreState {
@@ -54,7 +54,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v11.1 [Attempt Identity Hardened].
+ * @fileOverview Hardened Test Store v12.0 [Atomic Attempt Redesign].
+ * FIXED: Retake now generates a fresh attemptId and purges all previous state nodes.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -98,16 +99,19 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   }),
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode, forceNew = false) => {
-    // 1. CRITICAL: Atomic state purge
     const defaultTime = duration * 60;
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
 
-    // 2. Logic: If forceNew (Retake), completely bypass resumeData and purge localStorage node
-    let effectiveResume = !forceNew ? (resumeData || null) : null;
-
+    // 1. Logic: Strict Cache Liquidation for Retakes
     if (forceNew && typeof window !== 'undefined') {
        localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
-    } else if (!effectiveResume && !userId && typeof window !== 'undefined') {
+       sessionStorage.removeItem(`cracklix_active_attempt_${mockId}`);
+    }
+
+    let effectiveResume = !forceNew ? (resumeData || null) : null;
+
+    // 2. Guest Persistence Recovery
+    if (!effectiveResume && !userId && typeof window !== 'undefined') {
        try {
          const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
          if (stored) {
@@ -123,7 +127,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const now = Date.now();
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
     
-    // 3. ATOMIC Attempt ID: Every fresh start must have a globally unique identifier
+    // 3. ATOMIC Attempt ID: Retake ALWAYS generates a fresh identifier
     const attemptId = (isResuming && !forceNew) ? (effectiveResume.attemptId || nanoid(12)) : nanoid(12);
 
     set({

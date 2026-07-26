@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -20,9 +19,9 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v7.1 [Title Case Fixed].
- * FIXED: Replaced hardcoded insights with real subject-based analytics.
- * FIXED: Enforced Title Case for all subject nodes.
+ * @fileOverview Premium Analysis Screen v8.0 [Atomic Sync].
+ * FIXED: Data derived strictly from attemptId props.
+ * FIXED: Removed all hardcoded fallbacks and stale data buffers.
  */
 
 interface ReportScreenProps {
@@ -62,44 +61,42 @@ export default function ReportScreen(props: ReportScreenProps) {
     const acc = Number(attemptAccuracy);
     const scoreNum = Number(score);
 
-    // Dynamic Subject Insights
+    // 1. Dynamic Subject Insights (Pure Attempt Data)
     if (subjectAnalysis.length > 0) {
-      const bestSubject = [...subjectAnalysis].sort((a, b) => b.accuracy - a.accuracy)[0];
-      const worstSubject = [...subjectAnalysis].sort((a, b) => a.accuracy - b.accuracy)[0];
+      const sorted = [...subjectAnalysis].sort((a, b) => b.accuracy - a.accuracy);
+      const best = sorted[0];
+      const worst = sorted[sorted.length - 1];
 
-      if (bestSubject.accuracy >= 70) {
-        list.push({ type: 'STRENGTH', text: `High accuracy in ${toTitleCase(bestSubject.name)}.` });
+      if (best.accuracy >= 70) {
+        list.push({ type: 'STRENGTH', text: `High precision in ${toTitleCase(best.name)} node.` });
       }
       
-      if (worstSubject.accuracy < 50) {
-        list.push({ type: 'WEAKNESS', text: `Needs focus in ${toTitleCase(worstSubject.name)}.` });
+      if (worst.accuracy < 50 && worst.total > 0) {
+        list.push({ type: 'WEAKNESS', text: `Immediate focus required in ${toTitleCase(worst.name)}.` });
       }
     }
 
-    if (acc >= 90) list.push({ type: 'STRENGTH', text: "Outstanding precision across all attempted nodes." });
+    // 2. Behavioral Insights
+    if (acc >= 90) list.push({ type: 'STRENGTH', text: "Elite accuracy maintained across the attempt vertical." });
     
-    if (wrongCount > totalQuestions * 0.2) {
-      list.push({ type: 'WEAKNESS', text: "Heavy negative penalty detected. Reduce guesswork." });
+    if (wrongCount > totalQuestions * 0.25) {
+      list.push({ type: 'WEAKNESS', text: "Negative penalty audit: Excessive guesswork detected." });
     }
 
     if (scoreNum < avgScore) {
-       list.push({ type: 'SUGGESTION', text: "Target the platform average by increasing attempt rate." });
+       list.push({ type: 'SUGGESTION', text: "Target the platform average by increasing attempt volume." });
     }
     
-    // Fallback logic for small tests
-    if (list.length < 2) {
-       list.push({ type: 'SUGGESTION', text: "Practice more mock tests to improve your Punjab Rank." });
-    }
-
     return list.slice(0, 4);
   }, [attemptAccuracy, score, avgScore, wrongCount, totalQuestions, subjectAnalysis]);
 
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-500 pb-20 px-0 md:px-1">
       
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 overflow-x-hidden">
+      {/* SCORE GRID - REALTIME NODES */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
          <Card className="col-span-1 h-32 md:h-44 rounded-[22px] md:rounded-[24px] bg-[#F0FDF4] border-[#DCFCE7] shadow-sm flex flex-col justify-center px-4 md:px-6">
-            <p className="text-[9px] md:text-xs font-bold text-slate-500 mb-1">Net score</p>
+            <p className="text-[9px] md:text-xs font-bold text-slate-500 mb-1">Attempt score</p>
             <div className="flex items-baseline gap-1">
                <span className="text-xl md:text-4xl font-black text-[#10B981] tabular-nums">{score}</span>
                <span className="text-[10px] md:text-xl font-bold text-slate-400">/{totalQuestions}</span>
@@ -117,16 +114,17 @@ export default function ReportScreen(props: ReportScreenProps) {
          <SummaryMiniCard label="Skipped" val={skippedCount} color="text-slate-400" bg="bg-slate-50" className="hidden md:flex" />
       </div>
 
+      {/* REGISTRY RANKING NODE */}
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 flex items-center justify-between">
          <div className="flex items-center gap-4 md:gap-8 text-left">
-            <div className="h-12 w-12 md:h-16 md:h-16 rounded-full bg-[#1677FF] flex items-center justify-center text-white shadow-lg shrink-0">
+            <div className="h-12 w-12 md:h-16 rounded-full bg-[#1677FF] flex items-center justify-center text-white shadow-lg shrink-0">
                <Trophy className="h-6 w-6 md:h-8 md:w-8" />
             </div>
             <div className="text-left min-w-0">
                <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Punjab rank</p>
                <div className="flex items-baseline gap-2">
                   <span className="text-2xl md:text-5xl font-black text-[#1677FF] tabular-nums tracking-tighter">#{rank}</span>
-                  <span className="text-[9px] md:text-sm font-bold text-slate-300 truncate">/ {totalCandidates} Candidates</span>
+                  <span className="text-[9px] md:text-sm font-bold text-slate-300 truncate">/ {totalCandidates} Registry Nodes</span>
                </div>
             </div>
          </div>
@@ -134,11 +132,12 @@ export default function ReportScreen(props: ReportScreenProps) {
             <ShieldCheck className="h-5 w-5 text-[#1677FF]" />
             <div className="text-left">
                <p className="text-[10px] font-black text-[#1677FF] leading-none uppercase">Verified</p>
-               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1 uppercase">Top ranked</p>
+               <p className="text-[8px] md:text-[10px] font-bold text-slate-400 mt-1 uppercase">Attempt Lock</p>
             </div>
          </div>
       </Card>
 
+      {/* SUBJECT ANALYTICS - ATTEMPT SPECIFIC */}
       {subjectAnalysis.length > 0 && (
          <div className="space-y-6">
             <div className="flex items-center gap-3 px-1">
@@ -151,8 +150,8 @@ export default function ReportScreen(props: ReportScreenProps) {
                      <thead className="bg-slate-50/50">
                         <tr className="h-14">
                            <th className="px-5 md:px-8 font-bold text-[10px] md:text-xs text-slate-400 uppercase tracking-widest w-[40%]">Subject</th>
-                           <th className="px-2 font-bold text-[10px] md:text-xs text-slate-400 text-center uppercase tracking-widest">Progress</th>
-                           <th className="px-5 md:px-8 font-bold text-[10px] md:text-xs text-slate-400 text-right uppercase tracking-widest w-[25%]">Score</th>
+                           <th className="px-2 font-bold text-[10px] md:text-xs text-slate-400 text-center uppercase tracking-widest">Precision</th>
+                           <th className="px-5 md:px-8 font-bold text-[10px] md:text-xs text-slate-400 text-right uppercase tracking-widest w-[25%]">Net Score</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
@@ -180,23 +179,25 @@ export default function ReportScreen(props: ReportScreenProps) {
          </div>
       )}
 
+      {/* COMPARISON HUB */}
       <div className="space-y-6">
          <div className="flex items-center gap-3 px-1">
             <TrendingUp className="h-5 w-5 text-[#1677FF]" />
-            <h3 className="text-lg md:text-2xl font-black text-[#071B4D] uppercase tracking-tight">Competition snapshot</h3>
+            <h3 className="text-lg md:text-2xl font-black text-[#071B4D] uppercase tracking-tight">Attempt Benchmark</h3>
          </div>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <ComparisonNode label="Top score" val={topScore?.toFixed(1)} icon={<Award className="text-amber-500 h-5 w-5" />} />
-            <ComparisonNode label="Avg. score" val={avgScore?.toFixed(1)} icon={<Activity className="text-blue-500 h-5 w-5" />} />
-            <ComparisonNode label="Avg. accuracy" val={`${avgAccuracy?.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500 h-5 w-5" />} />
+            <ComparisonNode label="Registry Top" val={topScore?.toFixed(1)} icon={<Award className="text-amber-500 h-5 w-5" />} />
+            <ComparisonNode label="Avg score" val={avgScore?.toFixed(1)} icon={<Activity className="text-blue-500 h-5 w-5" />} />
+            <ComparisonNode label="Avg precision" val={`${avgAccuracy?.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500 h-5 w-5" />} />
             <ComparisonNode label="Score gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500 h-5 w-5" />} />
          </div>
       </div>
 
+      {/* INSIGHTS HUB */}
       <Card className="border border-[#E5EAF2] shadow-sm rounded-[24px] bg-white p-6 md:p-10 space-y-6">
          <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
             <Lightbulb className="h-5 w-5 text-[#F59E0B]" />
-            <h3 className="text-lg md:text-2xl font-black text-[#071B4D] uppercase tracking-tight">Smart insights</h3>
+            <h3 className="text-lg md:text-2xl font-black text-[#071B4D] uppercase tracking-tight">Audit Insights</h3>
          </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {insights.map((insight, i) => (
@@ -229,7 +230,7 @@ function SummaryMiniCard({ label, val, color, bg, className }: any) {
 
 function ComparisonNode({ label, val, icon }: any) {
    return (
-      <div className="flex items-center gap-4 p-4 md:p-6 rounded-2xl bg-white border border-[#E5EAF2] shadow-sm text-left group hover:translate-y-[-2px] transition-all">
+      <div className="flex items-center gap-4 p-4 md:p-6 rounded-2xl bg-white border border-[#E5EAF2] shadow-sm text-left group hover:translate-y-[-2px] transition-all h-full">
          <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">{icon}</div>
          <div className="min-w-0">
             <p className="text-[9px] md:text-[10px] font-bold text-slate-400 truncate uppercase tracking-widest leading-none">{label}</p>

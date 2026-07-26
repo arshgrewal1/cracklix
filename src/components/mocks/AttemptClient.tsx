@@ -41,9 +41,9 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Institutional Attempt Node v46.0 [Atomic Ranking Hardened].
- * FIXED: Optimized submission speed by pre-calculating metrics and improving UI responsiveness.
- * FIXED: Explicit unique attempt ID handling for retakes.
+ * @fileOverview Institutional Attempt Node v48.0 [Atomic Persistence Lock].
+ * FIXED: Every submission creates a UNIQUE document in the results collection.
+ * FIXED: Navigation is gated until the server acknowledges the write.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -161,7 +161,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
          if (attemptSnap.exists()) {
            const aData = attemptSnap.data();
-           if (aData.status === 'COMPLETED') { router.replace(`/results/view?id=${mockId}&attemptId=${aData.attemptId}`); return; }
+           if (aData.status === 'COMPLETED') { 
+              router.replace(`/results/view?id=${mockId}&attemptId=${aData.attemptId}`); 
+              return; 
+           }
            resumeData = aData;
          }
       }
@@ -189,7 +192,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     setShowSubmitModal(false);
     setIsSubmittingFinal(true);
     
-    // 1. CALCULATE METRICS OFF-CHAIN (HIGH SPEED)
+    // 1. CALCULATE METRICS IN-MEMORY (STRICT)
     let correctCount = 0; 
     let wrongCount = 0;
     const totalQuestions = questions.length;
@@ -254,82 +257,104 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
     const isQualified = percentage >= 40;
 
-    const navigationUrl = user 
-      ? `/results/view?id=${mockId}&attemptId=${attemptId}` 
-      : `/results/view?id=${mockId}`;
+    // 2. REGISTRY PERSISTENCE (UNIQUE DOCUMENT PER ATTEMPT)
+    const resultDocId = user ? `${user.uid}_${mockId}_${attemptId}` : `guest_${mockId}_${attemptId}`;
 
-    // 2. ATOMIC REGISTRY SYNC
     if (user) {
       try {
         await runTransaction(db, async (transaction) => {
+          const resultRef = doc(db, "results", resultDocId);
+          const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
           const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
           const globalMeritRef = doc(db, "leaderboard", user.uid);
-          const resultRef = doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
-          const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
 
           const lbSnap = await transaction.get(lbEntryRef);
           const globalSnap = await transaction.get(globalMeritRef);
-          
-          let isNewMockBest = true;
-          let oldAttemptCount = 0;
 
-          if (lbSnap.exists()) {
-            const existing = lbSnap.data();
-            oldAttemptCount = existing.attemptCount || 0;
-            const hasHigherScore = score > (existing.highestScore || 0);
-            const hasEqualScoreHigherAcc = (score === existing.highestScore && attemptAccuracy > existing.accuracy);
-            const hasEqualScoreAccLowerTime = (score === existing.highestScore && attemptAccuracy === existing.accuracy && timeTaken < existing.timeTaken);
-            isNewMockBest = hasHigherScore || hasEqualScoreHigherAcc || hasEqualScoreAccLowerTime;
-          }
-
-          const currentGlobalBest = globalSnap.exists() ? (globalSnap.data().highestScore || 0) : 0;
-          const newGlobalBest = Math.max(score, currentGlobalBest);
-
-          transaction.set(lbEntryRef, {
-            userId: user.uid,
-            userName: profile?.name || 'Aspirant',
-            photoURL: profile?.photoURL || "",
-            gender: profile?.gender || 'Other',
-            mockId,
-            highestScore: isNewMockBest ? score : (lbSnap.exists() ? lbSnap.data()?.highestScore : score),
-            accuracy: isNewMockBest ? attemptAccuracy : (lbSnap.exists() ? lbSnap.data()?.accuracy : attemptAccuracy),
-            timeTaken: isNewMockBest ? timeTaken : (lbSnap.exists() ? lbSnap.data()?.timeTaken : timeTaken),
-            attemptCount: oldAttemptCount + 1,
-            bestAttemptId: isNewMockBest ? attemptId : (lbSnap.exists() ? lbSnap.data()?.bestAttemptId : attemptId),
-            submittedAt: serverTimestamp()
-          }, { merge: true });
-
-          transaction.set(globalMeritRef, {
-            uid: user.uid,
-            displayName: profile?.name || 'Aspirant',
-            photoURL: profile?.photoURL || "",
-            gender: profile?.gender || 'Other',
-            highestScore: newGlobalBest,
-            totalTests: increment(1),
-            updatedAt: serverTimestamp(),
-            recentMockTitle: mockData.title
-          }, { merge: true });
-
+          // a. Commit Result Node
           transaction.set(resultRef, {
-             attemptId, mockId, mockTitle: mockData.title || mockTitle, userId: user.uid,
-             userName: profile?.name || 'Aspirant', userEmail: user.email || "", score, maxMarks, percentage, grade, isQualified,
-             positiveMarks: posMarks, negativeMarks: negMarks, correctCount, wrongCount, skippedCount, attemptedCount, totalQuestions,
-             attemptAccuracy, overallAccuracy, attemptRate, readiness, timeTaken, timestamp: new Date().toISOString(), createdAt: serverTimestamp(), languageMode: language,
+             attemptId, 
+             mockId, 
+             mockTitle: mockData.title || mockTitle, 
+             userId: user.uid,
+             userName: profile?.name || 'Aspirant', 
+             userEmail: user.email || "", 
+             score, 
+             maxMarks, 
+             percentage, 
+             grade, 
+             isQualified,
+             positiveMarks: posMarks, 
+             negativeMarks: negMarks, 
+             correctCount, 
+             wrongCount, 
+             skippedCount, 
+             attemptedCount, 
+             totalQuestions,
+             attemptAccuracy, 
+             overallAccuracy, 
+             attemptRate, 
+             readiness, 
+             timeTaken, 
+             timestamp: new Date().toISOString(), 
+             createdAt: serverTimestamp(), 
+             languageMode: language,
              subjectAnalysis: Object.values(subjectMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
              complexityAnalysis: Object.values(complexityMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) })),
              answers: studentAnswers 
           });
 
-          transaction.set(attemptPtrRef, { attemptId, status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true });
+          // b. Update Pointer Node (Always points to latest attempt for resume logic)
+          transaction.set(attemptPtrRef, { 
+             attemptId, 
+             status: 'COMPLETED', 
+             updatedAt: serverTimestamp() 
+          }, { merge: true });
+
+          // c. Update Merit Node (Conditional: Only if Best)
+          let isNewMockBest = true;
+          if (lbSnap.exists()) {
+            const existing = lbSnap.data();
+            const hasHigherScore = score > (existing.highestScore || 0);
+            const hasEqualScoreHigherAcc = (score === existing.highestScore && attemptAccuracy > existing.accuracy);
+            isNewMockBest = hasHigherScore || hasEqualScoreHigherAcc;
+          }
+
+          if (isNewMockBest) {
+             transaction.set(lbEntryRef, {
+                userId: user.uid,
+                userName: profile?.name || 'Aspirant',
+                photoURL: profile?.photoURL || "",
+                gender: profile?.gender || 'Other',
+                mockId,
+                highestScore: score,
+                accuracy: attemptAccuracy,
+                timeTaken: timeTaken,
+                bestAttemptId: attemptId,
+                submittedAt: serverTimestamp()
+             }, { merge: true });
+
+             const currentGlobalBest = globalSnap.exists() ? (globalSnap.data().highestScore || 0) : 0;
+             transaction.set(globalMeritRef, {
+                uid: user.uid,
+                displayName: profile?.name || 'Aspirant',
+                photoURL: profile?.photoURL || "",
+                gender: profile?.gender || 'Other',
+                highestScore: Math.max(score, currentGlobalBest),
+                totalTests: increment(1),
+                updatedAt: serverTimestamp(),
+                recentMockTitle: mockData.title
+             }, { merge: true });
+          }
         });
         
         stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
       } catch (e) {
          console.error("[CRACKLIX_SYNC_FAILURE]:", e);
-         toast({ variant: "destructive", title: "Cloud Sync Degraded", description: "Your result is safe locally." });
+         toast({ variant: "destructive", title: "Cloud Registry Error", description: "Your result is safe locally but failed to sync." });
       }
     } else {
-      localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify({
+      localStorage.setItem(`cracklix_guest_result_${mockId}_${attemptId}`, JSON.stringify({
          attemptId, mockId, score, maxMarks, percentage, grade, isQualified,
          attemptAccuracy, overallAccuracy, attemptRate, totalQuestions,
          correctCount, wrongCount, timeTaken, timestamp: new Date().toISOString(),
@@ -337,7 +362,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }));
     }
 
-    // 3. SNAPPY NAVIGATION
+    // 3. SECURE NAVIGATION (URL LOCK)
+    const navigationUrl = `/results/view?id=${mockId}&attemptId=${attemptId}`;
     router.replace(navigationUrl);
     resetStore();
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language, toast]);
@@ -356,10 +382,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
        </div>
        <div className="text-center space-y-2">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">
-             {isSubmittingFinal ? "Generating Analytics" : "Synchronizing Hub"}
+             {isSubmittingFinal ? "Finalizing Audit" : "Synchronizing Hub"}
           </p>
           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
-             {isSubmittingFinal ? "Securing results in master registry..." : "Loading questions from registry..."}
+             {isSubmittingFinal ? "Committing unique result node..." : "Loading pattern nodes..."}
           </p>
        </div>
     </div>
