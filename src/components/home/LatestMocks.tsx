@@ -14,7 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Standardized Latest Tests Hub v44.0 [Uppercase Removed].
+ * @fileOverview Standardized Latest Tests Hub v45.0.
+ * UPDATED: Limited to 3 cards for Home page balance.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -29,7 +30,7 @@ export default function LatestMocks() {
       const tA = a.createdAt?.seconds || 0;
       const tB = b.createdAt?.seconds || 0;
       return tB - tA;
-    }).slice(0, 4);
+    }).slice(0, 3);
   }, [rawMocks])
 
   const isPassActive = useMemo(() => {
@@ -58,9 +59,9 @@ export default function LatestMocks() {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem] bg-white border border-slate-100" />)
+             Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem] bg-white border border-slate-100" />)
           ) : mocks.map((mock, i) => {
             const isPremium = mock.accessLevel?.toUpperCase() === 'PREMIUM';
             const locked = isPremium && !isPassActive;

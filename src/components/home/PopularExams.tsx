@@ -23,7 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Standardized Popular Exams Hub v55.0 [Uppercase Removed].
+ * @fileOverview Standardized Popular Exams Hub v56.0.
+ * UPDATED: Limited to 3 cards as per institutional layout request.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -35,7 +36,7 @@ export default function PopularExams() {
 
   const examsQuery = useMemo(() => {
     if (!db) return null;
-    return query(collection(db, "exams"), where("isTrending", "==", true), limit(8));
+    return query(collection(db, "exams"), where("isTrending", "==", true), limit(3));
   }, [db]);
 
   const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
@@ -99,7 +100,7 @@ export default function PopularExams() {
 
   return (
     <section className="py-12 md:py-20 bg-white">
-      <div className="max-w-7xl auto px-4 md:px-8 space-y-10">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-10">
         
         {/* Standardized Header */}
         <div className="flex items-center justify-between px-1">
@@ -117,9 +118,9 @@ export default function PopularExams() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
            {loading ? (
-              Array.from({ length: 4 }).map((_, i) => (
+              Array.from({ length: 3 }).map((_, i) => (
                 <Skeleton key={i} className="h-64 w-full rounded-[2.5rem] bg-slate-50" />
               ))
            ) : exams?.map((exam: any, idx: number) => {

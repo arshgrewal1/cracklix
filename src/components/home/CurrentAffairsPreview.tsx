@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Standardized Current Affairs Preview v24.0 [Uppercase Removed].
+ * @fileOverview Standardized Current Affairs Preview v25.0.
+ * UPDATED: Limited to 3 items as per Home page optimization request.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -23,7 +24,7 @@ export default function CurrentAffairsPreview() {
     return query(
       collection(db, "current_affairs_hub"), 
       where("status", "==", "PUBLISHED"),
-      limit(4)
+      limit(3)
     );
   }, [db]);
 
@@ -49,9 +50,9 @@ export default function CurrentAffairsPreview() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-8 lg:gap-10">
            {loading ? (
-              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[230px] md:h-[400px] w-full rounded-[24px] md:rounded-[3rem] bg-white border border-slate-100" />)
+              Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[230px] md:h-[400px] w-full rounded-[24px] md:rounded-[3rem] bg-white border border-slate-100" />)
            ) : items?.map((item, idx) => (
               <motion.div 
                 key={item.id}
