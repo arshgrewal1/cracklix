@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { Suspense, useMemo, useEffect, useState } from "react"
@@ -10,8 +9,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Universal Result Hub Viewer v6.1 [Resilient Guard].
- * Hardened: Enforces unique attempt-id synchronization with improved guest fallback.
+ * @fileOverview Universal Result Hub Viewer v6.2 [Registry Hardened].
+ * FIXED: Persistent institutional loader to prevent 'No Result' flash during sync.
  */
 
 export default function ResultViewPage() {
@@ -44,22 +43,23 @@ function ResultGuard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Wait for authentication state to resolve before auditing registry
+    // 1. Wait for auth to resolve
     if (authLoading) return;
 
     async function verifyRegistryNode() {
+      // 2. Immediate exit if critical params are missing
       if (!db || !mockId) {
         setLoading(false);
+        setResultFound(false);
         return;
       }
 
       try {
         setLoading(true);
         
-        // 1. Resolve exact attempt reference
         let activeAttemptId = attemptIdFromUrl;
 
-        // 2. Logged-in User: Resolve latest from tracker if missing in URL
+        // 3. Resolve attempt ID for logged-in users
         if (!activeAttemptId && user) {
            const trackerSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
            if (trackerSnap.exists()) {
@@ -67,34 +67,27 @@ function ResultGuard() {
            }
         }
 
-        // 3. Document Verification
-        if (user && activeAttemptId) {
-          const resDocId = `${user.uid}_${mockId}_${activeAttemptId}`;
-          const snap = await getDoc(doc(db, "results", resDocId));
+        // 4. Primary Document Verification
+        if (user) {
+          const docId = activeAttemptId ? `${user.uid}_${mockId}_${activeAttemptId}` : `${user.uid}_${mockId}`;
+          const snap = await getDoc(doc(db, "results", docId));
           
-          if (!snap.exists()) {
-             // Fallback for legacy items (pre-attempt-id architecture)
-             const legacySnap = await getDoc(doc(db, "results", `${user.uid}_${mockId}`));
-             setResultFound(legacySnap.exists());
+          if (!snap.exists() && !activeAttemptId) {
+             // Second attempt check for older logic
+             const fallbackSnap = await getDoc(doc(db, "results", `${user.uid}_${mockId}`));
+             setResultFound(fallbackSnap.exists());
           } else {
-             setResultFound(true);
+             setResultFound(snap.exists());
           }
-        } else if (!user) {
-           // 4. Guest Session: Check local storage node
-           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
-           if (guestRes) {
-              setResultFound(true);
-           } else {
-              setResultFound(false);
-           }
         } else {
-           // Logged in but no attempt found
-           setResultFound(false);
+           // 5. Guest Fallback
+           const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
+           setResultFound(!!guestRes);
         }
       } catch (err) {
-        console.error("[RESULT_GUARD_AUDIT_FAILURE]:", err);
         setResultFound(false);
       } finally {
+        // Only stop loading once the verdict is definitive
         setLoading(false);
       }
     }
@@ -103,11 +96,14 @@ function ResultGuard() {
 
   if (loading) {
      return (
-        <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
-           <Zap className="h-10 w-10 text-primary animate-pulse" />
+        <div className="h-screen flex flex-col items-center justify-center bg-white space-y-8">
+           <div className="relative">
+              <Zap className="h-14 w-14 text-primary animate-pulse" />
+              <div className="absolute inset-0 border-2 border-primary/20 rounded-full animate-ping" />
+           </div>
            <div className="text-center space-y-2">
-              <p className="text-[10px] font-black uppercase text-[#0F172A] tracking-[0.4em]">Registry Handshake</p>
-              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Verifying unique attempt node...</p>
+              <p className="text-[11px] font-black uppercase text-[#0F172A] tracking-[0.4em]">Registry Handshake</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Generating official analysis...</p>
            </div>
         </div>
      );
@@ -122,7 +118,7 @@ function ResultGuard() {
            <div className="space-y-3">
               <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Registry Entry Missing</h2>
               <p className="text-slate-500 font-medium text-sm md:text-lg max-w-sm mx-auto leading-relaxed">
-                 This test attempt node could not be verified in the master ledger. Retake the test to generate a fresh snapshot.
+                 We couldn't verify this test attempt in the master ledger. Please retake the test to sync your performance.
               </p>
            </div>
            <div className="flex flex-col gap-3 w-full max-w-xs">

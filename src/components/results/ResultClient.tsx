@@ -1,12 +1,11 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
-import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useUser, useAuth, useFirestore, useDoc, useCollection } from "@/firebase"
+import { useUser, useFirestore, useDoc, useCollection } from "@/firebase"
 import { 
   collection, 
   query, 
@@ -67,9 +66,9 @@ import { BrandingSettings } from "@/types"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Result Hub v3.0 [Rank Engine & A4 Optimized].
- * FIXED: Implemented real-time rank calculation based on all user results.
- * FIXED: Enforced Uppercase branding for the official report card.
+ * @fileOverview Official Result Hub v3.1 [UI Refined].
+ * FIXED: Terminology 'Questions' enforced and Grade Icon blue removed.
+ * FIXED: Implementation of defensive array checks for analytics nodes.
  */
 export default function ResultClient() {
   const db = useFirestore()
@@ -93,10 +92,8 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
-  // 1. Resolve exact Result Document Identity
   useEffect(() => {
     if (userLoading || !db || !mockId) return;
-
     async function resolveId() {
        let targetId = attemptIdFromUrl;
        if (!targetId && user) {
@@ -105,7 +102,6 @@ export default function ResultClient() {
              targetId = trackerSnap.data().attemptId;
           }
        }
-
        if (user && targetId) setResolvedResultId(`${user.uid}_${mockId}_${targetId}`);
        else if (user) setResolvedResultId(`${user.uid}_${mockId}`);
     }
@@ -116,24 +112,14 @@ export default function ResultClient() {
   const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
-  // 2. Rank Engine: Calculate Live Standing across all results for this mock
   useEffect(() => {
      if (!db || !mockId || !sessionData?.score) return;
-
      async function calculateRank() {
         try {
-           const resultsRef = collection(db, "results");
-           // Filter for this mock and score strictly higher than user
-           const rankQuery = query(
-              resultsRef, 
-              where("mockId", "==", mockId), 
-              where("score", ">", sessionData.score)
-           );
+           const rankQuery = query(collection(db, "results"), where("mockId", "==", mockId), where("score", ">", sessionData.score));
            const countSnap = await getCountFromServer(rankQuery);
            setLiveRank(countSnap.data().count + 1);
-        } catch (e) {
-           console.warn("[RANK_AUDIT_ERROR]:", e);
-        }
+        } catch (e) { setLiveRank("---"); }
      }
      calculateRank();
   }, [db, mockId, sessionData?.score]);
@@ -147,7 +133,6 @@ export default function ResultClient() {
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
-  // 3. Question Bank Hydration
   useEffect(() => {
     async function loadQuestions() {
       if (!db || !mockId) { setLoadingQuestions(false); return; }
@@ -175,7 +160,7 @@ export default function ResultClient() {
             setQuestions(questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean));
           }
         }
-      } catch (e) { console.error(e); } finally { setLoadingQuestions(false) }
+      } catch (e) {} finally { setLoadingQuestions(false) }
     }
     loadQuestions()
   }, [db, mockId]);
@@ -183,31 +168,20 @@ export default function ResultClient() {
   const handleRetake = async () => {
     if (!db || isSyncing || !mockId || !user) return;
     if (!confirm("PURGE CURRENT PROGRESS AND RETAKE TEST?")) return;
-    
     setIsSyncing(true);
     try {
       await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
-      toast({ title: "TEST RESET SUCCESSFUL" });
       router.push(`/mocks/instructions?id=${mockId}&retake=true`);
-    } catch (e) {
-      toast({ variant: "destructive", title: "SYNC FAILURE" });
-    } finally {
-      setIsSyncing(false);
-    }
+    } catch (e) { toast({ variant: "destructive", title: "SYNC FAILURE" }); }
+    finally { setIsSyncing(false); }
   };
 
-  const handleDownloadPDF = () => {
-     setActiveMainTab("REPORT");
-     setTimeout(() => {
-        window.print();
-     }, 500);
-  };
+  const handleDownloadPDF = () => { setActiveMainTab("REPORT"); setTimeout(() => { window.print(); }, 500); };
 
   const reviewNodes = useMemo(() => {
     if (!activeSession || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
     const all = questions.map((q, i) => ({ ...q, originalIndex: i }));
     const correct: any[] = [], wrong: any[] = [], skipped: any[] = [];
-
     all.forEach((q) => {
       const ans = activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)];
       const isAttempted = ans !== null && ans !== undefined && String(ans) !== "";
@@ -234,11 +208,9 @@ export default function ResultClient() {
      return m > 0 ? `${m} MIN ${s} SEC` : `${s} SEC`;
   };
 
-  if (!mounted || (resultLoading && user)) {
-     return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-spin" /></div>;
+  if (!mounted || (resultLoading && user) || !activeSession) {
+     return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
   }
-
-  if (!activeSession) return null;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-[#0F172A] selection:bg-primary/10 flex flex-col overflow-x-hidden">
@@ -313,7 +285,7 @@ export default function ResultClient() {
                                    <div className="flex items-center gap-3"><BookOpen className="h-4 w-4 text-primary" /> {sub.name}</div>
                                    <span className="text-[#0F172A] tabular-nums">{sub.accuracy}%</span>
                                 </div>
-                                <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
+                                <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
                                    <motion.div 
                                       initial={{ width: 0 }} 
                                       animate={{ width: `${sub.accuracy}%` }} 
@@ -335,7 +307,7 @@ export default function ResultClient() {
                           <Zap className="h-6 w-6 text-primary fill-current" /> Performance Insights
                        </h2>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {(activeSession.insights || []).map((ins: string, i: number) => (
+                          {Array.isArray(activeSession.insights) && activeSession.insights.map((ins: string, i: number) => (
                              <div key={i} className="p-5 rounded-2xl bg-slate-50/50 border border-slate-100 flex items-start gap-4">
                                 <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                                 <p className="text-[12px] font-bold text-slate-600 uppercase tracking-tight leading-snug">{ins}</p>
