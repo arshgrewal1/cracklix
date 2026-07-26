@@ -7,8 +7,9 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Premium PWA Splash Hub v8.0.
+ * @fileOverview Premium PWA Splash Hub v9.0.
  * FIXED: Tighter vertical gap between icon and title.
+ * FIXED: Moved composition upwards for perfect vertical centering in viewport.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -36,7 +37,7 @@ export default function SplashScreen() {
           clearInterval(progressInterval);
           return 100;
         }
-        return prev + 1.2;
+        return prev + 1.5;
       });
     }, 20);
 
@@ -110,7 +111,7 @@ export default function SplashScreen() {
                    </p>
                 </div>
 
-                <div className="pt-16 md:pt-24 w-full max-w-[200px] md:max-w-[260px] mx-auto space-y-6">
+                <div className="pt-12 md:pt-16 w-full max-w-[200px] md:max-w-[260px] mx-auto space-y-6">
                    <div className="flex flex-col items-center gap-5">
                       <div className="relative h-[2px] w-full bg-white/5 rounded-full overflow-hidden shadow-inner">
                          <motion.div 

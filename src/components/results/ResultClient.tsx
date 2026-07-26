@@ -40,8 +40,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v42.0 [Index-Less Resolution].
- * FIXED: Removed 'orderBy' from Firestore query to bypass index requirement.
+ * @fileOverview Institutional Result Hub v43.0 [Index-Less Fixed].
+ * FIXED: Removed 'orderBy' from Firestore query to bypass index requirement and resolve 'Result not found' bug.
  */
 
 export default function ResultClient() {

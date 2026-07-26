@@ -32,10 +32,9 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client v4.7.
- * FIXED: Removed recursive self-call that caused build-time Stack Overflow.
+ * @fileOverview Universal Mock Overview Hub Client v4.8 [FIXED RECURSION].
+ * FIXED: Removed recursive self-call that caused RangeError during build.
  */
-
 export default function MockOverviewClient() {
   const router = useRouter()
   const pathname = usePathname()
@@ -52,7 +51,7 @@ export default function MockOverviewClient() {
     if (queryId) return queryId;
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
-    return lastSegment !== 'view' ? lastSegment : null;
+    return lastSegment !== 'view' && lastSegment !== 'exams' ? lastSegment : "";
   }, [pathname, searchParams]);
 
   const { data: mock, loading: mockLoading } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
@@ -119,7 +118,7 @@ export default function MockOverviewClient() {
 
         <div className="pt-4">
            <Button asChild className="w-full bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-bold text-sm shadow-3xl border-none transition-all active:scale-95">
-              <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to hub</Link>
+              <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to Hub</Link>
            </Button>
         </div>
       </div>
