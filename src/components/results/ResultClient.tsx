@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useFirestore } from "@/firebase"
@@ -48,8 +48,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toBlob } from 'html-to-image'
 
 /**
- * @fileOverview Universal Result Hub Viewer v46.0 [Institutional Sync].
- * FIXED: Direct PNG share optimized for scorecard layout.
+ * @fileOverview Universal Result Hub Viewer v47.0 [Professional Scorecard].
+ * FIXED: blob conversion and sharing protocol.
  */
 
 export default function ResultClient() {
@@ -76,7 +76,6 @@ export default function ResultClient() {
   const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
 
   const [isSharing, setIsSharing] = useState(false);
-  const [shareImageBlob, setShareImageBlob] = useState<Blob | null>(null);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -186,7 +185,7 @@ export default function ResultClient() {
     if (!sessionData || isSharing) return;
     
     setIsSharing(true);
-    toast({ title: "Synchronizing registry", description: "Generating official scorecard..." });
+    toast({ title: "Audit Sync", description: "Rasterizing professional scorecard..." });
 
     try {
       const node = document.getElementById('cracklix-result-card-canvas');
@@ -206,8 +205,8 @@ export default function ResultClient() {
       // Trigger Native Device Share Sheet
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
-            title: `My Cracklix Scorecard`,
-            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions} in the ${sessionData.mockTitle}. Check your official standing on Cracklix!`,
+            title: `My Cracklix Result`,
+            text: `🎯 Check my official score for ${sessionData.mockTitle}. Verified standing on Cracklix!`,
             files: [file]
          });
       } else {
