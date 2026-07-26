@@ -20,6 +20,8 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
+  display: 'swap',
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -45,7 +47,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "Cracklix",
   },
   formatDetection: {
@@ -74,7 +76,7 @@ export default function RootLayout({
       lang="en" 
       suppressHydrationWarning 
       className="scroll-smooth"
-      data-scroll-behavior="smooth"
+      style={{ backgroundColor: '#000000' }}
     >
       <body
         className={`
@@ -84,6 +86,8 @@ export default function RootLayout({
           bg-background
           text-foreground
           w-full
+          min-h-screen
+          overflow-x-hidden
         `}
       >
         <ThemeProvider

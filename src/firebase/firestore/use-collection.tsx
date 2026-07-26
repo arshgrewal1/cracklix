@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Query, 
   onSnapshot, 
@@ -12,14 +13,15 @@ import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
- * @fileOverview Production-Grade Firestore Collection Hook v3.4.
- * FIXED: Removed reliance on internal SDK properties (._query) which caused fatal crashes.
- * Uses the query object itself as a dependency (caller is responsible for memoizing the query).
+ * @fileOverview Production-Grade Firestore Collection Hook v3.5.
+ * FIXED: Added JSON comparison to snapshot listener to prevent "building" feel
+ * caused by repeated state updates with identical data.
  */
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<FirestoreError | null>(null);
+  const dataRef = useRef<string>("");
   
   useEffect(() => {
     if (!query) {
@@ -38,7 +40,13 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           id: doc.id,
         }));
 
-        setData(items as T[]);
+        // Registry Optimization: Only update state if data node differs
+        const dataString = JSON.stringify(items);
+        if (dataString !== dataRef.current) {
+          dataRef.current = dataString;
+          setData(items as T[]);
+        }
+        
         setLoading(false);
         setError(null);
       },
@@ -62,7 +70,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
     );
 
     return () => unsubscribe();
-  }, [query]); // Note: Caller MUST memoize this query using useMemo or useMemoFirebase
+  }, [query]);
 
   return { data, loading, error };
 }

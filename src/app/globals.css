@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -53,34 +54,31 @@
   * {
     @apply border-border;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  html, body {
+  html {
     scroll-behavior: smooth;
-    height: auto;
-    width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
-    position: relative;
+    -webkit-text-size-adjust: 100%;
   }
   
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-poppins), sans-serif;
     min-height: 100vh;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+    /* Native Android Scroll Physics */
+    overscroll-behavior-y: contain;
     touch-action: pan-y;
-    /* 
-       FIX: Removed global padding-top/left/right which caused gaps in Android WebViews. 
-       Safe area padding is now handled internally by components and scoped to iOS via utilities.
-    */
+    -webkit-overflow-scrolling: touch;
     padding: 0;
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  input, textarea, [contenteditable="true"] {
+  /* Prevent CLS for inputs */
+  input, textarea {
     @apply select-text;
+    font-size: 16px !important; /* Prevent iOS auto-zoom */
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -89,22 +87,11 @@
 }
 
 @layer utilities {
-  /* 
-     High-Fidelity Safe Area Utilities 
-     Logic: Default to 0 to prevent gaps on Android/Desktop. 
-     Override with env() ONLY on iOS (detected via Webkit mobile check).
-  */
   .pt-safe {
     padding-top: 0;
   }
   .pb-safe {
     padding-bottom: 0;
-  }
-  .pl-safe {
-    padding-left: 0;
-  }
-  .pr-safe {
-    padding-right: 0;
   }
 
   @supports (-webkit-touch-callout: none) {
@@ -114,19 +101,9 @@
     .pb-safe {
       padding-bottom: env(safe-area-inset-bottom);
     }
-    .pl-safe {
-      padding-left: env(safe-area-inset-left);
-    }
-    .pr-safe {
-      padding-right: env(safe-area-inset-right);
-    }
   }
 }
 
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -134,16 +111,9 @@
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-}
-
-.pb-safe-area {
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .shadow-4xl {
@@ -152,4 +122,9 @@
 
 .shadow-5xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+}
+
+/* Hardened Visibility Classes */
+.loading-skeleton {
+  @apply animate-pulse bg-slate-100 rounded-2xl;
 }

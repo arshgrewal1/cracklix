@@ -51,9 +51,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v6.0 [Stability Overhaul].
- * FIXED: Hydration safety for initial mounting.
- * FIXED: Corrected elapsedSeconds capping to respect actual session time.
+ * @fileOverview Hardened Test Store v6.1 [Native Efficiency].
+ * FIXED: Optimized tick logic to prevent micro-stuttering during CBT.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -76,6 +75,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   isGuest: false,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
+    // Reset state first to prevent previous test overlap
     set({
       mockId: null,
       questions: [],
@@ -134,15 +134,13 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   tick: () => {
     const state = get();
     if (state.questions.length > 0 && state.timeLeft > 0 && !state.isPaused) {
-      const nextTime = state.timeLeft - 1;
-      const nextElapsed = state.elapsedSeconds + 1;
+      set((s) => ({ 
+        timeLeft: s.timeLeft - 1,
+        elapsedSeconds: s.elapsedSeconds + 1
+      }));
       
-      set({ 
-        timeLeft: nextTime,
-        elapsedSeconds: nextElapsed
-      });
-      
-      if (nextTime % 30 === 0) state.persistGuestData();
+      // Background persistence every 30s
+      if (get().timeLeft % 30 === 0) state.persistGuestData();
     }
   },
 
