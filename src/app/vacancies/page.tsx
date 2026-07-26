@@ -17,7 +17,6 @@ import {
   ShieldCheck, 
   Bookmark, 
   X,
-  FileText,
   AlertCircle,
   TrendingUp,
   Landmark,
@@ -38,8 +37,8 @@ import { Vacancy } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Punjab Vacancy Registry v2.0.
- * REDESIGNED: Matches high-fidelity card layout from user screenshot.
+ * @fileOverview Official Punjab Vacancy Registry v2.2.
+ * REDESIGNED: Matches high-fidelity card layout and professional alignment.
  * TYPOGRAPHY: Strict Title Case and Sentence Case enforcement.
  */
 
@@ -121,7 +120,7 @@ export default function VacanciesPortal() {
          <section className="text-left space-y-10 md:space-y-16 max-w-5xl px-1">
             <div className="space-y-6 md:space-y-10">
                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4">
-                  <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary shadow-inner shrink-0">
+                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
                     <Megaphone className="h-5 w-5 md:h-6 md:w-6" />
                   </div>
                   <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-bold text-[10px] md:text-xs tracking-tight">Official recruitment hub</Badge>
@@ -130,7 +129,7 @@ export default function VacanciesPortal() {
                   Latest <br/> <span className="text-primary italic">vacancies.</span>
                </h1>
                <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl leading-tight tracking-tight">
-                  Discover verified Punjab Government job notifications, official PDFs, and direct apply portals in real-time.
+                  Discover verified Punjab government job notifications, official PDFs, and direct apply portals in real-time.
                </p>
             </div>
 
@@ -177,10 +176,9 @@ export default function VacanciesPortal() {
                      {filteredVacancies.map((v, i) => (
                         <motion.div key={v.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
                            <Link href={`/vacancies/${v.id}`}>
-                              <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[3rem] md:rounded-[4rem] bg-white group overflow-hidden flex flex-col text-left relative">
+                              <div className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[3rem] md:rounded-[4rem] bg-white group overflow-hidden flex flex-col text-left relative">
                                  <div className="p-8 md:p-12 space-y-8">
                                     
-                                    {/* Redesigned Top Row: Department Hub Badge + Bookmark */}
                                     <div className="flex justify-between items-start gap-4">
                                        <div className="flex-1 flex justify-center">
                                           <div className="bg-blue-50/50 border border-blue-100 px-5 py-3 rounded-2xl max-w-[280px] text-center">
@@ -200,7 +198,6 @@ export default function VacanciesPortal() {
                                        </button>
                                     </div>
 
-                                    {/* Redesigned Middle Row: Logo + Bold Title */}
                                     <div className="flex items-center gap-6 md:gap-10">
                                        <div className="shrink-0">
                                           <AuthorityLogo boardId={v.board} size="md" className="h-16 w-16 md:h-24 md:w-24 shadow-2xl bg-slate-50 border-4 border-white" />
@@ -212,7 +209,6 @@ export default function VacanciesPortal() {
                                        </div>
                                     </div>
 
-                                    {/* Metrics Grid */}
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-slate-50">
                                        <SummaryNode icon={Zap} label="Posts" val={v.totalPosts} />
                                        <SummaryNode icon={GraduationCap} label="Eligibility" val={v.education?.split(',')[0]} />
@@ -220,7 +216,6 @@ export default function VacanciesPortal() {
                                        <SummaryNode icon={Clock} label="Last date" val={new Date(v.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} color="text-rose-500" />
                                     </div>
 
-                                    {/* Redesigned Full-Width Action Button */}
                                     <div className="pt-6">
                                        <Button className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-[800] text-sm md:text-base tracking-widest rounded-2xl md:rounded-[3rem] shadow-4xl border-none active:scale-95 transition-all flex items-center justify-center gap-3">
                                           <span>View vacancy details</span>
@@ -228,7 +223,7 @@ export default function VacanciesPortal() {
                                        </Button>
                                     </div>
                                  </div>
-                              </Card>
+                              </div>
                            </Link>
                         </motion.div>
                      ))}
@@ -242,7 +237,7 @@ export default function VacanciesPortal() {
             </div>
 
             <div className="lg:col-span-4 space-y-12 md:space-y-16">
-               <Card className="border-none shadow-5xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-12 space-y-10 relative overflow-hidden group border border-white/5">
+               <Card className="border-none shadow-5xl rounded-[2.5rem] md:rounded-[3.5rem] bg-[#0F172A] text-white p-8 md:p-12 space-y-10 relative overflow-hidden group border border-white/5">
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><TrendingUp className="h-64 w-64 text-primary" /></div>
                   <div className="relative z-10 space-y-10 text-left">
                      <div className="space-y-2">

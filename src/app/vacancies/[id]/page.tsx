@@ -7,7 +7,7 @@ import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useFirestore, useUser, useCollection } from "@/firebase"
-import { doc, updateDoc, increment, serverTimestamp, collection, query, where, limit } from "firebase/firestore"
+import { doc, updateDoc, increment, collection, query, where, limit } from "firebase/firestore"
 import { 
   ArrowLeft, 
   ArrowRight,
@@ -23,17 +23,14 @@ import {
   FileText, 
   ExternalLink,
   Target,
-  Award,
   AlertCircle,
   HelpCircle,
   ChevronRight,
-  Loader2,
   DollarSign,
   Briefcase,
-  GraduationCap,
-  Edit3
+  GraduationCap
 } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AuthorityLogo } from "@/lib/exam-icons"
@@ -42,12 +39,11 @@ import { useToast } from "@/hooks/use-toast"
 import { Vacancy } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
-import { canAccessAdmin } from "@/lib/permissions"
 
 /**
- * @fileOverview Redesigned Vacancy Detail Node v2.0.
- * UPDATED: Implemented the requested "Hub" layout with ✅ bullet points.
- * SECURITY: Added Admin-only Edit button.
+ * @fileOverview Professional Vacancy Detail Hub v3.0.
+ * UPDATED: Removed Admin Edit button (moved to admin hub) and refined alignment.
+ * TYPOGRAPHY: Strict Title Case and Sentence Case enforcement.
  */
 
 export default function VacancyDetailPage() {
@@ -76,7 +72,6 @@ export default function VacancyDetailPage() {
   const { data: relatedVacancies } = useCollection<Vacancy>(relatedQuery as any)
 
   const isSaved = profile?.savedVacancies?.includes(id || "")
-  const isAdmin = canAccessAdmin(profile, user?.email)
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -110,22 +105,17 @@ export default function VacancyDetailPage() {
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left selection:bg-primary/10">
       <Navbar />
       
-      <main className="container mx-auto px-4 md:px-12 py-6 md:py-16 max-w-[1440px] space-y-12">
+      <main className="container mx-auto px-4 md:px-8 py-6 md:py-16 max-w-[1440px] space-y-12">
          
          <div className="flex items-center justify-between">
             <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90"><ArrowLeft className="h-5 w-5 md:h-6 md:w-6" /></button>
             <div className="flex items-center gap-3">
-               {isAdmin && (
-                  <Button asChild variant="outline" className="h-10 md:h-12 px-6 rounded-xl border-slate-200 bg-white text-[#0F172A] font-bold text-xs gap-2 shadow-sm">
-                     <Link href={`/admin/vacancies/add?id=${id}`}><Edit3 className="h-4 w-4" /> Edit vacancy</Link>
-                  </Button>
-               )}
                <button onClick={handleShare} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all active:scale-95"><Share2 className="h-5 w-5" /></button>
                <button className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all shadow-sm active:scale-95", isSaved ? "bg-primary border-primary text-white shadow-xl" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}><Bookmark className={cn("h-5 w-5", isSaved && "fill-current")} /></button>
             </div>
          </div>
 
-         <section className="bg-white rounded-[3rem] md:rounded-[5rem] shadow-5xl border border-slate-100 overflow-hidden relative group">
+         <section className="bg-white rounded-[3rem] md:rounded-[4rem] shadow-5xl border border-slate-100 overflow-hidden relative group">
             <div className="h-2 w-full bg-primary" />
             <CardContent className="p-8 md:p-20 flex flex-col lg:flex-row gap-12 md:gap-20 items-center">
                <div className="relative shrink-0 group-hover:scale-105 transition-transform duration-700">
@@ -136,7 +126,7 @@ export default function VacancyDetailPage() {
                <div className="flex-1 space-y-8 text-center lg:text-left">
                   <div className="space-y-4">
                      <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-                        <Badge className="bg-primary text-white border-none px-5 py-2 rounded-full font-bold text-[10px] md:text-xs tracking-tight shadow-xl">{vacancy.board} Hub</Badge>
+                        <Badge className="bg-primary text-white border-none px-5 py-2 rounded-full font-bold text-[10px] md:text-xs tracking-tight shadow-xl">{vacancy.board} hub</Badge>
                         <Badge variant="outline" className="bg-white border-slate-200 text-slate-400 px-4 py-1.5 rounded-full font-bold text-[9px] tracking-tight">{vacancy.category}</Badge>
                      </div>
                      <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-[#0F172A] tracking-tighter leading-[1] antialiased">
@@ -149,7 +139,7 @@ export default function VacancyDetailPage() {
                      </div>
                   </div>
 
-                  <div className="pt-6 flex flex-col sm:flex-row items-center gap-4">
+                  <div className="pt-6 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                      <Button className="w-full sm:w-auto h-16 md:h-20 px-12 md:px-20 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl md:rounded-[3rem] shadow-5xl border-none transition-all active:scale-95 group/btn" asChild>
                         <a href={vacancy.applyLink} target="_blank" rel="noopener noreferrer">Apply online <ArrowRight className="h-5 w-5 md:h-6 md:w-6 ml-3 group-hover/btn:translate-x-2 transition-transform" /></a>
                      </Button>
@@ -166,10 +156,9 @@ export default function VacancyDetailPage() {
          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-14">
             <div className="lg:col-span-8 space-y-12">
                
-               {/* REDESIGNED HUB SECTIONS */}
                <div className="space-y-10">
                   <HubSection label="Vacancy hub">
-                     <HubBullet text={`Post Name: ${vacancy.postName}`} />
+                     <HubBullet text={`Post name: ${vacancy.postName}`} />
                      <HubBullet text={`Total vacancies: ${vacancy.totalPosts} seats`} />
                      <HubBullet text={`Salary range: ${vacancy.salary}`} />
                      <HubBullet text={`Age threshold: ${vacancy.ageLimit}`} />
@@ -198,7 +187,7 @@ export default function VacancyDetailPage() {
                   <div className="relative z-10 space-y-12 text-left">
                      <div className="space-y-2">
                         <h3 className="text-3xl font-black tracking-tight leading-none">Registry dates</h3>
-                        <p className="text-[10px] font-bold text-slate-500 tracking-tight">Temporal ingestion node</p>
+                        <p className="text-[10px] font-bold text-slate-500 tracking-tight">Timeline registry</p>
                      </div>
                      
                      <div className="space-y-10">
@@ -220,7 +209,7 @@ export default function VacancyDetailPage() {
                      <HelpCircle className="h-8 w-8 text-primary" />
                      <h4 className="text-[11px] font-black tracking-tight text-[#0F172A]">Aspirant support</h4>
                   </div>
-                  <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">Verify your eligibility metrics before authorizing the transaction node. Official PDFs contain the final binding rules for the recruitment vertical.</p>
+                  <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">Verify your eligibility metrics before authorizing the application. Official PDFs contain the final binding rules for the recruitment vertical.</p>
                   <Button asChild variant="outline" className="w-full h-12 md:h-14 rounded-xl border-slate-200 text-[#0F172A] font-bold text-xs">
                      <Link href="/support">Open support desk <ChevronRight className="h-4 w-4" /></Link>
                   </Button>
@@ -262,12 +251,12 @@ export default function VacancyDetailPage() {
 function HubSection({ label, children }: { label: string, children: React.ReactNode }) {
    return (
       <div className="space-y-4">
-         <p className="text-[10px] md:text-xs font-bold text-slate-400 ml-1 tracking-widest">{label}</p>
-         <Card className="border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[3rem] bg-white overflow-hidden p-6 md:p-10">
+         <p className="text-[10px] md:text-xs font-bold text-slate-400 ml-1 tracking-widest uppercase">{label}</p>
+         <div className="bg-white border border-slate-100 shadow-xl rounded-[2rem] md:rounded-[3rem] overflow-hidden p-6 md:p-10 text-left">
             <div className="space-y-6">
                {children}
             </div>
-         </Card>
+         </div>
       </div>
    )
 }
