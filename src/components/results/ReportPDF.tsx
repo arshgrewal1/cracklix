@@ -28,8 +28,9 @@ interface ReportPDFProps {
 }
 
 /**
- * @fileOverview Institutional Portrait PDF Layout Hub v17.0.
- * FIXED: Standardized text alignment and synchronized domain to cracklix.in.
+ * @fileOverview Institutional Portrait PDF Layout Hub v18.0.
+ * FIXED: Explicit vertical spacing between Rank and Total Candidates to resolve overlap.
+ * UPDATED: Domain strictly synchronized to cracklix.in.
  */
 export default function ReportPDF(props: ReportPDFProps) {
   const {
@@ -54,11 +55,11 @@ export default function ReportPDF(props: ReportPDFProps) {
             </div>
             <div className="space-y-0.5 text-left">
                <h2 className="text-2xl font-black text-[#0F172A] tracking-tighter leading-none">Cracklix</h2>
-               <p className="text-[10px] font-bold text-primary">Smart Preparation Portal</p>
+               <p className="text-[10px] font-bold text-primary">Smart preparation portal</p>
             </div>
          </div>
          <div className="text-right space-y-1">
-            <p className="text-sm font-black text-[#0F172A]">Performance Report</p>
+            <p className="text-sm font-black text-[#0F172A]">Performance report</p>
             <p className="text-[8px] font-bold text-slate-400 tabular-nums">Ref Id: {resultId?.slice(0, 15)}</p>
          </div>
       </div>
@@ -68,8 +69,8 @@ export default function ReportPDF(props: ReportPDFProps) {
          {/* 2. Candidate Identity */}
          <div className="w-full bg-white rounded-[2rem] p-10 border border-slate-100 flex flex-col items-center justify-center shadow-sm relative overflow-hidden text-center">
             <div className="space-y-3 w-full">
-               <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Candidate Identity</p>
-               <h1 className="text-3xl font-black text-[#0F172A] leading-tight break-words max-w-[90%] mx-auto">
+               <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Candidate identity</p>
+               <h1 className="text-3xl font-black text-[#0F172A] leading-normal break-words max-w-[90%] mx-auto">
                   {studentName}
                </h1>
                <p className="text-lg font-bold text-slate-500 line-clamp-1">{examTitle}</p>
@@ -77,11 +78,11 @@ export default function ReportPDF(props: ReportPDFProps) {
             
             <div className="pt-6 border-t border-slate-100 mt-6 w-full max-w-lg mx-auto grid grid-cols-3 gap-8">
                <div className="space-y-1 text-center">
-                  <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Attempt Date</p>
+                  <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Attempt date</p>
                   <p className="text-sm font-black text-[#0F172A] tabular-nums">{date}</p>
                </div>
                <div className="space-y-1 text-center">
-                  <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Time Taken</p>
+                  <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Time taken</p>
                   <p className="text-sm font-black text-[#0F172A] tabular-nums">{timeTaken}</p>
                </div>
                <div className="space-y-1 text-center">
@@ -92,14 +93,14 @@ export default function ReportPDF(props: ReportPDFProps) {
          </div>
 
          {/* 3. Merit Standing */}
-         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center gap-4 shadow-2xl relative overflow-hidden">
+         <div className="w-full bg-[#0F172A] rounded-[2.5rem] p-10 text-white text-center flex flex-col items-center justify-center gap-1 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-48 w-48 text-primary" /></div>
             
-            <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] relative z-10">Your Punjab Rank</p>
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] relative z-10">Your Punjab rank</p>
             
-            <div className="flex flex-col items-center justify-center relative z-10 w-full py-2">
-               <span className="text-8xl font-black tabular-nums tracking-tighter leading-tight">#{rank}</span>
-               <span className="text-[14px] font-bold text-slate-400 tabular-nums mt-4">/ {totalCandidates.toLocaleString()} Candidates</span>
+            <div className="flex flex-col items-center justify-center relative z-10 w-full py-4 gap-4">
+               <span className="text-8xl font-black tabular-nums tracking-tighter leading-tight h-[110px]">#{rank}</span>
+               <span className="text-[14px] font-bold text-slate-400 tabular-nums mt-2">/ {totalCandidates.toLocaleString()} Candidates</span>
             </div>
 
             <div className="pt-4 relative z-10">
@@ -111,10 +112,10 @@ export default function ReportPDF(props: ReportPDFProps) {
 
          {/* 4. KPI Matrix */}
          <div className="grid grid-cols-4 gap-4 w-full">
-            <KPIBox label="Net Score" val={score} color="text-primary" />
+            <KPIBox label="Net score" val={score} color="text-primary" />
             <KPIBox label="Percentile" val={`${percentile}%`} color="text-purple-600" />
             <KPIBox label="Accuracy" val={`${attemptAccuracy}%`} color="text-emerald-600" />
-            <KPIBox label="Grade Hub" val={grade} color="text-amber-600" />
+            <KPIBox label="Grade hub" val={grade} color="text-amber-600" />
          </div>
 
          {/* 5. Count Summary */}
@@ -122,13 +123,13 @@ export default function ReportPDF(props: ReportPDFProps) {
             <CountPill label="Correct" val={correct} color="bg-emerald-50 text-emerald-600" />
             <CountPill label="Wrong" val={wrong} color="bg-rose-50 text-rose-600" />
             <CountPill label="Skipped" val={skipped} color="bg-slate-50 text-slate-400" />
-            <CountPill label="Total Items" val={total} color="bg-blue-50 text-blue-600" />
+            <CountPill label="Total questions" val={total} color="bg-blue-50 text-blue-600" />
          </div>
 
          {/* 6. Subject Analysis */}
          {subjects.length > 0 && (
             <div className="w-full space-y-3">
-               <p className="text-[10px] font-black text-slate-400 text-center uppercase tracking-widest">Subject Analysis</p>
+               <p className="text-[10px] font-black text-slate-400 text-center uppercase tracking-widest">Subject analysis</p>
                <div className="border border-slate-100 rounded-[1.5rem] overflow-hidden bg-white shadow-sm">
                   <table className="w-full text-center">
                      <thead>
@@ -162,7 +163,7 @@ export default function ReportPDF(props: ReportPDFProps) {
                </div>
                <div className="space-y-1 text-left">
                   <p className="text-primary font-black text-sm flex items-center gap-2 leading-none">
-                     <ShieldCheck className="h-4 w-4" /> Digitally Verified
+                     <ShieldCheck className="h-4 w-4" /> Digitally verified
                   </p>
                   <p className="text-slate-400 text-[9px] max-w-[280px] leading-relaxed font-medium">
                      Performance synchronized with Cracklix institutional registry. Scan to verify credentials on cracklix.in.

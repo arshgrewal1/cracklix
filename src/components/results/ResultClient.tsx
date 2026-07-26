@@ -51,9 +51,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v29.0.
- * FIXED: Displays attempt count for the specific session.
- * FIXED: Removed all remaining uppercase labels.
+ * @fileOverview Institutional Result Hub v31.0.
+ * FIXED: Removed all sticky positioning for natural scrolling.
+ * ADDED: Attempt counter visibility in all sub-views.
  */
 
 export default function ResultClient() {
@@ -311,8 +311,8 @@ export default function ResultClient() {
                  </div>
                  
                  <div className="flex gap-4 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 px-8 rounded-2xl border-2 font-bold text-[11px] bg-white">Retake</Button>
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-10 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-bold text-[11px]">
+                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 px-8 rounded-2xl border-2 font-bold text-[11px] bg-white transition-all active:scale-95">Retake</Button>
+                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 px-10 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-bold text-[11px] transition-all active:scale-95">
                        {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Download PDF
                     </Button>
                  </div>
@@ -322,9 +322,9 @@ export default function ResultClient() {
                   <div className="py-1.5 -mx-4 px-4 border-b border-slate-100 bg-transparent">
                      <div className="flex justify-center w-full max-w-2xl mx-auto">
                         <TabsList className="bg-white border border-slate-100 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center overflow-x-auto no-scrollbar">
-                           <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Analysis</TabsTrigger>
-                           <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Review</TabsTrigger>
-                           <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Report</TabsTrigger>
+                           <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Analysis</TabsTrigger>
+                           <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Review</TabsTrigger>
+                           <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 md:px-12 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Report</TabsTrigger>
                         </TabsList>
                      </div>
                   </div>
@@ -373,7 +373,7 @@ export default function ResultClient() {
                                          <Badge variant="outline" className="px-3 py-1 rounded-xl border-slate-200 text-slate-400 font-bold text-[9px]">
                                              Question #{q.originalIndex + 1}
                                          </Badge>
-                                         <Badge className="bg-primary/5 text-primary border-none text-[8px] font-bold">{q.subjectId || 'General Hub'}</Badge>
+                                         <Badge className="bg-primary/5 text-primary border-none text-[8px] font-bold">{q.subjectId || 'General hub'}</Badge>
                                       </div>
                                       <QuestionRenderer 
                                           question={q} 
