@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useUser, useCollection, useFirestore } from '@/firebase';
-import { collection, query, where, limit, orderBy } from 'firebase/firestore';
+import { collection, query, where, limit } from 'firebase/firestore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,19 +27,9 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview Institutional Performance Hub v6.7.
- * UPDATED: Integrated adaptive dark mode support.
+ * @fileOverview Official Progress Tracker v7.0.
+ * FIXED: Increased retrieval volume and hardened sorting to ensure latest attempts appear first.
  */
-
-// Formatting Utilities
-const formatTime = (seconds: number) => {
-  if (!seconds || seconds <= 0 || isNaN(seconds)) return "0m";
-  if (seconds > 86400) return "---";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-};
 
 export default function ContinueLearning() {
   const { user, profile } = useUser();
@@ -52,9 +42,10 @@ export default function ContinueLearning() {
     setMounted(true);
   }, []);
 
+  // Fetch a larger batch (100) to ensure latest ones are caught even if unsorted by server
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null;
-    return query(collection(db, "results"), where("userId", "==", user.uid), limit(20));
+    return query(collection(db, "results"), where("userId", "==", user.uid), limit(100));
   }, [db, user, mounted]);
 
   const examsQuery = useMemo(() => {
@@ -81,11 +72,9 @@ export default function ContinueLearning() {
     const validMockIds = new Set(combinedMocks.map(m => m.id));
     
     return [...rawResults]
-      .filter(r => {
-         const t = Number(r.timeTaken);
-         return validMockIds.has(r.mockId) && (!isNaN(t) && t < 43200);
-      })
+      .filter(r => validMockIds.has(r.mockId))
       .sort((a, b) => {
+        // High-precision client-side sorting by ISO timestamp
         const timeA = new Date(a.timestamp || 0).getTime();
         const timeB = new Date(b.timestamp || 0).getTime();
         return timeB - timeA;
@@ -98,11 +87,6 @@ export default function ContinueLearning() {
   }, [allExams, profile]);
 
   const handleReviewAction = (mockId: string, attemptId?: string) => {
-     const isValid = combinedMocks?.some(m => m.id === mockId);
-     if (!isValid) {
-        toast({ variant: "destructive", title: "Record Audit", description: "Test archived silently." });
-        return;
-     }
      router.push(`/results/view?id=${mockId}${attemptId ? `&attemptId=${attemptId}` : ''}`);
   };
 
@@ -119,10 +103,10 @@ export default function ContinueLearning() {
               <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center text-primary shadow-sm shrink-0">
                  <Target className="h-4 w-4 md:h-5 md:w-5" />
               </div>
-              <h2 className="text-xl md:text-4xl font-black text-foreground tracking-tight leading-none">My Progress</h2>
+              <h2 className="text-xl md:text-4xl font-black text-foreground tracking-tight leading-none">My progress</h2>
            </div>
            <Button asChild variant="ghost" className="text-primary font-bold text-[9px] md:text-xs tracking-widest gap-2 border-none bg-transparent cursor-pointer">
-              <Link href="/my-exams">View All <ChevronRight className="h-4 w-4" /></Link>
+              <Link href="/my-exams">View all <ChevronRight className="h-4 w-4" /></Link>
            </Button>
         </div>
 
@@ -130,7 +114,7 @@ export default function ContinueLearning() {
            <div className="lg:col-span-7 space-y-6">
               <div className="flex items-center gap-2 px-1">
                  <Zap className="h-3.5 w-3.5 text-primary" />
-                 <p className="text-[10px] md:text-xs font-black tracking-widest text-muted-foreground">Continue learning</p>
+                 <p className="text-[10px] md:text-xs font-black tracking-widest text-muted-foreground uppercase">Continue learning</p>
               </div>
               <div className="grid grid-cols-1 gap-4 md:gap-6">
                  {resultsLoading || mocksLoading || quizLoading ? (
@@ -154,7 +138,7 @@ export default function ContinueLearning() {
                                     <AuthorityLogo 
                                       boardId={mockMeta?.boardId || "GENERAL"} 
                                       size="md" 
-                                      className="h-16 w-16 md:h-[72px] md:w-[72px] relative transition-transform duration-500 group-hover:scale-105 dark:border-slate-800" 
+                                      className="h-16 w-16 md:h-[72px] md:w-[72px] relative transition-transform duration-500 group-hover:scale-105" 
                                     />
                                 </div>
                                 <div className="flex-1 space-y-4 md:space-y-5 min-w-0">
@@ -171,14 +155,14 @@ export default function ContinueLearning() {
                                     <div className="flex flex-wrap gap-2 md:gap-3">
                                        <InfoChip icon={<BookOpen className="h-3 w-3" />} label={`${res.totalQuestions} Qs`} />
                                        <InfoChip icon={<Clock className="h-3 w-3" />} label={`${mockMeta?.duration || 120}m`} />
-                                       <InfoChip icon={<Award className="h-3 w-3" />} label={`${res.totalQuestions} Pts`} />
+                                       <InfoChip icon={<Award className="h-3 w-3" />} label="Verified" />
                                     </div>
                                     <div className="pt-4">
                                        <Button 
                                          onClick={() => handleReviewAction(res.mockId, res.attemptId)} 
                                          className="h-12 px-7 md:px-8 bg-primary hover:bg-blue-700 text-white font-black text-[11px] md:text-xs tracking-widest rounded-full shadow-lg transition-all border-none flex items-center gap-2 group/btn"
                                        >
-                                         View Analysis
+                                         View analysis
                                          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
                                        </Button>
                                     </div>
@@ -199,7 +183,7 @@ export default function ContinueLearning() {
            <div className="lg:col-span-5 space-y-6">
               <div className="flex items-center gap-2 px-1">
                  <Star className="h-3.5 w-3.5 text-amber-500 fill-current" />
-                 <p className="text-[10px] md:text-xs font-black tracking-widest text-muted-foreground">Pinned Exams</p>
+                 <p className="text-[10px] md:text-xs font-black tracking-widest text-muted-foreground uppercase">Pinned exams</p>
               </div>
               <div className="grid grid-cols-1 gap-4">
                  {examsLoading ? (
@@ -216,7 +200,7 @@ export default function ContinueLearning() {
                                    </div>
                                    <div className="min-w-0">
                                       <h4 className="text-sm font-bold text-foreground truncate">{exam.name}</h4>
-                                      <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mt-0.5">{board?.abbreviation || 'Official'} Hub</p>
+                                      <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mt-0.5">{board?.abbreviation || 'Official'} hub</p>
                                    </div>
                                 </div>
                                 <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all" />

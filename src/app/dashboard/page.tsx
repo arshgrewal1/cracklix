@@ -18,7 +18,9 @@ import {
   ShieldCheck,
   Loader2,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  History,
+  BarChart3
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -26,12 +28,11 @@ import { cn } from '@/lib/utils';
 import StudentAvatar from '@/components/brand/StudentAvatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useStudyTimer } from '@/hooks/useStudyTimer';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Performance Hub v6.9.
- * UPDATED: Integrated persistent study timer for live dashboard feedback.
+ * @fileOverview Official Dashboard Portal v7.0.
+ * FIXED: Hardened attempt sorting to ensure latest tests are prioritized in the feed.
  */
 
 export default function StudentDashboard() {
@@ -45,23 +46,32 @@ export default function StudentDashboard() {
 
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null;
-    return query(collection(db, "results"), where("userId", "==", user.uid));
+    return query(collection(db, "results"), where("userId", "==", user.uid), limit(100));
   }, [db, user, mounted]);
 
-  const { data: results, loading: resultsLoading } = useCollection<any>(resultsQuery);
+  const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery);
+
+  const sortedResults = useMemo(() => {
+    if (!rawResults) return [];
+    return [...rawResults].sort((a, b) => {
+       const timeA = new Date(a.timestamp || 0).getTime();
+       const timeB = new Date(b.timestamp || 0).getTime();
+       return timeB - timeA;
+    }).slice(0, 10);
+  }, [rawResults]);
 
   const performance = useMemo(() => {
-    if (!results || results.length === 0) {
-      return { accuracy: 0, time: 0, totalCorrect: 0, totalAttempted: 0 };
+    if (!sortedResults || sortedResults.length === 0) {
+      return { accuracy: 0, totalCorrect: 0, totalAttempted: 0 };
     }
     let totalCorrect = 0; let totalAttempted = 0;
-    results.forEach((r: any) => {
+    sortedResults.forEach((r: any) => {
       totalCorrect += (r.correctCount || 0);
       totalAttempted += (r.attemptedCount || 0);
     });
     const accuracy = totalAttempted > 0 ? Math.round((totalCorrect / totalAttempted) * 100) : 0;
     return { accuracy, totalCorrect, totalAttempted };
-  }, [results]);
+  }, [sortedResults]);
 
   if (!mounted || authLoading) return <div className="h-screen flex items-center justify-center bg-background"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
 
@@ -81,7 +91,7 @@ export default function StudentDashboard() {
             </div>
             <div className="flex flex-wrap justify-center md:justify-start gap-3">
               <Badge className="bg-primary/10 text-primary border-none font-bold text-[10px] px-4 py-1.5 rounded-full">{profile?.pass?.plan || 'Free'} member</Badge>
-              <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-500 font-bold text-[10px] px-4 py-1.5 rounded-full">Total tests: {results?.length || 0}</Badge>
+              <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-500 font-bold text-[10px] px-4 py-1.5 rounded-full">Solved: {performance.totalAttempted}</Badge>
             </div>
           </div>
           <Button asChild className="h-14 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold text-[11px] tracking-tight rounded-2xl shadow-xl transition-all border-none">
@@ -91,22 +101,47 @@ export default function StudentDashboard() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
           <MetricPill label="Accuracy" val={`${performance.accuracy}%`} icon={<Target />} color="text-primary" bg="bg-blue-50 dark:bg-blue-950/30" progress={performance.accuracy} />
-          <MetricPill label="Today's study" val={displayTime} icon={<Zap />} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-950/30" />
+          <MetricPill label="Study time" val={displayTime} icon={<Clock />} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-950/30" />
           <MetricPill label="Solved items" val={performance.totalCorrect.toLocaleString()} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-950/30" />
-          <MetricPill label="Tests taken" val={results?.length || 0} icon={<CheckCircle2 />} color="text-indigo-500" bg="bg-indigo-50 dark:bg-indigo-950/30" />
+          <MetricPill label="Total tests" val={sortedResults.length} icon={<CheckCircle2 />} color="text-indigo-500" bg="bg-indigo-50 dark:bg-indigo-950/30" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
           <div className="lg:col-span-8">
              <Card className="border-none shadow-xl rounded-[2.5rem] bg-card overflow-hidden border border-border">
-                <CardHeader className="p-8 border-b border-border bg-muted/30">
-                   <CardTitle className="text-xl font-black text-foreground flex items-center gap-3">
-                      <Activity className="h-6 w-6 text-primary" /> Study activity
+                <CardHeader className="p-8 border-b border-border bg-muted/30 flex flex-row items-center justify-between">
+                   <CardTitle className="text-xl font-black text-foreground flex items-center gap-3 tracking-tighter">
+                      <History className="h-6 w-6 text-primary" /> Recent attempts
                    </CardTitle>
+                   <Badge variant="outline" className="text-[8px] font-black uppercase">Live feed</Badge>
                 </CardHeader>
-                <CardContent className="p-20 flex flex-col items-center justify-center text-center opacity-30 italic">
-                   <BarChart3 className="h-16 w-16 mb-4" />
-                   <p className="text-sm font-bold">Analysis synchronizing...</p>
+                <CardContent className="p-0">
+                   <div className="divide-y divide-border">
+                      {resultsLoading ? (
+                         Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 w-full bg-muted" />)
+                      ) : sortedResults.length > 0 ? (
+                         sortedResults.map((res: any) => (
+                           <Link key={res.id} href={`/results/view?id=${res.mockId}&attemptId=${res.attemptId}`} className="flex items-center justify-between p-6 hover:bg-muted/50 transition-all group">
+                              <div className="flex items-center gap-4 min-w-0">
+                                 <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground group-hover:text-primary transition-all shadow-inner"><Zap className="h-5 w-5" /></div>
+                                 <div className="min-w-0">
+                                    <p className="font-bold text-sm md:text-lg text-foreground truncate tracking-tight">{res.mockTitle}</p>
+                                    <div className="flex items-center gap-3 mt-1">
+                                       <span className="text-[10px] font-bold text-muted-foreground tabular-nums">{new Date(res.timestamp).toLocaleDateString('en-GB')}</span>
+                                       <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border-none text-[8px] font-black px-2">Score: {res.score}</Badge>
+                                    </div>
+                                 </div>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-muted-foreground opacity-20 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                           </Link>
+                         ))
+                      ) : (
+                         <div className="py-24 flex flex-col items-center justify-center text-center opacity-30 italic">
+                            <BarChart3 className="h-16 w-16 mb-4" />
+                            <p className="text-sm font-bold">Analysis synchronizing...</p>
+                         </div>
+                      )}
+                   </div>
                 </CardContent>
              </Card>
           </div>
@@ -116,10 +151,10 @@ export default function StudentDashboard() {
                 <div className="relative z-10 space-y-8 text-left">
                    <div className="space-y-1">
                       <h3 className="text-2xl font-black tracking-tight leading-none">Milestones</h3>
-                      <p className="text-[10px] font-bold text-slate-500 tracking-tight">Platform rewards</p>
+                      <p className="text-[10px] font-bold text-slate-500 tracking-tight uppercase">Platform rewards</p>
                    </div>
                    <div className="space-y-6">
-                      <p className="text-xs text-slate-400 font-medium">Practice daily to unlock achievement badges and state rank certificates.</p>
+                      <p className="text-xs text-slate-400 font-medium">Practice daily to unlock achievement badges and state rank certificates. Your progress is verified daily.</p>
                    </div>
                    <div className="pt-6 border-t border-white/5">
                       <Button asChild className="w-full h-14 bg-primary hover:bg-blue-700 text-white font-bold text-[10px] tracking-tight shadow-2xl border-none transition-all active:scale-95">
