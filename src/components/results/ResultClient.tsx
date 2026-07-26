@@ -60,8 +60,8 @@ import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * @fileOverview Premium Result Analysis Hub v17.0.
- * FIXED: Rebuilt participant counting and rank retrieval to ensure absolute accuracy.
+ * @fileOverview Premium Result Analysis Hub v18.0.
+ * FIXED: Rebuilt ID resolution for one-click speed. Removed blocking checks.
  */
 
 export default function ResultClient() {
@@ -90,9 +90,21 @@ export default function ResultClient() {
   const mockId = searchParams.get('id')
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
+  // Immediate ID Resolution
   useEffect(() => {
     if (userLoading || !db || !mockId) return;
+    
     async function resolveId() {
+       // Check local storage first for guest speed
+       if (!user) {
+          const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
+          if (guestRes) {
+             setGuestResult(JSON.parse(guestRes));
+             setResolvedResultId(`guest_${mockId}`);
+             return;
+          }
+       }
+
        let targetId = attemptIdFromUrl;
        if (!targetId && user) {
           const trackerSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
@@ -100,9 +112,12 @@ export default function ResultClient() {
               targetId = trackerSnap.data().attemptId;
           }
        }
-       if (user && targetId) setResolvedResultId(`${user.uid}_${mockId}_${targetId}`);
-       else if (user) setResolvedResultId(`${user.uid}_${mockId}`);
-       else setResolvedResultId(`guest_${mockId}`);
+       
+       const finalId = user 
+          ? (targetId ? `${user.uid}_${mockId}_${targetId}` : `${user.uid}_${mockId}`)
+          : `guest_${mockId}`;
+          
+       setResolvedResultId(finalId);
     }
     resolveId();
   }, [user, userLoading, db, mockId, attemptIdFromUrl]);
@@ -111,25 +126,21 @@ export default function ResultClient() {
   const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
+  // Efficient Ranking Hub
   useEffect(() => {
-     if (!db || !mockId || !sessionData) return;
+     if (!db || !mockId || !activeSession) return;
      
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
-           
-           // 1. Get Total Candidates Node
            const countSnap = await getCountFromServer(entriesRef);
            setTotalCandidates(countSnap.data().count);
 
-           // 2. Fetch Standings
            const q = query(entriesRef, orderBy("highestScore", "desc"), limit(500));
            const snap = await getDocs(q);
            
            if (isMounted) {
               const entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-              
-              // Apply institutional tie-break logic in memory to ensure 100% precision
               const sorted = entries.sort((a: any, b: any) => {
                  if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
                  if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
@@ -138,33 +149,22 @@ export default function ResultClient() {
               });
 
               const myIndex = sorted.findIndex(d => d.id === user?.uid);
-              
               if (myIndex !== -1) {
                  setLiveRank(myIndex + 1);
               } else if (countSnap.data().count > 500) {
-                 // If not in Top 500, calculate exact rank via secondary count
-                 const superiorQuery = query(entriesRef, where("highestScore", ">", sessionData.score));
+                 const superiorQuery = query(entriesRef, where("highestScore", ">", activeSession.score));
                  const superiorCountSnap = await getCountFromServer(superiorQuery);
                  setLiveRank(superiorCountSnap.data().count + 1);
               } else {
                  setLiveRank("---");
               }
            }
-        } catch (e) {
-           console.error("[RANKING_AUDIT_FAILURE]:", e);
-        }
+        } catch (e) { console.error("[RANKING_AUDIT_FAILURE]:", e); }
      }
      let isMounted = true;
      fetchRankingMetrics();
      return () => { isMounted = false; };
-  }, [db, mockId, sessionData, user?.uid, mounted]);
-
-  useEffect(() => {
-     if (!user && !userLoading && mockId) {
-        const stored = localStorage.getItem(`cracklix_guest_result_${mockId}`);
-        if (stored) { try { setGuestResult(JSON.parse(stored)); } catch (e) {} }
-     }
-  }, [user, userLoading, mockId]);
+  }, [db, mockId, sessionData, guestResult, user?.uid, mounted]);
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
@@ -200,27 +200,22 @@ export default function ResultClient() {
     loadQuestions()
   }, [db, mockId]);
 
-  const handleRetake = async () => {
+  const handleRetake = () => {
     if (!db || isSyncing || !mockId) return;
-    setIsSyncing(true);
-    try {
-      if (user) {
-        await deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
-      }
-      
-      resetStore();
-      
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
-        localStorage.removeItem(`cracklix_guest_result_${mockId}`);
-      }
-
-      toast({ title: "Synchronizing Registry", description: "Starting new attempt node..." });
-      router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
-    } catch (e) { 
-      toast({ variant: "destructive", title: "Retake failed" }); 
-      setIsSyncing(false);
+    
+    // Optimistic Reset & Redirect
+    if (user) {
+      deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {});
     }
+    
+    resetStore();
+    
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
+      localStorage.removeItem(`cracklix_guest_result_${mockId}`);
+    }
+
+    router.replace(`/mocks/attempt?id=${mockId}&retake=true`);
   };
 
   const handleDownloadPDF = async () => { 
@@ -228,8 +223,8 @@ export default function ResultClient() {
     setIsExporting(true);
     try {
       setActiveMainTab("REPORT"); 
-      toast({ title: "Generating Report", description: "This will take a few seconds..." });
-      await new Promise(r => setTimeout(r, 1500));
+      toast({ title: "Generating Report", description: "Capturing institutional node..." });
+      await new Promise(r => setTimeout(r, 1000));
       const element = document.getElementById('cracklix-result-card');
       if (!element) throw new Error("Capture node not found.");
       const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2, backgroundColor: '#ffffff' });
@@ -272,8 +267,19 @@ export default function ResultClient() {
      return m > 0 ? `${m}m ${s}s` : `${s}s`;
   };
 
-  if (!mounted || (resultLoading && user) || !activeSession) {
-     return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+  if (!mounted || (resultLoading && user && !activeSession)) {
+     return <div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
+  }
+
+  // Fallback UI for missing data
+  if (!activeSession) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
+        <AlertCircle className="h-12 w-12 text-rose-500" />
+        <h2 className="text-xl font-bold">Entry not found</h2>
+        <Button onClick={() => router.push('/dashboard')}>Back to portal</Button>
+      </div>
+    );
   }
 
   const percentile = totalCandidates > 1 
@@ -291,7 +297,7 @@ export default function ResultClient() {
               <div className="space-y-1 flex-1 min-w-0">
                  <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Audit Registry Node</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Analysis hub</span>
                  </div>
                  <h1 className="text-xl md:text-3xl font-black tracking-tight text-[#0F172A] leading-tight truncate">
                    {activeSession.mockTitle}
@@ -323,9 +329,9 @@ export default function ResultClient() {
                  <button 
                    onClick={handleRetake} 
                    disabled={isSyncing} 
-                   className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50 flex items-center justify-center cursor-pointer transition-all"
+                   className="flex-1 h-11 rounded-xl font-bold uppercase border-2 border-slate-200 bg-white text-[#0F172A] gap-2 text-[10px] tracking-tight hover:bg-slate-50 flex items-center justify-center cursor-pointer transition-all active:scale-95"
                  >
-                    {isSyncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />} 
+                    <RotateCcw className="h-3.5 w-3.5" /> 
                     Retake
                  </button>
                  <Button 
