@@ -23,6 +23,7 @@ import {
   Zap, 
   Loader2, 
   ShieldCheck,
+  CheckCircle2,
   RefreshCw,
   Clock,
   BarChart3,
@@ -51,7 +52,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 
 /**
- * @fileOverview Hardened Result Engine v5.0 [Strict source-of-truth].
+ * @fileOverview Hardened Result Engine v5.1 [Strict source-of-truth].
  * FIXED: Metrics are strictly derived from the unique Attempt/Result document.
  */
 export default function ResultClient() {
@@ -202,6 +203,13 @@ export default function ResultClient() {
      };
   }, [categorizedNodes, sessionData, mockData]);
 
+  const filteredQuestions = useMemo(() => {
+    if (activeReviewFilter === 'CORRECT') return categorizedNodes.correct;
+    if (activeReviewFilter === 'WRONG') return categorizedNodes.wrong;
+    if (activeReviewFilter === 'SKIPPED') return categorizedNodes.skipped;
+    return categorizedNodes.all;
+  }, [activeReviewFilter, categorizedNodes]);
+
   if (!mounted || (resultLoading && user)) return <div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>;
 
   if (!sessionData) return (
@@ -346,15 +354,6 @@ function ComplexityNode({ label, val, color }: any) {
          <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner border border-slate-100">
             <div className={cn("h-full transition-all duration-1000", color)} style={{ width: `${val}%` }} />
          </div>
-      </div>
-   )
-}
-
-function TimeAuditNode({ label, val }: any) {
-   return (
-      <div className="flex items-center justify-between py-2 border-b border-slate-50">
-         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
-         <span className="text-xs font-black tabular-nums">{val}</span>
       </div>
    )
 }
