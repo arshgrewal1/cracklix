@@ -1,19 +1,22 @@
-
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { 
   Trophy,
   Zap,
   Target,
   BarChart3,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  TrendingUp,
+  AlertCircle,
+  Lightbulb,
+  ArrowRight,
+  TrendingDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { AuthorityLogo } from "@/lib/exam-icons";
 
 interface ReportScreenProps {
   studentName: string;
@@ -23,159 +26,177 @@ interface ReportScreenProps {
   totalCandidates: number;
   accuracy: string | number;
   attemptAccuracy: string | number;
-  attemptRate: string | number;
   timeTaken: string;
   correct: number;
   wrong: number;
   skipped: number;
   total: number;
   date: string;
-  resultId?: string;
   percentile: number;
   subjects?: any[];
   grade?: string;
   isQualified?: boolean;
-  duration?: number | string;
-  boardId?: string;
+  topScore?: number;
+  avgScore?: number;
+  avgAccuracy?: number;
 }
 
 /**
- * @fileOverview Responsive Screen Layout for Browser Viewing v12.0.
- * FIXED: Replaced absolute positioning with high-density flex layouts.
- * TERMINOLOGY: Corrected 'Fix Error' to 'Wrong' for final institutional standard.
+ * @fileOverview Premium Responsive Result Interface v6.0.
+ * STYLE: Clean White, Navy Blue primary, large rounded corners.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
-    studentName, examTitle, score, rank, totalCandidates, 
-    attemptAccuracy, timeTaken, correct, wrong, skipped,
-    total, date, resultId, percentile, subjects = [], grade = "F",
-    isQualified, duration, boardId
+    score, rank, totalCandidates, 
+    attemptAccuracy, correct, wrong, skipped,
+    total, percentile, subjects = [], grade = "F",
+    topScore = 0, avgScore = 0, avgAccuracy = 0
   } = props;
 
+  const insights = useMemo(() => {
+    const list = [];
+    const accNum = Number(attemptAccuracy);
+    const scoreNum = Number(score);
+    const totalQ = Number(total);
+
+    if (accNum >= 90) list.push("Outstanding accuracy level achieved.");
+    else if (accNum >= 75) list.push("Strong accuracy node in core subjects.");
+    else list.push("Accuracy needs immediate auditing.");
+
+    if (scoreNum > avgScore) list.push("Performing above the candidate average.");
+    if (wrong > totalQ * 0.2) list.push("High penalty detected. Reduce guesswork.");
+    if (skipped > totalQ * 0.3) list.push("Topic familiarity audit recommended.");
+    
+    return list.slice(0, 4);
+  }, [attemptAccuracy, score, avgScore, wrong, skipped, total]);
+
   return (
-    <div className="w-full max-w-full overflow-x-hidden space-y-6 animate-in fade-in duration-500 text-left">
+    <div className="w-full space-y-6 animate-in fade-in duration-500">
       
-      {/* 1. IDENTITY HUB */}
-      <div className="bg-white rounded-[2rem] md:rounded-[3.5rem] p-8 md:p-14 border border-slate-100 shadow-sm space-y-10">
-         <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-            <AuthorityLogo boardId={boardId || "GENERAL"} size="md" className="h-16 w-16 md:h-28 md:w-28 rounded-2xl shadow-xl border-4 border-slate-50 bg-slate-50" />
-            <div className="space-y-3 text-center md:text-left flex-1 min-w-0">
-               <p className="text-[10px] font-bold text-primary uppercase tracking-[0.3em]">Institutional report</p>
-               <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] leading-tight truncate">{studentName}</h1>
-               <p className="text-lg md:text-2xl font-bold text-slate-500 line-clamp-2">{examTitle}</p>
-            </div>
-            <div className="flex flex-col items-center md:items-end gap-3 shrink-0">
-               <Badge className={cn("border-none px-6 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest shadow-lg", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                  {isQualified ? 'Qualified' : 'Attempted'}
-               </Badge>
-               <p className="text-[9px] font-bold text-slate-300 uppercase tracking-tighter tabular-nums">Ref: {resultId?.slice(0, 15)}</p>
-            </div>
-         </div>
+      {/* 1. HERO RANK CARD */}
+      <Card className="border-none shadow-2xl rounded-[32px] p-8 text-white relative overflow-hidden text-center bg-gradient-to-br from-[#071B4D] to-[#0A2C7A]">
+         <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-48 w-48" /></div>
          
-         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-10 border-t border-slate-50">
-            <DataMiniNode label="Attempt date" val={date} />
-            <DataMiniNode label="Time taken" val={timeTaken} />
-            <DataMiniNode label="Duration" val={duration ? `${duration}m` : 'Self'} />
-            <DataMiniNode label="Total items" val={total} />
-         </div>
-      </div>
-
-      {/* 2. MERIT SHIELD */}
-      <div className="bg-[#0F172A] rounded-[2rem] md:rounded-[4.5rem] p-10 md:p-20 text-white text-center relative overflow-hidden shadow-2xl">
-         <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-64 md:h-[500px] text-primary" /></div>
-         <div className="relative z-10 space-y-6">
-            <p className="text-[12px] md:text-base font-black text-primary uppercase tracking-[0.4em]">Punjab Rank</p>
-            <div className="flex items-center justify-center gap-6">
-               <span className="text-8xl md:text-[140px] font-[900] tracking-tighter text-white tabular-nums leading-none">#{rank}</span>
-               <span className="text-xl md:text-[40px] font-black text-slate-500 tabular-nums uppercase tracking-tight">/ {totalCandidates} Candidates</span>
+         <div className="relative z-10 space-y-4">
+            <p className="text-[11px] font-bold text-primary tracking-[0.4em] uppercase opacity-80">Punjab Rank</p>
+            <div className="space-y-1">
+               <span className="text-[100px] font-[900] tracking-tighter leading-none block drop-shadow-2xl">#{rank}</span>
+               <p className="text-sm font-bold text-slate-300 opacity-60">Out of {totalCandidates.toLocaleString()} candidates</p>
             </div>
-            <div className="pt-8">
-               <Badge className="bg-emerald-500 text-white border-none px-10 py-3 rounded-full font-black text-[10px] md:text-sm shadow-4xl uppercase tracking-widest">
-                  Verified Standing
-               </Badge>
+            <div className="pt-6 flex justify-center gap-3">
+               <Badge className="bg-emerald-500 text-white border-none font-bold text-[10px] px-6 py-2 rounded-full shadow-lg">Verified Standing</Badge>
+               {percentile >= 90 && <Badge className="bg-[#0A84FF] text-white border-none font-bold text-[10px] px-6 py-2 rounded-full shadow-lg">Top 10%</Badge>}
             </div>
          </div>
+      </Card>
+
+      {/* 2. STATS 2x2 GRID */}
+      <div className="grid grid-cols-2 gap-4">
+         <StatsPill label="Net Score" val={score} color="text-[#071B4D]" />
+         <StatsPill label="Percentile" val={`${percentile}%`} color="text-[#0A84FF]" />
+         <StatsPill label="Accuracy" val={`${attemptAccuracy}%`} color="text-emerald-500" />
+         <StatsPill label="Pass Grade" val={grade} color="text-amber-500" />
       </div>
 
-      {/* 3. STATS MATRIX */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-         <MetricBox label="Net score" val={score} color="text-primary" />
-         <MetricBox label="Percentile" val={`${percentile}%`} color="text-purple-600" />
-         <MetricBox label="Accuracy" val={`${attemptAccuracy}%`} color="text-emerald-600" />
-         <MetricBox label="Pass grade" val={grade} color="text-amber-600" />
+      {/* 3. QUESTION SUMMARY */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+         <CountCard label="Correct" val={correct} color="bg-emerald-50 text-emerald-600" />
+         <CountCard label="Wrong" val={wrong} color="bg-rose-50 text-rose-600" />
+         <CountCard label="Skipped" val={skipped} color="bg-slate-100 text-slate-500" />
+         <CountCard label="Total" val={total} color="bg-blue-50 text-blue-600" />
       </div>
 
-      {/* 4. SUBJECT ANALYSIS */}
+      {/* 4. SMART INSIGHTS */}
+      <Card className="border-none shadow-sm rounded-[32px] bg-white p-6 space-y-6">
+         <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
+            <Lightbulb className="h-5 w-5 text-amber-500" />
+            <h3 className="text-lg font-[800] text-[#071B4D]">Smart Insights</h3>
+         </div>
+         <div className="space-y-3">
+            {insights.map((msg, i) => (
+               <div key={i} className="flex items-start gap-4 p-3 bg-slate-50 rounded-2xl">
+                  <div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0" />
+                  <p className="text-sm font-semibold text-slate-600 leading-tight">{msg}</p>
+               </div>
+            ))}
+         </div>
+      </Card>
+
+      {/* 5. SUBJECT ANALYTICS */}
       {subjects.length > 0 && (
-         <section className="space-y-8 pt-10">
-            <div className="flex items-center gap-4 px-2">
-               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                  <BarChart3 className="h-6 w-6" />
-               </div>
-               <h3 className="text-xl md:text-3xl font-[900] tracking-tight text-[#0F172A] uppercase">Subject Mastery</h3>
+         <Card className="border-none shadow-sm rounded-[32px] bg-white overflow-hidden">
+            <div className="p-6 border-b border-slate-50 bg-slate-50/30">
+               <h3 className="text-lg font-[800] text-[#071B4D]">Subject Mastery</h3>
             </div>
-            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-2xl overflow-hidden">
-               <div className="overflow-x-auto no-scrollbar">
-                  <table className="w-full text-center border-collapse">
-                     <thead className="bg-slate-50 border-b border-slate-100">
-                        <tr className="h-16 md:h-20">
-                           <th className="px-10 py-4 font-black text-[10px] md:text-xs text-slate-500 tracking-widest text-left uppercase">Subject Hub</th>
-                           <th className="px-4 py-4 font-black text-[10px] md:text-xs text-center text-slate-500 tracking-widest uppercase">Score</th>
-                           <th className="px-10 py-4 font-black text-[10px] md:text-xs text-right text-slate-500 tracking-widest uppercase">Accuracy</th>
+            <div className="overflow-x-auto">
+               <table className="w-full text-left">
+                  <thead className="bg-slate-50 border-b border-slate-100">
+                     <tr className="h-12">
+                        <th className="px-6 font-bold text-[10px] text-slate-400 uppercase tracking-widest">Subject</th>
+                        <th className="px-4 font-bold text-[10px] text-slate-400 uppercase tracking-widest text-center">Score</th>
+                        <th className="px-6 font-bold text-[10px] text-slate-400 uppercase tracking-widest text-right">Accuracy</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                     {subjects.map((s, i) => (
+                        <tr key={i} className="h-16">
+                           <td className="px-6 font-bold text-sm text-[#071B4D]">{s.name}</td>
+                           <td className="px-4 text-center font-black text-primary tabular-nums">{Number(s.score).toFixed(1)}</td>
+                           <td className="px-6 text-right">
+                              <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[10px] px-3">{s.accuracy}%</Badge>
+                           </td>
                         </tr>
-                     </thead>
-                     <tbody className="divide-y divide-slate-50">
-                        {subjects.map((s, i) => (
-                           <tr key={i} className="hover:bg-slate-50 transition-colors h-16 md:h-24">
-                              <td className="px-10 font-black text-sm md:text-xl text-[#0F172A] text-left">{s.name}</td>
-                              <td className="px-4 text-center font-[900] text-primary text-base md:text-3xl tabular-nums">{Number(s.score).toFixed(1)}</td>
-                              <td className="px-10 text-right">
-                                 <Badge className="bg-emerald-50 text-emerald-600 border-none font-[900] text-[9px] md:text-sm tabular-nums px-4 py-1.5 rounded-xl shadow-sm">{s.accuracy}%</Badge>
-                              </td>
-                           </tr>
-                        ))}
-                     </tbody>
-                  </table>
-               </div>
+                     ))}
+                  </tbody>
+               </table>
             </div>
-         </section>
+         </Card>
       )}
 
-      {/* 5. COUNT GRID */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 pt-10 pb-10">
-         <CountCard label="Correct" val={correct} color="text-emerald-600 bg-emerald-50" />
-         <CountCard label="Wrong" val={wrong} color="text-rose-600 bg-rose-50" />
-         <CountCard label="Skipped" val={skipped} color="text-slate-400 bg-slate-50" />
-         <CountCard label="Total" val={total} color="text-blue-600 bg-blue-50" />
-      </div>
+      {/* 6. COMPETITION SNAPSHOT */}
+      <Card className="border-none shadow-sm rounded-[32px] bg-white p-6 space-y-6">
+         <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-[800] text-[#071B4D]">Competition Snapshot</h3>
+         </div>
+         <div className="grid grid-cols-2 gap-6">
+            <ComparisonNode label="Top Score" val={topScore.toFixed(1)} icon={<Award className="text-amber-500" />} />
+            <ComparisonNode label="Avg. Score" val={avgScore.toFixed(1)} icon={<Activity className="text-blue-500" />} />
+            <ComparisonNode label="Avg. Accuracy" val={`${avgAccuracy.toFixed(1)}%`} icon={<ShieldCheck className="text-emerald-500" />} />
+            <ComparisonNode label="Score Gap" val={`-${Math.max(0, topScore - Number(score)).toFixed(1)}`} icon={<TrendingDown className="text-rose-500" />} />
+         </div>
+      </Card>
 
     </div>
   );
 }
 
-function DataMiniNode({ label, val }: { label: string, val: string }) {
+function StatsPill({ label, val, color }: any) {
    return (
-      <div className="space-y-1 text-left">
-         <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-         <p className="text-sm md:text-2xl font-[900] text-[#0F172A] tabular-nums truncate">{val}</p>
-      </div>
-   )
-}
-
-function MetricBox({ label, val, color }: any) {
-   return (
-      <Card className="border-none shadow-xl bg-white p-8 md:p-14 rounded-[2rem] md:rounded-[4rem] flex flex-col items-center justify-center gap-4 transition-all border border-slate-50 h-40 md:h-[320px] text-center hover:translate-y-[-8px]">
-         <p className="text-[10px] md:text-sm font-black text-slate-400 uppercase tracking-[0.3em]">{label}</p>
-         <p className={cn("text-3xl md:text-[84px] font-[900] tabular-nums tracking-tighter leading-none", color)}>{val}</p>
+      <Card className="border-none shadow-sm rounded-[24px] bg-white p-6 text-center space-y-3">
+         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+         <p className={cn("text-3xl font-[900] tabular-nums tracking-tighter leading-none", color)}>{val}</p>
       </Card>
    )
 }
 
 function CountCard({ label, val, color }: any) {
    return (
-      <div className={cn("p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] flex flex-col items-center justify-center text-center gap-2 shadow-inner", color)}>
-         <span className="text-3xl md:text-7xl font-[900] tabular-nums tracking-tighter leading-none">{val}</span>
-         <span className="text-[9px] md:text-sm font-black uppercase tracking-[0.4em] opacity-60 mt-1">{label}</span>
+      <div className={cn("p-5 rounded-[22px] flex flex-col items-center justify-center text-center gap-1.5 shadow-sm", color)}>
+         <span className="text-2xl font-[900] tabular-nums leading-none">{val}</span>
+         <span className="text-[9px] font-bold opacity-60 uppercase tracking-wider">{label}</span>
+      </div>
+   )
+}
+
+function ComparisonNode({ label, val, icon }: any) {
+   return (
+      <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+         <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">{icon}</div>
+         <div className="min-w-0">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{label}</p>
+            <p className="text-base font-black text-[#071B4D] tabular-nums leading-none mt-1">{val}</p>
+         </div>
       </div>
    )
 }

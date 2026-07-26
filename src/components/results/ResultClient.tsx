@@ -1,11 +1,10 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useUser, useFirestore, useDoc } from "@/firebase"
+import { useUser, useFirestore } from "@/firebase"
 import { 
   collection, 
   query, 
@@ -14,7 +13,6 @@ import {
   documentId, 
   getDocs, 
   where,
-  limit,
   getCountFromServer,
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -24,7 +22,10 @@ import {
   Download,
   ChevronRight,
   AlertCircle,
-  RefreshCw
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  FileText
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -32,7 +33,6 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { useExamStore } from "@/store/useExamStore"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import ReportScreen from "./ReportScreen"
 import ReportPDF from "./ReportPDF"
@@ -41,8 +41,9 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Result Hub v50.0 [Testbook-Style Hardening].
- * FIXED: Implemented fixed-width 794px buffer for PDF export to prevent layout breakage.
+ * @fileOverview Institutional Result Hub v6.0 [Testbook Redesign].
+ * FIXED: Implemented 794px fixed-width PDF buffer.
+ * TERMINOLOGY: All questions / Wrong (Title Case).
  */
 
 export default function ResultClient() {
@@ -67,7 +68,9 @@ export default function ResultClient() {
   
   const [liveRank, setLiveRank] = useState<number | string>("---")
   const [totalCandidates, setTotalCandidates] = useState<number>(0)
-  const [previewScale, setPreviewScale] = useState(1);
+  const [topScore, setTopScore] = useState<number>(0)
+  const [avgScore, setAvgScore] = useState<number>(0)
+  const [avgAccuracy, setAvgAccuracy] = useState<number>(0)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -75,21 +78,6 @@ export default function ResultClient() {
   const attemptIdFromUrl = searchParams?.get('attemptId')
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
-
-  useEffect(() => {
-    if (activeMainTab === 'REPORT') {
-      const calculateScale = () => {
-        if (typeof window === 'undefined') return;
-        const screenWidth = window.innerWidth;
-        const targetWidth = 794; 
-        const available = screenWidth - 2;
-        setPreviewScale(available < targetWidth ? available / targetWidth : 1);
-      };
-      calculateScale();
-      window.addEventListener('resize', calculateScale);
-      return () => window.removeEventListener('resize', calculateScale);
-    }
-  }, [activeMainTab]);
 
   useEffect(() => {
     if (userLoading || !db || !mockId || !mounted) return;
@@ -149,13 +137,29 @@ export default function ResultClient() {
      async function fetchRankingMetrics() {
         try {
            const entriesRef = collection(db, "leaderboards", mockId, "entries");
-           const [countSnap, superiorCountSnap] = await Promise.all([
-             getCountFromServer(entriesRef),
-             getCountFromServer(query(entriesRef, where("highestScore", ">", activeSession.score)))
-           ]);
-           const displayTotal = countSnap.data().count;
-           setTotalCandidates(displayTotal);
-           setLiveRank(superiorCountSnap.data().count + 1);
+           const snap = await getDocs(query(entriesRef, where("mockId", "==", mockId)));
+           
+           const entries = snap.docs.map(d => d.data());
+           // HARDENED SORT: Score (Desc) > Accuracy (Desc) > Time (Asc)
+           const sorted = [...entries].sort((a: any, b: any) => {
+              if (b.highestScore !== a.highestScore) return b.highestScore - a.highestScore;
+              if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+              return a.timeTaken - b.timeTaken;
+           });
+
+           const totalCount = sorted.length;
+           const myIndex = sorted.findIndex(e => e.userId === activeSession.userId || e.uid === activeSession.userId);
+           const rank = myIndex === -1 ? totalCount : myIndex + 1;
+
+           const totalS = entries.reduce((acc, e) => acc + (e.highestScore || 0), 0);
+           const totalAcc = entries.reduce((acc, e) => acc + (e.accuracy || 0), 0);
+
+           setTotalCandidates(totalCount);
+           setLiveRank(rank);
+           setTopScore(sorted[0]?.highestScore || 0);
+           setAvgScore(totalCount > 0 ? totalS / totalCount : 0);
+           setAvgAccuracy(totalCount > 0 ? totalAcc / totalCount : 0);
+
         } catch (e) {}
      }
      fetchRankingMetrics();
@@ -205,24 +209,53 @@ export default function ResultClient() {
     const maxMarks = Number(activeSession.maxMarks) || totalQ;
     const percentage = Number(((score / maxMarks) * 100).toFixed(1));
     const isQualified = activeSession.isQualified || percentage >= 40;
-    const percentile = totalCandidates > 1 ? Number(Math.max(0, ((totalCandidates - Number(liveRank)) / totalCandidates) * 100).toFixed(1)) : 100;
-    return { score, maxMarks, percentage, attemptAccuracy: Number(activeSession.attemptAccuracy) || 0, grade: activeSession.grade || "F", isQualified, percentile };
+    
+    // Percentile = (Candidates below / Total) * 100
+    const belowCount = Math.max(0, totalCandidates - Number(liveRank));
+    const percentile = totalCandidates > 1 ? Number(((belowCount / totalCandidates) * 100).toFixed(1)) : 100;
+    
+    let grade = "F";
+    if (percentage >= 90) grade = "A+";
+    else if (percentage >= 80) grade = "A";
+    else if (percentage >= 70) grade = "B+";
+    else if (percentage >= 60) grade = "B";
+    else if (percentage >= 50) grade = "C";
+    else if (percentage >= 40) grade = "D";
+
+    return { score, maxMarks, percentage, attemptAccuracy: Number(activeSession.attemptAccuracy) || 0, grade, isQualified, percentile };
   }, [activeSession, totalCandidates, liveRank]);
 
   const handleDownloadPDF = async () => {
     if (isExporting || !activeSession || !finalMetrics) return;
     setIsExporting(true);
-    toast({ title: "Synchronizing report nodes" });
+    toast({ title: "Syncing report registry" });
+    
     try {
-      const container = document.getElementById('pdf-report-container');
+      const container = document.getElementById('pdf-export-buffer');
       if (!container) throw new Error("Capture node missing");
-      const canvas = await html2canvas(container, { scale: 3, useCORS: true, backgroundColor: "#ffffff", width: 794 });
-      const imgData = canvas.toDataURL('image/jpeg', 0.9);
+      
+      const canvas = await html2canvas(container, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        width: 794,
+        onclone: (clonedDoc) => {
+           const el = clonedDoc.getElementById('pdf-export-buffer');
+           if (el) el.style.display = 'block';
+        }
+      });
+      
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
-      pdf.save(`Cracklix_Report_${activeSession.userName || 'Student'}.pdf`);
+      pdf.save(`Report_${activeSession.userName || 'Student'}_${mockId}.pdf`);
       toast({ title: "Analysis downloaded" });
-    } catch (e) { toast({ variant: "destructive", title: "Export failed" }); } finally { setIsExporting(false); }
+    } catch (e) { 
+       console.error(e);
+       toast({ variant: "destructive", title: "Export failed" }); 
+    } finally { 
+       setIsExporting(false); 
+    }
   };
 
   const reviewNodes = useMemo(() => {
@@ -247,67 +280,64 @@ export default function ResultClient() {
     return reviewNodes.all;
   }, [activeReviewFilter, reviewNodes]);
 
-  const handleRetake = () => mockId && router.push(`/mocks/attempt?id=${mockId}&retake=true`);
-
   if (isSearching) return (
-     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
+     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8FAFC] space-y-6">
         <Zap className="h-12 w-12 text-primary animate-pulse" />
-        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Synchronizing analytical registry...</p>
+        <p className="text-[10px] font-bold text-slate-300 tracking-tight">Syncing Analysis Registry...</p>
      </div>
   );
 
   if (errorNotFound) return (
      <div className="h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center">
-        <Card className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-14 shadow-5xl border border-slate-100 space-y-10">
+        <Card className="max-w-md w-full bg-white rounded-[2rem] p-10 md:p-14 shadow-5xl border border-slate-100 space-y-10">
            <div className="h-20 w-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
               <AlertCircle className="h-10 w-10" />
            </div>
-           <h2 className="text-2xl font-black text-[#0F172A]">Result node not found</h2>
-           <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold"><Link href="/dashboard">Back to Dashboard</Link></Button>
+           <h2 className="text-2xl font-black text-[#0F172A]">Report Node Not Found</h2>
+           <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-bold"><Link href="/dashboard">Return to Dashboard</Link></Button>
         </Card>
      </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-body">
+    <div className="min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
-      <main className="container mx-auto max-w-7xl px-4 md:px-8 py-6 md:py-12 space-y-10 pb-32 text-left">
+      <main className="container mx-auto max-w-[480px] px-4 py-6 space-y-6 pb-40">
         
         {activeSession && finalMetrics && (
-           <div className="space-y-10 animate-in fade-in duration-500">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                 <div className="flex items-center gap-6 text-left w-full md:w-auto">
-                    <AuthorityLogo boardId={activeSession?.boardId || "GENERAL"} size="sm" className="h-14 w-14 md:h-20 md:w-20 rounded-2xl shadow-xl bg-white border-none" />
-                    <div className="space-y-1 flex-1 min-w-0">
-                       <h1 className="text-xl md:text-4xl font-black tracking-tight text-[#0F172A] truncate">{activeSession?.mockTitle}</h1>
-                       <div className="flex items-center gap-4">
-                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[10px] font-black px-4 py-1.5 rounded-full shadow-sm uppercase">Verified Hub</Badge>
-                          <span className="text-[10px] md:text-sm font-black text-primary uppercase">Attempt #{profile?.totalTests || 1}</span>
+           <div className="space-y-6 animate-in fade-in duration-500">
+              {/* BRANDED HEADER */}
+              <Card className="border-none shadow-sm rounded-[32px] bg-white p-6 space-y-6">
+                 <div className="flex flex-col items-center gap-4">
+                    <img src="/logo/cracklix-logo-dark.png" alt="Logo" className="h-14 w-auto object-contain" />
+                    <div className="text-center space-y-1.5">
+                       <h1 className="text-xl font-[800] text-[#071B4D] leading-tight">{activeSession.mockTitle}</h1>
+                       <div className="flex flex-wrap justify-center items-center gap-2">
+                          <Badge className="bg-primary/5 text-primary border-none text-[9px] font-bold px-3 py-1 rounded-full uppercase">Verified Attempt #{profile?.totalTests || 1}</Badge>
                        </div>
                     </div>
                  </div>
                  
-                 <div className="flex gap-4 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleRetake} className="flex-1 h-14 md:h-16 px-10 rounded-2xl border-2 font-bold text-[11px] bg-white transition-all active:scale-95">Retake</Button>
-                    <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex-[2] h-14 md:h-16 px-12 bg-[#0F172A] hover:bg-black text-white rounded-2xl shadow-2xl font-bold text-[11px] transition-all active:scale-95 border-none">
-                       {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Download PDF
-                    </Button>
+                 <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-50">
+                    <HeaderMiniNode label="Date" val={new Date(activeSession.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} />
+                    <HeaderMiniNode label="Duration" val={`${mockData?.duration || 120}m`} />
+                    <HeaderMiniNode label="Candidates" val={totalCandidates.toLocaleString()} />
                  </div>
               </div>
 
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-                  <div className="flex justify-center w-full max-w-2xl mx-auto mb-10">
-                     <TabsList className="bg-white border border-slate-200 p-1 rounded-2xl shadow-xl h-14 md:h-16 w-full flex items-center">
-                        <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl px-6 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all uppercase tracking-widest">Analysis</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="flex-1 rounded-xl px-6 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all uppercase tracking-widest">Review</TabsTrigger>
-                        <TabsTrigger value="REPORT" className="flex-1 rounded-xl px-6 font-bold text-[10px] md:text-[11px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all uppercase tracking-widest">Report</TabsTrigger>
+                  <div className="flex justify-center mb-6">
+                     <TabsList className="bg-slate-100 p-1 rounded-2xl h-12 w-full flex items-center shadow-inner">
+                        <TabsTrigger value="OVERVIEW" className="flex-1 rounded-xl font-bold text-[11px] h-full data-[state=active]:bg-white data-[state=active]:text-[#071B4D] transition-all">Overview</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="flex-1 rounded-xl font-bold text-[11px] h-full data-[state=active]:bg-white data-[state=active]:text-[#071B4D] transition-all">Review</TabsTrigger>
+                        <TabsTrigger value="REPORT" className="flex-1 rounded-xl font-bold text-[11px] h-full data-[state=active]:bg-white data-[state=active]:text-[#071B4D] transition-all">Report</TabsTrigger>
                      </TabsList>
                   </div>
 
-                  <TabsContent value="OVERVIEW">
+                  <TabsContent value="OVERVIEW" className="space-y-6 m-0">
                       <ReportScreen 
                          {...activeSession} 
-                         resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
+                         resultId={activeSession.id || activeSession.attemptId || "GUEST"}
                          studentName={activeSession.userName || profile?.name || "Aspirant"}
                          rank={liveRank} 
                          totalCandidates={totalCandidates}
@@ -321,77 +351,73 @@ export default function ResultClient() {
                          score={finalMetrics.score.toFixed(2)}
                          accuracy={finalMetrics.percentage}
                          attemptAccuracy={finalMetrics.attemptAccuracy}
-                         attemptRate={activeSession.attemptRate}
                          isQualified={finalMetrics.isQualified}
                          grade={finalMetrics.grade}
                          subjects={activeSession.subjectAnalysis}
                          duration={mockData?.duration}
                          boardId={activeSession?.boardId}
+                         topScore={topScore}
+                         avgScore={avgScore}
+                         avgAccuracy={avgAccuracy}
                       />
                   </TabsContent>
 
-                  <TabsContent value="REVIEW" className="space-y-6 max-w-5xl mx-auto">
-                      <div className="flex items-center gap-1 bg-white p-1 rounded-2xl shadow-lg border border-slate-200 w-full max-w-2xl mx-auto h-12 md:h-14">
-                          <FilterButton active={activeReviewFilter === 'ALL'} label="All Items" onClick={() => setActiveReviewFilter('ALL')} />
-                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Fix Errors (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
+                  <TabsContent value="REVIEW" className="space-y-4 m-0">
+                      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl h-11 w-full shadow-inner mb-4 overflow-x-auto no-scrollbar">
+                          <FilterButton active={activeReviewFilter === 'ALL'} label="All questions" onClick={() => setActiveReviewFilter('ALL')} />
+                          <FilterButton active={activeReviewFilter === 'WRONG'} label={`Wrong (${reviewNodes.wrong.length})`} onClick={() => setActiveReviewFilter('WRONG')} color="rose" />
                           <FilterButton active={activeReviewFilter === 'CORRECT'} label="Correct" onClick={() => setActiveReviewFilter('CORRECT')} color="emerald" />
                       </div>
-                      <div className="grid grid-cols-1 gap-6 md:gap-10 pt-4">
+                      <div className="space-y-4 pt-2">
                           {filteredQuestions.map((q) => (
-                              <Card key={q.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white text-left p-8 md:p-14 transition-all duration-300 hover:shadow-2xl">
-                                  <div className="space-y-8">
-                                      <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                                         <Badge variant="outline" className="px-4 py-1.5 rounded-full border-slate-200 text-slate-400 font-black text-[9px] uppercase tracking-widest">Question #{q.originalIndex + 1}</Badge>
-                                         <Badge className="bg-primary/5 text-primary border-none text-[9px] font-black uppercase tracking-widest">{q.subjectId || 'General'}</Badge>
-                                      </div>
-                                      <QuestionRenderer 
-                                          question={q} 
-                                          language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
-                                          showSolution={true} 
-                                          selectedAnswer={activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)]} 
-                                          className="p-0 shadow-none border-none bg-transparent" 
-                                      />
+                              <Card key={q.id} className="border-none shadow-sm rounded-[24px] bg-white p-6 space-y-6">
+                                  <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                                     <Badge variant="outline" className="px-3 py-1 rounded-lg border-slate-100 text-slate-400 font-bold text-[9px]">Question #{q.originalIndex + 1}</Badge>
+                                     <Badge className="bg-primary/5 text-primary border-none text-[8px] font-bold">{q.subjectId || 'General'}</Badge>
                                   </div>
+                                  <QuestionRenderer 
+                                      question={q} 
+                                      language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
+                                      showSolution={true} 
+                                      selectedAnswer={activeSession.answers?.[q.originalIndex] ?? activeSession.answers?.[String(q.originalIndex)]} 
+                                      className="p-0 shadow-none border-none bg-transparent" 
+                                  />
                               </Card>
                           ))}
                       </div>
                   </TabsContent>
 
-                  <TabsContent value="REPORT" className="px-0 pb-40 pt-10 flex flex-col items-center">
-                      <div style={{ width: '794px', transform: `scale(${previewScale})`, transformOrigin: 'top center', marginBottom: `${(1123 * previewScale) - 1123}px` }} className="bg-white p-0 shadow-4xl border border-slate-200 origin-top rounded-lg overflow-hidden">
-                         <ReportPDF 
-                            {...activeSession}
-                            resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
-                            studentName={activeSession.userName || profile?.name || "Aspirant"}
-                            rank={liveRank} 
-                            totalCandidates={totalCandidates}
-                            timeTaken={formatTimeStr(activeSession.timeTaken)}
-                            correct={activeSession.correctCount}
-                            wrong={activeSession.wrongCount}
-                            skipped={activeSession.skippedCount}
-                            total={activeSession.totalQuestions}
-                            date={new Date(activeSession.timestamp).toLocaleDateString('en-GB')}
-                            percentile={finalMetrics.percentile}
-                            score={finalMetrics.score.toFixed(2)}
-                            accuracy={finalMetrics.percentage}
-                            attemptAccuracy={finalMetrics.attemptAccuracy}
-                            isQualified={finalMetrics.isQualified}
-                            grade={finalMetrics.grade}
-                            subjects={activeSession.subjectAnalysis}
-                            duration={mockData?.duration}
-                         />
-                      </div>
+                  <TabsContent value="REPORT" className="space-y-6 m-0">
+                      <Card className="border-none shadow-lg rounded-[32px] bg-white p-6 text-center space-y-8">
+                         <div className="space-y-2">
+                            <h3 className="text-xl font-[800] text-[#071B4D]">Performance Report</h3>
+                            <p className="text-sm text-slate-500 font-medium">Download your verified assessment certificate.</p>
+                         </div>
+                         <Button onClick={handleDownloadPDF} disabled={isExporting} className="w-full h-16 bg-[#071B4D] hover:bg-black text-white rounded-2xl shadow-xl font-bold gap-3">
+                            {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />} Download PDF Report
+                         </Button>
+                      </Card>
                   </TabsContent>
               </Tabs>
+
+              <div className="flex gap-4">
+                 <Button asChild variant="outline" className="flex-1 h-14 rounded-2xl border-slate-200 font-bold text-sm bg-white shadow-sm">
+                    <Link href={`/mocks/instructions?id=${mockId}&retake=true`}>Retake Test</Link>
+                 </Button>
+                 <Button asChild className="flex-1 h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl shadow-lg font-bold text-sm">
+                    <Link href="/dashboard">Exit Hub</Link>
+                 </Button>
+              </div>
            </div>
         )}
 
+        {/* HIDDEN PDF BUFFER - FIXED WIDTH 794px */}
         <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
-          <div id="pdf-report-container">
+          <div id="pdf-export-buffer" style={{ width: '794px', backgroundColor: '#ffffff' }}>
             {finalMetrics && activeSession && (
               <ReportPDF 
                  {...activeSession}
-                 resultId={activeSession.id || activeSession.attemptId || "REF-GUEST"}
+                 resultId={activeSession.id || activeSession.attemptId || "GUEST"}
                  studentName={activeSession.userName || profile?.name || "Aspirant"}
                  rank={liveRank} 
                  totalCandidates={totalCandidates}
@@ -419,9 +445,18 @@ export default function ResultClient() {
   )
 }
 
+function HeaderMiniNode({ label, val }: { label: string, val: string }) {
+   return (
+      <div className="text-center space-y-0.5">
+         <p className="text-[8px] font-black text-slate-400 uppercase tracking-tight">{label}</p>
+         <p className="text-[13px] font-bold text-[#071B4D] tabular-nums">{val}</p>
+      </div>
+   )
+}
+
 function FilterButton({ active, label, onClick, color = "primary" }: any) {
   return (
-    <button onClick={onClick} className={cn("flex-1 px-4 h-full rounded-xl text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-600 text-white shadow-xl" : color === 'emerald' ? "bg-emerald-600 text-white shadow-xl" : "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}>
+    <button onClick={onClick} className={cn("flex-1 px-4 h-full rounded-lg text-[10px] font-bold transition-all active:scale-95 whitespace-nowrap border border-transparent", active ? color === 'rose' ? "bg-rose-50 text-rose-600 shadow-sm" : color === 'emerald' ? "bg-emerald-50 text-emerald-600 shadow-sm" : "bg-white text-[#071B4D] shadow-sm" : "text-slate-400 hover:text-slate-600")}>
        {label}
     </button>
   )
