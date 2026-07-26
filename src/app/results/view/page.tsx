@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { Suspense, useMemo, useEffect, useState } from "react"
@@ -9,8 +10,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Universal Result Hub Viewer v6.0 [Attempt Guard].
- * Hardened: Enforces unique attempt-id synchronization for immutable data display.
+ * @fileOverview Universal Result Hub Viewer v6.1 [Resilient Guard].
+ * Hardened: Enforces unique attempt-id synchronization with improved guest fallback.
  */
 
 export default function ResultViewPage() {
@@ -35,7 +36,7 @@ function ResultGuard() {
   const db = useFirestore();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useUser();
+  const { user, loading: authLoading } = useUser();
 
   const mockId = searchParams.get('id');
   const attemptIdFromUrl = searchParams.get('attemptId');
@@ -43,6 +44,9 @@ function ResultGuard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Wait for authentication state to resolve before auditing registry
+    if (authLoading) return;
+
     async function verifyRegistryNode() {
       if (!db || !mockId) {
         setLoading(false);
@@ -55,7 +59,7 @@ function ResultGuard() {
         // 1. Resolve exact attempt reference
         let activeAttemptId = attemptIdFromUrl;
 
-        // 2. If no attemptId in URL, try to resolve latest from user's attempt tracker
+        // 2. Logged-in User: Resolve latest from tracker if missing in URL
         if (!activeAttemptId && user) {
            const trackerSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
            if (trackerSnap.exists()) {
@@ -63,22 +67,28 @@ function ResultGuard() {
            }
         }
 
-        // 3. Final Verification in Results Collection
-        if (activeAttemptId && user) {
-          const resultPath = `results/${user.uid}_${mockId}_${activeAttemptId}`;
-          const snap = await getDoc(doc(db, resultPath));
+        // 3. Document Verification
+        if (user && activeAttemptId) {
+          const resDocId = `${user.uid}_${mockId}_${activeAttemptId}`;
+          const snap = await getDoc(doc(db, "results", resDocId));
           
           if (!snap.exists()) {
-             // Fallback for legacy items (no attemptId in path)
-             const legacySnap = await getDoc(doc(db, `results/${user.uid}_${mockId}`));
+             // Fallback for legacy items (pre-attempt-id architecture)
+             const legacySnap = await getDoc(doc(db, "results", `${user.uid}_${mockId}`));
              setResultFound(legacySnap.exists());
           } else {
              setResultFound(true);
           }
-        } else if (searchParams.get('guest') === 'true') {
+        } else if (!user) {
+           // 4. Guest Session: Check local storage node
            const guestRes = localStorage.getItem(`cracklix_guest_result_${mockId}`);
-           setResultFound(!!guestRes);
+           if (guestRes) {
+              setResultFound(true);
+           } else {
+              setResultFound(false);
+           }
         } else {
+           // Logged in but no attempt found
            setResultFound(false);
         }
       } catch (err) {
@@ -89,14 +99,14 @@ function ResultGuard() {
       }
     }
     verifyRegistryNode();
-  }, [db, mockId, attemptIdFromUrl, user, searchParams]);
+  }, [db, mockId, attemptIdFromUrl, user, authLoading]);
 
   if (loading) {
      return (
         <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
            <Zap className="h-10 w-10 text-primary animate-pulse" />
            <div className="text-center space-y-2">
-              <p className="text-[10px] font-black uppercase text-[#0F172A] tracking-[0.4em]">Audit handshake</p>
+              <p className="text-[10px] font-black uppercase text-[#0F172A] tracking-[0.4em]">Registry Handshake</p>
               <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Verifying unique attempt node...</p>
            </div>
         </div>
@@ -110,7 +120,7 @@ function ResultGuard() {
               <AlertCircle className="h-10 w-10" />
            </div>
            <div className="space-y-3">
-              <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Registry entry missing</h2>
+              <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Registry Entry Missing</h2>
               <p className="text-slate-500 font-medium text-sm md:text-lg max-w-sm mx-auto leading-relaxed">
                  This test attempt node could not be verified in the master ledger. Retake the test to generate a fresh snapshot.
               </p>

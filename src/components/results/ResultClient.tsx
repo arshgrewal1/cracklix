@@ -1,10 +1,11 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
+import { useUser, useFirestore, useDoc } from "@/firebase"
 import { 
   collection, 
   query, 
@@ -52,12 +53,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/types"
 
 /**
- * @fileOverview Official Result Dashboard v6.0 [Attempt Isolated].
- * Rebuild: Consumes static analytical snapshot from the result document.
+ * @fileOverview Official Result Dashboard v6.1 [Resilient Sync].
+ * Rebuild: Dynamically resolves the correct result document ID for logged-in and guest users.
  */
 export default function ResultClient() {
   const db = useFirestore()
-  const { user, profile } = useUser()
+  const { user, profile, loading: userLoading } = useUser()
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
@@ -69,6 +70,7 @@ export default function ResultClient() {
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
   const [guestResult, setGuestResult] = useState<any>(null)
   const [activeMainTab, setActiveMainTab] = useState<string>("OVERVIEW")
+  const [resolvedResultId, setResolvedResultId] = useState<string | null>(null);
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -80,31 +82,50 @@ export default function ResultClient() {
     return lastSegment !== 'view' ? lastSegment : null;
   }, [pathname, searchParams]);
 
-  const attemptId = searchParams?.get('attemptId');
-  const isGuestMode = !user || searchParams?.get('guest') === 'true';
+  const attemptIdFromUrl = searchParams?.get('attemptId');
 
-  // SOURCE OF TRUTH: Attempt Registry Node
-  const resultRef = useMemo(() => {
-     if (!db || !mockId) return null;
-     if (attemptId && user) return doc(db, "results", `${user.uid}_${mockId}_${attemptId}`);
-     if (user) return doc(db, "results", `${user.uid}_${mockId}`);
-     return null;
-  }, [db, user, mockId, attemptId]);
+  // RESOLVE THE SOURCE OF TRUTH ID
+  useEffect(() => {
+    if (userLoading || !db || !mockId) return;
 
+    async function resolveId() {
+       let targetId = attemptIdFromUrl;
+
+       // If logged in and missing ID, check attempt tracker
+       if (!targetId && user) {
+          const trackerSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
+          if (trackerSnap.exists()) {
+             targetId = trackerSnap.data().attemptId;
+          }
+       }
+
+       if (user && targetId) {
+          setResolvedResultId(`${user.uid}_${mockId}_${targetId}`);
+       } else if (user) {
+          // Fallback to legacy ID
+          setResolvedResultId(`${user.uid}_${mockId}`);
+       } else {
+          setResolvedResultId(null);
+       }
+    }
+    resolveId();
+  }, [user, userLoading, db, mockId, attemptIdFromUrl]);
+
+  // DATA FETCHING
+  const resultRef = useMemo(() => (db && resolvedResultId ? doc(db, "results", resolvedResultId) : null), [db, resolvedResultId]);
   const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
   const { data: branding } = useDoc<BrandingSettings>(useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]));
 
   useEffect(() => {
-     if (isGuestMode && mockId) {
+     if (!user && !userLoading && mockId) {
         const stored = localStorage.getItem(`cracklix_guest_result_${mockId}`);
         if (stored) {
           try {
-            const parsed = JSON.parse(stored);
-            if (!attemptId || parsed.attemptId === attemptId) setGuestResult(parsed);
+            setGuestResult(JSON.parse(stored));
           } catch (e) {}
         }
      }
-  }, [isGuestMode, mockId, attemptId]);
+  }, [user, userLoading, mockId]);
 
   const activeSession = useMemo(() => user ? sessionData : guestResult, [user, sessionData, guestResult]);
 
@@ -175,7 +196,7 @@ export default function ResultClient() {
   if (!activeSession) return (
      <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
         <AlertCircle className="h-16 w-16 text-slate-200" />
-        <h2 className="text-2xl font-black text-[#0F172A]">Result node missing</h2>
+        <h2 className="text-2xl font-black text-[#0F172A]">Result Node Missing</h2>
         <p className="text-slate-500 max-w-sm">This attempt record could not be synchronized. Retake the test if the issue persists.</p>
         <Button onClick={() => router.push('/mocks')} variant="outline">Browse Tests</Button>
      </div>
@@ -213,7 +234,7 @@ export default function ResultClient() {
                  <StatCard label="Attempt grade" val={activeSession.grade || 'F'} icon={<Award className="text-amber-500" />} highlight />
                  <StatCard label="Accuracy" val={`${activeSession.accuracy}%`} icon={<Target className="text-emerald-500" />} />
                  <StatCard label="Time taken" val={`${Math.round(activeSession.timeTaken / 60)}m`} icon={<Timer className="text-blue-500" />} />
-                 <StatCard label="Correct items" val={activeSession.correctCount} icon={<CheckCircle2 className="text-emerald-600" />} />
+                 <StatCard label="Correct" val={activeSession.correctCount} icon={<CheckCircle2 className="text-emerald-600" />} />
                  <StatCard label="Mistakes" val={activeSession.wrongCount} icon={<AlertCircle className="text-rose-500" />} />
               </section>
 
@@ -272,7 +293,7 @@ export default function ResultClient() {
                           </div>
                           <QuestionRenderer 
                             question={q} 
-                            language={mockData?.languageMode || 'ENGLISH_PUNJABI'} 
+                            language={activeSession.languageMode || 'ENGLISH_PUNJABI'} 
                             showSolution={true} 
                             selectedAnswer={activeSession.answers?.[q.originalIndex]} 
                             className="p-0 shadow-none border-none bg-transparent" 
@@ -305,6 +326,7 @@ export default function ResultClient() {
                        percentile={merit.percentile} 
                        branding={branding}
                        subjects={activeSession.subjectAnalysis}
+                       grade={activeSession.grade}
                     />
                  </div>
               </div>
