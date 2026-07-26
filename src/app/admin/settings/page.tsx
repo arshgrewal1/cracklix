@@ -422,7 +422,7 @@ export default function AdminSettings() {
                  <div className="space-y-6">
                     <FormNode label="Founder Name" value={formData.founderName} onChange={v => setFormData({...formData, founderName: v})} />
                     <FormNode label="Institutional Role" value={formData.founderRole} onChange={v => setFormData({...formData, founderRole: v})} />
-                    <FormNode label="Official Email" value={founder.founderEmail} onChange={v => setFormData({...formData, founderEmail: v})} />
+                    <FormNode label="Official Email" value={formData.founderEmail} onChange={v => setFormData({...formData, founderEmail: v})} />
                     <FormNode label="Registry Date" value={formData.founderBuildingSince} onChange={v => setFormData({...formData, founderBuildingSince: v})} />
                  </div>
                  <div className="space-y-6">
