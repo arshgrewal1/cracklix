@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { motion } from 'framer-motion';
 
 interface ReportScreenProps {
@@ -47,7 +48,7 @@ interface ReportScreenProps {
 
 /**
  * @fileOverview Responsive Screen Layout for Browser Viewing.
- * UPDATED: Fixed resultId.slice crash and normalized Title Case typography.
+ * FIXED: Added missing Card import and handled undefined resultId.
  */
 export default function ReportScreen(props: ReportScreenProps) {
   const {
@@ -65,33 +66,33 @@ export default function ReportScreen(props: ReportScreenProps) {
       <div className="bg-white rounded-[2rem] p-6 md:p-10 border border-slate-100 shadow-sm space-y-6">
          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <div className="space-y-1">
-               <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Performance Report</p>
+               <p className="text-[10px] font-bold text-primary tracking-tight">Performance Report</p>
                <h1 className="text-xl md:text-4xl font-black text-[#0F172A] leading-tight">{studentName}</h1>
                <p className="text-sm md:text-xl font-bold text-slate-500">{examTitle}</p>
             </div>
             <div className="text-left md:text-right">
-               <Badge className={cn("border-none px-4 py-1 rounded-full text-[10px] font-black uppercase", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+               <Badge className={cn("border-none px-4 py-1 rounded-full text-[10px] font-black", isQualified ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
                   {isQualified ? 'Qualified' : 'Attempted'}
                </Badge>
-               <p className="text-[10px] font-bold text-slate-300 mt-2">ID: {resultId?.slice(0, 12) || "REF-GUEST"}</p>
+               <p className="text-[10px] font-bold text-slate-300 mt-2">ID: {resultId?.slice(0, 12) || 'Registry'}</p>
             </div>
          </div>
          
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-50">
             <div className="space-y-1">
-               <p className="text-[9px] font-bold text-slate-400 uppercase">Attempt Date</p>
+               <p className="text-[9px] font-bold text-slate-400">Attempt Date</p>
                <p className="text-sm font-bold text-[#0F172A]">{date}</p>
             </div>
             <div className="space-y-1">
-               <p className="text-[9px] font-bold text-slate-400 uppercase">Time Taken</p>
+               <p className="text-[9px] font-bold text-slate-400">Time Taken</p>
                <p className="text-sm font-bold text-[#0F172A] tabular-nums">{timeTaken}</p>
             </div>
             <div className="space-y-1">
-               <p className="text-[9px] font-bold text-slate-400 uppercase">Duration</p>
+               <p className="text-[9px] font-bold text-slate-400">Duration</p>
                <p className="text-sm font-bold text-[#0F172A]">{duration ? `${duration}m` : 'Timed'}</p>
             </div>
             <div className="space-y-1">
-               <p className="text-[9px] font-bold text-slate-400 uppercase">Candidates</p>
+               <p className="text-[9px] font-bold text-slate-400">Candidates</p>
                <p className="text-sm font-bold text-[#0F172A] tabular-nums">{totalCandidates.toLocaleString()}</p>
             </div>
          </div>
@@ -101,7 +102,7 @@ export default function ReportScreen(props: ReportScreenProps) {
       <div className="bg-[#0F172A] rounded-[2rem] md:rounded-[3rem] p-8 md:p-14 text-white text-center relative overflow-hidden shadow-2xl border border-white/5">
          <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-64 w-64 text-primary" /></div>
          <div className="relative z-10 space-y-4">
-            <p className="text-[10px] md:text-sm font-bold text-primary uppercase tracking-[0.2em]">Your Punjab Rank</p>
+            <p className="text-[10px] md:text-sm font-bold text-primary tracking-tight">Your Punjab Rank</p>
             <div className="flex items-baseline justify-center gap-3">
                <span className="text-6xl md:text-[120px] font-black tracking-tighter text-white tabular-nums">#{rank}</span>
                <span className="text-lg md:text-4xl font-bold text-slate-500 tabular-nums">/ {totalCandidates}</span>
@@ -114,7 +115,7 @@ export default function ReportScreen(props: ReportScreenProps) {
 
       {/* Main Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-         <MetricBox label="Net Score" val={score} sub="Actual Pts" icon={<Zap />} color="text-primary" bg="bg-blue-50" />
+         <MetricBox label="Net Score" val={score} sub="Actual points" icon={<Zap />} color="text-primary" bg="bg-blue-50" />
          <MetricBox label="Percentile" val={`${percentile}%`} sub="Verified standing" icon={<TrendingUp />} color="text-purple-600" bg="bg-purple-50" />
          <MetricBox label="Accuracy" val={`${attemptAccuracy}%`} sub="Precision index" icon={<Target />} color="text-emerald-600" bg="bg-emerald-50" />
          <MetricBox label="Status" val={`Grade ${grade}`} sub="Audit level" icon={<Award />} color="text-amber-600" bg="bg-amber-50" />
@@ -131,9 +132,9 @@ export default function ReportScreen(props: ReportScreenProps) {
                   <table className="w-full text-left">
                      <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                           <th className="px-6 py-4 font-bold text-[10px] text-slate-500 uppercase">Subject</th>
-                           <th className="px-4 py-4 font-bold text-[10px] text-center text-slate-500 uppercase">Score</th>
-                           <th className="px-4 py-4 font-bold text-[10px] text-center text-slate-500 uppercase">Accuracy</th>
+                           <th className="px-6 py-4 font-bold text-[10px] text-slate-500 tracking-tight">Subject</th>
+                           <th className="px-4 py-4 font-bold text-[10px] text-center text-slate-500 tracking-tight">Score</th>
+                           <th className="px-4 py-4 font-bold text-[10px] text-center text-slate-500 tracking-tight">Accuracy</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
@@ -163,7 +164,7 @@ export default function ReportScreen(props: ReportScreenProps) {
   );
 }
 
-function MetricBox({ label, val, sub, icon, color, bg }: any) {
+function MetricBox({ label, val, icon, color, bg }: any) {
    return (
       <Card className="border-none shadow-lg bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] flex flex-col items-start gap-4 hover:translate-y-[-2px] transition-all border border-slate-50">
          <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner", bg, color)}>
@@ -171,7 +172,7 @@ function MetricBox({ label, val, sub, icon, color, bg }: any) {
          </div>
          <div>
             <p className="text-[10px] md:text-xl font-black text-[#0F172A] tabular-nums leading-none tracking-tight">{val}</p>
-            <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{label}</p>
+            <p className="text-[8px] md:text-[10px] font-bold text-slate-400 tracking-tight mt-1">{label}</p>
          </div>
       </Card>
    )
@@ -181,7 +182,7 @@ function CountNode({ label, val, color }: any) {
    return (
       <div className={cn("p-6 rounded-2xl flex flex-col items-center justify-center text-center gap-1", color)}>
          <span className="text-xl md:text-3xl font-black tabular-nums">{val}</span>
-         <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest opacity-60">{label}</span>
+         <span className="text-[8px] md:text-[10px] font-bold tracking-tight opacity-60">{label}</span>
       </div>
    )
 }
