@@ -48,8 +48,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import html2canvas from 'html2canvas'
 
 /**
- * @fileOverview Universal Result Hub Viewer v35.0 [Transmission Hardened].
- * FIXED: Optimized scale and implemented direct Blob sharing to prevent Transmission Errors.
+ * @fileOverview Universal Result Hub Viewer v36.0 [Native Direct Share].
+ * FIXED: Implemented direct navigator.share with files array.
  */
 
 export default function ResultClient() {
@@ -189,25 +189,15 @@ export default function ResultClient() {
     generationAttempted.current = true;
     setIsGenerating(true);
     
-    // Safety 15s timeout
-    const timeoutId = setTimeout(() => {
-       if (!preGeneratedImage) {
-          setIsGenerating(false);
-          generationAttempted.current = false;
-       }
-    }, 15000);
-
     try {
-      // Allow 3s for all assets (Logo, QR, Fonts) to rasterize
-      await new Promise(r => setTimeout(r, 3000));
-      
+      await new Promise(r => setTimeout(r, 2000));
       const node = document.getElementById('shareable-result-certificate');
-      if (!node) throw new Error("Capture node not found");
+      if (!node) return;
 
       const canvas = await html2canvas(node, {
          useCORS: true,
-         scale: 1, // High-fidelity at scale 1 (1080x1350). Scale 2 creates oversized files for mobile share.
-         backgroundColor: "#0B5FFF",
+         scale: 1, // High-fidelity but sharing-safe size
+         backgroundColor: "#ffffff",
          logging: false,
          width: 1080,
          height: 1350
@@ -215,15 +205,13 @@ export default function ResultClient() {
 
       const dataUrl = canvas.toDataURL('image/png', 0.9);
       setPreGeneratedImage(dataUrl);
-      clearTimeout(timeoutId);
     } catch (e: any) {
       console.error("[SHARE_ERROR]:", e);
       generationAttempted.current = false;
-      clearTimeout(timeoutId);
     } finally {
       setIsGenerating(false);
     }
-  }, [mounted, sessionData, liveRank, preGeneratedImage]);
+  }, [mounted, sessionData, liveRank]);
 
   useEffect(() => {
      if (sessionData && liveRank !== "---" && !preGeneratedImage && !isGenerating) {
@@ -235,44 +223,30 @@ export default function ResultClient() {
     if (!sessionData) return;
     
     if (!preGeneratedImage) {
-       toast({ title: "Synchronizing card", description: "Preparing HD certificate. Please wait 3 seconds." });
-       if (!isGenerating) prepareShareCard();
+       toast({ title: "Wait a second", description: "Certificate is still synchronizing." });
        return;
     }
 
     try {
-      // Manual Blob conversion for Native Share compatibility
-      const base64Data = preGeneratedImage.split(',')[1];
-      const binaryData = atob(base64Data);
-      const uint8Array = new Uint8Array(binaryData.length);
-      for (let i = 0; i < binaryData.length; i++) {
-        uint8Array[i] = binaryData.charCodeAt(i);
-      }
-      const blob = new Blob([uint8Array], { type: 'image/png' });
-      const file = new File([blob], `Cracklix_Result_${Date.now()}.png`, { type: 'image/png' });
+      const blob = await (await fetch(preGeneratedImage)).blob();
+      const file = new File([blob], `Cracklix_Rank_${liveRank}.png`, { type: 'image/png' });
 
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
          await navigator.share({
-            title: 'My Cracklix Result',
-            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions} in ${sessionData.mockTitle}! Ranked #${liveRank} in Punjab.`,
+            title: `Cracklix Result: ${sessionData.mockTitle}`,
+            text: `🎯 I scored ${sessionData.score}/${sessionData.totalQuestions} and ranked #${liveRank} in Punjab!`,
             files: [file]
          });
       } else {
-         // Direct Download Fallback for "Transmission Failed" scenarios
          const link = document.createElement('a');
-         link.download = `Cracklix_Result_${Date.now()}.png`;
+         link.download = `Cracklix_Merit_Card.png`;
          link.href = preGeneratedImage;
          link.click();
-         toast({ title: "Certificate Downloaded", description: "You can now share this from your gallery." });
+         toast({ title: "Certificate Downloaded" });
       }
-    } catch (e: any) { 
+    } catch (e: any) {
        if (e.name !== 'AbortError') {
-          // Final fallback to direct download
-          const link = document.createElement('a');
-          link.download = `Cracklix_Result_Backup.png`;
-          link.href = preGeneratedImage;
-          link.click();
-          toast({ title: "Sharing limited", description: "Image saved to gallery for manual sharing." });
+          toast({ variant: "destructive", title: "Share failed", description: "Transmission interrupted." });
        }
     }
   };
@@ -309,24 +283,23 @@ export default function ResultClient() {
                     <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="lg" className="h-16 w-16 md:h-20 md:w-20 bg-white shadow-xl border border-slate-100" />
                     <div className="text-left space-y-2">
                        <div className="flex flex-wrap items-center gap-3">
-                          <Badge className="bg-[#10B981] text-white border-none px-3 py-1 font-bold text-[9px]">Verified hub</Badge>
-                          <Badge className="bg-[#1677FF] text-white border-none px-3 py-1 font-bold text-[9px]">Attempt #{profile?.totalTests || 1}</Badge>
+                          <Badge className="bg-[#0B57D0] text-white border-none px-3 py-1 font-bold text-[9px]">Verified hub</Badge>
+                          <Badge className="bg-slate-100 text-slate-500 border-none px-3 py-1 font-bold text-[9px]">Rank #{liveRank}</Badge>
                        </div>
                        <h1 className="text-xl md:text-3xl font-[800] text-[#071B4D] tracking-tight">{sessionData.mockTitle}</h1>
-                       <div className="flex flex-wrap items-center gap-6 text-[10px] md:xs font-bold text-slate-400">
+                       <div className="flex flex-wrap items-center gap-6 text-[10px] md:xs font-bold text-slate-400 uppercase tracking-widest">
                           <div className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> <span>{new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span></div>
                           <div className="flex items-center gap-2"><TimerIcon className="h-3.5 w-3.5" /> <span>{mockData?.duration || 120}m</span></div>
-                          <div className="flex items-center gap-2"><Users className="h-3.5 w-3.5" /> <span>{totalCandidates.toLocaleString()} Candidates</span></div>
                        </div>
                     </div>
                  </div>
                  <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-                    <Button onClick={handleShareResult} disabled={isGenerating && !preGeneratedImage} className="flex-1 lg:flex-none h-12 px-8 bg-gradient-to-r from-[#2563EB] to-[#4F46E5] text-white hover:brightness-110 font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
+                    <Button onClick={handleShareResult} disabled={isGenerating && !preGeneratedImage} className="flex-1 lg:flex-none h-12 px-8 bg-[#0B57D0] hover:bg-blue-700 text-white font-bold rounded-xl gap-3 text-xs shadow-lg active:scale-95 transition-all border-none">
                        {isGenerating && !preGeneratedImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />} 
-                       {preGeneratedImage ? "Direct share card" : isGenerating ? "Preparing card..." : "Generate share card"}
+                       Share Merit Card
                     </Button>
                     <Button asChild className="flex-1 lg:flex-none h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-3 text-xs shadow-md">
-                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake test</Link>
+                       <Link href={`/mocks/instructions?id=${mockId}&retake=true`}><RefreshCw className="h-4 w-4" /> Retake Test</Link>
                     </Button>
                  </div>
               </Card>
@@ -334,8 +307,8 @@ export default function ResultClient() {
               <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full space-y-6 md:space-y-10">
                   <div className="flex justify-center">
                      <TabsList className="bg-slate-100 p-1 rounded-3xl border border-[#E5EAF2] shadow-inner flex w-fit gap-1 h-auto">
-                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis hub</TabsTrigger>
-                        <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review portal</TabsTrigger>
+                        <TabsTrigger value="OVERVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Analysis Hub</TabsTrigger>
+                        <TabsTrigger value="REVIEW" className="rounded-2xl px-10 font-bold text-[11px] h-11 data-[state=active]:bg-white data-[state=active]:text-[#0F172A] transition-all">Review Portal</TabsTrigger>
                      </TabsList>
                   </div>
 
@@ -362,7 +335,7 @@ export default function ResultClient() {
                       </div>
                       <div className="grid grid-cols-1 gap-6">
                           {filteredQuestions.map((q) => (
-                              <Card key={q.id} className="border border-slate-100 shadow-sm rounded-[2.5rem] bg-white p-6 md:p-12 space-y-8 text-left">
+                              <Card key={q.id} className="border border-[#E5EAF2] shadow-sm rounded-[2.5rem] bg-white p-6 md:p-12 space-y-8 text-left">
                                   <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                                      <div className="flex items-center gap-3">
                                         <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-[#0F172A] shadow-inner">#{q.originalIndex + 1}</div>

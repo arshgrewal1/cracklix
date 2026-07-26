@@ -13,7 +13,11 @@ import {
   Users, 
   Star,
   Timer,
-  X
+  X,
+  FileText,
+  BarChart3,
+  Calendar,
+  Check
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import QRCode from 'qrcode';
@@ -25,9 +29,8 @@ interface ShareableResultCardProps {
 }
 
 /**
- * @fileOverview High-Fidelity Social Share Certificate v3.1 [Production Registry].
- * FIXED: Explicitly imported all lucide-react nodes to prevent background capture crashes.
- * FIXED: Uses official /logo.png with anonymous crossOrigin for reliable capture.
+ * @fileOverview Institutional Merit Certificate v4.0 [Professional Redesign].
+ * Requirements: White background, Blue theme (#0B57D0), Testbook style.
  */
 export default function ShareableResultCard({ data, rank, totalCandidates }: ShareableResultCardProps) {
   const [qrUrl, setQrUrl] = useState<string>('');
@@ -37,8 +40,8 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
     const url = `https://cracklix.in/results/view?id=${data.mockId}&attemptId=${data.attemptId}`;
     QRCode.toDataURL(url, { 
       margin: 1, 
-      width: 200, 
-      color: { dark: '#071B4D', light: '#ffffff' } 
+      width: 240, 
+      color: { dark: '#0B57D0', light: '#ffffff' } 
     }).then(setQrUrl).catch(() => {});
   }, [data]);
 
@@ -47,132 +50,138 @@ export default function ShareableResultCard({ data, rank, totalCandidates }: Sha
   return (
     <div 
       id="shareable-result-certificate"
-      className="w-[1080px] h-[1350px] bg-gradient-to-br from-[#0B5FFF] via-[#4F46E5] to-[#7C3AED] flex flex-col relative overflow-hidden"
+      className="w-[1080px] h-[1350px] bg-white text-[#0F172A] flex flex-col relative overflow-hidden border-[24px] border-slate-50"
       style={{ fontFamily: 'Inter, sans-serif' }}
     >
-      {/* 1. AMBIENT GLOW NODES */}
-      <div className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] bg-white/10 blur-[120px] rounded-full" />
-      <div className="absolute bottom-[-100px] right-[-100px] w-[600px] h-[600px] bg-primary/20 blur-[150px] rounded-full" />
+      {/* 1. INSTITUTIONAL ACCENTS */}
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#0B57D0]/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#0B57D0]/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
       
-      <div className="relative z-10 flex-1 flex flex-col p-16 space-y-12">
+      <div className="relative z-10 flex-1 flex flex-col p-20 space-y-10">
          
          {/* 2. HEADER HUB */}
-         <div className="flex flex-col items-center text-center space-y-6">
-            <div className="h-[140px] w-auto flex items-center justify-center">
-               <img 
-                 src="/logo.png" 
-                 alt="Cracklix" 
-                 crossOrigin="anonymous"
-                 className="h-full object-contain filter drop-shadow-2xl" 
-               />
-            </div>
-            <div className="space-y-1">
-               <div className="flex items-center justify-center gap-3">
-                  <span className="text-xl font-bold text-white/70 uppercase tracking-[0.3em]">Punjab Smart Exam Platform</span>
-                  <ShieldCheck className="h-6 w-6 text-emerald-400 fill-emerald-400/20" />
+         <div className="flex justify-between items-start border-b-2 border-slate-100 pb-10">
+            <div className="space-y-4">
+               <div className="h-[100px] w-auto flex items-start justify-start">
+                  <img 
+                    src="/logo/cracklix-logo-dark.png" 
+                    alt="Cracklix" 
+                    crossOrigin="anonymous"
+                    className="h-full object-contain" 
+                  />
                </div>
+               <div className="flex items-center gap-3">
+                  <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-4 py-1.5 rounded-full font-black text-sm uppercase tracking-widest flex items-center gap-2">
+                     <ShieldCheck className="h-4 w-4" /> Verified Result
+                  </Badge>
+               </div>
+            </div>
+            <div className="text-right space-y-2">
+               <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Candidate Node</p>
+               <p className="text-4xl font-black text-[#0B57D0] tracking-tight">{data.userName}</p>
             </div>
          </div>
 
-         {/* 3. RANK HUB */}
-         <div className="relative">
-            <div className="bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-600 p-1.5 rounded-[4rem] shadow-5xl">
-               <div className="bg-[#071B4D] rounded-[3.8rem] p-12 text-center relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12"><Trophy className="h-64 w-64" /></div>
-                  <div className="space-y-4 relative z-10">
-                     <p className="text-2xl font-black text-amber-400 uppercase tracking-[0.4em]">Punjab State Rank</p>
+         {/* 3. TEST INFO PILL */}
+         <div className="bg-slate-50 rounded-3xl p-8 flex items-center justify-between border border-slate-100">
+            <div className="space-y-1">
+               <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Mock Title</p>
+               <h2 className="text-3xl font-[800] text-[#0F172A] tracking-tight">{data.mockTitle}</h2>
+            </div>
+            <div className="flex gap-10">
+               <MetaInfo label="Attempted" val={new Date(data.timestamp).toLocaleDateString('en-GB')} />
+               <MetaInfo label="Duration" val={`${data.timeTaken ? Math.floor(data.timeTaken/60) : 0} Min`} />
+            </div>
+         </div>
+
+         {/* 4. RANK HUB - CENTERPIECE */}
+         <div className="relative pt-4">
+            <div className="bg-gradient-to-br from-[#0B57D0] to-[#0842A0] rounded-[4rem] p-1 shadow-2xl">
+               <div className="bg-white rounded-[3.8rem] p-12 text-center relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Trophy className="h-64 w-64 text-[#0B57D0]" /></div>
+                  <div className="space-y-2 relative z-10">
+                     <p className="text-2xl font-black text-[#0B57D0] uppercase tracking-[0.4em]">Punjab State Rank</p>
                      <div className="flex flex-col items-center">
-                        <span className="text-[180px] font-black text-white leading-none tracking-tighter tabular-nums drop-shadow-2xl">
+                        <span className="text-[220px] font-black text-[#0F172A] leading-none tracking-tighter tabular-nums antialiased">
                            #{rank}
                         </span>
-                        <div className="inline-flex items-center gap-4 bg-white/10 px-8 py-3 rounded-full border border-white/20 backdrop-blur-md">
-                           <Users className="h-6 w-6 text-amber-400" />
-                           <span className="text-2xl font-bold text-white">Out of {totalCandidates.toLocaleString()} Candidates</span>
+                        <div className="inline-flex items-center gap-4 bg-slate-50 px-10 py-4 rounded-full border border-slate-100 shadow-inner">
+                           <Users className="h-8 w-8 text-[#0B57D0]" />
+                           <span className="text-3xl font-bold text-slate-600">Out of {totalCandidates.toLocaleString()} Candidates</span>
                         </div>
                      </div>
                   </div>
                </div>
             </div>
-            <div className="absolute -bottom-6 -right-6 h-40 w-40 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[3rem] flex flex-col items-center justify-center shadow-4xl">
-               <Star className="h-10 w-10 text-amber-400 fill-current mb-2" />
-               <span className="text-[10px] font-black text-white uppercase tracking-widest text-center leading-tight">Verified<br/>Attempt</span>
-            </div>
          </div>
 
-         {/* 4. CANDIDATE HUB */}
-         <div className="bg-white/5 border border-white/10 rounded-[3rem] p-10 flex items-center justify-between backdrop-blur-md">
-            <div className="space-y-2">
-               <p className="text-sm font-black text-primary uppercase tracking-[0.3em]">Candidate Name</p>
-               <p className="text-4xl font-black text-white">{data.userName}</p>
-            </div>
-            <div className="text-right space-y-2">
-               <p className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">Test Series</p>
-               <p className="text-2xl font-bold text-white max-w-[400px] line-clamp-1">{data.mockTitle}</p>
-            </div>
+         {/* 5. SCORE MATRIX GRID */}
+         <div className="grid grid-cols-4 gap-6 pt-4">
+            <StatCard label="Score" val={`${data.score}/${data.totalQuestions}`} color="text-[#0B57D0]" bg="bg-blue-50" />
+            <StatCard label="Accuracy" val={`${data.attemptAccuracy}%`} color="text-emerald-600" bg="bg-emerald-50" />
+            <StatCard label="Percentile" val={`${Math.max(0, Math.round(((totalCandidates - Number(rank)) / (totalCandidates || 1)) * 100))}%`} color="text-purple-600" bg="bg-purple-50" />
+            <StatCard label="Pass Grade" val={data.grade || "A+"} color="text-amber-600" bg="bg-amber-50" />
          </div>
 
-         {/* 5. METRIC GRID */}
+         {/* 6. PILLAR STATS */}
          <div className="grid grid-cols-4 gap-6">
-            <div className="p-6 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-2xl bg-emerald-500">
-               <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Score</span>
-               <span className="text-3xl font-[900] text-white tabular-nums leading-none">{data.score}/{data.totalQuestions}</span>
-            </div>
-            <div className="p-6 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-2xl bg-indigo-500">
-               <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Accuracy</span>
-               <span className="text-3xl font-[900] text-white tabular-nums leading-none">{data.attemptAccuracy}%</span>
-            </div>
-            <div className="p-6 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-2xl bg-orange-500">
-               <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Percentile</span>
-               <span className="text-3xl font-[900] text-white tabular-nums leading-none">{Math.max(0, Math.round(((totalCandidates - Number(rank)) / (totalCandidates || 1)) * 100))}%</span>
-            </div>
-            <div className="p-6 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-2xl bg-blue-500">
-               <span className="text-[10px] font-black uppercase text-white/70 tracking-widest">Grade</span>
-               <span className="text-3xl font-[900] text-white tabular-nums leading-none">{data.grade || "A+"}</span>
-            </div>
-         </div>
-
-         {/* 6. STATS LINE */}
-         <div className="grid grid-cols-3 gap-6 pt-4">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-               <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shadow-inner"><CheckCircle2 className="h-5 w-5 text-emerald-400" /></div>
-               <div className="text-left">
-                  <p className="text-[8px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Correct</p>
-                  <p className="text-xl font-black text-white tabular-nums leading-none">{data.correctCount}</p>
-               </div>
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-               <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shadow-inner"><X className="h-5 w-5 text-rose-400" /></div>
-               <div className="text-left">
-                  <p className="text-[8px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Wrong</p>
-                  <p className="text-xl font-black text-white tabular-nums leading-none">{data.wrongCount}</p>
-               </div>
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-               <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shadow-inner"><Zap className="h-5 w-5 text-slate-400" /></div>
-               <div className="text-left">
-                  <p className="text-[8px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Skipped</p>
-                  <p className="text-xl font-black text-white tabular-nums leading-none">{data.skippedCount}</p>
-               </div>
-            </div>
+            <Pillar icon={<CheckCircle2 className="text-emerald-500" />} label="Correct" val={data.correctCount} />
+            <Pillar icon={<X className="text-rose-500" />} label="Wrong" val={data.wrongCount} />
+            <Pillar icon={<Clock className="text-slate-400" />} label="Skipped" val={data.skippedCount} />
+            <Pillar icon={<BarChart3 className="text-blue-500" />} label="Total" val={data.totalQuestions} />
          </div>
 
          {/* 7. FOOTER AUDIT */}
-         <div className="mt-auto pt-10 border-t border-white/10 flex items-center justify-between">
-            <div className="flex items-center gap-8">
-               <div className="bg-white p-3 rounded-2xl shadow-2xl">
-                  {qrUrl ? <img src={qrUrl} alt="Verify" className="h-24 w-24" /> : <div className="h-24 w-24 bg-slate-100 animate-pulse rounded-lg" />}
+         <div className="mt-auto pt-10 border-t-2 border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-10">
+               <div className="bg-white p-2 rounded-2xl shadow-xl border border-slate-100">
+                  {qrUrl ? <img src={qrUrl} alt="Verify" className="h-28 w-24" /> : <div className="h-28 w-24 bg-slate-50 animate-pulse rounded-lg" />}
                </div>
                <div className="space-y-1 text-left">
-                  <p className="text-xl font-black text-white uppercase tracking-tight">Verify Result</p>
-                  <p className="text-sm font-bold text-white/50 tracking-widest uppercase">WWW.CRACKLIX.IN</p>
+                  <p className="text-2xl font-black text-[#0B57D0] uppercase tracking-tight">Verify Result</p>
+                  <p className="text-sm font-bold text-slate-400 tracking-widest uppercase">WWW.CRACKLIX.IN</p>
                </div>
             </div>
             <div className="text-right">
-               <p className="text-sm font-black text-white/30 uppercase tracking-[0.5em]">Auth ID: {data.attemptId?.slice(0, 16).toUpperCase()}</p>
+               <p className="text-sm font-black text-slate-300 uppercase tracking-[0.5em] mb-4">Auth node: {data.attemptId?.slice(0, 16).toUpperCase()}</p>
+               <div className="inline-flex items-center gap-2 text-[#0B57D0]">
+                  <ShieldCheck className="h-5 w-5" />
+                  <span className="text-xs font-black uppercase tracking-widest">Institutional Merit Node</span>
+               </div>
             </div>
          </div>
 
       </div>
     </div>
   );
+}
+
+function MetaInfo({ label, val }: any) {
+   return (
+      <div className="text-right space-y-1">
+         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+         <p className="text-xl font-bold text-[#0F172A] tabular-nums">{val}</p>
+      </div>
+   )
+}
+
+function StatCard({ label, val, color, bg }: any) {
+   return (
+      <div className={cn("p-6 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 shadow-sm border border-slate-50", bg)}>
+         <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
+         <span className={cn("text-3xl font-[900] tabular-nums leading-none tracking-tighter", color)}>{val}</span>
+      </div>
+   )
+}
+
+function Pillar({ icon, label, val }: any) {
+   return (
+      <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-2xl shadow-sm">
+         <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">{icon}</div>
+         <div className="text-left">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{label}</p>
+            <p className="text-xl font-black text-[#0F172A] tabular-nums leading-none">{val}</p>
+         </div>
+      </div>
+   )
 }
