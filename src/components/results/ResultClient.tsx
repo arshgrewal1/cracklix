@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react"
@@ -42,7 +41,7 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 
 /**
- * @fileOverview Universal Result Hub Viewer v11.0 [Hardened PDF].
+ * @fileOverview Universal Result Hub Viewer v12.0 [Fixed Tabs & Icons].
  */
 
 export default function ResultClient() {
