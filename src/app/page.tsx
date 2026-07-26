@@ -23,7 +23,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v508.0 [Terminology Updated].
+ * @fileOverview Institutional Premium Hub v508.1.
+ * UPDATED: Removed all uppercase styling for a cleaner UI.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -100,7 +101,7 @@ export default function HomePage() {
                             <button className="relative overflow-hidden w-full h-14 md:h-16 bg-gradient-to-r from-blue-600 to-blue-400 hover:brightness-110 text-white font-bold tracking-tight text-[11px] md:text-xs rounded-xl md:rounded-[2rem] shadow-4xl transition-all duration-300 active:scale-95 border-none group/btn cursor-pointer text-center">
                                <div className="flex items-center justify-center gap-3 relative z-10 px-8">
                                   <Zap className="h-4 w-4 fill-white text-white" />
-                                  <span className="uppercase tracking-widest">Start Challenge</span>
+                                  <span className="tracking-tight">Start challenge</span>
                                   <ChevronRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-2" />
                                </div>
                                <motion.div 

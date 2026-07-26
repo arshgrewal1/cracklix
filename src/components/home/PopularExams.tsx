@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -23,8 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Standardized Popular Exams Hub v57.0.
- * UPDATED: Integrated adaptive dark mode support.
+ * @fileOverview Standardized Popular Exams Hub v57.1.
+ * UPDATED: Purged all uppercase styling.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -185,7 +186,7 @@ export default function PopularExams() {
 
         <div className="flex items-center justify-center gap-4 text-muted-foreground py-4 opacity-50">
            <ShieldCheck className="h-5 w-5" />
-           <span className="text-[10px] font-semibold tracking-tight">Institutional registry verified</span>
+           <span className="text-[10px] font-semibold tracking-tight">Official registry verified</span>
         </div>
 
       </div>

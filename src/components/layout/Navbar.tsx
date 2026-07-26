@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -36,8 +37,8 @@ import { canAccessAdmin } from "@/lib/permissions";
 import AnnouncementBar from "./AnnouncementBar";
 
 /**
- * @fileOverview Standard In-Flow Navigation Hub v159.0.
- * UPDATED: Logo variant restored to "light" for light theme compatibility.
+ * @fileOverview Standard In-Flow Navigation Hub v159.1.
+ * UPDATED: Purged all uppercase classes.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -137,16 +138,16 @@ export default function Navbar() {
 
             <div className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-6 xl:gap-8 h-full">
               <NavLink href="/" label="Home" active={pathname === '/'} />
-              <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
+              <NavLink href="/exams" label="Mock tests" active={pathname === '/exams'} />
               <NavLink href="/vacancies" label="Vacancies" active={pathname === '/vacancies'} />
-              <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
-              <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
+              <NavLink href="/pyqs" label="Old papers" active={pathname === '/pyqs'} />
+              <NavLink href="/current-affairs" label="Current affairs" active={pathname === '/current-affairs'} />
             </div>
 
             <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10 shrink-0">
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden lg:flex flex-col items-end shrink-0">
-                    <span className="text-[9px] font-black text-emerald-600 leading-none uppercase tracking-widest">Elite Access</span>
+                    <span className="text-[9px] font-black text-emerald-600 leading-none tracking-tight">Elite access</span>
                     <span className="text-[11px] font-bold text-muted-foreground mt-1.5 leading-none tabular-nums">{timeLeft}</span>
                  </div>
               )}
@@ -191,12 +192,12 @@ export default function Navbar() {
                       </div>
                       <div className="h-px w-full bg-border" />
                       <div className="w-full space-y-1 text-left">
-                         <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My Progress" />
-                         <ProfileMenuItem href="/pass" icon={Gem} label="Elite Pass Hub" />
-                         {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Console" />}
-                         <ProfileMenuItem href="/profile" icon={Settings} label="Portal Settings" />
+                         <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My progress" />
+                         <ProfileMenuItem href="/pass" icon={Gem} label="Elite pass hub" />
+                         {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin console" />}
+                         <ProfileMenuItem href="/profile" icon={Settings} label="Portal settings" />
                       </div>
-                      <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
+                      <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold text-[11px] rounded-xl transition-all border-none">Log out</Button>
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>

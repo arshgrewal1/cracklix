@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -36,8 +37,8 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Performance Hub v6.8.
- * UPDATED: Integrated adaptive dark mode support.
+ * @fileOverview Institutional Performance Hub v6.8.1.
+ * UPDATED: Purged all uppercase classes.
  */
 
 const formatTime = (seconds: number) => {
@@ -127,7 +128,7 @@ export default function StudentDashboard() {
               <CardHeader className="p-8 md:p-12 border-b border-border bg-muted/30 flex flex-row items-center justify-between">
                 <div className="text-left">
                   <CardTitle className="text-xl md:text-3xl font-black text-foreground tracking-tight">Performance flow</CardTitle>
-                  <p className="text-[10px] font-bold text-muted-foreground mt-1 uppercase tracking-widest">Practice consistency index</p>
+                  <p className="text-[10px] font-bold text-muted-foreground mt-1 tracking-tight">Practice consistency index</p>
                 </div>
                 <Badge className="bg-primary text-white border-none text-[9px] font-bold px-3 py-1 rounded-lg shadow-lg">Live sync</Badge>
               </CardHeader>
@@ -156,8 +157,8 @@ export default function StudentDashboard() {
               <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Activity className="h-64 w-64 text-primary" /></div>
               <div className="relative z-10 space-y-8 text-left">
                 <div className="space-y-1">
-                  <h3 className="text-2xl font-black tracking-tight leading-none uppercase">Milestones</h3>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Platform rewards</p>
+                  <h3 className="text-2xl font-black tracking-tight leading-none">Milestones</h3>
+                  <p className="text-[10px] font-bold text-slate-500 tracking-tight">Platform rewards</p>
                 </div>
                 <div className="space-y-6">
                   <MilestoneItem label="7 day streak" progress={Math.min(100, (stats.currentStreak / 7) * 100)} target={`${stats.currentStreak}/7`} />
@@ -172,7 +173,7 @@ export default function StudentDashboard() {
               </div>
             </Card>
             <div className="p-8 md:p-10 bg-card rounded-[2.5rem] border border-border shadow-xl space-y-6 text-left group hover:translate-y-[-4px] transition-all duration-500">
-              <h4 className="text-[10px] font-black text-muted-foreground tracking-widest uppercase">Certificates</h4>
+              <h4 className="text-[10px] font-black text-muted-foreground tracking-tight uppercase">Certificates</h4>
               <div className="h-40 flex flex-col items-center justify-center text-center opacity-30 italic">
                 <Award className="h-10 w-10 mb-4 text-muted-foreground" />
                 <p className="text-[11px] font-bold tracking-tight">Syncing milestones...</p>
@@ -192,7 +193,7 @@ function MetricPill({ label, val, icon, color, bg, progress }: any) {
       <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner", bg, color)}>{React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}</div>
       <div className="space-y-0.5">
         <p className="text-xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter leading-none">{val}</p>
-        <p className="text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
+        <p className="text-[8px] md:text-[9px] font-bold text-muted-foreground tracking-tight">{label}</p>
       </div>
       {progress !== undefined && <div className="h-1 w-full bg-muted rounded-full overflow-hidden mt-2"><div className="h-full bg-primary transition-all duration-1000" style={{ width: `${progress}%` }} /></div>}
     </motion.div>
@@ -204,8 +205,8 @@ function InsightNode({ label, value, icon }: any) {
     <Card className="p-6 md:p-10 rounded-[2.5rem] shadow-xl bg-card border border-border flex items-center gap-6 group hover:translate-x-1 transition-all duration-300">
       <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-muted flex items-center justify-center shadow-inner shrink-0 group-hover:scale-110 transition-transform">{icon}</div>
       <div className="min-w-0 text-left">
-        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-2">{label}</p>
-        <p className="text-lg md:text-xl font-bold text-foreground truncate tracking-tight uppercase">{value}</p>
+        <p className="text-[9px] font-black text-muted-foreground tracking-tight leading-none mb-2">{label}</p>
+        <p className="text-lg md:text-xl font-bold text-foreground truncate tracking-tight">{value}</p>
       </div>
     </Card>
   );
@@ -215,7 +216,7 @@ function MilestoneItem({ label, progress, target }: any) {
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center text-[10px] font-bold">
-        <span className="text-slate-400 uppercase tracking-widest">{label}</span> <span className="text-primary tabular-nums">{target}</span>
+        <span className="text-slate-400 tracking-tight">{label}</span> <span className="text-primary tabular-nums">{target}</span>
       </div>
       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
         <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 1.5, ease: "easeOut" }} className="h-full bg-primary shadow-[0_0_15px_rgba(37,99,235,0.5)]" />

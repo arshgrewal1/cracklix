@@ -42,8 +42,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Login Hub v1.5 [Registry Hardened].
- * FIXED: Guest Data Sync now correctly updates the peak performance leaderboard registry.
+ * @fileOverview Login Hub v1.5.1.
+ * UPDATED: Purged all uppercase classes.
  */
 export default function LoginPage() {
   return (
@@ -291,10 +291,10 @@ function LoginContent() {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-8">
-            <HeroStat icon={ClipboardList} label={`${statsLoading ? '...' : formatCompact(stats?.totalMocks)}+ Mock Tests`} />
+            <HeroStat icon={ClipboardList} label={`${statsLoading ? '...' : formatCompact(stats?.totalMocks)}+ Mock tests`} />
             <HeroStat icon={Zap} label={`${statsLoading ? '...' : formatCompact(stats?.totalQuestions)}+ Questions`} />
             <HeroStat icon={Users} label={`${statsLoading ? '...' : formatCompact(stats?.totalUsers)}+ Aspirants`} />
-            <HeroStat icon={ShieldCheck} label="Official Patterns" />
+            <HeroStat icon={ShieldCheck} label="Official patterns" />
           </div>
         </div>
       </div>
@@ -310,7 +310,7 @@ function LoginContent() {
                   <h2 className="text-2xl md:text-3xl font-black tracking-tight text-[#0F172A]">
                     {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                   </h2>
-                  <p className="text-slate-400 font-bold text-[10px] md:text-[11px] uppercase tracking-widest">
+                  <p className="text-slate-400 font-bold text-[10px] md:text-[11px] tracking-tight">
                     {mode === 'login' ? 'Access your portal' : 'Join the preparation portal'}
                   </p>
                </div>
@@ -349,7 +349,7 @@ function LoginContent() {
                   <div className="flex items-center justify-between px-1">
                     <div className="flex items-center space-x-2">
                       <Checkbox id="remember" className="rounded-md" />
-                      <label htmlFor="remember" className="text-[11px] font-bold text-slate-500 uppercase tracking-wider cursor-pointer">Remember me</label>
+                      <label htmlFor="remember" className="text-[11px] font-bold text-slate-500 tracking-tight cursor-pointer">Remember me</label>
                     </div>
                     <button type="button" onClick={() => setIsResetDialogOpen(true)} className="text-[11px] font-black text-primary hover:underline">Forgot password?</button>
                   </div>
@@ -368,7 +368,7 @@ function LoginContent() {
                       <div className="h-px flex-1 bg-slate-100" />
                     </div>
                     <Button variant="outline" className="w-full h-14 border-2 border-slate-100 text-[#0F172A] gap-3 rounded-full font-bold text-[10px] md:text-[11px] hover:bg-slate-50 shadow-sm" onClick={handleGoogleSignIn} disabled={loading}>
-                       <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={20} height={20} className="h-5 w-5" alt="Google Logo" /> Google Login
+                       <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={20} height={20} className="h-5 w-5" alt="Google Logo" /> Google login
                     </Button>
                   </>
                 )}
@@ -379,7 +379,7 @@ function LoginContent() {
                <p className="text-[11px] md:text-[13px] font-bold text-slate-400">
                 {mode === 'login' ? "Don't have an account?" : "Already registered?"}
                 <button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} className="text-primary font-black ml-2 hover:underline">
-                  {mode === 'login' ? 'Create Account' : 'Login Portal'}
+                  {mode === 'login' ? 'Create Account' : 'Login portal'}
                 </button>
                </p>
             </div>
@@ -391,7 +391,7 @@ function LoginContent() {
         <DialogContent className="bg-white rounded-[2rem] max-w-[440px] p-8 md:p-12 shadow-5xl text-left border-none">
           <DialogHeader className="text-center space-y-4">
             <div className="h-14 w-14 md:h-16 md:w-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-xl">{resetLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <RefreshCw className="h-6 w-6" />}</div>
-            <DialogTitle className="text-xl md:text-2xl font-black tracking-tight text-[#0F172A]">Recover Account</DialogTitle>
+            <DialogTitle className="text-xl md:text-2xl font-black tracking-tight text-[#0F172A]">Recover account</DialogTitle>
             <DialogDescription className="text-slate-400 text-[10px] md:sm font-bold text-center mt-2 leading-relaxed">Enter your email for reset link.</DialogDescription>
           </DialogHeader>
           <div className="py-8 space-y-6">
@@ -402,7 +402,7 @@ function LoginContent() {
           </div>
           <DialogFooter>
             <Button onClick={() => handleResetPassword()} disabled={resetLoading} className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] rounded-full shadow-xl transition-all border-none">
-              {resetLoading ? "Processing..." : "Send Reset Link"}
+              {resetLoading ? "Processing..." : "Send reset link"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -421,4 +421,3 @@ function HeroStat({ icon: Icon, label }: { icon: any, label: string }) {
     </div>
   )
 }
-

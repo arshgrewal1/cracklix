@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -13,8 +14,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Standardized Institutional Merit Preview v4.0 [Latest Rankers Fixed].
- * Standardized tie-breaking to favor latest high-scorers.
+ * @fileOverview Standardized Institutional Merit Preview v4.1.
+ * UPDATED: Purged all uppercase classes.
  */
 
 export default function MeritPreview() {
@@ -57,8 +58,8 @@ export default function MeritPreview() {
                <Trophy className="h-5 w-5 md:h-6 md:w-6 fill-current" />
              </div>
              <div className="text-left">
-                <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Top Rankers</h2>
-                <p className="text-[11px] md:text-sm font-medium text-slate-500">Live merit list of latest peak performing aspirants.</p>
+                <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Top rankers</h2>
+                <p className="text-[11px] md:text-sm font-medium text-slate-500">Live merit list of latest performing aspirants.</p>
              </div>
           </div>
           <Link href="/leaderboard" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline group">
@@ -92,7 +93,7 @@ export default function MeritPreview() {
                           </div>
                           <div className="min-w-0 w-full space-y-1">
                              <p className="font-bold text-sm md:text-lg text-[#0F172A] leading-tight tracking-tight truncate px-2">{res.displayName}</p>
-                             <p className="text-[10px] md:text-xs font-bold text-primary tabular-nums tracking-tighter uppercase">Peak: {(Number(res.highestScore) || 0).toFixed(1)}</p>
+                             <p className="text-[10px] md:text-xs font-bold text-primary tabular-nums tracking-tight">Peak: {(Number(res.highestScore) || 0).toFixed(1)}</p>
                           </div>
                        </div>
                     </Card>

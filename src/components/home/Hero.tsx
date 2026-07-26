@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from "react";
@@ -8,8 +9,8 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v64.0.
- * UPDATED: Added adaptive dark mode support for text and containers.
+ * @fileOverview Premium Mobile-First PWA Hero v64.1.
+ * UPDATED: Purged all uppercase classes.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -151,6 +152,12 @@ export default function Hero() {
                )}
              </AnimatePresence>
           </motion.div>
+
+          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 text-slate-400 font-bold text-[9px] md:text-[11px] tracking-tight pt-10 border-t border-slate-100 max-w-lg mx-auto">
+             <div className="flex items-center gap-2 hover:text-primary transition-colors"><ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> Secure hub</div>
+             <div className="flex items-center gap-2 hover:text-primary transition-colors"><Zap className="h-3.5 w-3.5 text-primary" /> Instant sync</div>
+             <div className="flex items-center gap-2 hover:text-primary transition-colors"><Layers className="h-3.5 w-3.5 text-primary" /> Offline ready</div>
+          </div>
         </div>
       </div>
     </section>

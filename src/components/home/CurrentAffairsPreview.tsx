@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -13,8 +14,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Standardized Current Affairs Preview v25.0.
- * UPDATED: Limited to 3 items as per Home page optimization request.
+ * @fileOverview Standardized Current Affairs Preview v25.1.
+ * UPDATED: Purged all uppercase classes.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();

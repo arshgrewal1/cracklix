@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -31,8 +32,8 @@ import { Button } from "@/components/ui/button";
 import { canAccessAdmin } from "@/lib/permissions";
 
 /**
- * @fileOverview Mobile Sidebar v92.0.
- * UPDATED: Restored Light Mode branding.
+ * @fileOverview Mobile Sidebar v92.1.
+ * UPDATED: Purged all uppercase classes.
  */
 export default function MobileSidebar({
   onClose,
@@ -67,13 +68,13 @@ export default function MobileSidebar({
 
   const mainItems = [
     { label: "Home", href: "/", icon: Home },
-    { label: "My Exam Center", href: "/my-exams", icon: Target },
-    { label: "My Purchases", href: "/my-purchases", icon: CreditCard },
-    { label: "Exam Explorer", href: "/exams", icon: Landmark },
-    { label: "Practice Tests", href: "/mocks", icon: Zap },
-    { label: "Current Affairs", href: "/current-affairs", icon: Newspaper },
-    { label: "Study Material", href: "/notes", icon: BookOpen },
-    { label: "Hall of Rankers", href: "/leaderboard", icon: Trophy },
+    { label: "My exam center", href: "/my-exams", icon: Target },
+    { label: "My purchases", href: "/my-purchases", icon: CreditCard },
+    { label: "Exam explorer", href: "/exams", icon: Landmark },
+    { label: "Practice tests", href: "/mocks", icon: Zap },
+    { label: "Current affairs", href: "/current-affairs", icon: Newspaper },
+    { label: "Study material", href: "/notes", icon: BookOpen },
+    { label: "Hall of rankers", href: "/leaderboard", icon: Trophy },
   ];
 
   if (!mounted) return null;
@@ -125,8 +126,8 @@ export default function MobileSidebar({
                 <h3 className="text-base font-black text-foreground tracking-tight truncate leading-none">
                   {profile?.name || user?.displayName || "Aspirant"}
                 </h3>
-                <p className="mt-1.5 text-[9px] text-slate-400 font-bold tracking-widest uppercase">
-                  Account Center
+                <p className="mt-1.5 text-[9px] text-slate-400 font-bold tracking-tight">
+                  Account center
                 </p>
               </div>
 
@@ -137,7 +138,7 @@ export default function MobileSidebar({
 
         {/* NAVIGATION LIST */}
         <div className="px-3">
-          <p className="mb-2 px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase text-left">
+          <p className="mb-2 px-4 text-[10px] font-black text-slate-400 tracking-tight text-left">
             Explore
           </p>
 
@@ -149,7 +150,7 @@ export default function MobileSidebar({
                 className="flex h-14 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] bg-[#0F172A] text-white shadow-lg mb-2 cursor-pointer border-none"
               >
                 <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
-                <span className="font-bold text-[15px] tracking-tight">Admin Console</span>
+                <span className="font-bold text-[15px] tracking-tight">Admin console</span>
                 <ChevronRight className="ml-auto h-4 w-4 opacity-30" />
               </Link>
             )}
@@ -194,7 +195,7 @@ export default function MobileSidebar({
            <div className="bg-[#0B1528] rounded-[2rem] p-4 md:p-6 space-y-6 border border-white/5 shadow-xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-16 w-16" /></div>
               <div className="relative z-10 text-left space-y-1">
-                <h4 className="text-[10px] font-black text-primary tracking-[0.3em] uppercase">Community</h4>
+                <h4 className="text-[10px] font-black text-primary tracking-tight">Community</h4>
                 <p className="text-base font-bold text-white leading-tight">Help others prepare smarter.</p>
               </div>
               <div className="relative z-10">
@@ -212,7 +213,7 @@ export default function MobileSidebar({
           className="w-full h-14 justify-start text-red-500 text-sm font-black rounded-2xl hover:bg-red-50 transition-all active:scale-95 cursor-pointer border-none"
         >
           <LogOut className="h-5 w-5 mr-4" />
-          Sign Out
+          Sign out
         </Button>
       </div>
     </div>
