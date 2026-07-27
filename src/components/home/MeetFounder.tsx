@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from "react";
@@ -11,8 +10,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Refined Meet Founder Section v8.0.
- * UPDATED: Added Follow on Instagram button next to the story link.
+ * @fileOverview Refined Meet Founder Section v8.5 [SEO Hardened].
+ * UPDATED: Added alt text to images for accessibility and SEO.
  */
 export default function MeetFounder() {
   const db = useFirestore();
@@ -28,7 +27,7 @@ export default function MeetFounder() {
   };
 
   return (
-    <section className="py-12 md:py-24 bg-slate-50/50 border-y border-slate-100 relative overflow-hidden">
+    <section aria-labelledby="founder-heading" className="py-12 md:py-24 bg-slate-50/50 border-y border-slate-100 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="container mx-auto px-4 md:px-8 max-w-6xl relative z-10">
@@ -45,7 +44,7 @@ export default function MeetFounder() {
                  <Star className="h-3 w-3 fill-current" /> Verified Founder
               </div>
               
-              <h2 className="text-3xl md:text-6xl font-[800] text-[#0F172A] tracking-tighter leading-[0.95] antialiased">
+              <h2 id="founder-heading" className="text-3xl md:text-6xl font-[800] text-[#0F172A] tracking-tighter leading-[0.95] antialiased">
                 Meet the <br/> <span className="text-primary italic">founder.</span>
               </h2>
               
@@ -96,7 +95,7 @@ export default function MeetFounder() {
               {founder.showImage ? (
                 <Image
                   src="/founder.png"
-                  alt={founder.name}
+                  alt={`Portrait of ${founder.name}, Founder of Cracklix`}
                   fill
                   className="object-cover grayscale hover:grayscale-0 transition-all duration-1000 group-hover:scale-110"
                   priority

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -37,8 +36,8 @@ import { canAccessAdmin } from "@/lib/permissions";
 import AnnouncementBar from "./AnnouncementBar";
 
 /**
- * @fileOverview Standard In-Flow Navigation Hub v159.1.
- * UPDATED: Purged all uppercase classes.
+ * @fileOverview Standard In-Flow Navigation Hub v160.0 [SEO Hardened].
+ * UPDATED: Added ARIA labels and semantic role optimizations for AdSense/SEO crawlers.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -106,14 +105,14 @@ export default function Navbar() {
     <div className="relative flex flex-col w-full">
       <AnnouncementBar />
       <header className="w-full bg-background border-b border-slate-100 shadow-sm relative z-[1000]">
-        <nav className="w-full h-[84px] md:h-[116px] transition-all">
+        <nav aria-label="Main navigation" className="w-full h-[84px] md:h-[116px] transition-all">
           <div className="relative w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 h-full flex items-center justify-between">
 
             <div className="flex items-center gap-0 z-10 shrink-0 h-full">
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
                   <button
-                    aria-label="Open menu"
+                    aria-label="Open side menu"
                     className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-lg border border-slate-200 bg-card text-foreground shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 cursor-pointer"
                   >
                     <Menu className="w-6 h-6 md:w-7 md:h-7" />
@@ -122,7 +121,7 @@ export default function Navbar() {
                 <SheetContent side="left" className="w-[300px] p-0 border-none bg-background z-[2001] shadow-2xl [&>button]:hidden">
                   <SheetHeader className="sr-only">
                     <SheetTitle>Menu</SheetTitle>
-                    <SheetDescription>Navigation Menu</SheetDescription>
+                    <SheetDescription>Navigation Menu for mobile devices</SheetDescription>
                   </SheetHeader>
                   <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
                 </SheetContent>
@@ -146,7 +145,7 @@ export default function Navbar() {
 
             <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10 shrink-0">
               {profile?.passStatus === 'active' && timeLeft && (
-                 <div className="hidden lg:flex flex-col items-end shrink-0">
+                 <div className="hidden lg:flex flex-col items-end shrink-0" aria-label="Premium membership status">
                     <span className="text-[9px] font-black text-emerald-600 leading-none tracking-tight">Elite access</span>
                     <span className="text-[11px] font-bold text-muted-foreground mt-1.5 leading-none tabular-nums">{timeLeft}</span>
                  </div>
@@ -154,17 +153,21 @@ export default function Navbar() {
 
               <Link
                 href="/search"
-                className="w-10 h-10 md:w-12 rounded-lg flex items-center justify-center bg-muted text-foreground hover:text-primary transition-all active:scale-95 shadow-sm shrink-0"
+                aria-label="Search platform"
+                className="w-10 h-10 md:h-12 rounded-lg flex items-center justify-center bg-muted text-foreground hover:text-primary transition-all active:scale-95 shadow-sm shrink-0"
               >
                 <Search className="w-6 h-6" />
               </Link>
 
               {loading ? (
-                <Skeleton className="w-10 h-10 md:w-12 rounded-lg bg-muted shrink-0" />
+                <Skeleton className="w-10 h-10 md:h-12 rounded-lg bg-muted shrink-0" />
               ) : user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="w-10 h-10 md:h-12 rounded-lg overflow-hidden border border-slate-100 bg-muted flex items-center justify-center active:scale-95 transition-all shadow-sm shrink-0">
+                    <button 
+                      aria-label="User account menu"
+                      className="w-10 h-10 md:h-12 rounded-lg overflow-hidden border border-slate-100 bg-muted flex items-center justify-center active:scale-95 transition-all shadow-sm shrink-0"
+                    >
                       <StudentAvatar
                         profile={profile}
                         className="w-full h-full border-none"
@@ -190,7 +193,7 @@ export default function Navbar() {
                            <Link href="/profile" className="text-[11px] font-medium text-muted-foreground hover:text-primary">My Profile</Link>
                          </div>
                       </div>
-                      <div className="h-px w-full bg-border" />
+                      <div className="h-px w-full bg-border" aria-hidden="true" />
                       <div className="w-full space-y-1 text-left">
                          <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My progress" />
                          <ProfileMenuItem href="/pass" icon={Gem} label="Elite pass hub" />

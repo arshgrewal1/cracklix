@@ -15,10 +15,11 @@ import { collection, query, where } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { HelpArticle } from "@/types"
 import { useRouter } from "next/navigation"
+import Head from "next/head"
 
 /**
- * @fileOverview Official Institutional FAQ Hub v6.3.
- * FIXED: UI Back button hidden in standalone PWA mode.
+ * @fileOverview Official Institutional FAQ Hub v6.5 [SEO Refined].
+ * FIXED: Added FAQPage JSON-LD for Google Rich Results.
  */
 
 export function FAQContent() {
@@ -37,30 +38,55 @@ export function FAQContent() {
     return [...rawFaqs].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
   }, [rawFaqs]);
 
+  // Dynamic FAQ Schema
+  const faqSchema = useMemo(() => {
+    if (!faqs || faqs.length === 0) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.title,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.content
+        }
+      }))
+    };
+  }, [faqs]);
+
   return (
-    <div className="bg-white p-6 md:p-14 rounded-[2.5rem] md:rounded-[4rem] shadow-4xl border border-slate-100 space-y-8">
-       <Accordion type="single" collapsible className="w-full">
-          {loading ? (
-             Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl mb-4" />)
-          ) : faqs && faqs.length > 0 ? (
-             faqs.map((faq, idx) => (
-              <AccordionItem key={faq.id} value={`item-${idx}`} className="border-b border-slate-50 py-5 md:py-8 last:border-0">
-                <AccordionTrigger className="text-left font-headline font-black text-base md:text-2xl text-[#0F172A] hover:text-primary transition-all hover:no-underline px-4 uppercase tracking-tight antialiased">
-                  {faq.title}
-                </AccordionTrigger>
-                <AccordionContent className="text-[13px] md:text-lg text-slate-500 font-medium leading-relaxed px-4 pt-6 pb-4">
-                  {faq.content}
-                </AccordionContent>
-              </AccordionItem>
-            ))
-          ) : (
-             <div className="py-20 text-center opacity-30 italic font-black uppercase text-xl flex flex-col items-center gap-6">
-                <Zap className="h-12 w-12" />
-                Registry Empty
-             </div>
-          )}
-       </Accordion>
-    </div>
+    <>
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
+      <div className="bg-white p-6 md:p-14 rounded-[2.5rem] md:rounded-[4rem] shadow-4xl border border-slate-100 space-y-8">
+         <Accordion type="single" collapsible className="w-full">
+            {loading ? (
+               Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl mb-4" />)
+            ) : faqs && faqs.length > 0 ? (
+               faqs.map((faq, idx) => (
+                <AccordionItem key={faq.id} value={`item-${idx}`} className="border-b border-slate-50 py-5 md:py-8 last:border-0">
+                  <AccordionTrigger className="text-left font-headline font-black text-base md:text-2xl text-[#0F172A] hover:text-primary transition-all hover:no-underline px-4 uppercase tracking-tight antialiased">
+                    {faq.title}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-[13px] md:text-lg text-slate-500 font-medium leading-relaxed px-4 pt-6 pb-4">
+                    {faq.content}
+                  </AccordionContent>
+                </AccordionItem>
+              ))
+            ) : (
+               <div className="py-20 text-center opacity-30 italic font-black uppercase text-xl flex flex-col items-center gap-6">
+                  <Zap className="h-12 w-12" />
+                  Registry Empty
+               </div>
+            )}
+         </Accordion>
+      </div>
+    </>
   )
 }
 
@@ -86,7 +112,11 @@ export default function FAQPage() {
         <div className="text-left space-y-6 md:space-y-10 max-w-4xl">
            <div className="flex items-center gap-4">
               {!isStandalone && (
-                 <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0 cursor-pointer">
+                 <button 
+                  onClick={() => router.back()} 
+                  aria-label="Go back"
+                  className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0 cursor-pointer"
+                 >
                     <ArrowLeft className="h-5 w-5" />
                  </button>
               )}
@@ -127,7 +157,7 @@ function QuickHelp({ icon: Icon, label, desc }: { icon: LucideIcon, label: strin
           <Icon className="h-6 w-6 md:h-8 md:w-8" />
        </div>
        <div className="space-y-1">
-          <p className="font-headline font-black text-sm md:text-xl uppercase text-[#0F172A] tracking-tight">{label}</p>
+          <h3 className="font-headline font-black text-sm md:text-xl uppercase text-[#0F172A] tracking-tight">{label}</h3>
           <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-snug">{desc}</p>
        </div>
     </div>

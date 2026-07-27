@@ -23,43 +23,69 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v14.0.
- * UPDATED: Domain synchronized to cracklix.in.
+ * @fileOverview Global Layout Registry v15.0 [SEO Hardened].
+ * UPDATED: Added comprehensive Metadata and JSON-LD Structured Data.
  */
 
 export const metadata: Metadata = {
-  title: "Cracklix | Punjab's Smart Mock Test Platform",
-  description: "Punjab's most trusted government exam preparation platform. Practice Unlimited Mock Tests for PSSSB, PPSC, Punjab Police.",
-  keywords: "Punjab Government Exams, PSSSB, PPSC, Punjab Police, Mock Test, Previous Year Papers, Current Affairs, Cracklix",
+  title: {
+    default: "Cracklix | Punjab's Smart Mock Test Platform",
+    template: "%s | Cracklix"
+  },
+  description: "Punjab's most trusted government exam preparation platform. Practice Unlimited Mock Tests for PSSSB, PPSC, Punjab Police and Central Government Exams.",
+  keywords: ["Punjab Government Exams", "PSSSB Patwari Mock Test", "PPSC PCS Preparation", "Punjab Police Constable Mock Test", "Punjab Previous Year Papers", "Current Affairs Punjab", "Cracklix App"],
+  authors: [{ name: "Arsh Grewal" }],
+  creator: "Arsh Grewal",
+  publisher: "Cracklix",
   metadataBase: new URL("https://cracklix.in"),
   alternates: {
     canonical: "/",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     title: "Cracklix | Punjab's Smart Mock Test Platform",
-    description: "Prepare for Punjab Government Exams with Cracklix.",
+    description: "Prepare for Punjab Government Exams with verified patterns, detailed solutions, and state-wide merit rankings.",
     url: "https://cracklix.in",
     siteName: "Cracklix",
     locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Cracklix Punjab Exam Hub",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Cracklix | Punjab's Smart Mock Test Platform",
-    description: "Prepare for Punjab Government Exams with Cracklix.",
+    description: "Punjab's smartest preparation portal for PSSSB, PPSC & Police Exams.",
+    images: ["/og-image.png"],
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Cracklix",
   },
-  formatDetection: {
-    telephone: false,
+  verification: {
+    google: "google-site-verification-id", // User should replace with actual ID
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
+  themeColor: "#0B1528",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -74,12 +100,54 @@ export default function RootLayout({
 }>) {
   const registryVersion = INSTITUTIONAL_PAYLOAD.version;
 
+  // JSON-LD Structured Data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Cracklix",
+    "url": "https://cracklix.in",
+    "description": "Punjab's smartest government exam preparation platform.",
+    "applicationCategory": "EducationApplication",
+    "operatingSystem": "Android, iOS, Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Arsh Grewal"
+    }
+  };
+
+  const orgJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Cracklix",
+    "url": "https://cracklix.in",
+    "logo": "https://cracklix.in/logo/cracklix-icon.png",
+    "sameAs": [
+      "https://www.instagram.com/cracklix.in/",
+      "https://t.me/cracklixapp"
+    ]
+  };
+
   return (
     <html 
       lang="en" 
       suppressHydrationWarning 
       className="scroll-smooth"
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
+      </head>
       <body
         className={`
           ${poppins.variable}

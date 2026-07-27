@@ -13,7 +13,12 @@ import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { canAccessAdmin, checkPermission } from "@/lib/permissions";
 import { Badge } from "@/components/ui/badge";
+import Head from "next/head";
 
+/**
+ * @fileOverview Admin Control Panel Layout v3.1 [SEO Protected].
+ * FIXED: Added noindex meta tag to prevent administrative nodes from being crawled.
+ */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
   const auth = useAuth();
@@ -97,6 +102,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <TooltipProvider delayDuration={0}>
+      {/* Security: Prevent indexing of admin pages */}
+      <meta name="robots" content="noindex, nofollow" />
+      
       <div className="min-h-screen w-full bg-white font-body flex overflow-hidden">
         
         <AdminSidebar 
@@ -116,6 +124,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center shrink-0 h-full">
               <button 
                 onClick={toggleSidebar}
+                aria-label="Toggle admin sidebar"
                 className="bg-white border border-slate-200 h-10 w-10 md:h-12 md:w-12 rounded-lg flex items-center justify-center shrink-0 active:scale-95 shadow-sm hover:border-primary/30 cursor-pointer"
               >
                 <Menu className="w-6 h-6 md:w-7 md:h-7" />
@@ -146,7 +155,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <main className="flex-1 p-4 md:p-10 lg:p-12 overflow-x-hidden">
             {!hasSpecificPermission ? (
-               <div className="h-full flex flex-col items-center justify-center space-y-6 text-center">
+               <div className="h-full flex flex-col items-center justify-center space-y-6 text-center px-4">
                   <div className="h-20 w-20 bg-amber-50 rounded-[2.5rem] flex items-center justify-center text-amber-500 shadow-inner">
                      <Lock className="h-10 w-10" />
                   </div>
