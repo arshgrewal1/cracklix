@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -20,8 +19,8 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v8.3.
- * UPDATED: Simplified vocabulary and Title Case normalization.
+ * @fileOverview Premium Analysis Screen v8.4.
+ * FIXED: Percentile displays 0% correctly.
  */
 
 interface ReportScreenProps {
@@ -103,7 +102,9 @@ export default function ReportScreen(props: ReportScreenProps) {
 
          <Card className="col-span-1 h-32 md:h-44 rounded-[22px] md:rounded-[24px] bg-blue-50 border-blue-100 shadow-sm flex flex-col justify-center px-4 md:px-6">
             <p className="text-[9px] md:text-xs font-bold text-slate-500 mb-1">Percentile</p>
-            <span className="text-xl md:text-4xl font-black text-blue-600 tabular-nums">{percentile > 0 ? `${percentile}%` : "--"}</span>
+            <span className="text-xl md:text-4xl font-black text-blue-600 tabular-nums">
+               {percentile !== undefined && percentile !== null ? `${percentile}%` : "--"}
+            </span>
             <p className="text-[8px] md:text-[10px] font-bold text-blue-400 tracking-tight mt-1">Verified index</p>
          </Card>
 

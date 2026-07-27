@@ -48,8 +48,9 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v110.1 [Title Visibility Fixed].
- * FIXED: Removed truncate from title to ensure full series names are visible.
+ * @fileOverview Universal Result Hub Engine v112.0 [Live Analysis Overhaul].
+ * FIXED: Removed manual refresh button.
+ * FIXED: Implemented real-time onSnapshot for rankings and percentile.
  */
 
 export default function ResultClient() {
@@ -87,6 +88,7 @@ export default function ResultClient() {
     return `${s}s`;
   };
 
+  // 1. Session & Question Loader
   useEffect(() => {
     if (userLoading || !db) return;
 
@@ -143,24 +145,31 @@ export default function ResultClient() {
     return () => unsubscribe();
   }, [db, user, userLoading, mockIdFromUrl, attemptIdFromUrl]);
 
+  // 2. LIVE METRICS & QUESTIONS
   useEffect(() => {
      if (!db || !sessionData) return;
      const mId = mockIdFromUrl || sessionData.mockId;
      if (!mId) return;
      
-     const loadMetrics = async () => {
-        if (sessionData.isGuestNode) return;
-        try {
-           const lbRef = collection(db, "leaderboards", mId, "entries");
-           const lbSnap = await getDocs(query(lbRef, orderBy("highestScore", "desc")));
-           const entries = lbSnap.docs.map(d => ({...d.data(), userId: d.id}));
+     // LIVE METRICS: Leaderboard onSnapshot for real-time ranking/percentile
+     let unsubscribeMetrics: () => void = () => {};
+     
+     if (!sessionData.isGuestNode) {
+        const lbRef = collection(db, "leaderboards", mId, "entries");
+        const q = query(lbRef, orderBy("highestScore", "desc"));
+        
+        unsubscribeMetrics = onSnapshot(q, (lbSnap) => {
+           const entries = lbSnap.docs.map(d => ({ ...d.data(), userId: d.id }));
            const myRank = entries.findIndex(e => e.userId === sessionData.userId) + 1;
+           
            setLiveRank(myRank || "---");
            setTotalCandidates(lbSnap.size);
            setTopScore(entries[0]?.highestScore || 0);
-           setAvgScore(entries.length ? entries.reduce((a,e: any) => a+(e.highestScore||0),0)/entries.length : 0);
-        } catch (e) {}
-     };
+           
+           const total = entries.reduce((acc, e: any) => acc + (Number(e.highestScore) || 0), 0);
+           setAvgScore(entries.length ? total / entries.length : 0);
+        });
+     }
 
      const loadQuestions = async () => {
         try {
@@ -195,7 +204,8 @@ export default function ResultClient() {
         } catch (e) {}
      };
 
-     loadMetrics(); loadQuestions();
+     loadQuestions();
+     return () => unsubscribeMetrics();
   }, [db, mockIdFromUrl, sessionData]);
 
   const reviewNodes = useMemo(() => {
@@ -273,13 +283,10 @@ export default function ResultClient() {
                     </div>
                  </div>
                  <div className="flex items-center gap-2 w-full lg:w-auto">
-                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-10 md:h-11 px-3 md:px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-[10px] md:text-[11px] border-none shadow-lg">
+                    <Button onClick={handleShare} disabled={isSharing} className="flex-1 lg:flex-none h-10 md:h-11 px-6 md:px-10 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full gap-2 text-[10px] md:text-[11px] border-none shadow-lg">
                        {isSharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Share2 className="h-3.5 w-3.5" />} Share
                     </Button>
-                    <Button onClick={() => window.location.reload()} className="flex-1 lg:flex-none h-10 md:h-11 px-3 md:px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full gap-2 text-[10px] md:text-[11px] border-none shadow-lg">
-                       <RefreshCw className="h-3.5 w-3.5" /> Refresh
-                    </Button>
-                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-10 md:h-11 px-3 md:px-4 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[10px] md:text-[11px] shadow-sm">
+                    <Button asChild variant="outline" className="flex-1 lg:flex-none h-10 md:h-11 px-6 md:px-10 border-2 border-slate-200 text-[#0F172A] font-bold rounded-full text-[10px] md:text-[11px] shadow-sm">
                        <Link href={`/mocks/instructions?id=${mockIdFromUrl || sessionData.mockId}&retake=true`}>Retake</Link>
                     </Button>
                  </div>
