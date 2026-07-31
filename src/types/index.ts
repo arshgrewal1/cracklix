@@ -265,40 +265,83 @@ export interface HelpArticle {
   createdAt: any;
 }
 
+export interface SelectionStage {
+  id: string;
+  label: string;
+  description?: string;
+}
+
 export interface Vacancy {
   id: string;
   title: string;
   department: string;
   board: string;
+  recruitmentName?: string;
   category: string;
+  subcategory?: string;
   type: string;
   adNumber: string;
   postName: string;
   totalPosts: string;
+  categoryWisePosts?: { category: string; count: string }[];
   salary: string;
+  payMatrix?: string;
+  payLevel?: string;
+  gradePay?: string;
   ageLimit: string;
+  ageRelaxation?: string;
   education: string;
+  qualificationDetail?: string;
   experience: string;
   selectionProcess: string;
+  selectionStages?: SelectionStage[];
+  physicalStandards?: string;
+  medicalStandards?: string;
   applicationFee: string;
+  feeDetails?: { category: string; amount: string }[];
+  paymentMode?: string;
   officialWebsite: string;
   applyLink: string;
   state: "Punjab";
   district: string;
+  locationDetail?: string;
   startDate: string;
   lastDate: string;
+  feeLastDate?: string;
+  correctionWindowDate?: string;
   examDate?: string;
   admitCardDate?: string;
+  answerKeyDate?: string;
   resultDate?: string;
+  counsellingDate?: string;
+  joiningDate?: string;
   status: ContentStatus;
   isFeatured?: boolean;
   isBreaking?: boolean;
+  isUrgent?: boolean;
+  isTrending?: boolean;
   showOnHomepage?: boolean;
+  sendNotification?: boolean;
+  priority?: number;
   logoUrl?: string;
   bannerUrl?: string;
   notificationPdfUrl?: string;
+  syllabusPdfUrl?: string;
+  previousPapersUrl?: string;
+  officialNoticeUrl?: string;
+  helpdeskUrl?: string;
   seoTitle?: string;
   seoDescription?: string;
+  keywords?: string[];
+  canonicalUrl?: string;
+  ogImageUrl?: string;
+  twitterCard?: string;
+  slug: string;
+  views?: number;
+  clicks?: number;
+  saves?: number;
+  shares?: number;
   publishedAt?: any;
   updatedAt?: any;
+  createdAt?: any;
 }
