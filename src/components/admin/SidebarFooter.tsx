@@ -3,8 +3,9 @@
 
 import React from 'react';
 import { cn } from "@/lib/utils";
-import { LogOut, ShieldCheck, Gem } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
 import StudentAvatar from '@/components/brand/StudentAvatar';
+import { isSuperAdmin } from '@/lib/permissions';
 
 interface SidebarFooterProps {
   isOpen: boolean;
@@ -13,14 +14,18 @@ interface SidebarFooterProps {
 }
 
 /**
- * Admin Sidebar Footer v2.2 (PWA Refined)
- * UPDATED: Enhanced click area for profile and logout controls.
+ * Admin Sidebar Footer v2.3 [Authority Hub Updated].
+ * FIXED: Correctly identifies Super Admin status using the founder email whitelist.
  */
 export default function SidebarFooter({
   isOpen,
   profile,
   handleLogout,
 }: SidebarFooterProps) {
+  
+  // High-fidelity authority detection
+  const isMasterAuthority = isSuperAdmin(profile, profile?.email);
+
   return (
     <div className="mt-auto border-t border-slate-50 bg-white p-3">
       {/* PROFILE HUB */}
@@ -42,15 +47,18 @@ export default function SidebarFooter({
             {profile?.name || "Administrator"}
           </p>
           <div className="flex items-center gap-1.5 mt-0.5">
-             <ShieldCheck className="h-2.5 w-2.5 text-primary" />
-             <p className="truncate text-[9px] font-black tracking-widest text-slate-400">
-               {profile?.role === 'SUPER_ADMIN' ? 'SUPER ADMIN' : profile?.role === 'ADMIN' ? 'ADMIN' : 'STAFF'}
+             <ShieldCheck className={cn("h-2.5 w-2.5", isMasterAuthority ? "text-rose-500" : "text-primary")} />
+             <p className={cn(
+               "truncate text-[9px] font-black tracking-widest uppercase",
+               isMasterAuthority ? "text-rose-600" : "text-slate-400"
+             )}>
+               {isMasterAuthority ? 'Super Admin' : profile?.role === 'ADMIN' ? 'Admin' : 'Staff'}
              </p>
           </div>
         </div>
       </div>
 
-      {/* LOGOUT PILL - TITLE CASE SYNC */}
+      {/* LOGOUT CONTROL */}
       <button
         onClick={handleLogout}
         className={cn(
