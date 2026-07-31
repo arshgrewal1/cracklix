@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -14,7 +15,10 @@ import {
   AlertCircle,
   ChevronRight,
   Gem,
-  Plus
+  Plus,
+  UploadCloud,
+  FileText,
+  ClipboardList
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
@@ -25,8 +29,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v37.0 [Production Hardened].
- * FIXED: Integrated parallel execution and cached count verification to prevent registry timeouts.
+ * Admin Dashboard Center v38.0 [Production Hardened].
+ * FIXED: Restored all administrative shortcut nodes.
  */
 
 export default function AdminDashboard() {
@@ -99,13 +103,9 @@ export default function AdminDashboard() {
            lastFullSyncAt: serverTimestamp()
         }, { merge: true });
 
-        toast({ title: "Stats refreshed", description: "Master registry updated with latest audit results." });
+        toast({ title: "Stats refreshed" });
      } catch (err: any) {
-        toast({ 
-          variant: "destructive", 
-          title: "Update failed", 
-          description: err.message || "Institutional registry connection timed out." 
-        });
+        toast({ variant: "destructive", title: "Update failed" });
      } finally {
         setIsStatsSyncing(false);
      }
@@ -116,18 +116,14 @@ export default function AdminDashboard() {
     setIsSyncing(true)
     try {
       await seedInitialData(db)
-      toast({ title: "Registry Re-seeded", description: "Default preparation nodes added." })
+      toast({ title: "Registry re-seeded" })
       await handleSyncLiveStats()
     } finally {
       setIsSyncing(false)
     }
   }
 
-  if (!mounted) return (
-     <div className="h-screen w-full flex items-center justify-center bg-white">
-        <Loader2 className="h-8 w-8 text-primary animate-spin" />
-     </div>
-  );
+  if (!mounted) return null;
 
   const hasPending = (pendingNodes?.length || 0) > 0;
 
@@ -192,14 +188,15 @@ export default function AdminDashboard() {
                <div className="relative z-10 space-y-6 md:space-y-8 text-left">
                   <div className="space-y-1">
                      <h3 className="text-xl md:text-2xl font-black tracking-tight">Quick tools</h3>
-                     <p className="text-[8px] md:text-[9px] font-black text-slate-500 tracking-widest uppercase">Shortcuts</p>
+                     <p className="text-[8px] md:text-[9px] font-black text-slate-500 tracking-widest uppercase">Management Hub</p>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:gap-3">
-                     <AdminQuickLink label="Add question" href="/admin/mcq-bank/add" highlight />
-                     <AdminQuickLink label="Add vacancy" href="/admin/vacancies/add" />
-                     <AdminQuickLink label="Build test" href="/admin/mocks/builder" />
-                     <QuickActionCard label="Verify payments" href="/admin/payments/verify" highlight={hasPending} />
-                     <AdminQuickLink label="Admin settings" href="/admin/settings" />
+                     <AdminQuickLink label="Bulk ingestion" href="/admin/bulk-import" icon={UploadCloud} highlight />
+                     <AdminQuickLink label="Build test" href="/admin/mocks/builder" icon={PenSquare} highlight />
+                     <AdminQuickLink label="Add vacancy" href="/admin/vacancies/add" icon={Megaphone} />
+                     <AdminQuickLink label="Verify payments" href="/admin/payments/verify" icon={ShieldCheck} highlight={hasPending} />
+                     <AdminQuickLink label="Daily challenge" href="/admin/daily-quiz" icon={Flame} />
+                     <AdminQuickLink label="Study notes" href="/admin/notes" icon={FileText} />
                   </div>
                </div>
             </Card>
@@ -214,11 +211,11 @@ function AdminMetricCard({ label, value, sub, icon, href, highlight }: any) {
     <Link href={href} className="block group">
       <Card className={cn(
         "border-none shadow-xl bg-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] transition-all duration-500 text-left h-full",
-        "group-hover:translate-y-[-4px] border border-slate-50",
+        "group-hover:translate-y-[-4px] border border-slate-100",
         highlight && "ring-2 ring-primary/10 bg-primary/5"
       )}>
          <div className="flex items-center gap-4 md:gap-6">
-            <div className="h-12 w-12 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-50 shadow-inner shrink-0 group-hover:scale-110 transition-transform">
+            <div className={cn("h-12 w-12 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-50 shadow-inner shrink-0 group-hover:scale-110 transition-transform")}>
                {icon}
             </div>
             <div className="min-w-0 flex-1">
@@ -232,30 +229,19 @@ function AdminMetricCard({ label, value, sub, icon, href, highlight }: any) {
   )
 }
 
-function AdminQuickLink({ label, href, highlight }: any) {
+function AdminQuickLink({ label, href, icon: Icon, highlight }: any) {
    return (
       <Link href={href} className="group">
          <div className={cn(
            "flex items-center justify-between p-3 md:p-4 bg-white/5 border border-white/5 rounded-xl md:rounded-2xl hover:bg-white/10 transition-all active:scale-[0.98]",
            highlight && "border-primary/30 bg-primary/5"
          )}>
-            <span className={cn("text-[11px] font-bold ml-1 md:ml-2", highlight ? "text-primary" : "text-white")}>{label}</span>
+            <div className="flex items-center gap-3">
+               <Icon className={cn("h-4 w-4", highlight ? "text-primary" : "text-slate-400")} />
+               <span className={cn("text-[11px] font-bold", highlight ? "text-primary" : "text-white")}>{label}</span>
+            </div>
             <ChevronRight className={cn("h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1", highlight ? "text-primary" : "text-white/40")} />
          </div>
       </Link>
    )
-}
-
-function QuickActionCard({ label, href, highlight }: any) {
-    return (
-      <Link href={href} className="group">
-         <div className={cn(
-           "flex items-center justify-between p-3 md:p-4 bg-white/5 border border-white/5 rounded-xl md:rounded-2xl hover:bg-white/10 transition-all active:scale-[0.98]",
-           highlight && "border-emerald-500/30 bg-emerald-50/5"
-         )}>
-            <span className={cn("text-[11px] font-bold ml-1 md:ml-2", highlight ? "text-emerald-400" : "text-white")}>{label}</span>
-            <ChevronRight className={cn("h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1", highlight ? "text-emerald-400" : "text-white/40")} />
-         </div>
-      </Link>
-    )
 }

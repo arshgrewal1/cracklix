@@ -50,7 +50,8 @@ import {
   ExternalLink,
   Home,
   Network,
-  Sparkles
+  Sparkles,
+  SearchCode
 } from "lucide-react";
 
 import {
@@ -70,12 +71,22 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "Main Hub",
+    label: "Asset Bank",
     items: [
-      { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { label: "Question Bank", href: "/admin/mcq-bank", icon: Database },
+      { label: "Bulk Ingestion", href: "/admin/bulk-import", icon: UploadCloud, perm: 'uploadQuestions' },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
-      { label: "Review Center", href: "/admin/qa", icon: Activity, perm: 'reviewContent' },
+      { label: "Legacy Archive", href: "/admin/questions", icon: Archive },
+      { label: "Used Items", href: "/admin/used-questions", icon: History },
+    ],
+  },
+  {
+    label: "Test Center",
+    items: [
+      { label: "Build Test", href: "/admin/mocks/builder", icon: PenSquare, perm: 'createMock' },
+      { label: "Manage Tests", href: "/admin/mocks", icon: ClipboardList },
+      { label: "Daily Quiz", href: "/admin/daily-quiz", icon: Flame, perm: 'createMock' },
+      { label: "Review Hub", href: "/admin/qa", icon: Activity, perm: 'reviewContent' },
     ],
   },
   {
@@ -88,16 +99,6 @@ const NAV_GROUPS = [
       { label: "Series", href: "/admin/learning/series", icon: Layers, perm: 'manageSeries' },
       { label: "Chapters", href: "/admin/chapters", icon: NotebookTabs, perm: 'manageSeries' },
       { label: "Topics", href: "/admin/topics", icon: Library, perm: 'manageSeries' },
-      { label: "Subtopics", href: "/admin/subtopics", icon: Network, perm: 'manageSeries' },
-    ],
-  },
-  {
-    label: "Test Center",
-    items: [
-      { label: "Build Test", href: "/admin/mocks/builder", icon: PenSquare, perm: 'createMock' },
-      { label: "Manage Tests", href: "/admin/mocks", icon: ClipboardList },
-      { label: "Daily Quiz", href: "/admin/daily-quiz", icon: Flame, perm: 'createMock' },
-      { label: "Used Items", href: "/admin/used-questions", icon: History },
     ],
   },
   {
@@ -105,7 +106,8 @@ const NAV_GROUPS = [
     items: [
       { label: "PYQ Archive", href: "/admin/pyqs", icon: FileStack, perm: 'uploadPYQs' },
       { label: "Study Notes", href: "/admin/notes", icon: FileText, perm: 'publishContent' },
-      { label: "CA Hub", href: "/admin/current-affairs", icon: Newspaper, perm: 'publishContent' },
+      { label: "CA Manager", href: "/admin/current-affairs", icon: Newspaper, perm: 'publishContent' },
+      { label: "CA Bulk Upload", href: "/admin/current-affairs/bulk", icon: UploadCloud, perm: 'uploadQuestions' },
       { label: "Free Hub", href: "/admin/free-content", icon: Sparkles, perm: 'publishContent' },
       { label: "Exam Calendar", href: "/admin/calendar", icon: Calendar, perm: 'publishContent' },
     ],
