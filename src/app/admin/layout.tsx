@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo } from "react";
@@ -11,13 +12,13 @@ import Logo from "@/components/brand/Logo";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { canAccessAdmin, checkPermission } from "@/lib/permissions";
+import { canAccessAdmin, checkPermission, isSuperAdmin } from "@/lib/permissions";
 import { Badge } from "@/components/ui/badge";
-import Head from "next/head";
 
 /**
- * @fileOverview Admin Control Panel Layout v3.1 [SEO Protected].
- * FIXED: Added noindex meta tag to prevent administrative nodes from being crawled.
+ * @fileOverview Institutional Admin Layout v4.0.
+ * STRICT: Enforces granular permission gating for all staff members.
+ * RECOVERY: Founder email whitelist provides 100% fail-safe access.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -40,21 +41,42 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, []);
 
+  const isMasterAuthority = isSuperAdmin(profile, user?.email);
   const isAccessBlocked = mounted && !loading && !profileLoading && !canAccessAdmin(profile, user?.email);
   
   const hasSpecificPermission = useMemo(() => {
-     if (user?.email && canAccessAdmin(profile, user.email)) return true;
+     if (isMasterAuthority) return true;
      if (!profile) return false;
-     if (profile.role === 'SUPER_ADMIN') return true;
 
-     if (pathname.includes('/payments') || pathname.includes('/revenue')) return checkPermission(profile, 'managePayments', user?.email) || checkPermission(profile, 'viewRevenue', user?.email);
-     if (pathname.includes('/roles') || pathname.includes('/users')) return checkPermission(profile, 'manageRoles', user?.email) || checkPermission(profile, 'manageUsers', user?.email);
-     if (pathname.includes('/mcq-bank/add') || pathname.includes('/questions/add')) return checkPermission(profile, 'uploadQuestions', user?.email);
-     if (pathname.includes('/mocks/builder')) return checkPermission(profile, 'createMock', user?.email);
-     if (pathname.includes('/settings')) return checkPermission(profile, 'websiteSettings', user?.email);
+     // 1. Role Manager is STRICTLY for Super Admin
+     if (pathname.includes('/admin/roles')) return false;
+
+     // 2. Financial Gating
+     if (pathname.includes('/payments') || pathname.includes('/revenue')) {
+        return checkPermission(profile, 'managePayments', user?.email) || checkPermission(profile, 'viewRevenue', user?.email);
+     }
+     
+     // 3. Content Gating
+     if (pathname.includes('/mcq-bank') || pathname.includes('/questions/add')) {
+        return checkPermission(profile, 'uploadQuestions', user?.email);
+     }
+     if (pathname.includes('/mocks/builder')) {
+        return checkPermission(profile, 'createMock', user?.email);
+     }
+     if (pathname.includes('/current-affairs')) {
+        return checkPermission(profile, 'publishContent', user?.email);
+     }
+     if (pathname.includes('/exam-registry') || pathname.includes('/categories')) {
+        return checkPermission(profile, 'manageCategories', user?.email);
+     }
+
+     // 4. System Settings
+     if (pathname.includes('/settings') || pathname.includes('/health')) {
+        return checkPermission(profile, 'websiteSettings', user?.email);
+     }
      
      return true; 
-  }, [profile, user, pathname]);
+  }, [profile, user, pathname, isMasterAuthority]);
 
   useEffect(() => {
     if (isAccessBlocked) {
@@ -64,7 +86,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         router.replace('/dashboard');
       }
     } else if (mounted && !profileLoading && !hasSpecificPermission) {
-       router.replace('/admin'); 
+       // If on dashboard, allow, otherwise redirect to dashboard
+       if (pathname !== '/admin') router.replace('/admin'); 
     }
   }, [isAccessBlocked, hasSpecificPermission, user, profileLoading, router, pathname, mounted]);
 
@@ -91,9 +114,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <ShieldCheck className="h-12 w-12 text-blue-600 animate-pulse" />
           <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 text-primary animate-spin" />
        </div>
-       <div className="text-center space-y-1">
-          <p className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Admin Hub</p>
-          <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Auditing Identity...</p>
+       <div className="text-center space-y-1 px-6">
+          <p className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Institutional Hub</p>
+          <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Auditing Security Record...</p>
        </div>
     </div>
   );
@@ -102,7 +125,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <TooltipProvider delayDuration={0}>
-      {/* Security: Prevent indexing of admin pages */}
       <meta name="robots" content="noindex, nofollow" />
       
       <div className="min-h-screen w-full bg-white font-body flex overflow-hidden">
@@ -111,7 +133,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           isOpen={isSidebarOpen} 
           onToggle={toggleSidebar} 
           onCloseMobile={() => setIsSidebarOpen(false)}
-          profile={profile || { name: user.displayName, email: user.email, role: 'SUPER_ADMIN' }}
+          profile={profile || { name: user.displayName, email: user.email, role: 'STUDENT' }}
           handleLogout={handleLogout}
           pathname={pathname}
         />
@@ -144,10 +166,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                      <AlertCircle className="h-4 w-4" /> Account Suspended
                   </Badge>
                )}
-               <Button asChild variant="outline" className="flex h-10 md:h-11 rounded-full text-[9px] md:text-[11px] font-bold tracking-tight px-4 md:px-6 gap-2 border-slate-200">
+               <Button asChild variant="outline" className="flex h-10 md:h-11 rounded-full text-[9px] md:text-[11px] font-bold tracking-tight px-4 md:px-6 gap-2 border-slate-200 shadow-sm">
                   <Link href="/"><Home className="h-3.5 w-3.5" /> Student Portal</Link>
                </Button>
-               <div className="h-9 w-9 md:h-12 md:w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black shadow-lg shrink-0">
+               <div className="h-9 w-9 md:h-12 md:w-12 rounded-lg bg-[#0F172A] flex items-center justify-center text-white font-black shadow-lg shrink-0">
                   {(profile?.name || user.displayName || 'A')[0]}
                </div>
             </div>
@@ -155,13 +177,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <main className="flex-1 p-4 md:p-10 lg:p-12 overflow-x-hidden">
             {!hasSpecificPermission ? (
-               <div className="h-full flex flex-col items-center justify-center space-y-6 text-center px-4">
-                  <div className="h-20 w-20 bg-amber-50 rounded-[2.5rem] flex items-center justify-center text-amber-500 shadow-inner">
-                     <Lock className="h-10 w-10" />
+               <div className="h-full flex flex-col items-center justify-center space-y-8 text-center px-6 animate-in zoom-in-95 duration-500">
+                  <div className="h-24 w-24 bg-amber-50 rounded-[2.5rem] flex items-center justify-center text-amber-500 shadow-inner border border-amber-100">
+                     <Lock className="h-12 w-12" />
                   </div>
-                  <h2 className="text-2xl font-black uppercase tracking-tight">Permission Required</h2>
-                  <p className="text-slate-500 max-w-xs">You do not have authorization to access this specific hub.</p>
-                  <Button asChild className="rounded-full px-10"><Link href="/admin">Return to Dashboard</Link></Button>
+                  <div className="space-y-2">
+                    <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#0F172A]">Authorization Required</h2>
+                    <p className="text-slate-500 max-w-sm mx-auto font-medium">Your current staff permission node does not grant access to this hub. Please contact the founder.</p>
+                  </div>
+                  <Button asChild className="rounded-full px-12 h-14 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-[10px] tracking-widest border-none shadow-xl">
+                    <Link href="/admin">Return to Hub</Link>
+                  </Button>
                </div>
             ) : children}
           </main>
