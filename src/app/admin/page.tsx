@@ -18,7 +18,10 @@ import {
   Plus,
   UploadCloud,
   FileText,
-  ClipboardList
+  ClipboardList,
+  PenSquare,
+  Megaphone,
+  Flame
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
@@ -29,8 +32,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v38.0 [Production Hardened].
- * FIXED: Restored all administrative shortcut nodes.
+ * Admin Dashboard Center v38.1 [Import Fixed].
+ * FIXED: Added missing icon imports to resolve runtime ReferenceError.
  */
 
 export default function AdminDashboard() {
