@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -24,9 +25,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v521.0.
+ * @fileOverview Premium Institutional Hub v522.0.
  * FIXED: Redesigned Today's Challenge from scratch with premium glassmorphism.
- * FIXED: Restored missing Button and Badge imports.
+ * UPDATED: Standardized terminology to "Questions" and "Database".
  */
 export default function HomePage() {
   const { user } = useUser();

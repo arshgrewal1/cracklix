@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -42,9 +43,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v41.0 [Hardened].
- * FIXED: Bypasses Firebase Index requirements via client-side sorting.
- * FIXED: Restored ShieldAlert and CardTitle imports.
+ * @fileOverview Institutional Profile Hub v42.0 [Compact Hardened].
+ * FIXED: Live stat calculation from results and profile object.
+ * UPDATED: Title Case and standardized terminology.
  */
 
 export default function ProfilePage() {
@@ -87,7 +88,7 @@ export default function ProfilePage() {
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
 
   const { results, aggregateStats } = useMemo(() => {
-    if (!rawResults) return { results: [], aggregateStats: { totalTests: 0, highestScore: 0, avgAccuracy: 0, bestRank: "---" } };
+    if (!rawResults) return { results: [], aggregateStats: { totalTests: 0, highestScore: 0, avgAccuracy: 0, solvedQuestions: 0 } };
     
     const sorted = [...rawResults].sort((a, b) => {
       const timeA = new Date(a.timestamp || 0).getTime()
@@ -95,6 +96,7 @@ export default function ProfilePage() {
       return timeB - timeA
     })
 
+    const totalSolved = sorted.reduce((acc, r) => acc + (r.correctCount || 0), 0);
     const accuracyPool = sorted.map(r => r.accuracy !== undefined ? r.accuracy : r.attemptAccuracy || 0);
     const avgAccuracy = accuracyPool.length ? Math.round(accuracyPool.reduce((a, b) => a + b, 0) / accuracyPool.length) : 0;
     const highestScore = sorted.length ? Math.max(...sorted.map(r => r.score || 0)) : 0;
@@ -105,10 +107,10 @@ export default function ProfilePage() {
           totalTests: sorted.length,
           highestScore,
           avgAccuracy,
-          bestRank: profile?.bestRank ? `#${profile.bestRank}` : "---"
+          solvedQuestions: totalSolved
        }
     }
-  }, [profile, rawResults]);
+  }, [rawResults]);
 
   const handleUpdateProfile = async () => {
     if (!db || !user || !editForm) return
@@ -131,7 +133,7 @@ export default function ProfilePage() {
      setIsSaving(true);
      try {
         await deleteDoc(doc(db, 'users', user.uid));
-        toast({ title: "Account marked for removal" });
+        toast({ title: "Account removed" });
         router.push('/login');
      } catch (e: any) {
         toast({ variant: "destructive", title: "Action failed" });
@@ -143,7 +145,7 @@ export default function ProfilePage() {
   if (loading) return null;
 
   return (
-    <div className="min-h-[100dvh] bg-background font-body pb-safe text-left break-words">
+    <div className="min-h-screen bg-[#F8FAFC] font-body pb-safe text-left">
       <Navbar />
       
       <main className="w-full">
@@ -190,8 +192,8 @@ export default function ProfilePage() {
                  <div className="grid grid-cols-4 gap-2 md:gap-4">
                     <StatsNode icon={<ClipboardList className="h-4 w-4" />} label="Tests" value={aggregateStats.totalTests} color="text-blue-500" bgColor="bg-blue-50" />
                     <StatsNode icon={<Target className="h-4 w-4" />} label="Accuracy" value={`${aggregateStats.avgAccuracy}%`} color="text-emerald-500" bgColor="bg-emerald-50" />
-                    <StatsNode icon={<Trophy className="h-4 w-4" />} label="Rank" value={aggregateStats.bestRank} color="text-amber-500" bgColor="bg-amber-50" />
-                    <StatsNode icon={<Zap className="h-4 w-4" />} label="Score" value={aggregateStats.highestScore.toFixed(1)} color="text-primary" bgColor="bg-primary/10" />
+                    <StatsNode icon={<Zap className="h-4 w-4" />} label="Questions" value={aggregateStats.solvedQuestions} color="text-amber-500" bgColor="bg-amber-50" />
+                    <StatsNode icon={<Trophy className="h-4 w-4" />} label="Top score" value={aggregateStats.highestScore.toFixed(1)} color="text-primary" bgColor="bg-primary/10" />
                  </div>
 
                  <Card className="border-none shadow-xl rounded-2xl bg-card overflow-hidden border border-border">
