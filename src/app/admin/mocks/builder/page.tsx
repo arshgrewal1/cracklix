@@ -60,7 +60,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v57.0 [Hardened NEXT15].
+ * @fileOverview Master Mock Builder v58.0 [Strict NEXT15].
  * FIXED: Properly wrapped Firestore collection queries and resolved Promise-based searchParams.
  * FIXED: Standardized Lucide icons to latest supported naming.
  */
@@ -376,7 +376,7 @@ function MockBuilderContent() {
           <Button onClick={() => window.location.reload()} className="h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl font-bold gap-2">
              <RefreshCw className="h-4 w-4" /> Retry synchronization
           </Button>
-          <Button onClick={() => router.replace('/admin/daily-quiz')} variant="ghost" className="h-12 text-slate-400 font-bold uppercase text-[10px]">Return to list</Button>
+          <Button onClick={() => router.replace('/admin/mocks')} variant="ghost" className="h-12 text-slate-400 font-bold uppercase text-[10px]">Return to list</Button>
        </div>
     </div>
   );
@@ -739,7 +739,7 @@ function MockBuilderContent() {
                    </h3>
                    <Popover>
                       <PopoverTrigger asChild>
-                         <button className="h-10 md:h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] uppercase rounded-xl shadow-xl flex items-center justify-center gap-2 border-none">
+                         <button className="h-10 md:h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] uppercase rounded-xl shadow-xl flex items-center justify-center gap-2 border-none cursor-pointer">
                             <Plus className="h-4 w-4" /> Add section
                          </button>
                       </PopoverTrigger>
@@ -772,16 +772,16 @@ function MockBuilderContent() {
                                  </div>
                               </div>
                               <div className="flex gap-2">
-                                 <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active' : 'Focus'}</button>
+                                 <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm cursor-pointer", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active' : 'Focus'}</button>
                                  <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></Button>
                               </div>
                            </div>
                            <div className="p-6 md:p-10 space-y-3">
                               {sec.questions?.map((q: any, qIdx: number) => (
                                  <div key={q.id} className="flex items-center justify-between p-4 md:px-8 bg-white border border-slate-100 rounded-xl md:rounded-2xl hover:shadow-lg transition-all group">
-                                    <div className="flex items-center gap-4 md:gap-8 min-w-0">
-                                       <span className="text-xs md:text-lg font-black text-primary tabular-nums">#{offset + qIdx + 1}</span>
-                                       <p className="text-[12px] md:sm font-bold text-slate-600 break-words text-left">{q.englishQuestion}</p>
+                                    <div className="flex items-center gap-4 md:gap-8 min-w-0 text-left">
+                                       <span className="text-xs md:text-lg font-black text-primary tabular-nums shrink-0">#{offset + qIdx + 1}</span>
+                                       <p className="text-[12px] md:text-sm font-bold text-slate-600 break-words line-clamp-1">{q.englishQuestion}</p>
                                     </div>
                                     <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
                                  </div>

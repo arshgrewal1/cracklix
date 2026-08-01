@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -16,9 +15,11 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
+import { Exam } from "@/types"
 
 /**
- * @fileOverview Exam Vertical Registry v17.0 (Trending Toggle Added).
+ * @fileOverview Exam Vertical Registry v18.0 (Trending Toggle Added).
+ * FIXED: Standardized types and resolved ReferenceErrors.
  */
 
 export default function ExamRegistryPage() {
@@ -33,7 +34,7 @@ export default function ExamRegistryPage() {
   const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]);
   const catsQuery = useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]);
 
-  const { data: rawExams, loading } = useCollection<any>(examsQuery)
+  const { data: rawExams, loading } = useCollection<Exam>(examsQuery as any)
   const { data: boards } = useCollection<any>(boardsQuery)
   const { data: categories } = useCollection<any>(catsQuery)
 
@@ -141,7 +142,7 @@ export default function ExamRegistryPage() {
                        <button 
                           onClick={() => toggleTrending(e.id, !!e.isTrending)} 
                           className={cn(
-                            "h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all shadow-sm border mx-auto active:scale-90",
+                            "h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all shadow-sm border mx-auto active:scale-90 cursor-pointer",
                             e.isTrending ? "bg-amber-50 border-amber-200 text-amber-500" : "bg-slate-50 border-slate-100 text-slate-300 hover:text-amber-500"
                           )}
                           title={e.isTrending ? "Remove from Homepage" : "Promote to Homepage"}
@@ -151,8 +152,8 @@ export default function ExamRegistryPage() {
                     </TableCell>
                     <TableCell className="text-right px-8 md:px-12">
                       <div className="flex justify-end gap-2 md:gap-4 opacity-20 group-hover:opacity-100 transition-all">
-                        <button onClick={() => setEditingExam(e)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-5 w-5" /></button>
-                        <button onClick={async () => { if (confirm("Permanently purge this vertical node?")) await deleteDoc(doc(db!, "exams", e.id)) }} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
+                        <button onClick={() => setEditingExam(e)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all cursor-pointer"><Edit className="h-5 w-5" /></button>
+                        <button onClick={async () => { if (confirm("Permanently purge this vertical node?")) await deleteDoc(doc(db!, "exams", e.id)) }} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all cursor-pointer"><Trash2 className="h-5 w-5" /></button>
                       </div>
                     </TableCell>
                   </TableRow>

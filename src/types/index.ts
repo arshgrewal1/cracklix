@@ -129,7 +129,7 @@ export interface UserProfile {
   highestScore?: number;
   averageAccuracy?: number;
   averageTime?: number;
-  bestRank?: number;
+  bestRank?: number | string;
   studyStats?: StudyStats;
   pass?: {
     active: boolean;
@@ -187,7 +187,7 @@ export interface AttemptResult {
   subjectAnalysis: any[];
   complexityAnalysis: any[];
   answers: Record<string, number | null>;
-  rankAtSubmission?: number;
+  rankAtSubmission?: number | string;
   isGuestNode?: boolean;
 }
 

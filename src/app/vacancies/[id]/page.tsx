@@ -48,7 +48,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v4.9 [Strict NEXT15 Async].
+ * @fileOverview Enterprise Recruitment Intelligence Portal v5.0 [Strict NEXT15 Async].
  * FIXED: Handled async params and corrected JSX Button tag mismatch.
  */
 
@@ -161,8 +161,8 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
                         <a href={vacancy.applyLink} target="_blank" rel="noopener noreferrer">Apply online <ArrowRight className="h-5 w-5 md:h-8 md:w-8 ml-3 group-hover/btn:translate-x-3 transition-transform" /></a>
                      </Button>
                      <div className="flex gap-4">
-                        <button onClick={handleShare} className="h-16 w-16 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all active:scale-90"><Share2 className="h-6 w-6" /></button>
-                        <button className="h-16 w-16 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all active:scale-90"><Bookmark className="h-6 w-6" /></button>
+                        <button onClick={handleShare} className="h-16 w-16 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all active:scale-90 cursor-pointer"><Share2 className="h-6 w-6" /></button>
+                        <button className="h-16 w-16 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all active:scale-90 cursor-pointer"><Bookmark className="h-6 w-6" /></button>
                      </div>
                   </div>
                </div>
@@ -282,7 +282,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
                   <Button onClick={handleShare} variant="ghost" className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-white/5 text-white hover:bg-white/10 border-none shadow-inner transition-all flex items-center justify-center">
                     <Share2 className="h-5 w-5" />
                   </Button>
-                  <Button asChild className="flex-1 h-14 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-xs tracking-[0.3em] rounded-3xl md:rounded-[2.5rem] shadow-4xl border-none active:scale-95 transition-all">
+                  <Button asChild className="flex-1 h-14 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-xs tracking-[0.3em] rounded-3xl md:rounded-[3.5rem] shadow-4xl border-none active:scale-95 transition-all">
                      <a href={vacancy.applyLink} target="_blank" rel="noopener noreferrer">Apply online hub <ChevronRight className="h-4 w-4 md:h-6 md:w-6" /></a>
                   </Button>
                </div>

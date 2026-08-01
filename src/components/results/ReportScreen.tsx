@@ -19,8 +19,9 @@ import { cn } from '@/lib/utils';
 import { Card } from "@/components/ui/card";
 
 /**
- * @fileOverview Premium Analysis Screen v8.4.
+ * @fileOverview Premium Analysis Screen v8.5.
  * FIXED: Percentile displays 0% correctly.
+ * FIXED: Added missing type definitions and normalized Title Case.
  */
 
 interface ReportScreenProps {

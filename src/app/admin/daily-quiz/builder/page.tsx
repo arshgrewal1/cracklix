@@ -61,8 +61,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v48.0 [Strict NEXT15 Async].
+ * @fileOverview Daily Challenge Builder v49.0 [Strict NEXT15 Async].
  * FIXED: Corrected ReferenceError where setMockData was called instead of setQuizData.
+ * FIXED: Standardized Lucide icons to latest production variants.
  */
 
 export default function DailyQuizBuilder() {
