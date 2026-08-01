@@ -60,7 +60,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v60.0 [Hardened].
+ * @fileOverview Master Mock Builder v61.0 [Fix: State Iteration].
  * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 
@@ -82,7 +82,7 @@ function MockBuilderContent() {
   const id = searchParams?.get("id") ?? "";
   const isEditing = !!id
 
-  const [bankLoading, setBankLoading] = false;
+  const [bankLoading, setBankLoading] = useState(false);
   const [questionBank, setQuestionBank] = useState<any[]>([])
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
   const [initError, setInitError] = useState<string | null>(null);
@@ -753,7 +753,7 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
    return (
       <Card className="border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all rounded-xl p-3 space-y-2 group h-full">
          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+            <div className="h-7 w-7 rounded-lg bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
                {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-3.5 w-3.5" }) : null}
             </div>
             <span className="text-[9px] font-black uppercase text-slate-400 tracking-tight">{label}</span>

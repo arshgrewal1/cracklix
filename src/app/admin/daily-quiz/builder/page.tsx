@@ -62,7 +62,7 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v52.0 [Hardened].
+ * @fileOverview Daily Challenge Builder v53.0 [Fix: State Iteration].
  * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 
@@ -84,7 +84,7 @@ function DailyQuizBuilderContent() {
   const id = searchParams?.get("id") ?? "";
   const isEditing = !!id
 
-  const [bankLoading, setBankLoading] = false;
+  const [bankLoading, setBankLoading] = useState(false);
   const [questionBank, setQuestionBank] = useState<any[]>([])
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
   const [initError, setInitError] = useState<string | null>(null);
