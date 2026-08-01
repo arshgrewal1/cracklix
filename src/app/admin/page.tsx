@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -21,7 +22,8 @@ import {
   PenSquare,
   Megaphone,
   Flame,
-  BarChart3
+  BarChart3,
+  GraduationCap
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
@@ -32,8 +34,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v40.1.
- * FIXED: Standardized icon containers to circular format with logo-style background.
+ * Admin Dashboard Center v41.0.
+ * UPDATED: Added "Manage students" quick link.
  */
 
 export default function AdminDashboard() {
@@ -194,13 +196,12 @@ export default function AdminDashboard() {
                      <p className="text-[8px] md:text-[9px] font-black text-slate-500 tracking-widest uppercase">Management Hub</p>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:gap-3">
+                     <AdminQuickLink label="Manage students" href="/admin/users" icon={GraduationCap} />
                      <AdminQuickLink label="Live community" href="/admin/analytics" icon={BarChart3} />
                      <AdminQuickLink label="Bulk ingestion" href="/admin/bulk-import" icon={UploadCloud} />
                      <AdminQuickLink label="Build test" href="/admin/mocks/builder" icon={PenSquare} />
-                     <AdminQuickLink label="Add vacancy" href="/admin/vacancies/add" icon={Megaphone} />
                      <AdminQuickLink label="Verify payments" href="/admin/payments/verify" icon={ShieldCheck} highlight={hasPending} />
                      <AdminQuickLink label="Daily challenge" href="/admin/daily-quiz" icon={Flame} />
-                     <AdminQuickLink label="Study notes" href="/admin/notes" icon={FileText} />
                   </div>
                </div>
             </Card>
