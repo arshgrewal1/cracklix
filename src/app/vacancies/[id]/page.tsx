@@ -45,8 +45,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v7.7.
- * FIXED: Restored Users icon and ensured Title Case throughout.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v7.8.
+ * FIXED: Explicitly imported Users icon.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {

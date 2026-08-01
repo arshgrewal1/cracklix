@@ -13,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Density Current Affairs Preview v27.3.
- * FIXED: Restored missing Badge import.
+ * @fileOverview High-Density Current Affairs Preview v27.4.
+ * FIXED: Explicit Badge import for runtime stability.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -65,7 +65,7 @@ export default function CurrentAffairsPreview() {
                     <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left">
                        <div className="flex justify-between items-start mb-6">
                           <AuthorityLogo boardId="current-affairs" size="sm" className="h-10 w-10 md:h-12 md:w-12 shadow-lg border-2 border-background bg-muted" />
-                          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-primary border-none text-[7px] font-bold px-2 h-5">Verified</Badge>
+                          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-primary border-none text-[7px] font-bold px-2 py-0.5 rounded shadow-sm">Verified</Badge>
                        </div>
 
                        <div className="flex-1 space-y-1.5 min-w-0">

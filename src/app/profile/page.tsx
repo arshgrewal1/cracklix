@@ -30,7 +30,8 @@ import {
   Target,
   History,
   ChevronRight,
-  Gem
+  Gem,
+  ClipboardList
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -42,9 +43,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v39.0.
- * FIXED: ReferenceError for CardTitle resolved.
- * FIXED: Bypassed Firebase Index error by using client-side sorting for results.
+ * @fileOverview Institutional Profile Hub v40.0.
+ * FIXED: Explicit CardTitle import and optimized stat counters.
  */
 
 export default function ProfilePage() {
@@ -80,11 +80,9 @@ export default function ProfilePage() {
     }
   }, [profile])
 
-  // Logic: Remove server-side orderBy to instantly eliminate the Index error.
-  // We handle sorting in the useMemo below instead.
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid), limit(50))
+    return query(collection(db, "results"), where("userId", "==", user.uid), limit(100))
   }, [db, user])
 
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
@@ -99,17 +97,19 @@ export default function ProfilePage() {
   }, [rawResults])
 
   const aggregateStats = useMemo(() => {
-    if (!profile) return { totalTests: 0, highestScore: 0, avgAccuracy: 0, avgTime: 0, bestRank: "---" }
+    if (!profile && !rawResults) return { totalTests: 0, highestScore: 0, avgAccuracy: 0, avgTime: 0, bestRank: "---" }
     
-    // Fallback to results length if profile counter is not yet synced
+    const accuracy = rawResults?.length ? Math.round(rawResults.reduce((acc, r) => acc + (r.accuracy || 0), 0) / rawResults.length) : 0;
+    const peak = rawResults?.length ? Math.max(...rawResults.map(r => r.score || 0)) : 0;
+
     return {
-       totalTests: profile.totalTests || results?.length || 0,
-       highestScore: profile.highestScore || 0,
-       avgAccuracy: profile.averageAccuracy || 0,
-       avgTime: profile.averageTime || 0,
-       bestRank: profile.bestRank ? `#${profile.bestRank}` : "---"
+       totalTests: profile?.totalTests || rawResults?.length || 0,
+       highestScore: profile?.highestScore || peak || 0,
+       avgAccuracy: profile?.averageAccuracy || accuracy || 0,
+       avgTime: profile?.averageTime || 0,
+       bestRank: profile?.bestRank ? `#${profile.bestRank}` : "---"
     }
-  }, [profile, results]);
+  }, [profile, rawResults]);
 
   const handleUpdateProfile = async () => {
     if (!db || !user || !editForm) return

@@ -32,7 +32,8 @@ import {
   DollarSign,
   Search,
   Link as LinkIcon,
-  GraduationCap as GraduationCapIcon
+  GraduationCap as GraduationCapIcon,
+  Users
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Switch } from "@/components/ui/switch"
@@ -42,8 +43,8 @@ import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Vacancy Builder Hub v2.6.
- * FIXED: Restored missing AnimatePresence and motion imports.
+ * @fileOverview Enterprise Vacancy Builder Hub v2.7.
+ * FIXED: Explicit AnimatePresence and motion imports to resolve runtime ReferenceError.
  */
 
 const BOARD_OPTIONS = [

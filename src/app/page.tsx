@@ -15,16 +15,16 @@ import GlobalSearch from "@/components/home/GlobalSearch";
 import LatestVacancy from "@/components/home/LatestVacancy";
 import MeetFounder from "@/components/home/MeetFounder";
 import { useUser, useCollection, useFirestore } from "@/firebase";
-import { Zap, Clock, Trophy, ChevronRight, Flame, ShieldCheck, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Zap, Clock, Trophy, ChevronRight, Flame, ShieldCheck, Loader2, HelpCircle, ArrowRight, Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
+import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Institutional Premium Hub v511.0.
- * UPDATED: Repositioned challenge chips to the top header for maximum visibility.
- * TERMINOLOGY: Switched "Items" to "Questions" globally.
+ * @fileOverview Premium Institutional Hub v512.0.
+ * REDESIGNED: "Today's Challenge" card with high-fidelity glassmorphism.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -47,79 +47,81 @@ export default function HomePage() {
       <GlobalSearch />
       <QuickActions />
 
-      {user && (
-        <ContinueLearning />
-      )}
+      {user && <ContinueLearning />}
 
-      {/* Today's Challenge Hub - High Density (Top Chips) */}
-      <section className="py-4 md:py-8 bg-background">
+      {/* Today's Challenge Hub - Premium Glassmorphism Redesign */}
+      <section className="py-6 md:py-10 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
-               initial={{ opacity: 0, y: 15 }}
+               initial={{ opacity: 0, y: 20 }}
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
-               transition={{ duration: 0.5 }}
-               className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] rounded-[24px] p-4 md:p-6 border border-white/10 shadow-xl relative overflow-hidden group text-left flex flex-col justify-center min-h-[140px]"
+               className="relative bg-gradient-to-br from-[#111827] to-[#1F2937] rounded-[24px] p-6 md:p-8 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden group text-left"
             >
-               <div className="absolute top-2 right-2 opacity-[0.05] pointer-events-none group-hover:scale-110 transition-transform duration-1000">
-                  <Zap className="h-24 w-24 text-primary" />
-               </div>
-               
-               <div className="relative z-10 w-full space-y-4">
-                  {/* Header Row: Title + Chips moved to top */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                     <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 shadow-inner">
-                           <Flame className="h-4.5 w-4.5 fill-current animate-pulse" />
+               {/* Premium Background Decorations */}
+               <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+               <motion.div 
+                 animate={{ scale: [1, 1.2, 1], opacity: [0.03, 0.06, 0.03] }}
+                 transition={{ duration: 8, repeat: Infinity }}
+                 className="absolute -top-20 -right-20 w-80 h-80 bg-primary rounded-full blur-[100px]" 
+               />
+               <motion.div 
+                 animate={{ y: [0, -20, 0] }}
+                 transition={{ duration: 5, repeat: Infinity }}
+                 className="absolute bottom-10 left-10 w-4 h-4 bg-orange-400 rounded-full blur-md opacity-[0.08]" 
+               />
+
+               <div className="relative z-10 space-y-6 md:space-y-8">
+                  {/* Top Row: Brand & Title */}
+                  <div className="flex items-center justify-between gap-4">
+                     <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center shadow-[0_0_20px_rgba(251,146,60,0.4)] shrink-0">
+                           <Flame className="h-5 w-5 md:h-6 md:w-6 text-white fill-current animate-pulse" />
                         </div>
-                        <h2 className="text-base md:text-xl font-bold tracking-tight text-white antialiased">
-                           Today's challenge
+                        <h2 className="text-xl md:text-[32px] font-bold text-white tracking-tighter antialiased">
+                           Today's Challenge
                         </h2>
                      </div>
-                     
-                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                        {activeQuiz ? (
-                           <>
-                              <ChallengeChip icon={<Clock className="h-3 w-3" />} label={`${activeQuiz.duration}m`} />
-                              <ChallengeChip icon={<ShieldCheck className="h-3 w-3" />} label={`${activeQuiz.totalQuestions} Questions`} />
-                           </>
-                        ) : (
-                           <div className="h-7 w-24 bg-white/5 rounded-lg animate-pulse" />
-                        )}
-                     </div>
+                     <Badge className="bg-gradient-to-r from-primary to-blue-500 text-white border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest shadow-xl">
+                        Daily
+                     </Badge>
                   </div>
 
-                  <div className="space-y-1">
+                  {/* Second Row: Premium Stat Cards */}
+                  <div className="grid grid-cols-3 gap-3 md:gap-4">
+                     <StatCard icon={<Clock className="text-orange-400" />} label={`${activeQuiz?.duration || 15} Min`} />
+                     <StatCard icon={<HelpCircle className="text-blue-400" />} label={`${activeQuiz?.totalQuestions || 20} Questions`} />
+                     <StatCard icon={<Trophy className="text-amber-400" />} label={`${activeQuiz?.rewardXP || 100} XP`} />
+                  </div>
+
+                  {/* Challenge Content Block */}
+                  <div className="space-y-1 pt-2">
+                     <h3 className="text-lg md:text-[22px] font-semibold text-white tracking-tight leading-tight">
+                        {activeQuiz?.title || "GK Master Challenge"}
+                     </h3>
+                     <p className="text-[13px] md:text-sm text-slate-400 font-medium tracking-tight">
+                        Daily practice challenge to improve speed and accuracy.
+                     </p>
+                  </div>
+
+                  {/* Premium CTA Button */}
+                  <div className="pt-2">
                      {!isMounted || quizLoading ? (
-                        <div className="h-4 w-48 bg-white/5 animate-pulse rounded-lg" />
+                        <div className="h-14 w-full bg-white/5 animate-pulse rounded-2xl" />
+                     ) : activeQuiz ? (
+                        <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="block">
+                           <Button className="w-full h-14 bg-gradient-to-r from-[#3B82F6] to-[#2563EB] hover:brightness-110 text-white font-black uppercase text-[11px] md:text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_-10px_rgba(37,99,235,0.5)] border-none transition-all active:scale-[0.98] group/btn">
+                              <Zap className="h-4 w-4 mr-2 fill-current" />
+                              Start Challenge
+                              <ArrowRight className="h-4 w-4 ml-auto opacity-40 group-hover/btn:translate-x-1 transition-transform" />
+                           </Button>
+                        </Link>
                      ) : (
-                        <p className="text-sm md:text-lg font-medium text-slate-300 line-clamp-1 italic">
-                           "{activeQuiz?.title || "Daily practice mode active"}"
-                        </p>
+                        <div className="p-4 bg-white/5 rounded-xl text-center">
+                           <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Awaiting daily node sync</p>
+                        </div>
                      )}
                   </div>
-
-                  {!isMounted || quizLoading ? (
-                    <div className="flex justify-start">
-                       <Loader2 className="h-6 w-6 text-primary animate-spin" />
-                    </div>
-                  ) : activeQuiz ? (
-                    <div className="w-full">
-                       <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="block">
-                          <button className="relative overflow-hidden w-full h-11 md:h-12 bg-primary hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all duration-300 active:scale-95 border-none group/btn">
-                             <div className="flex items-center justify-center gap-3 relative z-10">
-                                <Zap className="h-3.5 w-3.5 fill-white text-white" />
-                                <span>Start challenge</span>
-                                <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
-                             </div>
-                          </button>
-                       </Link>
-                    </div>
-                  ) : (
-                    <div className="opacity-20">
-                       <p className="text-white font-bold text-sm tracking-tight">No active challenge found</p>
-                    </div>
-                  )}
                </div>
             </motion.div>
          </div>
@@ -138,11 +140,11 @@ export default function HomePage() {
   );
 }
 
-function ChallengeChip({ icon, label }: { icon: React.ReactNode, label: string }) {
+function StatCard({ icon, label }: { icon: React.ReactNode, label: string }) {
    return (
-      <div className="inline-flex items-center gap-1.5 h-7 px-3 bg-white/5 border border-white/10 rounded-lg shadow-sm shrink-0">
-         <span className="text-primary">{icon}</span>
-         <span className="text-[10px] font-bold text-slate-300">{label}</span>
+      <div className="flex flex-col items-center justify-center p-3 md:p-4 bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl space-y-2 hover:bg-white/10 transition-all cursor-default">
+         <div className="opacity-80 scale-90 md:scale-100">{icon}</div>
+         <span className="text-[10px] md:text-sm font-semibold text-white/90 tracking-tight whitespace-nowrap">{label}</span>
       </div>
-   )
+   );
 }
