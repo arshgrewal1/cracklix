@@ -1,8 +1,8 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { 
   Users, 
   Zap, 
@@ -40,9 +40,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Real-Time Community Analytics v3.0.
- * FIXED: Strictly uses real Firestore snapshots for all metrics.
- * UPDATED: Implemented Social API Registry Hub with Connect triggers.
+ * @fileOverview Premium Real-Time Community Analytics v3.1.
+ * FIXED: Imported missing Button component to resolve ReferenceError.
  */
 
 type SocialPlatform = 'YOUTUBE' | 'TELEGRAM' | 'INSTAGRAM' | 'FACEBOOK' | 'X_PORTAL' | 'LINKEDIN';
@@ -139,7 +138,7 @@ export default function CommunityAnalyticsPage() {
               status: 'CONNECTED'
            }
         }, { merge: true });
-        toast({ title: "API Registry Updated", description: `${selectedSocial} node synchronized.` });
+        toast({ title: "API Database Updated", description: `${selectedSocial} node synchronized.` });
         setSelectedSocial(null);
         setSocialCreds({ apiKey: "", channelId: "" });
      } catch (e) {
@@ -198,7 +197,7 @@ export default function CommunityAnalyticsPage() {
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             <AnalyticCard label="Mock Attempts" value={liveMetrics.totalAttempts} trend="Active" icon={<Layers />} color="orange" />
             <AnalyticCard label="Reports Generated" value={liveMetrics.totalResults} trend="Sync" icon={<FileText />} color="blue" />
-            <AnalyticCard label="Mock Assets" value={liveMetrics.totalMocks} trend="Bank" icon={<Database />} color="purple" />
+            <AnalyticCard label="Mock Assets" value={liveMetrics.totalMocks} trend="Database" icon={<Database />} color="purple" />
             <AnalyticCard label="Paper Archives" value={liveMetrics.totalPYQs} trend="Vault" icon={<Clock />} color="emerald" />
          </div>
       </section>
@@ -261,7 +260,7 @@ export default function CommunityAnalyticsPage() {
                <DialogTitle className="text-2xl font-black text-[#0F172A] uppercase flex items-center gap-3">
                   <LinkIcon className="h-6 w-6 text-primary" /> Connect {selectedSocial?.replace('_', ' ')}
                </DialogTitle>
-               <DialogDescription className="text-slate-400 font-medium">Link your official social API node to the registry.</DialogDescription>
+               <DialogDescription className="text-slate-400 font-medium">Link your official social API node to the database.</DialogDescription>
             </DialogHeader>
             <div className="p-8 space-y-6">
                <div className="space-y-1.5">
@@ -342,7 +341,7 @@ function SocialNode({ icon, label, status, onClick }: any) {
                "text-[8px] font-bold uppercase tracking-widest",
                isConnected ? "text-emerald-500" : "text-rose-500"
             )}>
-               {isConnected ? "Registry Linked" : "Disconnected"}
+               {isConnected ? "Database Linked" : "Disconnected"}
             </p>
          </div>
          <button 
