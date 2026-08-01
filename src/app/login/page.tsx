@@ -16,7 +16,7 @@ import {
   KeyRound,
   Eye,
   EyeOff,
-  ArrowLeft,
+  ArrowRight,
   Star
 } from "lucide-react";
 import { useAuth, useFirestore, useUser } from "@/firebase";
@@ -38,9 +38,8 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Hardened Institutional Auth Portal v6.0.
- * FIXED: Reverted to default authDomain for 100% reliability.
- * FIXED: Non-blocking profile sync to prevent "Blank Page" hangs.
+ * @fileOverview Premium Institutional Auth Portal v7.0.
+ * REDESIGNED: Larger branding, optimized vertical action hierarchy.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -86,16 +85,11 @@ function LoginContent() {
     const provider = new GoogleAuthProvider();
     
     try {
-      // Ensure local persistence for PWA stability
       await setPersistence(auth, browserLocalPersistence);
       const result = await signInWithPopup(auth, provider);
-      
-      // BACKGROUND TASK: Don't wait for Firestore to redirect
       finalizeUserNode(result.user, result.user.displayName || "Aspirant");
-      
       router.replace(returnUrl);
     } catch (error: any) {
-      console.error("[AUTH_ERROR]:", error.code);
       if (error.code !== 'auth/popup-closed-by-user') {
         toast({ 
           variant: "destructive", 
@@ -182,7 +176,7 @@ function LoginContent() {
         localStorage.setItem('cracklix_session_id', deviceId);
       }
     } catch (e) {
-      console.warn("[SYNC_WARNING]: Background profile update delayed.");
+      console.warn("[SYNC_WARNING]: Background sync delayed.");
     }
   };
 
@@ -191,102 +185,109 @@ function LoginContent() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-[440px]"
+        className="w-full max-w-[460px]"
       >
-        <Card className="border border-slate-100 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] bg-white rounded-[32px] overflow-hidden flex flex-col p-6 md:p-10">
+        <Card className="border border-slate-100 shadow-[0_40px_100px_-12px_rgba(0,0,0,0.08)] bg-white rounded-[40px] overflow-hidden flex flex-col p-8 md:p-14">
           
-          <div className="mb-8 flex justify-center">
-            <Logo variant="light" align="center" className="h-12 md:h-14" imgClassName="h-full w-auto" />
+          {/* 1. BRAND HUB: INCREASED LOGO SIZE */}
+          <div className="mb-12 flex justify-center scale-[1.3] md:scale-[1.5] transition-transform">
+            <Logo variant="light" align="center" className="h-16 md:h-20" imgClassName="h-full w-auto" />
           </div>
 
           <AnimatePresence mode="wait">
             <motion.div 
               key={mode}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="space-y-6 w-full"
+              className="space-y-8 w-full"
             >
-              <div className="space-y-1 text-center">
-                <h1 className="text-2xl font-[900] tracking-tight text-[#0F172A]">
+              <div className="space-y-1.5 text-center">
+                <h1 className="text-3xl font-[900] tracking-tighter text-[#0F172A] uppercase">
                   {mode === 'signin' ? 'Welcome back' : mode === 'signup' ? 'Create account' : 'Recover access'}
                 </h1>
-                <p className="text-slate-400 font-medium text-xs md:text-sm">
-                  {mode === 'signin' ? 'Continue your preparation journey.' : 'Join Punjab\'s smartest prep community.'}
+                <p className="text-slate-400 font-medium text-[13px] md:text-base">
+                  Continue your preparation journey.
                 </p>
               </div>
 
-              <div className="flex items-center justify-center gap-6 text-slate-400 font-bold text-[8px] uppercase tracking-widest pb-2 border-b border-slate-50">
-                 <div className="flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary" /> Fast</div>
-                 <div className="flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-emerald-500" /> Secure</div>
-                 <div className="flex items-center gap-1.5"><Star className="h-3 w-3 text-amber-500" /> Verified</div>
-              </div>
-
-              <div className="space-y-3">
-                 <Button 
-                    onClick={handleGoogleSignIn}
-                    disabled={isConnecting}
-                    className="w-full h-14 bg-white hover:bg-slate-50 border-2 border-slate-100 text-[#0F172A] rounded-xl font-bold text-sm shadow-sm transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-3 relative overflow-hidden"
-                 >
-                    <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={20} height={20} className={cn("h-5 w-5", isConnecting && "animate-pulse")} alt="Google" />
-                    <span>Continue with Google</span>
-                 </Button>
-
-                 <div className="relative py-2">
-                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
-                    <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
-                       <span className="bg-white px-4 text-slate-300">Or use email</span>
-                    </div>
-                 </div>
-
-                 <form onSubmit={handleEmailAuth} className="space-y-4">
+              {/* 2. AUTH FORM HUB */}
+              <div className="space-y-6">
+                 <form onSubmit={handleEmailAuth} className="space-y-5">
                     {mode === 'signup' && (
-                       <div className="space-y-1 text-left">
-                          <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Full name</Label>
-                          <Input value={name} onChange={e => setName(e.target.value)} placeholder="Arsh Grewal" className="h-12 bg-slate-50 border-none font-bold rounded-xl" />
+                       <div className="space-y-1.5 text-left animate-in slide-in-from-top-2">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Full name</Label>
+                          <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Arsh Grewal" className="h-14 bg-slate-50 border-none font-bold rounded-2xl px-5 text-base shadow-inner" />
                        </div>
                     )}
-                    <div className="space-y-1 text-left">
-                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Email address</Label>
+                    <div className="space-y-1.5 text-left">
+                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Email address</Label>
                        <div className="relative">
-                          <Mail className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
-                          <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@domain.com" className="h-12 pl-12 bg-slate-50 border-none font-bold rounded-xl" />
+                          <Mail className="h-5 w-5 absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                          <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@domain.com" className="h-14 pl-14 bg-slate-50 border-none font-bold rounded-2xl text-base shadow-inner" />
                        </div>
                     </div>
                     {mode !== 'forgot' && (
-                       <div className="space-y-1 text-left">
+                       <div className="space-y-1.5 text-left">
                           <div className="flex justify-between px-1">
-                             <Label className="text-[10px] font-black uppercase text-slate-400">Password</Label>
-                             <button type="button" onClick={() => setMode('forgot')} className="text-[10px] font-bold text-primary hover:underline bg-transparent border-none">Forgot?</button>
+                             <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Password</Label>
+                             <button type="button" onClick={() => setMode('forgot')} className="text-[10px] font-bold text-primary hover:underline bg-transparent border-none">Forgot password?</button>
                           </div>
                           <div className="relative">
-                             <KeyRound className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
-                             <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="h-12 pl-12 pr-12 bg-slate-50 border-none font-bold rounded-xl" />
-                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 bg-transparent border-none p-0"><Eye className="h-4 w-4" /></button>
+                             <KeyRound className="h-5 w-5 absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                             <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="h-14 pl-14 pr-14 bg-slate-50 border-none font-bold rounded-2xl text-base shadow-inner" />
+                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 bg-transparent border-none p-0 transition-colors"><Eye className="h-5 w-5" /></button>
                           </div>
                        </div>
                     )}
-                    <Button type="submit" disabled={isConnecting} className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl shadow-xl transition-all border-none mt-2">
-                       {isConnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Recover Account'}
+                    <Button type="submit" disabled={isConnecting} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-[11px] rounded-2xl shadow-xl transition-all border-none mt-2 active:scale-95">
+                       {isConnecting ? <Loader2 className="h-5 w-5 animate-spin" /> : mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Recover Account'}
                     </Button>
                  </form>
+
+                 {/* 3. DIVIDER NODE */}
+                 <div className="relative py-4">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
+                    <div className="relative flex justify-center text-[9px] font-black uppercase tracking-[0.3em]">
+                       <span className="bg-white px-6 text-slate-300">Or continue with</span>
+                    </div>
+                 </div>
+
+                 {/* 4. GOOGLE HUB: REDESIGNED & REPOSITIONED BELOW */}
+                 <Button 
+                    onClick={handleGoogleSignIn}
+                    disabled={isConnecting}
+                    className="w-full h-16 bg-white hover:bg-slate-50 border-2 border-slate-100 text-[#0F172A] rounded-2xl font-bold text-sm shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-4 relative overflow-hidden"
+                 >
+                    <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={24} height={24} className={cn("h-6 w-6", isConnecting && "animate-pulse")} alt="Google" />
+                    <span className="tracking-tight">Continue with Google</span>
+                 </Button>
               </div>
             </motion.div>
           </AnimatePresence>
 
-          <div className="mt-8 pt-6 border-t border-slate-50 text-center">
+          {/* 5. REGISTER FOOTER */}
+          <div className="mt-12 pt-8 border-t border-slate-50 text-center">
              <p className="text-xs font-bold text-slate-400">
                 {mode === 'signin' ? "Don't have an account?" : "Already have an account?"}
-                <button onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')} className="ml-2 text-primary font-black bg-transparent border-none p-0 cursor-pointer">
-                   {mode === 'signin' ? 'Register' : 'Login'}
+                <button onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')} className="ml-2 text-primary font-black bg-transparent border-none p-0 cursor-pointer uppercase tracking-tight hover:underline">
+                   {mode === 'signin' ? 'Register Now' : 'Login Hub'}
                 </button>
              </p>
           </div>
 
-          <div className="mt-8 flex items-center justify-center gap-3 text-slate-300">
-             <Lock className="h-4 w-4" />
-             <p className="text-[9px] font-bold uppercase tracking-tight text-slate-400">Your data is encrypted and secure.</p>
+          <div className="mt-10 flex items-center justify-center gap-3 opacity-60">
+             <div className="flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary fill-current" /> <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Fast</span></div>
+             <div className="flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-emerald-500" /> <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Secure</span></div>
+          </div>
+          
+          <div className="mt-6 flex flex-col items-center justify-center text-center space-y-1">
+             <div className="flex items-center gap-2 text-slate-300">
+                <Lock className="h-3 w-3" />
+                <p className="text-[9px] font-bold uppercase tracking-tight text-slate-300">End-to-end encrypted node</p>
+             </div>
+             <p className="text-[8px] font-black uppercase tracking-[0.2em] text-primary/30">Arsh Grewal verified</p>
           </div>
         </Card>
       </motion.div>
