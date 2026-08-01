@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -84,7 +85,7 @@ const NAV_GROUPS = [
     items: [
       { label: "Live Analytics", href: "/admin/analytics", icon: BarChart3, perm: 'viewAnalytics' },
       { label: "Role Manager", href: "/admin/roles", icon: KeyRound, perm: 'manageRoles' },
-      { label: "Students", href: "/admin/users", icon: Users, perm: 'manageUsers' },
+      { label: "Students", href: "/admin/users", icon: GraduationCap, perm: 'manageUsers' },
       { label: "Success Stories", href: "/admin/success-stories", icon: Trophy, perm: 'publishContent' },
       { label: "Help Articles", href: "/admin/help-center", icon: HelpCircle, perm: 'publishContent' },
       { label: "Support Desk", href: "/admin/support", icon: MessageCircle, perm: 'manageNotifications' },
