@@ -21,7 +21,8 @@ const FirebaseContext = createContext<FirebaseContextValue>({
 });
 
 /**
- * @fileOverview Hardened Context Node v2.7.
+ * @fileOverview Hardened Context Node v3.0 [SSR Resilient].
+ * FIXED: Context getters return null instead of throwing errors during SSR.
  */
 export function FirebaseProvider({
   children,
@@ -31,10 +32,10 @@ export function FirebaseProvider({
   storage,
 }: {
   children: ReactNode;
-  app: FirebaseApp;
-  firestore: Firestore;
-  auth: Auth;
-  storage: FirebaseStorage;
+  app: FirebaseApp | null;
+  firestore: Firestore | null;
+  auth: Auth | null;
+  storage: FirebaseStorage | null;
 }) {
   return (
     <FirebaseContext.Provider value={{ app, firestore, auth, storage }}>
@@ -45,24 +46,20 @@ export function FirebaseProvider({
 
 export const useFirebaseApp = () => {
   const context = useContext(FirebaseContext);
-  if (!context.app) throw new Error('useFirebaseApp must be used within a FirebaseProvider');
-  return context.app;
+  return context?.app || null;
 };
 
 export const useFirestore = () => {
   const context = useContext(FirebaseContext);
-  if (!context.firestore) throw new Error('useFirestore must be used within a FirebaseProvider');
-  return context.firestore;
+  return context?.firestore || null;
 };
 
 export const useAuth = () => {
   const context = useContext(FirebaseContext);
-  if (!context.auth) throw new Error('useAuth must be used within a FirebaseProvider');
-  return context.auth;
+  return context?.auth || null;
 };
 
 export const useStorage = () => {
   const context = useContext(FirebaseContext);
-  if (!context.storage) throw new Error('useStorage must be used within a FirebaseProvider');
-  return context.storage;
+  return context?.storage || null;
 };

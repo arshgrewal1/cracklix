@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -15,22 +14,17 @@ import {
   Database, 
   Loader2,
   Plus,
-  Trash2,
   Zap,
-  CheckCircle2,
+  CheckCircle,
   X,
   RefreshCw,
   Award,
   Check,
   Layers,
-  Save,
-  Flame,
+  PenSquare,
   Search,
-  Settings,
   AlertCircle,
-  ExternalLink,
   BookOpen,
-  ArrowUpRight,
   ArrowRight,
   Landmark,
   Target,
@@ -49,11 +43,9 @@ import {
   writeBatch, 
   documentId, 
   orderBy, 
-  DocumentData, 
   updateDoc, 
   increment, 
-  addDoc,
-  deleteDoc
+  addDoc
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -64,8 +56,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { MockType, AccessLevel } from "@/types"
 
 /**
- * @fileOverview Universal Test Architect v1.0.
- * Separated from Daily Quiz Builder to allow full-featured mock test creation.
+ * @fileOverview Universal Test Architect v1.3 [Syntax Fixed].
+ * FIXED: Corrected malformed query ternary on line 96.
  */
 
 export default function MockTestBuilder() {
@@ -83,19 +75,22 @@ function MockBuilderContent() {
   const { profile } = useUser()
   const { toast } = useToast()
 
-  const mockId = searchParams?.get("id") ?? ""
-  const isEditing = !!mockId
+  const id = searchParams?.get("id") ?? ""
+  const isEditing = !!id
 
   const [bankLoading, setBankLoading] = useState(false)
   const [questionBank, setQuestionBank] = useState<any[]>([])
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
   const [initError, setInitError] = useState<string | null>(null);
 
-  const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
-  const { data: existingMock } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
-  const { data: allSeries } = useCollection<any>(useMemo(() => (db ? collection(db, "test_series") : null), [db]))
-  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
+  const subjectsQuery = useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]);
+  const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]);
+  
+  const { data: subjects } = useCollection<any>(subjectsQuery);
+  const { data: boards } = useCollection<any>(boardsQuery);
+  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
+  const { data: allSeries } = useCollection<any>(useMemo(() => (db ? collection(db, "test_series") : null), [db]));
+  const { data: existingMock } = useDoc<any>(useMemo(() => (db && id ? doc(db, "mocks", id) : null), [db, id]));
   
   const [isInitializing, setIsInitializing] = useState(true)
   const [isPublishing, setIsPublishing] = useState(false)
@@ -119,6 +114,7 @@ function MockBuilderContent() {
     mockType: "FULL" as MockType,
     accessLevel: "PREMIUM" as AccessLevel,
     boardId: "",
+    boardIds: [],
     examIds: [],
     seriesId: "",
     learningSubjectId: ""
@@ -201,7 +197,7 @@ function MockBuilderContent() {
     if (stagedQuestions.length === 0) { toast({ variant: "destructive", title: "Assembly empty" }); return; }
 
     setIsPublishing(true);
-    const finalId = mockId || `mock-${Date.now()}`;
+    const finalId = id || `mock-${Date.now()}`;
     const mockRef = doc(db, "mocks", finalId);
 
     try {
@@ -250,7 +246,7 @@ function MockBuilderContent() {
   return (
     <div className="max-w-[1600px] mx-auto space-y-10 pb-40 text-left pt-2 px-1">
       <AdminPageHeader
-        icon={Layers}
+        icon={PenSquare}
         label="Institutional test architect"
         title={isEditing ? "Modify test" : "New test architect"}
         subtitle="Construct professional mock tests from the item bank."
@@ -259,7 +255,7 @@ function MockBuilderContent() {
            <button onClick={() => setStagedQuestions([])} className="h-11 px-6 rounded-xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50">Reset</button>
            <Button onClick={() => handlePublish(true)} variant="outline" className="h-11 px-6 rounded-xl font-bold uppercase text-[10px] border-slate-200">Save draft</Button>
            <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-11 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] shadow-xl gap-2 border-none">
-              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync live
+              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-5 w-5" />} Sync live
            </Button>
         </div>
       </AdminPageHeader>
@@ -272,19 +268,40 @@ function MockBuilderContent() {
                   <Input value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="h-12 md:h-14 rounded-xl bg-slate-50 border-none font-bold" placeholder="e.g. Patwari Full Mock #01" />
                </div>
 
-               <div className="grid grid-cols-2 gap-4">
+               <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-1.5 text-left">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Authority hub</Label>
-                     <select value={mockData.boardId} onChange={e => setMockData({...mockData, boardId: e.target.value})} className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs">
-                        <option value="">Select Board</option>
-                        {boards?.map((b: any) => <option key={b.id} value={b.id}>{b.abbreviation}</option>)}
-                     </select>
+                     <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Authority hubs</Label>
+                     <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-3 bg-slate-50 rounded-xl">
+                        {boards?.map((b: any) => (
+                           <button 
+                              key={b.id} 
+                              onClick={() => {
+                                 const current = mockData.boardIds || [];
+                                 const next = current.includes(b.id) ? current.filter((id:string) => id !== b.id) : [...current, b.id];
+                                 setMockData({...mockData, boardIds: next, boardId: next[0] || ""});
+                              }}
+                              className={cn(
+                                 "px-3 py-1 rounded-lg font-bold text-[9px] uppercase border transition-all",
+                                 mockData.boardIds?.includes(b.id) ? "bg-[#0F172A] text-white border-[#0F172A]" : "bg-white border-slate-200 text-slate-400"
+                              )}
+                           >
+                              {b.abbreviation}
+                           </button>
+                        ))}
+                     </div>
                   </div>
                   <div className="space-y-1.5 text-left">
                      <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Subject hub</Label>
-                     <select value={mockData.learningSubjectId} onChange={e => setMockData({...mockData, learningSubjectId: e.target.value})} className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs">
+                     <select value={mockData.learningSubjectId} onChange={e => setMockData({...mockData, learningSubjectId: e.target.value, seriesId: ""})} className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs">
                         <option value="">Select Subject</option>
                         {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                     </select>
+                  </div>
+                  <div className="space-y-1.5 text-left">
+                     <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Test series (L2)</Label>
+                     <select value={mockData.seriesId} onChange={e => setMockData({...mockData, seriesId: e.target.value})} className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs" disabled={!mockData.learningSubjectId}>
+                        <option value="">Select Series</option>
+                        {allSeries?.filter((s: any) => s.subjectId === mockData.learningSubjectId).map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
                      </select>
                   </div>
                </div>
@@ -330,8 +347,8 @@ function MockBuilderContent() {
 
          <div className="lg:col-span-8 space-y-8">
             <div className="flex bg-slate-100 p-1 rounded-2xl w-fit gap-1">
-               <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] transition-all", activeTab === 'BANK' ? "bg-white text-primary shadow-sm" : "text-slate-400")}>Database pool</button>
-               <button onClick={() => setActiveTab('ASSEMBLY')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] transition-all", activeTab === 'ASSEMBLY' ? "bg-white text-primary shadow-sm" : "text-slate-400")}>Active staging</button>
+               <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] transition-all border-none cursor-pointer", activeTab === 'BANK' ? "bg-white text-primary shadow-sm" : "text-slate-400 bg-transparent")}>Database pool</button>
+               <button onClick={() => setActiveTab('ASSEMBLY')} className={cn("px-8 py-2.5 rounded-xl font-bold uppercase text-[10px] transition-all border-none cursor-pointer", activeTab === 'ASSEMBLY' ? "bg-white text-primary shadow-sm" : "text-slate-400 bg-transparent")}>Active staging</button>
             </div>
 
             {activeTab === 'BANK' ? (

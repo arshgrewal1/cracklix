@@ -2,7 +2,7 @@ export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_PARTNER' | 'EDITOR' | 'REVIEWER' | 'MODERATOR' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET' | 'DAILY_CHALLENGE' | 'MINI_TEST' | 'REVISION_TEST';
 export type QuestionType = 'MCQ' | 'MULTIPLE_CORRECT' | 'TRUE_FALSE' | 'FILL_BLANK' | 'ASSERTION_REASON' | 'STATEMENT_BASED' | 'PARAGRAPH_BASED' | 'MATCH_FOLLOWING' | 'SEQUENCE' | 'IMAGE_BASED' | 'TABLE_BASED' | 'CASE_STUDY' | 'AUDIO_BASED' | 'VIDEO_BASED';
-export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED' | 'SCHEDULED' | 'EXPIRED';
+export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED' | 'SCHEDULED' | 'EXPIRED' | 'UNUSED' | 'USED';
 export type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED' | 'PENDING';
 export type Gender = 'Male' | 'Female' | 'Other';
 
@@ -36,6 +36,23 @@ export interface BrandingSettings {
   supportEmail: string;
   supportPhone: string;
   copyrightText: string;
+  updatedAt: any;
+}
+
+export interface DistributionSettings {
+  primaryWebsiteUrl: string;
+  installUrl: string;
+  playStoreUrl: string;
+  appStoreUrl: string;
+  shareTitle: string;
+  shareDescription: string;
+  shareMessage: string;
+  seoTitle: string;
+  seoDescription: string;
+  ogImageUrl: string;
+  twitterImageUrl: string;
+  keywords: string;
+  canonicalUrl: string;
   updatedAt: any;
 }
 
@@ -110,6 +127,7 @@ export interface UserProfile {
     expiryDate: string;
     allowedSeries?: string[];
     allowedCategories?: string[];
+    freePassClaimed?: boolean;
   };
 }
 
@@ -123,20 +141,37 @@ export interface StudySession {
   activityId?: string;
   timezone?: string;
   createdAt: any;
+  completedQuestions?: number;
+  correct?: number;
+  wrong?: number;
 }
 
-export interface LeaderboardEntry {
+export interface AttemptResult {
+  id: string;
+  attemptId: string;
+  mockId: string;
+  mockTitle: string;
   userId: string;
   userName: string;
-  photoURL?: string;
-  gender?: Gender;
-  mockId: string;
-  highestScore: number;
-  accuracy: number;
+  userEmail: string;
+  score: number;
+  maxMarks: number;
+  percentage: number;
+  correctCount: number;
+  wrongCount: number;
+  skippedCount: number;
+  attemptedCount: number;
+  totalQuestions: number;
+  attemptAccuracy: number;
   timeTaken: number;
-  attemptCount: number;
-  bestAttemptId: string;
-  submittedAt: any;
+  timestamp: string;
+  createdAt: any;
+  languageMode: string;
+  subjectAnalysis: any[];
+  complexityAnalysis: any[];
+  answers: Record<string, number>;
+  rankAtSubmission?: number;
+  isGuestNode?: boolean;
 }
 
 export interface Category {
@@ -145,6 +180,7 @@ export interface Category {
   description: string;
   displayOrder: number;
   iconUrl?: string;
+  updatedAt?: any;
 }
 
 export interface Board {
@@ -167,6 +203,44 @@ export interface Exam {
   totalMocks?: string | number;
   studentCount?: string;
   activeQuestions?: number;
+  createdAt?: any;
+  updatedAt?: any;
+}
+
+export interface Subject {
+  id: string;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  isActive: boolean;
+  displayOrder: number;
+  boardId?: string;
+  aliases?: string[];
+}
+
+export interface Topic {
+  id: string;
+  name: string;
+  subjectId: string;
+  chapterId: string;
+  isActive: boolean;
+  displayOrder: number;
+}
+
+export interface Chapter {
+  id: string;
+  name: string;
+  subjectId: string;
+  isActive: boolean;
+  displayOrder: number;
+}
+
+export interface Subtopic {
+  id: string;
+  name: string;
+  topicId: string;
+  subjectId: string;
+  displayOrder: number;
 }
 
 export interface TestSeries {
@@ -179,13 +253,25 @@ export interface TestSeries {
   displayOrder: number;
   isActive: boolean;
   accessLevel: AccessLevel;
+  counts: {
+    totalTests: number;
+    free: number;
+    premium: number;
+    questions: number;
+    mock: number;
+    subject: number;
+    sectional: number;
+    pyq: number;
+  };
 }
 
 export interface MockTest {
   id: string;
   title: string;
   boardId: string;
+  boardIds?: string[];
   examIds: string[];
+  examId?: string;
   learningSubjectId?: string;
   seriesId?: string;
   mockType: MockType;
@@ -197,6 +283,7 @@ export interface MockTest {
   positiveMarks: number;
   questionIds: string[];
   published: boolean;
+  status?: string;
   languageMode: LanguageDisplayMode;
   createdAt: any;
   updatedAt: any;
@@ -205,6 +292,7 @@ export interface MockTest {
 export interface Question {
   id: string;
   examId?: string;
+  examIds?: string[];
   boardId?: string;
   subjectId: string;
   sectionId?: string; 
@@ -213,14 +301,31 @@ export interface Question {
   language: LanguageDisplayMode;
   englishQuestion: string;
   punjabiQuestion?: string;
+  hindiQuestion?: string;
+  optionAEnglish: string;
+  optionAPunjabi?: string;
+  optionBEnglish: string;
+  optionBPunjabi?: string;
+  optionCEnglish: string;
+  optionCPunjabi?: string;
+  optionDEnglish: string;
+  optionDPunjabi?: string;
   correctAnswer: string; 
   englishExplanation?: string;
   punjabiExplanation?: string;
+  hindiExplanation?: string;
   marks: number;
   negativeMarks: number;
   status: ContentStatus;
   createdAt: any;
   updatedAt: any;
+  used?: boolean;
+  usageCount?: number;
+  usedInMocks?: string[];
+  tableContent?: {
+    headers: string[];
+    rows: string[][];
+  };
 }
 
 export interface AuditLog {
@@ -241,6 +346,7 @@ export interface CalendarEvent {
   color?: string;
   published: boolean;
   createdAt: any;
+  updatedAt?: any;
 }
 
 export interface SuccessStory {
@@ -253,6 +359,7 @@ export interface SuccessStory {
   imageUrl: string;
   published: boolean;
   createdAt: any;
+  updatedAt?: any;
 }
 
 export interface HelpArticle {
@@ -263,12 +370,7 @@ export interface HelpArticle {
   published: boolean;
   displayOrder: number;
   createdAt: any;
-}
-
-export interface SelectionStage {
-  id: string;
-  label: string;
-  description?: string;
+  updatedAt?: any;
 }
 
 export interface Vacancy {
@@ -276,72 +378,31 @@ export interface Vacancy {
   title: string;
   department: string;
   board: string;
-  recruitmentName?: string;
-  category: string;
-  subcategory?: string;
-  type: string;
-  adNumber: string;
-  postName: string;
-  totalPosts: string;
-  categoryWisePosts?: { category: string; count: string }[];
-  salary: string;
-  payMatrix?: string;
-  payLevel?: string;
-  gradePay?: string;
-  ageLimit: string;
-  ageRelaxation?: string;
-  education: string;
-  qualificationDetail?: string;
-  experience: string;
-  selectionProcess: string;
-  selectionStages?: SelectionStage[];
-  physicalStandards?: string;
-  medicalStandards?: string;
-  applicationFee: string;
-  feeDetails?: { category: string; amount: string }[];
-  paymentMode?: string;
-  officialWebsite: string;
-  applyLink: string;
-  state: "Punjab";
-  district: string;
-  locationDetail?: string;
-  startDate: string;
-  lastDate: string;
-  feeLastDate?: string;
-  correctionWindowDate?: string;
-  examDate?: string;
-  admitCardDate?: string;
-  answerKeyDate?: string;
-  resultDate?: string;
-  counsellingDate?: string;
-  joiningDate?: string;
   status: ContentStatus;
+  publishedAt?: any;
+  lastDate: string;
+  totalPosts: string;
+  education?: string;
+  salary?: string;
+  applyLink: string;
+  officialWebsite: string;
+  notificationPdfUrl?: string;
   isFeatured?: boolean;
   isBreaking?: boolean;
   isUrgent?: boolean;
   isTrending?: boolean;
   showOnHomepage?: boolean;
-  sendNotification?: boolean;
-  priority?: number;
-  logoUrl?: string;
-  bannerUrl?: string;
-  notificationPdfUrl?: string;
-  syllabusPdfUrl?: string;
-  previousPapersUrl?: string;
+  locationDetail?: string;
+  qualificationDetail?: string;
+  selectionProcess?: string;
+  applicationFee?: string;
+  paymentMode?: string;
+  startDate?: string;
+  examDate?: string;
+  resultDate?: string;
   officialNoticeUrl?: string;
   helpdeskUrl?: string;
   seoTitle?: string;
   seoDescription?: string;
-  keywords?: string[];
-  canonicalUrl?: string;
-  ogImageUrl?: string;
-  twitterCard?: string;
   slug: string;
-  views?: number;
-  clicks?: number;
-  saves?: number;
-  shares?: number;
-  publishedAt?: any;
-  updatedAt?: any;
-  createdAt?: any;
 }

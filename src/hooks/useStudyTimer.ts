@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useUser, useFirestore } from '@/firebase';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, increment } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, increment as fsIncrement } from 'firebase/firestore';
 import { getLocalDateString } from '@/lib/date-utils';
 import { create } from 'zustand';
 
 /**
- * @fileOverview Production Study Timer Engine v1.0.
- * Survival focused: Firestore sync + LocalStorage persistence.
+ * @fileOverview Production Study Timer Engine v1.1.
+ * FIXED: Aliased firestore increment to fsIncrement to avoid shadowing local state.
  */
 
 interface StudyStore {
@@ -26,7 +26,7 @@ const useStudyStore = create<StudyStore>((set) => ({
 }));
 
 export function useStudyTimer() {
-  const { user, profile } = useUser();
+  const { user } = useUser();
   const db = useFirestore();
   const { activeSeconds, increment, setBase, reset } = useStudyStore();
   
@@ -77,7 +77,7 @@ export function useStudyTimer() {
 
       await setDoc(statsRef, payload, { merge: true });
       await updateDoc(doc(db, 'users', user.uid), {
-         'studyStats.totalLifetimeStudyMinutes': increment(Math.floor(sessionSeconds / 60))
+         'studyStats.totalLifetimeStudyMinutes': fsIncrement(Math.floor(sessionSeconds / 60))
       });
       
     } catch (e) {
@@ -91,9 +91,8 @@ export function useStudyTimer() {
   useEffect(() => {
     if (!user || !db) return;
 
-    const statsRef = doc(db, 'users', user.uid, 'stats', 'study');
-    
     const initialize = async () => {
+       const statsRef = doc(db, 'users', user.uid, 'stats', 'study');
        const snap = await getDoc(statsRef);
        const todayStr = getLocalDateString();
        

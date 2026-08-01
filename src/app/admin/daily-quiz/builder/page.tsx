@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -17,7 +16,7 @@ import {
   Plus,
   Trash2,
   Zap,
-  CheckCircle2,
+  CheckCircle,
   X,
   RefreshCw,
   Award,
@@ -49,7 +48,6 @@ import {
   writeBatch, 
   documentId, 
   orderBy, 
-  DocumentData, 
   updateDoc, 
   increment, 
   addDoc,
@@ -63,8 +61,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v45.6.
- * FIXED: Variable name mismatch (setQuizData vs setMockData) in input handlers.
+ * @fileOverview Daily Challenge Builder v45.8 [Fixed setQuizData].
+ * FIXED: Standardized state setter reference from setMockData to setQuizData.
  */
 
 export default function DailyQuizBuilder() {
@@ -82,17 +80,20 @@ function DailyQuizBuilderContent() {
   const { profile } = useUser()
   const { toast } = useToast()
 
-  const quizId = searchParams?.get("id") ?? ""
-  const isEditing = !!quizId
+  const id = searchParams?.get("id") ?? ""
+  const isEditing = !!id
 
   const [bankLoading, setBankLoading] = useState(false)
   const [questionBank, setQuestionBank] = useState<any[]>([])
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
   const [initError, setInitError] = useState<string | null>(null);
 
-  const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
-  const { data: existingQuiz } = useDoc<any>(useMemo(() => (db && quizId ? doc(db, "daily_quizzes", quizId) : null), [db, quizId]))
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
+  const subjectsQuery = useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]);
+  const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
+  
+  const { data: subjects } = useCollection<any>(subjectsQuery);
+  const { data: boards } = useCollection<any>(boardsQuery);
+  const { data: existingQuiz } = useDoc<any>(useMemo(() => (db && id ? doc(db, "daily_quizzes", id) : null), [db, id]));
   
   const [isInitializing, setIsInitializing] = useState(true)
   const [isPublishing, setIsPublishing] = useState(false)
@@ -159,11 +160,10 @@ function DailyQuizBuilderContent() {
     const hydrateExisting = async () => {
       if (existingQuiz.questionIds?.length > 0) {
         const fetched: any[] = [];
-        const chunks = [];
         const questionIds = existingQuiz.questionIds;
-        for (let i = 0; i < questionIds.length; i += 30) {
-          chunks.push(questionIds.slice(i, i + 30));
-        }
+        const chunks = [];
+        for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
+        
         for (const chunk of chunks) {
           const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
              getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
@@ -171,12 +171,8 @@ function DailyQuizBuilderContent() {
              getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
           ]);
           mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
-          usedSnap.forEach(d => {
-            if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
-          });
-          legacySnap.forEach(d => {
-            if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
-          });
+          usedSnap.forEach(d => { if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id }); });
+          legacySnap.forEach(d => { if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id }); });
         }
         const hydrated = (existingQuiz.questionIds as string[]).map(id => fetched.find(q => q.id === id)).filter(Boolean);
         setStagedQuestions(hydrated);
@@ -214,7 +210,7 @@ function DailyQuizBuilderContent() {
     }
 
     setIsPublishing(true);
-    const finalId = quizId || `quiz-${Date.now()}`;
+    const finalId = id || `quiz-${Date.now()}`;
     const quizRef = doc(db, "daily_quizzes", finalId);
 
     try {
@@ -282,10 +278,10 @@ function DailyQuizBuilderContent() {
   };
 
   if (isInitializing) return (
-     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8">
-        <Zap className="h-12 w-12 text-primary animate-pulse" />
-        <p className="text-[10px] font-black uppercase text-slate-300">Synchronizing Hub...</p>
-     </div>
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8">
+       <Zap className="h-12 w-12 text-primary animate-pulse" />
+       <p className="text-[10px] font-black uppercase text-slate-300">Synchronizing Hub...</p>
+    </div>
   );
 
   if (initError) return (
@@ -318,7 +314,7 @@ function DailyQuizBuilderContent() {
            <button onClick={() => setStagedQuestions([])} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all border-none cursor-pointer text-slate-400">Reset</button>
            <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200 text-[#0F172A]">Save draft</Button>
            <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] tracking-tight shadow-2xl gap-3 border-none transition-all active:scale-95">
-              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync live
+              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-5 w-5" />} Sync live
            </Button>
         </div>
       </AdminPageHeader>
@@ -358,9 +354,9 @@ function DailyQuizBuilderContent() {
                </div>
 
                <div className="space-y-6 pt-6 border-t border-slate-50">
-                  <ConfigSwitch label="Official challenge" checked={quizData.isTodayQuiz} onChange={v => setQuizData({...quizData, isTodayQuiz: v})} />
-                  <ConfigSwitch label="Review allowed" checked={quizData.reviewModeEnabled} onChange={v => setQuizData({...quizData, reviewModeEnabled: v})} />
-                  <ConfigSwitch label="Show explanations" checked={quizData.explanationModeEnabled} onChange={v => setQuizData({...quizData, explanationModeEnabled: v})} />
+                  <ConfigSwitch label="Official challenge" checked={quizData.isTodayQuiz} onChange={(v: boolean) => setQuizData({...quizData, isTodayQuiz: v})} />
+                  <ConfigSwitch label="Review allowed" checked={quizData.reviewModeEnabled} onChange={(v: boolean) => setQuizData({...quizData, reviewModeEnabled: v})} />
+                  <ConfigSwitch label="Show explanations" checked={quizData.explanationModeEnabled} onChange={(v: boolean) => setQuizData({...quizData, explanationModeEnabled: v})} />
                </div>
             </Card>
          </div>
@@ -444,13 +440,13 @@ function DailyQuizBuilderContent() {
                                  <h4 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase">Assets Staged</h4>
                                  <p className="text-sm font-medium text-slate-500">Item selection verified and ready for registry integration.</p>
                               </div>
-                              <Button 
+                              <button 
                                 onClick={handleLinkSelected} 
                                 disabled={bankSelection.length === 0} 
                                 className="w-full md:w-auto h-[52px] bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-xl border-none transition-all active:scale-95 flex items-center justify-center gap-3 shrink-0 px-8"
                               >
                                  Link items <ArrowRight className="h-4 w-4" />
-                              </Button>
+                              </button>
                            </div>
                         </div>
                      </Card>
@@ -511,7 +507,7 @@ function DailyQuizBuilderContent() {
                      {stagedQuestions.length === 0 && (
                         <div className="h-80 flex flex-col items-center justify-center text-slate-300 opacity-20 border-2 border-dashed border-slate-200 rounded-[3rem] space-y-6">
                            <Layers className="h-16 w-16" />
-                           <p className="font-bold text-xl uppercase tracking-widest">Composition area empty</p>
+                           <p className="font-bold uppercase tracking-widest">Composition area empty</p>
                         </div>
                      )}
                   </div>
@@ -523,7 +519,7 @@ function DailyQuizBuilderContent() {
   )
 }
 
-function ConfigSwitch({ label, checked, onChange }: any) {
+function ConfigSwitch({ label, checked, onChange }: { label: string, checked: boolean, onChange: (v: boolean) => void }) {
    return (
       <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>

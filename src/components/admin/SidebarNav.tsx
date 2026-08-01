@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -51,7 +50,9 @@ import {
   Home,
   Network,
   Sparkles,
-  SearchCode
+  SearchCode,
+  RefreshCw,
+  CheckCircle
 } from "lucide-react";
 
 import {
@@ -132,7 +133,7 @@ const NAV_GROUPS = [
     label: "Financials",
     items: [
       { label: "Revenue", href: "/admin/revenue", icon: DollarSign, perm: 'viewRevenue' },
-      { label: "Active Passes", href: "/admin/subscriptions", icon: CreditCard, perm: 'managePayments' },
+      { label: "Active Passes", href: "/admin/subscriptions", icon: CheckCircle, perm: 'managePayments' },
       { label: "Verify Payments", href: "/admin/payments/verify", icon: ShieldCheck, perm: 'managePayments' },
       { label: "Pass Plans", href: "/admin/passes", icon: Gem, perm: 'managePasses' },
       { label: "Coupons", href: "/admin/coupons", icon: Tag, perm: 'manageCoupons' },
@@ -142,6 +143,7 @@ const NAV_GROUPS = [
     label: "System",
     items: [
       { label: "Health", href: "/admin/health", icon: HeartPulse, perm: 'websiteSettings' },
+      { label: "Maintenance", href: "/admin/maintenance", icon: RefreshCw, perm: 'websiteSettings' },
       { label: "Settings", href: "/admin/settings", icon: Settings, perm: 'websiteSettings' },
       { label: "Audit Logs", href: "/admin/audit-logs", icon: History, perm: 'manageRoles' },
     ],
