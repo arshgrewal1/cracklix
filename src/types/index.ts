@@ -98,6 +98,7 @@ export interface UserPermissions {
   firebaseSettings: boolean;
   exportData: boolean;
   importData: boolean;
+  publishStudyMaterial?: boolean;
 }
 
 export interface UserProfile {
@@ -146,6 +147,8 @@ export interface UserProfile {
   coins?: number;
   lastStudyDate?: string;
   totalLifetimeStudyMinutes?: number;
+  highestAccuracy?: number;
+  recentMockTitle?: string;
 }
 
 export interface StudySession {
@@ -189,6 +192,7 @@ export interface AttemptResult {
   answers: Record<string, number | null>;
   rankAtSubmission?: number | string;
   isGuestNode?: boolean;
+  accuracy: number;
 }
 
 export interface Category {

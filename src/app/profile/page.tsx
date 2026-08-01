@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -7,7 +6,7 @@ import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore, useAuth } from "@/firebase"
 import { collection, query, where, doc, updateDoc, serverTimestamp, deleteDoc, getDocs, limit, orderBy } from "firebase/firestore"
 import { deleteUser } from "firebase/auth"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -56,8 +55,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v31.1.
- * UPDATED: Purged all uppercase classes.
+ * @fileOverview Institutional Profile Hub v31.2.
+ * FIXED: Added missing CardTitle import.
  */
 
 export default function ProfilePage() {
@@ -232,7 +231,7 @@ export default function ProfilePage() {
                              results.map((res: any) => (
                                 <Link key={res.id} href={`/results/view?id=${res.mockId}&attemptId=${res.attemptId}`} className="flex items-center justify-between p-6 hover:bg-muted/50 transition-all group">
                                    <div className="flex items-center gap-4 min-w-0">
-                                      <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground group-hover:text-primary transition-all"><Zap className="h-5 w-5" /></div>
+                                      <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground group-hover:text-primary transition-all shadow-inner"><Zap className="h-5 w-5" /></div>
                                       <div className="min-w-0">
                                          <p className="font-bold text-sm md:text-lg text-foreground truncate tracking-tight">{res.mockTitle}</p>
                                          <div className="flex items-center gap-3 mt-0.5">

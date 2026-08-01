@@ -48,8 +48,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v5.0 [Strict NEXT15 Async].
- * FIXED: Handled async params and corrected JSX Button tag mismatch.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v5.1.
+ * FIXED: JSX Tag mismatch for Button component.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -103,7 +103,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
         </div>
         <div className="space-y-3">
            <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter uppercase">Record Purged</h2>
-           <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">This recruitment listing has been archived or the link has expired.</p>
+           <p className="text-slate-500 font-medium max-sm mx-auto leading-relaxed">This recruitment listing has been archived or the link has expired.</p>
         </div>
         <Button onClick={() => router.push('/vacancies')} variant="outline" className="rounded-2xl h-14 px-10 font-bold border-2">Return to Registry</Button>
      </div>
@@ -327,7 +327,7 @@ function StatPill({ icon: Icon, label, val, color, bg }: any) {
         </div>
         <div className="space-y-1">
            <p className="text-sm md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none">{val}</p>
-           <p className="text-[8px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+           <p className="text-[10px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
         </div>
      </Card>
   )

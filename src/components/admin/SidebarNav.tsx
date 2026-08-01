@@ -40,7 +40,9 @@ import {
   Home,
   Layers,
   RefreshCw,
-  CheckCircle
+  CheckCircle,
+  Sparkles,
+  SearchCode
 } from "lucide-react";
 
 import {

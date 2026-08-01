@@ -34,7 +34,8 @@ import {
   Landmark,
   Target,
   History,
-  Timer
+  Timer,
+  SquarePen
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -61,9 +62,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v49.0 [Strict NEXT15 Async].
- * FIXED: Corrected ReferenceError where setMockData was called instead of setQuizData.
- * FIXED: Standardized Lucide icons to latest production variants.
+ * @fileOverview Daily Challenge Builder v49.1 [Next.js 15 Async Hardened].
+ * FIXED: ReferenceError for setQuizData.
+ * FIXED: Synchronized icons and added missing imports.
  */
 
 export default function DailyQuizBuilder() {
