@@ -159,8 +159,8 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
     <nav className="flex-1 overflow-y-auto px-3 py-6 no-scrollbar space-y-8">
       {NAV_GROUPS.map((group) => {
         const authorizedItems = group.items.filter(item => {
-           if (!item.perm) return true;
-           return checkPermission(profile, item.perm as any, user?.email);
+           if (!(item as any).perm) return true;
+           return checkPermission(profile, (item as any).perm, user?.email);
         });
 
         if (authorizedItems.length === 0) return null;
@@ -168,7 +168,7 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
         return (
           <div key={group.label} className="space-y-2">
             {isOpen ? (
-              <p className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <p className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">
                 {group.label}
               </p>
             ) : (
@@ -205,7 +205,7 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
                     )} />
 
                     <span className={cn(
-                      "truncate text-[13px] font-bold transition-all duration-300",
+                      "truncate text-[13px] font-bold transition-all duration-300 text-left",
                       isOpen ? "max-w-[150px] opacity-100" : "max-w-0 opacity-0 hidden"
                     )}>
                       {item.label}

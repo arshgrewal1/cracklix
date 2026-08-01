@@ -1,14 +1,15 @@
+import React, { use } from "react";
 import LinkerContent from "@/components/admin/LinkerContent";
 
 /**
  * @fileOverview Content Linking Engine v1.4.
  * FIXED: dynamicParams: true is incompatible with output: export.
+ * FIXED: Handled async params for Next.js 15.
  */
 
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  // Pre-rendering core exam nodes for the admin architecture hub
   return [
     { examId: 'pcs' },
     { examId: 'patwari' },
@@ -17,7 +18,7 @@ export async function generateStaticParams() {
   ];
 }
 
-export default async function Page(props: { params: Promise<{ examId: string }> }) {
-  const { examId } = await props.params;
-  return <LinkerContent examId={examId} />;
+export default function Page(props: { params: Promise<{ examId: string }> }) {
+  const params = use(props.params);
+  return <LinkerContent examId={params.examId} />;
 }

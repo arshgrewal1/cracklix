@@ -8,7 +8,7 @@ import { create } from 'zustand';
 
 /**
  * @fileOverview Production Study Timer Engine v1.4 [Fixed Shadowing].
- * FIXED: Properly aliased Firestore increment to fsIncrement.
+ * FIXED: Properly aliased Firestore increment to fsIncrement to avoid local shadowing.
  */
 
 interface StudyStore {
@@ -34,7 +34,6 @@ export function useStudyTimer() {
   const lastActivityTime = useRef(Date.now());
   const isSyncing = useRef(false);
 
-  // Formatting utility: 1h 20m
   const formatStudyTime = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
     if (mins < 60) return `${mins}m`;
@@ -87,7 +86,6 @@ export function useStudyTimer() {
     }
   }, [user, db, activeSeconds, reset]);
 
-  // Main Effect
   useEffect(() => {
     if (!user || !db) return;
 
@@ -101,7 +99,6 @@ export function useStudyTimer() {
           if (data.lastStudyDate === todayStr) {
              setBase(data.todayStudyMinutes * 60);
           } else {
-             // Rollover check on mount
              await syncToFirestore(true);
           }
        }
@@ -110,21 +107,18 @@ export function useStudyTimer() {
     initialize();
 
     const ticker = setInterval(() => {
-      // 5 Minute Idle Check
       const now = Date.now();
       const idleTime = (now - lastActivityTime.current) / 1000;
       
-      if (idleTime < 300) { // 5 minutes
+      if (idleTime < 300) { 
          increment();
       }
 
-      // Sync every 60 seconds
       if (now - lastSyncTime.current > 60000) {
          syncToFirestore();
          lastSyncTime.current = now;
       }
 
-      // Midnight Rollover Check
       if (getLocalDateString() !== getLocalDateString(new Date(lastSyncTime.current))) {
          syncToFirestore(true);
       }

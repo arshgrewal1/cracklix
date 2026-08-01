@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useEffect, useState, Suspense } from "react"
+import React, { useMemo, useEffect, useState, use } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -48,11 +48,11 @@ import { useToast } from "@/hooks/use-toast"
 
 /**
  * @fileOverview Enterprise Recruitment Intelligence Portal v4.8 [Strict NEXT15 Async].
- * FIXED: Resolved TS17002 JSX closing tag mismatch for Button.
+ * FIXED: Handled async params and corrected JSX Button tag mismatch.
  */
 
-export default function VacancyDetailPage() {
-  const params = useParams()
+export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
   const db = useFirestore()
   const router = useRouter()
   const { user, profile } = useUser()
@@ -60,12 +60,8 @@ export default function VacancyDetailPage() {
   
   const [mounted, setMounted] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
-  const [activeTab, setActiveTab] = useState("overview")
 
-  const id = useMemo(() => {
-    if (!params?.id) return "";
-    return params.id as string;
-  }, [params]);
+  const id = params.id;
 
   useEffect(() => {
     setMounted(true)
@@ -93,7 +89,7 @@ export default function VacancyDetailPage() {
         } catch (e) {}
      } else {
         await navigator.clipboard.writeText(window.location.href);
-        toast({ title: "Link Copied", description: "The registry node URL is now on your clipboard." });
+        toast({ title: "Link Copied", description: "The URL is now on your clipboard." });
      }
   }
 
@@ -106,7 +102,7 @@ export default function VacancyDetailPage() {
         </div>
         <div className="space-y-3">
            <h2 className="text-3xl font-black text-[#0F172A] tracking-tighter uppercase">Record Purged</h2>
-           <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">This recruitment listing has been archived or the database link has expired.</p>
+           <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">This recruitment listing has been archived or the link has expired.</p>
         </div>
         <Button onClick={() => router.push('/vacancies')} variant="outline" className="rounded-2xl h-14 px-10 font-bold border-2">Return to Registry</Button>
      </div>
@@ -132,7 +128,6 @@ export default function VacancyDetailPage() {
       
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 md:px-12 py-6 md:py-16 space-y-12 md:space-y-24">
          
-         {/* ENTERPRISE HERO HUB */}
          <section className="bg-[#0F172A] rounded-[3rem] md:rounded-[5rem] shadow-5xl overflow-hidden relative group text-white">
             <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/10 blur-[160px] rounded-full pointer-events-none" />
             
@@ -146,7 +141,7 @@ export default function VacancyDetailPage() {
                   <div className="space-y-6">
                      <div className="flex flex-wrap justify-center lg:justify-start items-center gap-3">
                         <Badge className="bg-primary text-white border-none px-6 py-2 rounded-full font-black text-[10px] md:text-xs tracking-widest shadow-xl uppercase">{vacancy.board} official</Badge>
-                        {isNew() && <Badge className="bg-emerald-50 text-emerald-600 border-none px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-xl tracking-widest animate-pulse">New Node</Badge>}
+                        {isNew() && <Badge className="bg-emerald-50 text-emerald-600 border-none px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-xl tracking-widest animate-pulse">New</Badge>}
                         {isClosingSoon() && <Badge className="bg-rose-500 text-white border-none px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-xl tracking-widest">Closing Soon</Badge>}
                         <div className="h-10 w-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/10 shadow-inner"><Crown className="h-5 w-5 text-primary fill-primary" /></div>
                      </div>
@@ -173,7 +168,7 @@ export default function VacancyDetailPage() {
             </div>
          </section>
 
-         {/* QUICK STATS HUB */}
+         {/* QUICK STATS */}
          <section className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-10 px-1">
             <StatPill label="Total posts" val={vacancy.totalPosts} icon={Zap} color="text-primary" bg="bg-blue-50" />
             <StatPill label="Min. qualification" val={vacancy.education?.split(',')[0]} icon={GraduationCap} color="text-emerald-600" bg="bg-emerald-50" />
@@ -181,11 +176,10 @@ export default function VacancyDetailPage() {
             <StatPill label="Closing soon" val={new Date(vacancy.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} icon={Clock} color="text-rose-500" bg="bg-rose-50" />
          </section>
 
-         {/* DETAILED INTELLIGENCE HUB */}
+         {/* DETAILS */}
          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-24">
             <div className="lg:col-span-8 space-y-16 md:space-y-32">
                
-               {/* 1. OVERVIEW HUB */}
                <HubContainer label="Recruitment profile" icon={ClipboardList}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
                      <DataPoint label="Post Registry" value={vacancy.postName} />
@@ -201,7 +195,6 @@ export default function VacancyDetailPage() {
                   )}
                </HubContainer>
 
-               {/* 2. FINANCIAL HUB */}
                <HubContainer label="Financial metrics" icon={DollarSign} color="text-emerald-500">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
                      <DataPoint label="Salary Matrix" value={vacancy.salary} />
@@ -211,7 +204,6 @@ export default function VacancyDetailPage() {
                   </div>
                </HubContainer>
 
-               {/* 3. ELIGIBILITY HUB */}
                <HubContainer label="Eligibility nodes" icon={ShieldCheck} color="text-blue-500">
                   <div className="space-y-12">
                      <div className="space-y-4">
@@ -225,7 +217,6 @@ export default function VacancyDetailPage() {
                   </div>
                </HubContainer>
 
-               {/* 4. SELECTION HUB */}
                <HubContainer label="Selection lifecycle" icon={Target} color="text-rose-500">
                   <div className="space-y-10">
                      <p className="text-base md:text-2xl font-[700] text-[#0F172A] leading-relaxed antialiased">{vacancy.selectionProcess}</p>
@@ -240,101 +231,50 @@ export default function VacancyDetailPage() {
                      </div>
                   </div>
                </HubContainer>
-
             </div>
 
-            {/* SIDEBAR HUB */}
             <aside className="lg:col-span-4 space-y-10 md:space-y-16">
-               
-               {/* DATES CARD */}
                <Card className="border-none shadow-5xl rounded-[3rem] md:rounded-[4rem] bg-[#0F172A] text-white p-8 md:p-14 space-y-12 relative overflow-hidden group border border-white/5">
                   <div className="absolute top-0 right-0 p-14 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Calendar className="h-80 w-80 text-primary" /></div>
                   <div className="relative z-10 space-y-12 text-left">
                      <div className="space-y-3">
                         <h3 className="text-3xl md:text-5xl font-black tracking-tight leading-none uppercase">Registry</h3>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">Critical Timeline</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">Timeline</p>
                      </div>
-                     
                      <div className="space-y-10">
-                        <SidebarDate label="Inception node" val={formatDate(vacancy.startDate)} icon={<Zap className="text-emerald-500" />} />
-                        <SidebarDate label="Closure node" val={formatDate(vacancy.lastDate)} icon={<Clock className="text-rose-500" />} highlight />
+                        <SidebarDate label="Inception" val={formatDate(vacancy.startDate)} icon={<Zap className="text-emerald-500" />} />
+                        <SidebarDate label="Closure" val={formatDate(vacancy.lastDate)} icon={<Clock className="text-rose-500" />} highlight />
                         {vacancy.examDate && <SidebarDate label="Projected audit" val={formatDate(vacancy.examDate)} icon={<Target className="text-blue-500" />} />}
                      </div>
-
                      <div className="pt-12 border-t border-white/5">
                         <Button asChild className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-sm tracking-[0.2em] rounded-3xl shadow-4xl border-none transition-all active:scale-95 group/portal">
-                           <a href={vacancy.officialWebsite} target="_blank" rel="noopener noreferrer">Official portal hub <ExternalLink className="h-5 w-5 ml-3 group-hover/portal:translate-x-1 transition-transform" /></a>
+                           <a href={vacancy.officialWebsite} target="_blank" rel="noopener noreferrer">Official portal <ExternalLink className="h-5 w-5 ml-3 group-hover/portal:translate-x-1 transition-transform" /></a>
                         </Button>
                      </div>
                   </div>
                </Card>
 
-               {/* ASSETS HUB */}
                <div className="p-8 md:p-12 bg-white rounded-[3.5rem] border border-slate-100 shadow-xl space-y-10 text-left group hover:translate-y-[-8px] transition-all duration-500">
                   <div className="flex items-center gap-4">
                      <FileBadge className="h-10 w-10 text-primary" />
-                     <h4 className="text-xl font-black tracking-tight text-[#0F172A] uppercase">Official Files</h4>
+                     <h4 className="text-xl font-black tracking-tight text-[#0F172A] uppercase">Files</h4>
                   </div>
                   <div className="space-y-4">
                      <AssetLink label="Recruitment PDF" href={vacancy.notificationPdfUrl} icon={FileText} color="bg-rose-50 text-rose-600" />
                      <AssetLink label="Official Notice" href={vacancy.officialNoticeUrl} icon={Megaphone} color="bg-blue-50 text-blue-600" />
-                     <AssetLink label="Portal helpdesk" href={vacancy.helpdeskUrl} icon={HelpCircle} color="bg-slate-50 text-slate-600" />
-                  </div>
-               </div>
-
-               {/* PREP AD NODE */}
-               <div className="p-8 md:p-12 bg-[#F8FAFC] rounded-[3.5rem] border border-slate-100 shadow-xl space-y-8 text-left relative overflow-hidden group hover:translate-y-[-8px] transition-all duration-500">
-                  <div className="absolute top-[-10%] right-[-10%] w-[150px] h-[150px] bg-primary/5 blur-3xl rounded-full" />
-                  <div className="relative z-10 space-y-8">
-                     <div className="space-y-2">
-                        <h4 className="text-2xl font-black text-[#0F172A] tracking-tight uppercase">Elite Prep Hub</h4>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Master this vertical</p>
-                     </div>
-                     <p className="text-sm font-bold text-slate-500 leading-relaxed">Boost your rank with verified mock tests curated by institutional mentors.</p>
-                     <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl border-none">
-                        <Link href="/mocks">Browse Mock Series <ArrowRight className="h-4 w-4 ml-3" /></Link>
-                     </Button>
                   </div>
                </div>
             </aside>
          </div>
 
-         {/* RELATED NODES HUB */}
-         {relatedVacancies && relatedVacancies.length > 1 && (
-            <section className="space-y-10 md:space-y-20 pt-10">
-               <div className="flex items-center justify-between border-b border-slate-100 pb-8 px-1">
-                  <h3 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter antialiased italic">Related <span className="text-primary">Hubs.</span></h3>
-                  <Button asChild variant="ghost" className="text-primary font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-primary/5 rounded-full px-6">
-                     <Link href="/vacancies">View Registry <ArrowRight className="h-3.5 w-3.5" /></Link>
-                  </Button>
-               </div>
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-                  {relatedVacancies.filter(v => v.id !== id).map((v) => (
-                     <Link key={v.id} href={`/vacancies/${v.id}`}>
-                        <div className="border border-slate-50 shadow-2xl hover:shadow-[0_40px_80px_rgba(0,0,0,0.1)] transition-all duration-700 rounded-[3rem] md:rounded-[4rem] bg-white p-8 md:p-14 text-center space-y-10 group h-full flex flex-col relative overflow-hidden">
-                           <div className="h-20 w-20 md:h-32 md:w-32 mx-auto group-hover:scale-110 transition-transform duration-700 relative z-10"><AuthorityLogo boardId={v.board} size="md" className="h-full w-full shadow-2xl border-4 border-white bg-slate-50" /></div>
-                           <div className="flex-1 space-y-4 relative z-10">
-                              <h4 className="text-xl md:text-3xl font-[900] text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 tracking-tight">{v.title}</h4>
-                              <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">{v.department}</p>
-                           </div>
-                           <div className="pt-8 border-t border-slate-50 relative z-10">
-                              <Badge className="bg-slate-50 text-slate-400 border-none font-black text-[9px] uppercase tracking-widest px-4 py-1 rounded shadow-inner">{v.totalPosts} Posts Registry</Badge>
-                           </div>
-                        </div>
-                     </Link>
-                  ))}
-               </div>
-            </section>
-         )}
-
-         {/* STICKY BOTTOM ACTION BAR - PWA OPTIMIZED */}
+         {/* STICKY BOTTOM */}
          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-[95vw] max-w-4xl animate-in slide-in-from-bottom-24 duration-700 delay-500">
             <div className="bg-[#0F172A]/90 backdrop-blur-3xl p-4 md:p-6 rounded-[2.5rem] md:rounded-[3.5rem] shadow-5xl border border-white/10 flex items-center justify-between gap-4 md:gap-10">
                <div className="flex items-center gap-4 hidden sm:flex px-4 border-r border-white/10">
                   <AuthorityLogo boardId={vacancy.board} size="sm" className="h-10 w-10 md:h-12 md:w-12 bg-white/10 p-2 shadow-inner" />
-                  <div className="min-w-0">
-                     <p className="text-white font-black text-xs md:text-base truncate max-w-[200px] leading-none uppercase tracking-tight">{vacancy.title}</p>
-                     <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Official Registry Node</p>
+                  <div className="min-w-0 text-white">
+                     <p className="font-black text-xs md:text-base truncate max-w-[200px] leading-none uppercase tracking-tight">{vacancy.title}</p>
+                     <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Official Node</p>
                   </div>
                </div>
                <div className="flex-1 flex items-center gap-3">
@@ -347,7 +287,6 @@ export default function VacancyDetailPage() {
                </div>
             </div>
          </div>
-
       </main>
       <Footer />
     </div>

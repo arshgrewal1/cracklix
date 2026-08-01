@@ -62,7 +62,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 /**
  * @fileOverview Daily Challenge Builder v48.0 [Strict NEXT15 Async].
- * FIXED: setMockData reference to setQuizData and properly wrapped searchParams access.
+ * FIXED: setMockData reference to setQuizData and properly handled async searchParams.
  */
 
 export default function DailyQuizBuilder() {
@@ -80,12 +80,7 @@ function DailyQuizBuilderContent() {
   const { profile } = useUser()
   const { toast } = useToast()
 
-  const [id, setId] = useState<string | null>(null);
-
-  useEffect(() => {
-     setId(searchParams?.get("id") ?? "");
-  }, [searchParams]);
-
+  const id = searchParams?.get("id") ?? "";
   const isEditing = !!id
 
   const [bankLoading, setBankLoading] = useState(false)
@@ -271,7 +266,7 @@ function DailyQuizBuilderContent() {
        await addDoc(collection(db, "audit_logs"), {
           user: profile?.name || "Administrator",
           action: isEditing ? "QUIZ_UPDATE" : "QUIZ_CREATE",
-          details: `Daily challenge "${payload.title}" synchronized. ${isDraft ? 'Saved as Draft' : 'Questions Moved to usedQuestions Archive'}.`,
+          details: `Daily challenge "${payload.title}" synchronized. ${isDraft ? 'Saved as Draft' : 'Questions Moved to Archive'}.`,
           timestamp: serverTimestamp()
        });
 
@@ -509,12 +504,6 @@ function DailyQuizBuilderContent() {
                            </CardContent>
                         </Card>
                      ))}
-                     {stagedQuestions.length === 0 && (
-                        <div className="h-80 flex flex-col items-center justify-center text-slate-300 opacity-20 border-2 border-dashed border-slate-200 rounded-[3rem] space-y-6">
-                           <Layers className="h-16 w-16" />
-                           <p className="font-bold uppercase tracking-widest">Composition area empty</p>
-                        </div>
-                     )}
                   </div>
                </div>
             )}
@@ -526,7 +515,7 @@ function DailyQuizBuilderContent() {
 
 function ConfigSwitch({ label, checked, onChange }: { label: string, checked: boolean, onChange: (v: boolean) => void }) {
    return (
-      <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
+      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 transition-all">
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>
          <Switch checked={checked} onCheckedChange={onChange} />
       </div>

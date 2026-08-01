@@ -79,12 +79,7 @@ function MockBuilderContent() {
   const { profile } = useUser()
   const { toast } = useToast()
 
-  const [id, setId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setId(searchParams?.get("id") ?? "");
-  }, [searchParams]);
-
+  const id = searchParams?.get("id") ?? "";
   const isEditing = !!id
 
   const [bankLoading, setBankLoading] = useState(false);
@@ -187,14 +182,10 @@ function MockBuilderContent() {
           chunks.push(questionIds.slice(i, i + 30));
         }
         for (const chunk of chunks) {
-          const mcqBankRef = collection(db, "mcqBank");
-          const usedQuestionsRef = collection(db, "usedQuestions");
-          const questionsRef = collection(db, "questions");
-
           const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
-            getDocs(query(mcqBankRef, where(documentId(), "in", chunk))),
-            getDocs(query(usedQuestionsRef, where(documentId(), "in", chunk))),
-            getDocs(query(questionsRef, where(documentId(), "in", chunk)))
+            getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
+            getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
+            getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
           ]);
 
           mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
@@ -340,18 +331,15 @@ function MockBuilderContent() {
         ? [...currentBoards, id] 
         : currentBoards.filter((x: string) => x !== id);
 
-     // Auto-manage Exam IDs for "Board-wide" logic
      let nextExams = [...(mockData.examIds || [])];
      const childExams = (rawExams || []).filter((e: any) => e.boardId === id);
      const childIds = childExams.map((e: any) => e.id);
 
      if (isSelecting) {
-        // Automatically add all child exams to target list
         childIds.forEach(cid => {
            if (!nextExams.includes(cid)) nextExams.push(cid);
         });
      } else {
-        // Automatically remove all child exams from target list
         nextExams = nextExams.filter(eid => !childIds.includes(eid));
      }
 
@@ -511,7 +499,6 @@ function MockBuilderContent() {
               </div>
 
               <div className="space-y-10 pt-10 border-t border-slate-100">
-                 {/* BOARD MAPPING */}
                  <div className="space-y-6">
                     <div className="flex items-center gap-4">
                        <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-primary shadow-sm border border-blue-100">
@@ -553,7 +540,6 @@ function MockBuilderContent() {
                     </div>
                  </div>
 
-                 {/* EXAM TARGETING */}
                  <div className="space-y-6 pt-6 border-t border-slate-100">
                     <div className="flex items-center gap-4">
                        <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100">
@@ -592,15 +578,9 @@ function MockBuilderContent() {
                              </div>
                           )
                        })}
-                       {uniqueExams.length === 0 && (
-                          <div className="py-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                             <p className="text-[9px] font-bold text-slate-400 uppercase">Select board hubs first</p>
-                          </div>
-                       )}
                     </div>
                  </div>
 
-                 {/* SYSTEM CONTROL */}
                  <div className="space-y-6 pt-6 border-t border-slate-100">
                     <div className="flex items-center gap-4">
                        <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100">
@@ -612,7 +592,7 @@ function MockBuilderContent() {
                        </div>
                     </div>
                     <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", mockData.published ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-slate-50 opacity-60")}>
-                       <div className="space-y-0.5">
+                       <div className="space-y-0.5 text-left">
                           <p className="text-[11px] font-bold uppercase text-[#0F172A] tracking-tight">System activation</p>
                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Enable live feed access</p>
                        </div>
@@ -764,7 +744,7 @@ function MockBuilderContent() {
                       </PopoverTrigger>
                       <PopoverContent className="w-[320px] p-6 bg-[#0F172A] text-white rounded-[2rem] border-white/10 shadow-5xl z-[1001]">
                          <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase text-primary tracking-widest ml-1">Section hub name</Label>
+                            <Label className="text-[10px] font-black uppercase text-primary tracking-widest ml-1 text-left block">Section hub name</Label>
                             <Input placeholder="e.g. Punjab GK" className="h-12 bg-white/5 border-white/10 text-white rounded-full font-bold px-6 shadow-inner" onKeyDown={(e) => {
                                if(e.key === 'Enter') {
                                   const val = (e.target as HTMLInputElement).value;
@@ -778,7 +758,6 @@ function MockBuilderContent() {
                 
                 <div className="grid grid-cols-1 gap-6">
                    {sections.map((sec: any, sIdx: number) => {
-                      // Calculate global numbering offset
                       const offset = sections.slice(0, sIdx).reduce((acc, s) => acc + (s.questions?.length || 0), 0);
                       
                       return (
@@ -801,12 +780,11 @@ function MockBuilderContent() {
                                  <div key={q.id} className="flex items-center justify-between p-4 md:px-8 bg-white border border-slate-100 rounded-xl md:rounded-2xl hover:shadow-lg transition-all group">
                                     <div className="flex items-center gap-4 md:gap-8 min-w-0">
                                        <span className="text-xs md:text-lg font-black text-primary tabular-nums">#{offset + qIdx + 1}</span>
-                                       <p className="text-[12px] md:text-sm font-bold text-slate-600 break-words">{q.englishQuestion}</p>
+                                       <p className="text-[12px] md:text-sm font-bold text-slate-600 break-words text-left">{q.englishQuestion}</p>
                                     </div>
                                     <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
                                  </div>
                               ))}
-                              {(!sec.questions || sec.questions.length === 0) && <div className="py-12 text-center opacity-30 italic font-black uppercase text-[10px]">No items linked</div>}
                            </div>
                         </Card>
                       )
