@@ -2,7 +2,7 @@ export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_PARTNER' | 'EDITOR' | 'REVIEWER' | 'MODERATOR' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET' | 'DAILY_CHALLENGE' | 'MINI_TEST' | 'REVISION_TEST';
 export type QuestionType = 'MCQ' | 'MULTIPLE_CORRECT' | 'TRUE_FALSE' | 'FILL_BLANK' | 'ASSERTION_REASON' | 'STATEMENT_BASED' | 'PARAGRAPH_BASED' | 'MATCH_FOLLOWING' | 'SEQUENCE' | 'IMAGE_BASED' | 'TABLE_BASED' | 'CASE_STUDY' | 'AUDIO_BASED' | 'VIDEO_BASED';
-export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED' | 'SCHEDULED' | 'EXPIRED' | 'UNUSED' | 'USED';
+export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED' | 'SCHEDULED' | 'EXPIRED' | 'UNUSED' | 'USED' | 'VERIFIED';
 export type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED' | 'PENDING';
 export type Gender = 'Male' | 'Female' | 'Other';
 
@@ -37,6 +37,7 @@ export interface BrandingSettings {
   supportPhone: string;
   copyrightText: string;
   updatedAt: any;
+  showFounderImage?: boolean;
 }
 
 export interface DistributionSettings {
@@ -98,7 +99,7 @@ export interface UserProfile {
   dob?: string;
   address?: string;
   role: UserRole;
-  status: UserStatus;
+  status: UserStatus | string;
   permissions: UserPermissions;
   state: "Punjab";
   targetExam: string;
@@ -129,6 +130,10 @@ export interface UserProfile {
     allowedCategories?: string[];
     freePassClaimed?: boolean;
   };
+  sessionVersion?: number;
+  referralCode?: string;
+  referredBy?: string;
+  coins?: number;
 }
 
 export interface StudySession {
@@ -287,6 +292,12 @@ export interface MockTest {
   languageMode: LanguageDisplayMode;
   createdAt: any;
   updatedAt: any;
+  sections?: ExamSection[];
+}
+
+export interface ExamSection {
+  name: string;
+  count: number;
 }
 
 export interface Question {
@@ -405,4 +416,40 @@ export interface Vacancy {
   seoTitle?: string;
   seoDescription?: string;
   slug: string;
+  adNumber?: string;
+  type?: string;
+  district?: string;
+  gradePay?: string;
+  ageLimit?: string;
+  ageRelaxation?: string;
+  experience?: string;
 }
+
+export type AdType = 'BANNER' | 'ADSENSE' | 'HTML';
+export type AdStatus = 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
+export type AdPlacementType = 'HOMEPAGE_TOP' | 'HOMEPAGE_MIDDLE' | 'HOMEPAGE_BOTTOM' | 'EXAM_LISTING' | 'MOCK_LISTING' | 'NOTES_PAGE' | 'CA_PAGE' | 'RESULT_PAGE' | 'SIDEBAR' | 'FOOTER';
+
+export interface Ad {
+  id: string;
+  title: string;
+  type: AdType;
+  status: AdStatus;
+  placements: AdPlacementType[];
+  desktopImageUrl?: string;
+  mobileImageUrl?: string;
+  externalUrl?: string;
+  htmlCode?: string;
+  adSenseCode?: string;
+  priority: number;
+  targeting?: {
+    examIds: string[];
+  };
+  stats?: {
+    impressions: number;
+    clicks: number;
+  };
+  createdAt: any;
+  updatedAt: any;
+}
+
+export interface Advertisement extends Ad {}

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -42,7 +41,8 @@ import {
   BookMarked,
   Settings,
   Lock,
-  Unlock
+  Unlock,
+  PenSquare
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -74,7 +74,7 @@ import Link from "next/link"
 
 /**
  * @fileOverview Master Mock Builder v53.0 [Free Preview Logic].
- * UPDATED: Added Access Tier selection (Free Preview vs Premium) for granular gating.
+ * UPDATED: Fixed malformed Firestore queries and added missing PenSquare icon.
  */
 
 export default function MockBuilderPage() {
@@ -100,10 +100,16 @@ function MockBuilderContent() {
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
   const [initError, setInitError] = useState<string | null>(null);
   
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]))
-  const { data: rawExams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
-  const { data: rawSubjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
-  const { data: allSeries } = useCollection<any>(useMemo(() => (db ? collection(db, "test_series") : null), [db]))
+  const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]);
+  const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db]);
+  const subjectsQuery = useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]);
+  const seriesQuery = useMemo(() => (db ? collection(db, "test_series") : null), [db]);
+  
+  const { data: boards } = useCollection<any>(boardsQuery);
+  const { data: rawExams } = useCollection<any>(examsQuery);
+  const { data: subjects } = useCollection<any>(subjectsQuery);
+  const { data: allSeries } = useCollection<any>(seriesQuery);
+  
   const { data: existingMock } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
   
   const [isInitializing, setIsInitializing] = useState(true)
@@ -127,7 +133,7 @@ function MockBuilderContent() {
     mockType: "FULL" as MockType, 
     duration: 120, 
     difficulty: "Medium" as Difficulty, 
-    accessLevel: "FREE" as AccessLevel, // This now means 'FREE PREVIEW'
+    accessLevel: "FREE" as AccessLevel,
     published: true,
     languageMode: "ENGLISH_PUNJABI" as LanguageDisplayMode,
     positiveMarks: 1,
@@ -139,11 +145,6 @@ function MockBuilderContent() {
     { id: 'sec-1', name: 'General', questions: [] as any[] }
   ])
   const [activeSectionId, setActiveSectionId] = useState('sec-1')
-
-  const subjects = useMemo(() => {
-     if (!rawSubjects) return [];
-     return [...rawSubjects].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-  }, [rawSubjects]);
 
   const fetchFilteredBank = useCallback(async () => {
     if (!db) return;
@@ -399,7 +400,7 @@ function MockBuilderContent() {
   return (
     <div className="max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-40 text-left pt-2 px-4 md:px-10">
       <AdminPageHeader
-        icon={Layers}
+        icon={PenSquare}
         label="Assembly area"
         title={isEditing ? "Modify series" : "Mock builder"}
         subtitle="Manage structure and details for the test series."
