@@ -40,9 +40,8 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v8.0.
- * FIXED: Implemented Atomic Redirect Recovery to handle blocked popups in PWA/Mobile.
- * UPDATED: Logo scaled 3x and positioned at top per branding requirements.
+ * @fileOverview Premium Institutional Auth Portal v9.0 [Custom Domain Sync].
+ * FIXED: Optimized for custom domain authentication on cracklix.in.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -74,7 +73,6 @@ function LoginContent() {
   const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
 
-  // 1. ATOMIC REDIRECT RECOVERY: Catch users returning from Google Redirect
   useEffect(() => {
     if (!auth || !db) return;
 
@@ -87,18 +85,20 @@ function LoginContent() {
           router.replace(returnUrl);
         }
       } catch (error: any) {
-        console.error("[AUTH_REDIRECT_ERROR]:", error);
-        // Don't show toast for initial page load if no redirect happened
-        if (error.code !== 'auth/invalid-credential') {
-           toast({ variant: "destructive", title: "Sign-in failed", description: "Could not sync with Google. Try again." });
+        if (error.code === 'auth/redirect-uri-mismatch') {
+           toast({ 
+             variant: "destructive", 
+             title: "Domain mismatch", 
+             description: "Add https://cracklix.in/__/auth/handler to Google Cloud Console." 
+           });
         }
+        setIsConnecting(false);
       }
     };
 
     handleRedirect();
   }, [auth, db, router, returnUrl, toast]);
 
-  // 2. Handle existing session redirect
   useEffect(() => {
     if (!authLoading && user && !isConnecting) {
       router.replace(returnUrl);
@@ -110,33 +110,24 @@ function LoginContent() {
     
     setIsConnecting(true);
     const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
     
     try {
-      // Ensure persistence is set for PWA stability
       await setPersistence(auth, browserLocalPersistence);
       
-      // Attempt Popup First (Better Desktop UX)
-      try {
-        const result = await signInWithPopup(auth, provider);
-        await finalizeUserNode(result.user, result.user.displayName || "Aspirant");
-        router.replace(returnUrl);
-      } catch (popupError: any) {
-        // If popup is blocked or closed, fallback to Redirect
-        if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/popup-closed-by-user' || popupError.code === 'auth/cancelled-popup-request') {
-           console.log("[AUTH] Popup suppressed. Switching to redirect node...");
-           await signInWithRedirect(auth, provider);
-        } else {
-           throw popupError;
-        }
+      // On mobile/PWA, popup is often blocked. Switch to redirect for cracklix.in stability.
+      if (window.matchMedia('(display-mode: standalone)').matches || window.innerWidth < 768) {
+         await signInWithRedirect(auth, provider);
+      } else {
+         try {
+           const result = await signInWithPopup(auth, provider);
+           await finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+           router.replace(returnUrl);
+         } catch (popupError: any) {
+            await signInWithRedirect(auth, provider);
+         }
       }
     } catch (error: any) {
-      console.error("[AUTH_GOOGLE_FAILURE]:", error);
-      toast({ 
-        variant: "destructive", 
-        title: "Login failed", 
-        description: "Connection error. Please try again." 
-      });
+      toast({ variant: "destructive", title: "Login failed", description: "Identity sync error." });
       setIsConnecting(false);
     }
   };
@@ -144,31 +135,22 @@ function LoginContent() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth || !db || isConnecting) return;
-    
-    if (!email || (mode !== 'forgot' && !password)) {
-      toast({ variant: "destructive", title: "Validation failed", description: "All fields are required." });
-      return;
-    }
-
     setIsConnecting(true);
     try {
       await setPersistence(auth, browserLocalPersistence);
-      
       if (mode === 'signin') {
         const result = await signInWithEmailAndPassword(auth, email, password);
         await finalizeUserNode(result.user);
       } else if (mode === 'signup') {
-        if (!name) throw new Error("Name is required.");
         const result = await createUserWithEmailAndPassword(auth, email, password);
         await finalizeUserNode(result.user, name);
       } else if (mode === 'forgot') {
         await sendPasswordResetEmail(auth, email);
-        toast({ title: "Reset link sent", description: "Check your inbox." });
+        toast({ title: "Reset link sent" });
         setMode('signin');
         setIsConnecting(false);
         return;
       }
-      
       router.replace(returnUrl);
     } catch (error: any) {
       toast({ variant: "destructive", title: "Auth failed", description: error.message });
@@ -199,67 +181,38 @@ function LoginContent() {
           referralCode: generateReferralCode(userNode.uid),
           referredBy: referralFromUrl || null
         });
-
-        // Background stats increment
-        updateDoc(doc(db, 'settings', 'stats'), {
-          totalUsers: increment(1),
-          updatedAt: serverTimestamp()
-        }).catch(() => {});
+        updateDoc(doc(db, 'settings', 'stats'), { totalUsers: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
       } else {
-        await updateDoc(userRef, {
-          lastLoginAt: serverTimestamp(),
-          activeDeviceId: deviceId,
-          updatedAt: serverTimestamp()
-        });
+        await updateDoc(userRef, { lastLoginAt: serverTimestamp(), activeDeviceId: deviceId, updatedAt: serverTimestamp() });
       }
-
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('cracklix_session_id', deviceId);
-      }
-    } catch (e) {
-      console.warn("[SYNC_WARNING]: Background sync delayed.");
-    }
+      if (typeof window !== 'undefined') localStorage.setItem('cracklix_session_id', deviceId);
+    } catch (e) {}
   };
 
   return (
     <div className="min-h-[100dvh] bg-[#F8FAFC] flex flex-col items-center justify-center p-4 md:p-8 font-body selection:bg-primary/20">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-[460px]"
-      >
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[460px]">
         <Card className="border border-slate-100 shadow-[0_40px_100px_-12px_rgba(0,0,0,0.08)] bg-white rounded-[40px] overflow-hidden flex flex-col p-8 md:p-14">
           
-          {/* 1. BRAND HUB: LOGO AT TOP (3X SIZE) */}
           <div className="mb-12 flex justify-center scale-[1.5] md:scale-[2.0] transition-transform">
             <Logo variant="light" align="center" className="h-16 md:h-20" imgClassName="h-full w-auto" />
           </div>
 
           <AnimatePresence mode="wait">
-            <motion.div 
-              key={mode}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-8 w-full"
-            >
+            <motion.div key={mode} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8 w-full">
               <div className="space-y-1.5 text-center">
                 <h1 className="text-3xl font-[900] tracking-tighter text-[#0F172A] uppercase">
                   {mode === 'signin' ? 'Welcome back' : mode === 'signup' ? 'Create account' : 'Recover access'}
                 </h1>
-                <p className="text-slate-400 font-medium text-[13px] md:text-base">
-                  Continue your preparation journey.
-                </p>
+                <p className="text-slate-400 font-medium text-[13px] md:text-base">Continue your preparation journey.</p>
               </div>
 
-              {/* 2. AUTH FORM HUB */}
               <div className="space-y-6">
                  <form onSubmit={handleEmailAuth} className="space-y-5">
                     {mode === 'signup' && (
-                       <div className="space-y-1.5 text-left animate-in slide-in-from-top-2">
+                       <div className="space-y-1.5 text-left">
                           <Label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Full name</Label>
-                          <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Arsh Grewal" className="h-14 bg-slate-50 border-none font-bold rounded-2xl px-5 text-base shadow-inner" />
+                          <Input value={name} onChange={e => setName(e.target.value)} placeholder="Arsh Grewal" className="h-14 bg-slate-50 border-none font-bold rounded-2xl px-5 text-base shadow-inner" />
                        </div>
                     )}
                     <div className="space-y-1.5 text-left">
@@ -278,16 +231,15 @@ function LoginContent() {
                           <div className="relative">
                              <KeyRound className="h-5 w-5 absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                              <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="h-14 pl-14 pr-14 bg-slate-50 border-none font-bold rounded-2xl text-base shadow-inner" />
-                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 bg-transparent border-none p-0 transition-colors"><Eye className="h-5 w-5" /></button>
+                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 bg-transparent border-none p-0"><Eye className="h-5 w-5" /></button>
                           </div>
                        </div>
                     )}
-                    <Button type="submit" disabled={isConnecting} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-[11px] rounded-2xl shadow-xl transition-all border-none mt-2 active:scale-95">
+                    <Button type="submit" disabled={isConnecting} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-[11px] rounded-2xl shadow-xl border-none active:scale-95">
                        {isConnecting ? <Loader2 className="h-5 w-5 animate-spin" /> : mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Recover Account'}
                     </Button>
                  </form>
 
-                 {/* 3. DIVIDER NODE */}
                  <div className="relative py-4">
                     <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
                     <div className="relative flex justify-center text-[9px] font-black uppercase tracking-[0.3em]">
@@ -295,20 +247,18 @@ function LoginContent() {
                     </div>
                  </div>
 
-                 {/* 4. GOOGLE HUB: REDESIGNED BELOE SIGN IN */}
                  <Button 
                     onClick={handleGoogleSignIn}
                     disabled={isConnecting}
-                    className="w-full h-16 bg-white hover:bg-slate-50 border-2 border-slate-100 text-[#0F172A] rounded-2xl font-bold text-sm shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-4 relative overflow-hidden"
+                    className="w-full h-16 bg-white hover:bg-slate-50 border-2 border-slate-100 text-[#0F172A] rounded-2xl font-bold text-sm shadow-sm active:scale-[0.98] flex items-center justify-center gap-4"
                  >
                     <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={24} height={24} className={cn("h-6 w-6", isConnecting && "animate-pulse")} alt="Google" />
-                    <span className="tracking-tight">Continue with Google</span>
+                    <span>Continue with Google</span>
                  </Button>
               </div>
             </motion.div>
           </AnimatePresence>
 
-          {/* 5. REGISTER FOOTER */}
           <div className="mt-12 pt-8 border-t border-slate-50 text-center">
              <p className="text-xs font-bold text-slate-400">
                 {mode === 'signin' ? "Don't have an account?" : "Already have an account?"}
@@ -319,14 +269,14 @@ function LoginContent() {
           </div>
 
           <div className="mt-10 flex items-center justify-center gap-3 opacity-60">
-             <div className="flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary fill-current" /> <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Fast</span></div>
-             <div className="flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-emerald-500" /> <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Secure</span></div>
+             <div className="flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary fill-current" /> <span className="text-[8px] font-black uppercase text-slate-400">Fast</span></div>
+             <div className="flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-emerald-500" /> <span className="text-[8px] font-black uppercase text-slate-400">Secure</span></div>
           </div>
           
           <div className="mt-6 flex flex-col items-center justify-center text-center space-y-1">
              <div className="flex items-center gap-2 text-slate-300">
                 <Lock className="h-3 w-3" />
-                <p className="text-[9px] font-bold uppercase tracking-tight text-slate-300">End-to-end encrypted node</p>
+                <p className="text-[9px] font-bold uppercase tracking-tight">End-to-end encrypted node</p>
              </div>
              <p className="text-[8px] font-black uppercase tracking-[0.2em] text-primary/30">Arsh Grewal verified</p>
           </div>
