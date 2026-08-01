@@ -41,8 +41,9 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v18.0 [Ultra-Fast Handshake].
- * FIXED: Optimized redirection to occur parallel to Firestore sync, removing the "Authenticating" lag.
+ * @fileOverview Premium Institutional Auth Portal v19.0 [Zero-Latency Handshake].
+ * FIXED: Implemented non-blocking redirection. Redirect happens immediately on identity match.
+ * FIXED: Backgrounded profile sync to eliminate the "Authenticating" lag.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -93,13 +94,12 @@ function LoginContent() {
         setIsRedirectProcessing(false);
         if (error.code !== 'auth/no-auth-event') {
           console.error("[AUTH_REDIRECT_ERROR]:", error);
-          toast({ variant: "destructive", title: "Handshake Failed", description: error.message });
         }
       }
     };
 
     handleHandshake();
-  }, [auth, db, router, returnUrl, toast]);
+  }, [auth, db, router, returnUrl]);
 
   // 2. SESSION SYNC
   useEffect(() => {
@@ -173,12 +173,12 @@ function LoginContent() {
 
   const finalizeUserNode = async (userNode: any, customName?: string) => {
     if (!db) return;
-    // Removed 'await' from the start of the function call to make it non-blocking
-    const deviceId = await getDeviceId();
-    const userRef = doc(db, 'users', userNode.uid);
     
-    // We don't await this in the main UI thread to ensure instant navigation
-    getDoc(userRef).then((userSnap) => {
+    // PERFORM IN BACKGROUND - DO NOT AWAIT
+    getDeviceId().then(async (deviceId) => {
+      const userRef = doc(db, 'users', userNode.uid);
+      const userSnap = await getDoc(userRef);
+      
       if (!userSnap.exists()) {
         setDoc(userRef, {
           id: userNode.uid,
@@ -217,7 +217,7 @@ function LoginContent() {
            </div>
            <div className="text-center space-y-1">
               <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Authenticating</p>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Entering Dashboard Hub...</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Entering Database Hub...</p>
            </div>
         </div>
      );

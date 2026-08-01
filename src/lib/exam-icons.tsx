@@ -4,8 +4,9 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v50.0.
- * FIXED: Enforced strictly circular (rounded-full) geometry for all authority nodes.
+ * @fileOverview Institutional Branding Engine v51.0.
+ * FIXED: Strictly circular geometry (rounded-full).
+ * UPDATED: Increased zoom level (scale-125) for high visibility.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -93,18 +94,18 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "relative shrink-0 transition-all flex items-center justify-center rounded-full bg-slate-50/50 border border-slate-100/50 shadow-inner overflow-hidden",
+      "relative shrink-0 transition-all flex items-center justify-center rounded-full bg-slate-50 border border-slate-100 shadow-inner overflow-hidden",
       containerSize, 
       className
     )}>
       {logoUrl ? (
-        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110 scale-105">
+        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110 scale-[1.25]">
           <Image 
             src={logoUrl} 
             alt="Authority" 
             fill
             sizes="256px"
-            className="object-contain p-1"
+            className="object-contain p-0"
             referrerPolicy="no-referrer"
             onError={(e) => {
                (e.target as any).style.display = 'none';
@@ -112,7 +113,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           />
         </div>
       ) : (
-        <div className="h-full w-full p-2 opacity-40 scale-105">
+        <div className="h-full w-full p-2 opacity-40 scale-125">
           {getFallbackIcon()}
         </div>
       )}
