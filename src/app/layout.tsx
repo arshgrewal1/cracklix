@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import GlobalStudyTracker from "@/components/analytics/GlobalStudyTracker";
+import StudyTimerManager from "@/components/analytics/StudyTimerManager";
 import SplashScreen from "@/components/pwa/SplashScreen";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -23,8 +24,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v15.0 [SEO Hardened].
- * UPDATED: Added comprehensive Metadata and JSON-LD Structured Data.
+ * @fileOverview Global Layout Registry v16.0.
+ * UPDATED: Integrated StudyTimerManager for centralized time tracking.
  */
 
 export const metadata: Metadata = {
@@ -80,7 +81,7 @@ export const metadata: Metadata = {
     title: "Cracklix",
   },
   verification: {
-    google: "google-site-verification-id", // User should replace with actual ID
+    google: "google-site-verification-id", 
   },
 };
 
@@ -175,6 +176,7 @@ export default function RootLayout({
               </div>
             </div>
 
+            <StudyTimerManager key="global-timer-manager" />
             <GlobalStudyTracker key="global-tracker" />
             <PWAInstallHandler key="pwa-handler" />
             <MobileNav key="mobile-navigation" />
