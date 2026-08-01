@@ -21,7 +21,9 @@ import {
   Clock,
   Instagram,
   Youtube,
-  Facebook
+  Facebook,
+  Database,
+  SearchCode
 } from "lucide-react"
 import { useFirestore } from "@/firebase"
 import { collection, query, limit, onSnapshot, where, Timestamp } from "firebase/firestore"
@@ -29,9 +31,9 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Real-Time Community Analytics v2.0.
+ * @fileOverview Premium Real-Time Community Analytics v2.2.
  * FIXED: Strictly uses real Firestore snapshots for all metrics.
- * UPDATED: Replaced all mock/hardcoded values with live collection logic.
+ * UPDATED: Integrated presence monitoring and authentic growth tracking.
  */
 
 export default function CommunityAnalyticsPage() {
@@ -59,12 +61,11 @@ export default function CommunityAnalyticsPage() {
 
     const todayStart = new Date(); 
     todayStart.setHours(0,0,0,0);
-    const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const now = Date.now();
 
     // 1. Live Users Hub Listener
     const unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
        const docs = snap.docs.map(d => d.data());
-       const now = Date.now();
        
        setLiveMetrics(prev => ({
           ...prev,
@@ -119,7 +120,7 @@ export default function CommunityAnalyticsPage() {
               <Activity className="h-4 w-4 text-emerald-500 animate-pulse" />
               <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Live Community Intelligence</span>
            </div>
-          <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter">Community Dashboard</h1>
+          <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter">Live Community</h1>
           <p className="text-slate-500 font-medium text-sm md:text-lg">Real-time database snapshots of student activity.</p>
         </div>
         <div className="bg-white px-6 py-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
@@ -128,7 +129,7 @@ export default function CommunityAnalyticsPage() {
               <p className="text-xs font-bold text-emerald-600 tabular-nums">Active • {lastSync}</p>
            </div>
            <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-inner">
-              <RefreshCw className="h-5 w-5 animate-spin-slow" />
+              <RefreshCw className="h-5 w-5 animate-spin" />
            </div>
         </div>
       </div>

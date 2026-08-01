@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -21,7 +20,8 @@ import {
   ClipboardList,
   PenSquare,
   Megaphone,
-  Flame
+  Flame,
+  BarChart3
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
@@ -32,8 +32,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v38.1 [Import Fixed].
- * FIXED: Added missing icon imports to resolve runtime ReferenceError.
+ * Admin Dashboard Center v39.0 [Live Analytics Linked].
+ * FIXED: Added "Live Community" to quick tools and linked student stats to analytics.
  */
 
 export default function AdminDashboard() {
@@ -154,8 +154,8 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-         <AdminMetricCard label="Total earnings" value={`₹${(stats?.totalRevenue || 0).toLocaleString()}`} sub="Verified sales" icon={<DollarSign className="text-emerald-500" />} href="/admin/payments" />
-         <AdminMetricCard label="Active students" value={statsLoading ? "..." : (stats?.activePasses || 0)} sub="Elite members" icon={<Gem className="text-primary" />} href="/admin/users" />
+         <AdminMetricCard label="Total earnings" value={`₹${(stats?.totalRevenue || 0).toLocaleString()}`} sub="Verified sales" icon={<DollarSign className="text-emerald-500" />} href="/admin/revenue" />
+         <AdminMetricCard label="Active students" value={statsLoading ? "..." : (stats?.activePasses || 0)} sub="Live Community" icon={<Gem className="text-primary" />} href="/admin/analytics" highlight />
          <AdminMetricCard label="Approvals needed" value={pendingNodes?.length || 0} sub="Pending payments" icon={<AlertCircle className={cn(hasPending ? "text-rose-500 animate-pulse" : "text-slate-300")} />} href="/admin/payments/verify" highlight={hasPending} />
       </div>
 
@@ -194,6 +194,7 @@ export default function AdminDashboard() {
                      <p className="text-[8px] md:text-[9px] font-black text-slate-500 tracking-widest uppercase">Management Hub</p>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:gap-3">
+                     <AdminQuickLink label="Live community" href="/admin/analytics" icon={BarChart3} highlight />
                      <AdminQuickLink label="Bulk ingestion" href="/admin/bulk-import" icon={UploadCloud} highlight />
                      <AdminQuickLink label="Build test" href="/admin/mocks/builder" icon={PenSquare} highlight />
                      <AdminQuickLink label="Add vacancy" href="/admin/vacancies/add" icon={Megaphone} />
@@ -224,7 +225,7 @@ function AdminMetricCard({ label, value, sub, icon, href, highlight }: any) {
             <div className="min-w-0 flex-1">
                <p className="text-[8px] md:text-[9px] font-black text-slate-400 mb-1 truncate tracking-tight uppercase">{label}</p>
                <div className="text-lg md:text-3xl font-black text-[#0F172A] leading-none tabular-nums truncate">{value}</div>
-               <p className="text-[7px] md:text-[8px] font-bold text-slate-300 uppercase mt-2 truncate">{sub}</p>
+               <p className={cn("text-[7px] md:text-[8px] font-bold uppercase mt-2 truncate", highlight ? "text-primary" : "text-slate-300")}>{sub}</p>
             </div>
          </div>
       </Card>

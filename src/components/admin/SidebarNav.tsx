@@ -41,9 +41,7 @@ import {
   Layers,
   RefreshCw,
   CheckCircle,
-  SearchCode,
-  Network,
-  Sparkles
+  BarChart3
 } from "lucide-react";
 
 import {
@@ -82,6 +80,17 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: "Community",
+    items: [
+      { label: "Live Analytics", href: "/admin/analytics", icon: BarChart3, perm: 'viewAnalytics' },
+      { label: "Role Manager", href: "/admin/roles", icon: KeyRound, perm: 'manageRoles' },
+      { label: "Students", href: "/admin/users", icon: Users, perm: 'manageUsers' },
+      { label: "Success Stories", href: "/admin/success-stories", icon: Trophy, perm: 'publishContent' },
+      { label: "Help Articles", href: "/admin/help-center", icon: HelpCircle, perm: 'publishContent' },
+      { label: "Support Desk", href: "/admin/support", icon: MessageCircle, perm: 'manageNotifications' },
+    ],
+  },
+  {
     label: "Hierarchy & Registry",
     items: [
       { label: "Folders", href: "/admin/categories", icon: FolderTree, perm: 'manageCategories' },
@@ -102,16 +111,6 @@ const NAV_GROUPS = [
       { label: "CA Bulk Upload", href: "/admin/current-affairs/bulk", icon: UploadCloud, perm: 'uploadQuestions' },
       { label: "Free Hub", href: "/admin/free-content", icon: Zap, perm: 'publishContent' },
       { label: "Exam Calendar", href: "/admin/calendar", icon: Calendar, perm: 'publishContent' },
-    ],
-  },
-  {
-    label: "Community",
-    items: [
-      { label: "Role Manager", href: "/admin/roles", icon: KeyRound, perm: 'manageRoles' },
-      { label: "Students", href: "/admin/users", icon: Users, perm: 'manageUsers' },
-      { label: "Success Stories", href: "/admin/success-stories", icon: Trophy, perm: 'publishContent' },
-      { label: "Help Articles", href: "/admin/help-center", icon: HelpCircle, perm: 'publishContent' },
-      { label: "Support Desk", href: "/admin/support", icon: MessageCircle, perm: 'manageNotifications' },
     ],
   },
   {
