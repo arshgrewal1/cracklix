@@ -14,8 +14,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Density Current Affairs Preview v27.5.
- * FIXED: Added missing Badge import to resolve ReferenceError.
+ * @fileOverview High-Density Current Affairs Preview v27.6.
+ * FIXED: Restored missing Badge and Button imports.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();

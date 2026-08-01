@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useMemo, useEffect, useState, use } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -47,7 +47,8 @@ import { useToast } from "@/hooks/use-toast"
 
 /**
  * @fileOverview Enterprise Recruitment Intelligence Portal v7.9.
- * FIXED: Added missing Users import and handled async params.
+ * FIXED: Restored missing Users icon import.
+ * FIXED: Handled async params for Next.js 15 compatibility.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {

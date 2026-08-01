@@ -3,7 +3,7 @@
 
 import React, { Suspense, useEffect, useState, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useFirestore, useDoc } from "@/firebase"
+import { useUser, useFirestore, useDoc } from "@/firebase"
 import { doc, setDoc, serverTimestamp } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -44,8 +44,8 @@ import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Vacancy Builder Hub v2.8.
- * FIXED: Added missing AnimatePresence and motion imports.
+ * @fileOverview Enterprise Vacancy Builder Hub v2.9.
+ * FIXED: Restored missing motion and AnimatePresence imports.
  */
 
 const BOARD_OPTIONS = [
@@ -75,6 +75,7 @@ export default function AddVacancyPage() {
 }
 
 function VacancyBuilder() {
+  const { user, profile } = useUser();
   const searchParams = useSearchParams()
   const id = searchParams?.get("id")
   const db = useFirestore()

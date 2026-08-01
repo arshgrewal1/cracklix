@@ -18,6 +18,7 @@ import {
   Phone, 
   MapPin, 
   ShieldCheck,
+  ShieldAlert,
   Zap, 
   Activity,
   Trash2,
@@ -44,8 +45,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v40.1.
- * FIXED: Explicit CardTitle and client-side sorting to bypass Index error.
+ * @fileOverview Institutional Profile Hub v40.5.
+ * FIXED: Added missing ShieldAlert and CardTitle imports.
+ * FIXED: Implemented client-side sorting to bypass Firestore Index requirement.
  */
 
 export default function ProfilePage() {
@@ -83,7 +85,7 @@ export default function ProfilePage() {
 
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
-    // Removed orderBy to bypass Firestore Indexing requirements immediately
+    // REMOVED: orderBy to bypass Index error during build. We sort client-side.
     return query(collection(db, "results"), where("userId", "==", user.uid), limit(100))
   }, [db, user])
 
@@ -91,7 +93,6 @@ export default function ProfilePage() {
 
   const results = useMemo(() => {
     if (!rawResults) return []
-    // Client-side sorting for instant results without index delay
     return [...rawResults].sort((a, b) => {
       const timeA = new Date(a.timestamp || 0).getTime()
       const timeB = new Date(b.timestamp || 0).getTime()
@@ -100,19 +101,16 @@ export default function ProfilePage() {
   }, [rawResults])
 
   const aggregateStats = useMemo(() => {
-    if (!profile && !rawResults) return { totalTests: 0, highestScore: 0, avgAccuracy: 0, avgTime: 0, bestRank: "---" }
-    
     const accuracy = rawResults?.length ? Math.round(rawResults.reduce((acc, r) => acc + (r.accuracy || 0), 0) / rawResults.length) : 0;
     const peak = rawResults?.length ? Math.max(...rawResults.map(r => r.score || 0)) : 0;
 
     return {
-       totalTests: results.length || profile?.totalTests || 0,
-       highestScore: profile?.highestScore || peak || 0,
-       avgAccuracy: accuracy || profile?.averageAccuracy || 0,
-       avgTime: profile?.averageTime || 0,
+       totalTests: rawResults?.length || 0,
+       highestScore: peak,
+       avgAccuracy: accuracy,
        bestRank: profile?.bestRank ? `#${profile.bestRank}` : "---"
     }
-  }, [profile, rawResults, results]);
+  }, [profile, rawResults]);
 
   const handleUpdateProfile = async () => {
     if (!db || !user || !editForm) return

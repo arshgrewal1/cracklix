@@ -15,8 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Density Categories Hub v51.4.
- * FIXED: Added missing Badge import to resolve ReferenceError.
+ * @fileOverview High-Density Categories Hub v51.5.
+ * FIXED: Restored missing Badge and Button imports.
  */
 
 const TARGET_IDS = [

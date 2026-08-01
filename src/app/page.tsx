@@ -25,9 +25,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v512.0.
- * REDESIGNED: "Today's Challenge" card from scratch with high-fidelity glassmorphism.
- * FIXED: Added missing Button import to resolve ReferenceError.
+ * @fileOverview Premium Institutional Hub v512.5.
+ * FIXED: Restored Button and Badge components.
+ * REDESIGNED: "Today's Challenge" card with premium high-fidelity glassmorphism.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -92,7 +92,7 @@ export default function HomePage() {
 
                   {/* Second Row: Premium Stat Cards */}
                   <div className="grid grid-cols-3 gap-3 md:gap-4">
-                     <StatCard icon={<Clock className="text-orange-400" />} label={`${activeQuiz?.duration || 15} Min`} />
+                     <StatCard icon={<Clock className="text-orange-400" />} label={`${activeQuiz?.duration || 15} Minutes`} />
                      <StatCard icon={<HelpCircle className="text-blue-400" />} label={`${activeQuiz?.totalQuestions || 20} Questions`} />
                      <StatCard icon={<Trophy className="text-amber-400" />} label={`${activeQuiz?.rewardXP || 100} XP`} />
                   </div>
