@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v51.0.
- * FIXED: Strictly circular geometry (rounded-full).
- * UPDATED: Increased zoom level (scale-125) for high visibility.
+ * @fileOverview Institutional Branding Engine v53.0.
+ * FIXED: Reduced zoom to scale-100 and added p-2 to prevent clipping.
+ * GEOMETRY: strictly circular (rounded-full).
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -71,8 +71,8 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   const sizeClasses = {
     sm: "h-9 w-9 md:h-11 md:w-11",
     md: "h-12 w-12 md:h-16 md:w-16",
-    lg: "h-20 w-20 md:h-28 md:w-28",
-    xl: "h-28 w-28 md:h-36 md:w-36"
+    lg: "h-24 w-24 md:h-32 md:w-32",
+    xl: "h-32 w-32 md:h-44 md:w-44"
   };
 
   const containerSize = sizeClasses[size];
@@ -94,12 +94,12 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "relative shrink-0 transition-all flex items-center justify-center rounded-full bg-slate-50 border border-slate-100 shadow-inner overflow-hidden",
+      "relative shrink-0 transition-all flex items-center justify-center rounded-full bg-slate-50 border border-slate-100 shadow-inner overflow-hidden p-2",
       containerSize, 
       className
     )}>
       {logoUrl ? (
-        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110 scale-[1.25]">
+        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110 scale-100">
           <Image 
             src={logoUrl} 
             alt="Authority" 
@@ -113,7 +113,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           />
         </div>
       ) : (
-        <div className="h-full w-full p-2 opacity-40 scale-125">
+        <div className="h-full w-full p-0 opacity-40 scale-100">
           {getFallbackIcon()}
         </div>
       )}

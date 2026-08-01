@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v52.0.
- * FIXED: Strictly circular geometry (rounded-full).
- * UPDATED: Increased zoom level (scale-[1.35]) for ultra-high visibility.
+ * @fileOverview Institutional Branding Engine v53.0.
+ * FIXED: Reduced zoom to scale-100 and added p-2 to prevent clipping.
+ * GEOMETRY: strictly circular (rounded-full).
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -94,12 +94,12 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "relative shrink-0 transition-all flex items-center justify-center rounded-full bg-slate-50/50 border border-slate-100 shadow-inner overflow-hidden",
+      "relative shrink-0 transition-all flex items-center justify-center rounded-full bg-slate-50/50 border border-slate-100 shadow-inner overflow-hidden p-2",
       containerSize, 
       className
     )}>
       {logoUrl ? (
-        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110 scale-[1.35]">
+        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110 scale-100">
           <Image 
             src={logoUrl} 
             alt="Authority" 
@@ -113,7 +113,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           />
         </div>
       ) : (
-        <div className="h-full w-full p-2 opacity-40 scale-[1.35]">
+        <div className="h-full w-full p-0 opacity-40 scale-100">
           {getFallbackIcon()}
         </div>
       )}

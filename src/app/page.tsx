@@ -24,8 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v528.0.
- * FIXED: Converted Today's Challenge icon to circular geometry.
+ * @fileOverview Premium Institutional Hub v529.0.
+ * FIXED: Reduced icon zoom to prevent clipping and restored original Today's Challenge icon style.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -50,7 +50,7 @@ export default function HomePage() {
 
       {user && <ContinueLearning />}
 
-      {/* Today's Challenge Hub - Premium Glassmorphism Redesign */}
+      {/* Today's Challenge Hub - Restored Icon Style */}
       <section className="py-6 md:py-10 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
@@ -71,8 +71,8 @@ export default function HomePage() {
                   {/* Top Row: Brand & Title */}
                   <div className="flex items-center justify-between gap-2">
                      <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                        <div className="h-8 w-8 md:h-12 md:w-12 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center shadow-[0_0_20px_rgba(251,146,60,0.4)] shrink-0">
-                           <Flame className="h-4 w-4 md:h-6 md:w-6 text-white fill-current animate-pulse" />
+                        <div className="h-10 w-10 md:h-14 md:w-14 rounded-full bg-primary/10 flex items-center justify-center shadow-inner shrink-0 border border-primary/20">
+                           <Flame className="h-5 w-5 md:h-7 md:w-7 text-primary fill-current animate-pulse" />
                         </div>
                         <h2 className="text-base md:text-[32px] font-bold text-white tracking-tight antialiased truncate">
                            Today's Challenge
