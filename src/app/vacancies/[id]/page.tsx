@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState, use } from "react"
@@ -45,8 +46,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v7.8.
- * FIXED: Explicitly imported Users icon.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v7.9.
+ * FIXED: Added missing Users import and handled async params.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {

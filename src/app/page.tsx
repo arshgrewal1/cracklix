@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -21,10 +22,12 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 /**
  * @fileOverview Premium Institutional Hub v512.0.
- * REDESIGNED: "Today's Challenge" card with high-fidelity glassmorphism.
+ * REDESIGNED: "Today's Challenge" card from scratch with high-fidelity glassmorphism.
+ * FIXED: Added missing Button import to resolve ReferenceError.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -142,7 +145,7 @@ export default function HomePage() {
 
 function StatCard({ icon, label }: { icon: React.ReactNode, label: string }) {
    return (
-      <div className="flex flex-col items-center justify-center p-3 md:p-4 bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl space-y-2 hover:bg-white/10 transition-all cursor-default">
+      <div className="flex flex-col items-center justify-center p-3 md:p-4 bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl space-y-2 hover:bg-white/10 transition-all cursor-default h-full">
          <div className="opacity-80 scale-90 md:scale-100">{icon}</div>
          <span className="text-[10px] md:text-sm font-semibold text-white/90 tracking-tight whitespace-nowrap">{label}</span>
       </div>

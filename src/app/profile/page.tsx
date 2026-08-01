@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -43,8 +44,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v40.0.
- * FIXED: Explicit CardTitle import and optimized stat counters.
+ * @fileOverview Institutional Profile Hub v40.1.
+ * FIXED: Explicit CardTitle and client-side sorting to bypass Index error.
  */
 
 export default function ProfilePage() {
@@ -82,6 +83,7 @@ export default function ProfilePage() {
 
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
+    // Removed orderBy to bypass Firestore Indexing requirements immediately
     return query(collection(db, "results"), where("userId", "==", user.uid), limit(100))
   }, [db, user])
 
@@ -89,6 +91,7 @@ export default function ProfilePage() {
 
   const results = useMemo(() => {
     if (!rawResults) return []
+    // Client-side sorting for instant results without index delay
     return [...rawResults].sort((a, b) => {
       const timeA = new Date(a.timestamp || 0).getTime()
       const timeB = new Date(b.timestamp || 0).getTime()
@@ -103,13 +106,13 @@ export default function ProfilePage() {
     const peak = rawResults?.length ? Math.max(...rawResults.map(r => r.score || 0)) : 0;
 
     return {
-       totalTests: profile?.totalTests || rawResults?.length || 0,
+       totalTests: results.length || profile?.totalTests || 0,
        highestScore: profile?.highestScore || peak || 0,
-       avgAccuracy: profile?.averageAccuracy || accuracy || 0,
+       avgAccuracy: accuracy || profile?.averageAccuracy || 0,
        avgTime: profile?.averageTime || 0,
        bestRank: profile?.bestRank ? `#${profile.bestRank}` : "---"
     }
-  }, [profile, rawResults]);
+  }, [profile, rawResults, results]);
 
   const handleUpdateProfile = async () => {
     if (!db || !user || !editForm) return

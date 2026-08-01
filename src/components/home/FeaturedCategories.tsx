@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -15,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 
 /**
  * @fileOverview High-Density Categories Hub v51.4.
- * FIXED: Explicit Badge import for runtime stability.
+ * FIXED: Added missing Badge import to resolve ReferenceError.
  */
 
 const TARGET_IDS = [

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -13,8 +14,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Density Current Affairs Preview v27.4.
- * FIXED: Explicit Badge import for runtime stability.
+ * @fileOverview High-Density Current Affairs Preview v27.5.
+ * FIXED: Added missing Badge import to resolve ReferenceError.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { Suspense, useEffect, useState, useMemo } from "react"
@@ -43,8 +44,8 @@ import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Vacancy Builder Hub v2.7.
- * FIXED: Explicit AnimatePresence and motion imports to resolve runtime ReferenceError.
+ * @fileOverview Enterprise Vacancy Builder Hub v2.8.
+ * FIXED: Added missing AnimatePresence and motion imports.
  */
 
 const BOARD_OPTIONS = [
