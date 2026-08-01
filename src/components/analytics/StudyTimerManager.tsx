@@ -5,17 +5,16 @@ import { useUser, useFirestore } from '@/firebase';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp, increment as fsIncrement } from 'firebase/firestore';
 import { getLocalDateString } from '@/lib/date-utils';
 import { useStudyStore } from '@/hooks/useStudyTimer';
-import { usePathname } from 'next/navigation';
 
 /**
- * @fileOverview Institutional Study Engine v1.3 [Reliability Hardened].
- * FIXED: Atomic midnight rollover at 12:00 AM local time.
- * FIXED: Persistent counting across all app nodes.
+ * @fileOverview Institutional Study Engine v1.4 [Reliability Hardened].
+ * FIXED: Replaced reactive activeSeconds with getState() to prevent effect loops.
+ * FIXED: Precise Hh Mm Ss sync to database registry.
  */
 export default function StudyTimerManager() {
   const { user } = useUser();
   const db = useFirestore();
-  const { activeSeconds, increment, setBase, reset } = useStudyStore();
+  const { increment, setBase, reset } = useStudyStore();
   
   const lastSyncTime = useRef(Date.now());
   const lastActivityTime = useRef(Date.now());
@@ -24,7 +23,9 @@ export default function StudyTimerManager() {
   const syncToFirestore = useCallback(async (isRollover = false) => {
     if (!user || !db || isSyncing.current) return;
     
+    const currentSeconds = useStudyStore.getState().activeSeconds;
     isSyncing.current = true;
+    
     try {
       const statsRef = doc(db, 'users', user.uid, 'stats', 'study');
       const todayStr = getLocalDateString();
@@ -48,17 +49,17 @@ export default function StudyTimerManager() {
         return;
       }
 
-      const totalMinsToday = Math.floor(activeSeconds / 60);
+      const totalMinsToday = Math.floor(currentSeconds / 60);
       const prevMins = data?.todayStudyMinutes || 0;
       const newMins = totalMinsToday - prevMins;
 
-      // Sync active minutes to database hub
+      // Sync active seconds and minutes to database hub
       await setDoc(statsRef, {
         todayStudyMinutes: totalMinsToday,
         lastActiveTime: serverTimestamp(),
         lastStudyDate: todayStr,
         updatedAt: serverTimestamp(),
-        lastSyncedSeconds: activeSeconds
+        lastSyncedSeconds: currentSeconds
       }, { merge: true });
 
       if (newMins > 0) {
@@ -73,7 +74,7 @@ export default function StudyTimerManager() {
     } finally {
       isSyncing.current = false;
     }
-  }, [user, db, activeSeconds, reset]);
+  }, [user, db, reset]);
 
   useEffect(() => {
     if (!user || !db) return;
@@ -131,10 +132,14 @@ export default function StudyTimerManager() {
     window.addEventListener('touchstart', activityListener);
     window.addEventListener('touchmove', activityListener);
     
-    window.addEventListener('visibilitychange', () => {
+    const handleVisibility = () => {
        activityListener();
-       syncToFirestore();
-    });
+       if (document.visibilityState === 'hidden') {
+          syncToFirestore();
+       }
+    };
+
+    window.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       clearInterval(ticker);
@@ -144,6 +149,7 @@ export default function StudyTimerManager() {
       window.removeEventListener('scroll', activityListener);
       window.removeEventListener('touchstart', activityListener);
       window.removeEventListener('touchmove', activityListener);
+      window.removeEventListener('visibilitychange', handleVisibility);
       syncToFirestore();
     };
   }, [user, db, increment, setBase, syncToFirestore]);

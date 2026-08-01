@@ -3,8 +3,9 @@
 import { create } from 'zustand';
 
 /**
- * @fileOverview Institutional Study Store v2.0.
+ * @fileOverview Institutional Study Store v2.1.
  * Centralized state for time tracking to prevent multiple interval collisions.
+ * UPDATED: Granular Hh Mm Ss formatting for live feedback.
  */
 
 interface StudyStore {
@@ -25,11 +26,18 @@ export function useStudyTimer() {
   const activeSeconds = useStudyStore(s => s.activeSeconds);
   
   const formatStudyTime = (totalSeconds: number) => {
-    const mins = Math.floor(totalSeconds / 60);
-    if (mins < 60) return `${mins}m`;
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+    if (!totalSeconds || totalSeconds <= 0) return "0s";
+    
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    
+    const parts = [];
+    if (h > 0) parts.push(`${h}h`);
+    if (m > 0 || h > 0) parts.push(`${m}m`);
+    parts.push(`${s}s`);
+    
+    return parts.join(' ');
   };
 
   return { 
