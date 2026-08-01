@@ -13,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Compact Vacancy Hub v3.5.
- * FIXED: Added missing key props to skeleton loaders.
+ * @fileOverview Compact Vacancy Hub v3.6.
+ * FIXED: Removed truncate from department to show full institutional lines.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
@@ -72,8 +72,8 @@ export default function LatestVacancy() {
                        </div>
 
                        <div className="space-y-1.5 flex-1 min-w-0">
-                          <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-1 truncate">{v.title}</h3>
-                          <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate opacity-60">{v.department}</p>
+                          <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">{v.title}</h3>
+                          <p className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60 leading-relaxed">{v.department}</p>
                           
                           <div className="flex items-center gap-3 pt-3 mt-3 border-t border-border">
                              <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-bold text-slate-400">

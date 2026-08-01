@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState, use } from "react"
@@ -46,9 +45,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v7.9.
- * FIXED: Restored missing Users icon import.
- * FIXED: Handled async params for Next.js 15 compatibility.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v8.0.
+ * FIXED: Removed truncate from department field in hero.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -159,7 +157,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
                         {vacancy.title}
                      </h1>
                      <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-slate-400 font-bold text-[10px] md:text-lg tracking-tight">
-                        <span className="flex items-center gap-2 truncate max-w-[200px] md:max-w-md"><Landmark className="h-3.5 w-3.5 text-primary shrink-0" /> {vacancy.department}</span>
+                        <span className="flex items-center gap-2 break-words"><Landmark className="h-3.5 w-3.5 text-primary shrink-0" /> {vacancy.department}</span>
                         <span className="flex items-center gap-2 shrink-0"><MapPin className="h-3.5 w-3.5 text-rose-500" /> {vacancy.district || "Punjab"}</span>
                      </div>
                   </div>

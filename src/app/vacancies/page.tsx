@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -39,8 +38,8 @@ import { Vacancy } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Punjab Vacancy Registry v3.2 [Apple Inspired].
- * REDESIGNED: Premium layout with high-fidelity filtering and institutional branding.
+ * @fileOverview Official Punjab Vacancy Registry v3.3.
+ * FIXED: Removed truncate from department field for full visibility.
  */
 
 const CATEGORY_CHIPS = [
@@ -180,7 +179,7 @@ export default function VacanciesPortal() {
                                        
                                        <div className="flex justify-between items-start gap-4">
                                           <div className="flex flex-wrap items-center gap-3">
-                                             <Badge className="bg-primary text-white border-none px-5 py-2 rounded-full font-black text-[10px] uppercase shadow-lg tracking-widest">{v.board} Hub</Badge>
+                                             <Badge className="bg-primary text-white border-none px-5 py-2 rounded-full font-black text-[10px] uppercase shadow-lg tracking-tighter">{v.board} Hub</Badge>
                                              {v.isUrgent && <Badge className="bg-rose-500 text-white border-none px-5 py-2 rounded-full font-black text-[10px] uppercase shadow-lg tracking-widest animate-pulse">Urgent</Badge>}
                                              {v.isFeatured && <div className="h-10 w-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500 shadow-inner"><Sparkles className="h-5 w-5 fill-current" /></div>}
                                           </div>
@@ -200,7 +199,7 @@ export default function VacanciesPortal() {
                                              <AuthorityLogo boardId={v.board} size="md" className="h-20 w-20 md:h-32 md:w-32 shadow-2xl border-[6px] border-white bg-slate-50" />
                                           </div>
                                           <div className="min-w-0 flex-1 space-y-4">
-                                             <h3 className="text-2xl md:text-5xl font-black text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight">
+                                             <h3 className="text-2xl md:text-5xl font-black text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight uppercase break-words">
                                                 {v.title}
                                              </h3>
                                              <div className="flex flex-wrap items-center gap-4 text-slate-400 font-bold text-[10px] md:text-sm uppercase tracking-widest">
