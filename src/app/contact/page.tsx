@@ -12,16 +12,20 @@ import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
 import { useDoc, useFirestore } from "@/firebase"
 import { doc } from "firebase/firestore"
+import { SUPPORT_EMAIL, SUPPORT_PHONE } from "@/lib/constants"
 
 /**
- * @fileOverview Institutional Support Hub v2.1.
- * UPDATED: Dynamically pulls contact info from System Portal.
+ * @fileOverview Institutional Support Hub v2.2 [Full Live Sync].
+ * UPDATED: Strictly pulls dynamic contact info from Branding Registry.
  */
 
 export default function ContactPage() {
   const db = useFirestore()
-  const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db])
-  const { data: settings } = useDoc<any>(settingsRef)
+  const brandRef = useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db])
+  const globalRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db])
+  
+  const { data: brand } = useDoc<any>(brandRef)
+  const { data: global } = useDoc<any>(globalRef)
 
   const { toast } = useToast()
   const [sending, setSending] = useState(false)
@@ -30,17 +34,17 @@ export default function ContactPage() {
     e.preventDefault()
     setSending(true)
     setTimeout(() => {
-      toast({ title: "Message Logged", description: "Arsh Grewal Management will contact you within 24 hours." })
+      toast({ title: "Message Logged", description: "Our management node will contact you within 24 hours." })
       setSending(false)
       const form = e.target as HTMLFormElement
       form.reset()
     }, 1500)
   }
 
-  const supportInfo = {
-    email: settings?.supportEmail || "cracklixhelp@gmail.com",
-    phone: settings?.supportPhone || "+91 98881 88602",
-    address: settings?.address || "Shergarh, Punjab"
+  const info = {
+    email: brand?.supportEmail || global?.supportEmail || SUPPORT_EMAIL,
+    phone: brand?.supportPhone || global?.supportPhone || SUPPORT_PHONE,
+    address: brand?.address || global?.address || "Shergarh, Punjab"
   }
 
   return (
@@ -51,7 +55,7 @@ export default function ContactPage() {
           
           <div className="lg:col-span-5 space-y-8 md:space-y-12">
             <div className="space-y-4">
-              <div className="h-10 w-10 md:h-14 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+              <div className="h-10 w-10 md:h-14 rounded-xl md:rounded-2xl bg-slate-50 border border-slate-100 shadow-inner flex items-center justify-center text-primary">
                  <MessageSquare className="h-5 w-5 md:h-7 md:w-7" />
               </div>
               <h1 className="text-3xl md:text-6xl font-headline font-black text-[#0F172A] tracking-tight uppercase leading-[0.9]">
@@ -63,11 +67,11 @@ export default function ContactPage() {
             </div>
 
             <div className="space-y-6 md:space-y-10">
-               <ContactInfo icon={<Mail className="h-4 w-4 md:h-5 md:h-5" />} label="Email Node" value={supportInfo.email} />
-               <a href={`https://wa.me/${supportInfo.phone.replace(/\D/g, '')}`} target="_blank" className="block group">
-                 <ContactInfo icon={<Phone className="h-4 w-4 md:h-5 md:h-5" />} label="WhatsApp Hub" value={supportInfo.phone} />
+               <ContactInfo icon={<Mail className="h-4 w-4 md:h-5 md:h-5" />} label="Email Node" value={info.email} />
+               <a href={`https://wa.me/${info.phone.replace(/\D/g, '')}`} target="_blank" className="block group">
+                 <ContactInfo icon={<Phone className="h-4 w-4 md:h-5 md:h-5" />} label="WhatsApp Hub" value={info.phone} />
                </a>
-               <ContactInfo icon={<MapPin className="h-4 w-4 md:h-5 md:h-5" />} label="HQs Node" value={supportInfo.address} />
+               <ContactInfo icon={<MapPin className="h-4 w-4 md:h-5 md:h-5" />} label="HQs Node" value={info.address} />
             </div>
 
             <div className="pt-8 border-t border-slate-100 flex items-center gap-3 text-emerald-600">

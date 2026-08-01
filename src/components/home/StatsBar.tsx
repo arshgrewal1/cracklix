@@ -46,8 +46,8 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 }
 
 /**
- * @fileOverview Institutional Stats Bar v1.7.
- * TERMINOLOGY: Replaced 'items' with 'questions'.
+ * @fileOverview Institutional Stats Bar v1.8 [Live Sync].
+ * FIXED: Strictly pulls visibility nodes and trend labels from system portal.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -66,7 +66,7 @@ export default function StatsBar() {
   const activeStats = useMemo(() => {
     if (!mounted || !settings) return [];
 
-    const s = settings.statsVisibility || {
+    const visibility = settings.statsVisibility || {
       showQuestions: true,
       showMocks: true,
       showCategories: true,
@@ -85,17 +85,67 @@ export default function StatsBar() {
     const totalUsers = stats?.totalUsers || 0;
     const shouldShowStudents = settings.studentCounterMode === 'auto' 
       ? totalUsers >= (settings.studentCounterThreshold || 1000) 
-      : s.showStudents;
+      : visibility.showStudents;
 
     const pool = [];
-    if (s.showQuestions) pool.push({ label: "Practice questions", val: stats?.totalQuestions || 0, trend: trends.questions, icon: <Zap />, color: "text-blue-50", bg: "bg-blue-600", href: "/exams" });
-    if (s.showMocks) pool.push({ label: "Mock tests", val: stats?.totalMocks || 0, trend: trends.mocks, icon: <ClipboardList />, color: "text-purple-50", bg: "bg-purple-600", href: "/mocks" });
-    if (s.showCategories) pool.push({ label: "Exam categories", val: stats?.totalCategories || 0, trend: trends.categories, icon: <ShieldCheck />, color: "text-emerald-50", bg: "bg-emerald-600", href: "/exams" });
+    
+    if (visibility.showQuestions) {
+       pool.push({ 
+          label: "Practice questions", 
+          val: stats?.totalQuestions || 0, 
+          trend: trends.questions, 
+          icon: <Zap />, 
+          bg: "bg-slate-50", 
+          color: "text-primary",
+          href: "/exams" 
+       });
+    }
+    
+    if (visibility.showMocks) {
+       pool.push({ 
+          label: "Mock tests", 
+          val: stats?.totalMocks || 0, 
+          trend: trends.mocks, 
+          icon: <ClipboardList />, 
+          bg: "bg-slate-50", 
+          color: "text-primary",
+          href: "/mocks" 
+       });
+    }
+    
+    if (visibility.showCategories) {
+       pool.push({ 
+          label: "Exam hubs", 
+          val: stats?.totalCategories || 0, 
+          trend: trends.categories, 
+          icon: <ShieldCheck />, 
+          bg: "bg-slate-50", 
+          color: "text-primary",
+          href: "/exams" 
+       });
+    }
     
     if (shouldShowStudents) {
-      pool.push({ label: "Verified students", val: totalUsers, trend: trends.students, icon: <Users />, color: "text-blue-50", bg: "bg-blue-700", href: "/leaderboard" });
-    } else if (s.showSupport) {
-      pool.push({ label: "Student support", val: "24x7", trend: trends.support, icon: <Headset />, color: "text-orange-50", bg: "bg-orange-600", noSuffix: true, href: "/support" });
+      pool.push({ 
+         label: "Verified students", 
+         val: totalUsers, 
+         trend: trends.students, 
+         icon: <Users />, 
+         bg: "bg-slate-50", 
+         color: "text-primary",
+         href: "/leaderboard" 
+      });
+    } else if (visibility.showSupport) {
+      pool.push({ 
+         label: "Student support", 
+         val: "24x7", 
+         trend: trends.support, 
+         icon: <Headset />, 
+         bg: "bg-slate-50", 
+         color: "text-primary",
+         noSuffix: true, 
+         href: "/support" 
+      });
     }
 
     return pool.slice(0, 4);
@@ -124,7 +174,7 @@ export default function StatsBar() {
                     "relative group min-h-[140px] md:min-h-[160px] border border-slate-100 bg-white shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[28px] p-5 md:p-8 flex flex-col items-center justify-center gap-3 overflow-hidden hover:-translate-y-1.5 active:scale-95 cursor-pointer h-full"
                   )}>
                     <div className={cn(
-                      "h-10 w-10 md:h-14 md:w-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 shadow-inner z-10",
+                      "h-10 w-10 md:h-14 md:w-14 rounded-full flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 shadow-inner z-10 border border-slate-100",
                       item.bg,
                       item.color
                     )}>

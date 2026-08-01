@@ -15,8 +15,8 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.32.
- * FIXED: Explicit type casting for Firestore query to resolve Advertisement type mismatch.
+ * @fileOverview Institutional Ad-Node v1.33 [Real-Time Sync].
+ * FIXED: Strictly respects the 'adSenseEnabled' toggle from system portal.
  */
 
 export default function AdPlacement({ placement, className, examId }: AdPlacementProps) {
@@ -63,7 +63,10 @@ export default function AdPlacement({ placement, className, examId }: AdPlacemen
     }
   }, [activeAd, db]);
 
-  if (loading || !activeAd || isAdFree || isSafetyZone) return null;
+  // System Override: If AdSense is disabled in portal, block all ADSENSE type nodes immediately
+  const isSystemBlocked = activeAd?.type === 'ADSENSE' && globalSettings?.adSenseEnabled === false;
+
+  if (loading || !activeAd || isAdFree || isSafetyZone || isSystemBlocked) return null;
 
   const handleClick = () => {
     if (db && activeAd) trackAdClick(db, activeAd.id);
@@ -72,7 +75,7 @@ export default function AdPlacement({ placement, className, examId }: AdPlacemen
   return (
     <div className={cn("w-full flex justify-center py-6", className)}>
       <div className="max-w-7xl w-full">
-         {activeAd.type === 'ADSENSE' && globalSettings?.adSenseEnabled ? (
+         {activeAd.type === 'ADSENSE' ? (
             <div 
               className="mx-auto bg-slate-50 border border-slate-100 rounded-xl overflow-hidden min-h-[90px] flex items-center justify-center"
               dangerouslySetInnerHTML={{ __html: activeAd.adSenseCode || '' }}

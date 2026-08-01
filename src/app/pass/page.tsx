@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -33,15 +32,15 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { useUser, useCollection, useFirestore } from "@/firebase"
-import { collection } from "firebase/firestore"
+import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
+import { collection, doc } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Elite Pass Portal v453.0 [Compacted].
- * UPDATED: Reduced card footprint and padding to match Home Hub style.
+ * @fileOverview Institutional Elite Pass Portal v454.0 [Live Sync Enabled].
+ * UPDATED: Strictly pulling Free Trial status and days from global registry.
  */
 
 const BENEFITS = [
@@ -70,7 +69,10 @@ export default function PassPage() {
   }, [user, userLoading, router]);
 
   const passQuery = useMemo(() => (db ? collection(db, "passes") : null), [db])
+  const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db])
+
   const { data: rawPasses, loading: passesLoading } = useCollection<any>(passQuery)
+  const { data: settings } = useDoc<any>(settingsRef)
 
   const passes = useMemo(() => {
      if (!rawPasses) return []
@@ -223,10 +225,12 @@ export default function PassPage() {
 
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
               {passesLoading ? (
-                 Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[320px] w-full rounded-[2rem] bg-muted border border-border" />)
+                 Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[320px] w-full rounded-[24px] bg-muted border border-border" />)
               ) : passes.map((plan, idx) => {
                  const isElite = plan.id.includes('elite');
                  const isFree = plan.price === 0;
+                 const showTrial = isFree && settings?.freeTrialEnabled;
+
                  return (
                     <motion.div 
                       key={plan.id}
@@ -253,7 +257,7 @@ export default function PassPage() {
                                 <CardTitle className="text-lg md:text-xl font-black text-foreground tracking-tighter">{plan.name}</CardTitle>
                                 <div className="flex items-baseline justify-center gap-1">
                                    <span className="text-xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter">₹{plan.price}</span>
-                                   <span className="text-[8px] md:text-[9px] font-bold text-muted-foreground tracking-tight">/ {plan.durationDays} Days</span>
+                                   <span className="text-[8px] md:text-[9px] font-bold text-muted-foreground tracking-tight">/ {isFree ? (settings?.freeTrialDays || 30) : plan.durationDays} Days</span>
                                 </div>
                              </div>
                           </CardHeader>
@@ -278,7 +282,7 @@ export default function PassPage() {
                                isElite ? "bg-primary hover:bg-blue-700 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                              )}>
                                 <Link href={`/checkout?plan=${plan.id}`}>
-                                   {isFree ? 'Activate hub' : 'Get Elite Pass'} <ArrowRight className="ml-2 h-3 w-3" />
+                                   {isFree ? (showTrial ? 'Claim Free Trial' : 'Activate Free Node') : 'Get Elite Pass'} <ArrowRight className="ml-2 h-3 w-3" />
                                 </Link>
                              </Button>
                           </CardFooter>

@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useDoc, useFirestore } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 interface LogoProps {
   className?: string;
@@ -17,8 +19,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix Brand Identity v130.0.
- * UPDATED: Increased scaling bounds for high-visibility 'Zoom' requirements.
+ * @fileOverview Cracklix Brand Identity v131.0 [Real-Time Sync].
+ * FIXED: Pulls dynamic logo URL from branding registry with local fallback.
  */
 export default function Logo({
   className = "",
@@ -30,15 +32,22 @@ export default function Logo({
   align = 'left',
   iconOnly = false
 }: LogoProps) {
+  const db = useFirestore();
+  const brandRef = useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]);
+  const { data: brand } = useDoc<any>(brandRef);
   
-  const assets = {
+  const staticAssets = {
     light: "/logo/cracklix-logo-dark.png",
     dark: "/logo/cracklix-logo-light.png",
     icon: "/logo/cracklix-icon.png"
   };
 
   const isIcon = variant === 'icon' || iconOnly;
-  const src = assets[isIcon ? 'icon' : variant];
+  
+  // Use remote logo if available in registry, otherwise fallback to local asset
+  const src = isIcon 
+    ? (brand?.logoUrl || staticAssets.icon)
+    : (variant === 'light' ? (brand?.logoUrl || staticAssets.light) : (brand?.logoUrl || staticAssets.dark));
 
   const content = (
     <div className={cn(
@@ -48,7 +57,7 @@ export default function Logo({
     )}>
       <Image
         src={src}
-        alt="Cracklix"
+        alt={brand?.organizationName || "Cracklix"}
         width={isIcon ? 320 : 1200}
         height={isIcon ? 320 : 480}
         priority={priority}
@@ -56,6 +65,7 @@ export default function Logo({
           "h-auto transition-all flex-shrink-0 object-contain w-auto scale-110",
           imgClassName
         )}
+        unoptimized={src.startsWith('http')}
       />
     </div>
   );

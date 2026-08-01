@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from "react";
@@ -25,21 +24,26 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Footer Hub v25.0 [Social Sync].
+ * @fileOverview Institutional Footer Hub v26.0 [Full Live Sync].
+ * FIXED: Uses branding registry for all contact nodes.
  */
 export default function Footer() {
   const db = useFirestore();
-  const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
-  const { data: settings } = useDoc<any>(settingsRef);
+  const globalRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
+  const brandRef = useMemo(() => (db ? doc(db, 'settings', 'branding') : null), [db]);
+  
+  const { data: global } = useDoc<any>(globalRef);
+  const { data: brand } = useDoc<any>(brandRef);
 
   const currentYear = new Date().getFullYear();
 
   const info = {
-    email: settings?.supportEmail || SUPPORT_EMAIL,
-    phone: settings?.supportPhone || SUPPORT_PHONE,
-    telegram: settings?.telegramUrl || TELEGRAM_GROUP,
-    instagram: settings?.instagramUrl || INSTAGRAM_PROFILE,
-    footerText: settings?.footerText || "Punjab's most advanced government exam portal."
+    email: brand?.supportEmail || global?.supportEmail || SUPPORT_EMAIL,
+    phone: brand?.supportPhone || global?.supportPhone || SUPPORT_PHONE,
+    telegram: global?.telegramUrl || TELEGRAM_GROUP,
+    instagram: global?.instagramUrl || INSTAGRAM_PROFILE,
+    footerText: brand?.footerText || "Punjab's most advanced government exam portal.",
+    copyright: brand?.copyrightText || `© ${currentYear} Cracklix. All Rights Reserved.`
   };
 
   return (
@@ -113,7 +117,7 @@ export default function Footer() {
       <div className="border-t border-white/5 bg-black/20 pt-8 pb-28 md:py-8">
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-4">
-             <p className="text-[12px] text-slate-500 font-bold">© {currentYear} Cracklix</p>
+             <p className="text-[12px] text-slate-500 font-bold">{info.copyright}</p>
              <Badge variant="outline" className="border-white/10 text-slate-500 text-[10px] font-bold">V{PLATFORM_VERSION.version}</Badge>
           </div>
           <div className="flex items-center gap-3 text-[12px] font-bold text-slate-600 tracking-tight">
