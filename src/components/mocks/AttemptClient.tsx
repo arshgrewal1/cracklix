@@ -38,11 +38,12 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
+import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Official Attempt Hub v107.0.
- * FIXED: Enforces atomic updatedAt sync on start and submission for instant UI refresh.
- * FIXED: Parallelized leaderboard and result commits for sub-1s report generation.
+ * @fileOverview Official Attempt Hub v108.0.
+ * FIXED: Atomic scoring logic - ensured skipped questions are NOT counted as wrong.
+ * FIXED: attemptId persistence - uses local variable for redirect to prevent 'undefined' in URL.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -74,7 +75,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
   const {
     initExam,
-    attemptId,
+    attemptId: storeAttemptId,
     tick,
     isPaused,
     setPaused,
@@ -113,7 +114,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       setMockData(mData);
 
       const questionIds: string[] = mData.questionIds || [];
-      if (questionIds.length === 0) throw new Error("No items in test.");
+      if (questionIds.length === 0) throw new Error("No questions in test.");
       
       const chunks = [];
       for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
@@ -147,7 +148,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
       initExam(mockId, mData.title, user?.uid || null, finalQuestions, mData.duration || 120, resumeData, mData.languageMode, isRetakeRequested);
       
-      // Update activity pointer immediately to refresh Continue Learning
       if (user) {
          setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), {
             mockId,
@@ -173,7 +173,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   }, [isInitializing, initError, tick]);
 
   const handleSubmitFinal = useCallback(async () => {
-    if (!db || isSubmittingFinal || !mockData || !mockId || !attemptId) return;
+    if (!db || isSubmittingFinal || !mockData || !mockId) return;
+    
+    // ATOMIC attemptId generation to avoid redirect failures
+    const finalAttemptId = storeAttemptId || `at_${nanoid(12)}`;
     
     setShowSubmitModal(false);
     setIsSubmittingFinal(true);
@@ -198,9 +201,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
     questions.forEach((q: any, idx: number) => {
       const studentAnsIdx = studentAnswers[idx];
-      const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
+      const correctKey = (q.correctAnswer || "A").trim().toUpperCase();
+      const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(correctKey);
+      
       const isAttempted = studentAnsIdx !== undefined && studentAnsIdx !== null;
-      const isCorrect = isAttempted && studentAnsIdx === correctOptIdx;
+      const isCorrect = isAttempted && Number(studentAnsIdx) === correctOptIdx;
 
       const sId = q.subjectId || 'General';
       if (!subjectMap[sId]) subjectMap[sId] = { name: sId, total: 0, correct: 0, wrong: 0, score: 0 };
@@ -230,15 +235,15 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     
     if (user) {
       try {
-        const resultRef = doc(db, "results", attemptId);
+        const resultRef = doc(db, "results", finalAttemptId);
         const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
         const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
         const globalMeritRef = doc(db, "leaderboard", user.uid);
         const statsRef = doc(db, "settings", "stats");
 
         const resultPayload = {
-           id: attemptId,
-           attemptId, 
+           id: finalAttemptId,
+           attemptId: finalAttemptId, 
            mockId, 
            mockTitle: mockData.title, 
            userId: user.uid,
@@ -253,6 +258,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            attemptedCount, 
            totalQuestions,
            attemptAccuracy, 
+           accuracy: attemptAccuracy,
            timeTaken, 
            timestamp: new Date().toISOString(), 
            updatedAt: serverTimestamp(),
@@ -263,10 +269,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            answers: studentAnswers 
         };
 
-        // PARALLEL EXECUTION FOR 1-SECOND SUBMISSION
         await Promise.all([
            setDoc(resultRef, resultPayload),
-           setDoc(attemptPtrRef, { attemptId, status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true }),
+           setDoc(attemptPtrRef, { attemptId: finalAttemptId, status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true }),
            setDoc(lbEntryRef, { 
               userId: user.uid, 
               userName: profile?.name || 'Aspirant', 
@@ -280,6 +285,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               uid: user.uid, 
               displayName: profile?.name || 'Aspirant', 
               totalTests: increment(1), 
+              highestScore: score, // Update high score
               updatedAt: serverTimestamp(), 
               recentMockTitle: mockData.title 
            }, { merge: true }),
@@ -297,7 +303,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }
     } else {
        const guestPayload = {
-          attemptId, 
+          attemptId: finalAttemptId, 
           mockId, 
           mockTitle: mockData.title, 
           score, 
@@ -308,12 +314,12 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           timeTaken, 
           languageMode: language 
        };
-       localStorage.setItem(`cracklix_guest_result_${attemptId}`, JSON.stringify(guestPayload));
+       localStorage.setItem(`cracklix_guest_result_${finalAttemptId}`, JSON.stringify(guestPayload));
     }
 
-    router.push(`/results/view?id=${mockId}&attemptId=${attemptId}`);
+    router.replace(`/results/view?id=${mockId}&attemptId=${finalAttemptId}`);
     setTimeout(() => resetStore(), 1000);
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, attemptId, resetStore, language, toast]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, storeAttemptId, resetStore, language, toast]);
 
   if (isInitializing || isSubmittingFinal) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8 z-[2000] fixed inset-0">
@@ -323,10 +329,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
        </div>
        <div className="text-center space-y-2 px-6">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">
-             {isSubmittingFinal ? "Finalizing report" : "Generating report"}
+             {isSubmittingFinal ? "Finalizing report" : "Synchronizing test"}
           </p>
           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
-             {isSubmittingFinal ? "Preparing your analysis" : "Loading test patterns"}
+             {isSubmittingFinal ? "Preparing your analysis" : "Loading verified patterns"}
           </p>
        </div>
     </div>

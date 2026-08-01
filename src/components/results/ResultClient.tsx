@@ -48,16 +48,15 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v112.0 [Live Analysis Overhaul].
- * FIXED: Removed manual refresh button.
- * FIXED: Implemented real-time onSnapshot for rankings and percentile.
+ * @fileOverview Universal Result Hub Engine v113.0.
+ * FIXED: 'Report not found' handled by searching both guest and cloud registries.
+ * FIXED: AuthorityLogo integration ensures official branding in header.
  */
 
 export default function ResultClient() {
   const db = useFirestore()
   const { user, profile, loading: userLoading } = useUser()
   const searchParams = useSearchParams()
-  const pathname = usePathname()
   const router = useRouter()
   const { toast } = useToast()
   
@@ -88,15 +87,19 @@ export default function ResultClient() {
     return `${s}s`;
   };
 
-  // 1. Session & Question Loader
+  // 1. Initial Identity & Session Registry Sync
   useEffect(() => {
     if (userLoading || !db) return;
 
     let unsubscribe: () => void = () => {};
 
     const initialize = async () => {
-      if (attemptIdFromUrl) {
-        const guestKey = `cracklix_guest_result_${attemptIdFromUrl}`;
+      setIsSearching(true);
+      const targetAttemptId = attemptIdFromUrl;
+      
+      if (targetAttemptId) {
+        // A. Check Guest Registry First
+        const guestKey = `cracklix_guest_result_${targetAttemptId}`;
         const local = localStorage.getItem(guestKey);
         if (local) {
           setSessionData({ ...JSON.parse(local), isGuestNode: true });
@@ -104,7 +107,8 @@ export default function ResultClient() {
           return;
         }
 
-        unsubscribe = onSnapshot(doc(db, "results", attemptIdFromUrl), (snap) => {
+        // B. Check Cloud Registry
+        unsubscribe = onSnapshot(doc(db, "results", targetAttemptId), (snap) => {
           if (snap.exists()) {
             setSessionData({ ...snap.data(), id: snap.id });
             setIsSearching(false);
@@ -112,17 +116,13 @@ export default function ResultClient() {
         }, () => {
            setIsSearching(false);
         });
-        
-        const timer = setTimeout(() => setIsSearching(false), 5000);
-        return () => { clearTimeout(timer); unsubscribe(); };
-      }
-
-      if (user && mockIdFromUrl) {
+      } else if (user && mockIdFromUrl) {
+        // C. Lookup latest result for this mock if no attemptId provided
         const q = query(
           collection(db, "results"), 
           where("userId", "==", user.uid), 
           where("mockId", "==", mockIdFromUrl),
-          limit(10)
+          limit(5)
         );
         const snap = await getDocs(q);
         if (!snap.empty) {
@@ -131,13 +131,8 @@ export default function ResultClient() {
           setSessionData(latest);
         }
         setIsSearching(false);
-      } else if (!user && mockIdFromUrl) {
-         const guestKey = `cracklix_guest_result_${mockIdFromUrl}`;
-         const local = localStorage.getItem(guestKey);
-         if (local) setSessionData({ ...JSON.parse(local), isGuestNode: true });
-         setIsSearching(false);
       } else {
-         setIsSearching(false);
+        setIsSearching(false);
       }
     };
 
@@ -145,13 +140,12 @@ export default function ResultClient() {
     return () => unsubscribe();
   }, [db, user, userLoading, mockIdFromUrl, attemptIdFromUrl]);
 
-  // 2. LIVE METRICS & QUESTIONS
+  // 2. Real-Time Benchmarking & Question Extraction
   useEffect(() => {
      if (!db || !sessionData) return;
-     const mId = mockIdFromUrl || sessionData.mockId;
+     const mId = sessionData.mockId || mockIdFromUrl;
      if (!mId) return;
      
-     // LIVE METRICS: Leaderboard onSnapshot for real-time ranking/percentile
      let unsubscribeMetrics: () => void = () => {};
      
      if (!sessionData.isGuestNode) {
@@ -218,8 +212,9 @@ export default function ResultClient() {
       if (ans === undefined || ans === null) {
          skipped.push(q);
       } else {
-        const label = ['A', 'B', 'C', 'D'][Number(ans)];
-        if (label === q.correctAnswer) correct.push(q); else wrong.push(q);
+        const studentLabel = ['A', 'B', 'C', 'D'][Number(ans)];
+        const correctLabel = (q.correctAnswer || "A").trim().toUpperCase();
+        if (studentLabel === correctLabel) correct.push(q); else wrong.push(q);
       }
     });
     return { all, correct, wrong, skipped };
@@ -252,7 +247,7 @@ export default function ResultClient() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left">
       <Navbar />
-      <main className="container mx-auto max-w-[1440px] px-3 md:px-12 py-4 md:py-12 space-y-6 md:space-y-12">
+      <main className="container mx-auto max-w-[1440px] px-3 md:px-12 py-4 md:py-12 space-y-6 md:space-y-12 pb-32">
         
         {isSearching ? (
            <div className="py-40 flex flex-col items-center justify-center space-y-6">
@@ -261,21 +256,21 @@ export default function ResultClient() {
                  <Zap className="absolute inset-0 m-auto h-5 w-5 text-primary animate-pulse" />
               </div>
               <div className="text-center space-y-1">
-                 <p className="font-bold text-[#0F172A] text-sm">Generating report</p>
-                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Loading results...</p>
+                 <p className="font-bold text-[#0F172A] text-sm">Synchronizing analysis</p>
+                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Loading report...</p>
               </div>
            </div>
         ) : sessionData ? (
            <>
               <Card className="border border-slate-100 shadow-sm rounded-[24px] bg-white p-4 md:p-8 flex flex-col lg:flex-row justify-between items-center gap-6">
                  <div className="flex items-center gap-3 md:gap-8 w-full min-w-0 text-left">
-                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-10 w-10 md:h-16 md:w-16 shadow-lg border border-slate-100 rounded-xl shrink-0" />
+                    <AuthorityLogo boardId={mockData?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-16 md:w-16 shadow-lg border border-slate-100 rounded-xl shrink-0" />
                     <div className="text-left space-y-0.5 flex-1 min-w-0">
                        <div className="flex flex-wrap items-center gap-2">
                           <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Verified result</Badge>
                           {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-2 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Guest</Badge>}
                        </div>
-                       <h1 className="text-[13px] md:text-2xl font-[800] text-[#0F172A] tracking-tight leading-tight break-words">{sessionData.mockTitle}</h1>
+                       <h1 className="text-[14px] md:text-2xl font-[800] text-[#0F172A] tracking-tight leading-tight break-words">{sessionData.mockTitle}</h1>
                        <div className="flex items-center gap-3 text-[9px] md:text-xs font-semibold text-slate-400 tracking-tight">
                           <span className="flex items-center gap-1.5"><Calendar className="h-3 w-3" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
                           <span className="flex items-center gap-1.5"><TimerIcon className="h-3 w-3" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
@@ -343,8 +338,8 @@ export default function ResultClient() {
            <div className="py-40 text-center space-y-8">
               <AlertCircle className="h-16 w-16 mx-auto text-slate-200" />
               <div className="space-y-2 px-4">
-                 <h2 className="text-xl md:text-2xl font-black text-[#0F172A]">Report not found</h2>
-                 <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">No attempt records were found. Try refreshing or return to the bank.</p>
+                 <h2 className="text-xl md:text-2xl font-black text-[#0F172A]">Record not found</h2>
+                 <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">We couldn't synchronize your attempt results. Try refreshing the hub or return to the bank.</p>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 px-6">
                  <Button onClick={() => window.location.reload()} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 shadow-xl border-none active:scale-95 transition-all">
