@@ -25,8 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v522.0.
- * FIXED: Redesigned Today's Challenge from scratch with premium glassmorphism.
+ * @fileOverview Premium Institutional Hub v523.0.
  * UPDATED: Standardized terminology to "Questions" and "Database".
  */
 export default function HomePage() {
@@ -116,7 +115,7 @@ export default function HomePage() {
                         </Link>
                      ) : (
                         <div className="p-4 bg-white/5 rounded-xl text-center">
-                           <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Awaiting daily node sync</p>
+                           <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Awaiting daily database sync</p>
                         </div>
                      )}
                   </div>

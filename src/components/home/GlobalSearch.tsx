@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -11,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 
 /**
- * @fileOverview Institutional Sticky Search Hub v16.3.
+ * @fileOverview Institutional Sticky Search Hub v16.4.
  * UPDATED: Branding synchronized to "Arsh Grewal verified".
  */
 

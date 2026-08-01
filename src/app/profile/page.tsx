@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { 
   Mail, 
   Phone, 
@@ -43,9 +42,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v42.0 [Compact Hardened].
- * FIXED: Live stat calculation from results and profile object.
- * UPDATED: Title Case and standardized terminology.
+ * @fileOverview Institutional Profile Hub v43.0 [Sync Fixed].
+ * FIXED: Accuracy and Question stats correctly pull live from Firestore.
+ * UPDATED: Standardized terminology to "Questions" and "Database".
  */
 
 export default function ProfilePage() {

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { create } from "zustand";
@@ -54,7 +55,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Hardened Test Store v16.0 [Atomic Attempt ID].
+ * @fileOverview Hardened Test Store v17.0 [Terminology Standardized].
+ * FIXED: Atomic Attempt ID generation and Terminology update.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -124,7 +126,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const rawStartTime = isResuming && effectiveResume?.startTime ? effectiveResume.startTime : now;
     
     // ATOMIC attemptId logic: Use unique nanoID for the primary key.
-    // If resuming, keep the old ID. If new, generate a fresh one.
     const attemptId = (isResuming && !forceNew) ? (effectiveResume.attemptId || `at_${nanoid(12)}`) : `at_${nanoid(12)}`;
 
     set({
