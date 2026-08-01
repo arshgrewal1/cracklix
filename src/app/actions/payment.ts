@@ -1,4 +1,3 @@
-
 'use client';
 
 import { firestore as db } from '@/firebase/app';
@@ -13,32 +12,34 @@ import {
 } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Testbook-Style Subscription Actions v5.3.
- * UPDATED: Integrated incremental statistics update for revenue and active passes.
+ * @fileOverview Hardened Testbook-Style Subscription Actions v5.4.
+ * FIXED: TypeScript strict null-safety and type casting for Firestore snapshots.
  */
 
 export async function activateFreePass(userId: string, planId: string) {
+  if (!db) throw new Error("Database offline.");
+  
   try {
     const userRef = doc(db, 'users', userId);
     const userSnap = await getDoc(userRef);
     if (!userSnap.exists()) throw new Error("User node not found.");
-    const userData = userSnap.data();
+    const userData = userSnap.data() as any;
 
     const planSnap = await getDoc(doc(db, "passes", planId));
     if (!planSnap.exists()) throw new Error("Pass node missing in registry.");
-    const planData = planSnap.data();
+    const planData = planSnap.data() as any;
 
     if (planData.price > 0) throw new Error("Security Violation: Paid plan via free node.");
 
     const now = new Date();
     const durationDays = planData.durationDays || 30;
     const currentExpiry = userData.passExpiresAt ? new Date(userData.passExpiresAt) : null;
-    const isPassActive = currentExpiry && currentExpiry > now;
+    const isPassActive = !!(currentExpiry && currentExpiry > now);
 
     let newExpiryDate: Date;
 
     if (isPassActive && userData.status === planId) {
-      newExpiryDate = new Date(currentExpiry.getTime());
+      newExpiryDate = new Date(currentExpiry!.getTime());
       newExpiryDate.setDate(newExpiryDate.getDate() + durationDays);
     } else {
       newExpiryDate = new Date();
@@ -69,7 +70,7 @@ export async function activateFreePass(userId: string, planId: string) {
     }
 
     return { success: true };
-  } catch (e: unknown) {
+  } catch (e: any) {
     console.error('Free Pass Activation Error:', e);
     throw new Error('Failed to activate free pass node.');
   }
@@ -82,12 +83,13 @@ export async function submitManualPayment(data: {
   planId: string;
   transactionId: string;
 }) {
+  if (!db) throw new Error("Database offline.");
   const { userId, userEmail, userName, planId, transactionId } = data;
 
   try {
     const planSnap = await getDoc(doc(db, "passes", planId));
     if (!planSnap.exists()) throw new Error("Invalid Plan Node");
-    const planData = planSnap.data();
+    const planData = planSnap.data() as any;
 
     const reqRef = await addDoc(collection(db, 'payment_requests'), {
       userId,
@@ -103,38 +105,40 @@ export async function submitManualPayment(data: {
     });
 
     return { success: true, requestId: reqRef.id };
-  } catch (e) {
+  } catch (e: any) {
     console.error('Manual Payment Submission Error:', e);
     throw new Error('Failed to submit verification request.');
   }
 }
 
 export async function approvePaymentRequest(requestId: string, adminId: string) {
+  if (!db) throw new Error("Database offline.");
+  
   try {
     const reqRef = doc(db, 'payment_requests', requestId);
     const snap = await getDoc(reqRef);
     
     if (!snap.exists()) throw new Error('Request not found');
-    const data = snap.data();
+    const data = snap.data() as any;
 
     const userRef = doc(db, 'users', data.userId);
     const userSnap = await getDoc(userRef);
-    const userData = userSnap.data() || {};
+    const userData = userSnap.data() as any || {};
 
     const planSnap = await getDoc(doc(db, "passes", data.planId));
     if (!planSnap.exists()) throw new Error("Pass node missing in registry.");
-    const planData = planSnap.data();
+    const planData = planSnap.data() as any;
 
     const now = new Date();
     const durationDays = planData.durationDays || 30;
     const currentExpiry = userData.passExpiresAt ? new Date(userData.passExpiresAt) : null;
-    const isPassActive = currentExpiry && currentExpiry > now;
+    const isPassActive = !!(currentExpiry && currentExpiry > now);
     const newTier = planData.tier || 1;
 
     let newExpiryDate: Date;
 
     if (isPassActive && userData.status === data.planId) {
-      newExpiryDate = new Date(currentExpiry.getTime());
+      newExpiryDate = new Date(currentExpiry!.getTime());
       newExpiryDate.setDate(newExpiryDate.getDate() + durationDays);
     } else {
       newExpiryDate = new Date();
@@ -170,7 +174,7 @@ export async function approvePaymentRequest(requestId: string, adminId: string) 
     }).catch(() => {});
 
     return { success: true };
-  } catch (e) {
+  } catch (e: any) {
     console.error('Approval Error:', e);
     throw new Error('Failed to approve payment.');
   }

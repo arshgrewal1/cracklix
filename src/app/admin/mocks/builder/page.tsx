@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,7 +14,7 @@ import {
   Plus,
   Trash2,
   Zap,
-  CheckCircle2,
+  CheckCircle,
   X,
   RefreshCw,
   Check,
@@ -60,15 +60,15 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v53.1.
- * FIXED: Malformed query syntax and added PenSquare import.
+ * @fileOverview Master Mock Builder v53.2.
+ * FIXED: ReferenceError for PenSquare and corrected malformed query syntax.
  */
 
 export default function MockBuilderPage() {
   return (
-    <React.Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
       <MockBuilderContent />
-    </React.Suspense>
+    </Suspense>
   )
 }
 
@@ -398,7 +398,7 @@ function MockBuilderContent() {
               {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save draft
            </Button>
            <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] tracking-tight shadow-2xl gap-3 border-none transition-all active:scale-95">
-              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync live
+              {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-5 w-5" />} Sync live
            </Button>
         </div>
       </AdminPageHeader>
@@ -594,14 +594,14 @@ function MockBuilderContent() {
                  <div className="space-y-6 pt-6 border-t border-slate-100">
                     <div className="flex items-center gap-4">
                        <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100">
-                          <CheckCircle2 className="h-5 w-5" />
+                          <CheckCircle className="h-5 w-5" />
                        </div>
                        <div className="space-y-0.5 text-left">
                           <h4 className="text-[13px] font-black text-[#0F172A] uppercase tracking-tight">System control</h4>
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Visibility control</p>
                        </div>
                     </div>
-                    <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", mockData.published ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-slate-100 opacity-60")}>
+                    <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", mockData.published ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-slate-50 opacity-60")}>
                        <div className="space-y-0.5">
                           <p className="text-[11px] font-bold uppercase text-[#0F172A] tracking-tight">System activation</p>
                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Enable live feed access</p>

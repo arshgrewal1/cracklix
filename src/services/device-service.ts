@@ -1,10 +1,10 @@
-
 import { Firestore, doc, updateDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { UserProfile, DeviceLock } from '@/types';
 import { getDeviceId, getDeviceName } from '@/lib/device';
 
 /**
- * @fileOverview Institutional Device Binding Logic.
+ * @fileOverview Institutional Device Binding Logic v2.0.
+ * FIXED: Secure type casting for toDate() call.
  */
 
 export const DeviceService = {
@@ -61,7 +61,18 @@ export const DeviceService = {
   canChangeDevice(profile: UserProfile): { canChange: boolean; daysRemaining: number } {
     if (!profile.deviceLock?.lastChangedAt) return { canChange: true, daysRemaining: 0 };
 
-    const lastChanged = profile.deviceLock.lastChangedAt.toDate();
+    // Resolve date regardless of whether it's a Timestamp, Date, or string
+    let lastChanged: Date;
+    const ts = profile.deviceLock.lastChangedAt;
+    
+    if (ts && typeof ts.toDate === 'function') {
+      lastChanged = ts.toDate();
+    } else if (ts instanceof Date) {
+      lastChanged = ts;
+    } else {
+      lastChanged = new Date(ts);
+    }
+
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - lastChanged.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

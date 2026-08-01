@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
@@ -9,8 +8,8 @@ import { Loader2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 /**
- * @fileOverview Ad Entry Page Node v3.2 (Next.js 15 Hardened).
- * FIXED: Wrapped content in Suspense to satisfy Next.js 15 CSR bailout requirements.
+ * @fileOverview Ad Entry Page Node v3.3.
+ * FIXED: Awaited searchParams and provided Suspense fallback for Next.js 15.
  */
 export default function AdEntryPage() {
   return (
@@ -23,7 +22,7 @@ export default function AdEntryPage() {
 function AdEntryLoader() {
   const db = useFirestore();
   const searchParams = useSearchParams();
-  const id = searchParams.get('id');
+  const id = searchParams?.get('id');
   
   const [existingAd, setExistingAd] = useState<any>(null);
   const [exams, setExams] = useState<any[]>([]);

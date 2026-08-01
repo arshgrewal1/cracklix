@@ -13,6 +13,14 @@ export type ExamLanguage = 'en' | 'pa' | 'hi' | 'bilingual';
 
 export type LanguageDisplayMode = 'ENGLISH' | 'PUNJABI' | 'HINDI' | 'ENGLISH_PUNJABI' | 'ENGLISH_HINDI';
 
+export interface DeviceLock {
+  deviceId: string;
+  deviceName: string;
+  lastChangedAt: any;
+  enabled: boolean;
+  enforcementLevel: number;
+}
+
 export interface StudyStats {
   todayStudyMinutes: number;
   yesterdayStudyMinutes: number;
@@ -107,14 +115,15 @@ export interface UserProfile {
   updatedAt: any;
   lastLoginAt?: any;
   activeDeviceId?: string;
+  deviceLock?: DeviceLock;
   passStatus: 'active' | 'expired' | 'none';
   passExpiresAt?: string;
+  passActivatedAt?: string;
   photoURL?: string;
   gender?: Gender;
   pinnedExams?: string[];
   savedVacancies?: string[];
   savedCA?: string[];
-  // Platform-Wide Aggregates
   totalTests?: number;
   highestScore?: number;
   averageAccuracy?: number;
@@ -407,6 +416,8 @@ export interface Vacancy {
   applyLink: string;
   officialWebsite: string;
   notificationPdfUrl?: string;
+  officialNoticeUrl?: string;
+  helpdeskUrl?: string;
   isFeatured?: boolean;
   isBreaking?: boolean;
   isUrgent?: boolean;
@@ -420,8 +431,6 @@ export interface Vacancy {
   startDate?: string;
   examDate?: string;
   resultDate?: string;
-  officialNoticeUrl?: string;
-  helpdeskUrl?: string;
   seoTitle?: string;
   seoDescription?: string;
   slug: string;
