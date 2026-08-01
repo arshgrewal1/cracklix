@@ -60,8 +60,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v56.0 [Hardened NEXT15].
+ * @fileOverview Master Mock Builder v57.0 [Hardened NEXT15].
  * FIXED: Properly wrapped Firestore collection queries and resolved Promise-based searchParams.
+ * FIXED: Standardized Lucide icons to latest supported naming.
  */
 
 export default function MockBuilderPage() {
@@ -780,7 +781,7 @@ function MockBuilderContent() {
                                  <div key={q.id} className="flex items-center justify-between p-4 md:px-8 bg-white border border-slate-100 rounded-xl md:rounded-2xl hover:shadow-lg transition-all group">
                                     <div className="flex items-center gap-4 md:gap-8 min-w-0">
                                        <span className="text-xs md:text-lg font-black text-primary tabular-nums">#{offset + qIdx + 1}</span>
-                                       <p className="text-[12px] md:text-sm font-bold text-slate-600 break-words text-left">{q.englishQuestion}</p>
+                                       <p className="text-[12px] md:sm font-bold text-slate-600 break-words text-left">{q.englishQuestion}</p>
                                     </div>
                                     <button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: any) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90 border-none bg-transparent cursor-pointer"><X className="h-4 w-4" /></button>
                                  </div>

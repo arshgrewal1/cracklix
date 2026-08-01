@@ -62,7 +62,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 /**
  * @fileOverview Daily Challenge Builder v48.0 [Strict NEXT15 Async].
- * FIXED: setMockData reference to setQuizData and properly handled async searchParams.
+ * FIXED: Corrected ReferenceError where setMockData was called instead of setQuizData.
  */
 
 export default function DailyQuizBuilder() {

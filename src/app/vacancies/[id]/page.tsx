@@ -34,7 +34,8 @@ import {
   Bookmark,
   Smartphone,
   Printer,
-  FileBadge
+  FileBadge,
+  Megaphone
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -47,7 +48,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v4.8 [Strict NEXT15 Async].
+ * @fileOverview Enterprise Recruitment Intelligence Portal v4.9 [Strict NEXT15 Async].
  * FIXED: Handled async params and corrected JSX Button tag mismatch.
  */
 
@@ -337,7 +338,7 @@ function SidebarDate({ label, val, icon, highlight = false }: any) {
      <div className={cn("flex items-center justify-between p-6 rounded-3xl border-2 transition-all duration-500 group", highlight ? "bg-white/10 border-white/20 shadow-2xl scale-[1.05]" : "bg-white/5 border-transparent hover:border-white/10 hover:bg-white/10")}>
         <div className="flex items-center gap-4">
            <div className="h-10 w-10 bg-white/10 rounded-xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform">{icon}</div>
-           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">{label}</span>
+           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</span>
         </div>
         <span className="text-sm md:text-xl font-black tabular-nums tracking-tighter text-white">{val}</span>
      </div>
