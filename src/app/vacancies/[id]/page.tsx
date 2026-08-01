@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -143,7 +142,7 @@ export default function VacancyDetailPage() {
                   <div className="space-y-6">
                      <div className="flex flex-wrap justify-center lg:justify-start items-center gap-4">
                         <Badge className="bg-primary text-white border-none px-6 py-2 rounded-full font-black text-[10px] md:text-xs tracking-widest shadow-xl uppercase">{vacancy.board} official</Badge>
-                        {isNew() && <Badge className="bg-emerald-500 text-white border-none px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-xl tracking-widest animate-pulse">New Node</Badge>}
+                        {isNew() && <Badge className="bg-emerald-50 text-emerald-600 border-none px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-xl tracking-widest animate-pulse">New Node</Badge>}
                         {isClosingSoon() && <Badge className="bg-rose-500 text-white border-none px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-xl tracking-widest">Closing Soon</Badge>}
                         <div className="h-10 w-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/10 shadow-inner"><Crown className="h-5 w-5 text-primary fill-primary" /></div>
                      </div>
@@ -244,7 +243,7 @@ export default function VacancyDetailPage() {
             <aside className="lg:col-span-4 space-y-10 md:space-y-16">
                
                {/* DATES CARD */}
-               <Card className="border-none shadow-5xl rounded-[3rem] md:rounded-[4.5rem] bg-[#0F172A] text-white p-8 md:p-14 space-y-12 relative overflow-hidden group border border-white/5">
+               <Card className="border-none shadow-5xl rounded-[3rem] md:rounded-[4rem] bg-[#0F172A] text-white p-8 md:p-14 space-y-12 relative overflow-hidden group border border-white/5">
                   <div className="absolute top-0 right-0 p-14 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Calendar className="h-80 w-80 text-primary" /></div>
                   <div className="relative z-10 space-y-12 text-left">
                      <div className="space-y-3">
@@ -335,7 +334,7 @@ export default function VacancyDetailPage() {
                   </div>
                </div>
                <div className="flex-1 flex items-center gap-3">
-                  <Button onClick={handleShare} variant="ghost" className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-white/5 text-white hover:bg-white/10 border-none shadow-inner transition-all"><Share2 className="h-5 w-5" /></button>
+                  <Button onClick={handleShare} variant="ghost" className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-white/5 text-white hover:bg-white/10 border-none shadow-inner transition-all"><Share2 className="h-5 w-5" /></Button>
                   <Button asChild className="flex-1 h-14 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-xs tracking-[0.3em] rounded-3xl md:rounded-[2.5rem] shadow-4xl border-none active:scale-95 transition-all">
                      <a href={vacancy.applyLink} target="_blank" rel="noopener noreferrer">Apply online hub <ChevronRight className="ml-2 h-4 w-4 md:h-6 md:w-6" /></a>
                   </Button>
@@ -358,7 +357,7 @@ function HubContainer({ label, icon: Icon, color = "text-primary", children }: a
            </div>
            <h3 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tighter uppercase">{label}</h3>
         </div>
-        <div className="bg-white border-2 border-slate-50 shadow-2xl rounded-[3rem] md:rounded-[4.5rem] p-8 md:p-20 text-left transition-all duration-500 hover:shadow-4xl">
+        <div className="bg-white border-2 border-slate-50 shadow-2xl rounded-[3rem] md:rounded-[4rem] p-8 md:p-20 text-left transition-all duration-500 hover:shadow-4xl">
            {children}
         </div>
      </div>
