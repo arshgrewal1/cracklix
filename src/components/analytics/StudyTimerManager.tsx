@@ -8,14 +8,13 @@ import { useStudyStore } from '@/hooks/useStudyTimer';
 import { usePathname } from 'next/navigation';
 
 /**
- * @fileOverview Institutional Study Engine v1.2 [Standalone Manager].
- * FIXED: Resilient activity detection for mobile PWA (scroll/touch).
+ * @fileOverview Institutional Study Engine v1.3 [Reliability Hardened].
  * FIXED: Atomic midnight rollover at 12:00 AM local time.
+ * FIXED: Persistent counting across all app nodes.
  */
 export default function StudyTimerManager() {
   const { user } = useUser();
   const db = useFirestore();
-  const pathname = usePathname();
   const { activeSeconds, increment, setBase, reset } = useStudyStore();
   
   const lastSyncTime = useRef(Date.now());
@@ -49,26 +48,25 @@ export default function StudyTimerManager() {
         return;
       }
 
-      const sessionSeconds = activeSeconds - (data?.lastSyncedSeconds || 0);
-      if (sessionSeconds <= 0) {
-        isSyncing.current = false;
-        return;
-      }
+      const totalMinsToday = Math.floor(activeSeconds / 60);
+      const prevMins = data?.todayStudyMinutes || 0;
+      const newMins = totalMinsToday - prevMins;
 
       // Sync active minutes to database hub
       await setDoc(statsRef, {
-        todayStudyMinutes: Math.floor(activeSeconds / 60),
+        todayStudyMinutes: totalMinsToday,
         lastActiveTime: serverTimestamp(),
         lastStudyDate: todayStr,
         updatedAt: serverTimestamp(),
         lastSyncedSeconds: activeSeconds
       }, { merge: true });
 
-      // Update global user node for leaderboard ranking
-      await updateDoc(doc(db, 'users', user.uid), {
-         'studyStats.totalLifetimeStudyMinutes': fsIncrement(Math.floor(sessionSeconds / 60)),
-         'studyStats.lastStudyDate': todayStr
-      }).catch(() => {});
+      if (newMins > 0) {
+        await updateDoc(doc(db, 'users', user.uid), {
+           'studyStats.totalLifetimeStudyMinutes': fsIncrement(newMins),
+           'studyStats.lastStudyDate': todayStr
+        }).catch(() => {});
+      }
       
     } catch (e) {
       console.error("[STUDY_SYNC_FAILURE]:", e);
@@ -89,7 +87,7 @@ export default function StudyTimerManager() {
        if (snap.exists()) {
           const data = snap.data();
           if (data.lastStudyDate === todayStr) {
-             setBase(data.todayStudyMinutes * 60);
+             setBase(data.lastSyncedSeconds || (data.todayStudyMinutes * 60) || 0);
           } else {
              await syncToFirestore(true);
           }
@@ -126,7 +124,6 @@ export default function StudyTimerManager() {
        lastActivityTime.current = Date.now();
     };
 
-    // Global Activity Registry: Tracks all meaningful interactions
     window.addEventListener('mousemove', activityListener);
     window.addEventListener('keydown', activityListener);
     window.addEventListener('click', activityListener);
@@ -134,7 +131,6 @@ export default function StudyTimerManager() {
     window.addEventListener('touchstart', activityListener);
     window.addEventListener('touchmove', activityListener);
     
-    // Visibility Hub: Triggers sync on app minimize/restore
     window.addEventListener('visibilitychange', () => {
        activityListener();
        syncToFirestore();

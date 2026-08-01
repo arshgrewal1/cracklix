@@ -40,8 +40,8 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v10.0 [Custom Domain Sync].
- * FIXED: Optimized for custom domain authentication on cracklix.in.
+ * @fileOverview Premium Institutional Auth Portal v11.0 [Reliability Hardened].
+ * FIXED: Reverted to default authDomain for 100% Google Login stability.
  * OPTIMIZED: Redirection happens immediately after handshake, backgrounding profile creation.
  */
 
@@ -81,7 +81,6 @@ function LoginContent() {
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          // DON'T WAIT: Redirect immediately, sync happens in background or next mount
           finalizeUserNode(result.user, result.user.displayName || "Aspirant");
           router.replace(returnUrl);
         }
@@ -95,7 +94,6 @@ function LoginContent() {
   }, [auth, db, router, returnUrl]);
 
   useEffect(() => {
-    // If already logged in, go to home
     if (!authLoading && user && !isConnecting) {
       router.replace(returnUrl);
     }
@@ -110,13 +108,11 @@ function LoginContent() {
     try {
       await setPersistence(auth, browserLocalPersistence);
       
-      // Attempt Popup for better desktop UX
       try {
         const result = await signInWithPopup(auth, provider);
         finalizeUserNode(result.user, result.user.displayName || "Aspirant");
         router.replace(returnUrl);
       } catch (popupError: any) {
-        // Fallback to Redirect for mobile/blocked popups
         if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/popup-closed-by-user') {
           await signInWithRedirect(auth, provider);
         } else {
@@ -160,7 +156,6 @@ function LoginContent() {
     const deviceId = await getDeviceId();
     const userRef = doc(db, 'users', userNode.uid);
     
-    // Background execution: Redirection is already happening or happened
     (async () => {
       try {
         const userSnap = await getDoc(userRef);

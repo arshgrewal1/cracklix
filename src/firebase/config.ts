@@ -1,6 +1,6 @@
 export const firebaseConfig = {
   apiKey: "AIzaSyD2zUm458U4N7rN1YObDrcnM1HUAjxHB6U",
-  authDomain: "cracklix.in",
+  authDomain: "cracklix0.firebaseapp.com",
   projectId: "cracklix0",
   storageBucket: "cracklix0.firebasestorage.app",
   messagingSenderId: "928625847959",
