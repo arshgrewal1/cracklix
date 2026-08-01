@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -23,23 +24,35 @@ import {
   Youtube,
   Facebook,
   Database,
-  SearchCode
+  SearchCode,
+  Save,
+  X,
+  Loader2,
+  CheckCircle2
 } from "lucide-react"
-import { useFirestore } from "@/firebase"
-import { collection, query, limit, onSnapshot, where, Timestamp } from "firebase/firestore"
+import { useFirestore, useDoc } from "@/firebase"
+import { collection, query, limit, onSnapshot, where, Timestamp, doc, setDoc, serverTimestamp } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Real-Time Community Analytics v2.2.
+ * @fileOverview Premium Real-Time Community Analytics v3.0.
  * FIXED: Strictly uses real Firestore snapshots for all metrics.
- * UPDATED: Integrated presence monitoring and authentic growth tracking.
+ * UPDATED: Implemented Social API Registry Hub with Connect triggers.
  */
+
+type SocialPlatform = 'YOUTUBE' | 'TELEGRAM' | 'INSTAGRAM' | 'FACEBOOK' | 'X_PORTAL' | 'LINKEDIN';
 
 export default function CommunityAnalyticsPage() {
   const db = useFirestore()
+  const { toast } = useToast()
   const [mounted, setMounted] = useState(false);
   const [lastSync, setLastSync] = useState<string>("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const [liveMetrics, setLiveMetrics] = useState({
     totalUsers: 0,
@@ -54,6 +67,13 @@ export default function CommunityAnalyticsPage() {
     newToday: 0,
     activeToday: 0
   });
+
+  // Social Config State
+  const [selectedSocial, setSelectedSocial] = useState<SocialPlatform | null>(null);
+  const [socialCreds, setSocialCreds] = useState({ apiKey: "", channelId: "" });
+  
+  const socialRef = useMemo(() => (db ? doc(db, 'settings', 'social_apis') : null), [db]);
+  const { data: socialData } = useDoc<any>(socialRef);
 
   useEffect(() => {
     setMounted(true);
@@ -108,13 +128,34 @@ export default function CommunityAnalyticsPage() {
     };
   }, [db]);
 
+  const handleConnectAPI = async () => {
+     if (!db || !selectedSocial || isSaving) return;
+     setIsSaving(true);
+     try {
+        await setDoc(socialRef!, {
+           [selectedSocial]: {
+              ...socialCreds,
+              connectedAt: serverTimestamp(),
+              status: 'CONNECTED'
+           }
+        }, { merge: true });
+        toast({ title: "API Registry Updated", description: `${selectedSocial} node synchronized.` });
+        setSelectedSocial(null);
+        setSocialCreds({ apiKey: "", channelId: "" });
+     } catch (e) {
+        toast({ variant: "destructive", title: "Sync failed" });
+     } finally {
+        setIsSaving(false);
+     }
+  }
+
   if (!mounted) return null;
 
   return (
-    <div className="space-y-10 pb-32 text-left animate-in fade-in duration-700">
+    <div className="space-y-10 pb-32 text-left animate-in fade-in duration-700 px-1 md:px-4">
       
       {/* HEADER HUB */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1.5">
            <div className="flex items-center gap-2 mb-1">
               <Activity className="h-4 w-4 text-emerald-500 animate-pulse" />
@@ -136,7 +177,7 @@ export default function CommunityAnalyticsPage() {
 
       {/* ASPIRANT MATRIX */}
       <section className="space-y-6">
-         <div className="flex items-center gap-3 px-1">
+         <div className="flex items-center gap-3">
             <Users className="h-5 w-5 text-blue-500" />
             <h3 className="text-xl font-black text-[#0F172A] uppercase tracking-tight">Aspirant Matrix</h3>
          </div>
@@ -148,23 +189,9 @@ export default function CommunityAnalyticsPage() {
          </div>
       </section>
 
-      {/* AUTH NODES */}
+      {/* ENGAGEMENT FLOW */}
       <section className="space-y-6">
-         <div className="flex items-center gap-3 px-1">
-            <ShieldCheck className="h-5 w-5 text-emerald-500" />
-            <h3 className="text-xl font-black text-[#0F172A] uppercase tracking-tight">Access Nodes</h3>
-         </div>
-         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            <AnalyticCard label="Google Login" value={liveMetrics.googleUsers} trend="Sync" icon={<Globe />} color="blue" />
-            <AnalyticCard label="Email Login" value={liveMetrics.emailUsers} trend="Vault" icon={<Send />} color="slate" />
-            <AnalyticCard label="New Today" value={liveMetrics.newToday} trend="Growth" icon={<TrendingUp />} color="emerald" />
-            <AnalyticCard label="Daily Streak" value="---" trend="Alpha" icon={<RefreshCw />} color="rose" />
-         </div>
-      </section>
-
-      {/* CONTENT ENGAGEMENT */}
-      <section className="space-y-6">
-         <div className="flex items-center gap-3 px-1">
+         <div className="flex items-center gap-3">
             <Zap className="h-5 w-5 text-orange-500" />
             <h3 className="text-xl font-black text-[#0F172A] uppercase tracking-tight">Engagement Flow</h3>
          </div>
@@ -177,8 +204,8 @@ export default function CommunityAnalyticsPage() {
       </section>
 
       {/* SOCIAL COMMUNITY */}
-      <section className="space-y-8 pt-10">
-         <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-6">
+      <section className="space-y-8 pt-10 border-t border-slate-100">
+         <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
                <Globe className="h-5 w-5 text-blue-400" />
                <h3 className="text-xl font-black text-[#0F172A] uppercase tracking-tight">Social Community</h3>
@@ -187,14 +214,82 @@ export default function CommunityAnalyticsPage() {
          </div>
 
          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <SocialNode icon={<Youtube className="text-rose-600" />} label="YouTube" />
-            <SocialNode icon={<Send className="text-blue-500" />} label="Telegram" />
-            <SocialNode icon={<Instagram className="text-rose-500" />} label="Instagram" />
-            <SocialNode icon={<Facebook className="text-blue-700" />} label="Facebook" />
-            <SocialNode icon={<Activity className="text-sky-500" />} label="X Portal" />
-            <SocialNode icon={<LinkIcon className="text-blue-800" />} label="LinkedIn" />
+            <SocialNode 
+               icon={<Youtube className="text-rose-600" />} 
+               label="YouTube" 
+               status={socialData?.YOUTUBE?.status}
+               onClick={() => setSelectedSocial('YOUTUBE')}
+            />
+            <SocialNode 
+               icon={<Send className="text-blue-500" />} 
+               label="Telegram" 
+               status={socialData?.TELEGRAM?.status}
+               onClick={() => setSelectedSocial('TELEGRAM')}
+            />
+            <SocialNode 
+               icon={<Instagram className="text-rose-500" />} 
+               label="Instagram" 
+               status={socialData?.INSTAGRAM?.status}
+               onClick={() => setSelectedSocial('INSTAGRAM')}
+            />
+            <SocialNode 
+               icon={<Facebook className="text-blue-700" />} 
+               label="Facebook" 
+               status={socialData?.FACEBOOK?.status}
+               onClick={() => setSelectedSocial('FACEBOOK')}
+            />
+            <SocialNode 
+               icon={<Activity className="text-sky-500" />} 
+               label="X Portal" 
+               status={socialData?.X_PORTAL?.status}
+               onClick={() => setSelectedSocial('X_PORTAL')}
+            />
+            <SocialNode 
+               icon={<LinkIcon className="text-blue-800" />} 
+               label="LinkedIn" 
+               status={socialData?.LINKEDIN?.status}
+               onClick={() => setSelectedSocial('LINKEDIN')}
+            />
          </div>
       </section>
+
+      {/* API CONNECTOR DIALOG */}
+      <Dialog open={!!selectedSocial} onOpenChange={o => !o && setSelectedSocial(null)}>
+         <DialogContent className="sm:max-w-md rounded-[2rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left">
+            <div className="h-1.5 w-full bg-[#0F172A]" />
+            <DialogHeader className="p-8 pb-4">
+               <DialogTitle className="text-2xl font-black text-[#0F172A] uppercase flex items-center gap-3">
+                  <LinkIcon className="h-6 w-6 text-primary" /> Connect {selectedSocial?.replace('_', ' ')}
+               </DialogTitle>
+               <DialogDescription className="text-slate-400 font-medium">Link your official social API node to the registry.</DialogDescription>
+            </DialogHeader>
+            <div className="p-8 space-y-6">
+               <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">API Access Key</Label>
+                  <Input 
+                     value={socialCreds.apiKey} 
+                     onChange={e => setSocialCreds({...socialCreds, apiKey: e.target.value})}
+                     className="h-12 bg-slate-50 border-none rounded-xl px-4 font-mono text-xs" 
+                     placeholder="Enter verified key..." 
+                  />
+               </div>
+               <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Channel / Profile ID</Label>
+                  <Input 
+                     value={socialCreds.channelId} 
+                     onChange={e => setSocialCreds({...socialCreds, channelId: e.target.value})}
+                     className="h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm" 
+                     placeholder="e.g. @cracklixapp" 
+                  />
+               </div>
+            </div>
+            <DialogFooter className="p-8 bg-slate-50">
+               <Button onClick={handleConnectAPI} disabled={isSaving || !socialCreds.apiKey} className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl transition-all">
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />} Authorize Node
+               </Button>
+            </DialogFooter>
+         </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -234,18 +329,30 @@ function AnalyticCard({ label, value, trend, icon, color, highlight }: any) {
    )
 }
 
-function SocialNode({ icon, label }: any) {
+function SocialNode({ icon, label, status, onClick }: any) {
+   const isConnected = status === 'CONNECTED';
    return (
-      <Card className="border border-slate-100 bg-white p-6 rounded-2xl text-center space-y-4 shadow-sm hover:shadow-lg transition-all group overflow-hidden relative">
+      <Card className="border border-slate-100 bg-white p-6 rounded-[2rem] text-center space-y-4 shadow-sm hover:shadow-lg transition-all group overflow-hidden relative">
          <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
             {icon}
          </div>
          <div className="space-y-1">
             <p className="text-[10px] font-black uppercase text-[#0F172A]">{label}</p>
-            <p className="text-[8px] font-bold text-rose-500 uppercase tracking-widest">Disconnected</p>
+            <p className={cn(
+               "text-[8px] font-bold uppercase tracking-widest",
+               isConnected ? "text-emerald-500" : "text-rose-500"
+            )}>
+               {isConnected ? "Registry Linked" : "Disconnected"}
+            </p>
          </div>
-         <button className="w-full h-8 bg-slate-50 hover:bg-[#0F172A] hover:text-white rounded-lg font-black uppercase text-[8px] tracking-tight transition-all active:scale-95 border-none shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-            <LinkIcon className="h-2.5 w-2.5" /> Connect API
+         <button 
+           onClick={onClick}
+           className={cn(
+              "w-full h-8 rounded-lg font-black uppercase text-[8px] tracking-tight transition-all active:scale-95 border-none shadow-sm flex items-center justify-center gap-2 cursor-pointer",
+              isConnected ? "bg-emerald-50 text-emerald-600" : "bg-slate-50 text-slate-500 hover:bg-[#0F172A] hover:text-white"
+           )}
+         >
+            <LinkIcon className="h-2.5 w-2.5" /> {isConnected ? "Modify API" : "Connect API"}
          </button>
       </Card>
    )
