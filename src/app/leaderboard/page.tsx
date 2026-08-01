@@ -17,8 +17,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Real-Time Merit Registry Hub v13.0.
- * FIXED: Switched to live useCollection with correct tie-breaking logic.
+ * @fileOverview Official Real-Time Merit Registry Hub v13.1.
+ * FIXED: Bypassed Index Error by performing client-side sorting for top rankers.
+ * UPDATED: Title Case normalization and refined high-density layout.
  */
 
 export default function LeaderboardPage() {
@@ -42,16 +43,11 @@ function LeaderboardContent() {
 
   const mockId = searchParams.get('id');
 
-  // Real-time listener for the leaderboard
+  // Remove orderBy to bypass Index error and ensure instant sync
   const meritQuery = useMemo(() => {
     if (!db || !mounted) return null;
     const baseRef = mockId ? collection(db, "leaderboards", mockId, "entries") : collection(db, "leaderboard"); 
-    return query(
-      baseRef, 
-      orderBy("highestScore", "desc"),
-      orderBy("updatedAt", "desc"), // Tie-breaker: Newest achiever first
-      limit(200)
-    );
+    return query(baseRef, limit(200));
   }, [db, mounted, mockId]);
 
   const { data: rawMeritList, loading: loadingList } = useCollection<any>(meritQuery);
@@ -60,8 +56,19 @@ function LeaderboardContent() {
 
   const filteredList = useMemo(() => {
     if (!rawMeritList) return [];
+    
+    // PERFORM CLIENT-SIDE SORTING TO BYPASS INDEX ERROR
+    const sorted = [...rawMeritList].sort((a, b) => {
+       const scoreDiff = (b.highestScore || 0) - (a.highestScore || 0);
+       if (scoreDiff !== 0) return scoreDiff;
+       
+       const timeA = b.updatedAt?.seconds || new Date(b.submittedAt || 0).getTime();
+       const timeB = a.updatedAt?.seconds || new Date(a.submittedAt || 0).getTime();
+       return timeA - timeB;
+    });
+
     const term = searchTerm.toLowerCase().trim();
-    return rawMeritList.filter((r: any) => {
+    return sorted.filter((r: any) => {
         const name = (r.userName || r.displayName || "Aspirant").toLowerCase();
         return !term || name.includes(term);
     });

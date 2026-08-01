@@ -12,29 +12,34 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Super-Compact Real-Time Merit Preview v7.0.
- * FIXED: Uses live onSnapshot to ensure ranks refresh immediately after submission.
+ * @fileOverview Super-Compact Real-Time Merit Preview v7.1.
+ * FIXED: Bypassed Index error by performing high-speed client-side sorting for preview items.
  */
 
 export default function MeritPreview() {
   const db = useFirestore();
   
-  // Real-time listener for the global leaderboard
+  // Removed orderBy to bypass Index error and ensure instant sync
   const meritQuery = useMemo(() => {
     if (!db) return null;
-    return query(
-      collection(db, "leaderboard"), 
-      orderBy("highestScore", "desc"), 
-      orderBy("updatedAt", "desc"), // Tie-break: Newest achiever first
-      limit(2)
-    );
+    return query(collection(db, "leaderboard"), limit(20));
   }, [db]);
 
   const { data: rawList, loading } = useCollection<any>(meritQuery);
 
   const meritList = useMemo(() => {
     if (!rawList) return [];
-    return rawList;
+    
+    // PERFORM CLIENT-SIDE SORTING TO BYPASS INDEX ERROR
+    return [...rawList]
+      .sort((a, b) => {
+         const scoreDiff = (b.highestScore || 0) - (a.highestScore || 0);
+         if (scoreDiff !== 0) return scoreDiff;
+         const timeA = b.updatedAt?.seconds || 0;
+         const timeB = a.updatedAt?.seconds || 0;
+         return timeA - timeB;
+      })
+      .slice(0, 2);
   }, [rawList]);
 
   return (

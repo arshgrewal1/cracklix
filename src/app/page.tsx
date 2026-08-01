@@ -24,9 +24,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v514.0.
- * FIXED: Redesigned "Today's Challenge" with high-fidelity Linear/Notion style.
- * FIXED: Ensured all ReferenceErrors (Badge, Button) are resolved.
+ * @fileOverview Premium Institutional Hub v520.0.
+ * FIXED: Redesigned Today's Challenge with premium glassmorphism.
+ * FIXED: Resolved Button and Badge ReferenceErrors.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -67,11 +67,6 @@ export default function HomePage() {
                  transition={{ duration: 8, repeat: Infinity }}
                  className="absolute -top-20 -right-20 w-80 h-80 bg-primary rounded-full blur-[100px]" 
                />
-               <motion.div 
-                 animate={{ y: [0, -20, 0] }}
-                 transition={{ duration: 5, repeat: Infinity }}
-                 className="absolute bottom-10 left-10 w-4 h-4 bg-orange-400 rounded-full blur-md opacity-[0.08]" 
-               />
 
                <div className="relative z-10 space-y-6 md:space-y-8">
                   {/* Top Row: Brand & Title */}
@@ -91,9 +86,9 @@ export default function HomePage() {
 
                   {/* Second Row: Premium Stat Cards */}
                   <div className="grid grid-cols-3 gap-3 md:gap-4">
-                     <StatCard icon={<Clock className="text-orange-400" />} label={`${activeQuiz?.duration || 15} Minutes`} />
-                     <StatCard icon={<HelpCircle className="text-blue-400" />} label={`${activeQuiz?.totalQuestions || 20} Questions`} />
-                     <StatCard icon={<Trophy className="text-amber-400" />} label={`${activeQuiz?.rewardXP || 100} XP`} />
+                     <StatCard icon={<Clock className="text-orange-400 h-4 w-4" />} label={`${activeQuiz?.duration || 15} Minutes`} />
+                     <StatCard icon={<HelpCircle className="text-blue-400 h-4 w-4" />} label={`${activeQuiz?.totalQuestions || 20} Questions`} />
+                     <StatCard icon={<Trophy className="text-amber-400 h-4 w-4" />} label={`${activeQuiz?.rewardXP || 100} XP`} />
                   </div>
 
                   {/* Challenge Content Block */}

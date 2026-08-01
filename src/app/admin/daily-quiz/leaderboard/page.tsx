@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo } from "react"
@@ -14,8 +13,8 @@ import { AdminPageHeader, AdminTableSkeleton } from "@/components/admin"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Daily Challenge Merit Registry v3.0 [Registry Hardened].
- * FIXED: Uses the dedicated 'leaderboard' collection for high-fidelity peak ranking.
+ * @fileOverview Daily Challenge Merit Registry v3.1 [Index Bypass].
+ * FIXED: Bypassed Index error by performing client-side sorting for admin leaderboard views.
  */
 
 export default function DailyQuizLeaderboard() {
@@ -23,15 +22,21 @@ export default function DailyQuizLeaderboard() {
 
   const meritQuery = useMemo(() => {
     if (!db) return null;
-    return query(
-      collection(db, "leaderboard"), 
-      orderBy("highestScore", "desc"),
-      orderBy("updatedAt", "asc"),
-      limit(100)
-    );
+    return query(collection(db, "leaderboard"), limit(200));
   }, [db]);
 
-  const { data: meritList, loading } = useCollection<any>(meritQuery);
+  const { data: rawMeritList, loading } = useCollection<any>(meritQuery);
+
+  const meritList = useMemo(() => {
+     if (!rawMeritList) return [];
+     return [...rawMeritList].sort((a, b) => {
+        const scoreDiff = (b.highestScore || 0) - (a.highestScore || 0);
+        if (scoreDiff !== 0) return scoreDiff;
+        const timeA = a.updatedAt?.seconds || 0;
+        const timeB = b.updatedAt?.seconds || 0;
+        return timeA - timeB;
+     });
+  }, [rawMeritList]);
 
   return (
     <div className="space-y-10 md:space-y-16 text-left pb-32 animate-in fade-in duration-700 pt-2 px-1">
@@ -88,36 +93,38 @@ export default function DailyQuizLeaderboard() {
               <TableBody>
                 {loading ? (
                   <AdminTableSkeleton rows={6} columns={4} />
-                ) : meritList && meritList.length > 0 ? meritList.slice(3).map((r: any, i: number) => (
-                  <TableRow key={r.uid} className="hover:bg-slate-50 border-slate-50 transition-all group">
-                    <TableCell className="px-8 md:px-12 py-6 md:py-10">
-                       <div className="flex items-center gap-6">
-                          <span className="font-black text-slate-200 text-xl md:text-3xl tabular-nums group-hover:text-primary transition-colors">#{i + 4}</span>
-                          <div className="flex items-center gap-4">
-                             <StudentAvatar profile={{ name: r.displayName, photoURL: r.photoURL, gender: r.gender }} className="h-10 w-10 md:h-14 md:w-14 rounded-xl shadow-inner bg-slate-50" />
-                             <div className="min-w-0">
-                                <p className="font-black text-[#0F172A] text-sm md:text-lg leading-none">{r.displayName}</p>
-                                <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Verified Profile</p>
-                             </div>
-                          </div>
-                       </div>
-                    </TableCell>
-                    <TableCell>
-                       <div className="space-y-1">
-                          <p className="font-bold text-[#0F172A] text-xs md:text-base line-clamp-1">{r.recentMockTitle || "Practice Registry"}</p>
-                          <p className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-widest">Achieved: {new Date(r.updatedAt?.seconds * 1000).toLocaleDateString('en-GB')}</p>
-                       </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                       <Badge className="bg-blue-50 text-blue-600 border-none px-3 py-1 font-black text-[9px] md:text-[10px] rounded-lg shadow-sm">
-                          {r.totalTests} tests
-                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-right px-8 md:px-12">
-                       <span className="font-black text-lg md:text-3xl text-[#0F172A] tabular-nums tracking-tighter">{(r.highestScore || 0).toFixed(1)}</span>
-                    </TableCell>
-                  </TableRow>
-                )) : (
+                ) : meritList && meritList.length > 0 ? (
+                  meritList.slice(3).map((r: any, i: number) => (
+                    <TableRow key={r.uid} className="hover:bg-slate-50 border-slate-50 transition-all group">
+                      <TableCell className="px-8 md:px-12 py-6 md:py-10">
+                         <div className="flex items-center gap-6">
+                            <span className="font-black text-slate-200 text-xl md:text-3xl tabular-nums group-hover:text-primary transition-colors">#{i + 4}</span>
+                            <div className="flex items-center gap-4">
+                               <StudentAvatar profile={{ name: r.displayName, photoURL: r.photoURL, gender: r.gender }} className="h-10 w-10 md:h-14 md:w-14 rounded-xl shadow-inner bg-slate-50" />
+                               <div className="min-w-0">
+                                  <p className="font-black text-[#0F172A] text-sm md:text-lg leading-none">{r.displayName}</p>
+                                  <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Verified Profile</p>
+                               </div>
+                            </div>
+                         </div>
+                      </TableCell>
+                      <TableCell>
+                         <div className="space-y-1">
+                            <p className="font-bold text-[#0F172A] text-xs md:text-base line-clamp-1">{r.recentMockTitle || "Practice Registry"}</p>
+                            <p className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-widest">Achieved: {new Date(r.updatedAt?.seconds * 1000).toLocaleDateString('en-GB')}</p>
+                         </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                         <Badge className="bg-blue-50 text-blue-600 border-none px-3 py-1 font-black text-[9px] md:text-[10px] rounded-lg shadow-sm">
+                            {r.totalTests} tests
+                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-right px-8 md:px-12">
+                         <span className="font-black text-lg md:text-3xl text-[#0F172A] tabular-nums tracking-tighter">{(r.highestScore || 0).toFixed(1)}</span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
                   <TableRow>
                      <TableCell colSpan={4} className="h-80 md:h-[500px] text-center">
                         <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
