@@ -27,7 +27,9 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   browserLocalPersistence,
-  setPersistence
+  setPersistence,
+  getRedirectResult,
+  signInWithRedirect
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp, updateDoc, increment } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
@@ -38,8 +40,9 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v7.0.
- * REDESIGNED: Larger branding, optimized vertical action hierarchy.
+ * @fileOverview Premium Institutional Auth Portal v8.0.
+ * FIXED: Implemented Atomic Redirect Recovery to handle blocked popups in PWA/Mobile.
+ * UPDATED: Logo scaled 3x and positioned at top per branding requirements.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -71,7 +74,31 @@ function LoginContent() {
   const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
 
-  // Handle existing session redirect
+  // 1. ATOMIC REDIRECT RECOVERY: Catch users returning from Google Redirect
+  useEffect(() => {
+    if (!auth || !db) return;
+
+    const handleRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          setIsConnecting(true);
+          await finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+          router.replace(returnUrl);
+        }
+      } catch (error: any) {
+        console.error("[AUTH_REDIRECT_ERROR]:", error);
+        // Don't show toast for initial page load if no redirect happened
+        if (error.code !== 'auth/invalid-credential') {
+           toast({ variant: "destructive", title: "Sign-in failed", description: "Could not sync with Google. Try again." });
+        }
+      }
+    };
+
+    handleRedirect();
+  }, [auth, db, router, returnUrl, toast]);
+
+  // 2. Handle existing session redirect
   useEffect(() => {
     if (!authLoading && user && !isConnecting) {
       router.replace(returnUrl);
@@ -83,20 +110,33 @@ function LoginContent() {
     
     setIsConnecting(true);
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     
     try {
+      // Ensure persistence is set for PWA stability
       await setPersistence(auth, browserLocalPersistence);
-      const result = await signInWithPopup(auth, provider);
-      finalizeUserNode(result.user, result.user.displayName || "Aspirant");
-      router.replace(returnUrl);
-    } catch (error: any) {
-      if (error.code !== 'auth/popup-closed-by-user') {
-        toast({ 
-          variant: "destructive", 
-          title: "Login failed", 
-          description: "Connection timed out. Please try again." 
-        });
+      
+      // Attempt Popup First (Better Desktop UX)
+      try {
+        const result = await signInWithPopup(auth, provider);
+        await finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+        router.replace(returnUrl);
+      } catch (popupError: any) {
+        // If popup is blocked or closed, fallback to Redirect
+        if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/popup-closed-by-user' || popupError.code === 'auth/cancelled-popup-request') {
+           console.log("[AUTH] Popup suppressed. Switching to redirect node...");
+           await signInWithRedirect(auth, provider);
+        } else {
+           throw popupError;
+        }
       }
+    } catch (error: any) {
+      console.error("[AUTH_GOOGLE_FAILURE]:", error);
+      toast({ 
+        variant: "destructive", 
+        title: "Login failed", 
+        description: "Connection error. Please try again." 
+      });
       setIsConnecting(false);
     }
   };
@@ -116,11 +156,11 @@ function LoginContent() {
       
       if (mode === 'signin') {
         const result = await signInWithEmailAndPassword(auth, email, password);
-        finalizeUserNode(result.user);
+        await finalizeUserNode(result.user);
       } else if (mode === 'signup') {
         if (!name) throw new Error("Name is required.");
         const result = await createUserWithEmailAndPassword(auth, email, password);
-        finalizeUserNode(result.user, name);
+        await finalizeUserNode(result.user, name);
       } else if (mode === 'forgot') {
         await sendPasswordResetEmail(auth, email);
         toast({ title: "Reset link sent", description: "Check your inbox." });
@@ -160,7 +200,8 @@ function LoginContent() {
           referredBy: referralFromUrl || null
         });
 
-        await updateDoc(doc(db, 'settings', 'stats'), {
+        // Background stats increment
+        updateDoc(doc(db, 'settings', 'stats'), {
           totalUsers: increment(1),
           updatedAt: serverTimestamp()
         }).catch(() => {});
@@ -189,8 +230,8 @@ function LoginContent() {
       >
         <Card className="border border-slate-100 shadow-[0_40px_100px_-12px_rgba(0,0,0,0.08)] bg-white rounded-[40px] overflow-hidden flex flex-col p-8 md:p-14">
           
-          {/* 1. BRAND HUB: INCREASED LOGO SIZE */}
-          <div className="mb-12 flex justify-center scale-[1.3] md:scale-[1.5] transition-transform">
+          {/* 1. BRAND HUB: LOGO AT TOP (3X SIZE) */}
+          <div className="mb-12 flex justify-center scale-[1.5] md:scale-[2.0] transition-transform">
             <Logo variant="light" align="center" className="h-16 md:h-20" imgClassName="h-full w-auto" />
           </div>
 
@@ -254,7 +295,7 @@ function LoginContent() {
                     </div>
                  </div>
 
-                 {/* 4. GOOGLE HUB: REDESIGNED & REPOSITIONED BELOW */}
+                 {/* 4. GOOGLE HUB: REDESIGNED BELOE SIGN IN */}
                  <Button 
                     onClick={handleGoogleSignIn}
                     disabled={isConnecting}
