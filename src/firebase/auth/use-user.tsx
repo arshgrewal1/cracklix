@@ -8,9 +8,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth Hub v17.1.
- * FIXED: Added missing 'use client' directive and removed database write operations 
- * from within the snapshot listener to prevent infinite loops.
+ * @fileOverview Hardened Auth Hub v17.2.
+ * UX: Minimal state triggers to prevent full-screen hangs on dashboard.
  */
 export function useUser() {
   const auth = useAuth();
@@ -28,9 +27,7 @@ export function useUser() {
   useEffect(() => {
     getDeviceId().then(id => {
       if (id) setCurrentDeviceId(id);
-    }).catch(() => {
-      // Silent fail for device ID
-    });
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {

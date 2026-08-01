@@ -1,553 +1,207 @@
 'use client';
 
-import React, { useState, Suspense, useEffect, useMemo, useCallback, useRef } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import Logo from "@/components/brand/Logo"
+import React, { useState, Suspense, useEffect, useMemo, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import Logo from "@/components/brand/Logo";
 import { 
-  Mail, 
-  Lock, 
-  User as UserIcon, 
-  Eye, 
-  EyeOff, 
   Loader2, 
   ShieldCheck, 
   Zap, 
-  RefreshCw, 
-  ClipboardList,
-  Users,
-  ChevronLeft,
+  Lock,
+  MousePointer2,
   Shield,
-  Check,
   CheckCircle2
-} from "lucide-react"
-import { useAuth, useFirestore, useUser, useDoc } from "@/firebase"
+} from "lucide-react";
+import { useAuth, useFirestore, useUser } from "@/firebase";
 import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
   signInWithPopup, 
+  signInWithRedirect,
   GoogleAuthProvider,
-  sendPasswordResetEmail,
-  updateProfile,
-  User
-} from "firebase/auth"
-import { doc, setDoc, getDoc, serverTimestamp, updateDoc, increment } from "firebase/firestore"
-import { useToast } from "@/hooks/use-toast"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { motion, AnimatePresence } from "framer-motion"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Capacitor } from "@capacitor/core"
-import Image from "next/image"
-import { generateReferralCode } from "@/lib/referral"
+  browserPopupBlocked
+} from "firebase/auth";
+import { doc, setDoc, getDoc, serverTimestamp, updateDoc, increment } from "firebase/firestore";
+import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
+import { generateReferralCode } from "@/lib/referral";
+import Image from "next/image";
 
 /**
- * @fileOverview Premium Login Hub v2.0.0.
- * UPDATED: Seamless Google Sign-In experience with branded pre-load and success overlays.
+ * @fileOverview Premium Single-Page Login Hub v3.0.
+ * UX: Single-page, one-tap, no confusing intermediate loaders.
+ * LOGIC: Atomic Google Sign-In with popup/redirect fallback.
  */
+
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="h-screen w-full flex flex-col items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>}>
+    <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>}>
       <LoginContent />
     </Suspense>
   )
 }
 
 function LoginContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const auth = useAuth()
-  const db = useFirestore()
-  const { toast } = useToast()
-  const { user, profile, loading: authLoading } = useUser()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const auth = useAuth();
+  const db = useFirestore();
+  const { toast } = useToast();
+  const { user, loading: authLoading } = useUser();
 
-  const [mode, setMode] = useState<'login' | 'register'>('login')
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [resetEmail, setResetEmail] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [resetLoading, setResetLoading] = useState(false)
-  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
+  const [isConnecting, setIsConnecting] = useState(false);
   
-  // Transition States
-  const [isGoogleConnecting, setIsGoogleConnecting] = useState(false)
-  const [isAuthSuccess, setIsAuthSuccess] = useState(false)
-  const [canRedirect, setCanRedirect] = useState(false)
-  
-  const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/dashboard", [searchParams]);
+  const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
-  const initialMode = useMemo(() => searchParams?.get("mode"), [searchParams]);
 
-  const syncAttempted = useRef(false);
-
+  // Redirect if already authenticated
   useEffect(() => {
-     if (initialMode === 'register') setMode('register');
-  }, [initialMode]);
-
-  const syncGuestData = useCallback(async (uid: string, userName: string, userEmail: string) => {
-     if (!db || syncAttempted.current) return;
-     syncAttempted.current = true;
-
-     const keys = Object.keys(localStorage);
-     const resultKeys = keys.filter(k => k.startsWith('cracklix_guest_result_'));
-     
-     if (resultKeys.length > 0) {
-        for (const key of resultKeys) {
-           try {
-              const data = JSON.parse(localStorage.getItem(key) || '{}');
-              const mockId = data.mockId;
-              if (!mockId) continue;
-
-              const resultRef = doc(db, "results", `${uid}_${mockId}`);
-              const attemptRef = doc(db, "attempts", `${uid}_${mockId}`);
-              const leaderboardRef = doc(db, "leaderboard", uid);
-
-              const score = Number(data.score) || 0;
-
-              await setDoc(resultRef, {
-                 ...data,
-                 userId: uid,
-                 userName,
-                 userEmail,
-                 createdAt: serverTimestamp()
-              }, { merge: true });
-
-              await setDoc(attemptRef, {
-                 status: 'COMPLETED',
-                 updatedAt: serverTimestamp()
-              }, { merge: true });
-
-              const lbSnap = await getDoc(leaderboardRef);
-              if (!lbSnap.exists()) {
-                await setDoc(leaderboardRef, {
-                  uid,
-                  displayName: userName,
-                  photoURL: "",
-                  highestScore: score,
-                  totalTests: 1,
-                  updatedAt: serverTimestamp(),
-                  recentMockTitle: data.mockTitle || "Guest Test"
-                });
-              } else {
-                const lbData = lbSnap.data();
-                const updates: any = {
-                  totalTests: increment(1),
-                  updatedAt: serverTimestamp()
-                };
-                if (score > (lbData.highestScore || 0)) {
-                  updates.highestScore = score;
-                  updates.recentMockTitle = data.mockTitle || lbData.recentMockTitle;
-                }
-                await updateDoc(leaderboardRef, updates);
-              }
-
-              localStorage.removeItem(key);
-           } catch (e) {
-              console.error("[GUEST_SYNC_FAILURE]:", e);
-           }
-        }
-     }
-  }, [db]);
-
-  useEffect(() => {
-    if (!authLoading && user) {
-      if (isAuthSuccess && !canRedirect) return; // Wait for success screen
-
-      const profileName = profile?.name || user.displayName || name || "Aspirant";
-      syncGuestData(user.uid, profileName, user.email || "").then(() => {
-         router.replace(returnUrl);
-      });
+    if (!authLoading && user && !isConnecting) {
+      router.replace(returnUrl);
     }
-  }, [user, profile, authLoading, router, returnUrl, syncGuestData, name, isAuthSuccess, canRedirect]);
-
-  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
-  const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
-
-  const handleEmailAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (mode === 'register' && password !== confirmPassword) {
-      toast({ variant: "destructive", title: "Passwords mismatch", description: "Passwords must match." })
-      return
-    }
-
-    setLoading(true)
-    try {
-      if (mode === 'login') {
-        await signInWithEmailAndPassword(auth, email, password)
-      } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-        const userNode = userCredential.user
-        await updateProfile(userNode, { displayName: name })
-        
-        await setDoc(doc(db!, 'users', userNode.uid), {
-          id: userNode.uid,
-          name,
-          email,
-          role: 'STUDENT',
-          state: "Punjab",
-          createdAt: new Date().toISOString(),
-          updatedAt: serverTimestamp(),
-          status: 'Free',
-          passType: 'FREE',
-          pinnedExams: [],
-          referralCode: generateReferralCode(userNode.uid),
-          referredBy: referralFromUrl || null,
-          coins: 0
-        })
-
-        await updateDoc(doc(db!, 'settings', 'stats'), {
-           totalUsers: increment(1),
-           updatedAt: serverTimestamp()
-        }).catch(() => {});
-      }
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Authentication failed", description: error.message })
-      setLoading(false)
-    }
-  }
+  }, [user, authLoading, router, returnUrl, isConnecting]);
 
   const handleGoogleSignIn = async () => {
-    if (loading || isGoogleConnecting) return;
-    if (Capacitor.isNativePlatform()) {
-       toast({ title: "Mobile login", description: "Use email/password on the Android app.", variant: "destructive" });
-       return;
-    }
-
-    setIsGoogleConnecting(true);
-    // Visual pause for branded connecting screen
-    await new Promise(resolve => setTimeout(resolve, 800));
+    if (!auth || !db || isConnecting) return;
+    
+    setIsConnecting(true);
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
 
     try {
-      const provider = new GoogleAuthProvider()
-      const result = await signInWithPopup(auth, provider)
-      const userNode = result.user
-      if (!userNode.email) throw new Error("Email is required.");
-      
-      const userRef = doc(db!, 'users', userNode.uid)
-      const userSnap = await getDoc(userRef)
-
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          id: userNode.uid,
-          name: userNode.displayName || "Aspirant",
-          email: userNode.email,
-          role: 'STUDENT',
-          state: "Punjab",
-          createdAt: new Date().toISOString(),
-          updatedAt: serverTimestamp(),
-          status: 'Free',
-          passType: 'FREE',
-          pinnedExams: [],
-          referralCode: generateReferralCode(userNode.uid),
-          referredBy: referralFromUrl || null,
-          coins: 0
-        })
-
-        await updateDoc(doc(db!, 'settings', 'stats'), {
-          totalUsers: increment(1),
-          updatedAt: serverTimestamp()
-        }).catch(() => {});
-      }
-
-      setIsGoogleConnecting(false);
-      setIsAuthSuccess(true);
-      // Branded success delay
-      await new Promise(resolve => setTimeout(resolve, 2500));
-      setCanRedirect(true);
-
+      // 1. Primary Attempt: Popup (Fastest & most native feel)
+      const result = await signInWithPopup(auth, provider);
+      await finalizeUserNode(result.user);
+      router.replace(returnUrl);
     } catch (error: any) {
-      if (error.code !== 'auth/popup-closed-by-user') {
-         toast({ variant: "destructive", title: "Social login error", description: error.message })
+      // 2. Fallback: Redirect (If popup blocked or unsupported)
+      if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+        try {
+          await signInWithRedirect(auth, provider);
+        } catch (redirectError: any) {
+          toast({ variant: "destructive", title: "Login Failed", description: redirectError.message });
+          setIsConnecting(false);
+        }
+      } else if (error.code !== 'auth/popup-closed-by-user') {
+        toast({ variant: "destructive", title: "Authentication Error", description: error.message });
+        setIsConnecting(false);
+      } else {
+        setIsConnecting(false);
       }
-      setLoading(false)
-      setIsGoogleConnecting(false)
     }
-  }
+  };
 
-  const handleResetPassword = async () => {
-    if (!resetEmail) {
-      toast({ variant: "destructive", title: "Email required" })
-      return
-    }
-    setResetLoading(true)
-    try {
-      await sendPasswordResetEmail(auth, resetEmail)
-      toast({ title: "Reset link sent" })
-      setIsResetDialogOpen(false)
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message })
-    } finally {
-      setResetLoading(false)
-    }
-  }
+  const finalizeUserNode = async (userNode: any) => {
+    const userRef = doc(db!, 'users', userNode.uid);
+    const userSnap = await getDoc(userRef);
 
-  const formatCompact = (num: number) => {
-    if (!num || num === 0) return "0";
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return num.toString();
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        id: userNode.uid,
+        name: userNode.displayName || "Aspirant",
+        email: userNode.email,
+        role: 'STUDENT',
+        state: "Punjab",
+        createdAt: new Date().toISOString(),
+        updatedAt: serverTimestamp(),
+        status: 'Free',
+        passType: 'FREE',
+        pinnedExams: [],
+        referralCode: generateReferralCode(userNode.uid),
+        referredBy: referralFromUrl || null,
+        coins: 0
+      });
+
+      await updateDoc(doc(db!, 'settings', 'stats'), {
+        totalUsers: increment(1),
+        updatedAt: serverTimestamp()
+      }).catch(() => {});
+    }
   };
 
   return (
-    <div className="min-h-[100dvh] bg-white flex flex-col lg:flex-row text-[#0F172A] font-body selection:bg-primary/20 overflow-x-hidden relative">
+    <div className="min-h-[100dvh] bg-[#F8FAFC] flex flex-col items-center justify-center p-4 md:p-8 font-body selection:bg-primary/20">
       
-      {/* 1. BRANDED CONNECTING OVERLAY */}
-      <AnimatePresence>
-        {isGoogleConnecting && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10000] bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] flex flex-col items-center justify-center text-white p-6 text-center"
-          >
-            <motion.div
-              animate={{ 
-                y: [0, -10, 0],
-                scale: [1, 1.05, 1]
-              }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="mb-10"
-            >
-               <div className="relative">
-                  <Logo variant="dark" iconOnly className="h-28 w-28 md:h-40 md:w-40" />
-                  <motion.div 
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-[-20px] border-2 border-white/10 rounded-full border-t-white/40"
-                  />
-               </div>
-            </motion.div>
-            <div className="space-y-3">
-               <h2 className="text-2xl md:text-3xl font-black tracking-tight">Connecting your Google Account...</h2>
-               <p className="text-blue-100/70 text-sm md:text-base font-medium tracking-tight">Please wait while we securely sign you in.</p>
-            </div>
-            <div className="mt-16">
-              <Loader2 className="h-10 w-10 animate-spin text-white opacity-20" />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="w-full max-w-[440px]"
+      >
+        <Card className="border border-slate-100 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] bg-white rounded-[32px] overflow-hidden flex flex-col items-center p-8 md:p-14 text-center">
+          
+          <div className="mb-10">
+            <Logo variant="light" align="center" className="h-16 md:h-20" imgClassName="h-full w-auto" />
+          </div>
 
-      {/* 2. AUTH SUCCESS OVERLAY */}
-      <AnimatePresence>
-        {isAuthSuccess && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10001] bg-white flex flex-col items-center justify-center text-[#0F172A] p-6 text-center"
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", damping: 15 }}
-              className="mb-10"
-            >
-               <div className="h-24 w-24 md:h-32 md:w-32 rounded-[2.5rem] md:rounded-[3rem] bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-2xl border border-emerald-100 relative">
-                  <CheckCircle2 className="h-12 w-12 md:h-16 md:w-16" />
-                  <motion.div 
-                     animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
-                     transition={{ duration: 1, repeat: Infinity }}
-                     className="absolute inset-0 rounded-[3rem] bg-emerald-500"
-                  />
-               </div>
-            </motion.div>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-10">Welcome back!</h2>
-            <div className="space-y-4 w-full max-w-[280px] mx-auto text-left">
-               <SuccessStep label="Syncing your profile" delay={0.3} />
-               <SuccessStep label="Loading your progress" delay={0.6} />
-               <SuccessStep label="Preparing dashboard" delay={0.9} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 3. HERO SECTION (DESKTOP) */}
-      <div className="hidden lg:flex flex-[1.1] bg-[#020B2D] text-white px-12 xl:px-20 py-0 flex-col justify-center relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-[#2563EB]/5 pointer-events-none" />
-        <div className="relative z-10 space-y-12 xl:space-y-16 max-w-[650px]">
-          <Logo variant="dark" align="left" className="my-0" imgClassName="h-24 md:h-40" />
-          <div className="space-y-8">
-            <h1 className="text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.05]">
-              Punjab's smart <br/> 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-300">
-                exam platform
-              </span>
+          <div className="space-y-3 mb-10">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[#0F172A] antialiased">
+              Welcome back
             </h1>
-            <p className="text-base xl:text-xl text-slate-300 font-medium leading-relaxed">
-              Practice mock tests and performance analytics verified by official recruitment standards.
+            <p className="text-slate-400 font-medium text-sm md:text-base leading-snug tracking-tight">
+              Continue your preparation with one secure login.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-8">
-            <HeroStat icon={ClipboardList} label={`${statsLoading ? '...' : formatCompact(stats?.totalMocks)}+ Mock tests`} />
-            <HeroStat icon={Zap} label={`${statsLoading ? '...' : formatCompact(stats?.totalQuestions)}+ Questions`} />
-            <HeroStat icon={Users} label={`${statsLoading ? '...' : formatCompact(stats?.totalUsers)}+ Aspirants`} />
-            <HeroStat icon={ShieldCheck} label="Official patterns" />
+
+          {/* Benefits Row */}
+          <div className="flex items-center justify-center gap-6 mb-12">
+             <BenefitNode icon={<Zap className="h-3.5 w-3.5" />} label="Fast" />
+             <BenefitNode icon={<ShieldCheck className="h-3.5 w-3.5" />} label="Secure" />
+             <BenefitNode icon={<MousePointer2 className="h-3.5 w-3.5" />} label="One Tap" />
           </div>
-        </div>
-      </div>
 
-      {/* 4. LOGIN FORM HUB */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-12 lg:px-20 py-0 relative bg-slate-50 lg:bg-white overflow-y-auto">
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[480px] py-8 md:py-12">
-          <Card className="border-none shadow-5xl lg:shadow-none bg-white rounded-[32px] p-6 md:p-10 space-y-6 md:space-y-8">
-            <div className="space-y-4 text-center lg:text-left">
-               <div className="flex justify-center lg:justify-start -ml-4 md:-ml-8">
-                  <Logo variant="light" align="left" imgClassName="h-16 md:h-24" />
-               </div>
-               <div className="space-y-1">
-                  <h2 className="text-2xl md:text-3xl font-black tracking-tight text-[#0F172A]">
-                    {mode === 'login' ? 'Welcome back' : 'Create account'}
-                  </h2>
-                  <p className="text-slate-400 font-bold text-[10px] md:text-[11px] tracking-tight">
-                    {mode === 'login' ? 'Access your portal' : 'Join the preparation portal'}
-                  </p>
-               </div>
-            </div>
-
-            <form onSubmit={handleEmailAuth} className="space-y-5">
-              {mode === 'register' && (
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-bold text-slate-400 ml-1">Full name</Label>
-                  <div className="relative group">
-                    <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                    <Input value={name} onChange={(e) => setName(e.target.value)} required className="h-12 md:h-14 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="e.g. Arsh Grewal" />
+          <div className="w-full space-y-8">
+             <div className="relative group">
+                <Button 
+                  onClick={handleGoogleSignIn}
+                  disabled={isConnecting}
+                  className="w-full h-14 md:h-16 bg-white hover:bg-slate-50 border-2 border-slate-100 text-[#0F172A] rounded-2xl font-bold text-base md:text-lg shadow-sm transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-4 relative overflow-hidden"
+                >
+                  <div className="shrink-0">
+                    <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={24} height={24} className={cn("h-6 w-6", isConnecting && "animate-pulse")} alt="Google" />
                   </div>
-                </div>
-              )}
-              
-              <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold text-slate-400 ml-1">Email address</Label>
-                <div className="relative group">
-                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 md:h-14 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="name@domain.com" />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-bold text-slate-400 ml-1">Password</Label>
-                  <div className="relative group">
-                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 md:h-14 rounded-2xl bg-slate-50 border-none text-[#0F172A] pl-12 md:pl-14 pr-12 font-bold shadow-inner" placeholder="Password" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors border-none bg-transparent cursor-pointer">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
-                  </div>
-                </div>
-
-                {mode === 'login' && (
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="remember" className="rounded-md" />
-                      <label htmlFor="remember" className="text-[11px] font-bold text-slate-500 tracking-tight cursor-pointer">Remember me</label>
-                    </div>
-                    <button type="button" onClick={() => setIsResetDialogOpen(true)} className="text-[11px] font-black text-primary hover:underline border-none bg-transparent cursor-pointer">Forgot password?</button>
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-2 flex flex-col gap-3">
-                <Button type="submit" className="w-full h-12 md:h-14 bg-blue-600 text-white font-bold text-xs rounded-full shadow-xl border-none transition-all active:scale-[0.98]" disabled={loading || (user && !authLoading)}>
-                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : user ? "Redirecting..." : mode === 'login' ? "Login to portal" : "Create my account"}
+                  <span>{isConnecting ? 'Signing in...' : 'Continue with Google'}</span>
+                  
+                  {isConnecting && (
+                    <motion.div 
+                      layoutId="loader"
+                      className="absolute bottom-0 left-0 h-1 bg-primary"
+                      initial={{ width: 0 }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 2 }}
+                    />
+                  )}
                 </Button>
-                
-                {!user && (
-                  <div className="space-y-5 pt-3">
-                    <div className="text-center space-y-1">
-                       <p className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em]">Fast • Secure • One Tap Login</p>
-                    </div>
+             </div>
 
-                    <Button 
-                      variant="outline" 
-                      type="button"
-                      className="w-full h-12 md:h-14 border-2 border-slate-100 text-[#0F172A] gap-3 rounded-full font-bold text-[10px] md:text-[11px] hover:bg-slate-50 shadow-sm transition-all active:scale-95 group" 
-                      onClick={handleGoogleSignIn} 
-                      disabled={loading || isGoogleConnecting}
-                    >
-                       <motion.div
-                         animate={isGoogleConnecting ? { rotate: 360 } : {}}
-                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                         className="shrink-0"
-                       >
-                         <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={20} height={20} className="h-5 w-5" alt="Google Logo" />
-                       </motion.div>
-                       Continue with Google
-                    </Button>
-
-                    <div className="flex flex-col items-center gap-3">
-                       <div className="flex items-center justify-center gap-2 text-slate-400">
-                          <Shield className="h-3 w-3" />
-                          <p className="text-[9px] font-medium leading-none">Your Google account is used only for secure authentication.</p>
-                       </div>
-
-                       <div className="text-center pt-1">
-                          <p className="text-[11px] md:text-[13px] font-bold text-slate-400">
-                           {mode === 'login' ? "Don't have an account?" : "Already registered?"}
-                           <button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} className="text-primary font-black ml-2 hover:underline border-none bg-transparent cursor-pointer">
-                             {mode === 'login' ? 'Create account' : 'Login portal'}
-                           </button>
-                          </p>
-                       </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </form>
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* 5. PASSWORD RECOVERY DIALOG */}
-      <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-        <DialogContent className="bg-white rounded-[2rem] max-w-[440px] p-8 md:p-12 shadow-5xl text-left border-none">
-          <DialogHeader className="text-center space-y-4">
-            <div className="h-14 w-14 md:h-16 md:w-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-xl">{resetLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <RefreshCw className="h-6 w-6" />}</div>
-            <DialogTitle className="text-xl md:text-2xl font-black tracking-tight text-[#0F172A]">Recover account</DialogTitle>
-            <DialogDescription className="text-slate-400 text-[10px] md:sm font-bold text-center mt-2 leading-relaxed">Enter your email for reset link.</DialogDescription>
-          </DialogHeader>
-          <div className="py-8 space-y-6">
-            <div className="space-y-1.5 text-left">
-              <Label className="text-[10px] font-bold text-slate-400 ml-1">Your email</Label>
-              <Input type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="aspirant@cracklix.com" className="h-16 bg-slate-50 border-none rounded-2xl text-[#0F172A] text-base font-bold px-6 shadow-inner" />
-            </div>
+             <div className="space-y-4 pt-4 border-t border-slate-50 flex flex-col items-center">
+                <div className="flex items-center gap-3 text-slate-300">
+                   <Lock className="h-4 w-4" />
+                   <div className="w-px h-3 bg-slate-100" />
+                   <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-tight leading-relaxed max-w-[280px]">
+                     We never post without permission. <br className="hidden md:block"/> Your data is encrypted and secure.
+                   </p>
+                </div>
+             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={() => handleResetPassword()} disabled={resetLoading} className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] rounded-full shadow-xl transition-all border-none">
-              {resetLoading ? "Processing..." : "Send reset link"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+        </Card>
+
+        {/* Brand Footer */}
+        <div className="mt-12 flex items-center justify-center gap-2 text-slate-400">
+           <Shield className="h-3.5 w-3.5 text-emerald-500" />
+           <span className="text-[9px] font-black uppercase tracking-[0.3em] antialiased">Institutional Hub Secure</span>
+        </div>
+      </motion.div>
     </div>
   )
 }
 
-function HeroStat({ icon: Icon, label }: { icon: any, label: string }) {
+function BenefitNode({ icon, label }: { icon: React.ReactNode, label: string }) {
   return (
-    <div className="flex items-center gap-4 group">
-      <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-        <Icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-      </div>
-      <span className="text-[11px] md:sm xl:text-lg font-bold tracking-tight text-slate-200">{label}</span>
+    <div className="flex items-center gap-2 text-slate-400">
+       <span className="text-primary">{icon}</span>
+       <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest">{label}</span>
     </div>
-  )
-}
-
-function SuccessStep({ label, delay }: { label: string, delay: number }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, x: -10 }} 
-      animate={{ opacity: 1, x: 0 }} 
-      transition={{ delay }}
-      className="flex items-center gap-3"
-    >
-      <div className="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-         <Check className="h-3 w-3 text-emerald-600 stroke-[4px]" />
-      </div>
-      <span className="text-[13px] font-bold text-slate-600 tracking-tight">{label}</span>
-    </motion.div>
   )
 }
