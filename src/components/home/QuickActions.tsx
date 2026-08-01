@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -17,7 +16,8 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Home Quick Actions Hub v1.0.
+ * @fileOverview Home Quick Actions Hub v1.1.
+ * FIXED: Converted rectangular icon containers to strictly circular format.
  */
 
 const ACTIONS = [
@@ -48,7 +48,7 @@ export default function QuickActions() {
                 className="flex flex-col items-center gap-3 group"
               >
                 <div className={cn(
-                  "h-12 w-12 md:h-16 md:w-16 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-sm border border-slate-100/50",
+                  "h-12 w-12 md:h-16 md:w-16 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-sm border border-slate-100/50",
                   action.bg,
                   action.color
                 )}>

@@ -32,8 +32,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v39.0 [Live Analytics Linked].
- * FIXED: Added "Live Community" to quick tools and linked student stats to analytics.
+ * Admin Dashboard Center v40.0.
+ * FIXED: Converted rectangular icon containers to strictly circular format.
  */
 
 export default function AdminDashboard() {
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
                {recentUsers?.map((u: any) => (
                   <div key={u.id} className="flex items-center justify-between p-3 md:p-5 bg-slate-50/50 rounded-xl md:rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-lg transition-all duration-300">
                      <div className="flex items-center gap-3 md:gap-5 min-w-0">
-                        <StudentAvatar profile={u} className="h-10 w-10 md:h-12 md:w-12 rounded-lg md:rounded-xl bg-slate-100" />
+                        <StudentAvatar profile={u} className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-slate-100" />
                         <div className="min-w-0 text-left">
                            <p className="font-bold text-sm md:text-lg text-[#0F172A] truncate leading-tight">{u.name}</p>
                            <p className="text-[9px] text-slate-400 font-bold mt-1 truncate lowercase">{u.email}</p>
@@ -219,7 +219,7 @@ function AdminMetricCard({ label, value, sub, icon, href, highlight }: any) {
         highlight && "ring-2 ring-primary/10 bg-primary/5"
       )}>
          <div className="flex items-center gap-4 md:gap-6">
-            <div className={cn("h-12 w-12 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-50 shadow-inner shrink-0 group-hover:scale-110 transition-transform")}>
+            <div className={cn("h-12 w-12 md:h-14 md:w-14 rounded-full bg-slate-50 flex items-center justify-center border border-slate-50 shadow-inner shrink-0 group-hover:scale-110 transition-transform")}>
                {icon}
             </div>
             <div className="min-w-0 flex-1">
@@ -241,7 +241,9 @@ function AdminQuickLink({ label, href, icon: Icon, highlight }: any) {
            highlight && "border-primary/30 bg-primary/5"
          )}>
             <div className="flex items-center gap-3">
-               <Icon className={cn("h-4 w-4", highlight ? "text-primary" : "text-slate-400")} />
+               <div className={cn("h-8 w-8 rounded-full flex items-center justify-center bg-white/5", highlight && "bg-primary/20")}>
+                  <Icon className={cn("h-4 w-4", highlight ? "text-primary" : "text-slate-400")} />
+               </div>
                <span className={cn("text-[11px] font-bold", highlight ? "text-primary" : "text-white")}>{label}</span>
             </div>
             <ChevronRight className={cn("h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1", highlight ? "text-primary" : "text-white/40")} />

@@ -24,8 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v526.0.
- * FIXED: Corrected component tag syntax and PWA layout constraints.
+ * @fileOverview Premium Institutional Hub v528.0.
+ * FIXED: Converted Today's Challenge icon to circular geometry.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -138,9 +138,9 @@ export default function HomePage() {
 
 function StatCard({ icon, label }: { icon: React.ReactNode, label: string }) {
    return (
-      <div className="flex flex-col items-center justify-center p-2 md:p-4 bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl space-y-1.5 hover:bg-white/10 transition-all cursor-default h-full">
+      <div className="flex flex-col items-center justify-center p-2 md:p-4 bg-white/5 border border-white/10 backdrop-blur-md rounded-full space-y-1.5 hover:bg-white/10 transition-all cursor-default h-full aspect-square">
          <div className="opacity-80 scale-90 md:scale-100">{icon}</div>
-         <span className="text-[8px] md:text-sm font-semibold text-white/90 tracking-tight whitespace-nowrap">{label}</span>
+         <span className="text-[8px] md:text-xs font-semibold text-white/90 tracking-tight whitespace-nowrap">{label}</span>
       </div>
    );
 }

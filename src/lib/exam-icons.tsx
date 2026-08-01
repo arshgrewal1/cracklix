@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v48.0.
- * FIXED: Removed white square boxes and implemented 'Icon Zoom' logic for seamless UI integration.
+ * @fileOverview Institutional Branding Engine v50.0.
+ * FIXED: Enforced strictly circular (rounded-full) geometry for all authority nodes.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -93,18 +93,18 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "relative shrink-0 transition-all flex items-center justify-center bg-transparent border-none shadow-none",
+      "relative shrink-0 transition-all flex items-center justify-center rounded-full bg-slate-50/50 border border-slate-100/50 shadow-inner overflow-hidden",
       containerSize, 
       className
     )}>
       {logoUrl ? (
-        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110 scale-110">
+        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110 scale-105">
           <Image 
             src={logoUrl} 
             alt="Authority" 
             fill
             sizes="256px"
-            className="object-contain"
+            className="object-contain p-1"
             referrerPolicy="no-referrer"
             onError={(e) => {
                (e.target as any).style.display = 'none';
@@ -112,7 +112,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           />
         </div>
       ) : (
-        <div className="h-full w-full p-0 opacity-20 scale-110">
+        <div className="h-full w-full p-2 opacity-40 scale-105">
           {getFallbackIcon()}
         </div>
       )}

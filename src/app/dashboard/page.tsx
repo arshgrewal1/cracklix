@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -32,8 +31,8 @@ import { useStudyTimer } from '@/hooks/useStudyTimer';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Official Real-Time Dashboard Portal v9.0.
- * FIXED: Standardized terminology to "Questions" and "Database".
+ * @fileOverview Official Real-Time Dashboard Portal v9.1.
+ * FIXED: Converted metric icons to strictly circular geometry.
  */
 
 export default function StudentDashboard() {
@@ -87,8 +86,8 @@ export default function StudentDashboard() {
       <main className="container mx-auto px-4 md:px-8 py-8 md:py-16 max-w-7xl space-y-8 md:space-y-12">
         <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-card p-6 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-xl border border-border flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div className="relative shrink-0">
-            <StudentAvatar profile={profile} className="h-24 w-24 md:h-44 md:w-44 rounded-[2.5rem] md:rounded-[3.5rem] border-4 border-background shadow-2xl" />
-            <div className="absolute -bottom-2 -right-2 bg-primary h-8 w-8 md:h-12 md:w-12 rounded-xl flex items-center justify-center text-white shadow-xl border-4 border-background"><ShieldCheck className="h-4 w-4 md:h-6 md:w-6" /></div>
+            <StudentAvatar profile={profile} className="h-24 w-24 md:h-44 md:w-44 rounded-full border-4 border-background shadow-2xl" />
+            <div className="absolute -bottom-2 -right-2 bg-primary h-8 w-8 md:h-12 md:w-12 rounded-full flex items-center justify-center text-white shadow-xl border-4 border-background"><ShieldCheck className="h-4 w-4 md:h-6 md:w-6" /></div>
           </div>
           <div className="flex-1 text-center md:text-left space-y-4 min-w-0">
             <div className="space-y-1">
@@ -129,7 +128,7 @@ export default function StudentDashboard() {
                          sortedResults.map((res: any) => (
                            <Link key={res.id} href={`/results/view?id=${res.mockId}&attemptId=${res.attemptId}`} className="flex items-center justify-between p-6 hover:bg-muted/50 transition-all group">
                               <div className="flex items-center gap-4 min-w-0">
-                                 <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground group-hover:text-primary transition-all shadow-inner"><Zap className="h-5 w-5" /></div>
+                                 <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground group-hover:text-primary transition-all shadow-inner"><Zap className="h-5 w-5" /></div>
                                  <div className="min-w-0">
                                     <p className="font-bold text-sm md:text-lg text-foreground truncate tracking-tight">{res.mockTitle}</p>
                                     <div className="flex items-center gap-3 mt-1">
@@ -180,7 +179,7 @@ export default function StudentDashboard() {
 function MetricPill({ label, val, icon, color, bg, progress }: any) {
   return (
     <motion.div whileHover={{ y: -4 }} className="p-5 md:p-8 bg-card rounded-[2rem] shadow-lg border border-border flex flex-col gap-4 text-left group transition-all duration-300 h-full">
-      <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner shrink-0", bg, color)}>{React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: cn("h-5 w-5 md:h-6 md:w-6") }) : null}</div>
+      <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center shadow-inner shrink-0", bg, color)}>{React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: cn("h-5 w-5 md:h-6 md:w-6") }) : null}</div>
       <div className="space-y-0.5 min-w-0 w-full">
         <p className="text-xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter leading-none truncate">{val}</p>
         <p className="text-[8px] md:text-[9px] font-black text-muted-foreground tracking-tight uppercase mt-1">{label}</p>

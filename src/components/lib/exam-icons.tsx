@@ -1,12 +1,11 @@
 import React from "react"
-import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Activity, Cpu, Building2, Globe, Settings, FileText, FileStack } from "lucide-react"
+import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Activity, Cpu, Building2, Globe, Settings, FileText, FileStack, Newspaper } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v45.0.
- * FIXED: Standardized public paths and normalized scaling for small cards.
- * UPDATED: Removed white square boxes and implemented zoom logic.
+ * @fileOverview Institutional Branding Engine v50.0.
+ * FIXED: Enforced strictly circular (rounded-full) geometry for all authority nodes.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -14,6 +13,7 @@ const CANONICAL_BOARD_LOGOS: Record<string, string> = {
   'psssb': '/logos/boards/psssb.png',
   'punjab-police': '/logos/boards/punjab-police.png',
   'teaching-hub': '/logos/boards/education-board.png',
+  'education-board': '/logos/boards/education-board.png',
   'pscl': '/logos/boards/pscb.png',
   'pspcl': '/logos/boards/pspcl.png',
   'pstcl': '/logos/boards/pstcl.png',
@@ -51,7 +51,10 @@ interface AuthorityLogoProps {
 }
 
 export const AuthorityLogo = ({ board, category, boardId, categoryId, className, size = 'md' }: AuthorityLogoProps) => {
-  const normalize = (id: string) => (id || "").toLowerCase().trim().replace(/\s+/g, '-').replace(/\./g, '');
+  const normalize = (id: string) => {
+    if (!id) return "";
+    return id.toLowerCase().trim().replace(/\s+/g, '-').replace(/\./g, '');
+  };
   
   const bId = normalize(boardId || board?.id || board?.abbreviation || "");
   const cId = normalize(categoryId || category?.id || board?.categoryId || "");
@@ -65,7 +68,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     category?.logoUrl;
   
   const sizeClasses = {
-    sm: "h-9 w-9 md:h-12 md:w-12",
+    sm: "h-9 w-9 md:h-11 md:w-11",
     md: "h-12 w-12 md:h-16 md:w-16",
     lg: "h-20 w-20 md:h-28 md:w-28",
     xl: "h-28 w-28 md:h-36 md:w-36"
@@ -73,31 +76,12 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   const containerSize = sizeClasses[size];
 
-  if (logoUrl) {
-    return (
-      <div className={cn(
-        "relative shrink-0 transition-all flex items-center justify-center",
-        containerSize, 
-        className
-      )}>
-        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110">
-          <Image 
-            src={logoUrl} 
-            alt="Authority" 
-            fill
-            sizes="256px"
-            className="object-contain"
-            referrerPolicy="no-referrer"
-          />
-        </div>
-      </div>
-    );
-  }
-
   const getFallbackIcon = () => {
-    if (bId === 'mock-test') return <Zap className="h-full w-full text-primary" />;
-    if (bId === 'study-material') return <BookOpen className="h-full w-full text-indigo-600" />;
-    if (bId === 'pyq') return <FileStack className="h-full w-full text-emerald-600" />;
+    if (bId === 'mock-test' || bId.includes('mock') || bId.includes('test')) return <Zap className="h-full w-full text-primary" />;
+    if (bId === 'study-material' || bId.includes('note')) return <BookOpen className="h-full w-full text-indigo-600" />;
+    if (bId === 'pyq' || bId.includes('paper')) return <FileStack className="h-full w-full text-emerald-600" />;
+    if (bId.includes('current')) return <Newspaper className="h-full w-full text-primary" />;
+    if (bId.includes('computer')) return <Cpu className="h-full w-full text-blue-500" />;
     if (cId.includes('govt')) return <Landmark className="h-full w-full text-amber-600" />;
     if (cId.includes('teaching')) return <BookOpen className="h-full w-full text-blue-600" />;
     if (cId.includes('technical')) return <Settings className="h-full w-full text-slate-600" />;
@@ -109,13 +93,29 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "flex items-center justify-center transition-all",
+      "relative shrink-0 transition-all flex items-center justify-center rounded-full bg-slate-50/50 border border-slate-100/50 shadow-inner overflow-hidden",
       containerSize, 
       className
     )}>
-      <div className="h-full w-full scale-110">
-        {getFallbackIcon()}
-      </div>
+      {logoUrl ? (
+        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110 scale-105">
+          <Image 
+            src={logoUrl} 
+            alt="Authority" 
+            fill
+            sizes="256px"
+            className="object-contain p-1"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+               (e.target as any).style.display = 'none';
+            }}
+          />
+        </div>
+      ) : (
+        <div className="h-full w-full p-2 opacity-40 scale-105">
+          {getFallbackIcon()}
+        </div>
+      )}
     </div>
   );
 };
