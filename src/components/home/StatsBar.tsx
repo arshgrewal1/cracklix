@@ -47,7 +47,7 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 
 /**
  * @fileOverview Institutional Stats Bar v1.7.
- * RESTORED: Removed 'truncate' from labels to fix text clipping.
+ * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 export default function StatsBar() {
   const db = useFirestore();

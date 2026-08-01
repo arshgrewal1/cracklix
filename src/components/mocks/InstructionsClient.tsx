@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from "react";
@@ -25,7 +24,7 @@ interface InstructionsClientProps {
 
 /**
  * @fileOverview Official Test Rules Hub v6.7.
- * FIXED: Replaced "Registry" with "Database" and ensured Title Case.
+ * TERMINOLOGY: Replaced 'items' with 'questions' and ensured Title Case.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -209,7 +208,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               <StatPlate icon={<Clock />} label="Duration" val={`${mock?.duration || 0}m`} />
-              <StatPlate icon={<BookOpen />} label="Items" val={mock?.totalQuestions || 0} />
+              <StatPlate icon={<BookOpen />} label="Questions" val={mock?.totalQuestions || 0} />
               <StatPlate icon={<Zap />} label="Total pts" val={(mock?.totalQuestions || 0) * (mock?.positiveMarks || 1)} />
               <StatPlate icon={<ShieldCheck />} label="Penalty" val={`-${mock?.negativeMarks || 0.25}`} />
            </div>

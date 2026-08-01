@@ -20,11 +20,11 @@ import { motion, AnimatePresence } from "framer-motion"
 
 /**
  * @fileOverview Official Bookmarks Hub v8.2.
- * UPDATED: Systematically removed uppercase styling for refined typography.
+ * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 
 const FILTER_CHIPS = [
-  { id: "all", label: "All items" },
+  { id: "all", label: "All questions" },
   { id: "Math", label: "Mathematics", icon: Calculator },
   { id: "Reasoning", label: "Reasoning", icon: BrainCircuit },
   { id: "CA", label: "Current affairs", icon: Newspaper },
@@ -99,7 +99,7 @@ export default function BookmarksPage() {
         setSelectedQuestion(qSnap.data());
         setIsViewing(true);
       } else {
-        alert("Original item has been archived from the bank.");
+        alert("Original question has been archived from the bank.");
       }
     } finally {
       setLoadingItem(false);
@@ -127,10 +127,10 @@ export default function BookmarksPage() {
           >
             <div className="flex items-center gap-3">
                <Bookmark className="h-5 w-5 text-primary" />
-               <span className="text-[10px] font-bold text-muted-foreground">Personal registry</span>
+               <span className="text-[10px] font-bold text-muted-foreground">Personal vault</span>
             </div>
             <h1 className="text-3xl md:text-6xl font-black text-foreground tracking-tighter leading-none antialiased">
-              Saved <span className="text-primary italic">items.</span>
+              Saved <span className="text-primary italic">questions.</span>
             </h1>
             <p className="text-muted-foreground font-medium text-sm md:text-lg max-w-xl leading-snug">
               Review your bookmarked questions and notes for high-speed revision.
@@ -147,7 +147,7 @@ export default function BookmarksPage() {
                  <Input 
                    value={searchTerm}
                    onChange={e => setSearchTerm(e.target.value)}
-                   placeholder="Search saved statements" 
+                   placeholder="Search saved questions" 
                    className="h-14 md:h-16 pl-14 pr-14 rounded-2xl bg-card border-border shadow-xl text-base md:text-lg font-bold placeholder:text-muted-foreground focus:ring-4 focus:ring-primary/5 transition-all"
                  />
                  {searchTerm && (
@@ -202,7 +202,7 @@ export default function BookmarksPage() {
                       <div className="flex items-center justify-between">
                          <div className="flex items-center gap-4">
                             <Badge className="bg-primary/5 text-primary border-none text-[9px] font-bold px-3 py-1 shadow-sm">
-                               {b.subject || 'Registry hub'}
+                               {b.subject || 'Database vault'}
                             </Badge>
                             <span className="text-[10px] font-bold text-muted-foreground tabular-nums">
                                Saved: {new Date(b.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
@@ -262,7 +262,7 @@ export default function BookmarksPage() {
                    </div>
                 </div>
                 <div className="space-y-4 max-w-sm px-6">
-                   <h2 className="text-3xl font-black text-foreground tracking-tighter">No saved items</h2>
+                   <h2 className="text-3xl font-black text-foreground tracking-tighter">No saved questions</h2>
                    <p className="text-muted-foreground font-bold text-sm md:text-base tracking-tight leading-relaxed">Bookmark important questions and notes for quick revision.</p>
                 </div>
                 <Button asChild className="h-16 px-12 bg-primary hover:bg-blue-700 text-white font-bold text-[10px] tracking-widest rounded-2xl shadow-xl border-none transition-all active:scale-95">

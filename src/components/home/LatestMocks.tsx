@@ -15,7 +15,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
  * @fileOverview High-Density Latest Tests Hub v51.0.
- * COMPACT: Limited to 2 items on Home Page. Drastically reduced card radii and padding.
+ * COMPACT: Limited to 2 questions on Home Page. Drastically reduced card radii and padding.
+ * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -49,7 +50,7 @@ export default function LatestMocks() {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
+        <div className="grid grid-cols-1 gap-4 md:gap-8">
           {loading ? (
              Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-2xl bg-muted" />)
           ) : mocks && mocks.length > 0 ? mocks.map((mock, i) => {
@@ -69,7 +70,7 @@ export default function LatestMocks() {
                 <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-500 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left flex-1 min-h-[160px] md:min-h-[220px]">
                   
                   <div className="flex justify-between items-start mb-4">
-                    <AuthorityLogo boardId={boardId} size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-lg shadow-sm border-2 border-background" />
+                    <AuthorityLogo boardId={boardId} size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-lg shadow-sm border-2 border-background bg-muted" />
                     {isPremium && (
                        <Badge className="bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-none px-2 py-0.5 rounded-full font-bold text-[7px] flex items-center gap-1">
                           <Lock className="h-2 w-2" /> Elite
@@ -85,7 +86,7 @@ export default function LatestMocks() {
                     <div className="flex items-center gap-3 pt-1">
                        <div className="flex items-center gap-1 text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase tracking-tight">
                           <BookOpen className="h-3 w-3 text-primary/40" />
-                          {mock.totalQuestions} items
+                          {mock.totalQuestions} questions
                        </div>
                        <div className="h-1 w-1 rounded-full bg-border" />
                        <span className="text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase">{mock.difficulty} level</span>

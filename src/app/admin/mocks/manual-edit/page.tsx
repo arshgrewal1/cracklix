@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -37,7 +36,7 @@ import { Badge } from "@/components/ui/badge"
 
 /**
  * @fileOverview High-Fidelity Manual Content Editor v3.0.
- * UPDATED: Integrated 'Remove from Test' logic and forced correct answer/explanation management.
+ * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 
 export default function ManualMockEditPage() {
@@ -124,7 +123,7 @@ function ManualEditContent() {
       ]);
       
       setQuestions(questions.map((q: any) => q.id === editingQuestion.id ? editingQuestion : q))
-      toast({ title: "Item updated", description: "Bilingual content synced successfully." })
+      toast({ title: "Question updated", description: "Bilingual content synced successfully." })
       setEditingQuestion(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Save failed" })
@@ -134,7 +133,7 @@ function ManualEditContent() {
   }
 
   const handleRemoveFromMock = async (questionId: string) => {
-    if (!db || !mockId || !confirm("Remove this item from the test series?")) return;
+    if (!db || !mockId || !confirm("Remove this question from the test series?")) return;
     try {
       const mockRef = doc(db, "mocks", mockId);
       await updateDoc(mockRef, {
@@ -142,7 +141,7 @@ function ManualEditContent() {
         updatedAt: serverTimestamp()
       });
       setQuestions(prev => prev.filter(q => q.id !== questionId));
-      toast({ title: "Item removed from test" });
+      toast({ title: "Question removed from test" });
     } catch (e) {
       toast({ variant: "destructive", title: "Action failed" });
     }
@@ -171,7 +170,7 @@ function ManualEditContent() {
           </Button>
           <div className="text-left min-w-0 flex-1">
             <h1 className="text-2xl md:text-4xl font-bold text-[#0F172A] tracking-tight truncate leading-none">{mock?.title || "Manual editor"}</h1>
-            <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest mt-2 uppercase">Content management • {questions.length} Items</p>
+            <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest mt-2 uppercase">Content management • {questions.length} Questions</p>
           </div>
         </div>
         <Button className="w-full md:w-auto bg-[#0F172A] hover:bg-black text-white h-12 md:h-14 px-8 md:px-10 rounded-xl md:rounded-2xl font-bold tracking-tight text-sm shadow-xl gap-3 transition-all active:scale-95" onClick={() => router.back()}>
@@ -189,7 +188,7 @@ function ManualEditContent() {
                </div>
                <div className="min-w-0">
                   <h2 className="text-xl md:text-3xl font-bold text-[#0F172A] leading-none uppercase">{name}</h2>
-                  <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{qList.length} Ingested items</p>
+                  <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{qList.length} Ingested questions</p>
                </div>
             </div>
 
@@ -220,7 +219,7 @@ function ManualEditContent() {
                             onClick={() => setEditingQuestion({...q})} 
                             className="w-full md:w-auto h-12 md:h-14 px-8 md:px-10 bg-slate-50 hover:bg-primary text-[#0F172A] hover:text-white rounded-xl md:rounded-2xl font-bold text-[9px] md:text-[11px] tracking-tight gap-2 shadow-sm border-none transition-all active:scale-95"
                           >
-                             <Edit className="h-4 w-4" /> Edit item
+                             <Edit className="h-4 w-4" /> Edit question
                           </Button>
                           <Button 
                             onClick={() => handleRemoveFromMock(q.id)} 
@@ -238,7 +237,7 @@ function ManualEditContent() {
         )) : (
           <div className="py-40 text-center opacity-30 italic font-bold uppercase text-xl flex flex-col items-center gap-6">
              <AlertCircle className="h-16 w-16" />
-             No items found in this test
+             No questions found in this test
           </div>
         )}
       </div>
@@ -255,8 +254,8 @@ function ManualEditContent() {
                         <Settings className="h-6 w-6 md:h-8 md:w-8" />
                      </div>
                      <div className="text-left">
-                        <DialogTitle className="text-xl md:text-4xl font-bold text-[#0F172A] leading-none">Modify Item</DialogTitle>
-                        <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2">Item {editingQuestion?.originalIndex} • Bilingual Hub</p>
+                        <DialogTitle className="text-xl md:text-4xl font-bold text-[#0F172A] leading-none">Modify Question</DialogTitle>
+                        <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2">Question {editingQuestion?.originalIndex} • Bilingual Hub</p>
                      </div>
                   </div>
                   <TabsList className="bg-slate-100 p-1 h-11 md:h-14 rounded-xl md:rounded-2xl w-full md:w-auto shadow-inner">

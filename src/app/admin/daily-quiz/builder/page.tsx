@@ -63,7 +63,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 /**
  * @fileOverview Daily Challenge Builder v52.0 [Hardened].
- * FIXED: setMockData reference error resolved to setQuizData.
+ * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 
 export default function DailyQuizBuilder() {
@@ -84,7 +84,7 @@ function DailyQuizBuilderContent() {
   const id = searchParams?.get("id") ?? "";
   const isEditing = !!id
 
-  const [bankLoading, setBankLoading] = useState(false)
+  const [bankLoading, setBankLoading] = false;
   const [questionBank, setQuestionBank] = useState<any[]>([])
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
   const [initError, setInitError] = useState<string | null>(null);
@@ -140,7 +140,7 @@ function DailyQuizBuilderContent() {
       setQuestionBank(result.data);
       setDiagnostic(result.diagnostic);
     } catch (e: any) {
-      setInitError("Registry connection degraded. Retrying...");
+      setInitError("Database connection degraded. Retrying...");
     } finally {
       setBankLoading(false);
     }
@@ -196,7 +196,7 @@ function DailyQuizBuilderContent() {
     const toAdd = questionBank.filter((q: any) => bankSelection.includes(q.id));
     setStagedQuestions(prev => [...prev, ...toAdd]);
     setBankSelection([]);
-    toast({ title: "Assets linked" });
+    toast({ title: "Questions linked" });
   };
 
   const handlePublish = async (isDraft: boolean) => {
@@ -206,7 +206,7 @@ function DailyQuizBuilderContent() {
        return;
     }
     if (stagedQuestions.length === 0) {
-       toast({ variant: "destructive", title: "Assembly area empty", description: "Add items to challenge." });
+       toast({ variant: "destructive", title: "Assembly area empty", description: "Add questions to challenge." });
        return;
     }
 
@@ -291,7 +291,7 @@ function DailyQuizBuilderContent() {
         icon={Flame}
         label="Challenge builder"
         title={isEditing ? "Modify challenge" : "New daily quiz"}
-        subtitle="Configure official daily items."
+        subtitle="Configure official daily questions."
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full md:w-auto mt-4 md:mt-0">
            <button onClick={() => setStagedQuestions([])} className="h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all cursor-pointer text-slate-400 font-bold uppercase text-[9px]">Reset</button>
@@ -316,7 +316,7 @@ function DailyQuizBuilderContent() {
                      <Input type="number" value={quizData.duration} onChange={e => setQuizData({...quizData, duration: parseInt(e.target.value) || 0})} className="h-9 rounded-xl bg-slate-50 border-none font-black text-center shadow-inner text-[#0F172A] text-xs" />
                   </div>
                   <div className="space-y-1 text-left">
-                     <Label className="text-[9px] font-bold uppercase text-slate-400 ml-1">Pts per item</Label>
+                     <Label className="text-[9px] font-bold uppercase text-slate-400 ml-1">Pts per question</Label>
                      <Input type="number" value={quizData.positiveMarks} onChange={e => setQuizData({...quizData, positiveMarks: parseFloat(e.target.value) || 1})} className="h-9 rounded-xl bg-slate-50 border-none font-black text-center text-emerald-600 shadow-inner text-xs" />
                   </div>
                </div>
@@ -404,7 +404,7 @@ function DailyQuizBuilderContent() {
                                 disabled={bankSelection.length === 0} 
                                 className="w-full md:w-auto h-9 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[8px] tracking-widest rounded-xl shadow-lg border-none flex items-center justify-center gap-2 px-6 transition-all"
                               >
-                                 Link items <ArrowRight className="h-3 w-3" />
+                                 Link questions <ArrowRight className="h-3 w-3" />
                               </button>
                            </div>
                         </div>
@@ -412,7 +412,7 @@ function DailyQuizBuilderContent() {
 
                   <div className="grid grid-cols-1 gap-2 pt-2 px-1">
                      {bankLoading ? (
-                        Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-xl bg-white" />)
+                        Array.from({ length: 3 }).map((_, i) => <Skeleton className="h-14 w-full rounded-xl bg-white" />)
                      ) : displayBank.length > 0 ? displayBank.map((q) => {
                         const isSel = bankSelection.includes(q.id);
                         return (
@@ -431,7 +431,7 @@ function DailyQuizBuilderContent() {
                      }) : (
                         <div className="py-20 text-center opacity-30 italic font-black uppercase text-xs flex flex-col items-center gap-3">
                            <AlertCircle className="h-8 w-8 text-slate-300" />
-                           No items available
+                           No questions available
                         </div>
                      )}
                   </div>
@@ -439,7 +439,7 @@ function DailyQuizBuilderContent() {
             ) : (
                <div className="space-y-4 animate-in fade-in duration-500 px-1">
                   <div className="flex items-center justify-between">
-                     <h3 className="text-base font-black text-[#0F172A] uppercase flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> Staged items</h3>
+                     <h3 className="text-base font-black text-[#0F172A] uppercase flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> Staged questions</h3>
                      <Badge className="bg-[#0F172A] text-white border-none font-bold text-[9px] px-3 py-1 rounded-lg">{stagedQuestions.length}</Badge>
                   </div>
                   <div className="grid grid-cols-1 gap-2">

@@ -60,9 +60,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v60.0 [Compact & Hardened].
- * FIXED: Removed malformed Firestore queries and restored full relational metadata.
- * FIXED: Removed all uppercase text classes for Title Case normalization.
+ * @fileOverview Master Mock Builder v60.0 [Hardened].
+ * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 
 export default function MockBuilderPage() {
@@ -83,7 +82,7 @@ function MockBuilderContent() {
   const id = searchParams?.get("id") ?? "";
   const isEditing = !!id
 
-  const [bankLoading, setBankLoading] = useState(false);
+  const [bankLoading, setBankLoading] = false;
   const [questionBank, setQuestionBank] = useState<any[]>([])
   const [diagnostic, setDiagnostic] = useState<DiagnosticReport | null>(null)
   const [initError, setInitError] = useState<string | null>(null);
@@ -150,7 +149,7 @@ function MockBuilderContent() {
       setQuestionBank(result.data);
       setDiagnostic(result.diagnostic);
     } catch (e: any) {
-      setInitError("Registry connection degraded. Retrying...");
+      setInitError("Database connection degraded. Retrying...");
     } finally {
       setBankLoading(false);
     }
@@ -242,7 +241,7 @@ function MockBuilderContent() {
     const toAdd = questionBank.filter((q: any) => bankSelection.includes(q.id));
     setSections((prev: any[]) => prev.map((s: any) => s.id === activeSectionId ? { ...s, questions: [...(s.questions || []), ...toAdd] } : s));
     setBankSelection([]);
-    toast({ title: `Linked ${toAdd.length} items` });
+    toast({ title: `Linked ${toAdd.length} questions` });
   }
 
   const handlePublish = async (isDraft: boolean) => {
@@ -253,7 +252,7 @@ function MockBuilderContent() {
     }
     const flatQuestions = sections.flatMap((s: any) => (s.questions || []));
     if (flatQuestions.length === 0) {
-       toast({ variant: "destructive", title: "Assembly area empty", description: "Add items to the test series." });
+       toast({ variant: "destructive", title: "Assembly area empty", description: "Add questions to the test series." });
        return;
     }
 
@@ -369,7 +368,7 @@ function MockBuilderContent() {
           <AlertCircle className="h-7 w-7" />
        </div>
        <div className="space-y-2 max-w-sm mx-auto">
-          <h2 className="text-xl font-black text-[#0F172A] tracking-tight">Sync failure</h2>
+          <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Sync failure</h2>
           <p className="text-slate-500 font-medium leading-relaxed text-xs">{initError}</p>
        </div>
        <div className="flex flex-col gap-2 w-full max-w-xs">
@@ -490,7 +489,7 @@ function MockBuilderContent() {
 
               <div className="grid grid-cols-2 gap-3">
                  <div className="space-y-1 text-left">
-                    <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Pts per item</Label>
+                    <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase">Pts per question</Label>
                     <Input type="number" step="0.25" value={mockData.positiveMarks} onChange={e => setMockData((p: any) => ({...p, positiveMarks: parseFloat(e.target.value) || 1}))} className="h-9 md:h-10 rounded-xl bg-slate-50 border-none font-black text-center text-[10px] text-emerald-600 shadow-inner" />
                  </div>
                  <div className="space-y-1 text-left">
@@ -617,7 +616,7 @@ function MockBuilderContent() {
                   <div className="relative group w-full px-1">
                      <div className="relative flex items-center h-10 bg-white border border-slate-100 rounded-xl shadow-sm px-4 gap-3">
                         <Search className="h-3.5 w-3.5 text-slate-400" />
-                        <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-[11px]" placeholder="Search statements..." />
+                        <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="flex-1 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-[11px]" placeholder="Search database..." />
                      </div>
                   </div>
 
@@ -641,7 +640,7 @@ function MockBuilderContent() {
 
                            <div className="flex-1 space-y-2 text-center md:text-left w-full min-w-0">
                               <div className="space-y-0.5">
-                                 <h4 className="text-sm font-black text-[#0F172A] uppercase tracking-tight">Assets Staged</h4>
+                                 <h4 className="text-sm font-black text-[#0F172A] uppercase tracking-tight">Questions Staged</h4>
                                  <p className="text-[9px] font-medium text-slate-500 uppercase">Selection ready</p>
                               </div>
                               <Button 
@@ -649,7 +648,7 @@ function MockBuilderContent() {
                                 disabled={bankSelection.length === 0} 
                                 className="w-full md:w-auto h-9 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[8px] tracking-widest rounded-xl shadow-lg border-none active:scale-95 flex items-center justify-center gap-2 px-6"
                               >
-                                 Link items <ArrowRight className="h-3 w-3" />
+                                 Link questions <ArrowRight className="h-3 w-3" />
                               </Button>
                            </div>
                         </div>
@@ -720,7 +719,7 @@ function MockBuilderContent() {
                                  <div className="h-7 w-7 rounded-lg bg-[#0F172A] text-white flex items-center justify-center font-black text-xs shadow-md">{sIdx + 1}</div>
                                  <div className="text-left">
                                     <Input value={sec.name} onChange={e => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, name: e.target.value } : s))} className="h-6 p-0 bg-transparent border-none font-black text-sm md:text-lg focus-visible:ring-0 text-[#0F172A] uppercase" />
-                                    <p className="text-[7px] font-bold text-slate-400 uppercase mt-0.5">{(sec.questions?.length || 0)} items</p>
+                                    <p className="text-[7px] font-bold text-slate-400 uppercase mt-0.5">{(sec.questions?.length || 0)} questions</p>
                                  </div>
                               </div>
                               <div className="flex gap-2">
@@ -754,7 +753,7 @@ function PremiumFilterCard({ icon, label, value, onChange, options }: any) {
    return (
       <Card className="border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all rounded-xl p-3 space-y-2 group h-full">
          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+            <div className="h-7 w-7 rounded-lg bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
                {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-3.5 w-3.5" }) : null}
             </div>
             <span className="text-[9px] font-black uppercase text-slate-400 tracking-tight">{label}</span>

@@ -35,7 +35,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
  * @fileOverview Official Revision & Study Hub v6.0.
- * UPDATED: Removed sticky positioning for tabs and search bar.
+ * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 
 export default function RevisionHub() {
@@ -139,7 +139,7 @@ export default function RevisionHub() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input 
                 className="pl-12 h-14 rounded-2xl bg-white border-none shadow-xl shadow-slate-200/50 font-bold" 
-                placeholder="Search saved items..." 
+                placeholder="Search saved questions..." 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -167,7 +167,7 @@ export default function RevisionHub() {
                         <div className="flex items-center justify-between">
                            <div className="flex items-center gap-4">
                               <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase tracking-widest px-3">
-                                 {b.subject || 'General Hub'}
+                                 {b.subject || 'Database vault'}
                               </Badge>
                               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Saved {new Date(b.timestamp).toLocaleDateString()}</span>
                            </div>
@@ -237,7 +237,7 @@ export default function RevisionHub() {
              </TabsContent>
 
              <TabsContent value="starred">
-                <EmptyRevision icon={<Star />} title="Nothing Highlighted" desc="Mark items as important to build your custom study list." />
+                <EmptyRevision icon={<Star />} title="Nothing Highlighted" desc="Mark questions as important to build your custom study list." />
              </TabsContent>
           </Tabs>
         </div>

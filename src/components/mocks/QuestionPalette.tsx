@@ -19,8 +19,7 @@ interface QuestionPaletteProps {
 
 /**
  * @fileOverview Institutional CBT Palette Hub v42.0.
- * UPDATED: Increased legend circle size and label text.
- * UPDATED: Decreased grid box size for a balanced high-density look.
+ * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteProps) {
   const { questions, status, currentIdx, visited } = useExamStore();
@@ -59,7 +58,7 @@ export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteP
       <ScrollArea className="h-full">
         <div className="p-3 md:p-4 pt-12 md:pt-14 space-y-4 md:space-y-6 pb-32">
            
-           {/* 1. STATUS LEGEND HUB - INCREASED TEXT & CIRCLES */}
+           {/* 1. STATUS LEGEND HUB */}
            <div className="grid grid-cols-2 gap-2">
               <SummaryCard count={stats.answered} label="Answered" color="bg-[#1E5EFF]" />
               <SummaryCard count={stats.notAnswered} label="Not Answered" color="bg-[#94A3B8]" />
@@ -70,7 +69,7 @@ export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteP
 
            <div className="h-px w-full bg-slate-100" />
 
-           {/* 2. SECTIONAL GRIDS - COMPACT BOXES */}
+           {/* 2. SECTIONAL GRIDS */}
            <div className="space-y-4">
               {sections.map((section, sIdx) => (
                 <div key={sIdx} className="space-y-2">

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -53,11 +52,11 @@ import { useRouter } from "next/navigation"
 
 /**
  * @fileOverview Institutional Practice Hub v4.9 [Sticky Removed].
- * FIXED: Removed sticky search bar behavior and purged uppercase styling.
+ * TERMINOLOGY: Replaced 'items' with 'tests'.
  */
 
 const FILTER_CHIPS = [
-  { id: "all", label: "All items" },
+  { id: "all", label: "All tests" },
   { id: "FREE", label: "Free preview" },
   { id: "PREMIUM", label: "Premium tests" },
   { id: "Easy", label: "Easy" },
@@ -320,7 +319,7 @@ export default function PracticeHub() {
 
         <div className="flex items-center justify-center gap-3 text-slate-300 py-6 opacity-40">
            <ShieldCheck className="h-4 w-4" />
-           <span className="text-[9px] font-bold uppercase tracking-widest">Institutional registry sync</span>
+           <span className="text-[9px] font-bold uppercase tracking-widest">Institutional database sync</span>
         </div>
 
       </main>

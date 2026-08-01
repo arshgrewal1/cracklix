@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -43,7 +42,7 @@ import { useToast } from "@/hooks/use-toast"
 
 /**
  * @fileOverview Premium Current Affairs Hub v6.1 [Sticky Removed].
- * FIXED: Removed sticky search/filter behaviors and purged uppercase styling.
+ * TERMINOLOGY: Replaced 'items' with 'news'.
  */
 
 const CATEGORIES = [
@@ -134,7 +133,7 @@ export default function CurrentAffairsCenter() {
             <div className="space-y-1.5">
               <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-[#0F172A] tracking-tight">Current affairs</h1>
               <p className="text-slate-500 font-medium text-sm md:text-lg max-w-xl leading-snug">
-                Verified exam news, daily current affairs and bilingual preparation items.
+                Verified exam news, daily current affairs and bilingual preparation questions.
               </p>
             </div>
             
@@ -210,7 +209,7 @@ export default function CurrentAffairsCenter() {
                                    <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2">
                                          <Badge className="bg-blue-50 text-primary border-none text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm">
-                                            {item.type.toLowerCase()} hub
+                                            {item.type.toLowerCase()} news
                                          </Badge>
                                          <span className="text-[9px] font-bold text-slate-300 tabular-nums uppercase">{item.month} {item.year}</span>
                                       </div>
@@ -226,7 +225,7 @@ export default function CurrentAffairsCenter() {
 
                                    <h3 className="text-base md:text-lg font-bold text-[#0F172A] group-hover:text-primary transition-colors line-clamp-1">{item.title}</h3>
                                    <p className="text-[12px] md:text-sm text-slate-400 font-medium line-clamp-2 leading-relaxed">
-                                      Stay updated with verified {item.type.toLowerCase()} current affairs items for upcoming Punjab government exams and recruitments.
+                                      Stay updated with verified {item.type.toLowerCase()} current affairs news for upcoming Punjab government exams and recruitments.
                                    </p>
 
                                    <div className="flex items-center justify-between pt-2">
@@ -251,7 +250,7 @@ export default function CurrentAffairsCenter() {
               ) : (
                  <div className="py-24 text-center bg-white rounded-[2rem] border-2 border-dashed border-slate-100 flex flex-col items-center gap-6 opacity-30">
                     <Newspaper className="h-16 w-16 text-slate-300" />
-                    <p className="text-xl font-bold uppercase tracking-widest text-slate-400">Archives empty</p>
+                    <p className="text-xl font-bold uppercase tracking-widest text-slate-400">Vault empty</p>
                  </div>
               )}
            </div>
@@ -298,7 +297,7 @@ export default function CurrentAffairsCenter() {
                     <h4 className="text-[11px] font-black uppercase text-[#0F172A]">Security protocol</h4>
                  </div>
                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed tracking-tight">
-                    All current affairs items are verified against official gazettes before registry sync. 100% accuracy guaranteed.
+                    All current affairs news are verified against official gazettes before database sync. 100% accuracy guaranteed.
                  </p>
               </div>
            </div>
