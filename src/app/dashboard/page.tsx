@@ -31,8 +31,8 @@ import { useStudyTimer } from '@/hooks/useStudyTimer';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Official Real-Time Dashboard Portal v9.1.
- * FIXED: Converted metric icons to strictly circular geometry.
+ * @fileOverview Official Real-Time Dashboard Portal v9.2.
+ * FIXED: Standardized metric icon backgrounds to match logo registry style.
  */
 
 export default function StudentDashboard() {
@@ -105,10 +105,10 @@ export default function StudentDashboard() {
         </motion.section>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
-          <MetricPill label="Accuracy" val={`${performance.accuracy}%`} icon={<Target />} color="text-primary" bg="bg-blue-50 dark:bg-blue-950/30" progress={performance.accuracy} />
-          <MetricPill label="Study time" val={displayTime} icon={<Clock />} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-950/30" />
-          <MetricPill label="Solved questions" val={performance.totalCorrect.toLocaleString()} icon={<Trophy />} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-950/30" />
-          <MetricPill label="Total tests" val={sortedResults.length} icon={<CheckCircle2 />} color="text-indigo-500" bg="bg-indigo-50 dark:bg-indigo-950/30" />
+          <MetricPill label="Accuracy" val={`${performance.accuracy}%`} icon={<Target />} color="text-primary" progress={performance.accuracy} />
+          <MetricPill label="Study time" val={displayTime} icon={<Clock />} color="text-emerald-500" />
+          <MetricPill label="Solved questions" val={performance.totalCorrect.toLocaleString()} icon={<Trophy />} color="text-amber-500" />
+          <MetricPill label="Total tests" val={sortedResults.length} icon={<CheckCircle2 />} color="text-indigo-500" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
@@ -176,10 +176,10 @@ export default function StudentDashboard() {
   );
 }
 
-function MetricPill({ label, val, icon, color, bg, progress }: any) {
+function MetricPill({ label, val, icon, color, progress }: any) {
   return (
     <motion.div whileHover={{ y: -4 }} className="p-5 md:p-8 bg-card rounded-[2rem] shadow-lg border border-border flex flex-col gap-4 text-left group transition-all duration-300 h-full">
-      <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center shadow-inner shrink-0", bg, color)}>{React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: cn("h-5 w-5 md:h-6 md:w-6") }) : null}</div>
+      <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center shadow-inner shrink-0 bg-slate-50 border border-slate-100", color)}>{React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: cn("h-5 w-5 md:h-6 md:w-6") }) : null}</div>
       <div className="space-y-0.5 min-w-0 w-full">
         <p className="text-xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter leading-none truncate">{val}</p>
         <p className="text-[8px] md:text-[9px] font-black text-muted-foreground tracking-tight uppercase mt-1">{label}</p>

@@ -24,9 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v531.0.
- * FIXED: Resolved JSX syntax error (unbalanced tags) around Today's Challenge.
- * UPDATED: Today's Challenge indicators are compact squares with zero spacing.
+ * @fileOverview Premium Institutional Hub v531.1.
+ * UPDATED: Standardized Today's Challenge icon background to match logo style.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -67,7 +66,7 @@ export default function HomePage() {
                   {/* Top Row: Brand & Title */}
                   <div className="flex items-center justify-between gap-4">
                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/20 flex items-center justify-center shadow-inner shrink-0 border border-primary/20">
+                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-slate-50 flex items-center justify-center shadow-inner shrink-0 border border-slate-100">
                            <Flame className="h-5 w-5 md:h-6 md:w-6 text-primary fill-current animate-pulse" />
                         </div>
                         <h2 className="text-lg md:text-3xl font-[800] text-white tracking-tight antialiased truncate">

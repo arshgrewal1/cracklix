@@ -32,8 +32,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v40.0.
- * FIXED: Converted rectangular icon containers to strictly circular format.
+ * Admin Dashboard Center v40.1.
+ * FIXED: Standardized icon containers to circular format with logo-style background.
  */
 
 export default function AdminDashboard() {
@@ -194,9 +194,9 @@ export default function AdminDashboard() {
                      <p className="text-[8px] md:text-[9px] font-black text-slate-500 tracking-widest uppercase">Management Hub</p>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:gap-3">
-                     <AdminQuickLink label="Live community" href="/admin/analytics" icon={BarChart3} highlight />
-                     <AdminQuickLink label="Bulk ingestion" href="/admin/bulk-import" icon={UploadCloud} highlight />
-                     <AdminQuickLink label="Build test" href="/admin/mocks/builder" icon={PenSquare} highlight />
+                     <AdminQuickLink label="Live community" href="/admin/analytics" icon={BarChart3} />
+                     <AdminQuickLink label="Bulk ingestion" href="/admin/bulk-import" icon={UploadCloud} />
+                     <AdminQuickLink label="Build test" href="/admin/mocks/builder" icon={PenSquare} />
                      <AdminQuickLink label="Add vacancy" href="/admin/vacancies/add" icon={Megaphone} />
                      <AdminQuickLink label="Verify payments" href="/admin/payments/verify" icon={ShieldCheck} highlight={hasPending} />
                      <AdminQuickLink label="Daily challenge" href="/admin/daily-quiz" icon={Flame} />
@@ -219,7 +219,7 @@ function AdminMetricCard({ label, value, sub, icon, href, highlight }: any) {
         highlight && "ring-2 ring-primary/10 bg-primary/5"
       )}>
          <div className="flex items-center gap-4 md:gap-6">
-            <div className={cn("h-12 w-12 md:h-14 md:w-14 rounded-full bg-slate-50 flex items-center justify-center border border-slate-50 shadow-inner shrink-0 group-hover:scale-110 transition-transform")}>
+            <div className={cn("h-12 w-12 md:h-14 md:w-14 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100 shadow-inner shrink-0 group-hover:scale-110 transition-transform")}>
                {icon}
             </div>
             <div className="min-w-0 flex-1">
@@ -241,7 +241,7 @@ function AdminQuickLink({ label, href, icon: Icon, highlight }: any) {
            highlight && "border-primary/30 bg-primary/5"
          )}>
             <div className="flex items-center gap-3">
-               <div className={cn("h-8 w-8 rounded-full flex items-center justify-center bg-white/5", highlight && "bg-primary/20")}>
+               <div className={cn("h-8 w-8 rounded-full flex items-center justify-center bg-slate-50 border border-slate-100 shadow-inner group-hover:scale-110 transition-all")}>
                   <Icon className={cn("h-4 w-4", highlight ? "text-primary" : "text-slate-400")} />
                </div>
                <span className={cn("text-[11px] font-bold", highlight ? "text-primary" : "text-white")}>{label}</span>
