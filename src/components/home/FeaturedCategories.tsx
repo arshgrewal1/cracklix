@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,8 +15,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Density Categories Hub v51.1.
+ * @fileOverview High-Density Categories Hub v51.2.
  * FIXED: Restored missing Badge import.
+ * UPDATED: Removed uppercase.
  */
 
 const TARGET_IDS = [
@@ -41,7 +43,7 @@ export default function FeaturedCategories() {
     <section className="py-8 md:py-12 bg-background border-t border-border">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-1 text-left">
           <div className="flex items-center gap-3">
              <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
                <Layers className="h-4 w-4 md:h-5 md:w-5" />
@@ -72,7 +74,7 @@ export default function FeaturedCategories() {
                   <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left min-h-[140px] md:min-h-[180px]">
                      <div className="flex justify-between items-start mb-4">
                         <AuthorityLogo category={cat} size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-lg shadow-sm border-2 border-background" />
-                        <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 border-border text-muted-foreground text-[7px] font-black uppercase tracking-widest px-2">Official Hub</Badge>
+                        <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 border-border text-muted-foreground text-[7px] font-bold px-2 h-5">Official hub</Badge>
                      </div>
 
                      <div className="flex-1 space-y-1.5 min-w-0">
@@ -83,7 +85,7 @@ export default function FeaturedCategories() {
                      </div>
 
                      <div className="mt-6 pt-2">
-                        <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white font-bold uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none shadow-md">
+                        <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white font-bold text-[10px] rounded-xl transition-all active:scale-95 border-none shadow-md">
                            Enter hub <ArrowRight className="h-3 w-3" />
                         </Button>
                      </div>
@@ -91,7 +93,7 @@ export default function FeaturedCategories() {
                 </Link>
              </motion.div>
           )) : (
-            <div className="col-span-full py-8 text-center opacity-30 italic font-black uppercase text-[9px] border-2 border-dashed border-border rounded-2xl">
+            <div className="col-span-full py-8 text-center opacity-30 italic font-bold text-[11px] border-2 border-dashed border-border rounded-2xl">
                Registry standby
             </div>
           )}

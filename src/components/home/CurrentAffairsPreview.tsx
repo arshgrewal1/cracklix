@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -13,8 +14,9 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Density Current Affairs Preview v27.1.
+ * @fileOverview High-Density Current Affairs Preview v27.2.
  * FIXED: Restored missing Badge import.
+ * UPDATED: Removed uppercase.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -34,14 +36,14 @@ export default function CurrentAffairsPreview() {
     <section className="py-10 md:py-16 bg-slate-50/50 border-t border-border">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-1 text-left">
           <div className="flex items-center gap-3">
              <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
                <Newspaper className="h-4 w-4 md:h-5 md:w-5" />
              </div>
              <div className="text-left">
                 <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight">Current affairs</h2>
-                <p className="text-[10px] md:text-xs font-medium text-muted-foreground">Daily verified news nodes</p>
+                <p className="text-[10px] md:text-xs font-medium text-muted-foreground">Daily verified news</p>
              </div>
           </div>
           <Link href="/current-affairs" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group">
@@ -65,7 +67,7 @@ export default function CurrentAffairsPreview() {
                     <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left">
                        <div className="flex justify-between items-start mb-6">
                           <AuthorityLogo boardId="current-affairs" size="sm" className="h-10 w-10 md:h-12 md:w-12 shadow-lg border-2 border-background bg-muted" />
-                          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-primary border-none text-[7px] font-black uppercase px-2 py-0.5 rounded shadow-sm">Verified Node</Badge>
+                          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-primary border-none text-[7px] font-bold px-2 h-5">Verified</Badge>
                        </div>
 
                        <div className="flex-1 space-y-1.5 min-w-0">
@@ -73,15 +75,15 @@ export default function CurrentAffairsPreview() {
                              {item.title}
                           </h3>
                           <div className="flex items-center gap-3 pt-2">
-                             <div className="flex items-center gap-1.5 text-[8px] md:text-[9px] font-bold text-slate-400">
+                             <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400">
                                 <Calendar className="h-3 w-3 text-primary/40" /> {item.month} {item.year}
                              </div>
                           </div>
                        </div>
 
                        <div className="mt-6 pt-2">
-                          <Button className="w-full h-10 md:h-11 bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none shadow-md">
-                             Open Portal <ArrowRight className="h-3.5 w-3.5 ml-2" />
+                          <Button className="w-full h-10 md:h-11 bg-[#0F172A] hover:bg-primary text-white font-bold text-[10px] rounded-xl transition-all active:scale-95 border-none shadow-md">
+                             Open portal <ArrowRight className="h-3.5 w-3.5 ml-2" />
                           </Button>
                        </div>
                     </Card>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -55,8 +56,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v37.0.
- * FIXED: Restored CardTitle import and implemented client-side sorting to bypass Firebase Index requirement.
+ * @fileOverview Institutional Profile Hub v38.0.
+ * FIXED: CardTitle import and removed Firestore orderBy to resolve index error.
+ * FIXED: Removed all uppercase styling.
  */
 
 export default function ProfilePage() {
@@ -92,7 +94,7 @@ export default function ProfilePage() {
     }
   }, [profile])
 
-  // Removed orderBy to bypass Firebase Index error; will sort in useMemo
+  // Removed orderBy to bypass Firebase Index error
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
     return query(collection(db, "results"), where("userId", "==", user.uid), limit(50))
@@ -102,7 +104,6 @@ export default function ProfilePage() {
 
   const results = useMemo(() => {
     if (!rawResults) return []
-    // Client-side sorting for immediate registry sync
     return [...rawResults].sort((a, b) => {
       const timeA = new Date(a.timestamp || 0).getTime()
       const timeB = new Date(b.timestamp || 0).getTime()
@@ -113,13 +114,13 @@ export default function ProfilePage() {
   const aggregateStats = useMemo(() => {
     if (!profile) return { totalTests: 0, highestScore: 0, avgAccuracy: 0, avgTime: 0, bestRank: "---" }
     return {
-       totalTests: profile.totalTests || 0,
+       totalTests: profile.totalTests || results?.length || 0,
        highestScore: profile.highestScore || 0,
        avgAccuracy: profile.averageAccuracy || 0,
        avgTime: profile.averageTime || 0,
        bestRank: profile.bestRank ? `#${profile.bestRank}` : "---"
     }
-  }, [profile]);
+  }, [profile, results]);
 
   const handleUpdateProfile = async () => {
     if (!db || !user || !editForm) return
@@ -179,14 +180,14 @@ export default function ProfilePage() {
                     {!profileLoading && (
                       <>
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
-                          <h1 className="text-xl md:text-3xl font-black text-white leading-none tracking-tight truncate max-w-full uppercase">
+                          <h1 className="text-xl md:text-3xl font-black text-white leading-none tracking-tight truncate max-w-full">
                              {profile?.name}
                           </h1>
-                          <Badge className={cn("border-none text-[8px] font-black px-3 py-0.5 rounded-full shadow-2xl shrink-0", profile?.status === 'Free' ? "bg-white/10 text-slate-300" : "bg-primary text-white")}>{profile?.status || 'Free'} pass</Badge>
+                          <Badge className={cn("border-none text-[8px] font-bold px-3 py-0.5 rounded-full shadow-2xl shrink-0", profile?.status === 'Free' ? "bg-white/10 text-slate-300" : "bg-primary text-white")}>{profile?.status || 'Free'} pass</Badge>
                         </div>
                         <div className="flex flex-wrap items-center justify-start gap-x-4 gap-y-1 pt-1">
-                          <div className="flex items-center gap-2 text-white/60 font-bold text-[9px] md:text-[11px] tracking-tight shrink-0"><Mail className="h-3 w-3 text-primary" /> <span className="truncate max-w-[120px] md:max-w-[280px] uppercase">{profile?.email}</span></div>
-                          <div className="flex items-center gap-2 text-white/60 font-bold text-[9px] md:text-[11px] tracking-tight shrink-0"><Phone className="h-3 w-3 text-primary" /> <span className="uppercase">{profile?.phone || "Not added"}</span></div>
+                          <div className="flex items-center gap-2 text-white/60 font-bold text-[9px] md:text-[11px] tracking-tight shrink-0"><Mail className="h-3 w-3 text-primary" /> <span className="truncate max-w-[120px] md:max-w-[280px]">{profile?.email}</span></div>
+                          <div className="flex items-center gap-2 text-white/60 font-bold text-[9px] md:text-[11px] tracking-tight shrink-0"><Phone className="h-3 w-3 text-primary" /> <span className="">{profile?.phone || "Not added"}</span></div>
                         </div>
                       </>
                     )}
@@ -206,9 +207,9 @@ export default function ProfilePage() {
                     <StatsNode icon={<Zap />} label="High score" value={aggregateStats.highestScore.toFixed(1)} color="text-primary" bgColor="bg-primary/10" />
                  </div>
 
-                 <Card className="border-none shadow-3xl rounded-2xl bg-card overflow-hidden border border-border">
+                 <Card className="border-none shadow-xl rounded-2xl bg-card overflow-hidden border border-border">
                     <CardHeader className="p-5 md:p-6 border-b border-border bg-muted/30">
-                       <CardTitle className="text-xl font-black text-foreground flex items-center gap-3 tracking-tighter uppercase">
+                       <CardTitle className="text-xl font-black text-foreground flex items-center gap-3 tracking-tighter">
                           <History className="h-6 w-6 text-primary" /> Recent attempts
                        </CardTitle>
                     </CardHeader>
@@ -222,10 +223,10 @@ export default function ProfilePage() {
                                    <div className="flex items-center gap-4 min-w-0">
                                       <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:text-primary transition-all shadow-inner"><Zap className="h-4 w-4" /></div>
                                       <div className="min-w-0">
-                                         <p className="font-bold text-sm md:text-lg text-foreground truncate tracking-tight uppercase">{res.mockTitle}</p>
+                                         <p className="font-bold text-sm md:text-lg text-foreground truncate tracking-tight">{res.mockTitle}</p>
                                          <div className="flex items-center gap-2 mt-0.5">
                                             <span className="text-[9px] font-bold text-muted-foreground tabular-nums">{new Date(res.timestamp).toLocaleDateString('en-GB')}</span>
-                                            <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border-none text-[7px] font-black px-1.5 uppercase">Score: {res.score}</Badge>
+                                            <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border-none text-[7px] font-bold px-1.5">Score: {res.score}</Badge>
                                          </div>
                                       </div>
                                    </div>
@@ -233,7 +234,7 @@ export default function ProfilePage() {
                                 </Link>
                              ))
                           ) : (
-                             <div className="py-8 text-center opacity-20 italic font-black text-xs uppercase">No attempts found</div>
+                             <div className="py-8 text-center opacity-20 italic font-bold text-xs">No attempts found</div>
                           )}
                        </div>
                     </CardContent>
@@ -244,13 +245,13 @@ export default function ProfilePage() {
                  <Card className="border-none shadow-xl rounded-2xl bg-card p-5 md:p-6 space-y-5 border border-border text-left">
                     <h3 className="text-[10px] font-black tracking-tight text-muted-foreground uppercase">Control hub</h3>
                     <div className="space-y-2">
-                       <Button onClick={() => setIsEditing(true)} className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] tracking-tight shadow-xl transition-all active:scale-95 border-none gap-2 uppercase"><Edit className="h-4 w-4" /> Edit profile</Button>
-                       <Button asChild variant="outline" className="w-full h-11 rounded-full font-black text-[10px] tracking-tight shadow-sm transition-all active:scale-95 border-2 gap-2 uppercase"><Link href="/pass"><Gem className="h-4 w-4 text-primary" /> Get elite pass</Link></Button>
+                       <Button onClick={() => setIsEditing(true)} className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] tracking-tight shadow-xl transition-all active:scale-95 border-none gap-2">Edit profile</Button>
+                       <Button asChild variant="outline" className="w-full h-11 rounded-full font-bold text-[10px] tracking-tight shadow-sm transition-all active:scale-95 border-2 gap-2"><Link href="/pass"><Gem className="h-4 w-4 text-primary" /> Get elite pass</Link></Button>
                     </div>
 
                     <div className="pt-4 border-t border-border space-y-3">
-                       <p className="text-[8px] font-black text-muted-foreground tracking-tight uppercase">Account actions</p>
-                       <Button onClick={() => setIsDeleting(true)} variant="ghost" className="w-full h-9 text-rose-500 hover:bg-rose-50 rounded-xl font-black text-[8px] tracking-tight transition-all gap-2 uppercase"><Trash2 className="h-3.5 w-3.5" /> Delete account</Button>
+                       <p className="text-[8px] font-bold text-muted-foreground tracking-tight uppercase">Account actions</p>
+                       <Button onClick={() => setIsDeleting(true)} variant="ghost" className="w-full h-9 text-rose-500 hover:bg-rose-50 rounded-xl font-bold text-[8px] tracking-tight transition-all gap-2"><Trash2 className="h-3.5 w-3.5" /> Delete account</Button>
                     </div>
                  </Card>
               </div>
@@ -264,7 +265,7 @@ export default function ProfilePage() {
             <div className="h-1.5 w-full bg-[#0B1528] shrink-0" />
             <DialogHeader className="p-6 md:p-8 pb-2 shrink-0">
                <div className="flex justify-between items-center">
-                  <DialogTitle className="text-xl md:text-2xl font-black text-foreground flex items-center gap-3 tracking-tighter uppercase">
+                  <DialogTitle className="text-xl md:text-2xl font-bold text-foreground flex items-center gap-3 tracking-tighter">
                      <ShieldCheck className="h-5 w-5 text-primary" /> Edit profile
                   </DialogTitle>
                   <button onClick={() => setIsEditing(false)} className="p-2 rounded-xl hover:bg-muted transition-colors cursor-pointer border-none bg-transparent text-muted-foreground"><X className="h-5 w-5" /></button>
@@ -272,24 +273,24 @@ export default function ProfilePage() {
             </DialogHeader>
             <div className="px-6 md:px-8 pb-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1 text-left"><Label className="text-[9px] font-black text-muted-foreground ml-1 uppercase">Full name</Label><Input value={editForm?.name || ""} onChange={e => setEditForm((prev: any) => ({...prev, name: e.target.value}))} className="h-11 rounded-xl bg-muted border-none font-bold px-4" /></div>
-                  <div className="space-y-1 text-left"><Label className="text-[9px] font-black text-muted-foreground ml-1 uppercase">Email</Label><Input type="email" value={editForm?.email || ""} onChange={e => setEditForm((prev: any) => ({...prev, email: e.target.value}))} className="h-11 rounded-xl bg-muted border-none font-bold px-4" /></div>
+                  <div className="space-y-1 text-left"><Label className="text-[9px] font-bold text-muted-foreground ml-1 uppercase">Full name</Label><Input value={editForm?.name || ""} onChange={e => setEditForm((prev: any) => ({...prev, name: e.target.value}))} className="h-11 rounded-xl bg-muted border-none font-bold px-4" /></div>
+                  <div className="space-y-1 text-left"><Label className="text-[9px] font-bold text-muted-foreground ml-1 uppercase">Email</Label><Input type="email" value={editForm?.email || ""} onChange={e => setEditForm((prev: any) => ({...prev, email: e.target.value}))} className="h-11 rounded-xl bg-muted border-none font-bold px-4" /></div>
                </div>
                <div className="space-y-1 text-left">
-                  <Label className="text-[9px] font-black text-muted-foreground ml-1 uppercase">Mobile number</Label>
+                  <Label className="text-[9px] font-bold text-muted-foreground ml-1 uppercase">Mobile number</Label>
                   <div className="relative">
-                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-muted-foreground/40">+91</span>
-                     <Input value={editForm?.phone || ""} onChange={e => setEditForm((prev: any) => ({...prev, phone: e.target.value.replace(/\D/g, '').slice(0,10)}))} className="h-11 pl-12 rounded-xl bg-muted border-none font-black text-sm" />
+                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground/40">+91</span>
+                     <Input value={editForm?.phone || ""} onChange={e => setEditForm((prev: any) => ({...prev, phone: e.target.value.replace(/\D/g, '').slice(0,10)}))} className="h-11 pl-12 rounded-xl bg-muted border-none font-bold text-sm" />
                   </div>
                </div>
                <div className="space-y-1 text-left">
-                  <Label className="text-[9px] font-black text-muted-foreground ml-1 uppercase">Home address</Label>
+                  <Label className="text-[9px] font-bold text-muted-foreground ml-1 uppercase">Home address</Label>
                   <Textarea value={editForm?.address || ""} onChange={e => setEditForm((prev: any) => ({...prev, address: e.target.value}))} className="min-h-[80px] rounded-xl bg-muted border-none font-medium p-3 shadow-inner resize-none text-sm" />
                </div>
             </div>
             <DialogFooter className="p-5 md:p-6 bg-muted border-t border-border flex flex-row gap-3 items-center justify-between">
-               <Button variant="ghost" onClick={() => setIsEditing(false)} className="h-10 px-5 font-black text-[9px] text-muted-foreground border-none uppercase">Cancel</Button>
-               <Button onClick={handleUpdateProfile} disabled={isSaving} className="bg-primary hover:bg-blue-700 text-white h-10 px-6 rounded-full font-black text-[10px] flex-1 shadow-3xl transition-all active:scale-95 gap-2 uppercase">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save details</Button>
+               <Button variant="ghost" onClick={() => setIsEditing(false)} className="h-10 px-5 font-bold text-[9px] text-muted-foreground border-none">Cancel</Button>
+               <Button onClick={handleUpdateProfile} disabled={isSaving} className="bg-primary hover:bg-blue-700 text-white h-10 px-6 rounded-full font-bold text-[10px] flex-1 shadow-3xl transition-all active:scale-95 gap-2">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save details</Button>
             </DialogFooter>
          </DialogContent>
       </Dialog>
@@ -298,15 +299,15 @@ export default function ProfilePage() {
          <DialogContent className="sm:max-w-md w-[95vw] rounded-2xl bg-card border-none shadow-5xl p-8 text-center flex flex-col items-center">
             <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 mb-6 shadow-inner"><ShieldAlert className="h-8 w-8" /></div>
             <DialogHeader>
-               <DialogTitle className="text-xl font-black uppercase">Purge account</DialogTitle>
-               <DialogDescription className="text-muted-foreground text-sm font-medium mt-2">Type <code className="text-rose-600 font-black">DELETE</code> to permanently liquidate your preparation data.</DialogDescription>
+               <DialogTitle className="text-xl font-bold">Purge account</DialogTitle>
+               <DialogDescription className="text-muted-foreground text-sm font-medium mt-2">Type <code className="text-rose-600 font-bold">DELETE</code> to permanently liquidate your preparation data.</DialogDescription>
             </DialogHeader>
             <div className="w-full my-6">
-               <Input value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} className="h-12 bg-muted border-none text-center font-black text-rose-600 uppercase" placeholder="---" />
+               <Input value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} className="h-12 bg-muted border-none text-center font-bold text-rose-600" placeholder="---" />
             </div>
             <div className="grid grid-cols-2 gap-3 w-full">
-               <Button variant="ghost" onClick={() => setIsDeleting(false)} className="font-bold text-[10px] uppercase">Cancel</Button>
-               <Button onClick={handleDeleteAccount} disabled={deleteConfirm !== 'DELETE' || isSaving} className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] shadow-xl uppercase">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete forever"}</Button>
+               <Button variant="ghost" onClick={() => setIsDeleting(false)} className="font-bold text-[10px]">Cancel</Button>
+               <Button onClick={handleDeleteAccount} disabled={deleteConfirm !== 'DELETE' || isSaving} className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] shadow-xl">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete forever"}</Button>
             </div>
          </DialogContent>
       </Dialog>
@@ -323,7 +324,7 @@ function StatsNode({ icon, label, value, color, bgColor }: any) {
         </div>
         <div className="space-y-0.5 min-w-0 w-full">
           <p className="text-sm md:text-xl font-black text-foreground tabular-nums tracking-tighter leading-none truncate">{value}</p>
-          <p className="text-[7px] md:text-[8px] font-black tracking-tight text-muted-foreground uppercase mt-1 truncate">{label}</p>
+          <p className="text-[7px] md:text-[8px] font-bold text-muted-foreground uppercase mt-1 truncate">{label}</p>
         </div>
       </div>
     </Card>
