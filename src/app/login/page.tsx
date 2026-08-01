@@ -17,7 +17,8 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  Star
+  Star,
+  AlertCircle
 } from "lucide-react";
 import { useAuth, useFirestore, useUser } from "@/firebase";
 import { 
@@ -40,9 +41,9 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v16.0 [Performance Hardened].
+ * @fileOverview Premium Institutional Auth Portal v16.5 [Safety Notice Added].
+ * FIXED: Added red 'Spam check' notice to Forgot Password section.
  * FIXED: Optimized atomic handshake to eliminate "blank page" hangs.
- * FIXED: Backgrounded non-critical profile updates during login.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -83,7 +84,6 @@ function LoginContent() {
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          // HIGH SPEED HANDOFF: Redirect first, sync later in background
           finalizeUserNode(result.user, result.user.displayName || "Aspirant");
           router.replace(returnUrl);
         } else {
@@ -176,7 +176,6 @@ function LoginContent() {
     const deviceId = await getDeviceId();
     const userRef = doc(db, 'users', userNode.uid);
     
-    // FIRE AND FORGET: Background synchronization for maximum speed
     try {
       const userSnap = await getDoc(userRef);
       if (!userSnap.exists()) {
@@ -219,7 +218,7 @@ function LoginContent() {
            </div>
            <div className="text-center space-y-1">
               <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Authenticating</p>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verifying Registry Node...</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verifying Database Node...</p>
            </div>
         </div>
      );
@@ -244,6 +243,19 @@ function LoginContent() {
               </div>
 
               <div className="space-y-6">
+                 {mode === 'forgot' && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }} 
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-3"
+                    >
+                       <AlertCircle className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
+                       <p className="text-rose-600 font-bold text-[10px] leading-relaxed">
+                          Please check your <span className="underline">Spam folder</span> in your mail for the reset link if it doesn't appear in Inbox.
+                       </p>
+                    </motion.div>
+                 )}
+
                  <form onSubmit={handleEmailAuth} className="space-y-4">
                     {mode === 'signup' && (
                        <div className="space-y-1.5 text-left">
@@ -272,7 +284,7 @@ function LoginContent() {
                        </div>
                     )}
                     <Button type="submit" disabled={isConnecting} className="w-full h-14 md:h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl border-none active:scale-95">
-                       {isConnecting ? <Loader2 className="h-5 w-5 animate-spin" /> : mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Recover Account'}
+                       {isConnecting ? <Loader2 className="h-5 w-5 animate-spin" /> : mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Transmit Reset Link'}
                     </Button>
                  </form>
 
