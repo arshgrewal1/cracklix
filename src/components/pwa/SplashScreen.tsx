@@ -6,8 +6,8 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Optimized PWA Splash Hub v14.0 [Anti-Hang Hardened].
- * FIXED: Implemented a strict 4s safety timeout to prevent app hanging if Firestore sync is slow.
+ * @fileOverview Optimized PWA Splash Hub v15.0 [Fast-Track Hardened].
+ * FIXED: Accelerated progress bar and reduced exit latency.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -17,7 +17,6 @@ export default function SplashScreen() {
   const [forceClose, setForceClose] = useState(false);
 
   const isDataReady = useMemo(() => {
-    // If safety timeout triggered, ignore data status
     if (forceClose) return true;
     if (authLoading) return false;
     if (user && profileLoading) return false;
@@ -27,24 +26,21 @@ export default function SplashScreen() {
   useEffect(() => {
     setMounted(true);
     
-    // SAFETY PROTOCOL: Force exit splash after 4 seconds regardless of data state
-    // This prevents the "90% hang" on slow networks or DNS/SSL delays.
+    // SAFETY PROTOCOL: Force exit splash after 4 seconds
     const safetyTimer = setTimeout(() => {
-      console.log('[SPLASH] Safety override triggered.');
       setForceClose(true);
     }, 4000);
 
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        // Hang at 90% only if data isn't ready and safety timer hasn't fired
         if (prev >= 90 && !isDataReady) return 90;
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
         }
-        return prev + 4;
+        return prev + 6; // Accelerated progress
       });
-    }, 20);
+    }, 16);
 
     return () => {
       clearTimeout(safetyTimer);
@@ -54,7 +50,7 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (isDataReady && progress >= 100) {
-      const exitTimer = setTimeout(() => setIsVisible(false), 200);
+      const exitTimer = setTimeout(() => setIsVisible(false), 100);
       return () => clearTimeout(exitTimer);
     }
   }, [isDataReady, progress]);
@@ -68,7 +64,7 @@ export default function SplashScreen() {
           key="cracklix-premium-splash"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="fixed inset-0 z-[10000] bg-[#05070B] flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none"
         >
           <div className="absolute top-0 left-0 w-full h-full bg-primary/5 blur-[140px] rounded-full" />
@@ -77,7 +73,7 @@ export default function SplashScreen() {
              <motion.div
                initial={{ opacity: 0, scale: 0.8, y: 10 }}
                animate={{ opacity: 1, scale: 1, y: 0 }}
-               transition={{ duration: 0.6, ease: "easeOut" }}
+               transition={{ duration: 0.5, ease: "easeOut" }}
                className="relative"
              >
                 <div className="relative flex items-center justify-center">
@@ -104,7 +100,7 @@ export default function SplashScreen() {
              <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.6, delay: 0.2 }}
+               transition={{ duration: 0.5, delay: 0.15 }}
                className="text-center space-y-2 w-full -mt-16 md:-mt-24"
              >
                 <div className="space-y-1">

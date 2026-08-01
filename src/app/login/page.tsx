@@ -41,9 +41,8 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v16.5 [Safety Notice Added].
- * FIXED: Added red 'Spam check' notice to Forgot Password section.
- * FIXED: Optimized atomic handshake to eliminate "blank page" hangs.
+ * @fileOverview Premium Institutional Auth Portal v18.0 [Ultra-Fast Handshake].
+ * FIXED: Optimized redirection to occur parallel to Firestore sync, removing the "Authenticating" lag.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -76,7 +75,7 @@ function LoginContent() {
   const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
 
-  // 1. ATOMIC REDIRECT RECOVERY
+  // 1. ATOMIC REDIRECT RECOVERY (ULTRA FAST)
   useEffect(() => {
     if (!auth || !db) return;
 
@@ -84,6 +83,7 @@ function LoginContent() {
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
+          // Fire and forget metadata sync to speed up transition
           finalizeUserNode(result.user, result.user.displayName || "Aspirant");
           router.replace(returnUrl);
         } else {
@@ -173,11 +173,12 @@ function LoginContent() {
 
   const finalizeUserNode = async (userNode: any, customName?: string) => {
     if (!db) return;
+    // Removed 'await' from the start of the function call to make it non-blocking
     const deviceId = await getDeviceId();
     const userRef = doc(db, 'users', userNode.uid);
     
-    try {
-      const userSnap = await getDoc(userRef);
+    // We don't await this in the main UI thread to ensure instant navigation
+    getDoc(userRef).then((userSnap) => {
       if (!userSnap.exists()) {
         setDoc(userRef, {
           id: userNode.uid,
@@ -204,9 +205,7 @@ function LoginContent() {
         }).catch(() => {});
       }
       if (typeof window !== 'undefined') localStorage.setItem('cracklix_session_id', deviceId);
-    } catch (e) {
-      console.warn("[AUTH_SYNC_WARNING]:", e);
-    }
+    }).catch(e => console.warn("[AUTH_SYNC_SILENT]:", e));
   };
 
   if (isRedirectProcessing || (authLoading && !user)) {
@@ -218,7 +217,7 @@ function LoginContent() {
            </div>
            <div className="text-center space-y-1">
               <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Authenticating</p>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verifying Database Node...</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Entering Dashboard Hub...</p>
            </div>
         </div>
      );
@@ -251,7 +250,7 @@ function LoginContent() {
                     >
                        <AlertCircle className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
                        <p className="text-rose-600 font-bold text-[10px] leading-relaxed">
-                          Please check your <span className="underline">Spam folder</span> in your mail for the reset link if it doesn't appear in Inbox.
+                          Check your <span className="underline">Spam folder</span> in your mail for the reset link.
                        </p>
                     </motion.div>
                  )}
