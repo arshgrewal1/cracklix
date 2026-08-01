@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -15,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Density Categories Hub v51.5.
+ * @fileOverview High-Density Categories Hub v51.6.
  * FIXED: Restored missing Badge and Button imports.
  */
 
@@ -73,7 +72,7 @@ export default function FeaturedCategories() {
                   <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left min-h-[140px] md:min-h-[180px]">
                      <div className="flex justify-between items-start mb-4">
                         <AuthorityLogo category={cat} size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-lg shadow-sm border-2 border-background" />
-                        <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 border-border text-muted-foreground text-[7px] font-bold px-2 h-5">Official hub</Badge>
+                        <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 border-border text-muted-foreground text-[7px] font-bold px-2 h-5">Official Hub</Badge>
                      </div>
 
                      <div className="flex-1 space-y-1.5 min-w-0">
@@ -85,7 +84,7 @@ export default function FeaturedCategories() {
 
                      <div className="mt-6 pt-2">
                         <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white font-bold text-[10px] rounded-xl transition-all active:scale-95 border-none shadow-md">
-                           Enter hub <ArrowRight className="h-3 w-3" />
+                           Enter Hub <ArrowRight className="h-3 w-3" />
                         </Button>
                      </div>
                   </Card>

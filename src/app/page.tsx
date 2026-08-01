@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -25,9 +24,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v512.5.
- * FIXED: Restored Button and Badge components.
- * REDESIGNED: "Today's Challenge" card with premium high-fidelity glassmorphism.
+ * @fileOverview Premium Institutional Hub v513.0.
+ * FIXED: Redesigned "Today's Challenge" with high-fidelity Linear/Notion style.
+ * FIXED: Ensured all ReferenceErrors (Badge, Button) are resolved.
  */
 export default function HomePage() {
   const { user } = useUser();

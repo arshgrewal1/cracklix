@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,7 +13,7 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Density Current Affairs Preview v27.6.
+ * @fileOverview High-Density Current Affairs Preview v27.7.
  * FIXED: Restored missing Badge and Button imports.
  */
 export default function CurrentAffairsPreview() {
@@ -66,7 +65,7 @@ export default function CurrentAffairsPreview() {
                     <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left">
                        <div className="flex justify-between items-start mb-6">
                           <AuthorityLogo boardId="current-affairs" size="sm" className="h-10 w-10 md:h-12 md:w-12 shadow-lg border-2 border-background bg-muted" />
-                          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-primary border-none text-[7px] font-bold px-2 py-0.5 rounded shadow-sm">Verified</Badge>
+                          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-primary border-none text-[7px] font-bold px-2 py-0.5 rounded shadow-sm">Verified Node</Badge>
                        </div>
 
                        <div className="flex-1 space-y-1.5 min-w-0">
@@ -82,7 +81,7 @@ export default function CurrentAffairsPreview() {
 
                        <div className="mt-6 pt-2">
                           <Button className="w-full h-10 md:h-11 bg-[#0F172A] hover:bg-primary text-white font-bold text-[10px] rounded-xl transition-all active:scale-95 border-none shadow-md">
-                             Open portal <ArrowRight className="h-3.5 w-3.5 ml-2" />
+                             Open Portal <ArrowRight className="h-3.5 w-3.5 ml-2" />
                           </Button>
                        </div>
                     </Card>

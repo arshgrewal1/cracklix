@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -45,9 +44,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v40.5.
- * FIXED: Added missing ShieldAlert and CardTitle imports.
- * FIXED: Implemented client-side sorting to bypass Firestore Index requirement.
+ * @fileOverview Institutional Profile Hub v40.6 [Index Bypass].
+ * FIXED: Removed Firestore orderBy to bypass Index error during build. 
+ * FIXED: Restored missing ShieldAlert and CardTitle imports.
  */
 
 export default function ProfilePage() {
@@ -83,32 +82,35 @@ export default function ProfilePage() {
     }
   }, [profile])
 
+  // Fetch results pool - Remove orderBy to bypass index requirement
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
-    // REMOVED: orderBy to bypass Index error during build. We sort client-side.
-    return query(collection(db, "results"), where("userId", "==", user.uid), limit(100))
+    return query(collection(db, "results"), where("userId", "==", user.uid), limit(50))
   }, [db, user])
 
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
 
-  const results = useMemo(() => {
-    if (!rawResults) return []
-    return [...rawResults].sort((a, b) => {
+  // Identify stats and sort client-side
+  const { results, aggregateStats } = useMemo(() => {
+    if (!rawResults) return { results: [], aggregateStats: { totalTests: 0, highestScore: 0, avgAccuracy: 0, bestRank: "---" } };
+    
+    const sorted = [...rawResults].sort((a, b) => {
       const timeA = new Date(a.timestamp || 0).getTime()
       const timeB = new Date(b.timestamp || 0).getTime()
       return timeB - timeA
-    }).slice(0, 10)
-  }, [rawResults])
+    })
 
-  const aggregateStats = useMemo(() => {
-    const accuracy = rawResults?.length ? Math.round(rawResults.reduce((acc, r) => acc + (r.accuracy || 0), 0) / rawResults.length) : 0;
-    const peak = rawResults?.length ? Math.max(...rawResults.map(r => r.score || 0)) : 0;
+    const accuracy = sorted.length ? Math.round(sorted.reduce((acc, r) => acc + (r.accuracy || 0), 0) / sorted.length) : 0;
+    const peak = sorted.length ? Math.max(...sorted.map(r => r.score || 0)) : 0;
 
     return {
-       totalTests: rawResults?.length || 0,
-       highestScore: peak,
-       avgAccuracy: accuracy,
-       bestRank: profile?.bestRank ? `#${profile.bestRank}` : "---"
+       results: sorted.slice(0, 10),
+       aggregateStats: {
+          totalTests: sorted.length,
+          highestScore: peak,
+          avgAccuracy: accuracy,
+          bestRank: profile?.bestRank ? `#${profile.bestRank}` : "---"
+       }
     }
   }, [profile, rawResults]);
 
@@ -173,7 +175,7 @@ export default function ProfilePage() {
                           <h1 className="text-xl md:text-3xl font-black text-white leading-none tracking-tight truncate max-w-full">
                              {profile?.name}
                           </h1>
-                          <Badge className={cn("border-none text-[8px] font-bold px-3 py-0.5 rounded-full shadow-2xl shrink-0", profile?.status === 'Free' ? "bg-white/10 text-slate-300" : "bg-primary text-white")}>{profile?.status || 'Free'} pass</Badge>
+                          <Badge className={cn("border-none text-[8px] font-bold px-3 py-0.5 rounded-full shadow-2xl shrink-0", profile?.status === 'Free' ? "bg-white/10 text-slate-300" : "bg-primary text-white")}>{profile?.status || 'Free'} Pass</Badge>
                         </div>
                         <div className="flex flex-wrap items-center justify-start gap-x-4 gap-y-1 pt-1">
                           <div className="flex items-center gap-2 text-white/60 font-bold text-[9px] md:text-[11px] tracking-tight shrink-0"><Mail className="h-3 w-3 text-primary" /> <span className="truncate max-w-[120px] md:max-w-[280px]">{profile?.email}</span></div>
@@ -236,12 +238,12 @@ export default function ProfilePage() {
                     <h3 className="text-[10px] font-black tracking-tight text-muted-foreground uppercase">Control hub</h3>
                     <div className="space-y-2">
                        <Button onClick={() => setIsEditing(true)} className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] tracking-tight shadow-xl transition-all active:scale-95 border-none gap-2">Edit profile</Button>
-                       <Button asChild variant="outline" className="w-full h-11 rounded-full font-bold text-[10px] tracking-tight shadow-sm transition-all active:scale-95 border-2 gap-2"><Link href="/pass"><Gem className="h-4 w-4 text-primary" /> Get elite pass</Link></Button>
+                       <Button asChild variant="outline" className="w-full h-11 rounded-full font-bold text-[10px] tracking-tight shadow-sm transition-all active:scale-95 border-2 gap-2"><Link href="/pass"><Gem className="h-4 w-4 text-primary" /> Get Elite Pass</Link></Button>
                     </div>
 
                     <div className="pt-4 border-t border-border space-y-3">
                        <p className="text-[8px] font-bold text-muted-foreground tracking-tight uppercase">Account actions</p>
-                       <Button onClick={() => setIsDeleting(true)} variant="ghost" className="w-full h-9 text-rose-500 hover:bg-rose-50 rounded-xl font-bold text-[8px] tracking-tight transition-all gap-2"><Trash2 className="h-3.5 w-3.5" /> Delete account</Button>
+                       <Button onClick={() => setIsDeleting(true)} variant="ghost" className="w-full h-9 text-rose-500 hover:bg-rose-50 rounded-xl font-bold text-[8px] tracking-tight transition-all gap-2"><Trash2 className="h-3.5 w-3.5" /> Delete Account</Button>
                     </div>
                  </Card>
               </div>
@@ -289,7 +291,7 @@ export default function ProfilePage() {
          <DialogContent className="sm:max-w-md w-[95vw] rounded-2xl bg-card border-none shadow-5xl p-8 text-center flex flex-col items-center">
             <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 mb-6 shadow-inner"><ShieldAlert className="h-8 w-8" /></div>
             <DialogHeader>
-               <DialogTitle className="text-xl font-bold">Purge account</DialogTitle>
+               <DialogTitle className="text-xl font-bold">Purge Account</DialogTitle>
                <DialogDescription className="text-muted-foreground text-sm font-medium mt-2">Type <code className="text-rose-600 font-bold">DELETE</code> to permanently liquidate your preparation data.</DialogDescription>
             </DialogHeader>
             <div className="w-full my-6">
@@ -297,7 +299,7 @@ export default function ProfilePage() {
             </div>
             <div className="grid grid-cols-2 gap-3 w-full">
                <Button variant="ghost" onClick={() => setIsDeleting(false)} className="font-bold text-[10px]">Cancel</Button>
-               <Button onClick={handleDeleteAccount} disabled={deleteConfirm !== 'DELETE' || isSaving} className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] shadow-xl">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete forever"}</Button>
+               <Button onClick={handleDeleteAccount} disabled={deleteConfirm !== 'DELETE' || isSaving} className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] shadow-xl">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete Forever"}</Button>
             </div>
          </DialogContent>
       </Dialog>

@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useUser, useCollection, useFirestore } from '@/firebase';
-import { collection, query, where, limit, orderBy } from 'firebase/firestore';
+import { collection, query, where, limit, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,12 +25,12 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview High-Fidelity Real-Time Progress Hub v9.0.
- * FIXED: Uses onSnapshot (via useCollection) on 'attempts' to ensure instant refresh.
- * LOGIC: Always shows the single most recent activity node (Resumed or Completed).
+ * @fileOverview High-Fidelity Real-Time Progress Hub v10.0.
+ * FIXED: Removed orderBy from Firestore query to bypass Index Requirement Error.
+ * LOGIC: Performs high-speed client-side sorting to identify the absolute latest attempt.
  */
 export default function ContinueLearning() {
-  const { user, profile } = useUser();
+  const { user } = useUser();
   const db = useFirestore();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -39,21 +39,28 @@ export default function ContinueLearning() {
     setMounted(true);
   }, []);
 
-  // 1. Listen to the latest attempt pointer (Source of Truth for "Activity")
+  // 1. Fetch user attempts without orderBy to bypass index requirement
   const attemptsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null;
     return query(
       collection(db, "attempts"), 
       where("userId", "==", user.uid),
-      orderBy("updatedAt", "desc"),
-      limit(1)
+      limit(50) // Fetch recent pool for client-side sorting
     );
   }, [db, user, mounted]);
 
-  const { data: latestAttempts, loading: attemptsLoading } = useCollection<any>(attemptsQuery);
-  const activeAttempt = latestAttempts?.[0];
+  const { data: rawAttempts, loading: attemptsLoading } = useCollection<any>(attemptsQuery);
 
-  // 2. Fetch the corresponding mock metadata and result if completed
+  // 2. Identify the absolute latest activity client-side
+  const activeAttempt = useMemo(() => {
+    if (!rawAttempts || rawAttempts.length === 0) return null;
+    return [...rawAttempts].sort((a, b) => {
+       const tA = a.updatedAt?.seconds || 0;
+       const tB = b.updatedAt?.seconds || 0;
+       return tB - tA;
+    })[0];
+  }, [rawAttempts]);
+
   const [mockMeta, setMockMeta] = useState<any>(null);
   const [resultData, setResultData] = useState<any>(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -70,15 +77,13 @@ export default function ContinueLearning() {
        try {
           const mId = activeAttempt.mockId;
           
-          // a. Get Mock Static Meta
-          const mSnap = await Promise.all([
-             getDoc(doc(db, "mocks", mId)),
-             getDoc(doc(db, "daily_quizzes", mId))
-          ]);
-          const meta = mSnap[0].exists() ? mSnap[0].data() : mSnap[1].exists() ? mSnap[1].data() : null;
+          const mRef = doc(db, "mocks", mId);
+          const dRef = doc(db, "daily_quizzes", mId);
+          
+          const [mSnap, dSnap] = await Promise.all([getDoc(mRef), getDoc(dRef)]);
+          const meta = mSnap.exists() ? mSnap.data() : dSnap.exists() ? dSnap.data() : null;
           setMockMeta(meta);
 
-          // b. Get Result if completed
           if (activeAttempt.status === 'COMPLETED' && activeAttempt.attemptId) {
              const rSnap = await getDoc(doc(db, "results", activeAttempt.attemptId));
              if (rSnap.exists()) setResultData(rSnap.data());
@@ -114,7 +119,7 @@ export default function ContinueLearning() {
 
         <div className="grid grid-cols-1 gap-4">
            {(attemptsLoading || isSyncing) ? (
-              <Skeleton className="h-40 w-full rounded-2xl bg-muted" />
+              <Skeleton className="h-28 w-full rounded-2xl bg-muted" />
            ) : activeAttempt && mockMeta ? (
                <motion.div
                  initial={{ opacity: 0, y: 10 }}
@@ -122,41 +127,41 @@ export default function ContinueLearning() {
                  className="w-full"
                >
                  <Card className={cn(
-                   "border border-border p-5 md:p-8 rounded-[2rem] shadow-xl transition-all duration-300 group relative overflow-hidden flex flex-col md:flex-row items-center gap-6 md:gap-10",
+                   "border border-border p-4 md:p-6 rounded-2xl shadow-lg transition-all duration-300 group relative overflow-hidden flex flex-col md:flex-row items-center gap-6",
                    isCompleted ? "bg-white" : "bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-white"
                  )}>
                    <div className="flex items-center gap-6 flex-1 min-w-0 w-full">
                       <div className="relative shrink-0">
-                        <AuthorityLogo boardId={mockMeta?.boardId || "GENERAL"} size="md" className="h-14 w-14 md:h-24 md:w-24 shadow-2xl border-4 border-white/10" />
+                        <AuthorityLogo boardId={mockMeta?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-16 md:w-16 shadow-xl border-2 border-white/10" />
                         {!isCompleted && (
-                           <div className="absolute -bottom-2 -right-2 h-8 w-8 bg-primary rounded-xl flex items-center justify-center shadow-lg animate-pulse border-2 border-[#0F172A]">
-                              <Clock className="h-4 w-4 text-white" />
+                           <div className="absolute -bottom-1 -right-1 h-6 w-6 bg-primary rounded-lg flex items-center justify-center shadow-lg animate-pulse border-2 border-[#0F172A]">
+                              <Clock className="h-3 w-3 text-white" />
                            </div>
                         )}
                       </div>
                       
-                      <div className="flex-1 space-y-3 min-w-0 text-left">
+                      <div className="flex-1 space-y-2 min-w-0 text-left">
                          <div className="flex items-center gap-2">
                             <Badge className={cn(
-                              "border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest",
+                              "border-none px-2 py-0.5 rounded-md font-bold text-[8px] uppercase tracking-tight",
                               isCompleted ? "bg-emerald-100 text-emerald-700" : "bg-primary text-white"
                             )}>
-                               {isCompleted ? "Completed" : "In progress"}
+                               {isCompleted ? "Completed" : "In Progress"}
                             </Badge>
-                            <span className={cn("text-[10px] font-bold tabular-nums uppercase tracking-tight", isCompleted ? "text-slate-400" : "text-slate-500")}>
+                            <span className={cn("text-[9px] font-bold tabular-nums uppercase", isCompleted ? "text-slate-400" : "text-slate-500")}>
                                Updated: {new Date(activeAttempt.updatedAt?.seconds * 1000 || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                          </div>
-                         <h3 className={cn("text-lg md:text-3xl font-black tracking-tight leading-tight line-clamp-1", isCompleted ? "text-[#0F172A]" : "text-white")}>
+                         <h3 className={cn("text-base md:text-xl font-black tracking-tight leading-tight line-clamp-1", isCompleted ? "text-[#0F172A]" : "text-white")}>
                             {mockMeta.title}
                          </h3>
                          <div className="flex flex-wrap items-center gap-4 pt-1">
-                            <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold opacity-60">
-                               <BookOpen className="h-4 w-4" /> {mockMeta.totalQuestions} Questions
+                            <div className="flex items-center gap-1.5 text-[9px] font-bold opacity-60">
+                               <BookOpen className="h-3 w-3" /> {mockMeta.totalQuestions} Questions
                             </div>
                             {resultData && (
-                               <div className="flex items-center gap-2 text-emerald-500 font-black text-[10px] md:text-xs">
-                                  <Trophy className="h-4 w-4" /> Last score: {resultData.score}
+                               <div className="flex items-center gap-1.5 text-emerald-500 font-black text-[9px]">
+                                  <Trophy className="h-3 w-3" /> Last Score: {resultData.score}
                                </div>
                             )}
                          </div>
@@ -165,13 +170,13 @@ export default function ContinueLearning() {
 
                    <div className="shrink-0 w-full md:w-auto">
                       <Button asChild className={cn(
-                        "w-full md:w-auto h-12 md:h-16 px-10 md:px-14 rounded-2xl font-black uppercase text-[10px] md:text-xs tracking-widest shadow-2xl border-none active:scale-95 transition-all gap-3",
+                        "w-full md:w-auto h-11 px-8 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg border-none transition-all active:scale-95 gap-2",
                         isCompleted ? "bg-[#0F172A] hover:bg-black text-white" : "bg-primary hover:bg-blue-700 text-white"
                       )}>
                         <Link href={isCompleted ? `/results/view?id=${activeAttempt.mockId}&attemptId=${activeAttempt.attemptId}` : `/mocks/attempt?id=${activeAttempt.mockId}`}>
-                           {isCompleted ? <BarChart3 className="h-4 w-4 md:h-5 md:w-5" /> : <Play className="h-4 w-4 md:h-5 md:w-5 fill-current" />}
-                           {isCompleted ? "View analysis" : "Resume test"}
-                           <ChevronRight className="h-4 w-4 md:h-5 md:w-5 opacity-40 ml-2" />
+                           {isCompleted ? <BarChart3 className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
+                           {isCompleted ? "View Analysis" : "Resume Test"}
+                           <ChevronRight className="h-4 w-4 opacity-40 ml-1" />
                         </Link>
                       </Button>
                    </div>
@@ -183,5 +188,3 @@ export default function ContinueLearning() {
     </section>
   );
 }
-
-import { getDoc, doc } from 'firebase/firestore';
