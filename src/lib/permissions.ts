@@ -1,3 +1,4 @@
+
 import { UserProfile, UserPermissions } from "@/types";
 
 /**
@@ -55,7 +56,8 @@ export const ADMIN_BASE_PERMISSIONS: UserPermissions = {
   manageSeries: true,
   viewAnalytics: true,
   manageNotifications: true,
-  manageAnnouncements: true
+  manageAnnouncements: true,
+  manageUsers: true
 };
 
 export function isSuperAdmin(profile: UserProfile | null, userEmail?: string | null): boolean {

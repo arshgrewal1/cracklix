@@ -105,18 +105,26 @@ export interface UserPermissions {
 export interface UserProfile {
   id: string;
   name: string;
+  username?: string;
   email: string;
   phone?: string;
   dob?: string;
   address?: string;
+  district?: string;
+  city?: string;
   role: UserRole;
   status: UserStatus | string;
   permissions: UserPermissions;
   state: "Punjab";
   targetExam: string;
+  examCategory?: string;
+  education?: string;
+  preferredLanguage?: string;
+  dailyGoal?: string;
   createdAt: any;
   updatedAt: any;
   lastLoginAt?: any;
+  lastSeen?: any;
   activeDeviceId?: string;
   deviceLock?: DeviceLock;
   passStatus: 'active' | 'expired' | 'none';
