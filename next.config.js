@@ -1,4 +1,3 @@
-
 const withPWA = require('next-pwa')({
     dest: 'public',
     register: true,
@@ -21,6 +20,14 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
+  async rewrites() {
+    return [
+      {
+        source: '/__/auth/:path*',
+        destination: `https://cracklix0.firebaseapp.com/__/auth/:path*`,
+      },
+    ];
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
