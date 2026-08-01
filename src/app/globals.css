@@ -23,7 +23,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 215 100% 54%;
-    --radius: 1.25rem;
+    --radius: 1rem;
   }
 
   .dark {
@@ -54,11 +54,14 @@
     @apply border-border;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    text-wrap: pretty;
   }
   
   body {
@@ -84,6 +87,7 @@
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold tracking-tight;
+    text-wrap: balance;
   }
 }
 
@@ -118,11 +122,11 @@
 }
 
 .shadow-4xl {
-  box-shadow: 0 15px 30px -8px rgba(22, 119, 255, 0.1);
+  box-shadow: 0 10px 25px -8px rgba(22, 119, 255, 0.1);
 }
 
 .shadow-5xl {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
 }
 
 @media print {

@@ -41,7 +41,6 @@ import {
   Layers,
   RefreshCw,
   CheckCircle,
-  Sparkles,
   SearchCode
 } from "lucide-react";
 
