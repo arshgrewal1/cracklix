@@ -64,8 +64,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Deep Institutional Aspirant Auditor v2.2.
- * FIXED: Added missing Trophy icon import to resolve ReferenceError.
+ * @fileOverview Deep Institutional Aspirant Auditor v2.3.
+ * FIXED: ReferenceError for 'results' and 'Trophy'.
  * FIXED: Bypassed Firebase Index Error by performing client-side sorting for Subscriptions and Sessions.
  */
 
@@ -84,14 +84,22 @@ export default function StudentDetailPage(props: { params: Promise<{ userId: str
 
   // 2. Aggregate Data Listeners (Index Resilient)
   const resultsQuery = useMemo(() => (db ? query(collection(db, "results"), where("userId", "==", userId)) : null), [db, userId]);
-  
-  // Removed orderBy to prevent Index Errors; Sorting is now handled client-side in useMemo
   const sessionsQuery = useMemo(() => (db ? query(collection(db, "users", userId, "study_sessions"), limit(100)) : null), [db, userId]);
   const subsQuery = useMemo(() => (db ? query(collection(db, "subscriptions"), where("userId", "==", userId)) : null), [db, userId]);
 
   const { data: rawResults, loading: rLoading } = useCollection<any>(resultsQuery);
   const { data: rawSessions } = useCollection<any>(sessionsQuery);
   const { data: rawSubscriptions } = useCollection<any>(subsQuery);
+
+  // CLIENT-SIDE SORTING (Registry Integrity)
+  const results = useMemo(() => {
+    if (!rawResults) return [];
+    return [...rawResults].sort((a, b) => {
+      const tA = new Date(a.timestamp || 0).getTime();
+      const tB = new Date(b.timestamp || 0).getTime();
+      return tB - tA;
+    });
+  }, [rawResults]);
 
   const sortedSessions = useMemo(() => {
     if (!rawSessions) return [];
@@ -112,18 +120,18 @@ export default function StudentDetailPage(props: { params: Promise<{ userId: str
   }, [rawSubscriptions]);
 
   const analytics = useMemo(() => {
-    if (!rawResults || rawResults.length === 0) return { 
+    if (!results || results.length === 0) return { 
        attempted: 0, accuracy: 0, avgScore: 0, highestScore: 0, solved: 0, correct: 0, wrong: 0, timeSpent: 0 
     };
     
-    const total = rawResults.length;
-    const correct = rawResults.reduce((acc, r) => acc + (r.correctCount || 0), 0);
-    const wrong = rawResults.reduce((acc, r) => acc + (r.wrongCount || 0), 0);
-    const attemptedQ = rawResults.reduce((acc, r) => acc + (r.attemptedCount || 0), 0);
-    const timeSpent = rawResults.reduce((acc, r) => acc + (r.timeTaken || 0), 0);
-    const scores = rawResults.map(r => r.score || 0);
+    const total = results.length;
+    const correct = results.reduce((acc, r) => acc + (r.correctCount || 0), 0);
+    const wrong = results.reduce((acc, r) => acc + (r.wrongCount || 0), 0);
+    const attemptedQ = results.reduce((acc, r) => acc + (r.attemptedCount || 0), 0);
+    const timeSpent = results.reduce((acc, r) => acc + (r.timeTaken || 0), 0);
+    const scores = results.map(r => r.score || 0);
     const avgScore = scores.reduce((a, b) => a + b, 0) / total;
-    const accuracies = rawResults.map(r => r.accuracy || 0);
+    const accuracies = results.map(r => r.accuracy || 0);
     
     return {
       attempted: total,
@@ -135,7 +143,7 @@ export default function StudentDetailPage(props: { params: Promise<{ userId: str
       wrong,
       timeSpent: Math.round(timeSpent / 60) // in minutes
     };
-  }, [rawResults]);
+  }, [results]);
 
   const handleAdminAction = async (action: string) => {
     if (!db || !profile || isProcessing) return;
@@ -413,7 +421,7 @@ function AnalyticNode({ label, val, icon }: any) {
 
 function SectionCard({ title, icon, children }: any) {
    return (
-      <Card className="border-none shadow-2xl rounded-[2.5rem] md:rounded-[3rem] bg-white overflow-hidden border border-slate-50">
+      <Card className="border-none shadow-2xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-50">
          <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30 text-left">
             <div className="flex items-center gap-5">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center shadow-sm shrink-0">{icon}</div>
@@ -458,4 +466,8 @@ function LearningMetric({ label, val, color }: any) {
          </div>
       </div>
    )
+}
+
+function Trophy({ className }: { className?: string }) {
+   return <Award className={className} />;
 }
