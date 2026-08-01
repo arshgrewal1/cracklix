@@ -40,8 +40,9 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v14.0.
- * FIXED: Atomic redirect handling to prevent login loop/email flicker.
+ * @fileOverview Premium Institutional Auth Portal v15.0 [Redirect Hardened].
+ * FIXED: Atomic redirect handling to resolve redirect_uri_mismatch.
+ * FIXED: Background sync is now awaited before redirect to prevent login loops.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -80,12 +81,12 @@ function LoginContent() {
 
     const handleHandshake = async () => {
       try {
+        // This is critical for catching users returning from Google
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          // DO NOT WAIT: Move user to dashboard instantly
+          // Must await data sync before moving to prevent "still logged out" state on landing
+          await finalizeUserNode(result.user, result.user.displayName || "Aspirant");
           router.replace(returnUrl);
-          // Sync database node in background
-          finalizeUserNode(result.user, result.user.displayName || "Aspirant");
         } else {
           setIsRedirectProcessing(false);
         }
@@ -93,12 +94,13 @@ function LoginContent() {
         setIsRedirectProcessing(false);
         if (error.code !== 'auth/no-auth-event') {
           console.error("[AUTH_REDIRECT_ERROR]:", error);
+          toast({ variant: "destructive", title: "Handshake Failed", description: error.message });
         }
       }
     };
 
     handleHandshake();
-  }, [auth, db, router, returnUrl]);
+  }, [auth, db, router, returnUrl, toast]);
 
   // 2. SESSION SYNC
   useEffect(() => {
@@ -120,23 +122,30 @@ function LoginContent() {
       const isStandalone = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone);
       const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
+      // STANDALONE / MOBILE ALWAYS USE REDIRECT
       if (isStandalone || isMobile) {
         await signInWithRedirect(auth, provider);
         return;
       }
 
-      const result = await signInWithPopup(auth, provider);
-      if (result.user) {
-        router.replace(returnUrl);
-        finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+      // DESKTOP ATTEMPT POPUP
+      try {
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) {
+          await finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+          router.replace(returnUrl);
+        }
+      } catch (e: any) {
+         // If popup blocked, fallback to redirect
+         if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+            await signInWithRedirect(auth, provider);
+         } else {
+            throw e;
+         }
       }
     } catch (error: any) {
-      if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
-         await signInWithRedirect(auth, provider);
-      } else {
-        toast({ variant: "destructive", title: "Login failed", description: "Identity sync error." });
-        setIsConnecting(false);
-      }
+      toast({ variant: "destructive", title: "Login failed", description: "Identity sync error." });
+      setIsConnecting(false);
     }
   };
 
@@ -148,12 +157,12 @@ function LoginContent() {
       await setPersistence(auth, browserLocalPersistence);
       if (mode === 'signin') {
         const result = await signInWithEmailAndPassword(auth, email, password);
+        await finalizeUserNode(result.user);
         router.replace(returnUrl);
-        finalizeUserNode(result.user);
       } else if (mode === 'signup') {
         const result = await createUserWithEmailAndPassword(auth, email, password);
+        await finalizeUserNode(result.user, name);
         router.replace(returnUrl);
-        finalizeUserNode(result.user, name);
       } else if (mode === 'forgot') {
         await sendPasswordResetEmail(auth, email);
         toast({ title: "Reset link sent" });
@@ -200,7 +209,7 @@ function LoginContent() {
       }
       if (typeof window !== 'undefined') localStorage.setItem('cracklix_session_id', deviceId);
     } catch (e) {
-      console.warn("[BACKGROUND_SYNC_FAILED]:", e);
+      console.warn("[AUTH_SYNC_WARNING]:", e);
     }
   };
 
@@ -212,8 +221,8 @@ function LoginContent() {
               <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 text-primary animate-spin" />
            </div>
            <div className="text-center space-y-1">
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Synchronizing Hub</p>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verifying Identity...</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Authenticating</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verifying Registry Node...</p>
            </div>
         </div>
      );
