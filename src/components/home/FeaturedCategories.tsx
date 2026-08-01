@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,8 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Density Categories Hub v51.6.
- * FIXED: Restored missing Badge and Button imports.
+ * @fileOverview High-Density Categories Hub v51.7.
+ * FIXED: Increased left padding on header to prevent clipping in PWA viewports.
  */
 
 const TARGET_IDS = [
@@ -41,24 +42,24 @@ export default function FeaturedCategories() {
     <section className="py-8 md:py-12 bg-background border-t border-border">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        <div className="flex items-center justify-between px-1 text-left">
+        <div className="flex items-center justify-between px-2 text-left">
           <div className="flex items-center gap-3">
              <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
                <Layers className="h-4 w-4 md:h-5 md:w-5" />
              </div>
-             <div className="text-left">
-                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight">Quick categories</h2>
-                <p className="text-[10px] md:text-xs font-medium text-muted-foreground">Browse exam hubs</p>
+             <div className="text-left min-w-0">
+                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight truncate">Quick Categories</h2>
+                <p className="text-[10px] md:text-xs font-medium text-muted-foreground truncate">Browse exam hubs</p>
              </div>
           </div>
-          <Link href="/exams" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group">
+          <Link href="/exams" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group shrink-0">
             View all <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
           {loading ? (
-             Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-2xl bg-muted" />)
+             Array.from({ length: 2 }).map((_, i) => <Skeleton className="h-36 w-full rounded-2xl bg-muted" />)
           ) : categories.length > 0 ? categories.map((cat, idx) => (
              <motion.div 
                key={cat.id}

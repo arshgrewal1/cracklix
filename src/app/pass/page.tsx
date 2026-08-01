@@ -40,9 +40,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Elite Pass Portal v452.0 [Ultra Compact].
- * UPDATED: Compacted cards to match Home Hub density.
- * UPDATED: Standardized terminology to "Questions" and "Database".
+ * @fileOverview Institutional Elite Pass Portal v453.0 [Compacted].
+ * UPDATED: Reduced card footprint and padding to match Home Hub style.
  */
 
 const BENEFITS = [
@@ -148,11 +147,11 @@ export default function PassPage() {
               </div>
 
               <h1 className="text-3xl md:text-6xl font-black tracking-tighter text-foreground leading-none antialiased">
-                Cracklix <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Elite Pass</span>
+                Elite <span className="text-primary italic">Pass.</span>
               </h1>
 
               <p className="text-sm md:text-xl text-muted-foreground font-medium max-w-2xl mx-auto leading-relaxed tracking-tight antialiased px-4">
-                Unlock unlimited Punjab Government exam preparation with one membership. Trusted by 100K+ successful aspirants.
+                Unlock unlimited Punjab Government exam preparation with one membership.
               </p>
            </motion.div>
 
@@ -218,13 +217,13 @@ export default function PassPage() {
         {/* PRICING PLANS */}
         <section id="plans" className="space-y-8 md:space-y-12">
            <div className="text-center space-y-1">
-              <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tighter">Select your access</h2>
-              <p className="text-muted-foreground font-medium text-xs md:text-sm">Institutional-grade preparation starting at zero cost.</p>
+              <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tighter">Select access hub</h2>
+              <p className="text-muted-foreground font-medium text-xs md:text-sm">Institutional preparation starting at zero cost.</p>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
               {passesLoading ? (
-                 Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[380px] w-full rounded-[2rem] bg-muted border border-border" />)
+                 Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[320px] w-full rounded-[2rem] bg-muted border border-border" />)
               ) : passes.map((plan, idx) => {
                  const isElite = plan.id.includes('elite');
                  const isFree = plan.price === 0;
@@ -238,48 +237,48 @@ export default function PassPage() {
                       className="flex"
                     >
                        <Card className={cn(
-                         "border border-border shadow-lg hover:shadow-2xl transition-all duration-500 rounded-[2rem] bg-card overflow-hidden flex flex-col group w-full relative",
+                         "border border-border shadow-md hover:shadow-xl transition-all duration-500 rounded-[24px] bg-card overflow-hidden flex flex-col group w-full relative",
                          isElite ? "ring-2 ring-primary ring-offset-background scale-[1.01] z-10 shadow-primary/10" : ""
                        )}>
                           {isElite && (
-                             <div className="bg-primary text-white py-1.5 text-center text-[8px] font-black tracking-widest uppercase shadow-md">
+                             <div className="bg-primary text-white py-1 text-center text-[8px] font-black tracking-widest uppercase shadow-md">
                                Recommended hub
                              </div>
                           )}
-                          <CardHeader className={cn("p-6 md:p-8 pb-3 text-center space-y-4", isElite ? "pt-8" : "")}>
-                             <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center mx-auto shadow-inner transition-transform group-hover:scale-110", isFree ? "bg-muted text-muted-foreground" : isElite ? "bg-amber-50 text-amber-500" : "bg-blue-50 text-primary")}>
-                                {isFree ? <Zap className="h-5 w-5" /> : isElite ? <Crown className="h-5 w-5 fill-current" /> : <Gem className="h-5 w-5" />}
+                          <CardHeader className={cn("p-5 md:p-6 pb-2 text-center space-y-3", isElite ? "pt-6" : "")}>
+                             <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center mx-auto shadow-inner transition-transform group-hover:scale-110", isFree ? "bg-muted text-muted-foreground" : isElite ? "bg-amber-50 text-amber-500" : "bg-blue-50 text-primary")}>
+                                {isFree ? <Zap className="h-4 w-4" /> : isElite ? <Crown className="h-4 w-4 fill-current" /> : <Gem className="h-4 w-4" />}
                              </div>
-                             <div className="space-y-1">
-                                <CardTitle className="text-xl md:text-2xl font-black text-foreground tracking-tighter">{plan.name}</CardTitle>
-                                <div className="flex items-baseline justify-center gap-1 pt-0.5">
-                                   <span className="text-2xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter">₹{plan.price}</span>
-                                   <span className="text-[9px] font-bold text-muted-foreground tracking-tight">/ {plan.durationDays} Days</span>
+                             <div className="space-y-0.5">
+                                <CardTitle className="text-lg md:text-xl font-black text-foreground tracking-tighter">{plan.name}</CardTitle>
+                                <div className="flex items-baseline justify-center gap-1">
+                                   <span className="text-xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter">₹{plan.price}</span>
+                                   <span className="text-[8px] md:text-[9px] font-bold text-muted-foreground tracking-tight">/ {plan.durationDays} Days</span>
                                 </div>
                              </div>
                           </CardHeader>
 
-                          <CardContent className="px-6 md:px-8 pb-4 flex-1">
-                             <div className="h-px w-full bg-border mb-4" />
-                             <ul className="space-y-2.5">
+                          <CardContent className="px-5 md:px-6 pb-3 flex-1">
+                             <div className="h-px w-full bg-border mb-3" />
+                             <ul className="space-y-2">
                                 {plan.features?.map((f: string, i: number) => (
-                                   <li key={i} className="flex items-start gap-2.5">
-                                      <div className={cn("h-4 w-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 shadow-inner", isElite ? "bg-primary text-white" : "bg-emerald-50 text-emerald-500")}>
-                                         <Check className="h-2.5 w-2.5 stroke-[4px]" />
+                                   <li key={i} className="flex items-start gap-2">
+                                      <div className={cn("h-3.5 w-3.5 rounded-full flex items-center justify-center shrink-0 mt-0.5 shadow-inner", isElite ? "bg-primary text-white" : "bg-emerald-50 text-emerald-500")}>
+                                         <Check className="h-2 w-2 stroke-[4px]" />
                                       </div>
-                                      <span className="text-[11px] md:text-xs font-bold text-muted-foreground leading-tight tracking-tight">{f}</span>
+                                      <span className="text-[10px] md:text-xs font-bold text-muted-foreground leading-tight tracking-tight">{f}</span>
                                    </li>
                                 ))}
                              </ul>
                           </CardContent>
 
-                          <CardFooter className="p-6 md:p-8 pt-0">
+                          <CardFooter className="p-5 md:p-6 pt-0">
                              <Button asChild className={cn(
-                               "w-full h-11 md:h-12 rounded-xl font-black tracking-tight text-[10px] shadow-lg transition-all active:scale-95 border-none",
+                               "w-full h-10 md:h-11 rounded-xl font-black tracking-tight text-[9px] md:text-[10px] shadow-md transition-all active:scale-95 border-none",
                                isElite ? "bg-primary hover:bg-blue-700 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                              )}>
                                 <Link href={`/checkout?plan=${plan.id}`}>
-                                   {isFree ? 'Activate hub' : 'Get Elite Pass'} <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                                   {isFree ? 'Activate hub' : 'Get Elite Pass'} <ArrowRight className="ml-2 h-3 w-3" />
                                 </Link>
                              </Button>
                           </CardFooter>
@@ -291,24 +290,24 @@ export default function PassPage() {
         </section>
 
         {/* BENEFITS MATRIX */}
-        <section className="space-y-10 md:space-y-16">
+        <section className="space-y-8 md:space-y-12">
            <div className="text-center space-y-2">
-              <h2 className="text-xl md:text-3xl font-black text-foreground tracking-tighter">Platform benefits</h2>
-              <div className="h-1 w-16 bg-primary mx-auto rounded-full" />
+              <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tighter">Vault benefits</h2>
+              <div className="h-1 w-12 bg-primary mx-auto rounded-full" />
            </div>
 
-           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {BENEFITS.map((b, i) => (
                  <motion.div 
                    key={i} 
-                   whileHover={{ y: -6 }}
-                   className="p-5 md:p-8 bg-card rounded-[1.5rem] md:rounded-[2rem] shadow-md border border-border transition-all duration-300 group hover:shadow-xl text-left h-full"
+                   whileHover={{ y: -4 }}
+                   className="p-4 md:p-6 bg-card rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-border transition-all duration-300 group hover:shadow-lg text-left h-full"
                  >
-                    <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner mb-4 md:mb-6 transition-transform group-hover:scale-110", b.bg, b.color)}>
-                       <b.icon className="h-5 w-5 md:h-6 md:w-6" />
+                    <div className={cn("h-9 w-9 md:h-11 md:h-11 rounded-xl flex items-center justify-center shadow-inner mb-3 md:mb-4 transition-transform group-hover:scale-110", b.bg, b.color)}>
+                       <b.icon className="h-4.5 w-4.5 md:h-5 md:h-5" />
                     </div>
-                    <h4 className="text-sm md:text-lg font-black text-foreground mb-1 tracking-tight">{b.label}</h4>
-                    <p className="text-[10px] md:text-sm text-muted-foreground font-medium leading-tight tracking-tight">{b.desc}</p>
+                    <h4 className="text-xs md:text-base font-black text-foreground mb-0.5 tracking-tight">{b.label}</h4>
+                    <p className="text-[9px] md:text-xs text-muted-foreground font-medium leading-tight tracking-tight">{b.desc}</p>
                  </motion.div>
               ))}
            </div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -13,8 +14,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Compact Vacancy Hub v3.2.
- * COMPACT: Limited to 2 items on Home Page. Reduced radii and padding.
+ * @fileOverview Compact Vacancy Hub v3.4.
+ * FIXED: Increased side padding to prevent clipping on left edge in PWA standalone mode.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
@@ -38,20 +39,20 @@ export default function LatestVacancy() {
   }, [rawVacancies]);
 
   return (
-    <section className="py-12 md:py-20 bg-background">
+    <section className="py-10 md:py-16 bg-background">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 space-y-8">
         
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-3 md:px-2 text-left">
           <div className="flex items-center gap-3">
              <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 shadow-inner shrink-0">
-               <Landmark className="h-4 w-4 md:h-5 md:w-5" />
+               <Target className="h-4 w-4 md:h-5 md:w-5" />
              </div>
-             <div className="text-left">
-                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight">Latest vacancies</h2>
-                <p className="text-[10px] md:text-xs font-medium text-muted-foreground">Official notifications hub</p>
+             <div className="text-left min-w-0">
+                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight truncate">Latest Vacancies</h2>
+                <p className="text-[10px] md:text-xs font-medium text-muted-foreground truncate">Official notifications hub</p>
              </div>
           </div>
-          <Link href="/vacancies" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group">
+          <Link href="/vacancies" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group shrink-0">
             View all <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
@@ -80,7 +81,7 @@ export default function LatestVacancy() {
                                 <Zap className="h-3 w-3 text-primary" /> {v.totalPosts} Posts
                              </div>
                              <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-bold text-slate-400">
-                                <Target className="h-3 w-3 text-emerald-500" /> {v.education?.split(' ')[0]}
+                                <Landmark className="h-3 w-3 text-emerald-500" /> {v.education?.split(' ')[0]}
                              </div>
                           </div>
                        </div>
@@ -96,7 +97,7 @@ export default function LatestVacancy() {
               ))
            ) : (
               <div className="col-span-full py-12 text-center opacity-30 italic font-bold text-sm border-2 border-dashed border-border rounded-2xl">
-                 Registry synchronized
+                 Database synchronized
               </div>
            )}
         </div>

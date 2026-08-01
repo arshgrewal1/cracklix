@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from "react"
@@ -14,9 +15,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Latest Tests Hub v51.0.
- * COMPACT: Limited to 2 questions on Home Page. Drastically reduced card radii and padding.
- * TERMINOLOGY: Replaced 'items' with 'questions'.
+ * @fileOverview High-Density Latest Tests Hub v51.1.
+ * FIXED: Increased left padding on header to prevent clipping in PWA viewports.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -35,17 +35,17 @@ export default function LatestMocks() {
     <section className="py-10 md:py-16 bg-background border-y border-border">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-2 text-left">
           <div className="flex items-center gap-3">
              <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center text-orange-500 shadow-inner shrink-0">
                <Zap className="h-4 w-4 md:h-5 md:w-5 fill-current" />
              </div>
-             <div className="text-left">
-                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight">Latest mocks</h2>
-                <p className="text-[10px] md:text-xs font-medium text-muted-foreground">New practice series synced</p>
+             <div className="text-left min-w-0">
+                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight truncate">Latest Mocks</h2>
+                <p className="text-[10px] md:text-xs font-medium text-muted-foreground truncate">New practice series synced</p>
              </div>
           </div>
-          <Link href="/mocks" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group">
+          <Link href="/mocks" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group shrink-0">
             View all <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
@@ -67,7 +67,7 @@ export default function LatestMocks() {
                 transition={{ delay: i * 0.05 }}
                 className="h-full"
               >
-                <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-500 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left flex-1 min-h-[160px] md:min-h-[220px]">
+                <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-300 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left flex-1 min-h-[160px] md:min-h-[220px]">
                   
                   <div className="flex justify-between items-start mb-4">
                     <AuthorityLogo boardId={boardId} size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-lg shadow-sm border-2 border-background bg-muted" />
