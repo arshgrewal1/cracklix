@@ -6,38 +6,42 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Optimized PWA Splash Hub v13.0 [High-Speed Entry].
- * OPTIMIZED: Reduced artificial delays and increased animation velocity for perceived performance.
+ * @fileOverview Optimized PWA Splash Hub v14.0 [Anti-Hang Hardened].
+ * FIXED: Implemented a strict 4s safety timeout to prevent app hanging if Firestore sync is slow.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const [forceClose, setForceClose] = useState(false);
 
   const isDataReady = useMemo(() => {
+    // If safety timeout triggered, ignore data status
+    if (forceClose) return true;
     if (authLoading) return false;
     if (user && profileLoading) return false;
     return true;
-  }, [authLoading, profileLoading, user]);
+  }, [authLoading, profileLoading, user, forceClose]);
 
   useEffect(() => {
     setMounted(true);
     
-    // Safety exit reduced to 2.5s - Prevents PWA hanging on slow connections
+    // SAFETY PROTOCOL: Force exit splash after 4 seconds regardless of data state
+    // This prevents the "90% hang" on slow networks or DNS/SSL delays.
     const safetyTimer = setTimeout(() => {
-      if (isDataReady) setIsVisible(false);
-    }, 2500);
+      console.log('[SPLASH] Safety override triggered.');
+      setForceClose(true);
+    }, 4000);
 
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        // Hang at 90% only if data isn't ready
+        // Hang at 90% only if data isn't ready and safety timer hasn't fired
         if (prev >= 90 && !isDataReady) return 90;
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
         }
-        // High-speed increment: reaches full in approx 500ms when ready
         return prev + 4;
       });
     }, 20);
@@ -49,7 +53,6 @@ export default function SplashScreen() {
   }, [isDataReady]);
 
   useEffect(() => {
-    // Instant exit when ready and bar is full
     if (isDataReady && progress >= 100) {
       const exitTimer = setTimeout(() => setIsVisible(false), 200);
       return () => clearTimeout(exitTimer);

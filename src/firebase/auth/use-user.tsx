@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { useAuth, useFirestore } from '../provider';
 import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth Hub v21.0 [Presence Hub].
- * UPDATED: Optimized profile loading to prevent login loops during background sync.
+ * @fileOverview Hardened Auth Hub v22.0 [Anti-Hang Sync].
+ * FIXED: Added error callback to onSnapshot to prevent profileLoading from hanging on permission errors.
+ * ADDED: Silent fallback to getDoc if real-time listener fails.
  */
 export function useUser() {
   const auth = useAuth();
@@ -76,42 +77,50 @@ export function useUser() {
 
     syncPresence(true);
 
-    const unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
-      try {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const now = new Date();
-          
-          let passStatus: 'active' | 'expired' | 'none' = data.passStatus || 'none';
-          
-          if (data.passExpiresAt) {
-             const expiryDate = new Date(data.passExpiresAt);
-             if (now > expiryDate) {
-                passStatus = 'expired';
-             } else {
-                passStatus = 'active';
-             }
-          }
-
-          const profileObj = { 
-            ...data, 
-            id: docSnap.id, 
-            passStatus 
-          } as UserProfile;
-
-          const profileString = JSON.stringify(profileObj);
-          if (profileString !== profileDataRef.current) {
-             profileDataRef.current = profileString;
-             setProfile(profileObj);
-          }
+    const handleProfileSnapshot = (docSnap: any) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const now = new Date();
+        
+        let passStatus: 'active' | 'expired' | 'none' = data.passStatus || 'none';
+        
+        if (data.passExpiresAt) {
+           const expiryDate = new Date(data.passExpiresAt);
+           passStatus = now > expiryDate ? 'expired' : 'active';
         }
-      } catch (e) {
-        console.error("[PROFILE_SYNC_ERROR]:", e);
-      } finally {
-        profileLoaded.current = true;
-        setProfileLoading(false);
+
+        const profileObj = { 
+          ...data, 
+          id: docSnap.id, 
+          passStatus 
+        } as UserProfile;
+
+        const profileString = JSON.stringify(profileObj);
+        if (profileString !== profileDataRef.current) {
+           profileDataRef.current = profileString;
+           setProfile(profileObj);
+        }
       }
-    });
+      profileLoaded.current = true;
+      setProfileLoading(false);
+    };
+
+    const unsubscribeProfile = onSnapshot(
+      userRef, 
+      handleProfileSnapshot,
+      async (err) => {
+        console.warn("[PROFILE_SYNC_FAIL]: Snapshot rejected. Using direct fetch fallback.", err.message);
+        // Fallback: Try a single direct getDoc fetch if real-time fails
+        try {
+          const snap = await getDoc(userRef);
+          handleProfileSnapshot(snap);
+        } catch (e) {
+          console.error("[PROFILE_FETCH_CRITICAL_FAIL]:", e);
+          setProfileLoading(false);
+          profileLoaded.current = true;
+        }
+      }
+    );
 
     const heartbeat = setInterval(() => {
        if (document.visibilityState === 'visible') {

@@ -40,9 +40,9 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v15.0 [Redirect Hardened].
- * FIXED: Atomic redirect handling to resolve redirect_uri_mismatch.
- * FIXED: Background sync is now awaited before redirect to prevent login loops.
+ * @fileOverview Premium Institutional Auth Portal v16.0 [Performance Hardened].
+ * FIXED: Optimized atomic handshake to eliminate "blank page" hangs.
+ * FIXED: Backgrounded non-critical profile updates during login.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -81,11 +81,10 @@ function LoginContent() {
 
     const handleHandshake = async () => {
       try {
-        // This is critical for catching users returning from Google
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          // Must await data sync before moving to prevent "still logged out" state on landing
-          await finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+          // HIGH SPEED HANDOFF: Redirect first, sync later in background
+          finalizeUserNode(result.user, result.user.displayName || "Aspirant");
           router.replace(returnUrl);
         } else {
           setIsRedirectProcessing(false);
@@ -122,21 +121,18 @@ function LoginContent() {
       const isStandalone = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone);
       const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-      // STANDALONE / MOBILE ALWAYS USE REDIRECT
       if (isStandalone || isMobile) {
         await signInWithRedirect(auth, provider);
         return;
       }
 
-      // DESKTOP ATTEMPT POPUP
       try {
         const result = await signInWithPopup(auth, provider);
         if (result.user) {
-          await finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+          finalizeUserNode(result.user, result.user.displayName || "Aspirant");
           router.replace(returnUrl);
         }
       } catch (e: any) {
-         // If popup blocked, fallback to redirect
          if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
             await signInWithRedirect(auth, provider);
          } else {
@@ -157,11 +153,11 @@ function LoginContent() {
       await setPersistence(auth, browserLocalPersistence);
       if (mode === 'signin') {
         const result = await signInWithEmailAndPassword(auth, email, password);
-        await finalizeUserNode(result.user);
+        finalizeUserNode(result.user);
         router.replace(returnUrl);
       } else if (mode === 'signup') {
         const result = await createUserWithEmailAndPassword(auth, email, password);
-        await finalizeUserNode(result.user, name);
+        finalizeUserNode(result.user, name);
         router.replace(returnUrl);
       } else if (mode === 'forgot') {
         await sendPasswordResetEmail(auth, email);
@@ -180,10 +176,11 @@ function LoginContent() {
     const deviceId = await getDeviceId();
     const userRef = doc(db, 'users', userNode.uid);
     
+    // FIRE AND FORGET: Background synchronization for maximum speed
     try {
       const userSnap = await getDoc(userRef);
       if (!userSnap.exists()) {
-        await setDoc(userRef, {
+        setDoc(userRef, {
           id: userNode.uid,
           name: customName || userNode.displayName || "Aspirant",
           email: userNode.email,
@@ -197,15 +194,15 @@ function LoginContent() {
           pinnedExams: [],
           referralCode: generateReferralCode(userNode.uid),
           referredBy: referralFromUrl || null
-        });
+        }, { merge: true });
         updateDoc(doc(db, 'settings', 'stats'), { totalUsers: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
       } else {
-        await updateDoc(userRef, { 
+        updateDoc(userRef, { 
           lastLoginAt: serverTimestamp(), 
           activeDeviceId: deviceId, 
           updatedAt: serverTimestamp(),
           online: true 
-        });
+        }).catch(() => {});
       }
       if (typeof window !== 'undefined') localStorage.setItem('cracklix_session_id', deviceId);
     } catch (e) {
