@@ -3,8 +3,8 @@ import ResultClient from "@/components/results/ResultClient";
 import { Loader2 } from "lucide-react";
 
 /**
- * @fileOverview Official Result Node Entry v1.1.
- * FIXED: Wrapped in Suspense to satisfy Next.js 15 CSR bailout requirements.
+ * @fileOverview Official Result Node Entry v1.2 [Strict NEXT15 Async].
+ * FIXED: Handled async params for Next.js 15.
  */
 
 export const dynamicParams = false;
@@ -21,7 +21,7 @@ export async function generateStaticParams() {
 }
 
 export default async function ResultPage(props: { params: Promise<{ id: string }> }) {
-  const { id } = await props.params;
+  const params = await props.params;
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
       <ResultClient />

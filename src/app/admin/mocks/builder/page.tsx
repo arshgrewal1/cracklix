@@ -60,8 +60,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v53.2.
- * FIXED: ReferenceError for PenSquare and corrected malformed query syntax.
+ * @fileOverview Master Mock Builder v54.0 [Strict NEXT15 Async].
+ * FIXED: Awaited searchParams and handled async params for Next.js 15.
  */
 
 export default function MockBuilderPage() {
@@ -182,11 +182,16 @@ function MockBuilderContent() {
           chunks.push(questionIds.slice(i, i + 30));
         }
         for (const chunk of chunks) {
+          const mcqBankRef = collection(db, "mcqBank");
+          const usedQuestionsRef = collection(db, "usedQuestions");
+          const questionsRef = collection(db, "questions");
+
           const [mcqSnap, usedSnap, legacySnap] = await Promise.all([
-            getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
-            getDocs(query(collection(db, "usedQuestions"), where(documentId(), "in", chunk))),
-            getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+            getDocs(query(mcqBankRef, where(documentId(), "in", chunk))),
+            getDocs(query(usedQuestionsRef, where(documentId(), "in", chunk))),
+            getDocs(query(questionsRef, where(documentId(), "in", chunk)))
           ]);
+
           mcqSnap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id }));
           usedSnap.forEach(d => {
             if (!fetched.find(f => f.id === d.id)) fetched.push({ ...d.data(), id: d.id });
