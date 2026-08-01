@@ -41,9 +41,9 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v19.0 [Zero-Latency Handshake].
- * FIXED: Implemented non-blocking redirection. Redirect happens immediately on identity match.
- * FIXED: Backgrounded profile sync to eliminate the "Authenticating" lag.
+ * @fileOverview Premium Institutional Auth Portal v21.0 [Zero-Latency Handshake].
+ * FIXED: Implemented Atomic Parallel Redirection. The app redirects as soon as user is detected.
+ * FIXED: Firestore sync is moved to a non-blocking background task.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -66,47 +66,35 @@ function LoginContent() {
 
   const [mode, setMode] = useState<AuthMode>('signin');
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isRedirectProcessing, setIsRedirectProcessing] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   
-  const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/", [searchParams]);
+  const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/dashboard", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
 
-  // 1. ATOMIC REDIRECT RECOVERY (ULTRA FAST)
+  // 1. ATOMIC REDIRECT (IMMEDIATE)
+  // If user is already found by the hook, move them out of here instantly.
   useEffect(() => {
-    if (!auth || !db) return;
-
-    const handleHandshake = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          // Fire and forget metadata sync to speed up transition
-          finalizeUserNode(result.user, result.user.displayName || "Aspirant");
-          router.replace(returnUrl);
-        } else {
-          setIsRedirectProcessing(false);
-        }
-      } catch (error: any) {
-        setIsRedirectProcessing(false);
-        if (error.code !== 'auth/no-auth-event') {
-          console.error("[AUTH_REDIRECT_ERROR]:", error);
-        }
-      }
-    };
-
-    handleHandshake();
-  }, [auth, db, router, returnUrl]);
-
-  // 2. SESSION SYNC
-  useEffect(() => {
-    if (!authLoading && !isRedirectProcessing && user && !isConnecting) {
+    if (user && !isConnecting && !authLoading) {
       router.replace(returnUrl);
     }
-  }, [user, authLoading, isRedirectProcessing, router, returnUrl, isConnecting]);
+  }, [user, isConnecting, authLoading, router, returnUrl]);
+
+  // 2. CATCH REDIRECT RESULTS (GOOGLE HANDSHAKE)
+  useEffect(() => {
+    if (!auth) return;
+    getRedirectResult(auth).then((result) => {
+      if (result?.user) {
+        finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+        router.replace(returnUrl);
+      }
+    }).catch((e) => {
+      console.warn("[AUTH_HANDSHAKE_NODE]:", e.message);
+    });
+  }, [auth, router, returnUrl]);
 
   const handleGoogleSignIn = async () => {
     if (!auth || !db || isConnecting) return;
@@ -126,18 +114,10 @@ function LoginContent() {
         return;
       }
 
-      try {
-        const result = await signInWithPopup(auth, provider);
-        if (result.user) {
-          finalizeUserNode(result.user, result.user.displayName || "Aspirant");
-          router.replace(returnUrl);
-        }
-      } catch (e: any) {
-         if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
-            await signInWithRedirect(auth, provider);
-         } else {
-            throw e;
-         }
+      const result = await signInWithPopup(auth, provider);
+      if (result.user) {
+        finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+        router.replace(returnUrl);
       }
     } catch (error: any) {
       toast({ variant: "destructive", title: "Login failed", description: "Identity sync error." });
@@ -171,16 +151,19 @@ function LoginContent() {
     }
   };
 
-  const finalizeUserNode = async (userNode: any, customName?: string) => {
+  /**
+   * Pushes user profile data to the database in the background.
+   * Does NOT block the UI redirection.
+   */
+  const finalizeUserNode = (userNode: any, customName?: string) => {
     if (!db) return;
     
-    // PERFORM IN BACKGROUND - DO NOT AWAIT
     getDeviceId().then(async (deviceId) => {
       const userRef = doc(db, 'users', userNode.uid);
       const userSnap = await getDoc(userRef);
       
       if (!userSnap.exists()) {
-        setDoc(userRef, {
+        const payload = {
           id: userNode.uid,
           name: customName || userNode.displayName || "Aspirant",
           email: userNode.email,
@@ -194,10 +177,11 @@ function LoginContent() {
           pinnedExams: [],
           referralCode: generateReferralCode(userNode.uid),
           referredBy: referralFromUrl || null
-        }, { merge: true });
-        updateDoc(doc(db, 'settings', 'stats'), { totalUsers: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
+        };
+        await setDoc(userRef, payload, { merge: true });
+        await updateDoc(doc(db, 'settings', 'stats'), { totalUsers: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
       } else {
-        updateDoc(userRef, { 
+        await updateDoc(userRef, { 
           lastLoginAt: serverTimestamp(), 
           activeDeviceId: deviceId, 
           updatedAt: serverTimestamp(),
@@ -205,10 +189,10 @@ function LoginContent() {
         }).catch(() => {});
       }
       if (typeof window !== 'undefined') localStorage.setItem('cracklix_session_id', deviceId);
-    }).catch(e => console.warn("[AUTH_SYNC_SILENT]:", e));
+    }).catch(e => console.warn("[AUTH_SYNC_BACKGROUND]:", e));
   };
 
-  if (isRedirectProcessing || (authLoading && !user)) {
+  if (isConnecting || (authLoading && !user)) {
      return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
            <div className="relative">
@@ -236,7 +220,7 @@ function LoginContent() {
             <motion.div key={mode} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8 w-full">
               <div className="space-y-1.5 text-center">
                 <h1 className="text-2xl md:text-3xl font-[900] tracking-tighter text-[#0F172A] uppercase leading-none">
-                  {mode === 'signin' ? 'Welcome back' : mode === 'signup' ? 'Create account' : 'Recover access'}
+                  {mode === 'signin' ? 'Welcome Back' : mode === 'signup' ? 'Create Account' : 'Recover Access'}
                 </h1>
                 <p className="text-slate-400 font-medium text-[12px] md:text-base">Continue your preparation journey.</p>
               </div>
@@ -258,12 +242,12 @@ function LoginContent() {
                  <form onSubmit={handleEmailAuth} className="space-y-4">
                     {mode === 'signup' && (
                        <div className="space-y-1.5 text-left">
-                          <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-widest">Full name</Label>
+                          <Label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Full Name</Label>
                           <Input value={name} onChange={e => setName(e.target.value)} placeholder="Arsh Grewal" className="h-12 md:h-14 bg-slate-50 border-none font-bold rounded-xl px-5 text-sm shadow-inner" />
                        </div>
                     )}
                     <div className="space-y-1.5 text-left">
-                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-widest">Email address</Label>
+                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Email Address</Label>
                        <div className="relative">
                           <Mail className="h-4 w-4 absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                           <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@domain.com" className="h-12 md:h-14 pl-12 bg-slate-50 border-none font-bold rounded-xl text-sm shadow-inner" />
@@ -325,7 +309,7 @@ function LoginContent() {
                 <Lock className="h-2.5 w-2.5" />
                 <p className="text-[8px] font-bold uppercase tracking-tight">End-to-end encrypted database node</p>
              </div>
-             <p className="text-[7px] font-black uppercase tracking-[0.2em] text-primary/30">Arsh Grewal verified</p>
+             <p className="text-[7px] font-black uppercase tracking-[0.2em] text-primary/30">Arsh Grewal Verified</p>
           </div>
         </Card>
       </motion.div>

@@ -8,9 +8,9 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth Hub v22.0 [Anti-Hang Sync].
- * FIXED: Added error callback to onSnapshot to prevent profileLoading from hanging on permission errors.
- * ADDED: Silent fallback to getDoc if real-time listener fails.
+ * @fileOverview Hardened Auth Hub v24.0 [Zero-Latency Sync].
+ * FIXED: loading state now resolves immediately when user is null or found.
+ * FIXED: profileLoading is decoupled from auth state to prevent hangs.
  */
 export function useUser() {
   const auth = useAuth();
@@ -40,6 +40,7 @@ export function useUser() {
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
+      // ATOMIC: Resolve loading immediately on auth response
       setAuthResolved(true);
       
       if (firebaseUser) {
@@ -110,12 +111,10 @@ export function useUser() {
       handleProfileSnapshot,
       async (err) => {
         console.warn("[PROFILE_SYNC_FAIL]: Snapshot rejected. Using direct fetch fallback.", err.message);
-        // Fallback: Try a single direct getDoc fetch if real-time fails
         try {
           const snap = await getDoc(userRef);
           handleProfileSnapshot(snap);
         } catch (e) {
-          console.error("[PROFILE_FETCH_CRITICAL_FAIL]:", e);
           setProfileLoading(false);
           profileLoaded.current = true;
         }
