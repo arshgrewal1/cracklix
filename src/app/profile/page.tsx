@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -17,34 +16,21 @@ import {
   Mail, 
   Phone, 
   MapPin, 
-  GraduationCap, 
-  Calendar, 
-  Trophy, 
-  Target, 
-  ClipboardList, 
   ShieldCheck,
   Zap, 
   Activity,
-  Edit,
-  Save,
-  Award,
-  History,
-  User as UserIcon,
-  ChevronRight,
-  CreditCard,
-  Loader2,
-  X,
-  Gem,
-  Smartphone,
   Trash2,
   CheckCircle2,
   Clock,
-  LucideIcon,
-  Timer,
-  AlertCircle,
-  ShieldAlert,
-  TrendingUp,
-  BarChart3
+  Settings,
+  X,
+  Loader2,
+  Save,
+  Trophy,
+  Target,
+  History,
+  ChevronRight,
+  Gem
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -56,9 +42,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v38.0.
- * FIXED: CardTitle import and removed Firestore orderBy to resolve index error.
- * FIXED: Removed all uppercase styling.
+ * @fileOverview Institutional Profile Hub v39.0.
+ * FIXED: ReferenceError for CardTitle resolved.
+ * FIXED: Bypassed Firebase Index error by using client-side sorting for results.
  */
 
 export default function ProfilePage() {
@@ -94,7 +80,8 @@ export default function ProfilePage() {
     }
   }, [profile])
 
-  // Removed orderBy to bypass Firebase Index error
+  // Logic: Remove server-side orderBy to instantly eliminate the Index error.
+  // We handle sorting in the useMemo below instead.
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
     return query(collection(db, "results"), where("userId", "==", user.uid), limit(50))
@@ -113,6 +100,8 @@ export default function ProfilePage() {
 
   const aggregateStats = useMemo(() => {
     if (!profile) return { totalTests: 0, highestScore: 0, avgAccuracy: 0, avgTime: 0, bestRank: "---" }
+    
+    // Fallback to results length if profile counter is not yet synced
     return {
        totalTests: profile.totalTests || results?.length || 0,
        highestScore: profile.highestScore || 0,
@@ -324,7 +313,7 @@ function StatsNode({ icon, label, value, color, bgColor }: any) {
         </div>
         <div className="space-y-0.5 min-w-0 w-full">
           <p className="text-sm md:text-xl font-black text-foreground tabular-nums tracking-tighter leading-none truncate">{value}</p>
-          <p className="text-[7px] md:text-[8px] font-bold text-muted-foreground uppercase mt-1 truncate">{label}</p>
+          <p className="text-[7px] md:text-[8px] font-bold text-muted-foreground mt-1 truncate">{label}</p>
         </div>
       </div>
     </Card>

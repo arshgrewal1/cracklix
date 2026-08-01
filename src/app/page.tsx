@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -23,9 +22,9 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v510.0.
- * UPDATED: Optimized Today's Challenge to match Continue Learning density.
- * FIXED: Removed all uppercase styling.
+ * @fileOverview Institutional Premium Hub v511.0.
+ * UPDATED: Repositioned challenge chips to the top header for maximum visibility.
+ * TERMINOLOGY: Switched "Items" to "Questions" globally.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -52,7 +51,7 @@ export default function HomePage() {
         <ContinueLearning />
       )}
 
-      {/* Today's Challenge Hub - Compact (Continue Learning Style) */}
+      {/* Today's Challenge Hub - High Density (Top Chips) */}
       <section className="py-4 md:py-8 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
@@ -67,7 +66,8 @@ export default function HomePage() {
                </div>
                
                <div className="relative z-10 w-full space-y-4">
-                  <div className="flex items-center justify-between gap-4">
+                  {/* Header Row: Title + Chips moved to top */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                      <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 shadow-inner">
                            <Flame className="h-4.5 w-4.5 fill-current animate-pulse" />
@@ -76,12 +76,17 @@ export default function HomePage() {
                            Today's challenge
                         </h2>
                      </div>
-                     {activeQuiz && (
-                       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar hidden sm:flex">
-                          <ChallengeChip icon={<Clock className="h-3 w-3" />} label={`${activeQuiz.duration}m`} />
-                          <ChallengeChip icon={<Trophy className="h-3 w-3" />} label={`${activeQuiz.rewardXP} XP`} />
-                       </div>
-                     )}
+                     
+                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                        {activeQuiz ? (
+                           <>
+                              <ChallengeChip icon={<Clock className="h-3 w-3" />} label={`${activeQuiz.duration}m`} />
+                              <ChallengeChip icon={<ShieldCheck className="h-3 w-3" />} label={`${activeQuiz.totalQuestions} Questions`} />
+                           </>
+                        ) : (
+                           <div className="h-7 w-24 bg-white/5 rounded-lg animate-pulse" />
+                        )}
+                     </div>
                   </div>
 
                   <div className="space-y-1">
@@ -99,22 +104,16 @@ export default function HomePage() {
                        <Loader2 className="h-6 w-6 text-primary animate-spin" />
                     </div>
                   ) : activeQuiz ? (
-                    <div className="flex flex-col sm:flex-row items-center gap-4">
-                      <div className="w-full sm:w-auto flex-1">
-                         <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="block">
-                            <button className="relative overflow-hidden w-full h-11 md:h-12 bg-primary hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all duration-300 active:scale-95 border-none group/btn">
-                               <div className="flex items-center justify-center gap-3 relative z-10">
-                                  <Zap className="h-3.5 w-3.5 fill-white text-white" />
-                                  <span>Start challenge</span>
-                                  <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
-                               </div>
-                            </button>
-                         </Link>
-                      </div>
-                      <div className="flex sm:hidden items-center gap-2">
-                         <ChallengeChip icon={<Clock className="h-3 w-3" />} label={`${activeQuiz.duration}m`} />
-                         <ChallengeChip icon={<ShieldCheck className="h-3 w-3" />} label={`${activeQuiz.totalQuestions} Items`} />
-                      </div>
+                    <div className="w-full">
+                       <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="block">
+                          <button className="relative overflow-hidden w-full h-11 md:h-12 bg-primary hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all duration-300 active:scale-95 border-none group/btn">
+                             <div className="flex items-center justify-center gap-3 relative z-10">
+                                <Zap className="h-3.5 w-3.5 fill-white text-white" />
+                                <span>Start challenge</span>
+                                <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
+                             </div>
+                          </button>
+                       </Link>
                     </div>
                   ) : (
                     <div className="opacity-20">

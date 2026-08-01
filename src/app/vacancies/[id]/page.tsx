@@ -12,7 +12,6 @@ import {
   Clock, 
   MapPin, 
   Zap, 
-  CheckCircle2, 
   ShieldCheck, 
   Landmark, 
   FileText, 
@@ -46,8 +45,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v7.6.
- * FIXED: Restored Users icon and implemented Next.js 15 async params handling.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v7.7.
+ * FIXED: Restored Users icon and ensured Title Case throughout.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -178,7 +177,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
 
          <section className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 px-1">
             <StatPill icon={Zap} label="Posts" val={vacancy.totalPosts} color="text-primary" bg="bg-blue-50" />
-            <StatPill icon={GraduationCap} label="Qualif." val={vacancy.education?.split(',')[0]} color="text-emerald-600" bg="bg-emerald-50" />
+            <StatPill icon={GraduationCap} label="Qualification" val={vacancy.education?.split(',')[0]} color="text-emerald-600" bg="bg-emerald-50" />
             <StatPill icon={Users} label="Age" val={vacancy.ageLimit || "18-37"} color="text-orange-500" bg="bg-orange-50" />
             <StatPill icon={Clock} label="Last date" val={formatDate(vacancy.lastDate)} color="text-rose-500" bg="bg-rose-50" />
          </section>

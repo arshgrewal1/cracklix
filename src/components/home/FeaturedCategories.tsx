@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -15,9 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Density Categories Hub v51.2.
+ * @fileOverview High-Density Categories Hub v51.3.
  * FIXED: Restored missing Badge import.
- * UPDATED: Removed uppercase.
  */
 
 const TARGET_IDS = [

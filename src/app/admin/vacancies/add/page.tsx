@@ -42,7 +42,7 @@ import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Vacancy Builder Hub v2.5.
+ * @fileOverview Enterprise Vacancy Builder Hub v2.6.
  * FIXED: Restored missing AnimatePresence and motion imports.
  */
 
