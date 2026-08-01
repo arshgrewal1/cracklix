@@ -62,9 +62,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v49.2 [Strict NEXT15 Async Hardened].
- * FIXED: ReferenceError for setQuizData.
- * FIXED: Awaited searchParams for Next.js 15.
+ * @fileOverview Daily Challenge Builder v49.3 [Hardened].
+ * FIXED: Resolved ReferenceError for setQuizData.
+ * FIXED: Awaited Next.js 15 searchParams.
  */
 
 export default function DailyQuizBuilder() {

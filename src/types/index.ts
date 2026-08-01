@@ -149,6 +149,8 @@ export interface UserProfile {
   totalLifetimeStudyMinutes?: number;
   highestAccuracy?: number;
   recentMockTitle?: string;
+  registrationDate?: string;
+  attemptRate?: number;
 }
 
 export interface StudySession {
@@ -193,6 +195,7 @@ export interface AttemptResult {
   rankAtSubmission?: number | string;
   isGuestNode?: boolean;
   accuracy: number;
+  submittedAt?: any;
 }
 
 export interface Category {
@@ -237,6 +240,13 @@ export interface Subject {
   displayOrder: number;
   boardId?: string;
   aliases?: string[];
+  testCount?: number;
+  mockCount?: number;
+  pyqCount?: number;
+  questionCount?: number;
+  attemptCount?: number;
+  progress?: number;
+  hasPremium?: boolean;
 }
 
 export interface Topic {
@@ -311,6 +321,8 @@ export interface MockTest {
   sections?: ExamSection[];
   isTodayQuiz?: boolean;
   rewardXP?: number;
+  attemptLimit?: number;
+  accessType?: string;
 }
 
 export interface ExamSection {
@@ -458,6 +470,9 @@ export interface Vacancy {
   clicks?: number;
   saves?: number;
   shares?: number;
+  postName?: string;
+  recruitmentName?: string;
+  categoryWisePosts?: any[];
 }
 
 export type AdType = 'BANNER' | 'ADSENSE' | 'HTML';

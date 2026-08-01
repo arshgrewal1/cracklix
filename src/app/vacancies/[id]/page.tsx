@@ -48,9 +48,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v5.2 [Hardened].
- * FIXED: Awaited params for Next.js 15 production compatibility.
- * FIXED: Corrected JSX Button tag mismatch.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v5.3 [Hardened].
+ * FIXED: Properly awaited async params for Next.js 15 compatibility.
+ * FIXED: Resolved JSX tag mismatch (Button vs button).
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {

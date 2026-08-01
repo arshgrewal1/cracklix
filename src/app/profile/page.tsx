@@ -4,7 +4,7 @@ import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore, useAuth } from "@/firebase"
-import { collection, query, where, doc, updateDoc, serverTimestamp, deleteDoc, limit, orderBy } from "firebase/firestore"
+import { collection, query, where, doc, updateDoc, serverTimestamp, deleteDoc, limit } from "firebase/firestore"
 import { deleteUser } from "firebase/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -55,8 +55,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v31.3.
- * FIXED: Added missing CardTitle import to resolve Runtime ReferenceError.
+ * @fileOverview Institutional Profile Hub v31.4.
+ * FIXED: Bypassed Firebase Index Error by using client-side sorting for results.
  */
 
 export default function ProfilePage() {
@@ -92,12 +92,22 @@ export default function ProfilePage() {
     }
   }, [profile])
 
+  // Removed orderBy to fix Firebase Index error. Client-side sort applied below.
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid), orderBy("createdAt", "desc"), limit(10))
+    return query(collection(db, "results"), where("userId", "==", user.uid), limit(50))
   }, [db, user])
 
-  const { data: results, loading: resultsLoading } = useCollection<any>(resultsQuery)
+  const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
+
+  const results = useMemo(() => {
+    if (!rawResults) return []
+    return [...rawResults].sort((a, b) => {
+      const timeA = new Date(a.timestamp || 0).getTime()
+      const timeB = new Date(b.timestamp || 0).getTime()
+      return timeB - timeA
+    }).slice(0, 10)
+  }, [rawResults])
 
   const aggregateStats = useMemo(() => {
     if (!profile) return { totalTests: 0, highestScore: 0, avgAccuracy: 0, avgTime: 0, bestRank: "---" }
