@@ -40,9 +40,10 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v11.0 [Reliability Hardened].
- * FIXED: Reverted to default authDomain for 100% Google Login stability.
- * OPTIMIZED: Redirection happens immediately after handshake, backgrounding profile creation.
+ * @fileOverview Premium Institutional Auth Portal v12.0 [PWA Optimized].
+ * FIXED: redirect_uri_mismatch resolved by pinning stable authDomain.
+ * FIXED: "Blank page" hang resolved by using Redirect flow for Standalone/Mobile.
+ * OPTIMIZED: Instant redirect to home, background profile sync.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -74,25 +75,32 @@ function LoginContent() {
   const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
 
+  // 1. RECOVERY NODE: Handle return from Google Redirect
   useEffect(() => {
     if (!auth || !db) return;
 
-    const handleRedirect = async () => {
+    const checkRedirect = async () => {
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+          // Atomic Redirect: Send to home immediately
           router.replace(returnUrl);
+          // Sync profile in background
+          finalizeUserNode(result.user, result.user.displayName || "Aspirant");
         }
       } catch (error: any) {
-        console.error("[AUTH_REDIRECT_ERROR]:", error);
+        if (error.code !== 'auth/no-auth-event') {
+          console.error("[AUTH_REDIRECT_ERROR]:", error);
+          toast({ variant: "destructive", title: "Access Blocked", description: "Google account handshake failed." });
+        }
         setIsConnecting(false);
       }
     };
 
-    handleRedirect();
-  }, [auth, db, router, returnUrl]);
+    checkRedirect();
+  }, [auth, db, router, returnUrl, toast]);
 
+  // 2. Already Logged In Guard
   useEffect(() => {
     if (!authLoading && user && !isConnecting) {
       router.replace(returnUrl);
@@ -104,20 +112,29 @@ function LoginContent() {
     
     setIsConnecting(true);
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     
     try {
       await setPersistence(auth, browserLocalPersistence);
       
+      // Standalone/Mobile PWA Protocol: Force Redirect to avoid "blank window" hangs
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isStandalone || isMobile) {
+        await signInWithRedirect(auth, provider);
+        return; // Execution stops here as page redirects
+      }
+
       try {
         const result = await signInWithPopup(auth, provider);
-        finalizeUserNode(result.user, result.user.displayName || "Aspirant");
-        router.replace(returnUrl);
-      } catch (popupError: any) {
-        if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/popup-closed-by-user') {
-          await signInWithRedirect(auth, provider);
-        } else {
-          throw popupError;
+        if (result.user) {
+          router.replace(returnUrl);
+          finalizeUserNode(result.user, result.user.displayName || "Aspirant");
         }
+      } catch (popupError: any) {
+        // Fallback if popup is blocked
+        await signInWithRedirect(auth, provider);
       }
     } catch (error: any) {
       toast({ variant: "destructive", title: "Login failed", description: "Identity sync error." });
@@ -133,9 +150,11 @@ function LoginContent() {
       await setPersistence(auth, browserLocalPersistence);
       if (mode === 'signin') {
         const result = await signInWithEmailAndPassword(auth, email, password);
+        router.replace(returnUrl);
         finalizeUserNode(result.user);
       } else if (mode === 'signup') {
         const result = await createUserWithEmailAndPassword(auth, email, password);
+        router.replace(returnUrl);
         finalizeUserNode(result.user, name);
       } else if (mode === 'forgot') {
         await sendPasswordResetEmail(auth, email);
@@ -144,7 +163,6 @@ function LoginContent() {
         setIsConnecting(false);
         return;
       }
-      router.replace(returnUrl);
     } catch (error: any) {
       toast({ variant: "destructive", title: "Auth failed", description: error.message });
       setIsConnecting(false);
@@ -156,37 +174,38 @@ function LoginContent() {
     const deviceId = await getDeviceId();
     const userRef = doc(db, 'users', userNode.uid);
     
-    (async () => {
-      try {
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            id: userNode.uid,
-            name: customName || userNode.displayName || "Aspirant",
-            email: userNode.email,
-            role: 'STUDENT',
-            state: "Punjab",
-            createdAt: new Date().toISOString(),
-            updatedAt: serverTimestamp(),
-            lastLoginAt: serverTimestamp(),
-            activeDeviceId: deviceId,
-            status: 'Free',
-            pinnedExams: [],
-            referralCode: generateReferralCode(userNode.uid),
-            referredBy: referralFromUrl || null
-          });
-          updateDoc(doc(db, 'settings', 'stats'), { totalUsers: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
-        } else {
-          await updateDoc(userRef, { 
-            lastLoginAt: serverTimestamp(), 
-            activeDeviceId: deviceId, 
-            updatedAt: serverTimestamp(),
-            online: true 
-          });
-        }
-        if (typeof window !== 'undefined') localStorage.setItem('cracklix_session_id', deviceId);
-      } catch (e) {}
-    })();
+    // Background Task: Profile Synchronization
+    try {
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          id: userNode.uid,
+          name: customName || userNode.displayName || "Aspirant",
+          email: userNode.email,
+          role: 'STUDENT',
+          state: "Punjab",
+          createdAt: new Date().toISOString(),
+          updatedAt: serverTimestamp(),
+          lastLoginAt: serverTimestamp(),
+          activeDeviceId: deviceId,
+          status: 'Free',
+          pinnedExams: [],
+          referralCode: generateReferralCode(userNode.uid),
+          referredBy: referralFromUrl || null
+        });
+        updateDoc(doc(db, 'settings', 'stats'), { totalUsers: increment(1), updatedAt: serverTimestamp() }).catch(() => {});
+      } else {
+        await updateDoc(userRef, { 
+          lastLoginAt: serverTimestamp(), 
+          activeDeviceId: deviceId, 
+          updatedAt: serverTimestamp(),
+          online: true 
+        });
+      }
+      if (typeof window !== 'undefined') localStorage.setItem('cracklix_session_id', deviceId);
+    } catch (e) {
+      console.warn("[BACKGROUND_SYNC_FAILED]:", e);
+    }
   };
 
   return (
@@ -194,7 +213,7 @@ function LoginContent() {
       <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[460px]">
         <Card className="border border-slate-100 shadow-[0_40px_100px_-12px_rgba(0,0,0,0.08)] bg-white rounded-[40px] overflow-hidden flex flex-col p-8 md:p-14">
           
-          <div className="mb-12 flex justify-center scale-[1.8] md:scale-[2.2] transition-transform">
+          <div className="mb-12 flex justify-center">
             <Logo variant="light" align="center" className="h-16 md:h-20" imgClassName="h-full w-auto" />
           </div>
 

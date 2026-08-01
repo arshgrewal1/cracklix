@@ -8,9 +8,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth Hub v20.0 [Presence Hub].
- * UPDATED: Implemented live presence tracking with interval-based heartbeat.
- * OPTIMIZED: Presence updates are fire-and-forget to prevent UI blocking.
+ * @fileOverview Hardened Auth Hub v21.0 [Presence Hub].
+ * UPDATED: Optimized profile loading to prevent login loops during background sync.
  */
 export function useUser() {
   const auth = useAuth();
@@ -67,7 +66,6 @@ export function useUser() {
 
     const userRef = doc(db, 'users', user.uid);
 
-    // Institutional Presence Hub: Sync status instantly
     const syncPresence = (isOnline: boolean) => {
        updateDoc(userRef, {
           online: isOnline,
@@ -78,7 +76,6 @@ export function useUser() {
 
     syncPresence(true);
 
-    // Real-time profile listener
     const unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
       try {
         if (docSnap.exists()) {
@@ -107,8 +104,6 @@ export function useUser() {
              profileDataRef.current = profileString;
              setProfile(profileObj);
           }
-        } else {
-          setProfile(null);
         }
       } catch (e) {
         console.error("[PROFILE_SYNC_ERROR]:", e);
@@ -118,7 +113,6 @@ export function useUser() {
       }
     });
 
-    // Heartbeat Node: Syncs presence every 4 minutes to keep online status accurate
     const heartbeat = setInterval(() => {
        if (document.visibilityState === 'visible') {
           syncPresence(true);
@@ -136,7 +130,6 @@ export function useUser() {
       unsubscribeProfile();
       clearInterval(heartbeat);
       document.removeEventListener('visibilitychange', handleVisibility);
-      syncPresence(false);
     };
   }, [user, db]);
 
