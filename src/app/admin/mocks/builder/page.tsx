@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -60,8 +60,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v54.0 [Strict NEXT15 Async].
- * FIXED: Awaited searchParams and handled async params for Next.js 15.
+ * @fileOverview Master Mock Builder v55.0 [Strict NEXT15 Async].
+ * FIXED: Awaited searchParams and correctly wrapped Firestore query.
  */
 
 export default function MockBuilderPage() {
@@ -79,8 +79,13 @@ function MockBuilderContent() {
   const { profile } = useUser()
   const { toast } = useToast()
 
-  const mockId = searchParams?.get("id") ?? ""
-  const isEditing = !!mockId
+  const [id, setId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setId(searchParams?.get("id") ?? "");
+  }, [searchParams]);
+
+  const isEditing = !!id
 
   const [bankLoading, setBankLoading] = useState(false);
   const [questionBank, setQuestionBank] = useState<any[]>([])
@@ -97,7 +102,7 @@ function MockBuilderContent() {
   const { data: subjects } = useCollection<any>(subjectsQuery);
   const { data: allSeries } = useCollection<any>(seriesQuery);
   
-  const { data: existingMock } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
+  const { data: existingMock } = useDoc<any>(useMemo(() => (db && id ? doc(db, "mocks", id) : null), [db, id]))
   
   const [isInitializing, setIsInitializing] = useState(true)
   const [isPublishing, setIsPublishing] = useState(false)
@@ -221,7 +226,7 @@ function MockBuilderContent() {
       setInitError("Failed to synchronize challenge data.");
       setIsInitializing(false);
     });
-  }, [db, existingMock, isEditing, rawExams, mockId]);
+  }, [db, existingMock, isEditing, rawExams, id]);
 
   const uniqueExams = useMemo(() => {
     if (!rawExams) return [];
@@ -261,7 +266,7 @@ function MockBuilderContent() {
     }
 
     setIsPublishing(true)
-    const finalId = mockId || `mock-${Date.now()}`
+    const finalId = id || `mock-${Date.now()}`
     const mockRef = doc(db, "mocks", finalId)
     const sectionMetadata = sections.map((s: any) => ({ name: s.name, count: s.questions?.length || 0 })).filter((s: any) => s.count > 0);
     
@@ -277,7 +282,7 @@ function MockBuilderContent() {
       published: !isDraft,
       status: isDraft ? 'DRAFT' : 'PUBLISHED',
       updatedAt: serverTimestamp(),
-      createdAt: isEditing ? (existingMock?.createdAt || serverTimestamp()) : serverTimestamp(),
+      createdAt: id ? (existingData?.createdAt || serverTimestamp()) : serverTimestamp(),
     };
 
     try {
@@ -337,7 +342,7 @@ function MockBuilderContent() {
 
      // Auto-manage Exam IDs for "Board-wide" logic
      let nextExams = [...(mockData.examIds || [])];
-     const childExams = rawExams.filter((e: any) => e.boardId === id);
+     const childExams = (rawExams || []).filter((e: any) => e.boardId === id);
      const childIds = childExams.map((e: any) => e.id);
 
      if (isSelecting) {

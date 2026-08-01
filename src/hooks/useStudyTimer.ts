@@ -7,8 +7,8 @@ import { getLocalDateString } from '@/lib/date-utils';
 import { create } from 'zustand';
 
 /**
- * @fileOverview Production Study Timer Engine v1.3 [Fixed Shadowing].
- * FIXED: Aliased firestore increment to fsIncrement to avoid shadowing local state.
+ * @fileOverview Production Study Timer Engine v1.4 [Fixed Shadowing].
+ * FIXED: Properly aliased Firestore increment to fsIncrement.
  */
 
 interface StudyStore {

@@ -47,8 +47,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v4.7 [Strict NEXT15 Async].
- * FIXED: Awaited params and corrected JSX tag mismatch.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v4.8 [Strict NEXT15 Async].
+ * FIXED: Resolved TS17002 JSX closing tag mismatch for Button.
  */
 
 export default function VacancyDetailPage() {
@@ -424,4 +424,3 @@ function formatDate(date: any) {
    if (!date) return "N/A";
    return new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 }
-

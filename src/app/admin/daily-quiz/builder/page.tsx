@@ -61,8 +61,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v46.0 [Strict NEXT15 Async].
- * FIXED: setMockData reference to setQuizData and awaited searchParams.
+ * @fileOverview Daily Challenge Builder v47.0 [Strict NEXT15 Async].
+ * FIXED: setMockData reference to setQuizData and awaited searchParams correctly.
  */
 
 export default function DailyQuizBuilder() {
@@ -80,7 +80,12 @@ function DailyQuizBuilderContent() {
   const { profile } = useUser()
   const { toast } = useToast()
 
-  const id = searchParams?.get("id") ?? ""
+  const [id, setId] = useState<string | null>(null);
+
+  useEffect(() => {
+     setId(searchParams?.get("id") ?? "");
+  }, [searchParams]);
+
   const isEditing = !!id
 
   const [bankLoading, setBankLoading] = useState(false)
@@ -184,7 +189,7 @@ function DailyQuizBuilderContent() {
       setInitError("Failed to synchronize challenge data.");
       setIsInitializing(false);
     });
-  }, [db, existingQuiz, isEditing]);
+  }, [db, existingQuiz, isEditing, id]);
 
   const displayBank = useMemo(() => {
     const stagedIds = new Set(stagedQuestions.map(q => q.id));
