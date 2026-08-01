@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -25,9 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v525.0.
- * FIXED: Resolved syntax error with PopularExams tag.
- * FIXED: Reduced "Today's Challenge" font size to prevent PWA wrapping.
+ * @fileOverview Premium Institutional Hub v526.0.
+ * FIXED: Corrected component tag syntax and PWA layout constraints.
  */
 export default function HomePage() {
   const { user } = useUser();

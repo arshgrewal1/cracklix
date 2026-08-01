@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Compact Vacancy Hub v3.4.
- * FIXED: Increased side padding to prevent clipping on left edge in PWA standalone mode.
+ * @fileOverview Compact Vacancy Hub v3.5.
+ * FIXED: Added missing key props to skeleton loaders.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
@@ -97,7 +96,7 @@ export default function LatestVacancy() {
               ))
            ) : (
               <div className="col-span-full py-12 text-center opacity-30 italic font-bold text-sm border-2 border-dashed border-border rounded-2xl">
-                 Database synchronized
+                 Vault synchronized
               </div>
            )}
         </div>

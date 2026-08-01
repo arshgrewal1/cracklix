@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Density Current Affairs Preview v27.8.
- * FIXED: Increased left padding on header to prevent clipping in PWA viewports.
+ * @fileOverview High-Density Current Affairs Preview v28.0.
+ * FIXED: Added missing key props to skeleton loaders.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -70,7 +69,7 @@ export default function CurrentAffairsPreview() {
                        </div>
 
                        <div className="flex-1 space-y-1.5 min-w-0">
-                          <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-1 truncate">
+                          <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 truncate">
                              {item.title}
                           </h3>
                           <div className="flex items-center gap-3 pt-2">

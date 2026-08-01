@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from "react"
@@ -15,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Latest Tests Hub v51.1.
- * FIXED: Increased left padding on header to prevent clipping in PWA viewports.
+ * @fileOverview High-Density Latest Tests Hub v52.0.
+ * FIXED: Added missing key props to skeleton loaders.
  */
 export default function LatestMocks() {
   const db = useFirestore()

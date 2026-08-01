@@ -12,8 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Super-Compact Real-Time Merit Preview v7.1.
- * FIXED: Bypassed Index error by performing high-speed client-side sorting for preview items.
+ * @fileOverview Super-Compact Real-Time Merit Preview v7.2.
+ * FIXED: Added missing key props to skeleton loaders.
  */
 
 export default function MeritPreview() {

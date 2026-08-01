@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -15,8 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Density Categories Hub v51.7.
- * FIXED: Increased left padding on header to prevent clipping in PWA viewports.
+ * @fileOverview High-Density Categories Hub v52.0.
+ * FIXED: Added missing key props to skeleton loaders.
  */
 
 const TARGET_IDS = [
@@ -40,7 +39,7 @@ export default function FeaturedCategories() {
 
   return (
     <section className="py-8 md:py-12 bg-background border-t border-border">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         <div className="flex items-center justify-between px-2 text-left">
           <div className="flex items-center gap-3">
@@ -59,7 +58,7 @@ export default function FeaturedCategories() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
           {loading ? (
-             Array.from({ length: 2 }).map((_, i) => <Skeleton className="h-36 w-full rounded-2xl bg-muted" />)
+             Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-2xl bg-muted" />)
           ) : categories.length > 0 ? categories.map((cat, idx) => (
              <motion.div 
                key={cat.id}
@@ -93,7 +92,7 @@ export default function FeaturedCategories() {
              </motion.div>
           )) : (
             <div className="col-span-full py-8 text-center opacity-30 italic font-bold text-[11px] border-2 border-dashed border-border rounded-2xl">
-               Registry standby
+               Database standby
             </div>
           )}
         </div>
