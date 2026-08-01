@@ -55,8 +55,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v36.0.
- * FIXED: Resolved ReferenceError for CardTitle.
+ * @fileOverview Institutional Profile Hub v37.0.
+ * FIXED: Restored CardTitle import and implemented client-side sorting to bypass Firebase Index requirement.
  */
 
 export default function ProfilePage() {
@@ -92,6 +92,7 @@ export default function ProfilePage() {
     }
   }, [profile])
 
+  // Removed orderBy to bypass Firebase Index error; will sort in useMemo
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
     return query(collection(db, "results"), where("userId", "==", user.uid), limit(50))
@@ -101,6 +102,7 @@ export default function ProfilePage() {
 
   const results = useMemo(() => {
     if (!rawResults) return []
+    // Client-side sorting for immediate registry sync
     return [...rawResults].sort((a, b) => {
       const timeA = new Date(a.timestamp || 0).getTime()
       const timeB = new Date(b.timestamp || 0).getTime()
@@ -206,8 +208,8 @@ export default function ProfilePage() {
 
                  <Card className="border-none shadow-3xl rounded-2xl bg-card overflow-hidden border border-border">
                     <CardHeader className="p-5 md:p-6 border-b border-border bg-muted/30">
-                       <CardTitle className="text-base md:text-xl font-black text-foreground flex items-center gap-3 tracking-tighter uppercase">
-                          <History className="h-5 w-5 text-primary" /> Recent attempts
+                       <CardTitle className="text-xl font-black text-foreground flex items-center gap-3 tracking-tighter uppercase">
+                          <History className="h-6 w-6 text-primary" /> Recent attempts
                        </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
@@ -220,7 +222,7 @@ export default function ProfilePage() {
                                    <div className="flex items-center gap-4 min-w-0">
                                       <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:text-primary transition-all shadow-inner"><Zap className="h-4 w-4" /></div>
                                       <div className="min-w-0">
-                                         <p className="font-bold text-sm md:text-base text-foreground truncate tracking-tight uppercase">{res.mockTitle}</p>
+                                         <p className="font-bold text-sm md:text-lg text-foreground truncate tracking-tight uppercase">{res.mockTitle}</p>
                                          <div className="flex items-center gap-2 mt-0.5">
                                             <span className="text-[9px] font-bold text-muted-foreground tabular-nums">{new Date(res.timestamp).toLocaleDateString('en-GB')}</span>
                                             <Badge className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border-none text-[7px] font-black px-1.5 uppercase">Score: {res.score}</Badge>
@@ -291,6 +293,23 @@ export default function ProfilePage() {
             </DialogFooter>
          </DialogContent>
       </Dialog>
+
+      <Dialog open={isDeleting} onOpenChange={setIsDeleting}>
+         <DialogContent className="sm:max-w-md w-[95vw] rounded-2xl bg-card border-none shadow-5xl p-8 text-center flex flex-col items-center">
+            <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 mb-6 shadow-inner"><ShieldAlert className="h-8 w-8" /></div>
+            <DialogHeader>
+               <DialogTitle className="text-xl font-black uppercase">Purge account</DialogTitle>
+               <DialogDescription className="text-muted-foreground text-sm font-medium mt-2">Type <code className="text-rose-600 font-black">DELETE</code> to permanently liquidate your preparation data.</DialogDescription>
+            </DialogHeader>
+            <div className="w-full my-6">
+               <Input value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} className="h-12 bg-muted border-none text-center font-black text-rose-600 uppercase" placeholder="---" />
+            </div>
+            <div className="grid grid-cols-2 gap-3 w-full">
+               <Button variant="ghost" onClick={() => setIsDeleting(false)} className="font-bold text-[10px] uppercase">Cancel</Button>
+               <Button onClick={handleDeleteAccount} disabled={deleteConfirm !== 'DELETE' || isSaving} className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] shadow-xl uppercase">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete forever"}</Button>
+            </div>
+         </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -300,7 +319,7 @@ function StatsNode({ icon, label, value, color, bgColor }: any) {
     <Card className="border-none shadow-lg rounded-xl md:rounded-2xl p-3 md:p-4 bg-card border border-border flex-1">
       <div className="flex flex-col items-center text-center gap-2">
         <div className={cn("h-8 w-8 md:h-10 md:w-10 rounded-lg flex items-center justify-center shadow-inner", bgColor)}>
-          {React.cloneElement(icon as React.ReactElement, { className: cn("h-4 w-4 md:h-5 md:w-5", color) })}
+          {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: cn("h-4 w-4 md:h-5 md:w-5", color) }) : null}
         </div>
         <div className="space-y-0.5 min-w-0 w-full">
           <p className="text-sm md:text-xl font-black text-foreground tabular-nums tracking-tighter leading-none truncate">{value}</p>

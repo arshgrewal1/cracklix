@@ -13,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Density Current Affairs Preview v27.0.
- * FIXED: Added missing Badge import.
+ * @fileOverview High-Density Current Affairs Preview v27.1.
+ * FIXED: Restored missing Badge import.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -80,7 +80,7 @@ export default function CurrentAffairsPreview() {
                        </div>
 
                        <div className="mt-6 pt-2">
-                          <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none shadow-md">
+                          <Button className="w-full h-10 md:h-11 bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none shadow-md">
                              Open Portal <ArrowRight className="h-3.5 w-3.5 ml-2" />
                           </Button>
                        </div>

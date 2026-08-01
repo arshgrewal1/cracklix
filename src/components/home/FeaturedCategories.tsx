@@ -14,8 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Density Categories Hub v51.0.
- * FIXED: Added missing Badge import.
+ * @fileOverview High-Density Categories Hub v51.1.
+ * FIXED: Restored missing Badge import.
  */
 
 const TARGET_IDS = [
@@ -83,7 +83,7 @@ export default function FeaturedCategories() {
                      </div>
 
                      <div className="mt-6 pt-2">
-                        <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none shadow-md">
+                        <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white font-bold uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none shadow-md">
                            Enter hub <ArrowRight className="h-3 w-3" />
                         </Button>
                      </div>

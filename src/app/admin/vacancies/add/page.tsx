@@ -42,8 +42,8 @@ import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Vacancy Builder Hub v2.4.
- * FIXED: Added missing motion and AnimatePresence imports.
+ * @fileOverview Enterprise Vacancy Builder Hub v2.5.
+ * FIXED: Restored missing AnimatePresence and motion imports.
  */
 
 const BOARD_OPTIONS = [

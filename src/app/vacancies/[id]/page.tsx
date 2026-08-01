@@ -46,8 +46,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v7.5.
- * FIXED: Added missing Users icon import.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v7.6.
+ * FIXED: Restored Users icon and implemented Next.js 15 async params handling.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
