@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from "react";
@@ -29,8 +30,9 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Institutional Share Hub v9.0.
- * FIXED: Explicit close button added to header and layout optimized for zero overflow.
+ * @fileOverview Institutional Share Hub v9.2.
+ * FIXED: Added explicit Close button to resolve PWA overlap.
+ * FIXED: Reduced modal footprint for better high-density PWA presentation.
  */
 
 const DETAILED_SHARE_MESSAGE = `🚀 Crack Punjab Government Exams with Cracklix!
@@ -148,40 +150,31 @@ export default function ShareButton({
           onClick={handleShare}
           disabled={isSharing}
           className={cn(
-            "w-full h-auto min-h-[50px] py-2.5 px-4 rounded-[16px] bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold shadow-lg transition-all active:scale-95 group relative overflow-hidden border-none flex items-center justify-start gap-3",
+            "w-full h-11 md:h-12 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold shadow-lg transition-all active:scale-95 group relative flex items-center justify-start gap-3 border-none",
             className
           )}
         >
-          <div className="shrink-0 flex items-center justify-center h-8 w-8 bg-white/10 rounded-xl">
-             {isSharing ? (
-               <Loader2 className="h-4 w-4 animate-spin" />
-             ) : (
-               <Share2 className="h-4 w-4 transition-transform group-hover:rotate-12" />
-             )}
+          <div className="shrink-0 flex items-center justify-center h-7 w-7 bg-white/10 rounded-lg">
+             {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4 transition-transform group-hover:rotate-12" />}
           </div>
           <div className="flex flex-col items-start text-left min-w-0 flex-1 overflow-hidden">
-             <span className="text-xs md:text-sm font-bold leading-none truncate w-full">Share Cracklix</span>
-             {showLabel && (
-               <span className="text-[8px] md:text-[9px] opacity-70 font-medium mt-1 leading-none truncate w-full">
-                 Invite fellow aspirants
-               </span>
-             )}
+             <span className="text-xs font-bold leading-none truncate w-full uppercase tracking-tight">Share portal</span>
           </div>
           <ChevronRight className="h-3.5 w-3.5 opacity-30 group-hover:translate-x-1 transition-transform ml-auto shrink-0" />
         </Button>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsShareDialogOpen}>
-        <DialogContent className="w-[94vw] max-w-[440px] rounded-[24px] bg-white border-none shadow-5xl p-0 overflow-hidden text-left z-[2100]">
+        <DialogContent className="w-[90vw] max-w-[380px] rounded-[24px] bg-white border-none shadow-5xl p-0 overflow-hidden text-left z-[2100]">
           <div className="h-1.5 w-full bg-blue-600" />
           <DialogHeader className="p-6 pb-2 relative">
              <button 
                 onClick={() => setIsShareDialogOpen(false)}
-                className="absolute right-4 top-4 p-2 hover:bg-slate-100 rounded-xl transition-all active:scale-90 z-20"
+                className="absolute right-4 top-4 p-2 hover:bg-slate-100 rounded-xl transition-all active:scale-90 z-20 border-none bg-transparent"
              >
                 <X className="h-5 w-5 text-slate-400" />
              </button>
-             <div className="h-12 w-12 bg-blue-50 rounded-[1.2rem] flex items-center justify-center mx-auto text-blue-600 shadow-xl mb-4 border border-blue-100">
+             <div className="h-12 w-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto text-blue-600 shadow-inner mb-4 border border-blue-100">
                 <Share2 className="h-6 w-6" />
              </div>
              <DialogTitle className="text-lg font-black text-[#0F172A] tracking-tighter uppercase text-center">Share hub</DialogTitle>
@@ -189,21 +182,21 @@ export default function ShareButton({
           </DialogHeader>
 
           <div className="px-6 pb-8 space-y-2">
-             <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(finalShareMessage)}`, '_blank')} className="w-full h-12 bg-[#25D366] hover:bg-[#20bd5c] text-white rounded-xl flex items-center px-5 gap-3 shadow-lg transition-all active:scale-95 border-none group">
+             <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(finalShareMessage)}`, '_blank')} className="w-full h-12 bg-[#25D366] hover:bg-[#20bd5c] text-white rounded-xl flex items-center px-5 gap-3 shadow-lg transition-all active:scale-95 border-none group cursor-pointer">
                 <MessageSquare className="h-5 w-5" /> <span className="font-bold text-xs flex-1 text-left uppercase tracking-tight">WhatsApp</span>
                 <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
              </button>
-             <button onClick={() => copyToClipboard(finalShareMessage, "Copied to clipboard")} className="w-full h-12 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-xl flex items-center px-5 gap-3 border border-slate-100 transition-all active:scale-95 group">
+             <button onClick={() => copyToClipboard(finalShareMessage, "Copied to clipboard")} className="w-full h-12 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-xl flex items-center px-5 gap-3 border border-slate-100 transition-all active:scale-95 group cursor-pointer">
                 <Send className="h-5 w-5 text-slate-400" /> <span className="font-bold text-xs flex-1 text-left uppercase tracking-tight">Copy message</span>
              </button>
-             <button onClick={() => copyToClipboard(activeSettings.installUrl, "Link copied")} className="w-full h-12 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-xl flex items-center px-5 gap-3 border border-slate-100 transition-all active:scale-95 group">
+             <button onClick={() => copyToClipboard(activeSettings.installUrl, "Link copied")} className="w-full h-12 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-xl flex items-center px-5 gap-3 border border-slate-100 transition-all active:scale-95 group cursor-pointer">
                 <Copy className="h-5 w-5 text-slate-400" /> <span className="font-bold text-xs flex-1 text-left uppercase tracking-tight">Copy app link</span>
              </button>
           </div>
           
           <DialogFooter className="bg-slate-50 p-4 border-t border-slate-100 flex items-center justify-center gap-2 text-slate-300">
              <ShieldCheck className="h-3.5 w-3.5" />
-             <p className="text-[8px] font-black uppercase tracking-widest">Institutional verified portal</p>
+             <p className="text-[8px] font-black uppercase tracking-widest">Institutional Hub verified</p>
           </DialogFooter>
         </DialogContent>
       </Dialog>
