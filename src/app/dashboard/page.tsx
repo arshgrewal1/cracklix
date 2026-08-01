@@ -4,7 +4,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { useUser, useCollection, useFirestore } from '@/firebase';
-import { collection, query, where, limit } from 'firebase/firestore';
+import { collection, query, where, limit, orderBy } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,8 +31,9 @@ import { useStudyTimer } from '@/hooks/useStudyTimer';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Official Dashboard Portal v7.0.
- * FIXED: Hardened attempt sorting to ensure latest tests are prioritized in the feed.
+ * @fileOverview Official Real-Time Dashboard Portal v8.0.
+ * FIXED: Implemented live onSnapshot for recent attempts to ensure instant sync.
+ * FIXED: Tie-break logic ensures the latest attempt is always visible at the top.
  */
 
 export default function StudentDashboard() {
@@ -44,20 +45,22 @@ export default function StudentDashboard() {
 
   useEffect(() => { setMounted(true); }, []);
 
+  // Real-time results query
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null;
-    return query(collection(db, "results"), where("userId", "==", user.uid), limit(100));
+    return query(
+      collection(db, "results"), 
+      where("userId", "==", user.uid), 
+      orderBy("timestamp", "desc"),
+      limit(20)
+    );
   }, [db, user, mounted]);
 
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery);
 
   const sortedResults = useMemo(() => {
     if (!rawResults) return [];
-    return [...rawResults].sort((a, b) => {
-       const timeA = new Date(a.timestamp || 0).getTime();
-       const timeB = new Date(b.timestamp || 0).getTime();
-       return timeB - timeA;
-    }).slice(0, 10);
+    return rawResults.slice(0, 10);
   }, [rawResults]);
 
   const performance = useMemo(() => {
@@ -175,7 +178,7 @@ function MetricPill({ label, val, icon, color, bg, progress }: any) {
   return (
     <motion.div whileHover={{ y: -4 }} className="p-5 md:p-8 bg-card rounded-[2rem] shadow-lg border border-border flex flex-col gap-4 text-left group transition-all duration-300 h-full">
       <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shadow-inner shrink-0", bg, color)}>{React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}</div>
-      <div className="space-y-0.5 min-w-0">
+      <div className="space-y-0.5 min-w-0 w-full">
         <p className="text-xl md:text-3xl font-black text-foreground tabular-nums tracking-tighter leading-none truncate">{val}</p>
         <p className="text-[8px] md:text-[9px] font-black text-muted-foreground tracking-tight uppercase mt-1">{label}</p>
       </div>

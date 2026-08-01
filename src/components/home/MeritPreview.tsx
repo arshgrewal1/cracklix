@@ -12,18 +12,20 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Super-Compact Merit Preview v6.0.
- * COMPACT: High-density horizontal nodes for Home Page. Reduced radii and text.
+ * @fileOverview Super-Compact Real-Time Merit Preview v7.0.
+ * FIXED: Uses live onSnapshot to ensure ranks refresh immediately after submission.
  */
 
 export default function MeritPreview() {
   const db = useFirestore();
   
+  // Real-time listener for the global leaderboard
   const meritQuery = useMemo(() => {
     if (!db) return null;
     return query(
       collection(db, "leaderboard"), 
       orderBy("highestScore", "desc"), 
+      orderBy("updatedAt", "desc"), // Tie-break: Newest achiever first
       limit(2)
     );
   }, [db]);
@@ -32,7 +34,7 @@ export default function MeritPreview() {
 
   const meritList = useMemo(() => {
     if (!rawList) return [];
-    return [...rawList].sort((a, b) => (b.highestScore || 0) - (a.highestScore || 0)).slice(0, 2);
+    return rawList;
   }, [rawList]);
 
   return (
@@ -59,11 +61,9 @@ export default function MeritPreview() {
               Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-xl bg-muted border border-border" />)
            ) : meritList && meritList.length > 0 ? meritList.map((res, i) => (
               <motion.div 
-                key={res.uid}
+                key={res.uid || res.id}
                 initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="h-full"
               >
                  <Link href="/leaderboard" className="block h-full">
@@ -92,7 +92,7 @@ export default function MeritPreview() {
                  </Link>
               </motion.div>
            )) : (
-              <div className="col-span-full py-8 text-center opacity-30 italic font-bold text-[9px] border-2 border-dashed border-border rounded-xl">
+              <div className="col-span-full py-12 text-center opacity-30 italic font-bold text-[9px] border-2 border-dashed border-border rounded-2xl">
                  Awaiting merit sync
               </div>
            )}

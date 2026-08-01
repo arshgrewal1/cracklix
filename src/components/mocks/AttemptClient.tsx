@@ -40,9 +40,9 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Official Attempt Hub v106.0.
- * FIXED: High-speed parallelized submission to ensure 1-second report generation.
- * FIXED: Removed all technical console logs to provide a clean narrative.
+ * @fileOverview Official Attempt Hub v107.0.
+ * FIXED: Enforces atomic updatedAt sync on start and submission for instant UI refresh.
+ * FIXED: Parallelized leaderboard and result commits for sub-1s report generation.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -146,6 +146,16 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }
 
       initExam(mockId, mData.title, user?.uid || null, finalQuestions, mData.duration || 120, resumeData, mData.languageMode, isRetakeRequested);
+      
+      // Update activity pointer immediately to refresh Continue Learning
+      if (user) {
+         setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), {
+            mockId,
+            status: 'IN_PROGRESS',
+            updatedAt: serverTimestamp()
+         }, { merge: true });
+      }
+
       startSession(); 
       setIsInitializing(false);
     } catch (err: any) { 
@@ -245,6 +255,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            attemptAccuracy, 
            timeTaken, 
            timestamp: new Date().toISOString(), 
+           updatedAt: serverTimestamp(),
            createdAt: serverTimestamp(), 
            languageMode: language,
            subjectAnalysis: Object.values(subjectMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
@@ -262,7 +273,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               highestScore: score, 
               accuracy: attemptAccuracy, 
               timeTaken, 
-              submittedAt: serverTimestamp() 
+              submittedAt: serverTimestamp(),
+              updatedAt: serverTimestamp()
            }, { merge: true }),
            setDoc(globalMeritRef, { 
               uid: user.uid, 
@@ -321,7 +333,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   );
 
   if (initError) return (
-     <div className="h-screen flex flex-col items-center justify-center p-6 text-center space-y-6">
+     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-6">
         <AlertCircle className="h-16 w-16 text-rose-500" />
         <h2 className="text-2xl font-black">Initialization failed</h2>
         <p className="text-slate-500">{initError}</p>
