@@ -24,8 +24,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v529.0.
- * FIXED: Reduced icon zoom to prevent clipping and restored original Today's Challenge icon style.
+ * @fileOverview Premium Institutional Hub v531.0.
+ * FIXED: Resolved JSX syntax error (unbalanced tags) around Today's Challenge.
+ * UPDATED: Today's Challenge indicators are compact squares with zero spacing.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -50,65 +51,60 @@ export default function HomePage() {
 
       {user && <ContinueLearning />}
 
-      {/* Today's Challenge Hub - Restored Icon Style */}
+      {/* Today's Challenge Hub - Square Compact Indicators */}
       <section className="py-6 md:py-10 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
                initial={{ opacity: 0, y: 20 }}
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
-               className="relative bg-gradient-to-br from-[#111827] to-[#1F2937] rounded-[24px] p-5 md:p-8 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden group text-left"
+               className="relative bg-gradient-to-br from-[#0B1224] to-[#161F33] rounded-[24px] p-5 md:p-8 border border-white/5 shadow-2xl overflow-hidden group text-left"
             >
                {/* Premium Background Decorations */}
-               <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-               <motion.div 
-                 animate={{ scale: [1, 1.2, 1], opacity: [0.03, 0.06, 0.03] }}
-                 transition={{ duration: 8, repeat: Infinity }}
-                 className="absolute -top-20 -right-20 w-80 h-80 bg-primary rounded-full blur-[100px]" 
-               />
-
-               <div className="relative z-10 space-y-5 md:space-y-8">
+               <div className="absolute inset-0 pointer-events-none opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+               
+               <div className="relative z-10 space-y-6 md:space-y-8">
                   {/* Top Row: Brand & Title */}
-                  <div className="flex items-center justify-between gap-2">
-                     <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                        <div className="h-10 w-10 md:h-14 md:w-14 rounded-full bg-primary/10 flex items-center justify-center shadow-inner shrink-0 border border-primary/20">
-                           <Flame className="h-5 w-5 md:h-7 md:w-7 text-primary fill-current animate-pulse" />
+                  <div className="flex items-center justify-between gap-4">
+                     <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/20 flex items-center justify-center shadow-inner shrink-0 border border-primary/20">
+                           <Flame className="h-5 w-5 md:h-6 md:w-6 text-primary fill-current animate-pulse" />
                         </div>
-                        <h2 className="text-base md:text-[32px] font-bold text-white tracking-tight antialiased truncate">
+                        <h2 className="text-lg md:text-3xl font-[800] text-white tracking-tight antialiased truncate">
                            Today's Challenge
                         </h2>
                      </div>
-                     <Badge className="bg-gradient-to-r from-primary to-blue-500 text-white border-none px-2 py-0.5 md:px-3 md:py-1 font-black text-[8px] md:text-[9px] uppercase tracking-widest shadow-xl shrink-0">
-                        Daily
+                     <Badge className="bg-primary text-white border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest shadow-xl shrink-0">
+                        Sync Live
                      </Badge>
                   </div>
 
-                  {/* Second Row: Premium Stat Cards */}
-                  <div className="grid grid-cols-3 gap-2 md:gap-4">
-                     <StatCard icon={<Clock className="text-orange-400 h-3.5 w-3.5 md:h-4 md:w-4" />} label={`${activeQuiz?.duration || 15} Min`} />
-                     <StatCard icon={<HelpCircle className="text-blue-400 h-3.5 w-3.5 md:h-4 md:w-4" />} label={`${activeQuiz?.totalQuestions || 20} Questions`} />
-                     <StatCard icon={<Trophy className="text-amber-400 h-3.5 w-3.5 md:h-4 md:w-4" />} label={`${activeQuiz?.rewardXP || 100} XP`} />
-                  </div>
-
-                  {/* Challenge Content Block */}
+                  {/* Challenge Info Block */}
                   <div className="space-y-1">
-                     <h3 className="text-base md:text-[22px] font-semibold text-white tracking-tight leading-tight line-clamp-1">
+                     <h3 className="text-base md:text-xl font-bold text-white tracking-tight leading-tight line-clamp-1">
                         {activeQuiz?.title || "GK Master Challenge"}
                      </h3>
                      <p className="text-[11px] md:text-sm text-slate-400 font-medium tracking-tight">
-                        Practice daily to improve speed and accuracy.
+                        Complete today's official patterns to earn XP.
                      </p>
                   </div>
 
+                  {/* Second Row: Square Compact Stat Indicators */}
+                  <div className="flex items-center gap-1.5 md:gap-2">
+                     <StatCard icon={<Clock className="text-orange-400 h-3.5 w-3.5" />} label={`${activeQuiz?.duration || 15}m`} />
+                     <StatCard icon={<HelpCircle className="text-blue-400 h-3.5 w-3.5" />} label={`${activeQuiz?.totalQuestions || 20} Qs`} />
+                     <StatCard icon={<Trophy className="text-amber-400 h-3.5 w-3.5" />} label={`${activeQuiz?.rewardXP || 100} XP`} />
+                  </div>
+
                   {/* Premium CTA Button */}
-                  <div className="pt-1">
+                  <div className="pt-2">
                      {!isMounted || quizLoading ? (
                         <div className="h-14 w-full bg-white/5 animate-pulse rounded-2xl" />
                      ) : activeQuiz ? (
                         <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="block">
-                           <Button className="w-full h-12 md:h-14 bg-gradient-to-r from-[#3B82F6] to-[#2563EB] hover:brightness-110 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_-10px_rgba(37,99,235,0.5)] border-none transition-all active:scale-[0.98] group/btn">
+                           <Button className="w-full h-12 md:h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-xl md:rounded-2xl shadow-xl border-none transition-all active:scale-95 group/btn">
                               <Zap className="h-4 w-4 mr-2 fill-current" />
-                              Start Challenge
+                              Attempt now
                               <ArrowRight className="h-4 w-4 ml-auto opacity-40 group-hover/btn:translate-x-1 transition-transform" />
                            </Button>
                         </Link>
@@ -138,9 +134,9 @@ export default function HomePage() {
 
 function StatCard({ icon, label }: { icon: React.ReactNode, label: string }) {
    return (
-      <div className="flex flex-col items-center justify-center p-2 md:p-4 bg-white/5 border border-white/10 backdrop-blur-md rounded-full space-y-1.5 hover:bg-white/10 transition-all cursor-default h-full aspect-square">
-         <div className="opacity-80 scale-90 md:scale-100">{icon}</div>
-         <span className="text-[8px] md:text-xs font-semibold text-white/90 tracking-tight whitespace-nowrap">{label}</span>
+      <div className="flex flex-col items-center justify-center px-4 py-2 bg-white/5 border border-white/5 rounded-xl space-y-1 hover:bg-white/10 transition-all cursor-default shrink-0 min-w-[70px] md:min-w-[90px]">
+         <div className="opacity-80 scale-90">{icon}</div>
+         <span className="text-[10px] md:text-xs font-black text-white/90 tracking-tight whitespace-nowrap tabular-nums">{label}</span>
       </div>
    );
 }
