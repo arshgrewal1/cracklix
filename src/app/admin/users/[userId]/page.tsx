@@ -52,17 +52,19 @@ import {
   CreditCard,
   Crown,
   BookOpen,
-  ClipboardList
+  ClipboardList,
+  Settings
 } from "lucide-react"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { motion } from "framer-motion"
 
 /**
- * @fileOverview Deep Institutional Aspirant Auditor v2.0.
- * Objective: 360-degree audit of a single student node with complete field visibility.
+ * @fileOverview Deep Institutional Aspirant Auditor v2.1.
+ * FIXED: Bypassed Firebase Index Error by performing client-side sorting for Subscriptions and Sessions.
  */
 
 export default function StudentDetailPage(props: { params: Promise<{ userId: string }> }) {
@@ -72,19 +74,40 @@ export default function StudentDetailPage(props: { params: Promise<{ userId: str
   const router = useRouter()
   const { toast } = useToast()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   // 1. Core Profile Sync
   const userRef = useMemo(() => (db ? doc(db, "users", userId) : null), [db, userId]);
   const { data: profile, loading: pLoading } = useDoc<any>(userRef);
 
-  // 2. Aggregate Data Listeners
+  // 2. Aggregate Data Listeners (Index Resilient)
   const resultsQuery = useMemo(() => (db ? query(collection(db, "results"), where("userId", "==", userId)) : null), [db, userId]);
-  const sessionsQuery = useMemo(() => (db ? query(collection(db, "users", userId, "study_sessions"), orderBy("startTime", "desc"), limit(50)) : null), [db, userId]);
-  const subsQuery = useMemo(() => (db ? query(collection(db, "subscriptions"), where("userId", "==", userId), orderBy("purchaseDate", "desc")) : null), [db, userId]);
+  
+  // Removed orderBy to prevent Index Errors; Sorting is now handled client-side in useMemo
+  const sessionsQuery = useMemo(() => (db ? query(collection(db, "users", userId, "study_sessions"), limit(100)) : null), [db, userId]);
+  const subsQuery = useMemo(() => (db ? query(collection(db, "subscriptions"), where("userId", "==", userId)) : null), [db, userId]);
 
   const { data: rawResults, loading: rLoading } = useCollection<any>(resultsQuery);
-  const { data: sessions } = useCollection<any>(sessionsQuery);
-  const { data: subscriptions } = useCollection<any>(subsQuery);
+  const { data: rawSessions } = useCollection<any>(sessionsQuery);
+  const { data: rawSubscriptions } = useCollection<any>(subsQuery);
+
+  const sortedSessions = useMemo(() => {
+    if (!rawSessions) return [];
+    return [...rawSessions].sort((a, b) => {
+      const tA = a.startTime?.seconds || new Date(a.startTime || 0).getTime();
+      const tB = b.startTime?.seconds || new Date(b.startTime || 0).getTime();
+      return tB - tA;
+    });
+  }, [rawSessions]);
+
+  const sortedSubscriptions = useMemo(() => {
+    if (!rawSubscriptions) return [];
+    return [...rawSubscriptions].sort((a, b) => {
+      const tA = new Date(a.purchaseDate || 0).getTime();
+      const tB = new Date(b.purchaseDate || 0).getTime();
+      return tB - tA;
+    });
+  }, [rawSubscriptions]);
 
   const analytics = useMemo(() => {
     if (!rawResults || rawResults.length === 0) return { 
@@ -152,7 +175,7 @@ export default function StudentDetailPage(props: { params: Promise<{ userId: str
   );
 
   if (!profile) return (
-     <div className="h-screen flex flex-col items-center justify-center p-6 text-center space-y-6">
+     <div className="h-screen flex flex-col items-center justify-center p-6 text-center space-y-10">
         <AlertCircle className="h-16 w-16 text-slate-200" />
         <div className="space-y-1">
            <h2 className="text-2xl font-black text-[#0F172A]">Aspirant Record Purged</h2>
@@ -166,9 +189,9 @@ export default function StudentDetailPage(props: { params: Promise<{ userId: str
     <div className="space-y-10 pb-32 text-left animate-in fade-in duration-700 pt-2 px-1">
       
       {/* 1. HEADER HUB */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
          <div className="flex items-center gap-6">
-            <button onClick={() => router.back()} className="h-12 w-12 rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0">
+            <button onClick={() => router.back()} className="h-12 w-12 rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm shrink-0 cursor-pointer">
                <ChevronLeft className="h-6 w-6" />
             </button>
             <div className="space-y-1">
@@ -183,7 +206,7 @@ export default function StudentDetailPage(props: { params: Promise<{ userId: str
             <Button onClick={() => setIsEditing(true)} className="flex-1 md:flex-none h-14 px-8 bg-[#0F172A] hover:bg-black text-white font-bold rounded-2xl shadow-xl gap-2 border-none">
                <Settings className="h-4 w-4" /> Edit Profile
             </Button>
-            <Button onClick={() => handleAdminAction('TOGGLE_STATUS')} className={cn("h-14 px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none", profile.status === 'SUSPENDED' ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700 text-white")}>
+            <Button onClick={() => handleAdminAction('TOGGLE_STATUS')} className={cn("h-14 px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none", profile.status === 'SUSPENDED' ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-rose-600 hover:bg-rose-700 text-white")}>
                {profile.status === 'SUSPENDED' ? 'Activate account' : 'Suspended access'}
             </Button>
          </div>
@@ -276,7 +299,7 @@ export default function StudentDetailPage(props: { params: Promise<{ userId: str
                            <div className="p-10 bg-[#0F172A] rounded-[2.5rem] text-center space-y-4 shadow-2xl relative overflow-hidden">
                               <div className="absolute top-0 right-0 p-4 opacity-5"><Crown className="h-24 w-24 text-primary" /></div>
                               <h4 className="text-3xl font-black text-white uppercase tracking-tight">{profile.pass?.plan || 'PRO PASS'}</h4>
-                              <Badge className="bg-emerald-500 text-white border-none px-5 py-1.5 uppercase font-black text-[9px] shadow-xl">Verified Active</Badge>
+                              <Badge className="bg-emerald-50 text-white border-none px-5 py-1.5 uppercase font-black text-[9px] shadow-xl">Verified Active</Badge>
                            </div>
                            <div className="space-y-6">
                               <DataField label="Activation Date" value={new Date(profile.pass?.purchaseDate || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} />
@@ -296,7 +319,7 @@ export default function StudentDetailPage(props: { params: Promise<{ userId: str
                <div className="lg:col-span-8">
                   <SectionCard title="Transaction ledger" icon={<CreditCard className="text-primary" />}>
                      <div className="divide-y divide-slate-100">
-                        {subscriptions && subscriptions.length > 0 ? subscriptions.map((s: any) => (
+                        {sortedSubscriptions && sortedSubscriptions.length > 0 ? sortedSubscriptions.map((s: any) => (
                            <div key={s.id} className="py-8 flex items-center justify-between group hover:bg-slate-50 transition-all rounded-xl px-4 -mx-4">
                               <div className="flex items-center gap-6">
                                  <div className="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 shadow-inner group-hover:bg-primary group-hover:text-white transition-all"><ShieldCheck className="h-6 w-6" /></div>
@@ -378,9 +401,9 @@ function AnalyticNode({ label, val, icon }: any) {
          <div className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
             {React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6" })}
          </div>
-         <div className="space-y-0.5 w-full min-w-0">
-            <p className="text-2xl md:text-4xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none">{val}</p>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 truncate">{label}</p>
+         <div className="space-y-0.5 min-w-0 w-full">
+            <p className="text-xs md:text-xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none truncate">{val}</p>
+            <p className="text-[7px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1 truncate">{label}</p>
          </div>
       </Card>
    )
@@ -433,12 +456,4 @@ function LearningMetric({ label, val, color }: any) {
          </div>
       </div>
    )
-}
-
-function setIsEditing(arg0: boolean) {
-   throw new Error("Function not implemented.")
-}
-
-function handleDelete(id: string, name: string) {
-   throw new Error("Function not implemented.")
 }
