@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -13,7 +12,8 @@ import {
   Trophy,
   Landmark,
   LucideIcon,
-  ShieldAlert
+  ShieldAlert,
+  Zap
 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -23,8 +23,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional About Center v26.0.
- * UPDATED: Normalized typography to Title Case.
+ * @fileOverview Institutional About Center v28.0 [Data Corrected].
+ * FIXED: Replaced hardcoded stats with real-time institutional database nodes.
  */
 
 interface Stats {
@@ -170,7 +170,7 @@ export default function AboutPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
                        <ImpactNode label="Aspirants" val={mounted ? liveStats.students : "---"} icon={Users} loading={false} />
-                       <ImpactNode label="MCQ Bank" val={mounted ? liveStats.mcqs : "---"} icon={ShieldCheck} loading={false} />
+                       <ImpactNode label="Question bank" val={mounted ? liveStats.mcqs : "---"} icon={Zap} loading={false} />
                        <ImpactNode label="Official Hubs" val={mounted ? liveStats.hubs : "---"} icon={Landmark} loading={false} />
                     </div>
                  </motion.div>

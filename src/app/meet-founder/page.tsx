@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from "react";
@@ -19,7 +18,8 @@ import {
   Briefcase,
   MapPin,
   ShieldAlert,
-  Instagram
+  Instagram,
+  Users
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,13 +28,17 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Official Meet the Founder Page v4.0.
- * UPDATED: Optimized social CTAs and synchronized Instagram handle.
+ * @fileOverview Official Meet the Founder Page v5.0.
+ * FIXED: Resolved layout overflow for "IN TOUCH" button on mobile devices.
+ * UPDATED: Uses real-time database counts for institutional trust.
  */
 export default function MeetFounderPage() {
   const db = useFirestore();
   const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
+  const statsRef = useMemo(() => (db ? doc(db, 'settings', 'stats') : null), [db]);
+
   const { data: settings } = useDoc<any>(settingsRef);
+  const { data: stats } = useDoc<any>(statsRef);
 
   const founder = {
     name: settings?.founderName || "Arsh Grewal",
@@ -49,8 +53,14 @@ export default function MeetFounderPage() {
     showImage: settings?.showFounderImage !== false
   };
 
+  const liveStats = {
+     aspirants: (stats?.totalUsers || 1000).toLocaleString() + "+",
+     mocks: (stats?.totalMocks || 450).toLocaleString() + "+",
+     questions: (stats?.totalQuestions || 12000).toLocaleString() + "+"
+  };
+
   return (
-    <div className="min-h-screen bg-white font-body text-left">
+    <div className="min-h-screen bg-white font-body text-left overflow-x-hidden">
       <Navbar />
       
       <main>
@@ -146,33 +156,36 @@ export default function MeetFounderPage() {
               </p>
             </div>
 
-            <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8">
-               <div className="text-center md:text-left space-y-1">
+            {/* FIXED CTA CONTAINER TO PREVENT OVERFLOW */}
+            <div className="pt-12 border-t border-slate-100 flex flex-col items-center justify-between gap-10">
+               <div className="text-center space-y-2 w-full">
                   <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Connect directly</p>
-                  <p className="text-xl md:text-2xl font-bold text-[#0F172A]">{founder.email}</p>
+                  <p className="text-lg md:text-4xl font-black text-[#0F172A] break-all">{founder.email}</p>
                </div>
-               <div className="flex items-center gap-4 w-full md:w-auto">
-                 <Button asChild variant="outline" className="h-16 px-8 rounded-2xl border-2 border-slate-200 text-[#0F172A] font-bold gap-3 active:scale-95 transition-all">
+               <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                 <Button asChild variant="outline" className="h-16 w-full sm:flex-1 rounded-[1.5rem] border-2 border-slate-200 text-[#0F172A] font-bold gap-3 active:scale-95 transition-all shadow-sm">
                     <a href={founder.instagramUrl} target="_blank" rel="noopener noreferrer">
                       <Instagram className="h-5 w-5 text-rose-500" />
                       Follow @cracklix.in
                     </a>
                  </Button>
-                 <Button asChild className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold uppercase text-[11px] tracking-widest rounded-2xl shadow-xl border-none active:scale-95 transition-all flex-1 md:flex-none">
-                    <Link href="/contact">Get in Touch <MessageCircle className="ml-2 h-4 w-4" /></Link>
+                 <Button asChild className="h-16 w-full sm:flex-1 bg-primary hover:bg-blue-700 text-white font-bold uppercase text-[11px] tracking-widest rounded-[1.5rem] shadow-xl border-none active:scale-95 transition-all">
+                    <Link href="/contact" className="flex items-center justify-center gap-2">
+                       Get in touch <MessageCircle className="h-5 w-5" />
+                    </Link>
                  </Button>
                </div>
             </div>
           </div>
         </section>
 
-        {/* STATS STRIP */}
+        {/* STATS STRIP - USES REAL DB NODES */}
         <section className="py-12 md:py-24 bg-slate-50 border-y border-slate-100">
            <div className="container mx-auto px-4 max-w-6xl">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-                 <MinimalStat value={(settings?.trustBadgeCount || 10000).toLocaleString() + "+"} label="Aspirants" icon={Target} />
-                 <MinimalStat value={(settings?.totalMocks || 450).toLocaleString() + "+"} label="Mock series" icon={Zap} />
-                 <MinimalStat value={(settings?.totalQuestions || 12000).toLocaleString() + "+"} label="MCQ bank" icon={ShieldCheck} />
+                 <MinimalStat value={liveStats.aspirants} label="Aspirants" icon={Users} />
+                 <MinimalStat value={liveStats.mocks} label="Mock tests" icon={Zap} />
+                 <MinimalStat value={liveStats.questions} label="Question bank" icon={ShieldCheck} />
                  <MinimalStat value={founder.buildingSince} label="Building since" icon={Briefcase} />
               </div>
            </div>
