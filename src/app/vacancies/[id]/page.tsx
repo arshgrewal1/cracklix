@@ -56,7 +56,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
   const params = use(props.params);
   const db = useFirestore()
   const router = useRouter()
-  const { user } = useUser()
+  const { user, profile } = useUser()
   const { toast } = useToast()
   
   const [mounted, setMounted] = useState(false)
@@ -93,6 +93,27 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
         toast({ title: "Link Copied", description: "The URL is now on your clipboard." });
      }
   }
+
+  const isBookmarked = profile?.savedVacancies?.includes(id);
+
+  const handleToggleBookmark = async () => {
+    if (!user || !db) {
+       toast({ title: "Identification required", description: "Please login to save this recruitment." });
+       return;
+    }
+    try {
+      const userRef = doc(db, "users", user.uid);
+      if (isBookmarked) {
+        await updateDoc(userRef, { savedVacancies: arrayRemove(id), updatedAt: serverTimestamp() });
+        toast({ title: "Removed from vault" });
+      } else {
+        await updateDoc(userRef, { savedVacancies: arrayUnion(id), updatedAt: serverTimestamp() });
+        toast({ title: "Record synchronized" });
+      }
+    } catch (e) {
+      toast({ variant: "destructive", title: "Sync failed" });
+    }
+  };
 
   if (loading || !mounted) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>
 
@@ -140,7 +161,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
                      </h1>
                      <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-slate-400 font-bold text-[10px] md:text-lg tracking-tight">
                         <span className="flex items-center gap-2 truncate max-w-[200px] md:max-w-md"><Landmark className="h-3.5 w-3.5 text-primary shrink-0" /> {vacancy.department}</span>
-                        <span className="flex items-center gap-2 shrink-0"><MapPin className="h-3.5 w-3.5 text-rose-500" /> {vacancy.district}</span>
+                        <span className="flex items-center gap-2 shrink-0"><MapPin className="h-3.5 w-3.5 text-rose-500" /> {vacancy.district || "Punjab"}</span>
                      </div>
                   </div>
 
@@ -150,7 +171,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
                      </Button>
                      <div className="flex gap-3">
                         <button onClick={handleShare} className="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all active:scale-90 cursor-pointer"><Share2 className="h-5 w-5" /></button>
-                        <button className="h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all active:scale-90 cursor-pointer"><Bookmark className="h-5 w-5" /></button>
+                        <button onClick={handleToggleBookmark} className={cn("h-11 w-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition-all active:scale-90 cursor-pointer", isBookmarked ? "text-primary" : "text-white hover:bg-white/10")}><Bookmark className={cn("h-5 w-5", isBookmarked && "fill-current")} /></button>
                      </div>
                   </div>
                </div>
@@ -160,7 +181,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
          <section className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 px-1">
             <StatPill icon={Zap} label="Posts" val={vacancy.totalPosts} color="text-primary" bg="bg-blue-50" />
             <StatPill icon={GraduationCap} label="Qualif." val={vacancy.education?.split(',')[0]} color="text-emerald-600" bg="bg-emerald-50" />
-            <StatPill icon={Users} label="Age" val={vacancy.ageLimit} color="text-orange-500" bg="bg-orange-50" />
+            <StatPill icon={Users} label="Age" val={vacancy.ageLimit || "18-37"} color="text-orange-500" bg="bg-orange-50" />
             <StatPill icon={Clock} label="Last date" val={formatDate(vacancy.lastDate)} color="text-rose-500" bg="bg-rose-50" />
          </section>
 
@@ -216,7 +237,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
                   <div className="relative z-10 space-y-6 text-left">
                      <div className="space-y-1">
                         <h3 className="text-xl md:text-2xl font-black tracking-tight leading-none uppercase text-white">Registry</h3>
-                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Timeline</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Timeline</p>
                      </div>
                      <div className="space-y-4">
                         <SidebarDate label="Opening" val={formatDate(vacancy.startDate)} icon={<Zap className="text-emerald-500" />} />
@@ -244,7 +265,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
             </aside>
          </div>
 
-         <div className="fixed bottom-20 md:bottom-4 left-1/2 -translate-x-1/2 z-[1000] w-[95vw] max-w-3xl animate-in slide-in-from-bottom-12 duration-500">
+         <div className="fixed bottom-24 md:bottom-4 left-1/2 -translate-x-1/2 z-[1000] w-[95vw] max-w-3xl animate-in slide-in-from-bottom-12 duration-500">
             <div className="bg-[#0F172A]/95 backdrop-blur-xl p-3 md:p-4 rounded-2xl shadow-5xl border border-white/10 flex items-center justify-between gap-3">
                <div className="flex items-center gap-3 hidden sm:flex px-4 border-r border-white/10">
                   <AuthorityLogo boardId={vacancy.board} size="sm" className="h-10 w-10 bg-white/10 p-2 shadow-inner" />

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo } from "react";
@@ -158,7 +157,7 @@ export default function ShareButton({
              {isSharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4 transition-transform group-hover:rotate-12" />}
           </div>
           <div className="flex flex-col items-start text-left min-w-0 flex-1 overflow-hidden">
-             <span className="text-xs font-bold leading-none truncate w-full uppercase tracking-tight">Share portal</span>
+             <span className="text-xs font-bold leading-none truncate w-full tracking-tight">Share portal</span>
           </div>
           <ChevronRight className="h-3.5 w-3.5 opacity-30 group-hover:translate-x-1 transition-transform ml-auto shrink-0" />
         </Button>
@@ -170,27 +169,27 @@ export default function ShareButton({
           <DialogHeader className="p-6 pb-2 relative">
              <button 
                 onClick={() => setIsShareDialogOpen(false)}
-                className="absolute right-4 top-4 p-2 hover:bg-slate-100 rounded-xl transition-all active:scale-90 z-20 border-none bg-transparent"
+                className="absolute right-4 top-4 p-2 hover:bg-slate-100 rounded-xl transition-all active:scale-90 z-20 border-none bg-transparent cursor-pointer"
              >
                 <X className="h-5 w-5 text-slate-400" />
              </button>
              <div className="h-12 w-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto text-blue-600 shadow-inner mb-4 border border-blue-100">
                 <Share2 className="h-6 w-6" />
              </div>
-             <DialogTitle className="text-lg font-black text-[#0F172A] tracking-tighter uppercase text-center">Share hub</DialogTitle>
-             <DialogDescription className="text-slate-400 font-bold text-[8px] mt-1 text-center uppercase tracking-widest">Select an option to share</DialogDescription>
+             <DialogTitle className="text-lg font-black text-[#0F172A] tracking-tighter text-center">Share hub</DialogTitle>
+             <DialogDescription className="text-slate-400 font-bold text-[8px] mt-1 text-center tracking-widest uppercase">Select an option to share</DialogDescription>
           </DialogHeader>
 
           <div className="px-6 pb-8 space-y-2">
              <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(finalShareMessage)}`, '_blank')} className="w-full h-12 bg-[#25D366] hover:bg-[#20bd5c] text-white rounded-xl flex items-center px-5 gap-3 shadow-lg transition-all active:scale-95 border-none group cursor-pointer">
-                <MessageSquare className="h-5 w-5" /> <span className="font-bold text-xs flex-1 text-left uppercase tracking-tight">WhatsApp</span>
+                <MessageSquare className="h-5 w-5" /> <span className="font-bold text-xs flex-1 text-left tracking-tight">WhatsApp</span>
                 <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
              </button>
              <button onClick={() => copyToClipboard(finalShareMessage, "Copied to clipboard")} className="w-full h-12 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-xl flex items-center px-5 gap-3 border border-slate-100 transition-all active:scale-95 group cursor-pointer">
-                <Send className="h-5 w-5 text-slate-400" /> <span className="font-bold text-xs flex-1 text-left uppercase tracking-tight">Copy message</span>
+                <Send className="h-5 w-5 text-slate-400" /> <span className="font-bold text-xs flex-1 text-left tracking-tight">Copy message</span>
              </button>
              <button onClick={() => copyToClipboard(activeSettings.installUrl, "Link copied")} className="w-full h-12 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-xl flex items-center px-5 gap-3 border border-slate-100 transition-all active:scale-95 group cursor-pointer">
-                <Copy className="h-5 w-5 text-slate-400" /> <span className="font-bold text-xs flex-1 text-left uppercase tracking-tight">Copy app link</span>
+                <Copy className="h-5 w-5 text-slate-400" /> <span className="font-bold text-xs flex-1 text-left tracking-tight">Copy app link</span>
              </button>
           </div>
           

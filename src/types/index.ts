@@ -1,4 +1,3 @@
-
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_PARTNER' | 'EDITOR' | 'REVIEWER' | 'MODERATOR' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET' | 'DAILY_CHALLENGE' | 'MINI_TEST' | 'REVISION_TEST';
@@ -147,13 +146,6 @@ export interface UserProfile {
   referralCode?: string;
   referredBy?: string;
   coins?: number;
-  lastStudyDate?: string;
-  totalLifetimeStudyMinutes?: number;
-  highestAccuracy?: number;
-  recentMockTitle?: string;
-  registrationDate?: string;
-  attemptRate?: number;
-  studyStatsData?: any;
 }
 
 export interface StudySession {
@@ -198,8 +190,6 @@ export interface AttemptResult {
   rankAtSubmission?: number | string;
   isGuestNode?: boolean;
   accuracy: number;
-  submittedAt?: any;
-  mockType?: MockType;
 }
 
 export interface Category {
@@ -233,8 +223,6 @@ export interface Exam {
   totalMocks?: string | number;
   studentCount?: string;
   activeQuestions?: number;
-  createdAt?: any;
-  updatedAt?: any;
 }
 
 export interface Subject {
@@ -244,15 +232,6 @@ export interface Subject {
   imageUrl?: string;
   isActive: boolean;
   displayOrder: number;
-  boardId?: string;
-  aliases?: string[];
-  testCount?: number;
-  mockCount?: number;
-  pyqCount?: number;
-  questionCount?: number;
-  attemptCount?: number;
-  progress?: number;
-  hasPremium?: boolean;
 }
 
 export interface Topic {
@@ -290,16 +269,6 @@ export interface TestSeries {
   displayOrder: number;
   isActive: boolean;
   accessLevel: AccessLevel;
-  counts: {
-    totalTests: number;
-    free: number;
-    premium: number;
-    questions: number;
-    mock: number;
-    subject: number;
-    sectional: number;
-    pyq: number;
-  };
 }
 
 export interface MockTest {
@@ -320,20 +289,12 @@ export interface MockTest {
   positiveMarks: number;
   questionIds: string[];
   published: boolean;
-  status?: string;
   languageMode: LanguageDisplayMode;
   createdAt: any;
   updatedAt: any;
-  sections?: ExamSection[];
   isTodayQuiz?: boolean;
   rewardXP?: number;
   attemptLimit?: number;
-  accessType?: string;
-}
-
-export interface ExamSection {
-  name: string;
-  count: number;
 }
 
 export interface Question {

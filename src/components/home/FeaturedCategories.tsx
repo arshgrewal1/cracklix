@@ -44,8 +44,8 @@ export default function FeaturedCategories() {
                <Layers className="h-4 w-4 md:h-5 md:w-5" />
              </div>
              <div className="text-left">
-                <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tight uppercase">Quick categories</h2>
-                <p className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase">Target your vertical</p>
+                <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tight">Quick categories</h2>
+                <p className="text-[10px] md:text-xs font-medium text-muted-foreground">Target your vertical</p>
              </div>
           </div>
           <Link href="/exams" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group">
@@ -74,7 +74,7 @@ export default function FeaturedCategories() {
                      </div>
 
                      <div className="flex-1 space-y-3 text-left">
-                        <h3 className="text-base md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2 uppercase">
+                        <h3 className="text-base md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">
                            {cat.title}
                         </h3>
                         
@@ -95,7 +95,7 @@ export default function FeaturedCategories() {
 
 function MiniBadge({ icon: Icon, label, color }: any) {
    return (
-      <div className={cn("px-2 py-0.5 rounded-lg flex items-center gap-1 font-semibold text-[8px] tracking-tight uppercase", color)}>
+      <div className={cn("px-2 py-0.5 rounded-lg flex items-center gap-1 font-semibold text-[8px] tracking-tight", color)}>
          <Icon className="h-2.5 w-2.5" />
          {label}
       </div>

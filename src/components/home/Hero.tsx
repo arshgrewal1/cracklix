@@ -61,7 +61,7 @@ export default function Hero() {
           </motion.div>
 
           <div className="space-y-2 w-full max-w-[340px] md:max-w-4xl px-1">
-            <h1 className="text-[28px] sm:text-6xl lg:text-[86px] font-black tracking-tighter leading-[1.05] text-foreground antialiased uppercase">
+            <h1 className="text-[28px] sm:text-6xl lg:text-[86px] font-black tracking-tighter leading-[1.05] text-foreground antialiased">
               Crack Punjab exams <br className="hidden sm:block" />
               <span className="text-primary italic">with confidence.</span>
             </h1>
