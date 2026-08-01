@@ -46,9 +46,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v7.4.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v7.5.
  * FIXED: Added missing Users icon import.
- * FIXED: UI Back button hidden in standalone PWA mode.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -354,4 +353,3 @@ function AssetLink({ label, href, icon: Icon, color }: any) {
       </a>
    )
 }
-

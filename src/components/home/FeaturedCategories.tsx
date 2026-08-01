@@ -14,8 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Density Categories Hub v50.0.
- * COMPACT: Limited to 2 items on Home Page. Reduced radii and padding for professional PWA look.
+ * @fileOverview High-Density Categories Hub v51.0.
+ * FIXED: Added missing Badge import.
  */
 
 const TARGET_IDS = [
@@ -34,7 +34,6 @@ export default function FeaturedCategories() {
 
   const categories = useMemo(() => {
     if (!rawCategories) return [];
-    // Show only the top 2 authorized categories on home for maximum compaction
     return rawCategories.filter(c => TARGET_IDS.includes(c.id)).slice(0, 2);
   }, [rawCategories]);
 

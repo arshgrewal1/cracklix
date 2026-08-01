@@ -55,9 +55,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v35.0.
- * FIXED: Added missing CardTitle import.
- * FIXED: Bypassed Index error via client-side sorting.
+ * @fileOverview Institutional Profile Hub v36.0.
+ * FIXED: Resolved ReferenceError for CardTitle.
  */
 
 export default function ProfilePage() {
@@ -95,7 +94,6 @@ export default function ProfilePage() {
 
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
-    // Remove orderBy to bypass index requirement
     return query(collection(db, "results"), where("userId", "==", user.uid), limit(50))
   }, [db, user])
 
@@ -103,7 +101,6 @@ export default function ProfilePage() {
 
   const results = useMemo(() => {
     if (!rawResults) return []
-    // Client-side sorting for latest attempts
     return [...rawResults].sort((a, b) => {
       const timeA = new Date(a.timestamp || 0).getTime()
       const timeB = new Date(b.timestamp || 0).getTime()
@@ -207,7 +204,7 @@ export default function ProfilePage() {
                     <StatsNode icon={<Zap />} label="High score" value={aggregateStats.highestScore.toFixed(1)} color="text-primary" bgColor="bg-primary/10" />
                  </div>
 
-                 <Card className="border-none shadow-xl rounded-2xl bg-card overflow-hidden border border-border">
+                 <Card className="border-none shadow-3xl rounded-2xl bg-card overflow-hidden border border-border">
                     <CardHeader className="p-5 md:p-6 border-b border-border bg-muted/30">
                        <CardTitle className="text-base md:text-xl font-black text-foreground flex items-center gap-3 tracking-tighter uppercase">
                           <History className="h-5 w-5 text-primary" /> Recent attempts

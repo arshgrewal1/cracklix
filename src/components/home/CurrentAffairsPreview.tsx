@@ -6,14 +6,15 @@ import { collection, query, where, limit } from 'firebase/firestore';
 import { Calendar, ChevronRight, Newspaper, ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Density Current Affairs Preview v26.0.
- * COMPACT: Limited to 2 items on Home Page. Reduced padding and radii.
+ * @fileOverview High-Density Current Affairs Preview v27.0.
+ * FIXED: Added missing Badge import.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -61,7 +62,7 @@ export default function CurrentAffairsPreview() {
                 className="h-full"
               >
                  <Link href="/current-affairs" className="block h-full">
-                    <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left">
+                    <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left">
                        <div className="flex justify-between items-start mb-6">
                           <AuthorityLogo boardId="current-affairs" size="sm" className="h-10 w-10 md:h-12 md:w-12 shadow-lg border-2 border-background bg-muted" />
                           <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-primary border-none text-[7px] font-black uppercase px-2 py-0.5 rounded shadow-sm">Verified Node</Badge>
@@ -80,7 +81,7 @@ export default function CurrentAffairsPreview() {
 
                        <div className="mt-6 pt-2">
                           <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none shadow-md">
-                             Attempt <ArrowRight className="h-3.5 w-3.5 ml-2" />
+                             Open Portal <ArrowRight className="h-3.5 w-3.5 ml-2" />
                           </Button>
                        </div>
                     </Card>
