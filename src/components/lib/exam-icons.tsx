@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v43.0.
- * FIXED: Removed all internal padding buffers (p-0) and normalized scaling.
+ * @fileOverview Institutional Branding Engine v44.0.
+ * FIXED: Standardized public paths and normalized scaling for small cards.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -64,8 +64,8 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     category?.logoUrl;
   
   const sizeClasses = {
-    sm: "h-11 w-11 md:h-12 md:w-12",
-    md: "h-14 w-14 md:h-18 md:w-18",
+    sm: "h-9 w-9 md:h-12 md:w-12",
+    md: "h-12 w-12 md:h-16 md:w-16",
     lg: "h-20 w-20 md:h-28 md:w-28",
     xl: "h-28 w-28 md:h-36 md:w-36"
   };
@@ -75,7 +75,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   if (logoUrl) {
     return (
       <div className={cn(
-        "relative shrink-0 overflow-hidden transition-all bg-white rounded-2xl border border-slate-100 shadow-xl",
+        "relative shrink-0 overflow-hidden transition-all bg-white rounded-xl border border-slate-100 shadow-sm",
         containerSize, 
         className
       )}>
@@ -84,7 +84,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           alt="Authority" 
           fill
           sizes="256px"
-          className="object-contain p-0"
+          className="object-contain p-1"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -106,11 +106,11 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "flex items-center justify-center transition-all bg-white rounded-2xl border border-slate-100 shadow-xl",
+      "flex items-center justify-center transition-all bg-white rounded-xl border border-slate-100 shadow-sm",
       containerSize, 
       className
     )}>
-      <div className="h-full w-full p-2">
+      <div className="h-full w-full p-1.5">
         {getFallbackIcon()}
       </div>
     </div>

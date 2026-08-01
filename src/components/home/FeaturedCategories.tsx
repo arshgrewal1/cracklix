@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Layers, ChevronRight, Zap, ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
@@ -13,8 +13,8 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 /**
- * @fileOverview Compact Institutional Categories Hub v48.0.
- * UPDATED: Reduced card sizes, added primary buttons, and removed uppercase labels.
+ * @fileOverview High-Density Categories Hub v49.0.
+ * COMPACT: Limited to 2 items on Home Page. Reduced radii and padding for professional PWA look.
  */
 
 const TARGET_IDS = [
@@ -28,17 +28,18 @@ export default function FeaturedCategories() {
   const db = useFirestore();
   
   const { data: rawCategories, loading } = useCollection<any>(
-    useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db])
+    useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc"), limit(10)) : null), [db])
   );
 
   const categories = useMemo(() => {
     if (!rawCategories) return [];
-    return rawCategories.filter(c => TARGET_IDS.includes(c.id)).slice(0, 5);
+    // Show only the top 2 authorized categories on home for maximum compaction
+    return rawCategories.filter(c => TARGET_IDS.includes(c.id)).slice(0, 2);
   }, [rawCategories]);
 
   return (
-    <section className="py-10 md:py-16 bg-background border-t border-border">
-      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <section className="py-8 md:py-12 bg-background border-t border-border">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-3">
@@ -47,7 +48,7 @@ export default function FeaturedCategories() {
              </div>
              <div className="text-left">
                 <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight">Quick categories</h2>
-                <p className="text-[10px] md:text-xs font-medium text-muted-foreground">Target your vertical</p>
+                <p className="text-[10px] md:text-xs font-medium text-muted-foreground">Browse exam hubs</p>
              </div>
           </div>
           <Link href="/exams" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group">
@@ -55,54 +56,47 @@ export default function FeaturedCategories() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
           {loading ? (
-             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-2xl bg-muted" />)
-          ) : categories.map((cat, idx) => (
+             Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-2xl bg-muted" />)
+          ) : categories.length > 0 ? categories.map((cat, idx) => (
              <motion.div 
                key={cat.id}
                initial={{ opacity: 0, y: 10 }}
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
                transition={{ delay: idx * 0.05 }}
-               className="flex flex-col h-full"
+               className="h-full"
              >
-                <Link href={`/exams/category/${cat.id}`} className="h-full block group">
-                  <Card className="border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl bg-card p-3 md:p-5 flex flex-col group h-full relative overflow-hidden text-left min-h-[160px] md:min-h-[220px]">
-                     <div className="flex justify-between items-start mb-4 md:mb-6">
-                        <AuthorityLogo category={cat} size="sm" className="h-9 w-9 md:h-12 md:w-12 rounded-lg" />
+                <Link href={`/exams/category/${cat.id}`} className="block h-full">
+                  <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left min-h-[140px] md:min-h-[180px]">
+                     <div className="flex justify-between items-start mb-4">
+                        <AuthorityLogo category={cat} size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-lg shadow-sm border-2 border-background" />
+                        <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 border-border text-muted-foreground text-[7px] font-black uppercase tracking-widest px-2">Official Hub</Badge>
                      </div>
 
-                     <div className="flex-1 space-y-2 text-left min-w-0">
-                        <h3 className="text-xs md:text-base font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                     <div className="flex-1 space-y-1.5 min-w-0">
+                        <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-1 truncate">
                            {cat.title}
                         </h3>
-                        
-                        <div className="flex flex-wrap gap-1">
-                           <MiniBadge icon={Zap} label="Tests" color="text-blue-600 bg-blue-50 dark:bg-blue-900/20" />
-                        </div>
+                        <p className="text-[10px] md:text-xs text-muted-foreground font-medium line-clamp-1 truncate opacity-60">Verified preparation vertical</p>
                      </div>
 
-                     <div className="pt-4 mt-2">
-                        <Button className="w-full h-8 md:h-10 bg-[#0F172A] hover:bg-primary text-white text-[9px] md:text-[10px] font-bold rounded-lg gap-2 active:scale-95 border-none transition-all">
-                           Open <ArrowRight className="h-3 w-3" />
+                     <div className="mt-6 pt-2">
+                        <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none shadow-md">
+                           Enter hub <ArrowRight className="h-3 w-3" />
                         </Button>
                      </div>
                   </Card>
                 </Link>
              </motion.div>
-          ))}
+          )) : (
+            <div className="col-span-full py-8 text-center opacity-30 italic font-black uppercase text-[9px] border-2 border-dashed border-border rounded-2xl">
+               Registry standby
+            </div>
+          )}
         </div>
       </div>
     </section>
   );
-}
-
-function MiniBadge({ icon: Icon, label, color }: any) {
-   return (
-      <div className={cn("px-1.5 py-0.5 rounded flex items-center gap-1 font-semibold text-[7px] md:text-[8px] tracking-tight", color)}>
-         <Icon className="h-2 w-2" />
-         {label}
-      </div>
-   )
 }
