@@ -22,12 +22,12 @@ import ExamHeader from "@/components/exam/ExamHeader";
 import TacticalFooter from "@/components/exam/TacticalFooter";
 import AntiCheat from "@/components/exam/AntiCheat";
 import QuestionRenderer from "@/components/questions/QuestionRenderer";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import QuestionPalette from "@/components/mocks/QuestionPalette";
 import SubjectTabs from "@/components/exam/SubjectTabs";
 import { Button } from "@/components/ui/button";
 import { Loader2, Play, ShieldCheck, Zap, AlertCircle, Save, RefreshCw, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
 import { useActiveSession } from "@/hooks/useStudyAnalytics";
 import {
@@ -41,7 +41,7 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Official Attempt Hub v108.0.
+ * @fileOverview Official Attempt Hub v109.0.
  * FIXED: Atomic scoring logic - ensured skipped questions are NOT counted as wrong.
  * FIXED: attemptId persistence - uses local variable for redirect to prevent 'undefined' in URL.
  */
@@ -199,6 +199,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       expert: { name: 'Expert', total: 0, correct: 0, wrong: 0, score: 0 }
     };
 
+    // HARDENED SCORING LOOP: Use question indices strictly
     questions.forEach((q: any, idx: number) => {
       const studentAnsIdx = studentAnswers[idx];
       const correctKey = (q.correctAnswer || "A").trim().toUpperCase();
@@ -233,6 +234,34 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const timeTaken = Math.max(1, elapsedSeconds);
     const attemptAccuracy = attemptedCount > 0 ? Number(((correctCount / attemptedCount) * 100).toFixed(1)) : 0;
     
+    const resultPayload = {
+       id: finalAttemptId,
+       attemptId: finalAttemptId, 
+       mockId, 
+       mockTitle: mockData.title, 
+       userId: user?.uid || "guest",
+       userName: profile?.name || 'Aspirant', 
+       userEmail: user?.email || "", 
+       score, 
+       maxMarks, 
+       percentage, 
+       correctCount, 
+       wrongCount, 
+       skippedCount, 
+       attemptedCount, 
+       totalQuestions,
+       attemptAccuracy, 
+       accuracy: attemptAccuracy,
+       timeTaken, 
+       timestamp: new Date().toISOString(), 
+       updatedAt: serverTimestamp(),
+       createdAt: serverTimestamp(), 
+       languageMode: language,
+       subjectAnalysis: Object.values(subjectMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
+       complexityAnalysis: Object.values(complexityMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) })),
+       answers: studentAnswers 
+    };
+
     if (user) {
       try {
         const resultRef = doc(db, "results", finalAttemptId);
@@ -240,34 +269,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
         const globalMeritRef = doc(db, "leaderboard", user.uid);
         const statsRef = doc(db, "settings", "stats");
-
-        const resultPayload = {
-           id: finalAttemptId,
-           attemptId: finalAttemptId, 
-           mockId, 
-           mockTitle: mockData.title, 
-           userId: user.uid,
-           userName: profile?.name || 'Aspirant', 
-           userEmail: user.email || "", 
-           score, 
-           maxMarks, 
-           percentage, 
-           correctCount, 
-           wrongCount, 
-           skippedCount, 
-           attemptedCount, 
-           totalQuestions,
-           attemptAccuracy, 
-           accuracy: attemptAccuracy,
-           timeTaken, 
-           timestamp: new Date().toISOString(), 
-           updatedAt: serverTimestamp(),
-           createdAt: serverTimestamp(), 
-           languageMode: language,
-           subjectAnalysis: Object.values(subjectMap).map((s: any) => ({ ...s, accuracy: Math.round((s.correct / (s.total || 1)) * 100) })),
-           complexityAnalysis: Object.values(complexityMap).map((d: any) => ({ ...d, accuracy: Math.round((d.correct / (d.total || 1)) * 100) })),
-           answers: studentAnswers 
-        };
 
         await Promise.all([
            setDoc(resultRef, resultPayload),
@@ -285,7 +286,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               uid: user.uid, 
               displayName: profile?.name || 'Aspirant', 
               totalTests: increment(1), 
-              highestScore: score, // Update high score
+              highestScore: score,
               updatedAt: serverTimestamp(), 
               recentMockTitle: mockData.title 
            }, { merge: true }),
@@ -302,19 +303,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
          return;
       }
     } else {
-       const guestPayload = {
-          attemptId: finalAttemptId, 
-          mockId, 
-          mockTitle: mockData.title, 
-          score, 
-          totalQuestions, 
-          accuracy: attemptAccuracy, 
-          timestamp: new Date().toISOString(), 
-          answers: studentAnswers, 
-          timeTaken, 
-          languageMode: language 
-       };
-       localStorage.setItem(`cracklix_guest_result_${finalAttemptId}`, JSON.stringify(guestPayload));
+       localStorage.setItem(`cracklix_guest_result_${finalAttemptId}`, JSON.stringify({ ...resultPayload, isGuestNode: true }));
     }
 
     router.replace(`/results/view?id=${mockId}&attemptId=${finalAttemptId}`);
@@ -341,7 +330,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   if (initError) return (
      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-6">
         <AlertCircle className="h-16 w-16 text-rose-500" />
-        <h2 className="text-2xl font-black">Initialization failed</h2>
+        <h2 className="text-2xl font-black text-[#0F172A]">Initialization failed</h2>
         <p className="text-slate-500">{initError}</p>
         <Button onClick={() => window.location.reload()} className="rounded-xl h-12 px-8">Retry sync</Button>
      </div>

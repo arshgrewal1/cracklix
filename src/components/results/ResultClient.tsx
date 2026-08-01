@@ -48,9 +48,8 @@ import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
 
 /**
- * @fileOverview Universal Result Hub Engine v113.0.
- * FIXED: 'Report not found' handled by searching both guest and cloud registries.
- * FIXED: AuthorityLogo integration ensures official branding in header.
+ * @fileOverview Universal Result Hub Engine v114.0.
+ * FIXED: Atomic report lookup - checks guest registry first, then cloud with high-fidelity onSnapshot.
  */
 
 export default function ResultClient() {
@@ -97,7 +96,7 @@ export default function ResultClient() {
       setIsSearching(true);
       const targetAttemptId = attemptIdFromUrl;
       
-      if (targetAttemptId) {
+      if (targetAttemptId && targetAttemptId !== 'undefined') {
         // A. Check Guest Registry First
         const guestKey = `cracklix_guest_result_${targetAttemptId}`;
         const local = localStorage.getItem(guestKey);
@@ -122,7 +121,7 @@ export default function ResultClient() {
           collection(db, "results"), 
           where("userId", "==", user.uid), 
           where("mockId", "==", mockIdFromUrl),
-          limit(5)
+          limit(10)
         );
         const snap = await getDocs(q);
         if (!snap.empty) {
@@ -132,6 +131,15 @@ export default function ResultClient() {
         }
         setIsSearching(false);
       } else {
+        // Final fallback: Check all local results for a matching mockId
+        const keys = Object.keys(localStorage).filter(k => k.startsWith('cracklix_guest_result_'));
+        for (const k of keys) {
+           const data = JSON.parse(localStorage.getItem(k) || '{}');
+           if (data.mockId === mockIdFromUrl) {
+              setSessionData({ ...data, isGuestNode: true });
+              break;
+           }
+        }
         setIsSearching(false);
       }
     };
@@ -150,10 +158,12 @@ export default function ResultClient() {
      
      if (!sessionData.isGuestNode) {
         const lbRef = collection(db, "leaderboards", mId, "entries");
-        const q = query(lbRef, orderBy("highestScore", "desc"));
+        const q = query(lbRef, limit(200));
         
         unsubscribeMetrics = onSnapshot(q, (lbSnap) => {
-           const entries = lbSnap.docs.map(d => ({ ...d.data(), userId: d.id }));
+           const entries = lbSnap.docs.map(d => ({ ...d.data(), userId: d.id }))
+              .sort((a: any, b: any) => (b.highestScore || 0) - (a.highestScore || 0));
+           
            const myRank = entries.findIndex(e => e.userId === sessionData.userId) + 1;
            
            setLiveRank(myRank || "---");
@@ -271,7 +281,7 @@ export default function ResultClient() {
                           {sessionData.isGuestNode && <Badge className="bg-amber-50 text-amber-600 border-none px-2 py-0.5 rounded-lg font-bold text-[8px] md:text-[9px]">Guest</Badge>}
                        </div>
                        <h1 className="text-[14px] md:text-2xl font-[800] text-[#0F172A] tracking-tight leading-tight break-words">{sessionData.mockTitle}</h1>
-                       <div className="flex items-center gap-3 text-[9px] md:text-xs font-semibold text-slate-400 tracking-tight">
+                       <div className="flex items-center gap-3 text-[9px] md:xs font-semibold text-slate-400 tracking-tight">
                           <span className="flex items-center gap-1.5"><Calendar className="h-3 w-3" /> {new Date(sessionData.timestamp).toLocaleDateString('en-GB')}</span>
                           <span className="flex items-center gap-1.5"><TimerIcon className="h-3 w-3" /> {formatTimeTaken(sessionData.timeTaken || 0)}</span>
                        </div>
@@ -338,12 +348,15 @@ export default function ResultClient() {
            <div className="py-40 text-center space-y-8">
               <AlertCircle className="h-16 w-16 mx-auto text-slate-200" />
               <div className="space-y-2 px-4">
-                 <h2 className="text-xl md:text-2xl font-black text-[#0F172A]">Record not found</h2>
+                 <h2 className="text-xl md:text-2xl font-black text-[#0F172A]">Report not found</h2>
                  <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">We couldn't synchronize your attempt results. Try refreshing the hub or return to the bank.</p>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 px-6">
                  <Button onClick={() => window.location.reload()} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl gap-3 shadow-xl border-none active:scale-95 transition-all">
                     <RefreshCw className="h-4 w-4" /> Refresh hub
+                 </Button>
+                 <Button asChild variant="outline" className="h-14 px-10 rounded-2xl font-bold border-2">
+                    <Link href="/mocks">Back to mocks</Link>
                  </Button>
               </div>
            </div>

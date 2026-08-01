@@ -1,12 +1,11 @@
 import React from "react"
-import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Activity, Cpu, Building2, Globe, Settings, FileText, FileStack } from "lucide-react"
+import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Activity, Cpu, Building2, Globe, Settings, FileText, FileStack, Newspaper } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v45.0.
- * FIXED: Standardized normalization for diverse Board IDs (e.g. "Punjab Police" -> "punjab-police").
- * FIXED: Ensuring fallback Lucide icons always render if PNG nodes are missing.
+ * @fileOverview Institutional Branding Engine v46.0.
+ * FIXED: Standardized normalization for diverse Board IDs and enhanced fallbacks.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -52,7 +51,10 @@ interface AuthorityLogoProps {
 }
 
 export const AuthorityLogo = ({ board, category, boardId, categoryId, className, size = 'md' }: AuthorityLogoProps) => {
-  const normalize = (id: string) => (id || "").toLowerCase().trim().replace(/\s+/g, '-').replace(/\./g, '');
+  const normalize = (id: string) => {
+    if (!id) return "";
+    return id.toLowerCase().trim().replace(/\s+/g, '-').replace(/\./g, '');
+  };
   
   const bId = normalize(boardId || board?.id || board?.abbreviation || "");
   const cId = normalize(categoryId || category?.id || board?.categoryId || "");
@@ -75,10 +77,11 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   const containerSize = sizeClasses[size];
 
   const getFallbackIcon = () => {
-    if (bId === 'mock-test' || bId.includes('mock')) return <Zap className="h-full w-full text-primary" />;
+    if (bId === 'mock-test' || bId.includes('mock') || bId.includes('test')) return <Zap className="h-full w-full text-primary" />;
     if (bId === 'study-material' || bId.includes('note')) return <BookOpen className="h-full w-full text-indigo-600" />;
     if (bId === 'pyq' || bId.includes('paper')) return <FileStack className="h-full w-full text-emerald-600" />;
     if (bId.includes('current')) return <Newspaper className="h-full w-full text-primary" />;
+    if (bId.includes('computer')) return <Cpu className="h-full w-full text-blue-500" />;
     if (cId.includes('govt')) return <Landmark className="h-full w-full text-amber-600" />;
     if (cId.includes('teaching')) return <BookOpen className="h-full w-full text-blue-600" />;
     if (cId.includes('technical')) return <Settings className="h-full w-full text-slate-600" />;
@@ -103,7 +106,6 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           className="object-contain p-1"
           referrerPolicy="no-referrer"
           onError={(e) => {
-             // Handle broken image paths by removing the src and letting the fallback show
              (e.target as any).style.display = 'none';
           }}
         />
@@ -115,13 +117,3 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     </div>
   );
 };
-
-// Add missing Newspaper icon import if used in fallback
-function Newspaper({ className }: { className?: string }) {
-   return (
-     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-       <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
-       <path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>
-     </svg>
-   )
-}
