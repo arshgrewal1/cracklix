@@ -41,9 +41,9 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Official Attempt Hub v109.0.
- * FIXED: Atomic scoring logic - ensured skipped questions are NOT counted as wrong.
- * FIXED: attemptId persistence - uses local variable for redirect to prevent 'undefined' in URL.
+ * @fileOverview Official Attempt Hub v110.0.
+ * FIXED: Atomic attemptId generation to prevent 'undefined' values in result URLs.
+ * FIXED: Ensures Firestore write completion before redirecting to Analysis hub.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -199,7 +199,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       expert: { name: 'Expert', total: 0, correct: 0, wrong: 0, score: 0 }
     };
 
-    // HARDENED SCORING LOOP: Use question indices strictly
     questions.forEach((q: any, idx: number) => {
       const studentAnsIdx = studentAnswers[idx];
       const correctKey = (q.correctAnswer || "A").trim().toUpperCase();
@@ -298,7 +297,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
         stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
       } catch (e: any) {
-         toast({ variant: "destructive", title: "Submission failure", description: "Database quota exceeded or connection lost." });
+         toast({ variant: "destructive", title: "Submission failure", description: "Connection lost during registry sync." });
          setIsSubmittingFinal(false);
          return;
       }
