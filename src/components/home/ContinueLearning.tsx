@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useUser, useCollection, useFirestore } from '@/firebase';
-import { collection, query, where, limit, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { collection, query, where, limit, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,10 +12,10 @@ import {
   ChevronRight,
   BookOpen,
   Clock,
-  ArrowRight,
   Trophy,
   RefreshCw,
-  Play
+  Play,
+  BarChart3
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -25,9 +25,9 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview High-Fidelity Real-Time Progress Hub v10.0.
- * FIXED: Removed orderBy from Firestore query to bypass Index Requirement Error.
- * LOGIC: Performs high-speed client-side sorting to identify the absolute latest attempt.
+ * @fileOverview High-Fidelity Real-Time Progress Hub v11.0.
+ * FIXED: Added missing BarChart3 import.
+ * FIXED: Removed orderBy to bypass Index Requirement Error.
  */
 export default function ContinueLearning() {
   const { user } = useUser();
@@ -45,7 +45,7 @@ export default function ContinueLearning() {
     return query(
       collection(db, "attempts"), 
       where("userId", "==", user.uid),
-      limit(50) // Fetch recent pool for client-side sorting
+      limit(50)
     );
   }, [db, user, mounted]);
 
@@ -76,7 +76,6 @@ export default function ContinueLearning() {
        setIsSyncing(true);
        try {
           const mId = activeAttempt.mockId;
-          
           const mRef = doc(db, "mocks", mId);
           const dRef = doc(db, "daily_quizzes", mId);
           

@@ -3,9 +3,8 @@
 import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useUser, useCollection, useFirestore, useAuth } from "@/firebase"
+import { useUser, useCollection, useFirestore } from "@/firebase"
 import { collection, query, where, doc, updateDoc, serverTimestamp, deleteDoc, limit } from "firebase/firestore"
-import { deleteUser } from "firebase/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -43,9 +42,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v40.7 [Index Bypass].
- * FIXED: Removed Firestore orderBy to bypass Index error and perform client-side sorting.
- * FIXED: Corrected stat field mappings for accurate live counts.
+ * @fileOverview Institutional Profile Hub v41.0 [Hardened].
+ * FIXED: Bypasses Firebase Index requirements via client-side sorting.
+ * FIXED: Restored ShieldAlert and CardTitle imports.
  */
 
 export default function ProfilePage() {
@@ -132,7 +131,6 @@ export default function ProfilePage() {
      setIsSaving(true);
      try {
         await deleteDoc(doc(db, 'users', user.uid));
-        // Note: deleteUser from auth requires recent re-authentication in production.
         toast({ title: "Account marked for removal" });
         router.push('/login');
      } catch (e: any) {

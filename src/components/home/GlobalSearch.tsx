@@ -155,7 +155,7 @@ export default function GlobalSearch() {
                  onClick={startListening}
                  className={cn(
                    "h-9 w-9 md:h-11 md:w-11 rounded-xl flex items-center justify-center transition-all shrink-0",
-                   isListening ? "bg-rose-500 text-white animate-pulse" : "text-muted-foreground hover:text-primary"
+                   isListening ? "bg-rose-50 text-white animate-pulse" : "text-muted-foreground hover:text-primary"
                  )}
                >
                   <Mic className="h-4 w-4 md:h-5 md:w-5" />

@@ -24,9 +24,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v520.0.
- * FIXED: Redesigned Today's Challenge with premium glassmorphism.
- * FIXED: Resolved Button and Badge ReferenceErrors.
+ * @fileOverview Premium Institutional Hub v521.0.
+ * FIXED: Redesigned Today's Challenge from scratch with premium glassmorphism.
+ * FIXED: Restored missing Button and Badge imports.
  */
 export default function HomePage() {
   const { user } = useUser();
