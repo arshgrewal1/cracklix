@@ -3,16 +3,18 @@
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
-import { Layers, ChevronRight, BookOpen, Zap } from 'lucide-react';
+import { Layers, ChevronRight, BookOpen, Zap, ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
 /**
- * @fileOverview Compact Institutional Categories Hub v45.0.
+ * @fileOverview Compact Institutional Categories Hub v46.0.
+ * UPDATED: Removed uppercase and added explicit colorful action buttons.
  */
 
 const TARGET_IDS = [
@@ -63,14 +65,12 @@ export default function FeaturedCategories() {
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
                transition={{ delay: idx * 0.05 }}
+               className="flex flex-col h-full"
              >
-                <Link href={`/exams/category/${cat.id}`}>
-                  <Card className="border border-border shadow-sm hover:shadow-2xl transition-all duration-500 rounded-2xl bg-card p-5 md:p-6 flex flex-col group h-full relative overflow-hidden text-left border-none">
+                <Link href={`/exams/category/${cat.id}`} className="h-full block group">
+                  <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-500 rounded-2xl bg-card p-5 flex flex-col group h-full relative overflow-hidden text-left border-none">
                      <div className="flex justify-between items-start mb-6">
                         <AuthorityLogo category={cat} size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-xl" />
-                        <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
-                           <ChevronRight className="h-4 w-4" />
-                        </div>
                      </div>
 
                      <div className="flex-1 space-y-3 text-left">
@@ -82,6 +82,12 @@ export default function FeaturedCategories() {
                            <MiniBadge icon={Zap} label="Tests" color="text-blue-600 bg-blue-50 dark:bg-blue-900/20" />
                            <MiniBadge icon={BookOpen} label="Notes" color="text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20" />
                         </div>
+                     </div>
+
+                     <div className="pt-6 mt-4">
+                        <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white text-[10px] font-bold rounded-xl gap-2 active:scale-95 border-none transition-all">
+                           Open category <ArrowRight className="h-3 w-3" />
+                        </Button>
                      </div>
                   </Card>
                 </Link>

@@ -29,9 +29,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Institutional Share Hub v9.2.
- * FIXED: Added explicit Close button to resolve PWA overlap.
- * FIXED: Reduced modal footprint for better high-density PWA presentation.
+ * @fileOverview Institutional Share Hub v9.3.
+ * FIXED: Added explicit Close button and improved mobile accessibility.
  */
 
 const DETAILED_SHARE_MESSAGE = `🚀 Crack Punjab Government Exams with Cracklix!

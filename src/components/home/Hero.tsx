@@ -8,8 +8,8 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v65.0.
- * COMPACT: Scaled down text and elements for improved mobile vertical economy.
+ * @fileOverview Premium Mobile-First PWA Hero v66.0.
+ * UPDATED: Removed uppercase from primary heading and buttons.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -86,7 +86,7 @@ export default function Hero() {
                     <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/10">
                       <Play className="h-3 w-3 fill-white text-white" />
                     </div>
-                    <span className="font-bold text-sm md:text-base text-white tracking-tight uppercase">
+                    <span className="font-bold text-sm md:text-base text-white tracking-tight">
                       Start preparation
                     </span>
                   </div>
@@ -112,7 +112,7 @@ export default function Hero() {
                         <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                            {isInstalling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                         </div>
-                        <span className="tracking-tight uppercase">Install app</span>
+                        <span className="tracking-tight">Install app</span>
                       </div>
                       <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -134,7 +134,7 @@ export default function Hero() {
                            <div className="w-8 h-8 rounded-xl bg-muted flex items-center justify-center shrink-0 border border-border group-hover:bg-primary/10 transition-colors">
                               <Landmark className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                            </div>
-                           <span className="tracking-tight uppercase">Browse selection</span>
+                           <span className="tracking-tight">Browse selection</span>
                         </div>
                         <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all group-hover:translate-x-1" />
                       </Link>

@@ -146,6 +146,8 @@ export interface UserProfile {
   referralCode?: string;
   referredBy?: string;
   coins?: number;
+  studyStatsArray?: any[];
+  lastStudyDate?: string;
 }
 
 export interface StudySession {
@@ -190,6 +192,7 @@ export interface AttemptResult {
   rankAtSubmission?: number | string;
   isGuestNode?: boolean;
   accuracy: number;
+  mockType?: string;
 }
 
 export interface Category {
@@ -232,6 +235,7 @@ export interface Subject {
   imageUrl?: string;
   isActive: boolean;
   displayOrder: number;
+  boardId?: string;
 }
 
 export interface Topic {

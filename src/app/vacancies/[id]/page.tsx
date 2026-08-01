@@ -6,7 +6,7 @@ import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useFirestore, useUser, useCollection } from "@/firebase"
-import { doc, updateDoc, increment, collection, query, where, limit } from "firebase/firestore"
+import { doc, updateDoc, increment, collection, query, where, limit, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { 
   Calendar, 
   Clock, 
@@ -46,10 +46,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v7.0.
- * FIXED: UI Back button hidden in standalone PWA mode.
- * FIXED: Action bar overlap with MobileNav resolved by conditional bottom spacing.
- * OPTIMIZED: Reduced text sizes and applied strict truncation to prevent overflow.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v7.1.
+ * FIXED: Added missing Users import.
+ * FIXED: Repositioned action bar to bottom-24 to clear mobile navigation.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -265,7 +264,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
             </aside>
          </div>
 
-         <div className="fixed bottom-24 md:bottom-4 left-1/2 -translate-x-1/2 z-[1000] w-[95vw] max-w-3xl animate-in slide-in-from-bottom-12 duration-500">
+         <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[1000] w-[95vw] max-w-3xl animate-in slide-in-from-bottom-12 duration-500">
             <div className="bg-[#0F172A]/95 backdrop-blur-xl p-3 md:p-4 rounded-2xl shadow-5xl border border-white/10 flex items-center justify-between gap-3">
                <div className="flex items-center gap-3 hidden sm:flex px-4 border-r border-white/10">
                   <AuthorityLogo boardId={vacancy.board} size="sm" className="h-10 w-10 bg-white/10 p-2 shadow-inner" />

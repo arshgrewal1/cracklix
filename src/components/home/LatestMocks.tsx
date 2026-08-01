@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Clock, Zap, Lock, ChevronRight, Layers, Star } from "lucide-react"
+import { BookOpen, Clock, Zap, Lock, ChevronRight, Layers, Star, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -14,7 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Compact Latest Tests Hub v47.0.
+ * @fileOverview Compact Latest Tests Hub v48.0.
+ * UPDATED: Removed uppercase and added explicit colorful action buttons.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -94,19 +95,19 @@ export default function LatestMocks() {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-2 pt-3 border-t border-border">
-                       <StatPill icon={BookOpen} label={`${mock.totalQuestions} Qs`} />
+                       <StatPill icon={BookOpen} label={`${mock.totalQuestions} items`} />
                        <StatPill icon={Clock} label={`${mock.duration}m`} />
                     </div>
                   </div>
 
                   <div className="mt-5 pt-3">
                     <Button asChild className={cn(
-                      "w-full h-9 md:h-11 rounded-xl font-bold text-[9px] md:text-[10px] tracking-tight shadow-md border-none transition-all active:scale-95 gap-2", 
-                      locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] dark:bg-primary hover:bg-black text-white"
+                      "w-full h-10 md:h-12 rounded-xl font-bold text-[9px] md:text-[11px] tracking-tight shadow-md border-none transition-all active:scale-95 gap-2", 
+                      locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-primary hover:bg-blue-700 text-white"
                     )}>
                         <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`}>
-                          {locked ? <Lock className="h-3 w-3" /> : null}
-                          Start Test
+                          {locked ? <Lock className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 fill-current" />}
+                          {locked ? "Unlock with Pass" : "Start Test"}
                         </Link>
                     </Button>
                   </div>

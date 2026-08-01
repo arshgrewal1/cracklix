@@ -42,9 +42,8 @@ import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Vacancy Builder Hub v2.1.
- * FIXED: Missing AnimatePresence import and GraduationCap naming collision.
- * COMPACT: Reduced padding and text scales for mobile-first PWA.
+ * @fileOverview Enterprise Vacancy Builder Hub v2.2.
+ * FIXED: Added missing AnimatePresence and motion imports.
  */
 
 const BOARD_OPTIONS = [
