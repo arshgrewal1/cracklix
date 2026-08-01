@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { useCollection, useFirestore, useDoc } from '@/firebase';
-import { collection, query, limit, doc, orderBy } from 'firebase/firestore';
-import { Trophy, ChevronRight, ArrowRight, Award } from 'lucide-react';
+import { useCollection, useFirestore } from '@/firebase';
+import { collection, query, limit, orderBy } from 'firebase/firestore';
+import { Trophy, ChevronRight, ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import StudentAvatar from '@/components/brand/StudentAvatar';
 import { cn } from '@/lib/utils';
@@ -13,8 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Density Merit Preview v5.0.
- * COMPACT: Limited to 2 items on Home Page. Drastically reduced radii and padding.
+ * @fileOverview Super-Compact Merit Preview v6.0.
+ * COMPACT: High-density horizontal nodes for Home Page. Reduced radii and text.
  */
 
 export default function MeritPreview() {
@@ -37,27 +36,27 @@ export default function MeritPreview() {
   }, [rawList]);
 
   return (
-    <section className="py-12 md:py-20 bg-background border-t border-border overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-left space-y-8">
+    <section className="py-8 md:py-12 bg-background border-t border-border overflow-hidden">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-left space-y-6">
         
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-3">
-             <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center text-amber-500 shadow-inner shrink-0">
-               <Trophy className="h-4 w-4 md:h-5 md:w-5 fill-current" />
+          <div className="flex items-center gap-2">
+             <div className="h-7 w-7 md:h-9 md:h-9 rounded-lg bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center text-amber-500 shadow-inner shrink-0">
+               <Trophy className="h-3.5 w-3.5 md:h-4 md:w-4 fill-current" />
              </div>
              <div className="text-left">
-                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight">Top rankers</h2>
-                <p className="text-[10px] md:text-xs font-medium text-muted-foreground">Live state merit list</p>
+                <h2 className="text-base md:text-xl font-black text-foreground tracking-tight">Top rankers</h2>
+                <p className="text-[8px] md:text-[10px] font-medium text-muted-foreground">Live merit list</p>
              </div>
           </div>
-          <Link href="/leaderboard" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group">
+          <Link href="/leaderboard" className="text-primary font-bold text-[9px] md:text-xs flex items-center gap-1 hover:underline group">
             View all <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6">
            {loading ? (
-              Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-2xl bg-muted border border-border" />)
+              Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-xl bg-muted border border-border" />)
            ) : meritList && meritList.length > 0 ? meritList.map((res, i) => (
               <motion.div 
                 key={res.uid}
@@ -68,24 +67,24 @@ export default function MeritPreview() {
                 className="h-full"
               >
                  <Link href="/leaderboard" className="block h-full">
-                    <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-500 group overflow-hidden bg-card p-4 md:p-6 flex flex-col justify-center rounded-2xl h-full text-center relative">
-                       <div className="flex items-center gap-4 text-left">
+                    <Card className="border border-border shadow-sm hover:shadow-lg transition-all duration-300 group overflow-hidden bg-card p-3 md:p-4 flex items-center rounded-xl md:rounded-2xl h-full text-left relative">
+                       <div className="flex items-center gap-3 md:gap-4 w-full">
                           <div className="relative shrink-0">
-                             <StudentAvatar profile={{ name: res.displayName, photoURL: res.photoURL, gender: res.gender }} className="h-12 w-12 md:h-14 md:w-14 rounded-xl border border-border shadow-inner group-hover:scale-105 transition-transform" />
+                             <StudentAvatar profile={{ name: res.displayName, photoURL: res.photoURL, gender: res.gender }} className="h-10 w-10 md:h-12 md:w-12 rounded-lg border border-border shadow-inner group-hover:scale-105 transition-transform" />
                              <div className={cn(
-                                "absolute -bottom-1 -right-1 h-5 w-5 rounded-lg flex items-center justify-center text-white text-[9px] font-black shadow-lg border-2 border-background",
+                                "absolute -bottom-1 -right-1 h-4 w-4 rounded-md flex items-center justify-center text-white text-[7px] font-black shadow-lg border border-background",
                                 i === 0 ? "bg-amber-400" : "bg-slate-300"
                              )}>
                                 #{i + 1}
                              </div>
                           </div>
                           <div className="min-w-0 flex-1 space-y-0.5">
-                             <p className="font-bold text-sm md:text-base text-foreground truncate uppercase tracking-tight">{res.displayName}</p>
-                             <p className="text-[10px] font-black text-primary tabular-nums tracking-tighter">Score: {(Number(res.highestScore) || 0).toFixed(1)}</p>
+                             <p className="font-bold text-[13px] md:text-base text-foreground truncate tracking-tight">{res.displayName}</p>
+                             <p className="text-[9px] md:text-[11px] font-black text-primary tabular-nums tracking-tight">Peak score: {(Number(res.highestScore) || 0).toFixed(1)}</p>
                           </div>
-                          <div className="shrink-0 hidden md:block">
-                             <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-inner">
-                                <ArrowRight className="h-4 w-4" />
+                          <div className="shrink-0">
+                             <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shadow-inner">
+                                <ArrowRight className="h-3.5 w-3.5" />
                              </div>
                           </div>
                        </div>
@@ -93,7 +92,7 @@ export default function MeritPreview() {
                  </Link>
               </motion.div>
            )) : (
-              <div className="col-span-full py-12 text-center opacity-30 italic font-black uppercase text-[10px] border-2 border-dashed border-border rounded-2xl">
+              <div className="col-span-full py-8 text-center opacity-30 italic font-bold text-[9px] border-2 border-dashed border-border rounded-xl">
                  Awaiting merit sync
               </div>
            )}
