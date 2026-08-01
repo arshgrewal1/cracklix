@@ -8,8 +8,9 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth Hub v19.0 [Presence Hub].
+ * @fileOverview Hardened Auth Hub v20.0 [Presence Hub].
  * UPDATED: Implemented live presence tracking with interval-based heartbeat.
+ * OPTIMIZED: Presence updates are fire-and-forget to prevent UI blocking.
  */
 export function useUser() {
   const auth = useAuth();
@@ -66,12 +67,16 @@ export function useUser() {
 
     const userRef = doc(db, 'users', user.uid);
 
-    // Initial presence update
-    updateDoc(userRef, {
-      online: true,
-      lastSeen: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    }).catch(() => {});
+    // Institutional Presence Hub: Sync status instantly
+    const syncPresence = (isOnline: boolean) => {
+       updateDoc(userRef, {
+          online: isOnline,
+          lastSeen: serverTimestamp(),
+          updatedAt: serverTimestamp()
+       }).catch(() => {});
+    };
+
+    syncPresence(true);
 
     // Real-time profile listener
     const unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
@@ -116,13 +121,13 @@ export function useUser() {
     // Heartbeat Node: Syncs presence every 4 minutes to keep online status accurate
     const heartbeat = setInterval(() => {
        if (document.visibilityState === 'visible') {
-          updateDoc(userRef, { lastSeen: serverTimestamp() }).catch(() => {});
+          syncPresence(true);
        }
     }, 240000);
 
     const handleVisibility = () => {
        const isOnline = document.visibilityState === 'visible';
-       updateDoc(userRef, { online: isOnline, lastSeen: serverTimestamp() }).catch(() => {});
+       syncPresence(isOnline);
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
@@ -131,7 +136,7 @@ export function useUser() {
       unsubscribeProfile();
       clearInterval(heartbeat);
       document.removeEventListener('visibilitychange', handleVisibility);
-      updateDoc(userRef, { online: false, lastSeen: serverTimestamp() }).catch(() => {});
+      syncPresence(false);
     };
   }, [user, db]);
 

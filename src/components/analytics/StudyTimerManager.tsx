@@ -8,9 +8,9 @@ import { useStudyStore } from '@/hooks/useStudyTimer';
 import { usePathname } from 'next/navigation';
 
 /**
- * @fileOverview Institutional Study Engine v1.0 [Standalone Manager].
- * FIXED: Ensures singular ticking node across all application routes.
- * RESET: Triggers midnight rollover at 12:00 AM local time.
+ * @fileOverview Institutional Study Engine v1.2 [Standalone Manager].
+ * FIXED: Resilient activity detection for mobile PWA (scroll/touch).
+ * FIXED: Atomic midnight rollover at 12:00 AM local time.
  */
 export default function StudyTimerManager() {
   const { user } = useUser();
@@ -33,8 +33,6 @@ export default function StudyTimerManager() {
       const snap = await getDoc(statsRef);
       const data = snap.data();
       
-      const sessionSeconds = activeSeconds - (data?.lastSyncedSeconds || 0);
-      
       // Handle Date Rollover (Midnight Reset)
       if (isRollover || (data?.lastStudyDate && data.lastStudyDate !== todayStr)) {
         await setDoc(statsRef, {
@@ -51,12 +49,13 @@ export default function StudyTimerManager() {
         return;
       }
 
+      const sessionSeconds = activeSeconds - (data?.lastSyncedSeconds || 0);
       if (sessionSeconds <= 0) {
         isSyncing.current = false;
         return;
       }
 
-      // Sync active minutes to registry
+      // Sync active minutes to database hub
       await setDoc(statsRef, {
         todayStudyMinutes: Math.floor(activeSeconds / 60),
         lastActiveTime: serverTimestamp(),
@@ -65,7 +64,7 @@ export default function StudyTimerManager() {
         lastSyncedSeconds: activeSeconds
       }, { merge: true });
 
-      // Update global user node
+      // Update global user node for leaderboard ranking
       await updateDoc(doc(db, 'users', user.uid), {
          'studyStats.totalLifetimeStudyMinutes': fsIncrement(Math.floor(sessionSeconds / 60)),
          'studyStats.lastStudyDate': todayStr
@@ -127,13 +126,19 @@ export default function StudyTimerManager() {
        lastActivityTime.current = Date.now();
     };
 
-    // User Interaction Hub
+    // Global Activity Registry: Tracks all meaningful interactions
     window.addEventListener('mousemove', activityListener);
     window.addEventListener('keydown', activityListener);
     window.addEventListener('click', activityListener);
     window.addEventListener('scroll', activityListener);
     window.addEventListener('touchstart', activityListener);
-    window.addEventListener('visibilitychange', () => syncToFirestore());
+    window.addEventListener('touchmove', activityListener);
+    
+    // Visibility Hub: Triggers sync on app minimize/restore
+    window.addEventListener('visibilitychange', () => {
+       activityListener();
+       syncToFirestore();
+    });
 
     return () => {
       clearInterval(ticker);
@@ -142,6 +147,7 @@ export default function StudyTimerManager() {
       window.removeEventListener('click', activityListener);
       window.removeEventListener('scroll', activityListener);
       window.removeEventListener('touchstart', activityListener);
+      window.removeEventListener('touchmove', activityListener);
       syncToFirestore();
     };
   }, [user, db, increment, setBase, syncToFirestore]);
