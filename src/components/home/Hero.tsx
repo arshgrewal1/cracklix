@@ -8,8 +8,8 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v67.0.
- * UPDATED: Removed uppercase from primary heading and buttons. Reduced font sizes for PWA.
+ * @fileOverview Premium Mobile-First PWA Hero v68.0.
+ * UPDATED: Removed uppercase from primary heading and buttons for professional Title Case.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);

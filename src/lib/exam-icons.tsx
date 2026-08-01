@@ -1,13 +1,11 @@
-
 import React from "react"
 import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Activity, Cpu, Building2, Globe, Settings, FileText, FileStack } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v40.0 (Global Scale Refinement).
- * FIXED: Balanced XL size (h-32) and added small padding to prevent overlap with border.
- * UPDATED: Icons fill the container with proper containment.
+ * @fileOverview Institutional Branding Engine v43.0.
+ * FIXED: Standardized public paths and normalized scaling for small cards.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -66,10 +64,10 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     category?.logoUrl;
   
   const sizeClasses = {
-    sm: "h-11 w-11 md:h-12 md:w-12",
-    md: "h-14 w-14 md:h-20 md:w-20",
+    sm: "h-9 w-9 md:h-11 md:w-11",
+    md: "h-12 w-12 md:h-16 md:w-16",
     lg: "h-20 w-20 md:h-28 md:w-28",
-    xl: "h-32 w-32 md:h-40 md:w-40"
+    xl: "h-28 w-28 md:h-36 md:w-36"
   };
 
   const containerSize = sizeClasses[size];
@@ -77,7 +75,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   if (logoUrl) {
     return (
       <div className={cn(
-        "relative shrink-0 overflow-hidden transition-all bg-white rounded-2xl border border-slate-100 shadow-xl",
+        "relative shrink-0 overflow-hidden transition-all bg-white rounded-xl border border-slate-100 shadow-sm",
         containerSize, 
         className
       )}>
@@ -108,11 +106,11 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "flex items-center justify-center transition-all bg-white rounded-2xl border border-slate-100 shadow-xl",
+      "flex items-center justify-center transition-all bg-white rounded-xl border border-slate-100 shadow-sm",
       containerSize, 
       className
     )}>
-      <div className="h-full w-full p-2">
+      <div className="h-full w-full p-1.5">
         {getFallbackIcon()}
       </div>
     </div>

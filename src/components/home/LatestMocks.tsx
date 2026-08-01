@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Clock, Zap, Lock, ChevronRight, Layers, Star, Play } from "lucide-react"
+import { BookOpen, Zap, Lock, ChevronRight, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Compact Latest Tests Hub v49.0.
- * UPDATED: Shrinking card size significantly and added primary CTA buttons.
+ * @fileOverview Compact Latest Tests Hub v50.0.
+ * UPDATED: Shrinking card sizes, adding colorful action buttons, and removing uppercase labels.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -75,7 +75,7 @@ export default function LatestMocks() {
                 transition={{ delay: i * 0.05 }}
                 className="flex flex-col h-full"
               >
-                <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-500 rounded-xl bg-card p-3 md:p-5 flex flex-col group h-full relative overflow-hidden text-left flex-1 border-none min-h-[180px] md:min-h-[260px]">
+                <Card className="border-none shadow-sm group-hover:shadow-xl transition-all duration-500 rounded-xl bg-card p-3 md:p-5 flex flex-col group h-full relative overflow-hidden text-left flex-1 min-h-[180px] md:min-h-[260px]">
                   
                   <div className="flex justify-between items-start mb-3 md:mb-6">
                     <AuthorityLogo boardId={boardId} size="sm" className="h-8 w-8 md:h-10 md:w-10 rounded-lg shadow-sm" />
@@ -102,7 +102,7 @@ export default function LatestMocks() {
                   <div className="mt-4 pt-2">
                     <Button asChild className={cn(
                       "w-full h-8 md:h-10 rounded-lg font-bold text-[9px] md:text-[10px] tracking-tight shadow-md border-none transition-all active:scale-95 gap-2", 
-                      locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-primary hover:bg-blue-700 text-white"
+                      locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-primary text-white"
                     )}>
                         <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`}>
                           {locked ? <Lock className="h-3 w-3" /> : <Play className="h-3 w-3 fill-current" />}

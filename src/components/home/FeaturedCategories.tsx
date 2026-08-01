@@ -3,8 +3,8 @@
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
-import { Layers, ChevronRight, BookOpen, Zap, ArrowRight } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Layers, ChevronRight, Zap, ArrowRight } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
@@ -13,8 +13,8 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 /**
- * @fileOverview Compact Institutional Categories Hub v47.0.
- * UPDATED: Reduced card sizes significantly and added primary CTA buttons.
+ * @fileOverview Compact Institutional Categories Hub v48.0.
+ * UPDATED: Reduced card sizes, added primary buttons, and removed uppercase labels.
  */
 
 const TARGET_IDS = [
@@ -68,7 +68,7 @@ export default function FeaturedCategories() {
                className="flex flex-col h-full"
              >
                 <Link href={`/exams/category/${cat.id}`} className="h-full block group">
-                  <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-500 rounded-xl bg-card p-3 md:p-5 flex flex-col group h-full relative overflow-hidden text-left border-none min-h-[160px] md:min-h-[220px]">
+                  <Card className="border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl bg-card p-3 md:p-5 flex flex-col group h-full relative overflow-hidden text-left min-h-[160px] md:min-h-[220px]">
                      <div className="flex justify-between items-start mb-4 md:mb-6">
                         <AuthorityLogo category={cat} size="sm" className="h-9 w-9 md:h-12 md:w-12 rounded-lg" />
                      </div>

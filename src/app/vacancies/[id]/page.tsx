@@ -46,9 +46,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v7.2.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v7.3.
  * FIXED: UI Back button hidden in standalone PWA mode.
  * FIXED: Repositioned action bar to bottom-24 to clear mobile navigation.
+ * FIXED: Added missing 'Users' import.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
