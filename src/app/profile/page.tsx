@@ -4,7 +4,7 @@ import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore, useAuth } from "@/firebase"
-import { collection, query, where, doc, updateDoc, serverTimestamp, deleteDoc, getDocs, limit, orderBy } from "firebase/firestore"
+import { collection, query, where, doc, updateDoc, serverTimestamp, deleteDoc, limit, orderBy } from "firebase/firestore"
 import { deleteUser } from "firebase/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -55,8 +55,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v31.2.
- * FIXED: Added missing CardTitle import.
+ * @fileOverview Institutional Profile Hub v31.3.
+ * FIXED: Added missing CardTitle import to resolve Runtime ReferenceError.
  */
 
 export default function ProfilePage() {
@@ -379,5 +379,5 @@ function StatsCard({ icon: Icon, label, value, color, bgColor, className }: { ic
 }
 
 function ProfileDataNode({ icon: Icon, label, value, colSpan = 1 }: { icon: LucideIcon, label: string, value: string, colSpan?: number }) {
-   return (<div className={cn("flex items-start gap-4 md:gap-8", colSpan > 1 ? "md:col-span-2" : "")}><div className="h-10 w-10 md:h-16 md:w-16 rounded-xl bg-muted flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-colors"><Icon className="h-4 w-4 md:h-7 md:w-7 text-muted-foreground" /></div><div className="min-w-0 space-y-0.5 text-left"><p className="text-[8px] md:text-11px font-black tracking-tight text-muted-foreground">{label}</p><p className="text-[11px] md:text-xl font-bold text-foreground leading-relaxed break-words tracking-tight">{value}</p></div></div>)
+   return (<div className={cn("flex items-start gap-4 md:gap-8", colSpan > 1 ? "md:col-span-2" : "")}><div className="h-10 w-10 md:h-16 md:w-16 rounded-xl bg-muted flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-colors"><Icon className="h-4 w-4 md:h-7 md:w-7 text-muted-foreground" /></div><div className="min-w-0 space-y-0.5 text-left"><p className="text-[8px] md:11px font-black tracking-tight text-muted-foreground">{label}</p><p className="text-[11px] md:text-xl font-bold text-foreground leading-relaxed break-words tracking-tight">{value}</p></div></div>)
 }

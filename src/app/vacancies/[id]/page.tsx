@@ -48,8 +48,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v5.1.
- * FIXED: JSX Tag mismatch for Button component.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v5.2 [Hardened].
+ * FIXED: Awaited params for Next.js 15 production compatibility.
+ * FIXED: Corrected JSX Button tag mismatch.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -171,10 +172,10 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
 
          {/* QUICK STATS */}
          <section className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-10 px-1">
-            <StatPill label="Total posts" val={vacancy.totalPosts} icon={Zap} color="text-primary" bg="bg-blue-50" />
-            <StatPill label="Min. qualification" val={vacancy.education?.split(',')[0]} icon={GraduationCap} color="text-emerald-600" bg="bg-emerald-50" />
-            <StatPill label="Age threshold" val={vacancy.ageLimit} icon={Users} color="text-orange-500" bg="bg-orange-50" />
-            <StatPill label="Closing soon" val={new Date(vacancy.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} icon={Clock} color="text-rose-500" bg="bg-rose-50" />
+            <StatPill icon={Zap} label="Total posts" val={vacancy.totalPosts} color="text-primary" bg="bg-blue-50" />
+            <StatPill icon={GraduationCap} label="Min. qualification" val={vacancy.education?.split(',')[0]} color="text-emerald-600" bg="bg-emerald-50" />
+            <StatPill icon={Users} label="Age threshold" val={vacancy.ageLimit} color="text-orange-500" bg="bg-orange-50" />
+            <StatPill icon={Clock} label="Closing soon" val={new Date(vacancy.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} color="text-rose-500" bg="bg-rose-50" />
          </section>
 
          {/* DETAILS */}

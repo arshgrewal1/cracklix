@@ -60,7 +60,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v58.0 [Strict NEXT15].
+ * @fileOverview Master Mock Builder v58.1 [Strict NEXT15].
  * FIXED: Properly wrapped Firestore collection queries and resolved Promise-based searchParams.
  * FIXED: Standardized Lucide icons to latest supported naming.
  */

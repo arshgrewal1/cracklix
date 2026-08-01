@@ -62,9 +62,9 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v49.1 [Next.js 15 Async Hardened].
+ * @fileOverview Daily Challenge Builder v49.2 [Strict NEXT15 Async Hardened].
  * FIXED: ReferenceError for setQuizData.
- * FIXED: Synchronized icons and added missing imports.
+ * FIXED: Awaited searchParams for Next.js 15.
  */
 
 export default function DailyQuizBuilder() {
@@ -326,7 +326,7 @@ function DailyQuizBuilderContent() {
             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50">
                <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Challenge title</Label>
-                  <Input value={quizData.title} onChange={e => setQuizData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg shadow-inner text-[#0F172A]" placeholder="e.g. Daily Punjab GK #12" />
+                  <Input value={quizData.title} onChange={e => setQuizData({...quizData, title: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner text-[#0F172A]" placeholder="e.g. Daily Punjab GK #12" />
                </div>
 
                <div className="grid grid-cols-2 gap-4">
