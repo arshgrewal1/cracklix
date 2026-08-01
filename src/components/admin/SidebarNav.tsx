@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
   Database,
   Newspaper,
   BookOpen,
@@ -17,11 +16,9 @@ import {
   ClipboardList,
   Users,
   DollarSign,
-  Smartphone,
   Gem,
   HeartPulse,
   Settings,
-  NotebookPen,
   MessageCircle,
   Trophy,
   Calendar,
@@ -35,22 +32,13 @@ import {
   FileJson,
   Zap,
   Flame,
-  BarChart3,
-  Megaphone,
-  Plus,
-  BookMarked,
-  Layers,
   History,
   Archive,
   FileStack,
   KeyRound,
-  ShieldAlert,
   FileText,
-  ExternalLink,
   Home,
-  Network,
-  Sparkles,
-  SearchCode,
+  Layers,
   RefreshCw,
   CheckCircle
 } from "lucide-react";
@@ -96,7 +84,7 @@ const NAV_GROUPS = [
       { label: "Folders", href: "/admin/categories", icon: FolderTree, perm: 'manageCategories' },
       { label: "Boards", href: "/admin/exams", icon: Building2, perm: 'manageCategories' },
       { label: "Exams", href: "/admin/exam-registry", icon: GraduationCap, perm: 'manageCategories' },
-      { label: "Subjects", href: "/admin/learning/subjects", icon: BookMarked, perm: 'manageCategories' },
+      { label: "Subjects", href: "/admin/learning/subjects", icon: BookOpen, perm: 'manageCategories' },
       { label: "Series", href: "/admin/learning/series", icon: Layers, perm: 'manageSeries' },
       { label: "Chapters", href: "/admin/chapters", icon: NotebookTabs, perm: 'manageSeries' },
       { label: "Topics", href: "/admin/topics", icon: Library, perm: 'manageSeries' },
@@ -109,7 +97,7 @@ const NAV_GROUPS = [
       { label: "Study Notes", href: "/admin/notes", icon: FileText, perm: 'publishContent' },
       { label: "CA Manager", href: "/admin/current-affairs", icon: Newspaper, perm: 'publishContent' },
       { label: "CA Bulk Upload", href: "/admin/current-affairs/bulk", icon: UploadCloud, perm: 'uploadQuestions' },
-      { label: "Free Hub", href: "/admin/free-content", icon: Sparkles, perm: 'publishContent' },
+      { label: "Free Hub", href: "/admin/free-content", icon: Zap, perm: 'publishContent' },
       { label: "Exam Calendar", href: "/admin/calendar", icon: Calendar, perm: 'publishContent' },
     ],
   },
@@ -126,7 +114,7 @@ const NAV_GROUPS = [
   {
     label: "Job Portal",
     items: [
-      { label: "Vacancy Hub", href: "/admin/vacancies", icon: Megaphone },
+      { label: "Vacancy Hub", href: "/admin/vacancies", icon: Newspaper },
     ],
   },
   {

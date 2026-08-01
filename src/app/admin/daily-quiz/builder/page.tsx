@@ -61,7 +61,7 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v45.8 [Fixed setQuizData].
+ * @fileOverview Daily Challenge Builder v45.9.
  * FIXED: Standardized state setter reference from setMockData to setQuizData.
  */
 

@@ -2,15 +2,13 @@
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { 
-  ChevronLeft, 
-  ChevronRight,
   Database, 
   Loader2,
   Plus,
@@ -19,29 +17,21 @@ import {
   CheckCircle2,
   X,
   RefreshCw,
-  Award,
   Check,
   Layers,
   Save,
   GraduationCap,
   AlertCircle,
-  FileText,
   Search,
-  ExternalLink,
   Landmark,
   BookOpen,
-  Filter,
-  Activity,
-  ArrowUpRight,
-  ArrowRight,
   Target,
-  History,
+  ArrowRight,
   ShieldCheck,
   Timer,
   BookMarked,
   Settings,
   Lock,
-  Unlock,
   PenSquare
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
@@ -56,11 +46,9 @@ import {
   writeBatch, 
   documentId, 
   orderBy, 
-  DocumentData, 
   updateDoc, 
   increment, 
-  addDoc,
-  deleteDoc
+  addDoc
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { MockType, Difficulty, AccessLevel, LanguageDisplayMode, MockAssignmentMode, ExamSection, Exam } from "@/types"
@@ -70,11 +58,10 @@ import { AdminPageHeader } from "@/components/admin"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
-import Link from "next/link"
 
 /**
- * @fileOverview Master Mock Builder v53.0 [Free Preview Logic].
- * UPDATED: Fixed malformed Firestore queries and added missing PenSquare icon.
+ * @fileOverview Master Mock Builder v53.1.
+ * FIXED: Malformed query syntax and added PenSquare import.
  */
 
 export default function MockBuilderPage() {
@@ -756,7 +743,7 @@ function MockBuilderContent() {
            ) : (
              <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
                 <div className="flex items-center justify-between px-2">
-                   <h3 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight uppercase flex items-center gap-4">
+                   <h3 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase flex items-center gap-4">
                       <Layers className="h-6 w-6 text-primary" /> Active area
                    </h3>
                    <Popover>

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useEffect, useState } from "react"
+import React, { useMemo, useEffect, useState, Suspense } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
@@ -47,13 +47,12 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v4.5 [Apple Inspired].
- * REDESIGNED: Premium data density with detailed recruitment lifecycle sections.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v4.6.
+ * FIXED: Asynchronous params handling and JSX tag mismatch.
  */
 
 export default function VacancyDetailPage() {
   const params = useParams()
-  const id = params?.id as string
   const db = useFirestore()
   const router = useRouter()
   const { user, profile } = useUser()
@@ -62,6 +61,11 @@ export default function VacancyDetailPage() {
   const [mounted, setMounted] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
   const [activeTab, setActiveTab] = useState("overview")
+
+  const id = useMemo(() => {
+    if (!params?.id) return "";
+    return params.id as string;
+  }, [params]);
 
   useEffect(() => {
     setMounted(true)
@@ -279,7 +283,7 @@ export default function VacancyDetailPage() {
                </div>
 
                {/* PREP AD NODE */}
-               <div className="p-8 md:p-12 bg-[#F8FAFC] rounded-[3.5rem] border border-slate-100 shadow-xl space-y-10 text-left relative overflow-hidden group hover:translate-y-[-8px] transition-all duration-500">
+               <div className="p-8 md:p-12 bg-[#F8FAFC] rounded-[3.5rem] border border-slate-100 shadow-xl space-y-8 text-left relative overflow-hidden group hover:translate-y-[-8px] transition-all duration-500">
                   <div className="absolute top-[-10%] right-[-10%] w-[150px] h-[150px] bg-primary/5 blur-3xl rounded-full" />
                   <div className="relative z-10 space-y-8">
                      <div className="space-y-2">
@@ -334,7 +338,9 @@ export default function VacancyDetailPage() {
                   </div>
                </div>
                <div className="flex-1 flex items-center gap-3">
-                  <Button onClick={handleShare} variant="ghost" className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-white/5 text-white hover:bg-white/10 border-none shadow-inner transition-all"><Share2 className="h-5 w-5" /></Button>
+                  <Button onClick={handleShare} variant="ghost" className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-white/5 text-white hover:bg-white/10 border-none shadow-inner transition-all flex items-center justify-center">
+                    <Share2 className="h-5 w-5" />
+                  </Button>
                   <Button asChild className="flex-1 h-14 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-xs tracking-[0.3em] rounded-3xl md:rounded-[2.5rem] shadow-4xl border-none active:scale-95 transition-all">
                      <a href={vacancy.applyLink} target="_blank" rel="noopener noreferrer">Apply online hub <ChevronRight className="ml-2 h-4 w-4 md:h-6 md:w-6" /></a>
                   </Button>

@@ -134,6 +134,8 @@ export interface UserProfile {
   referralCode?: string;
   referredBy?: string;
   coins?: number;
+  lastStudyDate?: string;
+  totalLifetimeStudyMinutes?: number;
 }
 
 export interface StudySession {
@@ -174,7 +176,7 @@ export interface AttemptResult {
   languageMode: string;
   subjectAnalysis: any[];
   complexityAnalysis: any[];
-  answers: Record<string, number>;
+  answers: Record<string, number | null>;
   rankAtSubmission?: number;
   isGuestNode?: boolean;
 }
@@ -293,6 +295,8 @@ export interface MockTest {
   createdAt: any;
   updatedAt: any;
   sections?: ExamSection[];
+  isTodayQuiz?: boolean;
+  rewardXP?: number;
 }
 
 export interface ExamSection {
@@ -337,6 +341,11 @@ export interface Question {
     headers: string[];
     rows: string[][];
   };
+  englishAssertion?: string;
+  punjabiAssertion?: string;
+  englishReason?: string;
+  punjabiReason?: string;
+  displayId?: string;
 }
 
 export interface AuditLog {
@@ -423,6 +432,18 @@ export interface Vacancy {
   ageLimit?: string;
   ageRelaxation?: string;
   experience?: string;
+  category?: string;
+  payMatrix?: string;
+  payLevel?: string;
+  medicalStandards?: string;
+  physicalStandards?: string;
+  feeLastDate?: string;
+  sendNotification?: boolean;
+  priority?: number;
+  views?: number;
+  clicks?: number;
+  saves?: number;
+  shares?: number;
 }
 
 export type AdType = 'BANNER' | 'ADSENSE' | 'HTML';
@@ -453,3 +474,20 @@ export interface Ad {
 }
 
 export interface Advertisement extends Ad {}
+
+export interface CurrentAffairHubItem {
+  id: string;
+  title: string;
+  type: 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  month: string;
+  year: string;
+  status: ContentStatus;
+  language: string;
+  duration: number;
+  positiveMarks: number;
+  negativeMarks: number;
+  pdfUrl?: string;
+  quizId?: string;
+  createdAt: any;
+  updatedAt: any;
+}
