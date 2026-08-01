@@ -62,9 +62,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v51.0 [Compact & Hardened].
+ * @fileOverview Daily Challenge Builder v52.0 [Hardened].
  * FIXED: setMockData reference error resolved to setQuizData.
- * FIXED: Removed all uppercase text classes for Title Case normalization.
  */
 
 export default function DailyQuizBuilder() {

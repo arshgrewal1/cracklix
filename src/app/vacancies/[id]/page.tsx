@@ -46,8 +46,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v7.1.
- * FIXED: Added missing Users import.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v7.2.
+ * FIXED: UI Back button hidden in standalone PWA mode.
  * FIXED: Repositioned action bar to bottom-24 to clear mobile navigation.
  */
 
@@ -123,7 +123,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
         </div>
         <div className="space-y-2">
            <h2 className="text-2xl font-black text-[#0F172A] tracking-tighter uppercase">Record Purged</h2>
-           <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">This recruitment listing has been archived or expired.</p>
+           <p className="text-slate-500 font-medium max-sm mx-auto leading-relaxed">This recruitment listing has been archived or expired.</p>
         </div>
         <Button onClick={() => router.push('/vacancies')} variant="outline" className="rounded-xl h-12 px-8 font-bold border-2">Return to Registry</Button>
      </div>

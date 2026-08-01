@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { Layers, ChevronRight, BookOpen, Zap, ArrowRight } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
@@ -13,14 +13,14 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 /**
- * @fileOverview Compact Institutional Categories Hub v46.0.
- * UPDATED: Removed uppercase and added explicit colorful action buttons.
+ * @fileOverview Compact Institutional Categories Hub v47.0.
+ * UPDATED: Reduced card sizes significantly and added primary CTA buttons.
  */
 
 const TARGET_IDS = [
   "punjab-government-exams",
   "punjab-teaching-exams",
-  "punjab-police-exams",
+  "punjab-technical-exams",
   "banking-exams"
 ];
 
@@ -33,7 +33,7 @@ export default function FeaturedCategories() {
 
   const categories = useMemo(() => {
     if (!rawCategories) return [];
-    return rawCategories.filter(c => TARGET_IDS.includes(c.id)).slice(0, 4);
+    return rawCategories.filter(c => TARGET_IDS.includes(c.id)).slice(0, 5);
   }, [rawCategories]);
 
   return (
@@ -42,11 +42,11 @@ export default function FeaturedCategories() {
         
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-3">
-             <div className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
+             <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
                <Layers className="h-4 w-4 md:h-5 md:w-5" />
              </div>
              <div className="text-left">
-                <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tight">Quick categories</h2>
+                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight">Quick categories</h2>
                 <p className="text-[10px] md:text-xs font-medium text-muted-foreground">Target your vertical</p>
              </div>
           </div>
@@ -55,9 +55,9 @@ export default function FeaturedCategories() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6">
           {loading ? (
-             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-2xl bg-muted border border-border" />)
+             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-36 w-full rounded-2xl bg-muted" />)
           ) : categories.map((cat, idx) => (
              <motion.div 
                key={cat.id}
@@ -68,25 +68,24 @@ export default function FeaturedCategories() {
                className="flex flex-col h-full"
              >
                 <Link href={`/exams/category/${cat.id}`} className="h-full block group">
-                  <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-500 rounded-2xl bg-card p-5 flex flex-col group h-full relative overflow-hidden text-left border-none">
-                     <div className="flex justify-between items-start mb-6">
-                        <AuthorityLogo category={cat} size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-xl" />
+                  <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-500 rounded-xl bg-card p-3 md:p-5 flex flex-col group h-full relative overflow-hidden text-left border-none min-h-[160px] md:min-h-[220px]">
+                     <div className="flex justify-between items-start mb-4 md:mb-6">
+                        <AuthorityLogo category={cat} size="sm" className="h-9 w-9 md:h-12 md:w-12 rounded-lg" />
                      </div>
 
-                     <div className="flex-1 space-y-3 text-left">
-                        <h3 className="text-base md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                     <div className="flex-1 space-y-2 text-left min-w-0">
+                        <h3 className="text-xs md:text-base font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">
                            {cat.title}
                         </h3>
                         
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-1">
                            <MiniBadge icon={Zap} label="Tests" color="text-blue-600 bg-blue-50 dark:bg-blue-900/20" />
-                           <MiniBadge icon={BookOpen} label="Notes" color="text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20" />
                         </div>
                      </div>
 
-                     <div className="pt-6 mt-4">
-                        <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white text-[10px] font-bold rounded-xl gap-2 active:scale-95 border-none transition-all">
-                           Open category <ArrowRight className="h-3 w-3" />
+                     <div className="pt-4 mt-2">
+                        <Button className="w-full h-8 md:h-10 bg-[#0F172A] hover:bg-primary text-white text-[9px] md:text-[10px] font-bold rounded-lg gap-2 active:scale-95 border-none transition-all">
+                           Open <ArrowRight className="h-3 w-3" />
                         </Button>
                      </div>
                   </Card>
@@ -101,8 +100,8 @@ export default function FeaturedCategories() {
 
 function MiniBadge({ icon: Icon, label, color }: any) {
    return (
-      <div className={cn("px-2 py-0.5 rounded-lg flex items-center gap-1 font-semibold text-[8px] tracking-tight", color)}>
-         <Icon className="h-2.5 w-2.5" />
+      <div className={cn("px-1.5 py-0.5 rounded flex items-center gap-1 font-semibold text-[7px] md:text-[8px] tracking-tight", color)}>
+         <Icon className="h-2 w-2" />
          {label}
       </div>
    )

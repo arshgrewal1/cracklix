@@ -41,7 +41,9 @@ import {
   Layers,
   RefreshCw,
   CheckCircle,
-  SearchCode
+  SearchCode,
+  Network,
+  Sparkles
 } from "lucide-react";
 
 import {

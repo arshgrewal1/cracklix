@@ -41,8 +41,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Compact Institutional Exam Card v13.0.
- * COMPACT: Reduced padding, radii, and font sizes for high-density layout.
+ * @fileOverview Compact Institutional Exam Card v14.0.
+ * COMPACT: Significant size reduction and added colorful CTA buttons.
  */
 export default function ExamCard({ 
   exam, 
@@ -105,18 +105,18 @@ export default function ExamCard({
     try {
       if (isPinned) {
         await updateDoc(userRef, { pinnedExams: arrayRemove(examId), updatedAt: serverTimestamp() });
-        toast({ title: "Removed from dashboard" });
+        toast({ title: "Removed from list" });
       } else {
         await updateDoc(userRef, { pinnedExams: arrayUnion(examId), updatedAt: serverTimestamp() });
-        toast({ title: "Added to dashboard" });
+        toast({ title: "Added to list" });
       }
     } finally { setIsPinning(false); }
   };
 
   const buttonConfig = useMemo(() => {
     if (stats.completed > 0 && stats.progress === 100) return { label: "Analysis", icon: BarChart3, variant: "bg-emerald-600 hover:bg-emerald-700" };
-    if (stats.completed > 0) return { label: "Continue", icon: RefreshCw, variant: "bg-primary hover:bg-blue-700" };
-    return { label: "Start Prep", icon: Play, variant: "bg-[#0F172A] hover:bg-black" };
+    if (stats.completed > 0) return { label: "Resume", icon: RefreshCw, variant: "bg-primary hover:bg-blue-700" };
+    return { label: "Start Now", icon: Play, variant: "bg-[#0F172A] hover:bg-black" };
   }, [stats]);
 
   if (!exam) return null;
@@ -129,80 +129,57 @@ export default function ExamCard({
       className="h-full w-full break-words"
     >
       <Link href={`/exams/view?id=${exam.id}`} className="block h-full">
-        <Card className="h-full bg-card border border-border shadow-md hover:shadow-2xl transition-all duration-500 rounded-2xl overflow-hidden flex flex-col group relative">
+        <Card className="h-full bg-card border border-border shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl md:rounded-2xl overflow-hidden flex flex-col group relative border-none min-h-[220px] md:min-h-[300px]">
           
-          <div className="p-4 md:p-6 flex justify-between items-center w-full relative z-10">
+          <div className="p-3 md:p-5 flex justify-between items-center w-full relative z-10">
             <div className="flex items-center gap-1.5">
-               <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black px-2 py-0.5 rounded uppercase">
+               <Badge className="bg-primary/10 text-primary border-none text-[7px] md:text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase">
                  Official
                </Badge>
-               {exam.isTrending && (
-                  <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black px-2 py-0.5 rounded flex items-center gap-1 uppercase">
-                    <ShieldCheck className="h-2.5 w-2.5" /> Verified
-                  </Badge>
-               )}
             </div>
             
             <button 
               onClick={handleTogglePin}
               disabled={isPinning}
               className={cn(
-                "h-8 w-8 rounded-lg border flex items-center justify-center transition-all active:scale-90 shadow-sm",
+                "h-7 w-7 rounded-lg border flex items-center justify-center transition-all active:scale-90 shadow-sm",
                 isPinned ? "bg-primary border-primary text-white" : "bg-card border-border text-muted-foreground hover:text-primary"
               )}
             >
-              {isPinning ? <Loader2 className="h-3 w-3 animate-spin" /> : <Bookmark className={cn("h-3.5 w-3.5", isPinned && "fill-current")} />}
+              {isPinning ? <Loader2 className="h-3 w-3 animate-spin" /> : <Bookmark className={cn("h-3 w-3", isPinned && "fill-current")} />}
             </button>
           </div>
 
-          <CardContent className="px-5 md:px-8 pb-6 flex-1 flex flex-col text-center">
+          <CardContent className="px-3 md:px-6 pb-4 md:pb-6 flex-1 flex flex-col text-left">
             
-            <div className="mb-4 flex justify-center">
+            <div className="mb-3">
                <AuthorityLogo 
                   boardId={exam.boardId} 
                   size="sm" 
-                  className="bg-card border-2 border-border shadow-lg rounded-xl h-12 w-12 md:h-14 md:w-14" 
+                  className="bg-card border border-border shadow-md rounded-lg h-9 w-9 md:h-11 md:w-11" 
                />
             </div>
 
-            <div className="space-y-2 mb-6">
-               <h3 className="text-base md:text-xl font-black text-foreground leading-tight group-hover:text-primary transition-colors tracking-tight line-clamp-2 min-h-[2.4em] uppercase">
+            <div className="space-y-1 mb-4 flex-1">
+               <h3 className="text-xs md:text-base font-black text-foreground leading-tight group-hover:text-primary transition-colors tracking-tight line-clamp-2 min-h-[2.4em]">
                  {exam.name}
                </h3>
-               <p className="text-muted-foreground font-medium text-[11px] md:text-xs line-clamp-2 leading-relaxed opacity-70">
-                  {exam.description || "Master the latest official recruitment patterns."}
+               <p className="text-muted-foreground font-medium text-[10px] md:text-xs line-clamp-2 leading-relaxed opacity-60">
+                  {exam.boardId} Authority Registry Node
                </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pt-5 border-t border-border text-left">
-               {stats.mocks > 0 && <StatRow label="Mocks" val={stats.mocks} icon={Zap} />}
-               {stats.pyqs > 0 && <StatRow label="PYQs" val={stats.pyqs} icon={FileStack} />}
-               {stats.questions > 0 && <StatRow label="MCQs" val={stats.questions} icon={Layers} />}
-               {stats.completed > 0 && <StatRow label="Solved" val={stats.completed} icon={CheckCircle2} color="text-emerald-600" />}
+            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-border">
+               <StatRow label="Mocks" val={stats.mocks} />
+               <StatRow label="Solved" val={stats.completed} color="text-emerald-600" />
             </div>
 
-            {user && stats.totalTests > 0 && (
-               <div className="space-y-2 mt-6 text-left">
-                  <div className="flex justify-between items-center text-[7px] font-black uppercase text-slate-400">
-                     <span>Mastery Index</span>
-                     <span className="text-primary tabular-nums">{stats.progress}%</span>
-                  </div>
-                  <div className="h-1 w-full bg-muted rounded-full overflow-hidden shadow-inner">
-                     <motion.div 
-                       initial={{ width: 0 }}
-                       animate={{ width: `${stats.progress}%` }}
-                       className="h-full bg-primary" 
-                     />
-                  </div>
-               </div>
-            )}
-
-            <div className="mt-6 pt-2">
+            <div className="mt-4 pt-2">
                <Button className={cn(
-                  "w-full h-10 md:h-12 rounded-xl text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all active:scale-95 border-none shadow-lg flex items-center justify-center gap-2",
+                  "w-full h-8 md:h-10 rounded-lg text-white font-black text-[9px] md:text-[10px] uppercase tracking-widest transition-all active:scale-95 border-none shadow-md flex items-center justify-center gap-2",
                   buttonConfig.variant
                )}>
-                  <buttonConfig.icon className={cn("h-3.5 w-3.5", buttonConfig.icon === RefreshCw && "animate-spin")} />
+                  <buttonConfig.icon className={cn("h-3 w-3", buttonConfig.icon === RefreshCw && "animate-spin")} />
                   <span>{buttonConfig.label}</span>
                </Button>
             </div>
@@ -213,14 +190,11 @@ export default function ExamCard({
   );
 }
 
-function StatRow({ label, val, icon: Icon, color }: any) {
+function StatRow({ label, val, color }: any) {
   return (
-    <div className="flex items-center justify-between gap-1.5 min-w-0">
-       <div className="flex items-center gap-1.5 min-w-0">
-          <Icon className="h-3 w-3 text-muted-foreground opacity-30 shrink-0" />
-          <span className="text-[9px] font-bold text-muted-foreground truncate tracking-tight uppercase">{label}</span>
-       </div>
-       <span className={cn("text-[10px] font-black tabular-nums tracking-tighter leading-none", color || "text-foreground")}>{val}</span>
+    <div className="flex items-center justify-between gap-1 min-w-0">
+       <span className="text-[7px] md:text-[8px] font-bold text-muted-foreground truncate tracking-tight uppercase">{label}</span>
+       <span className={cn("text-[9px] md:text-[10px] font-black tabular-nums tracking-tighter leading-none", color || "text-foreground")}>{val}</span>
     </div>
   );
 }

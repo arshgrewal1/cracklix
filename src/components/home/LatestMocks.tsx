@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { BookOpen, Clock, Zap, Lock, ChevronRight, Layers, Star, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where } from "firebase/firestore"
@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Compact Latest Tests Hub v48.0.
- * UPDATED: Removed uppercase and added explicit colorful action buttons.
+ * @fileOverview Compact Latest Tests Hub v49.0.
+ * UPDATED: Shrinking card size significantly and added primary CTA buttons.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -30,7 +30,7 @@ export default function LatestMocks() {
       const tA = a.createdAt?.seconds || 0;
       const tB = b.createdAt?.seconds || 0;
       return tB - tA;
-    }).slice(0, 4);
+    }).slice(0, 5);
   }, [rawMocks])
 
   const isPassActive = useMemo(() => {
@@ -45,11 +45,11 @@ export default function LatestMocks() {
         
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-3">
-             <div className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center text-orange-500 shadow-inner shrink-0">
+             <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center text-orange-500 shadow-inner shrink-0">
                <Zap className="h-4 w-4 md:h-5 md:w-5 fill-current" />
              </div>
              <div className="text-left">
-                <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tight">Latest mocks</h2>
+                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight">Latest mocks</h2>
                 <p className="text-[10px] md:text-xs font-medium text-muted-foreground">Recently synced items</p>
              </div>
           </div>
@@ -58,9 +58,9 @@ export default function LatestMocks() {
           </Link>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-6">
           {loading ? (
-             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-2xl bg-muted border border-border" />)
+             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-44 w-full rounded-xl bg-muted" />)
           ) : mocks.map((mock, i) => {
             const isPremium = mock.accessLevel?.toUpperCase() === 'PREMIUM';
             const locked = isPremium && !isPassActive;
@@ -75,39 +75,38 @@ export default function LatestMocks() {
                 transition={{ delay: i * 0.05 }}
                 className="flex flex-col h-full"
               >
-                <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left flex-1 border-none">
+                <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-500 rounded-xl bg-card p-3 md:p-5 flex flex-col group h-full relative overflow-hidden text-left flex-1 border-none min-h-[180px] md:min-h-[260px]">
                   
-                  <div className="flex justify-between items-start mb-4 md:mb-6">
-                    <AuthorityLogo boardId={boardId} size="sm" className="h-10 w-10 md:h-12 md:w-12 shadow-md" />
+                  <div className="flex justify-between items-start mb-3 md:mb-6">
+                    <AuthorityLogo boardId={boardId} size="sm" className="h-8 w-8 md:h-10 md:w-10 rounded-lg shadow-sm" />
                     {isPremium && (
-                       <Badge className="bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-none px-2 py-0.5 rounded-full font-bold text-[7px] md:text-[8px] flex items-center gap-1">
+                       <Badge className="bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-none px-1.5 py-0.5 rounded-full font-bold text-[7px] flex items-center gap-1">
                           <Lock className="h-2 w-2" /> Elite
                        </Badge>
                     )}
                   </div>
 
-                  <div className="flex-1 space-y-3">
-                    <div className="space-y-1 text-left">
-                       <p className="text-[8px] md:text-[9px] font-black text-primary tracking-tighter">{mock.difficulty || 'Mixed'} level</p>
-                       <h3 className="text-[13px] md:text-[15px] font-bold leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-2 min-h-[2.4em]">
+                  <div className="flex-1 space-y-2 min-w-0">
+                    <div className="space-y-0.5 text-left">
+                       <p className="text-[7px] md:text-[8px] font-black text-primary tracking-tighter uppercase">{mock.difficulty || 'Mixed'} level</p>
+                       <h3 className="text-xs md:text-sm font-bold leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-2 min-h-[2.4em]">
                            {mock.title}
                        </h3>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-2 pt-3 border-t border-border">
-                       <StatPill icon={BookOpen} label={`${mock.totalQuestions} items`} />
-                       <StatPill icon={Clock} label={`${mock.duration}m`} />
+                    <div className="grid grid-cols-2 gap-1 pt-2 border-t border-border">
+                       <StatPill icon={BookOpen} label={`${mock.totalQuestions} Qs`} />
                     </div>
                   </div>
 
-                  <div className="mt-5 pt-3">
+                  <div className="mt-4 pt-2">
                     <Button asChild className={cn(
-                      "w-full h-10 md:h-12 rounded-xl font-bold text-[9px] md:text-[11px] tracking-tight shadow-md border-none transition-all active:scale-95 gap-2", 
+                      "w-full h-8 md:h-10 rounded-lg font-bold text-[9px] md:text-[10px] tracking-tight shadow-md border-none transition-all active:scale-95 gap-2", 
                       locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-primary hover:bg-blue-700 text-white"
                     )}>
                         <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`}>
-                          {locked ? <Lock className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 fill-current" />}
-                          {locked ? "Unlock with Pass" : "Start Test"}
+                          {locked ? <Lock className="h-3 w-3" /> : <Play className="h-3 w-3 fill-current" />}
+                          {locked ? "Unlock" : "Start"}
                         </Link>
                     </Button>
                   </div>
@@ -123,8 +122,8 @@ export default function LatestMocks() {
 
 function StatPill({ icon: Icon, label }: any) {
    return (
-      <div className="flex items-center gap-1.5 text-[8px] md:text-[9px] font-bold text-muted-foreground tracking-tight">
-         <Icon className="h-2.5 w-2.5 text-primary/40 shrink-0" />
+      <div className="flex items-center gap-1 text-[7px] md:text-[8px] font-bold text-muted-foreground tracking-tight">
+         <Icon className="h-2 w-2 text-primary/40 shrink-0" />
          <span className="truncate">{label}</span>
       </div>
    )
