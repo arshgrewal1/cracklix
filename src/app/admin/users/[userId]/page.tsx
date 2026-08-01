@@ -53,7 +53,8 @@ import {
   Crown,
   BookOpen,
   ClipboardList,
-  Settings
+  Settings,
+  Trophy
 } from "lucide-react"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
@@ -63,7 +64,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Deep Institutional Aspirant Auditor v2.1.
+ * @fileOverview Deep Institutional Aspirant Auditor v2.2.
+ * FIXED: Added missing Trophy icon import to resolve ReferenceError.
  * FIXED: Bypassed Firebase Index Error by performing client-side sorting for Subscriptions and Sessions.
  */
 
@@ -399,7 +401,7 @@ function AnalyticNode({ label, val, icon }: any) {
    return (
       <Card className="border-none shadow-xl bg-white rounded-[2rem] p-6 md:p-8 border border-slate-50 flex flex-col items-center justify-center text-center gap-4 group hover:translate-y-[-4px] transition-all">
          <div className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-            {React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6" })}
+            {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6" }) : null}
          </div>
          <div className="space-y-0.5 min-w-0 w-full">
             <p className="text-xs md:text-xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none truncate">{val}</p>
