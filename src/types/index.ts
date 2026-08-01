@@ -140,6 +140,7 @@ export interface UserProfile {
     allowedSeries?: string[];
     allowedCategories?: string[];
     freePassClaimed?: boolean;
+    adFree?: boolean;
   };
   sessionVersion?: number;
   referralCode?: string;
@@ -151,6 +152,7 @@ export interface UserProfile {
   recentMockTitle?: string;
   registrationDate?: string;
   attemptRate?: number;
+  studyStatsData?: any;
 }
 
 export interface StudySession {
@@ -196,6 +198,7 @@ export interface AttemptResult {
   isGuestNode?: boolean;
   accuracy: number;
   submittedAt?: any;
+  mockType?: MockType;
 }
 
 export interface Category {
@@ -205,6 +208,7 @@ export interface Category {
   displayOrder: number;
   iconUrl?: string;
   updatedAt?: any;
+  logoUrl?: string;
 }
 
 export interface Board {
@@ -214,6 +218,7 @@ export interface Board {
   categoryId: string; 
   iconUrl?: string;
   displayOrder?: number;
+  logoUrl?: string;
 }
 
 export interface Exam {

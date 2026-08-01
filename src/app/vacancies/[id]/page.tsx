@@ -46,9 +46,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v6.0.
- * FIXED: Added missing 'Users' import.
- * COMPACT: Reduced padding and sizes for optimized layout.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v7.0.
+ * FIXED: UI Back button hidden in standalone PWA mode.
+ * FIXED: Action bar overlap with MobileNav resolved by conditional bottom spacing.
+ * OPTIMIZED: Reduced text sizes and applied strict truncation to prevent overflow.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -128,18 +129,18 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
                   <div className="absolute -bottom-2 -right-2 h-10 w-10 md:h-12 md:w-12 bg-emerald-500 rounded-xl border-[4px] border-[#0F172A] shadow-2xl flex items-center justify-center text-white"><ShieldCheck className="h-5 w-5 md:h-7 md:w-7 stroke-[3px]" /></div>
                </div>
 
-               <div className="flex-1 space-y-4 text-center lg:text-left min-w-0">
+               <div className="flex-1 space-y-4 text-center lg:text-left min-w-0 w-full">
                   <div className="space-y-3">
                      <div className="flex flex-wrap justify-center lg:justify-start items-center gap-2">
                         <Badge className="bg-primary text-white border-none px-4 py-1 rounded-full font-black text-[9px] shadow-xl uppercase tracking-tighter">{vacancy.board} official</Badge>
                         <div className="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center border border-white/10 shadow-inner"><Crown className="h-4 w-4 text-primary fill-primary" /></div>
                      </div>
-                     <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-white tracking-tighter leading-tight antialiased uppercase">
+                     <h1 className="text-xl sm:text-2xl md:text-5xl font-black text-white tracking-tight leading-tight antialiased uppercase break-words">
                         {vacancy.title}
                      </h1>
-                     <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-slate-400 font-bold text-xs md:text-lg tracking-tight">
-                        <span className="flex items-center gap-2 truncate max-w-[280px]"><Landmark className="h-4 w-4 text-primary shrink-0" /> {vacancy.department}</span>
-                        <span className="flex items-center gap-2 shrink-0"><MapPin className="h-4 w-4 text-rose-500" /> {vacancy.district}</span>
+                     <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-slate-400 font-bold text-[10px] md:text-lg tracking-tight">
+                        <span className="flex items-center gap-2 truncate max-w-[200px] md:max-w-md"><Landmark className="h-3.5 w-3.5 text-primary shrink-0" /> {vacancy.department}</span>
+                        <span className="flex items-center gap-2 shrink-0"><MapPin className="h-3.5 w-3.5 text-rose-500" /> {vacancy.district}</span>
                      </div>
                   </div>
 
@@ -158,7 +159,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
 
          <section className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 px-1">
             <StatPill icon={Zap} label="Posts" val={vacancy.totalPosts} color="text-primary" bg="bg-blue-50" />
-            <StatPill icon={GraduationCap} label="Qualification" val={vacancy.education?.split(',')[0]} color="text-emerald-600" bg="bg-emerald-50" />
+            <StatPill icon={GraduationCap} label="Qualif." val={vacancy.education?.split(',')[0]} color="text-emerald-600" bg="bg-emerald-50" />
             <StatPill icon={Users} label="Age" val={vacancy.ageLimit} color="text-orange-500" bg="bg-orange-50" />
             <StatPill icon={Clock} label="Last date" val={formatDate(vacancy.lastDate)} color="text-rose-500" bg="bg-rose-50" />
          </section>
@@ -182,10 +183,10 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
                </HubContainer>
 
                <HubContainer label="Eligibility criteria" icon={ShieldCheck} color="text-blue-500">
-                  <div className="space-y-6">
+                  <div className="space-y-6 text-left">
                      <div className="space-y-1">
                         <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Education hub</p>
-                        <p className="text-sm md:text-lg font-[700] text-[#0F172A] leading-relaxed antialiased">{vacancy.qualificationDetail || vacancy.education}</p>
+                        <p className="text-sm md:text-lg font-[700] text-[#0F172A] leading-relaxed antialiased break-words">{vacancy.qualificationDetail || vacancy.education}</p>
                      </div>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                         <DataPoint label="Nationality" value="Indian Citizen" />
@@ -196,12 +197,12 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
 
                <HubContainer label="Selection process" icon={Target} color="text-rose-500">
                   <div className="space-y-6">
-                     <p className="text-sm md:text-lg font-[700] text-[#0F172A] leading-relaxed antialiased">{vacancy.selectionProcess}</p>
+                     <p className="text-sm md:text-lg font-[700] text-[#0F172A] leading-relaxed antialiased break-words">{vacancy.selectionProcess}</p>
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {["Written Exam", "Physical Test", "Medical Audit", "Final Merit"].map((stage, i) => (
                            <div key={i} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 group hover:bg-white hover:shadow-lg transition-all duration-500">
                               <div className="h-8 w-8 rounded-lg bg-white shadow-md flex items-center justify-center text-primary font-black text-xs shrink-0 group-hover:scale-110 transition-transform">0{i+1}</div>
-                              <span className="text-xs md:text-sm font-[800] text-slate-700 uppercase tracking-tight">{stage}</span>
+                              <span className="text-xs md:text-sm font-[800] text-slate-700 uppercase tracking-tight truncate">{stage}</span>
                            </div>
                         ))}
                      </div>
@@ -243,7 +244,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
             </aside>
          </div>
 
-         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] w-[95vw] max-w-3xl animate-in slide-in-from-bottom-12 duration-500">
+         <div className="fixed bottom-20 md:bottom-4 left-1/2 -translate-x-1/2 z-[1000] w-[95vw] max-w-3xl animate-in slide-in-from-bottom-12 duration-500">
             <div className="bg-[#0F172A]/95 backdrop-blur-xl p-3 md:p-4 rounded-2xl shadow-5xl border border-white/10 flex items-center justify-between gap-3">
                <div className="flex items-center gap-3 hidden sm:flex px-4 border-r border-white/10">
                   <AuthorityLogo boardId={vacancy.board} size="sm" className="h-10 w-10 bg-white/10 p-2 shadow-inner" />
@@ -288,7 +289,7 @@ function DataPoint({ label, value, highlight = false }: any) {
   return (
      <div className="space-y-1">
         <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-300 tracking-widest">{label}</p>
-        <p className={cn("text-sm md:text-xl font-[800] leading-tight antialiased truncate", highlight ? "text-primary" : "text-slate-700")}>{value || "TBD"}</p>
+        <p className={cn("text-sm md:text-lg font-[800] leading-tight antialiased truncate", highlight ? "text-primary" : "text-slate-700")}>{value || "TBD"}</p>
      </div>
   )
 }
@@ -300,7 +301,7 @@ function StatPill({ icon: Icon, label, val, color, bg }: any) {
            <Icon className="h-4 w-4 md:h-5 md:w-5" />
         </div>
         <div className="space-y-0.5 min-w-0 w-full">
-           <p className="text-[13px] md:text-lg font-black text-[#0F172A] tabular-nums tracking-tighter leading-none truncate">{val}</p>
+           <p className="text-[12px] md:text-lg font-black text-[#0F172A] tabular-nums tracking-tighter leading-none truncate">{val}</p>
            <p className="text-[8px] font-black uppercase text-slate-400 tracking-tight truncate">{label}</p>
         </div>
      </Card>
