@@ -32,7 +32,7 @@ import {
   BookMarked,
   Settings,
   Lock,
-  PenSquare
+  SquarePen
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -60,8 +60,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v55.0 [Strict NEXT15 Async].
- * FIXED: Awaited searchParams and correctly wrapped Firestore query.
+ * @fileOverview Master Mock Builder v56.0 [Hardened NEXT15].
+ * FIXED: Properly wrapped Firestore collection queries and resolved Promise-based searchParams.
  */
 
 export default function MockBuilderPage() {
@@ -282,7 +282,7 @@ function MockBuilderContent() {
       published: !isDraft,
       status: isDraft ? 'DRAFT' : 'PUBLISHED',
       updatedAt: serverTimestamp(),
-      createdAt: id ? (existingData?.createdAt || serverTimestamp()) : serverTimestamp(),
+      createdAt: id ? (existingMock?.createdAt || serverTimestamp()) : serverTimestamp(),
     };
 
     try {
@@ -380,7 +380,7 @@ function MockBuilderContent() {
           <AlertCircle className="h-10 w-10" />
        </div>
        <div className="space-y-4 max-w-sm mx-auto">
-          <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Sync failure</h2>
+          <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Sync failure</h2>
           <p className="text-slate-500 font-medium leading-relaxed">{initError}</p>
        </div>
        <div className="flex flex-col gap-4 w-full max-w-xs">
@@ -397,13 +397,13 @@ function MockBuilderContent() {
   return (
     <div className="max-w-[1600px] mx-auto space-y-6 md:space-y-12 pb-40 text-left pt-2 px-4 md:px-10">
       <AdminPageHeader
-        icon={PenSquare}
+        icon={SquarePen}
         label="Assembly area"
         title={isEditing ? "Modify series" : "Mock builder"}
         subtitle="Manage structure and details for the test series."
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
-           <button onClick={() => router.back()} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all border-none cursor-pointer text-slate-400">Discard</button>
+           <button onClick={() => router.back()} className="h-14 px-6 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-all border-none cursor-pointer text-slate-400 font-bold uppercase text-[10px]">Discard</button>
            <Button onClick={() => handlePublish(true)} disabled={isPublishing} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200">
               {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save draft
            </Button>
@@ -758,9 +758,9 @@ function MockBuilderContent() {
                    </h3>
                    <Popover>
                       <PopoverTrigger asChild>
-                         <Button className="h-10 md:h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] uppercase rounded-xl shadow-xl gap-2">
+                         <button className="h-10 md:h-12 px-6 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] uppercase rounded-xl shadow-xl flex items-center justify-center gap-2 border-none">
                             <Plus className="h-4 w-4" /> Add section
-                         </Button>
+                         </button>
                       </PopoverTrigger>
                       <PopoverContent className="w-[320px] p-6 bg-[#0F172A] text-white rounded-[2rem] border-white/10 shadow-5xl z-[1001]">
                          <div className="space-y-4">

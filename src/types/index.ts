@@ -46,6 +46,7 @@ export interface BrandingSettings {
   copyrightText: string;
   updatedAt: any;
   showFounderImage?: boolean;
+  adSenseEnabled?: boolean;
 }
 
 export interface DistributionSettings {

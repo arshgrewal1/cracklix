@@ -61,8 +61,8 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v47.0 [Strict NEXT15 Async].
- * FIXED: setMockData reference to setQuizData and awaited searchParams correctly.
+ * @fileOverview Daily Challenge Builder v48.0 [Strict NEXT15 Async].
+ * FIXED: setMockData reference to setQuizData and properly wrapped searchParams access.
  */
 
 export default function DailyQuizBuilder() {
@@ -295,7 +295,7 @@ function DailyQuizBuilderContent() {
           <AlertCircle className="h-10 w-10" />
        </div>
        <div className="space-y-4 max-w-sm mx-auto">
-          <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Sync failure</h2>
+          <h2 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Sync failure</h2>
           <p className="text-slate-500 font-medium leading-relaxed">{initError}</p>
        </div>
        <div className="flex flex-col gap-4 w-full max-w-xs">
@@ -316,7 +316,7 @@ function DailyQuizBuilderContent() {
         subtitle="Configure the official daily items for the selection bank."
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
-           <button onClick={() => setStagedQuestions([])} className="h-14 px-6 rounded-2xl border border-slate-200 font-bold uppercase text-[10px] bg-white hover:bg-slate-50 transition-all border-none cursor-pointer text-slate-400">Reset</button>
+           <button onClick={() => setStagedQuestions([])} className="h-14 px-6 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-all border-none cursor-pointer text-slate-400 font-bold uppercase text-[10px]">Reset</button>
            <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-6 rounded-2xl font-bold uppercase text-[10px] tracking-tight border-slate-200 text-[#0F172A]">Save draft</Button>
            <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold uppercase text-[10px] tracking-tight shadow-2xl gap-3 border-none transition-all active:scale-95">
               {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-5 w-5" />} Sync live

@@ -144,7 +144,7 @@ export default function VacancyDetailPage() {
 
                <div className="flex-1 space-y-10 text-center lg:text-left">
                   <div className="space-y-6">
-                     <div className="flex flex-wrap justify-center lg:justify-start items-center gap-4">
+                     <div className="flex flex-wrap justify-center lg:justify-start items-center gap-3">
                         <Badge className="bg-primary text-white border-none px-6 py-2 rounded-full font-black text-[10px] md:text-xs tracking-widest shadow-xl uppercase">{vacancy.board} official</Badge>
                         {isNew() && <Badge className="bg-emerald-50 text-emerald-600 border-none px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-xl tracking-widest animate-pulse">New Node</Badge>}
                         {isClosingSoon() && <Badge className="bg-rose-500 text-white border-none px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-xl tracking-widest">Closing Soon</Badge>}
@@ -342,7 +342,7 @@ export default function VacancyDetailPage() {
                     <Share2 className="h-5 w-5" />
                   </Button>
                   <Button asChild className="flex-1 h-14 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-xs tracking-[0.3em] rounded-3xl md:rounded-[2.5rem] shadow-4xl border-none active:scale-95 transition-all">
-                     <a href={vacancy.applyLink} target="_blank" rel="noopener noreferrer">Apply online hub <ChevronRight className="ml-2 h-4 w-4 md:h-6 md:w-6" /></a>
+                     <a href={vacancy.applyLink} target="_blank" rel="noopener noreferrer">Apply online hub <ChevronRight className="h-4 w-4 md:h-6 md:w-6" /></a>
                   </Button>
                </div>
             </div>
