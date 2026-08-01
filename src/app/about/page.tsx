@@ -12,7 +12,6 @@ import {
   Trophy,
   Landmark,
   LucideIcon,
-  ShieldAlert,
   Zap
 } from "lucide-react"
 import Link from "next/link"
@@ -23,8 +22,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional About Center v28.0 [Data Corrected].
- * FIXED: Replaced hardcoded stats with real-time institutional database nodes.
+ * @fileOverview Institutional About Center v29.0 [Live Sync].
+ * FIXED: Pulls real stats from institutional database nodes.
  */
 
 interface Stats {
@@ -60,7 +59,7 @@ export default function AboutPage() {
     
     return {
       students: formatNumber(totalUsers),
-      mcqs: formatNumber(totalQuestions),
+      questions: formatNumber(totalQuestions),
       hubs: totalExams.toString() + "+"
     };
   }, [stats]);
@@ -128,7 +127,6 @@ export default function AboutPage() {
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
                             className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
                             priority
-                            data-ai-hint="professional man"
                           />
                            <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent opacity-80" />
                         </>
@@ -169,9 +167,9 @@ export default function AboutPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
-                       <ImpactNode label="Aspirants" val={mounted ? liveStats.students : "---"} icon={Users} loading={false} />
-                       <ImpactNode label="Question bank" val={mounted ? liveStats.mcqs : "---"} icon={Zap} loading={false} />
-                       <ImpactNode label="Official Hubs" val={mounted ? liveStats.hubs : "---"} icon={Landmark} loading={false} />
+                       <ImpactNode label="Aspirants" val={mounted ? liveStats.students : "---"} icon={Users} />
+                       <ImpactNode label="Questions" val={mounted ? liveStats.questions : "---"} icon={Zap} />
+                       <ImpactNode label="Official Hubs" val={mounted ? liveStats.hubs : "---"} icon={Landmark} />
                     </div>
                  </motion.div>
               </div>
@@ -200,18 +198,14 @@ export default function AboutPage() {
   )
 }
 
-function ImpactNode({ label, val, icon: Icon, loading }: { label: string, val: string, icon: LucideIcon, loading: boolean }) {
+function ImpactNode({ label, val, icon: Icon }: { label: string, val: string, icon: LucideIcon }) {
    return (
       <div className="bg-white/5 border border-white/10 rounded-2xl p-3 flex items-center gap-3 group transition-all">
          <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
             <Icon className="h-3.5 w-3.5 text-primary" />
          </div>
          <div className="text-left min-w-0">
-            {loading ? (
-               <Skeleton className="h-4 w-10 bg-white/10" />
-            ) : (
-               <p className="text-sm md:text-xl font-headline font-black text-white leading-none truncate">{val}</p>
-            )}
+            <p className="text-sm md:text-xl font-headline font-black text-white leading-none truncate">{val}</p>
             <p className="text-[7px] font-bold text-slate-500 tracking-widest mt-1 truncate uppercase">{label}</p>
          </div>
       </div>

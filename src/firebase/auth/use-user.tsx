@@ -8,8 +8,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth Hub v18.0 [Presence Integrated].
- * UPDATED: Implemented live presence tracking with heartbeat sync.
+ * @fileOverview Hardened Auth Hub v19.0 [Presence Hub].
+ * UPDATED: Implemented live presence tracking with interval-based heartbeat.
  */
 export function useUser() {
   const auth = useAuth();
@@ -30,7 +30,7 @@ export function useUser() {
     }).catch(() => {});
   }, []);
 
-  // 1. AUTH HANDSHAKE
+  // 1. Auth Switchboard
   useEffect(() => {
     if (!auth) {
       setAuthResolved(true);
@@ -56,7 +56,7 @@ export function useUser() {
     return () => unsubscribeAuth();
   }, [auth]);
 
-  // 2. PROFILE & PRESENCE SYNC
+  // 2. Presence & Profile Sync Node
   useEffect(() => {
     if (!user || !db) {
       setProfile(null);
@@ -64,15 +64,16 @@ export function useUser() {
       return;
     }
 
-    // A. Presence Node: Set Online
     const userRef = doc(db, 'users', user.uid);
+
+    // Initial presence update
     updateDoc(userRef, {
       online: true,
       lastSeen: serverTimestamp(),
       updatedAt: serverTimestamp()
     }).catch(() => {});
 
-    // B. Live Profile Listener
+    // Real-time profile listener
     const unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
       try {
         if (docSnap.exists()) {
@@ -105,26 +106,30 @@ export function useUser() {
           setProfile(null);
         }
       } catch (e) {
-        console.error("[PROFILE_AUDIT_ERROR]:", e);
+        console.error("[PROFILE_SYNC_ERROR]:", e);
       } finally {
         profileLoaded.current = true;
         setProfileLoading(false);
       }
     });
 
-    // C. Presence Node: Cleanup (Best effort for web)
-    const handleVisibility = () => {
-       if (document.visibilityState === 'hidden') {
-          updateDoc(userRef, { online: false, lastSeen: serverTimestamp() }).catch(() => {});
-       } else {
-          updateDoc(userRef, { online: true, lastSeen: serverTimestamp() }).catch(() => {});
+    // Heartbeat Node: Syncs presence every 4 minutes to keep online status accurate
+    const heartbeat = setInterval(() => {
+       if (document.visibilityState === 'visible') {
+          updateDoc(userRef, { lastSeen: serverTimestamp() }).catch(() => {});
        }
+    }, 240000);
+
+    const handleVisibility = () => {
+       const isOnline = document.visibilityState === 'visible';
+       updateDoc(userRef, { online: isOnline, lastSeen: serverTimestamp() }).catch(() => {});
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       unsubscribeProfile();
+      clearInterval(heartbeat);
       document.removeEventListener('visibilitychange', handleVisibility);
       updateDoc(userRef, { online: false, lastSeen: serverTimestamp() }).catch(() => {});
     };

@@ -28,8 +28,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Official Meet the Founder Page v5.0.
- * FIXED: Resolved layout overflow for "IN TOUCH" button on mobile devices.
+ * @fileOverview Official Meet the Founder Page v6.0.
+ * FIXED: Resolved layout overflow for "IN TOUCH" button.
  * UPDATED: Uses real-time database counts for institutional trust.
  */
 export default function MeetFounderPage() {
@@ -109,7 +109,9 @@ export default function MeetFounderPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-4"
                 >
-                  <Badge label={founder.role} />
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] md:text-xs font-bold tracking-tight text-primary">
+                    <Zap className="h-3 w-3 fill-current animate-pulse" /> {founder.role}
+                  </div>
                   <h1 className="text-4xl md:text-7xl font-[900] text-[#0F172A] tracking-tighter leading-[0.95]">
                     {founder.name.split(' ')[0]} <span className="text-primary">{founder.name.split(' ')[1]}.</span>
                   </h1>
@@ -119,9 +121,9 @@ export default function MeetFounderPage() {
                 </motion.div>
                 
                 <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-                  <FeatureChip icon={Target} label="Student First" />
-                  <FeatureChip icon={ShieldCheck} label="Verified Accuracy" />
-                  <FeatureChip icon={Heart} label="Built in Punjab" />
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm"><Target className="h-4 w-4 text-primary" /><span className="text-[10px] md:text-xs font-bold text-[#0F172A]">Student First</span></div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm"><ShieldCheck className="h-4 w-4 text-primary" /><span className="text-[10px] md:text-xs font-bold text-[#0F172A]">Verified Accuracy</span></div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm"><Heart className="h-4 w-4 text-primary" /><span className="text-[10px] md:text-xs font-bold text-[#0F172A]">Built in Punjab</span></div>
                 </div>
               </div>
             </div>
@@ -156,20 +158,19 @@ export default function MeetFounderPage() {
               </p>
             </div>
 
-            {/* FIXED CTA CONTAINER TO PREVENT OVERFLOW */}
-            <div className="pt-12 border-t border-slate-100 flex flex-col items-center justify-between gap-10">
-               <div className="text-center space-y-2 w-full">
+            <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-10">
+               <div className="text-center md:text-left space-y-2">
                   <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Connect directly</p>
-                  <p className="text-lg md:text-4xl font-black text-[#0F172A] break-all">{founder.email}</p>
+                  <p className="text-lg md:text-3xl font-black text-[#0F172A] break-all">{founder.email}</p>
                </div>
-               <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                 <Button asChild variant="outline" className="h-16 w-full sm:flex-1 rounded-[1.5rem] border-2 border-slate-200 text-[#0F172A] font-bold gap-3 active:scale-95 transition-all shadow-sm">
+               <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                 <Button asChild variant="outline" className="h-14 w-full sm:w-auto px-8 rounded-2xl border-2 border-slate-200 text-[#0F172A] font-bold gap-3 active:scale-95 transition-all">
                     <a href={founder.instagramUrl} target="_blank" rel="noopener noreferrer">
                       <Instagram className="h-5 w-5 text-rose-500" />
                       Follow @cracklix.in
                     </a>
                  </Button>
-                 <Button asChild className="h-16 w-full sm:flex-1 bg-primary hover:bg-blue-700 text-white font-bold uppercase text-[11px] tracking-widest rounded-[1.5rem] shadow-xl border-none active:scale-95 transition-all">
+                 <Button asChild className="h-14 w-full sm:w-auto px-8 bg-primary hover:bg-blue-700 text-white font-bold uppercase text-[10px] tracking-widest rounded-2xl shadow-xl border-none active:scale-95 transition-all">
                     <Link href="/contact" className="flex items-center justify-center gap-2">
                        Get in touch <MessageCircle className="h-5 w-5" />
                     </Link>
@@ -179,53 +180,32 @@ export default function MeetFounderPage() {
           </div>
         </section>
 
-        {/* STATS STRIP - USES REAL DB NODES */}
+        {/* STATS STRIP */}
         <section className="py-12 md:py-24 bg-slate-50 border-y border-slate-100">
            <div className="container mx-auto px-4 max-w-6xl">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-                 <MinimalStat value={liveStats.aspirants} label="Aspirants" icon={Users} />
-                 <MinimalStat value={liveStats.mocks} label="Mock tests" icon={Zap} />
-                 <MinimalStat value={liveStats.questions} label="Question bank" icon={ShieldCheck} />
-                 <MinimalStat value={founder.buildingSince} label="Building since" icon={Briefcase} />
+                 <div className="text-center space-y-3 group">
+                    <div className="h-12 w-12 md:h-16 md:w-16 bg-white rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm mx-auto flex items-center justify-center text-slate-300 group-hover:text-primary transition-all"><Users className="h-6 w-6" /></div>
+                    <div className="space-y-1"><p className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">{liveStats.aspirants}</p><p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Aspirants</p></div>
+                 </div>
+                 <div className="text-center space-y-3 group">
+                    <div className="h-12 w-12 md:h-16 md:w-16 bg-white rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm mx-auto flex items-center justify-center text-slate-300 group-hover:text-primary transition-all"><Zap className="h-6 w-6" /></div>
+                    <div className="space-y-1"><p className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">{liveStats.mocks}</p><p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Mock tests</p></div>
+                 </div>
+                 <div className="text-center space-y-3 group">
+                    <div className="h-12 w-12 md:h-16 md:w-16 bg-white rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm mx-auto flex items-center justify-center text-slate-300 group-hover:text-primary transition-all"><ShieldCheck className="h-6 w-6" /></div>
+                    <div className="space-y-1"><p className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">{liveStats.questions}</p><p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Question bank</p></div>
+                 </div>
+                 <div className="text-center space-y-3 group">
+                    <div className="h-12 w-12 md:h-16 md:w-16 bg-white rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm mx-auto flex items-center justify-center text-slate-300 group-hover:text-primary transition-all"><Briefcase className="h-6 w-6" /></div>
+                    <div className="space-y-1"><p className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">{founder.buildingSince}</p><p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Building since</p></div>
+                 </div>
               </div>
            </div>
         </section>
       </main>
 
       <Footer />
-    </div>
-  );
-}
-
-function Badge({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-[10px] md:text-xs font-bold tracking-tight text-primary">
-       <Zap className="h-3 w-3 fill-current" /> {label}
-    </span>
-  );
-}
-
-function FeatureChip({ icon: Icon, label }: { icon: any, label: string }) {
-  return (
-    <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm">
-       <Icon className="h-4 w-4 text-primary" />
-       <span className="text-[10px] md:text-xs font-bold text-[#0F172A] tracking-tight">{label}</span>
-    </div>
-  );
-}
-
-function MinimalStat({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
-  return (
-    <div className="text-center space-y-3 group">
-       <div className="h-12 w-12 md:h-16 md:w-16 bg-white rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm mx-auto flex items-center justify-center text-slate-300 group-hover:text-primary transition-all group-hover:scale-110">
-          <Icon className="h-6 w-6 md:h-8 md:w-8" />
-       </div>
-       <div className="space-y-1">
-          <p className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">
-            {value}
-          </p>
-          <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">{label}</p>
-       </div>
     </div>
   );
 }
