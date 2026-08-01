@@ -11,8 +11,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 
 /**
- * @fileOverview Institutional Sticky Search Hub v16.2.
- * UPDATED: Hardened dark mode support for input and result containers.
+ * @fileOverview Institutional Sticky Search Hub v16.3.
+ * UPDATED: Branding synchronized to "Arsh Grewal verified".
  */
 
 const TRENDING = [
@@ -203,7 +203,7 @@ export default function GlobalSearch() {
                     {results.mocks.length > 0 && (
                       <SearchGroup label="Practice mocks">
                         {results.mocks.map(m => (
-                          <SearchResult key={m.id} href={`/mocks/view?id=${m.id}`} title={m.title} sub={`${m.totalQuestions} items`} icon={<Zap className="h-4 w-4 text-primary" />} onClick={() => setIsOpen(false)} />
+                          <SearchResult key={m.id} href={`/mocks/view?id=${m.id}`} title={m.title} sub={`${m.totalQuestions} questions`} icon={<Zap className="h-4 w-4 text-primary" />} onClick={() => setIsOpen(false)} />
                         ))}
                       </SearchGroup>
                     )}
@@ -230,10 +230,10 @@ export default function GlobalSearch() {
           </AnimatePresence>
         </div>
 
-        {/* Official System Verified Badge */}
+        {/* Founder Verification Badge */}
         <div className="mt-4 flex items-center justify-center gap-2 text-muted-foreground">
            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-           <span className="text-[9px] font-bold uppercase tracking-widest antialiased">Official system verified</span>
+           <span className="text-[9px] font-bold uppercase tracking-widest antialiased">Arsh Grewal verified</span>
         </div>
       </div>
     </section>

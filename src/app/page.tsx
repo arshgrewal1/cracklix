@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v513.0.
+ * @fileOverview Premium Institutional Hub v514.0.
  * FIXED: Redesigned "Today's Challenge" with high-fidelity Linear/Notion style.
  * FIXED: Ensured all ReferenceErrors (Badge, Button) are resolved.
  */
