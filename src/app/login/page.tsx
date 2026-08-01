@@ -40,10 +40,8 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v12.0 [PWA Optimized].
- * FIXED: redirect_uri_mismatch resolved by pinning stable authDomain.
- * FIXED: "Blank page" hang resolved by using Redirect flow for Standalone/Mobile.
- * OPTIMIZED: Instant redirect to home, background profile sync.
+ * @fileOverview Premium Institutional Auth Portal v13.0.
+ * UPDATED: Logo zoom adjustment and container re-sync.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -75,7 +73,6 @@ function LoginContent() {
   const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
 
-  // 1. RECOVERY NODE: Handle return from Google Redirect
   useEffect(() => {
     if (!auth || !db) return;
 
@@ -83,9 +80,7 @@ function LoginContent() {
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
-          // Atomic Redirect: Send to home immediately
           router.replace(returnUrl);
-          // Sync profile in background
           finalizeUserNode(result.user, result.user.displayName || "Aspirant");
         }
       } catch (error: any) {
@@ -100,7 +95,6 @@ function LoginContent() {
     checkRedirect();
   }, [auth, db, router, returnUrl, toast]);
 
-  // 2. Already Logged In Guard
   useEffect(() => {
     if (!authLoading && user && !isConnecting) {
       router.replace(returnUrl);
@@ -117,13 +111,12 @@ function LoginContent() {
     try {
       await setPersistence(auth, browserLocalPersistence);
       
-      // Standalone/Mobile PWA Protocol: Force Redirect to avoid "blank window" hangs
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
       if (isStandalone || isMobile) {
         await signInWithRedirect(auth, provider);
-        return; // Execution stops here as page redirects
+        return;
       }
 
       try {
@@ -133,7 +126,6 @@ function LoginContent() {
           finalizeUserNode(result.user, result.user.displayName || "Aspirant");
         }
       } catch (popupError: any) {
-        // Fallback if popup is blocked
         await signInWithRedirect(auth, provider);
       }
     } catch (error: any) {
@@ -174,7 +166,6 @@ function LoginContent() {
     const deviceId = await getDeviceId();
     const userRef = doc(db, 'users', userNode.uid);
     
-    // Background Task: Profile Synchronization
     try {
       const userSnap = await getDoc(userRef);
       if (!userSnap.exists()) {
@@ -213,14 +204,14 @@ function LoginContent() {
       <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[460px]">
         <Card className="border border-slate-100 shadow-[0_40px_100px_-12px_rgba(0,0,0,0.08)] bg-white rounded-[40px] overflow-hidden flex flex-col p-8 md:p-14">
           
-          <div className="mb-12 flex justify-center">
-            <Logo variant="light" align="center" className="h-16 md:h-20" imgClassName="h-full w-auto" />
+          <div className="mb-14 flex justify-center w-full overflow-visible">
+            <Logo variant="light" align="center" className="h-20 md:h-28" imgClassName="h-full w-auto" />
           </div>
 
           <AnimatePresence mode="wait">
             <motion.div key={mode} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8 w-full">
               <div className="space-y-1.5 text-center">
-                <h1 className="text-2xl md:text-3xl font-[900] tracking-tighter text-[#0F172A] uppercase">
+                <h1 className="text-2xl md:text-3xl font-[900] tracking-tighter text-[#0F172A] uppercase leading-none">
                   {mode === 'signin' ? 'Welcome back' : mode === 'signup' ? 'Create account' : 'Recover access'}
                 </h1>
                 <p className="text-slate-400 font-medium text-[12px] md:text-base">Continue your preparation journey.</p>

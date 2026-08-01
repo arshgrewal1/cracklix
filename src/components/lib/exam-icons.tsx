@@ -4,8 +4,9 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v44.0.
+ * @fileOverview Institutional Branding Engine v45.0.
  * FIXED: Standardized public paths and normalized scaling for small cards.
+ * UPDATED: Removed white square boxes and implemented zoom logic.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -75,18 +76,20 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   if (logoUrl) {
     return (
       <div className={cn(
-        "relative shrink-0 overflow-hidden transition-all bg-white rounded-xl border border-slate-100 shadow-sm",
+        "relative shrink-0 transition-all flex items-center justify-center",
         containerSize, 
         className
       )}>
-        <Image 
-          src={logoUrl} 
-          alt="Authority" 
-          fill
-          sizes="256px"
-          className="object-contain p-1"
-          referrerPolicy="no-referrer"
-        />
+        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110">
+          <Image 
+            src={logoUrl} 
+            alt="Authority" 
+            fill
+            sizes="256px"
+            className="object-contain"
+            referrerPolicy="no-referrer"
+          />
+        </div>
       </div>
     );
   }
@@ -106,11 +109,11 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "flex items-center justify-center transition-all bg-white rounded-xl border border-slate-100 shadow-sm",
+      "flex items-center justify-center transition-all",
       containerSize, 
       className
     )}>
-      <div className="h-full w-full p-1.5">
+      <div className="h-full w-full scale-110">
         {getFallbackIcon()}
       </div>
     </div>

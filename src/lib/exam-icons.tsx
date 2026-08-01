@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v46.0.
- * FIXED: Standardized normalization for diverse Board IDs and enhanced fallbacks.
+ * @fileOverview Institutional Branding Engine v47.0.
+ * FIXED: Removed white square boxes and implemented 'Icon Zoom' logic.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -93,24 +93,26 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "relative shrink-0 overflow-hidden transition-all bg-white rounded-xl border border-slate-100 shadow-sm flex items-center justify-center",
+      "relative shrink-0 transition-all flex items-center justify-center",
       containerSize, 
       className
     )}>
       {logoUrl ? (
-        <Image 
-          src={logoUrl} 
-          alt="Authority" 
-          fill
-          sizes="256px"
-          className="object-contain p-1"
-          referrerPolicy="no-referrer"
-          onError={(e) => {
-             (e.target as any).style.display = 'none';
-          }}
-        />
+        <div className="relative w-full h-full transition-transform duration-500 hover:scale-110">
+          <Image 
+            src={logoUrl} 
+            alt="Authority" 
+            fill
+            sizes="256px"
+            className="object-contain"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+               (e.target as any).style.display = 'none';
+            }}
+          />
+        </div>
       ) : (
-        <div className="h-full w-full p-2 opacity-20">
+        <div className="h-full w-full p-2 opacity-20 scale-110">
           {getFallbackIcon()}
         </div>
       )}

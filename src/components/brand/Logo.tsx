@@ -17,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix Brand Identity v129.0.
- * UPDATED: Optimized for maximized scaling and left-anchoring.
+ * @fileOverview Cracklix Brand Identity v130.0.
+ * UPDATED: Increased scaling bounds for high-visibility 'Zoom' requirements.
  */
 export default function Logo({
   className = "",
@@ -49,11 +49,11 @@ export default function Logo({
       <Image
         src={src}
         alt="Cracklix"
-        width={isIcon ? 256 : 1000}
-        height={isIcon ? 256 : 400}
+        width={isIcon ? 320 : 1200}
+        height={isIcon ? 320 : 480}
         priority={priority}
         className={cn(
-          "h-auto transition-all flex-shrink-0 object-contain w-auto",
+          "h-auto transition-all flex-shrink-0 object-contain w-auto scale-110",
           imgClassName
         )}
       />
