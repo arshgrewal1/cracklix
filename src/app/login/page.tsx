@@ -40,8 +40,8 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Premium Institutional Auth Portal v13.0.
- * UPDATED: Logo zoom adjustment and container re-sync.
+ * @fileOverview Premium Institutional Auth Portal v14.0.
+ * FIXED: Atomic redirect handling to prevent login loop/email flicker.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -64,6 +64,7 @@ function LoginContent() {
 
   const [mode, setMode] = useState<AuthMode>('signin');
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isRedirectProcessing, setIsRedirectProcessing] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   
   const [email, setEmail] = useState("");
@@ -73,33 +74,38 @@ function LoginContent() {
   const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
 
+  // 1. ATOMIC REDIRECT RECOVERY
   useEffect(() => {
     if (!auth || !db) return;
 
-    const checkRedirect = async () => {
+    const handleHandshake = async () => {
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
+          // DO NOT WAIT: Move user to dashboard instantly
           router.replace(returnUrl);
+          // Sync database node in background
           finalizeUserNode(result.user, result.user.displayName || "Aspirant");
+        } else {
+          setIsRedirectProcessing(false);
         }
       } catch (error: any) {
+        setIsRedirectProcessing(false);
         if (error.code !== 'auth/no-auth-event') {
           console.error("[AUTH_REDIRECT_ERROR]:", error);
-          toast({ variant: "destructive", title: "Access Blocked", description: "Google account handshake failed." });
         }
-        setIsConnecting(false);
       }
     };
 
-    checkRedirect();
-  }, [auth, db, router, returnUrl, toast]);
+    handleHandshake();
+  }, [auth, db, router, returnUrl]);
 
+  // 2. SESSION SYNC
   useEffect(() => {
-    if (!authLoading && user && !isConnecting) {
+    if (!authLoading && !isRedirectProcessing && user && !isConnecting) {
       router.replace(returnUrl);
     }
-  }, [user, authLoading, router, returnUrl, isConnecting]);
+  }, [user, authLoading, isRedirectProcessing, router, returnUrl, isConnecting]);
 
   const handleGoogleSignIn = async () => {
     if (!auth || !db || isConnecting) return;
@@ -111,26 +117,26 @@ function LoginContent() {
     try {
       await setPersistence(auth, browserLocalPersistence);
       
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const isStandalone = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone);
+      const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
       if (isStandalone || isMobile) {
         await signInWithRedirect(auth, provider);
         return;
       }
 
-      try {
-        const result = await signInWithPopup(auth, provider);
-        if (result.user) {
-          router.replace(returnUrl);
-          finalizeUserNode(result.user, result.user.displayName || "Aspirant");
-        }
-      } catch (popupError: any) {
-        await signInWithRedirect(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      if (result.user) {
+        router.replace(returnUrl);
+        finalizeUserNode(result.user, result.user.displayName || "Aspirant");
       }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Login failed", description: "Identity sync error." });
-      setIsConnecting(false);
+      if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+         await signInWithRedirect(auth, provider);
+      } else {
+        toast({ variant: "destructive", title: "Login failed", description: "Identity sync error." });
+        setIsConnecting(false);
+      }
     }
   };
 
@@ -153,7 +159,6 @@ function LoginContent() {
         toast({ title: "Reset link sent" });
         setMode('signin');
         setIsConnecting(false);
-        return;
       }
     } catch (error: any) {
       toast({ variant: "destructive", title: "Auth failed", description: error.message });
@@ -199,6 +204,21 @@ function LoginContent() {
     }
   };
 
+  if (isRedirectProcessing || (authLoading && !user)) {
+     return (
+        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
+           <div className="relative">
+              <Zap className="h-10 w-10 text-primary animate-pulse" />
+              <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 text-primary animate-spin" />
+           </div>
+           <div className="text-center space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Synchronizing Hub</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verifying Identity...</p>
+           </div>
+        </div>
+     );
+  }
+
   return (
     <div className="min-h-[100dvh] bg-[#F8FAFC] flex flex-col items-center justify-center p-4 md:p-8 font-body selection:bg-primary/20">
       <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[460px]">
@@ -236,12 +256,12 @@ function LoginContent() {
                        <div className="space-y-1.5 text-left">
                           <div className="flex justify-between px-1">
                              <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-widest">Password</Label>
-                             <button type="button" onClick={() => setMode('forgot')} className="text-[9px] font-bold text-primary hover:underline bg-transparent border-none">Forgot password?</button>
+                             <button type="button" onClick={() => setMode('forgot')} className="text-[9px] font-bold text-primary hover:underline bg-transparent border-none cursor-pointer">Forgot password?</button>
                           </div>
                           <div className="relative">
                              <KeyRound className="h-4 w-4 absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                              <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="h-12 md:h-14 pl-12 pr-12 bg-slate-50 border-none font-bold rounded-xl text-sm shadow-inner" />
-                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 bg-transparent border-none p-0"><Eye className="h-4 w-4" /></button>
+                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 bg-transparent border-none p-0 cursor-pointer"><Eye className="h-4 w-4" /></button>
                           </div>
                        </div>
                     )}
