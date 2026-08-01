@@ -46,10 +46,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Enterprise Recruitment Intelligence Portal v7.3.
+ * @fileOverview Enterprise Recruitment Intelligence Portal v7.4.
+ * FIXED: Added missing Users icon import.
  * FIXED: UI Back button hidden in standalone PWA mode.
- * FIXED: Repositioned action bar to bottom-24 to clear mobile navigation.
- * FIXED: Added missing 'Users' import.
  */
 
 export default function VacancyDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -90,7 +89,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
         } catch (e) {}
      } else {
         await navigator.clipboard.writeText(window.location.href);
-        toast({ title: "Link Copied", description: "The URL is now on your clipboard." });
+        toast({ title: "Link Copied" });
      }
   }
 
@@ -98,7 +97,7 @@ export default function VacancyDetailPage(props: { params: Promise<{ id: string 
 
   const handleToggleBookmark = async () => {
     if (!user || !db) {
-       toast({ title: "Identification required", description: "Please login to save this recruitment." });
+       toast({ title: "Identification required" });
        return;
     }
     try {
@@ -310,7 +309,7 @@ function DataPoint({ label, value, highlight = false }: any) {
   return (
      <div className="space-y-1">
         <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-300 tracking-widest">{label}</p>
-        <p className={cn("text-sm md:text-lg font-[800] leading-tight antialiased truncate", highlight ? "text-primary" : "text-slate-700")}>{value || "TBD"}</p>
+        <p className={cn("text-sm md:text-lg font-[800] leading-tight antialiased break-words", highlight ? "text-primary" : "text-slate-700")}>{value || "TBD"}</p>
      </div>
   )
 }
@@ -355,3 +354,4 @@ function AssetLink({ label, href, icon: Icon, color }: any) {
       </a>
    )
 }
+

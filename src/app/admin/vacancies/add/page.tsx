@@ -42,8 +42,8 @@ import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Enterprise Vacancy Builder Hub v2.2.
- * FIXED: Added missing AnimatePresence and motion imports.
+ * @fileOverview Enterprise Vacancy Builder Hub v2.3.
+ * FIXED: Restored missing AnimatePresence and motion imports.
  */
 
 const BOARD_OPTIONS = [
@@ -195,7 +195,7 @@ function VacancyBuilder() {
            <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-xl border bg-white h-10 w-10 shadow-sm shrink-0"><ChevronLeft className="h-5 w-5" /></Button>
            <div className="text-left">
               <h1 className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight uppercase truncate max-w-[200px] md:max-w-none">{id ? 'Modify Record' : 'New Vacancy'}</h1>
-              <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Builder Hub v2.1</p>
+              <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Builder Hub v2.3</p>
            </div>
         </div>
         <div className="flex items-center gap-2">
@@ -252,7 +252,7 @@ function VacancyBuilder() {
                                 <FormNode label="Department Name" value={formData.department} onChange={v => setFormData({...formData, department: v})} placeholder="Home Affairs" />
                              </div>
                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="space-y-1.5">
+                                <div className="space-y-1.5 text-left">
                                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Board authority</Label>
                                    <select value={formData.board} onChange={e => setFormData({...formData, board: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner">
                                       {BOARD_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -273,7 +273,7 @@ function VacancyBuilder() {
                                 <FormNode label="Salary Hub" value={formData.salary} onChange={v => setFormData({...formData, salary: v})} placeholder="Pay Level 3" />
                                 <FormNode label="Grade Pay" value={formData.gradePay} onChange={v => setFormData({...formData, gradePay: v})} />
                              </div>
-                             <div className="space-y-2">
+                             <div className="space-y-2 text-left">
                                 <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Breakdown details</Label>
                                 <Textarea value={formData.locationDetail} onChange={e => setFormData({...formData, locationDetail: e.target.value})} placeholder="GEN: 500, SC: 200..." className="min-h-[120px] bg-slate-50 border-none rounded-xl text-sm" />
                              </div>
@@ -284,7 +284,7 @@ function VacancyBuilder() {
                           <div className="space-y-6">
                              <h2 className="text-xl md:text-2xl font-black text-[#0F172A] uppercase flex items-center gap-3"><GraduationCapIcon className="h-5 w-5 text-blue-500" /> Eligibility</h2>
                              <FormNode label="Primary Qualification" value={formData.education} onChange={v => setFormData({...formData, education: v})} placeholder="e.g. Graduation" />
-                             <div className="space-y-2">
+                             <div className="space-y-2 text-left">
                                 <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Detail nodes</Label>
                                 <Textarea value={formData.qualificationDetail} onChange={e => setFormData({...formData, qualificationDetail: e.target.value})} className="min-h-[120px] bg-slate-50 border-none rounded-xl" />
                              </div>
@@ -298,7 +298,7 @@ function VacancyBuilder() {
                        {activeStep === 3 && (
                           <div className="space-y-6">
                              <h2 className="text-xl md:text-2xl font-black text-[#0F172A] uppercase flex items-center gap-3"><Target className="h-5 w-5 text-rose-500" /> Selection</h2>
-                             <div className="space-y-2">
+                             <div className="space-y-2 text-left">
                                 <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Process Narrative</Label>
                                 <Textarea value={formData.selectionProcess} onChange={e => setFormData({...formData, selectionProcess: e.target.value})} className="min-h-[200px] bg-slate-50 border-none rounded-xl p-5" placeholder="1. Exam, 2. Physical..." />
                              </div>
@@ -341,7 +341,7 @@ function VacancyBuilder() {
                              <h2 className="text-xl md:text-2xl font-black text-[#0F172A] uppercase flex items-center gap-3"><Globe className="h-5 w-5 text-primary" /> Meta Hub</h2>
                              <div className="space-y-4">
                                 <FormNode label="SEO Title" value={formData.seoTitle} onChange={v => setFormData({...formData, seoTitle: v})} />
-                                <div className="space-y-2">
+                                <div className="space-y-2 text-left">
                                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Meta Description</Label>
                                    <Textarea value={formData.seoDescription} onChange={e => setFormData({...formData, seoDescription: e.target.value})} className="min-h-[100px] bg-slate-50 border-none rounded-xl" />
                                 </div>
@@ -392,7 +392,7 @@ function FormNode({ label, type = "text", value, onChange, placeholder, disabled
 function ConfigSwitch({ label, checked, onChange }: any) {
   return (
      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 group transition-all">
-        <div className="space-y-0.5">
+        <div className="space-y-0.5 text-left">
            <p className="font-black text-[10px] uppercase text-[#0F172A]">{label}</p>
            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tight">Active Node</p>
         </div>

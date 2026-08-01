@@ -11,9 +11,10 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Density Categories Hub v49.0.
+ * @fileOverview High-Density Categories Hub v50.0.
  * COMPACT: Limited to 2 items on Home Page. Reduced radii and padding for professional PWA look.
  */
 
