@@ -1,7 +1,6 @@
-
 "use client"
 
-import React, { useMemo, useState, useEffect } from "react"
+import React, { useMemo, useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, doc } from "firebase/firestore"
@@ -14,7 +13,8 @@ import {
   Crown,
   CheckCircle2,
   ChevronDown,
-  FileStack
+  FileStack,
+  Loader2
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -24,6 +24,13 @@ import { TestSeries, MockTest } from "@/types"
 import { cn } from "@/lib/utils"
 import { hasSeriesAccess } from "@/lib/access-control"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+
+/**
+ * @fileOverview Professional Test Listing Hub v5.0 [PWA Fixed].
+ * FIXED: Card overlap and collision issues on 320px screens.
+ * FIXED: Content clipping below bottom navigation.
+ * FIXED: Navigation guard added to prevent blinking/duplicate pushes.
+ */
 
 export default function SeriesDetailPortal() {
   const params = useParams()
@@ -81,12 +88,12 @@ export default function SeriesDetailPortal() {
         <button onClick={() => router.back()} className="p-2 hover:bg-slate-50 rounded-full transition-colors shrink-0">
           <ArrowLeft className="h-5 w-5 text-[#111827]" />
         </button>
-        <h1 className="text-[20px] font-bold text-[#111827] truncate">
+        <h1 className="text-[18px] md:text-[20px] font-bold text-[#111827] truncate">
           {series?.title}
         </h1>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6 pb-32 space-y-8">
+      <main className="max-w-4xl mx-auto px-4 py-6 pb-[calc(120px+env(safe-area-inset-bottom))] space-y-8">
         
         {/* FULL LENGTH SECTION */}
         {sections.full.length > 0 && (
@@ -164,65 +171,99 @@ function SectionHeader({ label, icon }: any) {
   return (
     <div className="flex items-center gap-3 px-1">
       {icon || <div className="h-1.5 w-6 bg-[#147BFF] rounded-full" />}
-      <h2 className="text-[17px] font-bold text-[#111827] uppercase tracking-tight">{label}</h2>
+      <h2 className="text-[15px] md:text-[17px] font-bold text-[#111827] uppercase tracking-tight">{label}</h2>
     </div>
   )
 }
 
 function TestCard({ test, index, attempt, hasAccess }: { test: MockTest, index: number, attempt: any, hasAccess: boolean }) {
   const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
+  const navigationGuard = useRef(false);
+
   const isCompleted = attempt?.status === 'COMPLETED';
   const isStarted = attempt?.status === 'IN_PROGRESS';
   const isPremium = test.accessLevel === 'PREMIUM';
   const locked = isPremium && !hasAccess;
 
-  const handleClick = () => {
-    if (locked) { router.push('/pass'); return; }
-    if (isCompleted) { router.push(`/results/view?id=${test.id}&attemptId=${attempt.attemptId}`); return; }
-    if (isStarted) { router.push(`/mocks/attempt?id=${test.id}`); return; }
-    router.push(`/mocks/instructions?id=${test.id}`);
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (navigationGuard.current) return;
+    
+    navigationGuard.current = true;
+    setIsNavigating(true);
+
+    if (locked) {
+      router.push('/pass');
+    } else if (isCompleted) {
+      router.push(`/results/view?id=${test.id}&attemptId=${attempt.attemptId}`);
+    } else if (isStarted) {
+      router.push(`/mocks/attempt?id=${test.id}`);
+    } else {
+      router.push(`/mocks/instructions?id=${test.id}`);
+    }
+
+    // Safety timeout to reset guard if navigation is cancelled or slow
+    setTimeout(() => {
+      navigationGuard.current = false;
+      setIsNavigating(false);
+    }, 2000);
   };
 
   return (
     <motion.div whileTap={{ scale: 0.98 }}>
-      <Card onClick={handleClick} className="border border-[#E5E7EB] shadow-soft rounded-[18px] bg-white p-4 flex items-center gap-4 cursor-pointer hover:border-[#147BFF]/30 transition-all group overflow-hidden">
+      <Card onClick={handleClick} className="border border-[#E5E7EB] shadow-soft rounded-[18px] bg-white p-3 md:p-4 flex items-center gap-3 md:gap-4 cursor-pointer hover:border-[#147BFF]/30 transition-all group overflow-hidden relative">
         {/* LEFT: CIRCULAR NUMBER */}
-        <div className="h-12 w-12 rounded-full bg-[#147BFF] flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0 transition-transform group-hover:scale-110">
+        <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#147BFF] flex items-center justify-center text-white font-bold text-sm md:text-lg shadow-lg shrink-0 transition-transform group-hover:scale-105">
           {index}
         </div>
 
         {/* CENTER: CONTENT */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-             <h3 className="text-[17px] font-bold text-[#111827] truncate leading-tight">{test.title}</h3>
-             {isPremium && <Crown className="h-3.5 w-3.5 text-amber-500 fill-current shrink-0" />}
+        <div className="flex-1 min-w-0 pr-1 md:pr-2">
+          <div className="flex items-center gap-1.5 md:gap-2 mb-1">
+             <h3 className="text-sm md:text-[17px] font-bold text-[#111827] truncate leading-tight">{test.title}</h3>
+             {isPremium && <Crown className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-500 fill-current shrink-0" />}
           </div>
-          <div className="flex items-center gap-1.5 text-[13px] font-medium text-[#6B7280]">
-            <span>{test.totalQuestions} Questions</span>
-            <span className="opacity-30">•</span>
-            <span>{test.totalQuestions * (test.positiveMarks || 1)} Marks</span>
-            <span className="opacity-30">•</span>
-            <span>{test.duration} Minutes</span>
+          
+          <div className="flex flex-wrap items-center gap-x-2 md:gap-x-3 gap-y-1 text-[10px] md:text-[13px] font-medium text-[#6B7280]">
+            <div className="flex items-center gap-1 whitespace-nowrap">
+               <span>{test.totalQuestions}</span>
+               <span className="text-[9px] opacity-60 uppercase font-black">Qs</span>
+            </div>
+            <span className="opacity-20 hidden md:inline">•</span>
+            <div className="flex items-center gap-1 whitespace-nowrap">
+               <span>{test.totalQuestions * (test.positiveMarks || 1)}</span>
+               <span className="text-[9px] opacity-60 uppercase font-black">Pts</span>
+            </div>
+            <span className="opacity-20 hidden md:inline">•</span>
+            <div className="flex items-center gap-1 whitespace-nowrap">
+               <span>{test.duration}</span>
+               <span className="text-[9px] opacity-60 uppercase font-black">Min</span>
+            </div>
           </div>
         </div>
 
         {/* RIGHT: ACTION */}
-        <div className="shrink-0 flex items-center gap-3">
-          {locked ? (
-            <div className="h-10 px-4 flex items-center justify-center bg-slate-100 text-[#6B7280] rounded-xl font-bold text-[13px] gap-2">
-               <Lock className="h-3.5 w-3.5" /> Locked
+        <div className="shrink-0 flex items-center">
+          {isNavigating ? (
+            <div className="h-9 w-20 md:w-24 bg-slate-50 flex items-center justify-center rounded-xl">
+               <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            </div>
+          ) : locked ? (
+            <div className="h-9 md:h-10 px-3 md:px-4 flex items-center justify-center bg-slate-100 text-[#6B7280] rounded-xl font-bold text-[11px] md:text-[13px] gap-1.5">
+               <Lock className="h-3 w-3" /> <span className="hidden xs:inline">Locked</span>
             </div>
           ) : isCompleted ? (
-            <button className="h-10 px-5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-[13px] shadow-md transition-all active:scale-95 whitespace-nowrap">
-               View Result
+            <button className="h-9 md:h-10 px-3 md:px-5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-[11px] md:text-[13px] shadow-md transition-all active:scale-95 whitespace-nowrap">
+               Result
             </button>
           ) : isStarted ? (
-            <button className="h-10 px-5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-[13px] shadow-md transition-all active:scale-95 whitespace-nowrap">
+            <button className="h-9 md:h-10 px-3 md:px-5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-[11px] md:text-[13px] shadow-md transition-all active:scale-95 whitespace-nowrap">
                Resume
             </button>
           ) : (
-            <button className="h-10 px-5 bg-[#147BFF] hover:bg-blue-600 text-white rounded-xl font-bold text-[13px] shadow-md transition-all active:scale-95 whitespace-nowrap flex items-center gap-1">
-               Start <ChevronRight className="h-4 w-4" />
+            <button className="h-9 md:h-10 px-4 md:px-6 bg-[#147BFF] hover:bg-blue-600 text-white rounded-xl font-bold text-[11px] md:text-[13px] shadow-md transition-all active:scale-95 whitespace-nowrap flex items-center gap-1">
+               Start <ChevronRight className="hidden md:inline h-4 w-4" />
             </button>
           )}
         </div>
@@ -230,3 +271,4 @@ function TestCard({ test, index, attempt, hasAccess }: { test: MockTest, index: 
     </motion.div>
   );
 }
+

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useUser, useAuth, useFirestore } from "@/firebase";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useUser, useFirestore } from "@/firebase";
 import { 
   doc, 
   getDoc, 
@@ -13,9 +13,7 @@ import {
   documentId, 
   getDocs, 
   setDoc, 
-  updateDoc, 
-  increment,
-  deleteDoc
+  increment
 } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import ExamHeader from "@/components/exam/ExamHeader";
@@ -26,29 +24,27 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import QuestionPalette from "@/components/mocks/QuestionPalette";
 import SubjectTabs from "@/components/exam/SubjectTabs";
 import { Button } from "@/components/ui/button";
-import { Loader2, Play, ShieldCheck, Zap, AlertCircle, Save, RefreshCw, X } from "lucide-react";
+import { Loader2, Zap, AlertCircle, Play, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useActiveSession } from "@/hooks/useStudyAnalytics";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter
+  DialogDescription
 } from "@/components/ui/dialog";
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Official Attempt Hub v110.0.
- * FIXED: Atomic attemptId generation to prevent 'undefined' values in result URLs.
- * FIXED: Ensures Firestore write completion before redirecting to Analysis hub.
+ * @fileOverview Official Attempt Hub v111.0 [Stability Hardened].
+ * FIXED: Refined initialization logic to prevent infinite re-render loops.
+ * FIXED: Atomic session handling for PWA standalone mode.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const db = useFirestore();
   const { user, profile, loading: userLoading } = useUser();
@@ -56,9 +52,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
   const mockId = useMemo(() => {
     if (propMockId) return propMockId;
-    const queryId = searchParams?.get('id');
-    if (queryId && queryId !== 'manual') return queryId;
-    return null;
+    return searchParams?.get('id') || null;
   }, [searchParams, propMockId]);
 
   const isRetakeRequested = searchParams?.get('retake') === 'true';
@@ -73,6 +67,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [mockData, setMockData] = useState<any>(null);
 
+  const loadingStarted = useRef(false);
+
   const {
     initExam,
     attemptId: storeAttemptId,
@@ -82,13 +78,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     currentIdx,
     questions,
     answers,
-    mockTitle,
     setAnswer,
     language,
     timeLeft,
     elapsedSeconds,
     setCurrentIdx,
-    saveAndNext,
     resetStore,
   } = useExamStore();
 
@@ -108,13 +102,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         targetSnap = await getDoc(dailyRef);
       }
       
-      if (!targetSnap.exists()) throw new Error("Test not found in database.");
+      if (!targetSnap.exists()) throw new Error("Test registry node not found.");
       
       const mData = targetSnap.data();
       setMockData(mData);
 
       const questionIds: string[] = mData.questionIds || [];
-      if (questionIds.length === 0) throw new Error("No questions in test.");
+      if (questionIds.length === 0) throw new Error("This test series has no questions.");
       
       const chunks = [];
       for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
@@ -136,7 +130,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const allFetched = (await Promise.all(chunkPromises)).flat();
       const finalQuestions = questionIds.map(id => allFetched.find(fq => fq.id === id)).filter(Boolean);
       
-      if (finalQuestions.length === 0) throw new Error("Database sync failure.");
+      if (finalQuestions.length === 0) throw new Error("Data integrity error: Questions missing.");
 
       let resumeData = null;
       if (user && !isRetakeRequested) {
@@ -161,10 +155,15 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     } catch (err: any) { 
       setInitError(err.message); 
       setIsInitializing(false);
+      loadingStarted.current = false;
     }
   }, [db, mockId, user, userLoading, initExam, startSession, isRetakeRequested]);
 
-  useEffect(() => { loadExam(); }, [loadExam]);
+  useEffect(() => {
+    if (!mockId || userLoading || loadingStarted.current) return;
+    loadingStarted.current = true;
+    loadExam();
+  }, [mockId, userLoading, loadExam]);
 
   useEffect(() => {
     if (isInitializing || initError) return;
@@ -175,9 +174,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !mockData || !mockId) return;
     
-    // ATOMIC attemptId generation to avoid redirect failures
     const finalAttemptId = storeAttemptId || `at_${nanoid(12)}`;
-    
     setShowSubmitModal(false);
     setIsSubmittingFinal(true);
     
@@ -186,7 +183,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const totalQuestions = questions.length;
     const studentAnswers = answers || {};
     const attemptedCount = Object.keys(studentAnswers).length;
-    const skippedCount = totalQuestions - attemptedCount;
 
     const posMarks = Number(mockData.positiveMarks) || 1;
     const negMarks = Number(mockData.negativeMarks) || 0.25;
@@ -246,7 +242,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
        percentage, 
        correctCount, 
        wrongCount, 
-       skippedCount, 
+       skippedCount: totalQuestions - attemptedCount, 
        attemptedCount, 
        totalQuestions,
        attemptAccuracy, 
@@ -297,7 +293,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
         stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
       } catch (e: any) {
-         toast({ variant: "destructive", title: "Submission failure", description: "Connection lost during registry sync." });
+         toast({ variant: "destructive", title: "Sync failure", description: "Audit node lost connection." });
          setIsSubmittingFinal(false);
          return;
       }
@@ -317,10 +313,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
        </div>
        <div className="text-center space-y-2 px-6">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">
-             {isSubmittingFinal ? "Finalizing report" : "Synchronizing test"}
+             {isSubmittingFinal ? "Finalizing report" : "Synchronizing test hub"}
           </p>
           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
-             {isSubmittingFinal ? "Preparing your analysis" : "Loading verified patterns"}
+             {isSubmittingFinal ? "Generating analysis" : "Loading verified patterns"}
           </p>
        </div>
     </div>
@@ -373,11 +369,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             <ShieldCheck className="h-16 w-16 text-primary mb-6" />
             <DialogHeader className="text-center w-full">
               <DialogTitle className="text-white font-black text-3xl text-center">Submit test</DialogTitle>
-              <DialogDescription className="text-slate-400 mt-2 text-center w-full">Finish your attempt and generate report.</DialogDescription>
+              <DialogDescription className="text-slate-400 mt-2 text-center w-full uppercase tracking-widest text-[10px] font-bold">Finish attempt and generate report</DialogDescription>
             </DialogHeader>
             <div className="w-full flex flex-col gap-3 mt-8">
-              <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl border-none flex items-center justify-center">Finish attempt</Button>
-              <Button variant="ghost" onClick={() => setShowSubmitModal(false)} disabled={isSubmittingFinal} className="w-full h-12 text-slate-400 hover:text-white font-bold flex items-center justify-center">Return to test</Button>
+              <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl border-none flex items-center justify-center uppercase tracking-widest text-[11px]">Finish attempt</Button>
+              <Button variant="ghost" onClick={() => setShowSubmitModal(false)} disabled={isSubmittingFinal} className="w-full h-12 text-slate-400 hover:text-white font-bold flex items-center justify-center uppercase tracking-widest text-[10px]">Return to test</Button>
             </div>
           </div>
         </DialogContent>

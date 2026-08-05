@@ -16,8 +16,8 @@ import { isAfter, subDays, isValid } from 'date-fns';
 import { create } from 'zustand';
 
 /**
- * @fileOverview Production-grade Study Analytics Engine v8.0 [Live Counting].
- * FIXED: Implemented shared state to allow real-time counting across all UI nodes.
+ * @fileOverview Production-grade Study Analytics Engine v8.1 [Stable Identity].
+ * FIXED: startSession identity is now stable to prevent infinite loops in consumers.
  */
 
 interface StudyStore {
@@ -101,7 +101,6 @@ export function useStudySessions() {
       } catch (e) {}
     });
 
-    // Add current live seconds to stats
     const liveToday = dbToday + activeSeconds;
 
     const sortedDates = Array.from(studyDates).sort((a, b) => b.localeCompare(a));
@@ -159,21 +158,24 @@ export function useActiveSession(activityType: StudySession['activityType'], act
   const db = useFirestore();
   const { incrementActive, resetActive, activeSeconds } = useStudyStore();
   const [isActive, setIsActive] = useState(false);
+  const isActiveRef = useRef(false);
   const startTimeRef = useRef<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const startSession = useCallback(() => {
-    if (isActive || typeof window === 'undefined') return;
+    if (isActiveRef.current || typeof window === 'undefined') return;
+    isActiveRef.current = true;
     setIsActive(true);
     startTimeRef.current = Date.now();
     intervalRef.current = setInterval(() => {
       incrementActive();
     }, 1000);
-  }, [isActive, incrementActive]);
+  }, [incrementActive]);
 
   const stopSession = useCallback(async (meta?: Partial<StudySession>) => {
-    if (!isActive || !user || !db) return null;
+    if (!isActiveRef.current || !user || !db) return null;
     
+    isActiveRef.current = false;
     setIsActive(false);
     if (intervalRef.current) clearInterval(intervalRef.current);
     
@@ -181,7 +183,6 @@ export function useActiveSession(activityType: StudySession['activityType'], act
     const startTime = startTimeRef.current || endTime;
     const durationSeconds = Math.round((endTime - startTime) / 1000);
 
-    // Save actual duration to DB
     if (durationSeconds >= 5) {
       const session: Omit<StudySession, 'id'> = {
         userId: user.uid,
@@ -202,11 +203,10 @@ export function useActiveSession(activityType: StudySession['activityType'], act
       }
     }
 
-    // Clean up local ticking state
     resetActive();
     startTimeRef.current = null;
     return null;
-  }, [isActive, user, db, activityType, activityId, resetActive]);
+  }, [user, db, activityType, activityId, resetActive]);
 
   useEffect(() => {
     return () => {
