@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser, useFirestore } from "@/firebase";
+import { useUser, useAuth, useFirestore } from "@/firebase";
 import { 
   doc, 
   getDoc, 
@@ -24,7 +24,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import QuestionPalette from "@/components/mocks/QuestionPalette";
 import SubjectTabs from "@/components/exam/SubjectTabs";
 import { Button } from "@/components/ui/button";
-import { Loader2, Zap, AlertCircle, Play, ChevronRight } from "lucide-react";
+import { Loader2, Zap, AlertCircle, Play, ChevronRight, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useActiveSession } from "@/hooks/useStudyAnalytics";
@@ -38,8 +38,8 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Official Attempt Hub v112.0 [Stability Hardened].
- * FIXED: Refined initialization logic to prevent infinite re-render loops.
+ * @fileOverview Official Attempt Hub v112.1 [Reference Fix].
+ * FIXED: Added missing ShieldCheck import.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -66,7 +66,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [mockData, setMockData] = useState<any>(null);
 
-  const loadingStarted = useRef(false);
+  const loadStarted = useRef(false);
 
   const {
     initExam,
@@ -158,8 +158,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       loadStarted.current = false;
     }
   }, [db, mockId, user, userLoading, initExam, startSession, isRetakeRequested]);
-
-  const loadStarted = useRef(false);
 
   useEffect(() => {
     if (!mockId || userLoading || loadStarted.current) return;
