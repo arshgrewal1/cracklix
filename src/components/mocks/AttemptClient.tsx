@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -13,7 +14,8 @@ import {
   documentId, 
   getDocs, 
   setDoc, 
-  increment
+  increment,
+  updateDoc
 } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import ExamHeader from "@/components/exam/ExamHeader";
@@ -36,10 +38,12 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { nanoid } from "nanoid";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors";
 
 /**
- * @fileOverview Official Attempt Hub v112.1 [Reference Fix].
- * FIXED: Added missing ShieldCheck import.
+ * @fileOverview Official Attempt Hub v113.0 [Stability Hardened].
+ * FIXED: Implemented auto-submit and hardened mutation synchronization.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -257,45 +261,51 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     };
 
     if (user) {
-      try {
-        const resultRef = doc(db, "results", finalAttemptId);
-        const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
-        const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
-        const globalMeritRef = doc(db, "leaderboard", user.uid);
-        const statsRef = doc(db, "settings", "stats");
+      const resultRef = doc(db, "results", finalAttemptId);
+      const attemptPtrRef = doc(db, "attempts", `${user.uid}_${mockId}`);
+      const lbEntryRef = doc(db, "leaderboards", mockId, "entries", user.uid);
+      const globalMeritRef = doc(db, "leaderboard", user.uid);
+      const statsRef = doc(db, "settings", "stats");
 
-        await Promise.all([
-           setDoc(resultRef, resultPayload),
-           setDoc(attemptPtrRef, { attemptId: finalAttemptId, status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true }),
-           setDoc(lbEntryRef, { 
-              userId: user.uid, 
-              userName: profile?.name || 'Aspirant', 
-              highestScore: score, 
-              accuracy: attemptAccuracy, 
-              timeTaken, 
-              submittedAt: serverTimestamp(),
-              updatedAt: serverTimestamp()
-           }, { merge: true }),
-           setDoc(globalMeritRef, { 
-              uid: user.uid, 
-              displayName: profile?.name || 'Aspirant', 
-              totalTests: increment(1), 
-              highestScore: score,
-              updatedAt: serverTimestamp(), 
-              recentMockTitle: mockData.title 
-           }, { merge: true }),
-           updateDoc(statsRef, { 
-              totalAttempts: increment(1), 
-              updatedAt: serverTimestamp() 
-           }).catch(() => {}) 
-        ]);
+      // OPTIMISTIC WRITE: Trigger mutations without blocking
+      setDoc(resultRef, resultPayload).catch(async (e) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: resultRef.path, operation: 'create', requestResourceData: resultPayload }));
+      });
 
-        stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
-      } catch (e: any) {
-         toast({ variant: "destructive", title: "Sync failure", description: "Audit node lost connection." });
-         setIsSubmittingFinal(false);
-         return;
-      }
+      setDoc(attemptPtrRef, { attemptId: finalAttemptId, status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true }).catch(async (e) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: attemptPtrRef.path, operation: 'update' }));
+      });
+
+      setDoc(lbEntryRef, { 
+        userId: user.uid, 
+        userName: profile?.name || 'Aspirant', 
+        highestScore: score, 
+        accuracy: attemptAccuracy, 
+        timeTaken, 
+        submittedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true }).catch(async (e) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: lbEntryRef.path, operation: 'write' }));
+      });
+
+      setDoc(globalMeritRef, { 
+        uid: user.uid, 
+        displayName: profile?.name || 'Aspirant', 
+        totalTests: increment(1), 
+        highestScore: score,
+        updatedAt: serverTimestamp(), 
+        recentMockTitle: mockData.title 
+      }, { merge: true }).catch(async (e) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: globalMeritRef.path, operation: 'write' }));
+      });
+
+      // Update total attempts if allowed (silently fail if no perms)
+      updateDoc(statsRef, { 
+        totalAttempts: increment(1), 
+        updatedAt: serverTimestamp() 
+      }).catch(() => {});
+
+      stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
     } else {
        localStorage.setItem(`cracklix_guest_result_${finalAttemptId}`, JSON.stringify({ ...resultPayload, isGuestNode: true }));
     }
@@ -303,6 +313,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     router.replace(`/results/view?id=${mockId}&attemptId=${finalAttemptId}`);
     setTimeout(() => resetStore(), 1000);
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, storeAttemptId, resetStore, language, toast]);
+
+  // AUTO-SUBMIT LOGIC
+  useEffect(() => {
+    if (timeLeft === 0 && !isInitializing && !isSubmittingFinal && questions.length > 0) {
+      handleSubmitFinal();
+    }
+  }, [timeLeft, isInitializing, isSubmittingFinal, questions.length, handleSubmitFinal]);
 
   if (isInitializing || isSubmittingFinal) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8 z-[2000] fixed inset-0">
