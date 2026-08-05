@@ -5,15 +5,15 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 220 33% 98%; /* #F6F8FC */
+    --foreground: 222 47% 11%; /* #111827 */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 215 100% 54%;
+    --primary: 215 100% 54%; /* #147BFF */
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
+    --secondary: 215 16% 47%; /* #6B7280 */
     --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215 16% 47%;
@@ -21,32 +21,10 @@
     --accent-foreground: 215 100% 54%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
+    --border: 214 32% 91%; /* #E5E7EB */
     --input: 214.3 31.8% 91.4%;
     --ring: 215 100% 54%;
     --radius: 0.75rem;
-  }
-
-  .dark {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 5%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 215 100% 54%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 222 47% 15%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 222 47% 15%;
-    --muted-foreground: 215 16% 70%;
-    --accent: 222 47% 15%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 222 47% 15%;
-    --input: 222 47% 15%;
-    --ring: 215 100% 54%;
   }
 }
 
@@ -57,45 +35,25 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  html {
-    scroll-behavior: smooth;
-    -webkit-text-size-adjust: 100%;
-    text-wrap: pretty;
-  }
-  
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-poppins), sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
-    overscroll-behavior-y: contain;
-    touch-action: pan-y;
-    -webkit-overflow-scrolling: touch;
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  /* PWA Typography Scaling */
-  h1 { @apply text-2xl md:text-5xl font-black tracking-tight; }
-  h2 { @apply text-xl md:text-3xl font-bold tracking-tight; }
-  h3 { @apply text-lg md:text-2xl font-bold tracking-tight; }
-  p { @apply text-sm md:text-base leading-relaxed; }
-
-  input, textarea, select {
-    font-size: 16px !important; /* Prevents auto-zoom on mobile safari */
+  h1, h2, h3, h4 {
+    @apply font-bold tracking-tight;
   }
 }
 
 @layer utilities {
   .pt-safe { padding-top: env(safe-area-inset-top); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-  
-  .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  
   .no-scrollbar::-webkit-scrollbar { display: none; }
-  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
 }
 
-.shadow-4xl { box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.05); }
-.shadow-5xl { box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08); }
+.shadow-soft {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+}
