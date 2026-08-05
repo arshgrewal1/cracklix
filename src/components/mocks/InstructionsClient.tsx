@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -23,10 +23,9 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v6.7.
- * TERMINOLOGY: Replaced 'items' with 'questions' and ensured Title Case.
+ * @fileOverview Official Test Rules Hub v7.0 [Flicker Fixed].
+ * FIXED: Implemented ref guards to prevent repeated loading states.
  */
-
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -39,132 +38,103 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
   const [isLoading, setIsLoading] = useState(true);
   const [latestAttemptId, setLatestAttemptId] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState(false);
-  const [accessChecked, setAccessChecked] = useState(false);
   const [accessError, setAccessError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
 
+  // Stable identifier extraction
   const activeId = useMemo(() => {
     if (propMockId) return propMockId;
     const queryId = searchParams.get('id');
     if (queryId && queryId !== 'manual') return queryId;
-    
     const segments = pathname.split('/').filter(Boolean);
     const last = segments[segments.length - 1];
     return (last && last !== 'instructions' && last !== 'view') ? last : null;
   }, [pathname, searchParams, propMockId]);
 
-  useEffect(() => {
-    async function loadTestAndAuditAccess() {
-      if (!db || !activeId) {
-        if (!activeId) {
-          setIsLoading(false);
-          setNotFound(true);
-        }
+  const loadStarted = useRef(false);
+
+  const loadTestAndAuditAccess = useCallback(async () => {
+    if (!db || !activeId || loadStarted.current) return;
+    loadStarted.current = true;
+
+    try {
+      setIsLoading(true);
+      setAccessError(null);
+      
+      const mockRef = doc(db, "mocks", activeId);
+      const dailyRef = doc(db, "daily_quizzes", activeId);
+      
+      let targetSnap = await getDoc(mockRef);
+      if (!targetSnap.exists()) {
+        targetSnap = await getDoc(dailyRef);
+      }
+
+      if (!targetSnap.exists()) {
+        setNotFound(true);
+        setIsLoading(false);
         return;
       }
 
-      try {
-        setIsLoading(true);
-        setLatestAttemptId(null);
-        
-        const mockRef = doc(db, "mocks", activeId);
-        const dailyRef = doc(db, "daily_quizzes", activeId);
-        
-        let targetSnap = await getDoc(mockRef);
-        if (!targetSnap.exists()) {
-          targetSnap = await getDoc(dailyRef);
+      const mData = targetSnap.data();
+      setMock(mData);
+
+      if (user) {
+        const resultsRef = collection(db, "results");
+        const q = query(
+          resultsRef, 
+          where("userId", "==", user.uid), 
+          where("mockId", "==", activeId)
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const attempts = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+          const latest = attempts.sort((a: any, b: any) => {
+             const tA = new Date(a.timestamp).getTime();
+             const tB = new Date(b.timestamp).getTime();
+             return tB - tA;
+          })[0];
+          setLatestAttemptId(latest.id);
         }
-
-        if (!targetSnap.exists()) {
-          setNotFound(true);
-          setIsLoading(false);
-          return;
-        }
-
-        const mData = targetSnap.data();
-        setMock(mData);
-
-        if (user) {
-          const resultsRef = collection(db, "results");
-          const q = query(
-            resultsRef, 
-            where("userId", "==", user.uid), 
-            where("mockId", "==", activeId)
-          );
-          const snap = await getDocs(q);
-          if (!snap.empty) {
-            const attempts = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-            const latest = attempts.sort((a: any, b: any) => {
-               const tA = new Date(a.timestamp).getTime();
-               const tB = new Date(b.timestamp).getTime();
-               return tB - tA;
-            })[0];
-            setLatestAttemptId(latest.id);
-          }
-        } else {
-          const lookupId = activeId;
-          const guestResult = localStorage.getItem(`cracklix_guest_result_${lookupId}`);
-          if (guestResult) {
-             const parsed = JSON.parse(guestResult);
-             setLatestAttemptId(parsed.attemptId || activeId);
-          }
-        }
-
-        const tier = (mData.accessLevel || 'FREE').toUpperCase();
-        if (tier === 'FREE') {
-          setAccessChecked(true);
-          setIsLoading(false);
-          return;
-        }
-
-        if (!user && !userLoading) {
-          router.push(`/login?returnUrl=${encodeURIComponent(pathname + (searchParams?.toString() ? '?' + searchParams.toString() : ''))}`);
-          return;
-        }
-
-        if (user && profile) {
-          const userEmail = user.email?.toLowerCase();
-          const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
-          
-          if (isAdmin) {
-            setAccessChecked(true);
-          } else {
-            const expiry = profile?.passExpiresAt ? new Date(profile.passExpiresAt) : null;
-            const isPassActive = expiry && expiry > new Date() && profile?.pass?.active !== false;
-
-            if (!isPassActive) {
-              setAccessError("Your Pro Pass is required for this premium test.");
-            } else {
-              setAccessChecked(true);
-            }
-          }
-        }
-
-      } catch (err: any) {
-        console.error("[INSTRUCTIONS_SYNC_ERROR]:", err);
-        setAccessError("Database sync failed. Please refresh.");
-      } finally {
-        setIsLoading(false);
       }
-    }
 
-    if (!userLoading) {
+      const tier = (mData.accessLevel || 'FREE').toUpperCase();
+      if (tier !== 'FREE' && user && profile) {
+        const userEmail = user.email?.toLowerCase();
+        const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
+        
+        if (!isAdmin) {
+          const expiry = profile?.passExpiresAt ? new Date(profile.passExpiresAt) : null;
+          const isPassActive = expiry && expiry > new Date() && profile?.pass?.active !== false;
+          if (!isPassActive) {
+            setAccessError("Your Pro Pass is required for this premium test.");
+          }
+        }
+      }
+
+    } catch (err: any) {
+      console.error("[INSTRUCTIONS_SYNC_ERROR]:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [db, activeId, user, profile]);
+
+  useEffect(() => {
+    if (!userLoading && activeId && !loadStarted.current) {
       loadTestAndAuditAccess();
     }
-  }, [db, activeId, user, userLoading, profile, router, pathname, searchParams]);
+  }, [userLoading, activeId, loadTestAndAuditAccess]);
 
-  const handleRetake = async () => {
+  const handleRetake = () => {
     if (!activeId) return;
     router.push(`/mocks/attempt?id=${activeId}&retake=true`);
   };
 
   const handleViewAnalysis = () => {
      if (!activeId) return;
-     const url = `/results/view?id=${activeId}${latestAttemptId ? `&attemptId=${latestAttemptId}` : ''}`;
-     router.push(url);
+     router.push(`/results/view?id=${activeId}${latestAttemptId ? `&attemptId=${latestAttemptId}` : ''}`);
   };
 
-  if (isLoading || userLoading) return (
+  if ((isLoading || userLoading) && !mock) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white space-y-8 p-6">
        <Zap className="h-12 w-12 text-primary animate-pulse" />
        <div className="space-y-3 w-full max-w-md text-center">

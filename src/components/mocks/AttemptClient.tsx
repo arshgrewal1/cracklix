@@ -38,9 +38,8 @@ import {
 import { nanoid } from "nanoid";
 
 /**
- * @fileOverview Official Attempt Hub v111.0 [Stability Hardened].
+ * @fileOverview Official Attempt Hub v112.0 [Stability Hardened].
  * FIXED: Refined initialization logic to prevent infinite re-render loops.
- * FIXED: Atomic session handling for PWA standalone mode.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -87,7 +86,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   } = useExamStore();
 
   const loadExam = useCallback(async () => {
-    if (!db || !mockId || userLoading) return;
+    if (!db || !mockId || userLoading || loadStarted.current) return;
+    loadStarted.current = true;
     
     try {
       setIsInitializing(true);
@@ -155,13 +155,14 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     } catch (err: any) { 
       setInitError(err.message); 
       setIsInitializing(false);
-      loadingStarted.current = false;
+      loadStarted.current = false;
     }
   }, [db, mockId, user, userLoading, initExam, startSession, isRetakeRequested]);
 
+  const loadStarted = useRef(false);
+
   useEffect(() => {
-    if (!mockId || userLoading || loadingStarted.current) return;
-    loadingStarted.current = true;
+    if (!mockId || userLoading || loadStarted.current) return;
     loadExam();
   }, [mockId, userLoading, loadExam]);
 
