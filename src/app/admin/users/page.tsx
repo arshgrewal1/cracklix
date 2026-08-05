@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -49,8 +48,9 @@ import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/compone
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
- * @fileOverview Institutional Aspirant Dashboard v4.0 [Real-Time].
- * FIXED: Advanced filtering and real-time metric counters.
+ * @fileOverview Institutional Aspirant Dashboard v4.1 [PWA Fixed].
+ * FIXED: Re-engineered horizontal scroll container to prevent PWA clipping.
+ * FIXED: Optimized table layout for mobile swiping.
  */
 
 export default function StudentManagementHub() {
@@ -133,7 +133,7 @@ export default function StudentManagementHub() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-10 text-left pb-32 animate-in fade-in duration-700 pt-2 px-1">
+    <div className="space-y-6 md:space-y-10 text-left pb-32 animate-in fade-in duration-700 pt-2 px-1 w-full max-w-full">
       <AdminPageHeader
         icon={GraduationCap}
         label="Institutional Aspirant Hub"
@@ -160,85 +160,87 @@ export default function StudentManagementHub() {
          <AdminSearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search by name, email, UID or phone..." />
       </Card>
 
-      <Card className="border-none shadow-xl rounded-[2.5rem] overflow-hidden bg-white border border-slate-50 mx-1">
-        <CardContent className="p-0 overflow-x-auto">
-          <Table className="min-w-[1200px]">
-            <TableHeader className="bg-slate-50/50">
-              <TableRow className="border-slate-100 h-16 md:h-20">
-                <TableHead className="px-6 md:px-10 text-[9px] font-black uppercase text-slate-400">Aspirant identity</TableHead>
-                <TableHead className="text-[9px] font-black uppercase text-slate-400">UID node</TableHead>
-                <TableHead className="text-[9px] font-black uppercase text-slate-400 text-center">Membership</TableHead>
-                <TableHead className="text-[9px] font-black uppercase text-slate-400 text-center">Last active</TableHead>
-                <TableHead className="text-right px-6 md:px-10 text-[9px] font-black uppercase text-slate-400">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <AdminTableSkeleton rows={10} columns={5} />
-              ) : filteredAspirants.map((a: any) => {
-                 const isOnline = a.online === true || (a.lastSeen?.seconds && Date.now() - a.lastSeen.seconds * 1000 < 300000);
-                 return (
-                  <TableRow key={a.id} className="border-slate-50 hover:bg-slate-50 transition-all group">
-                    <TableCell className="px-6 md:px-10 py-5">
-                       <div className="flex items-center gap-4">
-                          <div className="relative shrink-0">
-                             <StudentAvatar profile={a} className="h-11 w-11 rounded-xl shadow-inner bg-slate-50" />
-                             <div className={cn("absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white", isOnline ? "bg-emerald-500" : "bg-slate-300")} />
-                          </div>
-                          <div className="min-w-0">
-                             <p className="font-bold text-[#0F172A] text-sm md:text-base leading-tight truncate max-w-[180px]">{a.name}</p>
-                             <p className="text-[9px] md:text-[11px] font-medium text-slate-400 mt-1 truncate max-w-[180px]">{a.email}</p>
-                          </div>
-                       </div>
-                    </TableCell>
-                    <TableCell>
-                       <code className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded truncate block max-w-[120px]">
-                          {a.id}
-                       </code>
-                    </TableCell>
-                    <TableCell className="text-center">
-                       <Badge className={cn("border-none text-[8px] font-black uppercase px-2 py-0.5 shadow-sm", a.passStatus === 'active' ? "bg-amber-50 text-amber-600" : "bg-slate-100 text-slate-400")}>
+      <Card className="border-none shadow-xl rounded-[2.5rem] bg-white border border-slate-50 mx-1 w-full overflow-hidden">
+        <div className="overflow-x-auto w-full custom-scrollbar">
+          <CardContent className="p-0">
+            <Table className="min-w-[1000px] w-full">
+              <TableHeader className="bg-slate-50/50">
+                <TableRow className="border-slate-100 h-16 md:h-20">
+                  <TableHead className="px-6 md:px-10 text-[9px] font-black uppercase text-slate-400">Aspirant identity</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase text-slate-400">UID node</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase text-slate-400 text-center">Membership</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase text-slate-400 text-center">Last active</TableHead>
+                  <TableHead className="text-right px-6 md:px-10 text-[9px] font-black uppercase text-slate-400">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <AdminTableSkeleton rows={10} columns={5} />
+                ) : filteredAspirants.map((a: any) => {
+                   const isOnline = a.online === true || (a.lastSeen?.seconds && Date.now() - a.lastSeen.seconds * 1000 < 300000);
+                   return (
+                    <TableRow key={a.id} className="border-slate-50 hover:bg-slate-50 transition-all group">
+                      <TableCell className="px-6 md:px-10 py-5">
+                         <div className="flex items-center gap-4">
+                            <div className="relative shrink-0">
+                               <StudentAvatar profile={a} className="h-11 w-11 rounded-xl shadow-inner bg-slate-50" />
+                               <div className={cn("absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white", isOnline ? "bg-emerald-500" : "bg-slate-300")} />
+                            </div>
+                            <div className="min-w-0 max-w-[200px]">
+                               <p className="font-bold text-[#0F172A] text-sm md:text-base leading-tight truncate">{a.name}</p>
+                               <p className="text-[9px] md:text-[11px] font-medium text-slate-400 mt-1 truncate lowercase">{a.email}</p>
+                            </div>
+                         </div>
+                      </TableCell>
+                      <TableCell>
+                         <code className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded truncate block max-w-[120px]">
+                            {a.id}
+                         </code>
+                      </TableCell>
+                      <TableCell className="text-center">
+                         <Badge className={cn("border-none text-[8px] font-black uppercase px-2 py-0.5 shadow-sm", a.passStatus === 'active' ? "bg-amber-50 text-amber-600" : "bg-slate-100 text-slate-400")}>
                           {a.passStatus === 'active' ? (a.status || 'PRO') : 'FREE'}
-                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                       <div className="flex flex-col items-center">
-                          <span className="text-[10px] md:text-[12px] font-black text-[#0F172A] tabular-nums">
-                             {a.lastSeen ? new Date(a.lastSeen.seconds * 1000).toLocaleDateString('en-GB') : '---'}
-                          </span>
-                          <span className="text-[8px] font-bold text-slate-300 uppercase tracking-tighter mt-1">
-                             {a.lastSeen ? new Date(a.lastSeen.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}
-                          </span>
-                       </div>
-                    </TableCell>
-                    <TableCell className="text-right px-6 md:px-10">
-                       <div className="flex justify-end gap-2">
-                          <Button asChild size="icon" variant="ghost" className="h-9 w-9 rounded-xl bg-white shadow-sm border border-slate-100 text-primary hover:bg-primary/10">
-                             <Link href={`/admin/users/${a.id}`}><Eye className="h-4 w-4" /></Link>
-                          </Button>
-                          <DropdownMenu>
-                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl border border-slate-100 bg-white"><MoreVertical className="h-4 w-4 text-slate-400" /></Button>
-                             </DropdownMenuTrigger>
-                             <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2 z-[1101]">
-                                <DropdownMenuItem onClick={() => handleStatusChange(a.id, a.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE')} className="rounded-xl px-3 py-2.5 font-bold text-xs gap-3">
-                                   {a.status === 'SUSPENDED' ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <X className="h-4 w-4 text-rose-500" />}
-                                   {a.status === 'SUSPENDED' ? 'Enable account' : 'Disable account'}
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleDelete(a.id, a.name)} className="rounded-xl px-3 py-2.5 font-bold text-xs gap-3 text-rose-500 focus:text-rose-600 focus:bg-rose-50">
-                                   <Trash2 className="h-4 w-4" /> Purge profile
-                                </DropdownMenuItem>
-                             </DropdownMenuContent>
-                          </DropdownMenu>
-                       </div>
-                    </TableCell>
-                  </TableRow>
-                 )
+                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                         <div className="flex flex-col items-center">
+                            <span className="text-[10px] md:text-[12px] font-black text-[#0F172A] tabular-nums">
+                               {a.lastSeen ? new Date(a.lastSeen.seconds * 1000).toLocaleDateString('en-GB') : '---'}
+                            </span>
+                            <span className="text-[8px] font-bold text-slate-300 uppercase tracking-tighter mt-1">
+                               {a.lastSeen ? new Date(a.lastSeen.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}
+                            </span>
+                         </div>
+                      </TableCell>
+                      <TableCell className="text-right px-6 md:px-10">
+                         <div className="flex justify-end gap-2">
+                            <Button asChild size="icon" variant="ghost" className="h-9 w-9 rounded-xl bg-white shadow-sm border border-slate-100 text-primary hover:bg-primary/10">
+                               <Link href={`/admin/users/${a.id}`}><Eye className="h-4 w-4" /></Link>
+                            </Button>
+                            <DropdownMenu>
+                               <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl border border-slate-100 bg-white"><MoreVertical className="h-4 w-4 text-slate-400" /></Button>
+                               </DropdownMenuTrigger>
+                               <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2 z-[1101]">
+                                  <DropdownMenuItem onClick={() => handleStatusChange(a.id, a.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE')} className="rounded-xl px-3 py-2.5 font-bold text-xs gap-3">
+                                     {a.status === 'SUSPENDED' ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <X className="h-4 w-4 text-rose-500" />}
+                                     {a.status === 'SUSPENDED' ? 'Enable account' : 'Disable account'}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => handleDelete(a.id, a.name)} className="rounded-xl px-3 py-2.5 font-bold text-xs gap-3 text-rose-500 focus:text-rose-600 focus:bg-rose-50">
+                                     <Trash2 className="h-4 w-4" /> Purge profile
+                                  </DropdownMenuItem>
+                               </DropdownMenuContent>
+                            </DropdownMenu>
+                         </div>
+                      </TableCell>
+                    </TableRow>
+                   )
               })}
             </TableBody>
           </Table>
         </CardContent>
+      </div>
       </Card>
     </div>
   )

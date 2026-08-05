@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from "react";
@@ -16,9 +15,9 @@ import { canAccessAdmin, checkPermission, isSuperAdmin } from "@/lib/permissions
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Institutional Admin Layout v4.0.
- * STRICT: Enforces granular permission gating for all staff members.
- * RECOVERY: Founder email whitelist provides 100% fail-safe access.
+ * @fileOverview Institutional Admin Layout v4.1.
+ * FIXED: Removed overflow-x-hidden from main to allow nested horizontal scrolling on PWA.
+ * FIXED: Optimized container width for mobile standalone mode.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -139,7 +138,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
 
         <div className={cn(
-          "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
+          "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full max-w-full overflow-hidden",
           isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
         )}>
           <header className="h-[84px] md:h-[116px] pt-safe border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
@@ -175,7 +174,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </header>
 
-          <main className="flex-1 p-4 md:p-10 lg:p-12 overflow-x-hidden">
+          <main className="flex-1 p-4 md:p-10 lg:p-12 w-full max-w-full overflow-y-auto custom-scrollbar">
             {!hasSpecificPermission ? (
                <div className="h-full flex flex-col items-center justify-center space-y-8 text-center px-6 animate-in zoom-in-95 duration-500">
                   <div className="h-24 w-24 bg-amber-50 rounded-[2.5rem] flex items-center justify-center text-amber-500 shadow-inner border border-amber-100">

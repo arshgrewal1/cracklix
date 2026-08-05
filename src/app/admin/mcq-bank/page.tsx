@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback } from "react"
@@ -53,6 +52,11 @@ import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/compone
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
+
+/**
+ * @fileOverview Institutional MCQ Bank Hub v1.6 [PWA Fixed].
+ * FIXED: Re-engineered horizontal scroll container to prevent layout clipping in standalone mode.
+ */
 
 export default function MCQBankPage() {
   const db = useFirestore()
@@ -142,7 +146,7 @@ export default function MCQBankPage() {
   }, [questions, filters.status, duplicateAnalysis.ids]);
 
   return (
-    <div className="space-y-6 md:space-y-12 text-left pb-32 animate-in fade-in duration-700 pt-2 px-1">
+    <div className="space-y-6 md:space-y-12 text-left pb-32 animate-in fade-in duration-700 pt-2 px-1 w-full max-w-full overflow-hidden">
       <AdminPageHeader
         icon={Database}
         label="Central question database"
@@ -176,66 +180,68 @@ export default function MCQBankPage() {
          <AdminSearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search statements, IDs, or keywords..." />
       </Card>
 
-      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white border border-slate-50">
-        <CardContent className="p-0 overflow-x-auto">
-          <Table className="min-w-[1000px]">
-            <TableHeader className="bg-slate-50/50">
-              <TableRow className="h-14 border-slate-100">
-                <TableHead className="w-16 px-6 text-center">
-                  <Checkbox checked={selectedIds.length === displayedQuestions.length && displayedQuestions.length > 0} onCheckedChange={(checked) => setSelectedIds(checked ? displayedQuestions.map(q => q.id) : [])} />
-                </TableHead>
-                <TableHead className="px-6 text-[9px] font-bold text-slate-400 tracking-tight">Question ID</TableHead>
-                <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight">Statement</TableHead>
-                <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight text-center">Status</TableHead>
-                <TableHead className="text-right px-10 text-[9px] font-bold text-slate-400 tracking-tight">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading && questions.length === 0 ? (
-                <AdminTableSkeleton rows={8} columns={5} />
-              ) : displayedQuestions.length > 0 ? displayedQuestions.map((q) => (
-                <TableRow key={q.id} onClick={() => toggleSelection(q.id)} className={cn("hover:bg-slate-50 transition-all border-slate-50 group cursor-pointer", selectedIds.includes(q.id) && "bg-primary/5")}>
-                  <TableCell className="px-6 text-center" onClick={(e) => e.stopPropagation()}>
-                    <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={() => toggleSelection(q.id)} />
-                  </TableCell>
-                  <TableCell className="px-6 py-6 text-left max-w-[140px]">
-                     <div className="space-y-1.5">
-                        <code className="text-[10px] font-mono text-primary font-bold">ID: {q.id.slice(-8)}</code>
-                        <div className="flex gap-2">
-                           <Badge variant="outline" className="border-slate-100 text-slate-300 font-bold">{q.boardId || 'GOVT'}</Badge>
+      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white border border-slate-50 w-full">
+        <div className="overflow-x-auto w-full custom-scrollbar">
+          <CardContent className="p-0">
+            <Table className="min-w-[1000px] w-full">
+              <TableHeader className="bg-slate-50/50">
+                <TableRow className="h-14 border-slate-100">
+                  <TableHead className="w-16 px-6 text-center">
+                    <Checkbox checked={selectedIds.length === displayedQuestions.length && displayedQuestions.length > 0} onCheckedChange={(checked) => setSelectedIds(checked ? displayedQuestions.map(q => q.id) : [])} />
+                  </TableHead>
+                  <TableHead className="px-6 text-[9px] font-bold text-slate-400 tracking-tight">Question ID</TableHead>
+                  <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight">Statement</TableHead>
+                  <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight text-center">Status</TableHead>
+                  <TableHead className="text-right px-10 text-[9px] font-bold text-slate-400 tracking-tight">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading && questions.length === 0 ? (
+                  <AdminTableSkeleton rows={8} columns={5} />
+                ) : displayedQuestions.length > 0 ? displayedQuestions.map((q) => (
+                  <TableRow key={q.id} onClick={() => toggleSelection(q.id)} className={cn("hover:bg-slate-50 transition-all border-slate-50 group cursor-pointer", selectedIds.includes(q.id) && "bg-primary/5")}>
+                    <TableCell className="px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={() => toggleSelection(q.id)} />
+                    </TableCell>
+                    <TableCell className="px-6 py-6 text-left max-w-[140px]">
+                       <div className="space-y-1.5">
+                          <code className="text-[10px] font-mono text-primary font-bold">ID: {q.id.slice(-8)}</code>
+                          <div className="flex gap-2">
+                             <Badge variant="outline" className="border-slate-100 text-slate-300 font-bold">{q.boardId || 'GOVT'}</Badge>
+                          </div>
+                       </div>
+                    </TableCell>
+                    <TableCell className="max-w-md">
+                       <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
+                    </TableCell>
+                    <TableCell className="text-center">
+                       <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5", q.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}>{q.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right px-10" onClick={(e) => e.stopPropagation()}>
+                       <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
+                          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white shadow-sm" asChild>
+                             <Link href={`/admin/mcq-bank/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link>
+                          </Button>
+                          <button className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all border-none cursor-pointer" onClick={async () => { if(confirm("Delete this question?")) { await deleteDoc(doc(db!, "mcqBank", q.id)); fetchQuestions(false); } }}>
+                             <Trash2 className="h-4 w-4" />
+                          </button>
+                       </div>
+                    </TableCell>
+                  </TableRow>
+                )) : !loading && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-96 text-center">
+                        <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
+                          <Layers className="h-20 w-20 text-slate-400" />
+                          <p className="font-bold text-2xl">No matching questions</p>
                         </div>
-                     </div>
-                  </TableCell>
-                  <TableCell className="max-w-md">
-                     <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
-                  </TableCell>
-                  <TableCell className="text-center">
-                     <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5", q.status === 'PUBLISHED' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}>{q.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right px-10" onClick={(e) => e.stopPropagation()}>
-                     <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
-                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white shadow-sm" asChild>
-                           <Link href={`/admin/mcq-bank/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link>
-                        </Button>
-                        <button className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={async () => { if(confirm("Delete this question?")) { await deleteDoc(doc(db!, "mcqBank", q.id)); fetchQuestions(false); } }}>
-                           <Trash2 className="h-4 w-4" />
-                        </button>
-                     </div>
-                  </TableCell>
-                </TableRow>
-              )) : !loading && (
-                <TableRow>
-                   <TableCell colSpan={5} className="h-96 text-center">
-                      <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
-                         <Layers className="h-20 w-20 text-slate-400" />
-                         <p className="font-bold text-2xl">No matching questions</p>
-                      </div>
-                   </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </div>
       </Card>
       
       {hasMore && questions.length > 0 && (
@@ -277,7 +283,7 @@ export default function MCQBankPage() {
 function MetricCard({ label, value, icon, highlight }: any) {
   return (
     <Card className={cn(
-      "border-none shadow-xl bg-white p-6 md:p-8 rounded-2xl transition-all duration-500 hover:translate-y-[-2px] border border-slate-50 flex flex-col items-center justify-center text-center gap-2",
+      "border-none shadow-xl bg-white p-6 md:p-8 rounded-2xl transition-all duration-300 hover:translate-y-[-2px] border border-slate-50 flex flex-col items-center justify-center text-center gap-2",
       highlight && "ring-2 ring-rose-500/20 bg-rose-50/10"
     )}>
        <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner shrink-0">
