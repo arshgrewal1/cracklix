@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -48,11 +49,11 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { TestSeries, MockTest } from "@/types"
 import { hasSeriesAccess } from "@/lib/access-control"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v4.9 [Sticky Removed].
- * TERMINOLOGY: Replaced 'items' with 'tests'.
+ * @fileOverview Institutional Practice Hub v5.0 [Sync Hardened].
+ * FIXED: Stabilized loading state to prevent app blinking.
  */
 
 const FILTER_CHIPS = [
@@ -68,10 +69,22 @@ export default function PracticeHub() {
   const db = useFirestore()
   const { user, profile, loading: userLoading } = useUser()
   const router = useRouter()
+  const pathname = usePathname()
   
   const [searchTerm, setSearchTerm] = useState("")
   const [activeFilter, setActiveFilter] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && !userLoading && !user) {
+      router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+    }
+  }, [user, userLoading, router, pathname, mounted])
 
   // Real-time Data Listeners
   const seriesQuery = useMemo(() => (db ? query(collection(db, "test_series"), where("isActive", "==", true)) : null), [db])
@@ -157,6 +170,8 @@ export default function PracticeHub() {
         solved: results?.length || 0
      }
   }, [processedSeries, allMocks, results])
+
+  if (!mounted || userLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left flex flex-col overflow-x-hidden">

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -8,9 +9,9 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth Hub v24.0 [Zero-Latency Sync].
+ * @fileOverview Hardened Auth Hub v25.0 [Zero-Latency Sync].
  * FIXED: loading state now resolves immediately when user is null or found.
- * FIXED: profileLoading is decoupled from auth state to prevent hangs.
+ * FIXED: Prevented auth state flickering by unifying profile and user resolution.
  */
 export function useUser() {
   const auth = useAuth();
@@ -40,8 +41,6 @@ export function useUser() {
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      // ATOMIC: Resolve loading immediately on auth response
-      setAuthResolved(true);
       
       if (firebaseUser) {
         if (!profileLoaded.current) {
@@ -52,6 +51,7 @@ export function useUser() {
         profileDataRef.current = "";
         setProfileLoading(false);
         profileLoaded.current = true;
+        setAuthResolved(true); // Resolve immediately if no user
       }
     });
 
@@ -104,6 +104,7 @@ export function useUser() {
       }
       profileLoaded.current = true;
       setProfileLoading(false);
+      setAuthResolved(true); // Resolve loading only after profile is fetched or determined missing
     };
 
     const unsubscribeProfile = onSnapshot(
@@ -117,6 +118,7 @@ export function useUser() {
         } catch (e) {
           setProfileLoading(false);
           profileLoaded.current = true;
+          setAuthResolved(true);
         }
       }
     );

@@ -10,8 +10,8 @@ import { Capacitor } from '@capacitor/core';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 
 /**
- * @fileOverview Institutional PWA Manager v1.7.
- * FIXED: Optimized safe area handling for floating prompts.
+ * @fileOverview Institutional PWA Manager v1.8.
+ * FIXED: Removed merge conflict markers and optimized safe area handling.
  */
 export default function PWAManager() {
   const pathname = usePathname();
