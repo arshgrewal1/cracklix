@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -100,19 +99,19 @@ export default function SubjectDetailPortal() {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => router.push(`/subjects/${subjectId}/series/${item.id}`)}
                 >
-                  <Card className="border border-[#E5E7EB] shadow-soft rounded-[18px] bg-white p-4 flex items-center gap-4 cursor-pointer hover:border-[#147BFF]/30 transition-all group">
+                  <Card className="border border-[#E5E7EB] shadow-soft rounded-[18px] bg-white p-4 flex items-center gap-4 cursor-pointer hover:border-[#147BFF]/30 transition-all group overflow-hidden">
                     <div className="h-12 w-12 rounded-[14px] bg-[#F6F8FC] flex items-center justify-center shrink-0 border border-[#E5E7EB] shadow-inner group-hover:scale-105 transition-transform">
                       <AuthorityLogo boardId={item.boardId} size="sm" className="p-0 shadow-none border-none bg-transparent" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-[17px] font-bold text-[#111827] leading-tight truncate">{item.title}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[13px] font-medium text-[#6B7280]">{counts.tests} Mock Tests</span>
-                        <span className="h-1 w-1 rounded-full bg-[#E5E7EB]" />
-                        <span className="text-[13px] font-medium text-[#6B7280]">{counts.questions} Questions</span>
+                      <h3 className="text-[17px] font-bold text-[#111827] leading-tight break-words">{item.title}</h3>
+                      <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-1">
+                        <span className="text-[13px] font-medium text-[#6B7280] whitespace-nowrap">{counts.tests} Mock Tests</span>
+                        <span className="h-1 w-1 rounded-full bg-[#E5E7EB] hidden sm:block" />
+                        <span className="text-[13px] font-medium text-[#6B7280] whitespace-nowrap">{counts.questions} Questions</span>
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-[#6B7280] opacity-30 group-hover:opacity-100 group-hover:text-[#147BFF] transition-all" />
+                    <ChevronRight className="h-5 w-5 text-[#6B7280] opacity-30 group-hover:opacity-100 group-hover:text-[#147BFF] transition-all shrink-0" />
                   </Card>
                 </motion.div>
               )
