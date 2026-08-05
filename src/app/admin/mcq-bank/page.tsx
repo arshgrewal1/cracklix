@@ -247,20 +247,20 @@ export default function MCQBankPage() {
       )}
 
       {selectedIds.length > 0 && (
-         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500 w-[95vw] max-w-3xl">
-            <div className="bg-[#0F172A] text-white px-8 py-5 rounded-[2.5rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl">
-               <div className="flex items-center gap-5">
-                  <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-bold text-lg">{selectedIds.length}</div>
-                  <div>
-                    <p className="text-[11px] font-bold leading-none">Questions selected</p>
-                    <p className="text-[8px] font-bold text-slate-500 mt-1.5">Batch management active</p>
+         <div className="fixed bottom-[calc(90px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500 w-[calc(100%-24px)] max-w-3xl">
+            <div className="bg-[#0F172A] text-white px-4 md:px-8 py-4 rounded-[1.5rem] md:rounded-[2.5rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl">
+               <div className="flex items-center gap-3 md:gap-5 min-w-0">
+                  <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/20 rounded-xl md:rounded-2xl flex items-center justify-center text-primary font-bold text-sm md:text-lg shrink-0">{selectedIds.length}</div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] md:text-[11px] font-bold leading-none truncate">Selected</p>
+                    <p className="text-[7px] md:text-[8px] font-bold text-slate-500 mt-1 uppercase tracking-tight hidden sm:block">Batch Mode</p>
                   </div>
                </div>
-               <div className="flex items-center gap-3">
-                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-all font-bold text-[10px] shadow-lg border-none cursor-pointer"><CheckCircle2 className="h-4 w-4" /> Publish</button>
-                  <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90 shadow-sm border-none cursor-pointer"><Trash2 className="h-4 w-4" /></button>
-                  <div className="w-px h-10 bg-white/10 mx-2" />
-                  <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-white p-1 bg-transparent border-none cursor-pointer"><X className="h-6 w-6" /></button>
+               <div className="flex items-center gap-2 md:gap-3 shrink-0 flex-wrap justify-end">
+                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center justify-center gap-2 px-3 md:px-6 h-10 md:h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition-all font-bold text-[9px] md:text-[10px] shadow-lg border-none cursor-pointer"><CheckCircle2 className="h-3.5 w-3.5" /> <span className="hidden xs:inline">Publish</span></button>
+                  <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="flex items-center justify-center p-3 h-10 md:h-11 w-10 md:w-11 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90 shadow-sm border-none cursor-pointer"><Trash2 className="h-4 w-4" /></button>
+                  <div className="w-px h-8 bg-white/10 mx-1 hidden sm:block" />
+                  <button onClick={() => setSelectedIds([])} className="text-slate-400 hover:text-white p-2 bg-transparent border-none cursor-pointer"><X className="h-5 w-5" /></button>
                </div>
             </div>
          </div>

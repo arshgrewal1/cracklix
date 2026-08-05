@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -50,7 +51,6 @@ import { motion, AnimatePresence } from "framer-motion"
 
 /**
  * @fileOverview Master Mock Test Manager v4.1.
- * FIXED: Removed forced uppercase from mock test titles in registry.
  */
 
 export default function MockManagement() {
@@ -163,7 +163,7 @@ export default function MockManagement() {
             </div>
             <div className="space-y-1.5">
                <Label className="text-[10px] font-bold text-slate-400 ml-1">Filter Series</Label>
-               <select value={serFilter} onChange={e => setSerFilter(e.target.value)} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]" disabled={subFilter === 'all'}>
+               <select value={serFilter} onChange={e => setSortBy(e.target.value)} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]" disabled={subFilter === 'all'}>
                   <option value="all">All Series</option>
                   {allSeries?.filter((s: any) => s.subjectId === subFilter).map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
                </select>
@@ -259,36 +259,36 @@ export default function MockManagement() {
         </CardContent>
       </Card>
 
-      {/* BULK ACTION BAR */}
       <AnimatePresence>
          {selectedIds.length > 0 && (
             <motion.div 
-              initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }}
-              className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] w-[95vw] max-w-2xl"
+              initial={{ y: 100, opacity: 0, x: "-50%" }} 
+              animate={{ y: 0, opacity: 1, x: "-50%" }} 
+              exit={{ y: 100, opacity: 0, x: "-50%" }}
+              className="fixed bottom-[calc(90px+env(safe-area-inset-bottom))] left-1/2 z-[100] w-[calc(100%-24px)] max-w-2xl"
             >
-               <div className="bg-[#0F172A] text-white p-5 rounded-[2.5rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl">
-                  <div className="flex items-center gap-4 ml-2">
-                     <div className="h-10 w-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-bold">{selectedIds.length}</div>
-                     <p className="text-[11px] font-bold uppercase tracking-widest">Selected tests</p>
+               <div className="bg-[#0F172A] text-white p-4 md:p-5 rounded-[1.5rem] md:rounded-[2.5rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl">
+                  <div className="flex items-center gap-3 md:gap-4 ml-1 md:ml-2 min-w-0">
+                     <div className="h-9 w-9 md:h-10 md:w-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-bold text-sm shrink-0">{selectedIds.length}</div>
+                     <p className="text-[10px] md:text-[11px] font-bold uppercase tracking-tight truncate">Selected</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                     <Button onClick={() => setIsBulkMoveOpen(true)} className="h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-[10px] uppercase gap-2 border border-white/5"><MoveHorizontal className="h-4 w-4" /> Move hub</Button>
-                     <Button onClick={async () => { if(confirm("Bulk delete selected tests?")) { setIsProcessing(true); const b = writeBatch(db!); selectedIds.forEach(id => b.delete(doc(db!, "mocks", id))); await b.commit(); setSelectedIds([]); setIsProcessing(false); toast({ title: "Batch deleted" }); } }} className="h-11 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-[10px] uppercase gap-2 border-none shadow-lg"><Trash2 className="h-4 w-4" /> Delete</Button>
-                     <button onClick={() => setSelectedIds([])} className="p-3 text-slate-500 hover:text-white"><X className="h-5 w-5" /></button>
+                  <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                     <Button onClick={() => setIsBulkMoveOpen(true)} className="h-10 md:h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-[9px] md:text-[10px] uppercase gap-2 border border-white/5 px-3 md:px-5 min-w-[70px] justify-center"><MoveHorizontal className="h-3.5 w-3.5" /> <span className="hidden xs:inline">Move</span></Button>
+                     <Button onClick={async () => { if(confirm("Bulk delete selected tests?")) { setIsProcessing(true); const b = writeBatch(db!); selectedIds.forEach(id => b.delete(doc(db!, "mocks", id))); await b.commit(); setSelectedIds([]); setIsProcessing(false); toast({ title: "Batch deleted" }); } }} className="h-10 md:h-11 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-[9px] md:text-[10px] uppercase gap-2 border-none shadow-lg px-3 md:px-5 min-w-[70px] justify-center"><Trash2 className="h-3.5 w-3.5" /> <span className="hidden xs:inline">Delete</span></Button>
+                     <button onClick={() => setSelectedIds([])} className="p-2 text-slate-500 hover:text-white bg-transparent border-none cursor-pointer"><X className="h-5 w-5" /></button>
                   </div>
                </div>
             </motion.div>
          )}
       </AnimatePresence>
 
-      {/* BULK MOVE DIALOG */}
       <Dialog open={isBulkMoveOpen} onOpenChange={setIsBulkMoveOpen}>
-         <DialogContent className="sm:max-w-md rounded-[3rem] bg-white border-none shadow-5xl p-10 text-left">
+         <DialogContent className="sm:max-w-md rounded-[2rem] md:rounded-[3rem] bg-white border-none shadow-5xl p-6 md:p-10 text-left">
             <DialogHeader className="space-y-2">
-               <DialogTitle className="text-2xl font-bold text-[#0F172A]">Move tests</DialogTitle>
-               <DialogDescription className="text-slate-400 font-medium">Re-map {selectedIds.length} items to a different subject or series.</DialogDescription>
+               <DialogTitle className="text-xl md:text-2xl font-bold text-[#0F172A]">Move tests</DialogTitle>
+               <DialogDescription className="text-slate-400 font-medium text-sm">Re-map {selectedIds.length} items to a different subject or series.</DialogDescription>
             </DialogHeader>
-            <div className="py-8 space-y-6">
+            <div className="py-6 md:py-8 space-y-6">
                <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold text-slate-500 ml-1">Target Subject</Label>
                   <select value={moveTarget.subjectId} onChange={e => setMoveTarget({...moveTarget, subjectId: e.target.value, seriesId: ""})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner text-[#0F172A]">
@@ -305,7 +305,7 @@ export default function MockManagement() {
                </div>
             </div>
             <DialogFooter>
-               <Button onClick={handleBulkMove} disabled={isProcessing || !moveTarget.subjectId} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] tracking-widest rounded-2xl shadow-xl">
+               <Button onClick={handleBulkMove} disabled={isProcessing || !moveTarget.subjectId} className="w-full h-14 md:h-16 bg-[#0F172A] hover:bg-black text-white font-bold text-[10px] md:text-xs tracking-widest rounded-2xl shadow-xl border-none">
                   {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />} Confirm move
                </Button>
             </DialogFooter>
