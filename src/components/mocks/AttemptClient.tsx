@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -42,8 +41,8 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors";
 
 /**
- * @fileOverview Official Attempt Hub v113.0 [Stability Hardened].
- * FIXED: Implemented auto-submit and hardened mutation synchronization.
+ * @fileOverview Official Attempt Hub v114.0 [Performance Hardened].
+ * FIXED: Optimized submission path for instant feedback.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -267,7 +266,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const globalMeritRef = doc(db, "leaderboard", user.uid);
       const statsRef = doc(db, "settings", "stats");
 
-      // OPTIMISTIC WRITE: Trigger mutations without blocking
+      // OPTIMISTIC WRITE: Trigger mutations without blocking UI
       setDoc(resultRef, resultPayload).catch(async (e) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: resultRef.path, operation: 'create', requestResourceData: resultPayload }));
       });
@@ -299,7 +298,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: globalMeritRef.path, operation: 'write' }));
       });
 
-      // Update total attempts if allowed (silently fail if no perms)
       updateDoc(statsRef, { 
         totalAttempts: increment(1), 
         updatedAt: serverTimestamp() 
@@ -310,41 +308,28 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
        localStorage.setItem(`cracklix_guest_result_${finalAttemptId}`, JSON.stringify({ ...resultPayload, isGuestNode: true }));
     }
 
+    // INSTANT NAVIGATION: Move to result page immediately
     router.replace(`/results/view?id=${mockId}&attemptId=${finalAttemptId}`);
-    setTimeout(() => resetStore(), 1000);
+    // No explicit resetStore here - ResultClient will leverage the cached state for instant loading
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, storeAttemptId, resetStore, language, toast]);
 
-  // AUTO-SUBMIT LOGIC
   useEffect(() => {
     if (timeLeft === 0 && !isInitializing && !isSubmittingFinal && questions.length > 0) {
       handleSubmitFinal();
     }
   }, [timeLeft, isInitializing, isSubmittingFinal, questions.length, handleSubmitFinal]);
 
-  if (isInitializing || isSubmittingFinal) return (
+  if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8 z-[2000] fixed inset-0">
        <div className="relative">
           <Zap className="h-12 w-12 text-primary animate-pulse" />
           <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 text-blue-500 animate-spin" />
        </div>
        <div className="text-center space-y-2 px-6">
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">
-             {isSubmittingFinal ? "Finalizing report" : "Synchronizing test hub"}
-          </p>
-          <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
-             {isSubmittingFinal ? "Generating analysis" : "Loading verified patterns"}
-          </p>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Synchronizing test hub</p>
+          <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Loading verified patterns</p>
        </div>
     </div>
-  );
-
-  if (initError) return (
-     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-6">
-        <AlertCircle className="h-16 w-16 text-rose-500" />
-        <h2 className="text-2xl font-black text-[#0F172A]">Initialization failed</h2>
-        <p className="text-slate-500">{initError}</p>
-        <Button onClick={() => window.location.reload()} className="rounded-xl h-12 px-8">Retry sync</Button>
-     </div>
   );
 
   return (
@@ -388,7 +373,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               <DialogDescription className="text-slate-400 mt-2 text-center w-full uppercase tracking-widest text-[10px] font-bold">Finish attempt and generate report</DialogDescription>
             </DialogHeader>
             <div className="w-full flex flex-col gap-3 mt-8">
-              <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl border-none flex items-center justify-center uppercase tracking-widest text-[11px]">Finish attempt</Button>
+              <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl border-none flex items-center justify-center uppercase tracking-widest text-[11px]">
+                 {isSubmittingFinal ? <Loader2 className="h-4 w-4 animate-spin" /> : "Finish attempt"}
+              </Button>
               <Button variant="ghost" onClick={() => setShowSubmitModal(false)} disabled={isSubmittingFinal} className="w-full h-12 text-slate-400 hover:text-white font-bold flex items-center justify-center uppercase tracking-widest text-[10px]">Return to test</Button>
             </div>
           </div>

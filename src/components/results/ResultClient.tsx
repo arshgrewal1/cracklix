@@ -46,10 +46,11 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import ShareableResultCard from "./ShareableResultCard"
 import { toPng } from "html-to-image"
+import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Universal Result Hub Engine v114.0.
- * FIXED: Atomic report lookup - checks guest registry first, then cloud with high-fidelity onSnapshot.
+ * @fileOverview Universal Result Hub Engine v115.0 [Instant Sync].
+ * FIXED: Leverages useExamStore for instant question loading after submission.
  */
 
 export default function ResultClient() {
@@ -77,6 +78,10 @@ export default function ResultClient() {
 
   const mockIdFromUrl = searchParams.get('id')
   const attemptIdFromUrl = searchParams.get('attemptId')
+
+  // PERSISTENCE HUB: Check if we have the data already in the exam store (Zero-latency transition)
+  const cachedMockId = useExamStore(s => s.mockId);
+  const cachedQuestions = useExamStore(s => s.questions);
 
   const formatTimeTaken = (totalSeconds: number) => {
     if (!totalSeconds || totalSeconds <= 0) return "0s";
@@ -176,6 +181,16 @@ export default function ResultClient() {
      }
 
      const loadQuestions = async () => {
+        // INSTANT CACHE CHECK: If we just finished this test, don't re-fetch
+        if (cachedMockId === mId && cachedQuestions?.length > 0) {
+           setQuestions(cachedQuestions);
+           const mRef = doc(db, "mocks", mId);
+           const dRef = doc(db, "daily_quizzes", mId);
+           const [mSnap, dSnap] = await Promise.all([getDoc(mRef), getDoc(dRef)]);
+           setMockData(mSnap.exists() ? mSnap.data() : dSnap.data());
+           return;
+        }
+
         try {
            const mRef = doc(db, "mocks", mId);
            const dRef = doc(db, "daily_quizzes", mId);
@@ -210,7 +225,7 @@ export default function ResultClient() {
 
      loadQuestions();
      return () => unsubscribeMetrics();
-  }, [db, mockIdFromUrl, sessionData]);
+  }, [db, mockIdFromUrl, sessionData, cachedMockId, cachedQuestions]);
 
   const reviewNodes = useMemo(() => {
     if (!sessionData || !questions.length) return { all: [], correct: [], wrong: [], skipped: [] };
