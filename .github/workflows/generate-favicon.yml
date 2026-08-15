@@ -4,12 +4,14 @@ on:
 
 jobs:
   generate:
-    name: Generate Favicon and Commit
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repository (no credentials)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false   # important: do NOT persist GITHUB_TOKEN into git
 
       - name: Install ImageMagick & pngquant
         run: |
@@ -30,15 +32,12 @@ jobs:
           REPO: ${{ github.repository }}
           BRANCH: ${{ github.ref_name }}
         run: |
-          # configure git user
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # stage generated files (if any)
           git add public/favicon.ico || true
           git add public/icons/*.png || true
 
-          # nothing to commit?
           if git diff --cached --quiet; then
             echo "No generated icons to commit"
             exit 0
@@ -46,11 +45,9 @@ jobs:
 
           git commit -m "chore(ci): generate favicon.ico and icon PNGs"
 
-          # default branch fallback if BRANCH is empty (workflow_dispatch should set branch, but be safe)
           if [ -z "$BRANCH" ]; then
             BRANCH="main"
           fi
 
-          # set remote URL using PAT and push to the same branch the workflow was run on
-          git remote set-url origin https://x-access-token:${PUSH_TOKEN}@github.com/${REPO}.git
-          git push origin HEAD:${BRANCH}
+          # Push using PAT in the remote URL
+          git push https://x-access-token:${PUSH_TOKEN}@github.com/${REPO}.git HEAD:${BRANCH}
