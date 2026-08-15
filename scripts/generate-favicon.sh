@@ -1,36 +1,47 @@
 #!/usr/bin/env bash
 # scripts/generate-favicon.sh
-# Generate multi-size favicon.ico and PNG icons from the original logo
+# Generate multi-size favicon.ico and PNG icons from the best available source logo.
 # Usage: ./scripts/generate-favicon.sh
 # Requirements: ImageMagick (convert), pngquant or pngcrush (optional)
 
 set -euo pipefail
 
-SRC="public/logo/cracklix-icon.png"
-ICONS_DIR="public/icons"
-FAVICON="public/favicon.ico"
-
-if [ ! -f "$SRC" ]; then
-  echo "Source logo not found: $SRC"
+# Prefer the blue institutional icon in public/icons if present, otherwise fall back to public/logo/cracklix-icon.png
+if [ -f "public/icons/icon-512x512.png" ]; then
+  SRC="public/icons/icon-512x512.png"
+elif [ -f "public/icons/icon-192x192.png" ]; then
+  SRC="public/icons/icon-192x192.png"
+elif [ -f "public/logo/cracklix-icon.png" ]; then
+  SRC="public/logo/cracklix-icon.png"
+else
+  echo "No source logo found. Please add public/icons/icon-512x512.png or public/logo/cracklix-icon.png"
   exit 1
 fi
 
+ICONS_DIR="public/icons"
+FAVICON="public/favicon.ico"
+
 mkdir -p "$ICONS_DIR"
 
-# Create standardized sizes
-convert "$SRC" -resize 16x16^ -gravity center -background transparent -extent 16x16 "$ICONS_DIR/icon-16x16.png"
-convert "$SRC" -resize 32x32^ -gravity center -background transparent -extent 32x32 "$ICONS_DIR/icon-32x32.png"
-convert "$SRC" -resize 48x48^ -gravity center -background transparent -extent 48x48 "$ICONS_DIR/icon-48x48.png"
-convert "$SRC" -resize 72x72^ -gravity center -background transparent -extent 72x72 "$ICONS_DIR/icon-72x72.png"
-convert "$SRC" -resize 96x96^ -gravity center -background transparent -extent 96x96 "$ICONS_DIR/icon-96x96.png"
-convert "$SRC" -resize 128x128^ -gravity center -background transparent -extent 128x128 "$ICONS_DIR/icon-128x128.png"
-convert "$SRC" -resize 144x144^ -gravity center -background transparent -extent 144x144 "$ICONS_DIR/icon-144x144.png"
-convert "$SRC" -resize 152x152^ -gravity center -background transparent -extent 152x152 "$ICONS_DIR/icon-152x152.png"
-convert "$SRC" -resize 192x192^ -gravity center -background transparent -extent 192x192 "$ICONS_DIR/icon-192x192.png"
-convert "$SRC" -resize 384x384^ -gravity center -background transparent -extent 384x384 "$ICONS_DIR/icon-384x384.png"
-convert "$SRC" -resize 512x512^ -gravity center -background transparent -extent 512x512 "$ICONS_DIR/icon-512x512.png"
+echo "Using source: $SRC"
 
-# Create an ICO containing multiple sizes (16,32,48)
+# Create a clean centered square master (transparent background)
+convert "$SRC" -trim +repage -resize 512x512^ -gravity center -background transparent -extent 512x512 "$ICONS_DIR/master-512.png"
+
+# Generate sharp, downscaled PNGs (Lanczos + unsharp to keep logos crisp)
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 512x512 "$ICONS_DIR/icon-512x512.png"
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 384x384 -unsharp 0x0.75+0.75+0.008 "$ICONS_DIR/icon-384x384.png"
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 192x192 -unsharp 0x0.75+0.75+0.008 "$ICONS_DIR/icon-192x192.png"
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 152x152 -unsharp 0x0.75+0.75+0.008 "$ICONS_DIR/icon-152x152.png"
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 144x144 -unsharp 0x0.75+0.75+0.008 "$ICONS_DIR/icon-144x144.png"
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 128x128 -unsharp 0x0.75+0.75+0.008 "$ICONS_DIR/icon-128x128.png"
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 96x96 -unsharp 0x0.75+0.75+0.008 "$ICONS_DIR/icon-96x96.png"
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 72x72 -unsharp 0x0.75+0.75+0.008 "$ICONS_DIR/icon-72x72.png"
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 48x48 -unsharp 0x0.75+0.75+0.008 "$ICONS_DIR/icon-48x48.png"
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 32x32 -unsharp 0x0.75+0.75+0.008 "$ICONS_DIR/icon-32x32.png"
+convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 16x16 -unsharp 0x0.75+0.75+0.008 "$ICONS_DIR/icon-16x16.png"
+
+# Create an ICO containing multiple sizes (16,32,48) for broad compatibility
 convert "$ICONS_DIR/icon-16x16.png" "$ICONS_DIR/icon-32x32.png" "$ICONS_DIR/icon-48x48.png" "$FAVICON"
 
 # Optional optimization with pngquant (if available)
@@ -53,11 +64,10 @@ fi
 
 echo "Generated favicon and icons in $ICONS_DIR and $FAVICON"
 
-# Print verification commands
 cat <<EOF
-After running this script, verify with:
-  curl -I https://<your-domain>/favicon.ico
-  curl -I https://<your-domain>/icons/icon-48x48.png
+After the script runs, verify with:
+  curl -I https://cracklix.in/favicon.ico
+  curl -I https://cracklix.in/icons/icon-48x48.png
 
-Then in Google Search Console, use URL Inspection for your homepage and Request Indexing to speed up favicon refresh.
+If you want me to run the workflow, click Actions → Generate Favicon → Run workflow. Share the logs if anything fails and I'll help.
 EOF
