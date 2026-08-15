@@ -36,8 +36,9 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v10.1.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v10.2.
  * FIXED: UI Back button hidden in standalone PWA mode.
+ * FIXED: Forced scroll to top on mount.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -70,6 +71,7 @@ export default function ExamsEntryPage() {
   useEffect(() => {
     setMounted(true);
     if (typeof window !== 'undefined') {
+       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
        setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true);
     }
   }, []);

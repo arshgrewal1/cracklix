@@ -38,8 +38,8 @@ import { Vacancy } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Punjab Vacancy Registry v3.3.
- * FIXED: Removed truncate from department field for full visibility.
+ * @fileOverview Official Punjab Vacancy Registry v3.4.
+ * FIXED: Removed truncate from department field and added scroll-to-top logic.
  */
 
 const CATEGORY_CHIPS = [
@@ -62,6 +62,9 @@ export default function VacanciesPortal() {
 
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== 'undefined') {
+       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
   }, [])
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);

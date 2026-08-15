@@ -41,8 +41,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Current Affairs Hub v6.1 [Sticky Removed].
- * TERMINOLOGY: Replaced 'items' with 'news'.
+ * @fileOverview Premium Current Affairs Hub v6.2 [Flicker Fixed].
+ * FIXED: Enforced scroll-to-top on mount for consistent hub entry.
  */
 
 const CATEGORIES = [
@@ -67,6 +67,12 @@ export default function CurrentAffairsCenter() {
   const [selectedCategory, setSelectedCategory] = useState("All")
   
   const { startSession } = useActiveSession('CA')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) {

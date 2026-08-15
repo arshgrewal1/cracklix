@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -52,8 +51,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v5.0 [Sync Hardened].
- * FIXED: Stabilized loading state to prevent app blinking.
+ * @fileOverview Institutional Practice Hub v5.1 [Sync Hardened].
+ * FIXED: Stabilized loading state and enforced scroll-to-top on mount.
  */
 
 const FILTER_CHIPS = [
@@ -78,6 +77,9 @@ export default function PracticeHub() {
 
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== 'undefined') {
+       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
   }, [])
 
   useEffect(() => {

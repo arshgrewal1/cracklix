@@ -19,8 +19,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useActiveSession } from "@/hooks/useStudyAnalytics";
 
 /**
- * @fileOverview Official Download Center v3.0.
- * UPDATED: Removed all sticky positioning. Filter tabs and search scroll with the page.
+ * @fileOverview Official Download Center v3.1 [Flicker Fixed].
+ * FIXED: Enforced scroll-to-top on mount.
  */
 
 export default function NotesLibrary() {
@@ -31,6 +31,12 @@ export default function NotesLibrary() {
   const [searchTerm, setSearchTerm] = useState("")
   
   const { startSession } = useActiveSession('PDF');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) {

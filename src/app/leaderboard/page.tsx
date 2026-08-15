@@ -17,9 +17,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Official Real-Time Merit Registry Hub v13.1.
+ * @fileOverview Official Real-Time Merit Registry Hub v13.2.
  * FIXED: Bypassed Index Error by performing client-side sorting for top rankers.
- * UPDATED: Title Case normalization and refined high-density layout.
+ * FIXED: Forced scroll to top on navigation mount.
  */
 
 export default function LeaderboardPage() {
@@ -39,7 +39,12 @@ function LeaderboardContent() {
   const [searchTerm, setSearchTerm] = useState("")
   const [mounted, setMounted] = useState(false)
   
-  useEffect(() => { setMounted(true) }, []);
+  useEffect(() => { 
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }, []);
 
   const mockId = searchParams.get('id');
 

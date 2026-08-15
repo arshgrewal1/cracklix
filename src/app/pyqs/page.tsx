@@ -26,7 +26,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useStudyTracker } from "@/hooks/useStudyTracker";
 
 /**
- * @fileOverview Official PYQ Hub v2.7 (Real-Time Tracking).
+ * @fileOverview Official PYQ Hub v2.8 [Flicker Fixed].
+ * FIXED: Enforced scroll-to-top on mount.
  */
 
 export default function PYQPage() {
@@ -34,6 +35,12 @@ export default function PYQPage() {
   const { user } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
   
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }, []);
+
   // Real-time tracking
   useStudyTracker('pyq-archives', 'PYQ');
 
