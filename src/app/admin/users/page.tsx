@@ -30,6 +30,7 @@ import {
   Globe
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, doc, updateDoc, serverTimestamp, deleteDoc, onSnapshot, where, limit, orderBy } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -48,9 +49,8 @@ import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/compone
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
- * @fileOverview Institutional Aspirant Dashboard v4.1 [PWA Fixed].
- * FIXED: Re-engineered horizontal scroll container to prevent PWA clipping.
- * FIXED: Optimized table layout for mobile swiping.
+ * @fileOverview Institutional Aspirant Dashboard v4.2 [Real-Time Presence Fix].
+ * FIXED: "Online Now" strictly calculated using 5-minute heartbeat threshold.
  */
 
 export default function StudentManagementHub() {
@@ -71,6 +71,7 @@ export default function StudentManagementHub() {
     if (!aspirants) return { total: 0, active: 0, google: 0, email: 0, pro: 0, newToday: 0, online: 0 }
     const now = Date.now()
     const today = new Date().setHours(0,0,0,0)
+    const presenceThreshold = 300000; // 5 minutes
     
     return aspirants.reduce((acc, a) => {
       acc.total++
@@ -82,8 +83,10 @@ export default function StudentManagementHub() {
       const created = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : new Date(a.createdAt).getTime()
       if (created >= today) acc.newToday++
 
+      // Hardened Presence Check: online flag + lastSeen window
       const lastSeen = a.lastSeen?.seconds ? a.lastSeen.seconds * 1000 : 0
-      if (a.online === true || (lastSeen && now - lastSeen < 300000)) acc.online++
+      const isActuallyOnline = a.online === true && (now - lastSeen < presenceThreshold);
+      if (isActuallyOnline) acc.online++
       
       return acc
     }, { total: 0, active: 0, google: 0, email: 0, pro: 0, newToday: 0, online: 0 })
@@ -91,6 +94,9 @@ export default function StudentManagementHub() {
 
   const filteredAspirants = useMemo(() => {
     if (!aspirants) return []
+    const now = Date.now()
+    const presenceThreshold = 300000;
+
     return aspirants.filter((a: any) => {
       const search = searchTerm.toLowerCase().trim()
       const matchesSearch = !search || 
@@ -105,8 +111,8 @@ export default function StudentManagementHub() {
       const matchesProvider = providerFilter === 'all' || 
         (providerFilter === 'GOOGLE' ? (a.providerId === 'google.com' || a.email?.includes('gmail')) : (a.providerId !== 'google.com' && !a.email?.includes('gmail')))
       
-      const isOnline = a.online === true || (a.lastSeen?.seconds && Date.now() - a.lastSeen.seconds * 1000 < 300000)
-      const matchesOnline = onlineFilter === 'all' || (onlineFilter === 'ONLINE' ? isOnline : !isOnline)
+      const isActuallyOnline = a.online === true && (a.lastSeen?.seconds && now - a.lastSeen.seconds * 1000 < presenceThreshold);
+      const matchesOnline = onlineFilter === 'all' || (onlineFilter === 'ONLINE' ? isActuallyOnline : !isActuallyOnline)
 
       return matchesSearch && matchesStatus && matchesMembership && matchesProvider && matchesOnline
     }).sort((a, b) => {
@@ -177,14 +183,15 @@ export default function StudentManagementHub() {
                 {loading ? (
                   <AdminTableSkeleton rows={10} columns={5} />
                 ) : filteredAspirants.map((a: any) => {
-                   const isOnline = a.online === true || (a.lastSeen?.seconds && Date.now() - a.lastSeen.seconds * 1000 < 300000);
+                   const now = Date.now();
+                   const isActuallyOnline = a.online === true && (a.lastSeen?.seconds && now - a.lastSeen.seconds * 1000 < 300000);
                    return (
                     <TableRow key={a.id} className="border-slate-50 hover:bg-slate-50 transition-all group">
                       <TableCell className="px-6 md:px-10 py-5">
                          <div className="flex items-center gap-4">
                             <div className="relative shrink-0">
                                <StudentAvatar profile={a} className="h-11 w-11 rounded-xl shadow-inner bg-slate-50" />
-                               <div className={cn("absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white", isOnline ? "bg-emerald-500" : "bg-slate-300")} />
+                               <div className={cn("absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white", isActuallyOnline ? "bg-emerald-500" : "bg-slate-300")} />
                             </div>
                             <div className="min-w-0 max-w-[200px]">
                                <p className="font-bold text-[#0F172A] text-sm md:text-base leading-tight truncate">{a.name}</p>
@@ -204,12 +211,18 @@ export default function StudentManagementHub() {
                       </TableCell>
                       <TableCell className="text-center">
                          <div className="flex flex-col items-center">
-                            <span className="text-[10px] md:text-[12px] font-black text-[#0F172A] tabular-nums">
-                               {a.lastSeen ? new Date(a.lastSeen.seconds * 1000).toLocaleDateString('en-GB') : '---'}
-                            </span>
-                            <span className="text-[8px] font-bold text-slate-300 uppercase tracking-tighter mt-1">
-                               {a.lastSeen ? new Date(a.lastSeen.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}
-                            </span>
+                            {isActuallyOnline ? (
+                               <span className="text-[10px] font-black text-emerald-600 uppercase">🟢 Online</span>
+                            ) : (
+                               <>
+                                  <span className="text-[10px] md:text-[12px] font-black text-[#0F172A] tabular-nums">
+                                     {a.lastSeen ? new Date(a.lastSeen.seconds * 1000).toLocaleDateString('en-GB') : '---'}
+                                  </span>
+                                  <span className="text-[8px] font-bold text-slate-300 uppercase tracking-tighter mt-1">
+                                     {a.lastSeen ? new Date(a.lastSeen.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}
+                                  </span>
+                               </>
+                            )}
                          </div>
                       </TableCell>
                       <TableCell className="text-right px-6 md:px-10">

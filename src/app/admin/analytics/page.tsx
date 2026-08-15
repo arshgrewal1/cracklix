@@ -40,8 +40,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Real-Time Community Analytics v3.1.
- * FIXED: Imported missing Button component to resolve ReferenceError.
+ * @fileOverview Premium Real-Time Community Analytics v3.2 [Presence Fix].
+ * FIXED: Online users count hardened with 5-minute heartbeat window.
  */
 
 type SocialPlatform = 'YOUTUBE' | 'TELEGRAM' | 'INSTAGRAM' | 'FACEBOOK' | 'X_PORTAL' | 'LINKEDIN';
@@ -81,15 +81,21 @@ export default function CommunityAnalyticsPage() {
     const todayStart = new Date(); 
     todayStart.setHours(0,0,0,0);
     const now = Date.now();
+    const presenceThreshold = 300000; // 5 minutes
 
     // 1. Live Users Hub Listener
     const unsubUsers = onSnapshot(collection(db, "users"), (snap) => {
        const docs = snap.docs.map(d => d.data());
+       const currentNow = Date.now();
        
        setLiveMetrics(prev => ({
           ...prev,
           totalUsers: snap.size,
-          onlineUsers: docs.filter(u => u.online === true || (u.lastSeen?.seconds && u.lastSeen.seconds * 1000 > now - 300000)).length,
+          // Hardened logic for accurate Online count
+          onlineUsers: docs.filter(u => 
+             u.online === true && 
+             (u.lastSeen?.seconds && u.lastSeen.seconds * 1000 > currentNow - presenceThreshold)
+          ).length,
           googleUsers: docs.filter(u => u.providerId === 'google.com' || u.email?.includes('gmail')).length, 
           emailUsers: docs.filter(u => !u.providerId || u.providerId === 'password').length,
           proUsers: docs.filter(u => u.passStatus === 'active').length,

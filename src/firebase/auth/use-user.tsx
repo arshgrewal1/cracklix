@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, onSnapshot, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth, useFirestore } from '../provider';
 import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth Hub v26.0 [Zero-Flicker Sync].
- * FIXED: loading state now resolves atomically to prevent flickering.
+ * @fileOverview Hardened Auth Hub v27.0 [Real-Time Presence].
+ * FIXED: Implemented heartbeat and visibility listeners to prevent stale "Online" status.
  */
 export function useUser() {
   const auth = useAuth();
@@ -44,14 +44,12 @@ export function useUser() {
         if (!profileLoaded.current) {
           setProfileLoading(true);
         }
-        // Atomic Resolution: Ensure we don't blink if the profile is already in cache
-        // But keep profileLoading true for the first time
       } else {
         setProfile(null);
         profileDataRef.current = "";
         setProfileLoading(false);
         profileLoaded.current = true;
-        setAuthResolved(true); // Resolve immediately if no user
+        setAuthResolved(true);
       }
     });
 
@@ -68,6 +66,7 @@ export function useUser() {
 
     const userRef = doc(db, 'users', user.uid);
 
+    // Optimized Presence Handler
     const syncPresence = (isOnline: boolean) => {
        updateDoc(userRef, {
           online: isOnline,
@@ -76,7 +75,21 @@ export function useUser() {
        }).catch(() => {});
     };
 
+    // Heartbeat: 4 min (strictly less than admin's 5 min threshold)
+    const heartbeat = setInterval(() => {
+       if (document.visibilityState === 'visible') {
+          syncPresence(true);
+       }
+    }, 240000);
+
+    const handleVisibility = () => {
+       const isOnline = document.visibilityState === 'visible';
+       syncPresence(isOnline);
+    };
+
+    // Initial Online Set
     syncPresence(true);
+    document.addEventListener('visibilitychange', handleVisibility);
 
     const handleProfileSnapshot = (docSnap: any) => {
       if (docSnap.exists()) {
@@ -104,38 +117,23 @@ export function useUser() {
       }
       profileLoaded.current = true;
       setProfileLoading(false);
-      setAuthResolved(true); // Resolve loading only after profile is fetched
+      setAuthResolved(true);
     };
 
     const unsubscribeProfile = onSnapshot(
       userRef, 
       handleProfileSnapshot,
       async (err) => {
-        if (err.code === 'permission-denied') {
-          console.warn("[PROFILE_SYNC]: Denied. Waiting for hydration.");
-        }
-        // Recovery Node: Ensure app isn't stuck if snapshot fails
         setAuthResolved(true);
       }
     );
-
-    const heartbeat = setInterval(() => {
-       if (document.visibilityState === 'visible') {
-          syncPresence(true);
-       }
-    }, 240000);
-
-    const handleVisibility = () => {
-       const isOnline = document.visibilityState === 'visible';
-       syncPresence(isOnline);
-    };
-
-    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       unsubscribeProfile();
       clearInterval(heartbeat);
       document.removeEventListener('visibilitychange', handleVisibility);
+      // Offline transition attempt on unmount
+      syncPresence(false);
     };
   }, [user, db]);
 
