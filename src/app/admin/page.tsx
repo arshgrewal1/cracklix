@@ -34,8 +34,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v41.0.
- * UPDATED: Added "Manage students" quick link.
+ * Admin Dashboard Center v42.0.
+ * FIXED: Active Students count now strictly filters for Role: STUDENT and Status: ACTIVE.
  */
 
 export default function AdminDashboard() {
@@ -75,7 +75,8 @@ export default function AdminDashboard() {
           pyqCount, 
           pSnap, 
           catCount,
-          activePassesCount
+          activePassesCount,
+          activeStudentsCount
         ] = await Promise.all([
            getCountFromServer(collection(db, "mcqBank")),
            getCountFromServer(collection(db, "questions")),
@@ -88,7 +89,8 @@ export default function AdminDashboard() {
            getCountFromServer(collection(db, "pyqs")),
            getDocs(query(collection(db, "payment_requests"), where("status", "==", "APPROVED"))),
            getCountFromServer(collection(db, "categories")),
-           getCountFromServer(query(collection(db, "users"), where("passStatus", "==", "active")))
+           getCountFromServer(query(collection(db, "users"), where("passStatus", "==", "active"))),
+           getCountFromServer(query(collection(db, "users"), where("role", "==", "STUDENT"), where("status", "==", "ACTIVE")))
         ]);
 
         const totalRev = pSnap.docs.reduce((acc: number, d: DocumentData) => acc + (Number(d.data().amount) || 0), 0);
@@ -97,6 +99,7 @@ export default function AdminDashboard() {
            totalQuestions: mcqBankCount.data().count + legacyQCount.data().count,
            totalMocks: mockCount.data().count + quizCount.data().count,
            totalUsers: uCount.data().count,
+           activeStudents: activeStudentsCount.data().count, // Dynamic eligible student count
            totalExams: eCount.data().count,
            totalCategories: catCount.data().count,
            totalRevenue: totalRev,
@@ -110,6 +113,7 @@ export default function AdminDashboard() {
 
         toast({ title: "Stats refreshed" });
      } catch (err: any) {
+        console.error("[STATS_SYNC_FAILURE]:", err);
         toast({ variant: "destructive", title: "Update failed" });
      } finally {
         setIsStatsSyncing(false);
@@ -157,7 +161,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
          <AdminMetricCard label="Total earnings" value={`₹${(stats?.totalRevenue || 0).toLocaleString()}`} sub="Verified sales" icon={<DollarSign className="text-emerald-500" />} href="/admin/revenue" />
-         <AdminMetricCard label="Active students" value={statsLoading ? "..." : (stats?.activePasses || 0)} sub="Live Community" icon={<Gem className="text-primary" />} href="/admin/analytics" highlight />
+         <AdminMetricCard label="Active Students" value={statsLoading ? "..." : (stats?.activeStudents || 0)} sub="Eligible community" icon={<GraduationCap className="text-primary" />} href="/admin/analytics" highlight />
          <AdminMetricCard label="Approvals needed" value={pendingNodes?.length || 0} sub="Pending payments" icon={<AlertCircle className={cn(hasPending ? "text-rose-500 animate-pulse" : "text-slate-300")} />} href="/admin/payments/verify" highlight={hasPending} />
       </div>
 
