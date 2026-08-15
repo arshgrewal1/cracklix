@@ -25,8 +25,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Compact Trending Hubs v58.0.
- * COMPACT: Limited to 2 items on Home Page. Added colorful action button.
+ * @fileOverview Compact Trending Hubs v58.1.
+ * FIXED: Title truncation resolved - allows 2 lines.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -109,7 +109,7 @@ export default function PopularExams() {
                     className="h-full"
                  >
                     <Link href={`/exams/view?id=${exam.id}`} className="block h-full">
-                       <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden">
+                       <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden">
                           <div className="flex justify-between items-start mb-4">
                              <AuthorityLogo board={board} boardId={exam.boardId} size="sm" className="h-10 w-10 md:h-12 md:w-12 shadow-lg border-2 border-background bg-muted" />
                              <button 
@@ -125,7 +125,7 @@ export default function PopularExams() {
                           </div>
 
                           <div className="space-y-2 flex-1 text-left">
-                             <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-1">
+                             <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-primary transition-colors leading-tight line-clamp-2">
                                 {exam.name}
                              </h3>
                              <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-bold text-muted-foreground tracking-tight">

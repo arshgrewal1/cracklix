@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Latest Tests Hub v52.0.
- * FIXED: Added missing key props to skeleton loaders.
+ * @fileOverview High-Density Latest Tests Hub v52.1.
+ * FIXED: Title truncation resolved - allows 2 lines.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -78,7 +78,7 @@ export default function LatestMocks() {
                   </div>
 
                   <div className="flex-1 space-y-2 min-w-0">
-                    <h3 className="text-sm md:text-lg font-bold leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-1 truncate">
+                    <h3 className="text-sm md:text-lg font-bold leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-2">
                         {mock.title}
                     </h3>
                     

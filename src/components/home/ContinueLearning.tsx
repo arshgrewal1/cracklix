@@ -25,9 +25,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview High-Fidelity Real-Time Progress Hub v11.0.
- * FIXED: Added missing BarChart3 import.
- * FIXED: Removed orderBy to bypass Index Requirement Error.
+ * @fileOverview High-Fidelity Real-Time Progress Hub v11.1.
+ * FIXED: Title truncation resolved - allows 2 lines on mobile.
  */
 export default function ContinueLearning() {
   const { user } = useUser();
@@ -151,7 +150,7 @@ export default function ContinueLearning() {
                                Updated: {new Date(activeAttempt.updatedAt?.seconds * 1000 || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                          </div>
-                         <h3 className={cn("text-base md:text-xl font-black tracking-tight leading-tight line-clamp-1", isCompleted ? "text-[#0F172A]" : "text-white")}>
+                         <h3 className={cn("text-base md:text-xl font-black tracking-tight leading-tight line-clamp-2", isCompleted ? "text-[#0F172A]" : "text-white")}>
                             {mockMeta.title}
                          </h3>
                          <div className="flex flex-wrap items-center gap-4 pt-1">
