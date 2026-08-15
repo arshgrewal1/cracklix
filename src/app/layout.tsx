@@ -24,8 +24,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v16.0.
- * UPDATED: Integrated StudyTimerManager for centralized time tracking.
+ * @fileOverview Global Layout Registry v16.1.
+ * UPDATED: Optimized icon registry for high-fidelity blue logo assets.
  */
 
 export const metadata: Metadata = {
@@ -41,6 +41,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://cracklix.in"),
   alternates: {
     canonical: "/",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/icons/icon-192x192.png",
   },
   robots: {
     index: true,

@@ -1,9 +1,8 @@
-
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Official PWA Manifest Registry v2.5.
- * UPDATED: Synchronized background color with Cracklix Native Black (#05070B).
+ * @fileOverview Official PWA Manifest Registry v2.6.
+ * UPDATED: Synchronized icon purpose for any/maskable compatibility.
  */
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -28,19 +27,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/icons/icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "any"
-      },
-      {
-        src: "/icons/icon-maskable-192x192.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "maskable"
-      },
-      {
-        src: "/icons/icon-maskable-512x512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable"
+        purpose: "any maskable"
       }
     ],
     shortcuts: [
