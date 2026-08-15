@@ -28,9 +28,9 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 
 /**
- * @fileOverview Professional Test Listing Hub v6.0 [Mobile Overlap Fixed].
- * FIXED: Re-engineered TestCard with flex-grid to prevent overlap and collision.
- * FIXED: Bottom navigation padding synchronized with PWA safe areas.
+ * @fileOverview Professional Test Listing Hub v6.1 [Responsive Hardened].
+ * FIXED: Re-engineered TestCard with flex-grid and min-width constraints to prevent overlap.
+ * FIXED: Navigation guard added to prevent duplicate route pushes.
  */
 
 export default function SeriesDetailPortal() {
@@ -93,7 +93,7 @@ export default function SeriesDetailPortal() {
         </h1>
       </header>
 
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 pb-[calc(120px+env(safe-area-inset-bottom))] space-y-8">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 pb-[calc(140px+env(safe-area-inset-bottom))] space-y-8">
         {/* FULL LENGTH SECTION */}
         {sections.full.length > 0 && (
           <section className="space-y-4">
@@ -206,12 +206,12 @@ function TestCard({ test, index, attempt, hasAccess }: { test: MockTest, index: 
     setTimeout(() => {
       navigationGuard.current = false;
       setIsNavigating(false);
-    }, 2000);
+    }, 3000);
   };
 
   return (
     <motion.div whileTap={{ scale: 0.98 }}>
-      <Card onClick={handleClick} className="border border-[#E5E7EB] shadow-sm rounded-[18px] bg-white p-3 md:p-4 flex items-center gap-3 md:gap-4 cursor-pointer hover:border-[#147BFF]/30 transition-all group overflow-hidden relative">
+      <Card onClick={handleClick} className="border border-[#E5E7EB] shadow-sm rounded-[18px] bg-white p-3 md:p-4 flex items-center gap-3 md:gap-4 cursor-pointer hover:border-[#147BFF]/30 transition-all group overflow-hidden relative min-w-0">
         {/* LEFT: CIRCULAR NUMBER */}
         <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#147BFF] flex items-center justify-center text-white font-bold text-sm md:text-lg shadow-md shrink-0">
           {index}
@@ -219,23 +219,23 @@ function TestCard({ test, index, attempt, hasAccess }: { test: MockTest, index: 
 
         {/* CENTER: CONTENT */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 md:gap-2 mb-1">
-             <h3 className="text-sm md:text-[17px] font-bold text-[#111827] truncate leading-tight flex-1">{test.title}</h3>
-             {isPremium && <Crown className="h-3.5 w-3.5 text-amber-500 fill-current shrink-0" />}
+          <div className="flex items-start gap-1.5 md:gap-2 mb-1.5">
+             <h3 className="text-sm md:text-[17px] font-bold text-[#111827] line-clamp-2 leading-tight flex-1 min-w-0">{test.title}</h3>
+             {isPremium && <Crown className="h-3.5 w-3.5 text-amber-500 fill-current shrink-0 mt-0.5" />}
           </div>
           
-          <div className="flex items-center gap-2 md:gap-4 text-[10px] md:text-[13px] font-medium text-[#6B7280]">
-            <div className="flex items-center gap-1">
+          <div className="flex items-center gap-x-3 gap-y-1 flex-wrap text-[10px] md:text-[13px] font-medium text-[#6B7280]">
+            <div className="flex items-center gap-1 shrink-0">
                <span className="font-bold text-[#111827]">{test.totalQuestions}</span>
                <span className="opacity-60 text-[9px] uppercase font-black">Qs</span>
             </div>
-            <div className="w-px h-3 bg-slate-100" />
-            <div className="flex items-center gap-1">
+            <div className="w-px h-3 bg-slate-200 hidden xs:block shrink-0" />
+            <div className="flex items-center gap-1 shrink-0">
                <span className="font-bold text-[#111827]">{test.totalQuestions * (test.positiveMarks || 1)}</span>
                <span className="opacity-60 text-[9px] uppercase font-black">Pts</span>
             </div>
-            <div className="w-px h-3 bg-slate-100" />
-            <div className="flex items-center gap-1">
+            <div className="w-px h-3 bg-slate-200 hidden xs:block shrink-0" />
+            <div className="flex items-center gap-1 shrink-0">
                <span className="font-bold text-[#111827]">{test.duration}</span>
                <span className="opacity-60 text-[9px] uppercase font-black">Min</span>
             </div>
@@ -243,7 +243,7 @@ function TestCard({ test, index, attempt, hasAccess }: { test: MockTest, index: 
         </div>
 
         {/* RIGHT: ACTION */}
-        <div className="shrink-0 flex items-center min-w-[80px] justify-end">
+        <div className="shrink-0 flex items-center min-w-[70px] justify-end ml-1">
           {isNavigating ? (
             <div className="h-9 w-12 flex items-center justify-center">
                <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -253,11 +253,11 @@ function TestCard({ test, index, attempt, hasAccess }: { test: MockTest, index: 
                <Lock className="h-3 w-3" /> <span className="hidden xs:inline">Locked</span>
             </div>
           ) : isCompleted ? (
-            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">Result</span>
+            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100 whitespace-nowrap">Result</span>
           ) : isStarted ? (
-            <span className="text-[11px] font-bold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100">Resume</span>
+            <span className="text-[11px] font-bold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100 whitespace-nowrap">Resume</span>
           ) : (
-            <div className="flex items-center gap-1 text-[#147BFF] font-bold text-[11px] uppercase tracking-tight group-hover:gap-2 transition-all">
+            <div className="flex items-center gap-1 text-[#147BFF] font-bold text-[11px] uppercase tracking-tight group-hover:gap-2 transition-all whitespace-nowrap">
                Start <ChevronRight className="h-3.5 w-3.5" />
             </div>
           )}

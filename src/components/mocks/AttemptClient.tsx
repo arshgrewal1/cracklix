@@ -41,9 +41,9 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors";
 
 /**
- * @fileOverview Official Attempt Hub v115.0 [Swipe & Stability Hardened].
- * FIXED: Implemented horizontal swipe navigation between questions.
- * FIXED: Removed infinite re-render loops causing screen blinking.
+ * @fileOverview Official Attempt Hub v116.0 [Swipe & Stability Hardened].
+ * FIXED: Implemented horizontal swipe navigation between questions using framer-motion.
+ * FIXED: Added navigation guard and load guard to eradicate "blinking" loop.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -72,7 +72,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const [direction, setDirection] = useState(0);
 
   const loadStarted = useRef(false);
-  const lastIdx = useRef(0);
+  const navigationGuard = useRef(false);
 
   const {
     initExam,
@@ -91,12 +91,19 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     resetStore,
   } = useExamStore();
 
-  // Direction tracking for slide animation
-  useEffect(() => {
-    if (currentIdx > lastIdx.current) setDirection(1);
-    else if (currentIdx < lastIdx.current) setDirection(-1);
-    lastIdx.current = currentIdx;
-  }, [currentIdx]);
+  const handleSetCurrentIdx = useCallback((idx: number) => {
+    if (navigationGuard.current) return;
+    navigationGuard.current = true;
+    
+    if (idx > currentIdx) setDirection(1);
+    else if (idx < currentIdx) setDirection(-1);
+    
+    setCurrentIdx(idx);
+    
+    setTimeout(() => {
+      navigationGuard.current = false;
+    }, 100);
+  }, [currentIdx, setCurrentIdx]);
 
   const loadExam = useCallback(async () => {
     if (!db || !mockId || userLoading || loadStarted.current) return;
@@ -187,14 +194,14 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const threshold = 60;
     const { offset } = info;
 
-    // Dominant horizontal move check
-    if (Math.abs(offset.x) > Math.abs(offset.y)) {
+    // Detect horizontal move only when horizontal distance is greater than vertical distance
+    if (Math.abs(offset.x) > Math.abs(offset.y) * 1.5) {
       if (offset.x < -threshold && currentIdx < questions.length - 1) {
         // Swipe Left -> Next
-        setCurrentIdx(currentIdx + 1);
+        handleSetCurrentIdx(currentIdx + 1);
       } else if (offset.x > threshold && currentIdx > 0) {
         // Swipe Right -> Prev
-        setCurrentIdx(currentIdx - 1);
+        handleSetCurrentIdx(currentIdx - 1);
       }
     }
   };
@@ -332,7 +339,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     }
 
     router.replace(`/results/view?id=${mockId}&attemptId=${finalAttemptId}`);
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, storeAttemptId, language, toast]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, storeAttemptId, language]);
 
   useEffect(() => {
     if (timeLeft === 0 && !isInitializing && !isSubmittingFinal && questions.length > 0) {
@@ -402,7 +409,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
       <Sheet open={isPaletteOpen} onOpenChange={setIsPaletteOpen}>
         <SheetContent side="right" className="p-0 border-none w-[320px] shadow-5xl z-[1200] [&>button]:hidden">
-          <QuestionPalette onSelect={(idx: number) => { setCurrentIdx(idx); setIsPaletteOpen(false); }} onSubmit={() => { setIsPaletteOpen(false); setShowSubmitModal(true); }} />
+          <QuestionPalette onSelect={(idx: number) => { handleSetCurrentIdx(idx); setIsPaletteOpen(false); }} onSubmit={() => { setIsPaletteOpen(false); setShowSubmitModal(true); }} />
         </SheetContent>
       </Sheet>
 

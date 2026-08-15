@@ -16,8 +16,8 @@ import { isAfter, subDays, isValid } from 'date-fns';
 import { create } from 'zustand';
 
 /**
- * @fileOverview Production-grade Study Analytics Engine v8.1 [Stable Identity].
- * FIXED: startSession identity is now stable to prevent infinite loops in consumers.
+ * @fileOverview Production-grade Study Analytics Engine v8.2 [Stable Identity].
+ * FIXED: startSession identity is now strictly stable to prevent infinite loops in consumers.
  */
 
 interface StudyStore {
@@ -162,6 +162,7 @@ export function useActiveSession(activityType: StudySession['activityType'], act
   const startTimeRef = useRef<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Stable callback ensures function identity doesn't change when session starts/stops
   const startSession = useCallback(() => {
     if (isActiveRef.current || typeof window === 'undefined') return;
     isActiveRef.current = true;
