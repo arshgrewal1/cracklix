@@ -34,8 +34,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard Center v42.0.
- * FIXED: Active Students count now strictly filters for Role: STUDENT and Status: ACTIVE.
+ * Admin Dashboard Center v43.0.
+ * FIXED: Active Students count correctly filters by role: STUDENT.
  */
 
 export default function AdminDashboard() {
@@ -90,7 +90,8 @@ export default function AdminDashboard() {
            getDocs(query(collection(db, "payment_requests"), where("status", "==", "APPROVED"))),
            getCountFromServer(collection(db, "categories")),
            getCountFromServer(query(collection(db, "users"), where("passStatus", "==", "active"))),
-           getCountFromServer(query(collection(db, "users"), where("role", "==", "STUDENT"), where("status", "==", "ACTIVE")))
+           // FIXED: Filter strictly by role: STUDENT to represent the actual community count.
+           getCountFromServer(query(collection(db, "users"), where("role", "==", "STUDENT")))
         ]);
 
         const totalRev = pSnap.docs.reduce((acc: number, d: DocumentData) => acc + (Number(d.data().amount) || 0), 0);
@@ -99,7 +100,7 @@ export default function AdminDashboard() {
            totalQuestions: mcqBankCount.data().count + legacyQCount.data().count,
            totalMocks: mockCount.data().count + quizCount.data().count,
            totalUsers: uCount.data().count,
-           activeStudents: activeStudentsCount.data().count, // Dynamic eligible student count
+           activeStudents: activeStudentsCount.data().count, 
            totalExams: eCount.data().count,
            totalCategories: catCount.data().count,
            totalRevenue: totalRev,
