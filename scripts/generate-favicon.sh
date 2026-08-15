@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # scripts/generate-favicon.sh
 # Generate multi-size favicon.ico and PNG icons from the best available source logo.
+# This version will also convert a white background to transparent (if present) before trimming.
 # Usage: ./scripts/generate-favicon.sh
 # Requirements: ImageMagick (convert), pngquant or pngcrush (optional)
 
@@ -25,8 +26,13 @@ mkdir -p "$ICONS_DIR"
 
 echo "Using source: $SRC"
 
+# Create a temporary working copy that removes a solid white background if present.
+# The -fuzz percent allows approximate white (anti-aliased edges) to become transparent.
+TMP_SRC="$ICONS_DIR/source-for-processing.png"
+convert "$SRC" -alpha set -fuzz 12% -transparent white "$TMP_SRC" || cp "$SRC" "$TMP_SRC"
+
 # Create a clean centered square master (transparent background)
-convert "$SRC" -trim +repage -resize 512x512^ -gravity center -background transparent -extent 512x512 "$ICONS_DIR/master-512.png"
+convert "$TMP_SRC" -trim +repage -resize 512x512^ -gravity center -background transparent -extent 512x512 "$ICONS_DIR/master-512.png"
 
 # Generate sharp, downscaled PNGs (Lanczos + unsharp to keep logos crisp)
 convert "$ICONS_DIR/master-512.png" -filter Lanczos -resize 512x512 "$ICONS_DIR/icon-512x512.png"
@@ -60,6 +66,11 @@ if command -v pngcrush >/dev/null 2>&1; then
     pngcrush -rem alla -brute "$f" "$tmp" >/dev/null 2>&1 || continue
     mv "$tmp" "$f"
   done
+fi
+
+# Clean up temporary source
+if [ -f "$TMP_SRC" ]; then
+  rm -f "$TMP_SRC"
 fi
 
 echo "Generated favicon and icons in $ICONS_DIR and $FAVICON"
