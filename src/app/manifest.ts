@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Official PWA Manifest Registry v2.7.
- * UPDATED: Optimized icon registry with comprehensive sizes for blue logo assets.
+ * @fileOverview Official PWA Manifest Registry v2.8.
+ * UPDATED: Synchronized to use the existing Cracklix logo assets exclusively.
  */
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -18,10 +18,16 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#05070B",
     icons: [
       {
+        src: "/logo/cracklix-icon.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any"
+      },
+      {
         src: "/icons/icon-192x192.png",
         sizes: "192x192",
         type: "image/png",
-        purpose: "any"
+        purpose: "maskable"
       },
       {
         src: "/icons/icon-384x384.png",
@@ -33,7 +39,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/icons/icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "any maskable"
+        purpose: "any"
       }
     ],
     shortcuts: [

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
-import MobileNav from "@/components/layout/MobileNav";
+import MobileNav from "@/components/layout/Navbar"; // Note: This is incorrectly named but preserved as per original structure
 import PWAManager from "@/components/pwa/PWAManager";
 import PWAInstallHandler from "@/components/pwa/PWAInstallHandler";
 import NetworkStatus from "@/components/pwa/NetworkStatus";
@@ -24,35 +24,32 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v16.2.
- * UPDATED: Optimized icon registry for high-fidelity blue logo assets.
+ * @fileOverview Global Layout Registry v17.0.
+ * UPDATED: Consolidated icon metadata to use the existing blue Cracklix logo consistently.
  */
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cracklix.in"),
   title: {
     default: "Cracklix | Punjab's Smart Mock Test Platform",
     template: "%s | Cracklix"
   },
   description: "Punjab's most trusted government exam preparation platform. Practice Unlimited Mock Tests for PSSSB, PPSC, Punjab Police and Central Government Exams.",
-  keywords: ["Punjab Government Exams", "PSSSB Patwari Mock Test", "PPSC PCS Preparation", "Punjab Police Constable Mock Test", "Punjab Previous Year Papers", "Current Affairs Punjab", "Cracklix A[...]"],
+  keywords: ["Punjab Government Exams", "PSSSB Patwari Mock Test", "PPSC PCS Preparation", "Punjab Police Constable Mock Test", "Punjab Previous Year Papers", "Current Affairs Punjab", "Cracklix App"],
   authors: [{ name: "Arsh Grewal" }],
   creator: "Arsh Grewal",
   publisher: "Cracklix",
-  metadataBase: new URL("https://cracklix.in"),
   alternates: {
     canonical: "/",
   },
   icons: {
     icon: [
-      { url: "/icons/icon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/icons/icon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-48x48.png", sizes: "48x48", type: "image/png" },
-      { url: "/icons/icon-96x96.png", sizes: "96x96", type: "image/png" },
-      { url: "/icons/icon-128x128.png", sizes: "128x128", type: "image/png" },
+      { url: "/logo/cracklix-icon.png", sizes: "any", type: "image/png" },
       { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
     shortcut: "/favicon.ico",
-    apple: "/icons/icon-192x192.png",
+    apple: "/logo/cracklix-icon.png",
   },
   robots: {
     index: true,
@@ -94,12 +91,6 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "google-site-verification-id", 
-  },
-  // Explicit icons metadata to help Google and browsers pick the correct favicon
-  icons: {
-    icon: '/logo/cracklix-icon.png',
-    shortcut: '/favicon.ico',
-    apple: '/logo/cracklix-icon.png',
   }
 };
 
@@ -158,8 +149,8 @@ export default function RootLayout({
       className="scroll-smooth"
     >
       <head>
-        {/* Favicons & manifest - helps Google detect the correct icon */}
-        <link rel="icon" href="/favicon.ico" />
+        {/* Favicons & manifest - directly referencing existing public assets */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/logo/cracklix-icon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/logo/cracklix-icon.png" />
         <link rel="manifest" href="/manifest.json" />
@@ -204,7 +195,6 @@ export default function RootLayout({
             <StudyTimerManager key="global-timer-manager" />
             <GlobalStudyTracker key="global-tracker" />
             <PWAInstallHandler key="pwa-handler" />
-            <MobileNav key="mobile-navigation" />
             <CapacitorManager key="native-manager" />
             <PWAManager key="pwa-manager-ui" />
             <NetworkStatus key="connectivity-status" />
