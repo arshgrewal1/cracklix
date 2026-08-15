@@ -34,15 +34,14 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { useActiveSession } from "@/hooks/useStudyAnalytics"
 import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Premium Current Affairs Hub v6.2 [Flicker Fixed].
- * FIXED: Enforced scroll-to-top on mount for consistent hub entry.
+ * @fileOverview Premium Current Affairs Hub v6.3 [Route Persistent].
  */
 
 const CATEGORIES = [
@@ -60,27 +59,31 @@ export default function CurrentAffairsCenter() {
   const db = useFirestore()
   const { user, profile, loading: authLoading } = useUser()
   const router = useRouter()
+  const pathname = usePathname()
   const { toast } = useToast()
   
   const [activeType, setActiveType] = useState<"DAILY" | "WEEKLY" | "MONTHLY">("DAILY")
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
+  const [mounted, setMounted] = useState(false)
   
   const { startSession } = useActiveSession('CA')
 
   useEffect(() => {
+    setMounted(true)
     if (typeof window !== 'undefined') {
        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }
   }, []);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push(`/login?returnUrl=${encodeURIComponent('/current-affairs')}`);
+    if (mounted && !authLoading && !user) {
+      const returnUrl = window.location.pathname + window.location.search;
+      router.push(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
     } else if (user) {
       startSession();
     }
-  }, [user, authLoading, router, startSession]);
+  }, [user, authLoading, router, startSession, mounted]);
 
   const hubQuery = useMemo(() => (db ? query(collection(db, "current_affairs_hub"), where("status", "==", "PUBLISHED")) : null), [db])
   const { data: hubItems, loading } = useCollection<any>(hubQuery)
@@ -127,6 +130,10 @@ export default function CurrentAffairsCenter() {
       }
     } catch (e) { console.error(e); }
   }
+
+  if (!mounted || authLoading || !user) return (
+     <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left">

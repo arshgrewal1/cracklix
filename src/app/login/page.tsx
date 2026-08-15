@@ -37,9 +37,8 @@ import { cn } from "@/lib/utils";
 import { getDeviceId } from "@/lib/device";
 
 /**
- * @fileOverview Institutional Auth Portal v22.0.
- * UPDATED: Removed Google Sign-In and all uppercase text as per user request.
- * UPDATED: Added "Create or Register Account" primary toggle button.
+ * @fileOverview Institutional Auth Portal v23.0 [Route Persistent].
+ * FIXED: Improved returnUrl handling to ensure users land back where they started after refresh/login.
  */
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -68,7 +67,13 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   
-  const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/dashboard", [searchParams]);
+  // Robust returnUrl extraction
+  const returnUrl = useMemo(() => {
+     const url = searchParams?.get("returnUrl");
+     if (!url || url === '/') return "/dashboard";
+     return url;
+  }, [searchParams]);
+
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
 
   useEffect(() => {
@@ -148,7 +153,7 @@ function LoginContent() {
               <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 text-primary animate-spin" />
            </div>
            <div className="text-center space-y-1">
-              <p className="text-[10px] font-black tracking-[0.4em] text-primary">Authenticating</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Authenticating</p>
               <p className="text-[9px] font-bold text-slate-400 tracking-widest">Entering database hub...</p>
            </div>
         </div>

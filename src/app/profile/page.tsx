@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -42,9 +41,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Profile Hub v43.0 [Sync Fixed].
- * FIXED: Accuracy and Question stats correctly pull live from Firestore.
- * UPDATED: Standardized terminology to "Questions" and "Database".
+ * @fileOverview Institutional Profile Hub v44.0 [Refresh Stable].
+ * FIXED: Correctly captures full return URL (pathname + search) on auth redirect.
  */
 
 export default function ProfilePage() {
@@ -53,6 +51,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const { toast } = useToast()
 
+  const [mounted, setMounted] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState("")
@@ -62,8 +61,15 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    if (!loading && !user) router.push("/login?returnUrl=/profile")
-  }, [user, loading, router])
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && !loading && !user) {
+       const returnUrl = window.location.pathname + window.location.search;
+       router.push(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
+    }
+  }, [user, loading, router, mounted])
 
   useEffect(() => {
     if (profile) {
@@ -141,7 +147,7 @@ export default function ProfilePage() {
      }
   };
 
-  if (loading) return null;
+  if (loading || !mounted) return null;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body pb-safe text-left">

@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser, useDoc } from "@/firebase"
@@ -36,9 +36,7 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v10.2.
- * FIXED: UI Back button hidden in standalone PWA mode.
- * FIXED: Forced scroll to top on mount.
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v10.3 [Route Persistent].
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -61,6 +59,7 @@ const POPULAR_CHIPS = [
 export default function ExamsEntryPage() {
   const db = useFirestore();
   const router = useRouter();
+  const pathname = usePathname();
   const { user, profile, loading: authLoading } = useUser();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -76,7 +75,13 @@ export default function ExamsEntryPage() {
     }
   }, []);
 
-  // DATA FETCHING
+  useEffect(() => {
+    if (mounted && !authLoading && !user) {
+      const returnUrl = window.location.pathname + window.location.search;
+      router.push(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
+    }
+  }, [user, authLoading, router, mounted]);
+
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: platformStats } = useDoc<any>(statsRef);
 
@@ -128,15 +133,13 @@ export default function ExamsEntryPage() {
     recognition.start();
   };
 
-  if (!mounted || authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+  if (!mounted || authLoading || !user) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC] font-body text-left overflow-x-hidden w-full">
       <Navbar />
       
       <main className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 space-y-12 md:space-y-20">
-        
-        {/* ENTERPRISE HERO HUB */}
         <section className="relative px-1 overflow-hidden">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -146,7 +149,7 @@ export default function ExamsEntryPage() {
             <div className="space-y-6 max-w-4xl">
               <div className="flex items-center justify-center md:justify-start gap-3">
                  {!isStandalone && (
-                    <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0">
+                    <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0 cursor-pointer">
                        <ArrowLeft className="h-5 w-5" />
                     </button>
                  )}
@@ -232,7 +235,6 @@ export default function ExamsEntryPage() {
           </motion.div>
         </section>
 
-        {/* POPULAR VERTICALS GRID */}
         <section className="space-y-10 md:space-y-14 w-full text-left">
            <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
               <div className="flex items-center gap-4">
@@ -262,7 +264,6 @@ export default function ExamsEntryPage() {
            </div>
         </section>
 
-        {/* OFFICIAL AUTHORITY HUBS */}
         <section className="space-y-10 md:space-y-14 w-full text-left pt-10">
            <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
               <div className="flex items-center gap-4">

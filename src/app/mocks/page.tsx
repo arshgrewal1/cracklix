@@ -51,8 +51,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v5.1 [Sync Hardened].
- * FIXED: Stabilized loading state and enforced scroll-to-top on mount.
+ * @fileOverview Institutional Practice Hub v5.2 [Route Persistent].
  */
 
 const FILTER_CHIPS = [
@@ -84,7 +83,8 @@ export default function PracticeHub() {
 
   useEffect(() => {
     if (mounted && !userLoading && !user) {
-      router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+      const returnUrl = window.location.pathname + window.location.search;
+      router.push(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
     }
   }, [user, userLoading, router, pathname, mounted])
 
@@ -173,7 +173,7 @@ export default function PracticeHub() {
      }
   }, [processedSeries, allMocks, results])
 
-  if (!mounted || userLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+  if (!mounted || userLoading || !user) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left flex flex-col overflow-x-hidden">

@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Notes Center v2.2 (Typography Hardened).
+ * @fileOverview Notes Center v2.3 [Route Persistent].
  */
 
 export default function StudyMaterialPage() {
@@ -27,12 +27,18 @@ export default function StudyMaterialPage() {
   const pathname = usePathname()
   const { user, profile, loading: authLoading } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && !authLoading && !user) {
+      const returnUrl = window.location.pathname + window.location.search;
+      router.push(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
     }
-  }, [user, authLoading, router, pathname]);
+  }, [user, authLoading, router, mounted]);
 
   const notesQuery = useMemo(() => (db ? query(collection(db, "notes"), orderBy("updatedAt", "desc")) : null), [db])
   const { data: notes, loading } = useCollection<any>(notesQuery)
@@ -47,7 +53,7 @@ export default function StudyMaterialPage() {
     }
   }, [notes, searchTerm])
 
-  if (authLoading || !user) return (
+  if (!mounted || authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
        <p className="text-[10px] font-black uppercase text-slate-300">Syncing...</p>
@@ -86,9 +92,7 @@ export default function StudyMaterialPage() {
         <Tabs defaultValue="notes" className="space-y-12 md:space-y-20">
            <div className="bg-white border border-slate-100 p-1.5 rounded-2xl md:rounded-3xl shadow-sm flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2">
              <TabsList className="bg-transparent border-none p-0 h-12 md:h-16 flex gap-2">
-                <TabsTrigger value="notes" className="rounded-xl px-6 md:px-10 font-black uppercase text-[10px] md:text-[11px] gap-3 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
-                  <FileText className="h-4 w-4" /> Notes
-                </TabsTrigger>
+                <HubTab value="notes" icon={<FileText className="h-4 w-4" />} label="Notes" />
                 <TabsTrigger value="syllabus" className="rounded-xl px-6 md:px-10 font-black uppercase text-[10px] md:text-[11px] gap-3 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
                   <Info className="h-4 w-4" /> Syllabus
                 </TabsTrigger>
@@ -128,6 +132,18 @@ export default function StudyMaterialPage() {
       <Footer />
     </div>
   )
+}
+
+function HubTab({ value, icon, label }: { value: string, icon: React.ReactNode, label: string }) {
+  return (
+    <TabsTrigger 
+      value={value} 
+      className="px-6 md:px-10 font-black uppercase text-[10px] md:text-[11px] gap-3 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all"
+    >
+      <span className="shrink-0">{icon}</span>
+      {label}
+    </TabsTrigger>
+  );
 }
 
 function NotesGrid({ data, loading, profile }: any) {

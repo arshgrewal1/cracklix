@@ -8,8 +8,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth Hub v27.0 [Real-Time Presence].
- * FIXED: Implemented heartbeat and visibility listeners to prevent stale "Online" status.
+ * @fileOverview Hardened Auth Hub v28.0 [Refresh Persistent].
+ * FIXED: Prevented false-positive unauthenticated state during initial boot.
  */
 export function useUser() {
   const auth = useAuth();
@@ -32,10 +32,7 @@ export function useUser() {
 
   // 1. Auth Switchboard
   useEffect(() => {
-    if (!auth) {
-      setAuthResolved(true);
-      return;
-    }
+    if (!auth) return;
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
@@ -49,6 +46,7 @@ export function useUser() {
         profileDataRef.current = "";
         setProfileLoading(false);
         profileLoaded.current = true;
+        // Only mark resolved if we have checked auth and no user exists
         setAuthResolved(true);
       }
     });
@@ -75,7 +73,6 @@ export function useUser() {
        }).catch(() => {});
     };
 
-    // Heartbeat: 4 min (strictly less than admin's 5 min threshold)
     const heartbeat = setInterval(() => {
        if (document.visibilityState === 'visible') {
           syncPresence(true);
@@ -87,7 +84,6 @@ export function useUser() {
        syncPresence(isOnline);
     };
 
-    // Initial Online Set
     syncPresence(true);
     document.addEventListener('visibilitychange', handleVisibility);
 
@@ -123,7 +119,8 @@ export function useUser() {
     const unsubscribeProfile = onSnapshot(
       userRef, 
       handleProfileSnapshot,
-      async (err) => {
+      (err) => {
+        // Fallback resolution on error
         setAuthResolved(true);
       }
     );
@@ -132,7 +129,6 @@ export function useUser() {
       unsubscribeProfile();
       clearInterval(heartbeat);
       document.removeEventListener('visibilitychange', handleVisibility);
-      // Offline transition attempt on unmount
       syncPresence(false);
     };
   }, [user, db]);

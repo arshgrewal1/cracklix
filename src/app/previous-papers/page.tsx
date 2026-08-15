@@ -16,8 +16,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Old Papers Hub v2.5.
- * REFINED: Reduced font sizes and removed uppercase for better readability.
+ * @fileOverview Official Old Papers Hub v2.6 [Route Persistent].
  */
 
 export default function PreviousPapersPage() {
@@ -26,12 +25,18 @@ export default function PreviousPapersPage() {
   const pathname = usePathname()
   const { user, loading: authLoading } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && !authLoading && !user) {
+      const returnUrl = window.location.pathname + window.location.search;
+      router.push(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
     }
-  }, [user, authLoading, router, pathname]);
+  }, [user, authLoading, router, mounted]);
 
   const pyqQuery = useMemo(() => {
     if (!db || !user) return null
@@ -56,7 +61,7 @@ export default function PreviousPapersPage() {
     return groups
   }, [pyqs, searchTerm])
 
-  if (authLoading || !user) return (
+  if (!mounted || authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
        <p className="text-[10px] font-black uppercase text-slate-300">Syncing...</p>

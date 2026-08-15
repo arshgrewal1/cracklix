@@ -8,6 +8,7 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  trailingSlash: true, // Crucial for reliable route preservation on refresh in static environments
   output: process.env.BUILD_TARGET === 'android' ? 'export' : undefined,
   images: {
     unoptimized: true,

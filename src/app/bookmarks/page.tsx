@@ -19,8 +19,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Official Bookmarks Hub v8.2.
- * TERMINOLOGY: Replaced 'items' with 'questions'.
+ * @fileOverview Official Bookmarks Hub v8.3 [Route Persistent].
  */
 
 const FILTER_CHIPS = [
@@ -40,6 +39,7 @@ export default function BookmarksPage() {
   const pathname = usePathname()
   const { user, loading: authLoading } = useUser()
   
+  const [mounted, setMounted] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [activeFilter, setActiveFilter] = useState("all")
   
@@ -48,10 +48,15 @@ export default function BookmarksPage() {
   const [loadingItem, setLoadingItem] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && !authLoading && !user) {
+      const returnUrl = window.location.pathname + window.location.search;
+      router.push(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
     }
-  }, [user, authLoading, router, pathname]);
+  }, [user, authLoading, router, mounted]);
 
   const bookmarkQuery = useMemo(() => (db && user ? query(collection(db, "bookmarks"), where("userId", "==", user.uid)) : null), [db, user])
   const { data: rawBookmarks, loading } = useCollection<any>(bookmarkQuery)
@@ -106,7 +111,7 @@ export default function BookmarksPage() {
     }
   };
 
-  if (authLoading || !user) return (
+  if (authLoading || !user || !mounted) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-background space-y-4">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
        <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">Syncing identity...</p>
