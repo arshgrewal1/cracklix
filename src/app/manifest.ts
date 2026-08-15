@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Official PWA Manifest Registry v2.6.
- * UPDATED: Synchronized icon purpose for any/maskable compatibility.
+ * @fileOverview Official PWA Manifest Registry v2.7.
+ * UPDATED: Optimized icon registry with comprehensive sizes for blue logo assets.
  */
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -20,6 +20,12 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         src: "/icons/icon-192x192.png",
         sizes: "192x192",
+        type: "image/png",
+        purpose: "any"
+      },
+      {
+        src: "/icons/icon-384x384.png",
+        sizes: "384x384",
         type: "image/png",
         purpose: "any"
       },
