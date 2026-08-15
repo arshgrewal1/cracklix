@@ -27,7 +27,7 @@ import SubjectTabs from "@/components/exam/SubjectTabs";
 import { Button } from "@/components/ui/button";
 import { Loader2, Zap, AlertCircle, Play, ChevronRight, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useActiveSession } from "@/hooks/useStudyAnalytics";
 import {
   Dialog,
@@ -41,8 +41,9 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors";
 
 /**
- * @fileOverview Official Attempt Hub v114.0 [Performance Hardened].
- * FIXED: Optimized submission path for instant feedback.
+ * @fileOverview Official Attempt Hub v115.0 [Swipe & Stability Hardened].
+ * FIXED: Implemented horizontal swipe navigation between questions.
+ * FIXED: Removed infinite re-render loops causing screen blinking.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -68,8 +69,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const [showExitModal, setShowExitModal] = useState(false);
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [mockData, setMockData] = useState<any>(null);
+  const [direction, setDirection] = useState(0);
 
   const loadStarted = useRef(false);
+  const lastIdx = useRef(0);
 
   const {
     initExam,
@@ -87,6 +90,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     setCurrentIdx,
     resetStore,
   } = useExamStore();
+
+  // Direction tracking for slide animation
+  useEffect(() => {
+    if (currentIdx > lastIdx.current) setDirection(1);
+    else if (currentIdx < lastIdx.current) setDirection(-1);
+    lastIdx.current = currentIdx;
+  }, [currentIdx]);
 
   const loadExam = useCallback(async () => {
     if (!db || !mockId || userLoading || loadStarted.current) return;
@@ -172,6 +182,22 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const interval = setInterval(() => { tick(); }, 1000);
     return () => clearInterval(interval);
   }, [isInitializing, initError, tick]);
+
+  const handleDragEnd = (event: any, info: any) => {
+    const threshold = 60;
+    const { offset } = info;
+
+    // Dominant horizontal move check
+    if (Math.abs(offset.x) > Math.abs(offset.y)) {
+      if (offset.x < -threshold && currentIdx < questions.length - 1) {
+        // Swipe Left -> Next
+        setCurrentIdx(currentIdx + 1);
+      } else if (offset.x > threshold && currentIdx > 0) {
+        // Swipe Right -> Prev
+        setCurrentIdx(currentIdx - 1);
+      }
+    }
+  };
 
   const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !mockData || !mockId) return;
@@ -266,7 +292,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       const globalMeritRef = doc(db, "leaderboard", user.uid);
       const statsRef = doc(db, "settings", "stats");
 
-      // OPTIMISTIC WRITE: Trigger mutations without blocking UI
       setDoc(resultRef, resultPayload).catch(async (e) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: resultRef.path, operation: 'create', requestResourceData: resultPayload }));
       });
@@ -304,14 +329,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }).catch(() => {});
 
       stopSession({ completedQuestions: attemptedCount, correct: correctCount, wrong: wrongCount });
-    } else {
-       localStorage.setItem(`cracklix_guest_result_${finalAttemptId}`, JSON.stringify({ ...resultPayload, isGuestNode: true }));
     }
 
-    // INSTANT NAVIGATION: Move to result page immediately
     router.replace(`/results/view?id=${mockId}&attemptId=${finalAttemptId}`);
-    // No explicit resetStore here - ResultClient will leverage the cached state for instant loading
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, storeAttemptId, resetStore, language, toast]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockData, elapsedSeconds, stopSession, storeAttemptId, language, toast]);
 
   useEffect(() => {
     if (timeLeft === 0 && !isInitializing && !isSubmittingFinal && questions.length > 0) {
@@ -336,23 +357,44 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     <div className="flex flex-col h-screen bg-white font-body select-none overflow-hidden relative">
       <AntiCheat />
       <ExamHeader onPaletteToggle={() => setIsPaletteOpen(true)} onExitRequest={() => setShowExitModal(true)} />
+      
       <main className="flex-1 flex flex-col min-h-0 bg-slate-50/50 relative overflow-hidden">
         <div className="flex-1 flex flex-col min-h-0 w-full overflow-hidden">
-          <div className="w-full bg-white"><div className="max-w-4xl mx-auto"><SubjectTabs /></div></div>
-          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-10 pt-4 pb-12 w-full">
+          <div className="w-full bg-white border-b border-slate-100">
             <div className="max-w-4xl mx-auto">
-              {questions.length > 0 && questions[currentIdx] ? (
-                <motion.div key={currentIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="w-full">
-                  <QuestionRenderer 
-                    language={language} 
-                    question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
-                    selectedAnswer={answers?.[currentIdx] ?? null} 
-                    onSelect={(idx: number) => !isSubmittingFinal && setAnswer(currentIdx, idx, db)} 
-                    className="shadow-md border-none p-6 md:p-12 rounded-[2.5rem]" 
-                  />
-                </motion.div>
-              ) : <div className="py-20 text-center opacity-20"><Loader2 className="h-10 w-10 mx-auto mb-4 animate-spin text-primary" /></div>}
+              <SubjectTabs />
             </div>
+          </div>
+          
+          <div className="flex-1 relative overflow-hidden">
+            <AnimatePresence initial={false} custom={direction} mode="popLayout">
+              <motion.div
+                key={currentIdx}
+                custom={direction}
+                initial={{ x: direction > 0 ? "100%" : "-100%", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: direction > 0 ? "-100%" : "100%", opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30, opacity: { duration: 0.2 } }}
+                drag="x"
+                dragDirectionLock
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.5}
+                onDragEnd={handleDragEnd}
+                className="absolute inset-0 overflow-y-auto custom-scrollbar px-4 md:px-10 pt-4 pb-12 w-full touch-pan-y"
+              >
+                <div className="max-w-4xl mx-auto pointer-events-auto">
+                  {questions.length > 0 && questions[currentIdx] ? (
+                    <QuestionRenderer 
+                      language={language} 
+                      question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
+                      selectedAnswer={answers?.[currentIdx] ?? null} 
+                      onSelect={(idx: number) => !isSubmittingFinal && setAnswer(currentIdx, idx, db)} 
+                      className="shadow-md border-none p-6 md:p-12 rounded-[2.5rem]" 
+                    />
+                  ) : <div className="py-20 text-center opacity-20"><Loader2 className="h-10 w-10 mx-auto mb-4 animate-spin text-primary" /></div>}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
         <TacticalFooter onSubmit={() => !isSubmittingFinal && setShowSubmitModal(true)} />

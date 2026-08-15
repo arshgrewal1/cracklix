@@ -24,12 +24,13 @@ import { TestSeries, MockTest } from "@/types"
 import { cn } from "@/lib/utils"
 import { hasSeriesAccess } from "@/lib/access-control"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import Navbar from "@/components/layout/Navbar"
+import Footer from "@/components/layout/Footer"
 
 /**
- * @fileOverview Professional Test Listing Hub v5.0 [PWA Fixed].
- * FIXED: Card overlap and collision issues on 320px screens.
- * FIXED: Content clipping below bottom navigation.
- * FIXED: Navigation guard added to prevent blinking/duplicate pushes.
+ * @fileOverview Professional Test Listing Hub v6.0 [Mobile Overlap Fixed].
+ * FIXED: Re-engineered TestCard with flex-grid to prevent overlap and collision.
+ * FIXED: Bottom navigation padding synchronized with PWA safe areas.
  */
 
 export default function SeriesDetailPortal() {
@@ -82,9 +83,8 @@ export default function SeriesDetailPortal() {
   if (!mounted || serLoading || authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="animate-spin text-[#147BFF] h-8 w-8" /></div>
 
   return (
-    <div className="min-h-screen bg-[#F6F8FC] font-body text-left">
-      {/* TOP APP BAR */}
-      <header className="sticky top-0 z-50 bg-white border-b border-[#E5E7EB] h-14 md:h-16 flex items-center px-4 md:px-8 gap-4 shadow-soft">
+    <div className="min-h-screen bg-[#F6F8FC] font-body text-left flex flex-col">
+      <header className="sticky top-0 z-50 bg-white border-b border-[#E5E7EB] h-14 md:h-16 flex items-center px-4 md:px-8 gap-4 shadow-sm">
         <button onClick={() => router.back()} className="p-2 hover:bg-slate-50 rounded-full transition-colors shrink-0">
           <ArrowLeft className="h-5 w-5 text-[#111827]" />
         </button>
@@ -93,8 +93,7 @@ export default function SeriesDetailPortal() {
         </h1>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6 pb-[calc(120px+env(safe-area-inset-bottom))] space-y-8">
-        
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 pb-[calc(120px+env(safe-area-inset-bottom))] space-y-8">
         {/* FULL LENGTH SECTION */}
         {sections.full.length > 0 && (
           <section className="space-y-4">
@@ -138,8 +137,8 @@ export default function SeriesDetailPortal() {
             <Accordion type="single" collapsible className="space-y-3">
               {Object.entries(sections.pyq).sort((a,b) => b[0].localeCompare(a[0])).map(([year, list]: [string, any]) => (
                 <AccordionItem key={year} value={year} className="border-none">
-                  <AccordionTrigger className="bg-white px-6 h-14 rounded-xl border border-[#E5E7EB] hover:no-underline font-bold text-[#111827] shadow-soft">
-                     {year} Papers
+                  <AccordionTrigger className="bg-white px-6 h-14 rounded-xl border border-[#E5E7EB] hover:no-underline font-bold text-[#111827] shadow-sm flex items-center justify-between">
+                     <span className="flex-1 text-left">{year} Papers</span>
                   </AccordionTrigger>
                   <AccordionContent className="pt-3 space-y-3 px-1">
                     {list.map((m: any, i: number) => (
@@ -163,6 +162,7 @@ export default function SeriesDetailPortal() {
            <div className="py-20 text-center opacity-30 italic font-bold text-[#6B7280]">No tests discovered in this hub.</div>
         )}
       </main>
+      <Footer />
     </div>
   )
 }
@@ -203,7 +203,6 @@ function TestCard({ test, index, attempt, hasAccess }: { test: MockTest, index: 
       router.push(`/mocks/instructions?id=${test.id}`);
     }
 
-    // Safety timeout to reset guard if navigation is cancelled or slow
     setTimeout(() => {
       navigationGuard.current = false;
       setIsNavigating(false);
@@ -212,63 +211,58 @@ function TestCard({ test, index, attempt, hasAccess }: { test: MockTest, index: 
 
   return (
     <motion.div whileTap={{ scale: 0.98 }}>
-      <Card onClick={handleClick} className="border border-[#E5E7EB] shadow-soft rounded-[18px] bg-white p-3 md:p-4 flex items-center gap-3 md:gap-4 cursor-pointer hover:border-[#147BFF]/30 transition-all group overflow-hidden relative">
+      <Card onClick={handleClick} className="border border-[#E5E7EB] shadow-sm rounded-[18px] bg-white p-3 md:p-4 flex items-center gap-3 md:gap-4 cursor-pointer hover:border-[#147BFF]/30 transition-all group overflow-hidden relative">
         {/* LEFT: CIRCULAR NUMBER */}
-        <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#147BFF] flex items-center justify-center text-white font-bold text-sm md:text-lg shadow-lg shrink-0 transition-transform group-hover:scale-105">
+        <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#147BFF] flex items-center justify-center text-white font-bold text-sm md:text-lg shadow-md shrink-0">
           {index}
         </div>
 
         {/* CENTER: CONTENT */}
-        <div className="flex-1 min-w-0 pr-1 md:pr-2">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 md:gap-2 mb-1">
-             <h3 className="text-sm md:text-[17px] font-bold text-[#111827] truncate leading-tight">{test.title}</h3>
-             {isPremium && <Crown className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-500 fill-current shrink-0" />}
+             <h3 className="text-sm md:text-[17px] font-bold text-[#111827] truncate leading-tight flex-1">{test.title}</h3>
+             {isPremium && <Crown className="h-3.5 w-3.5 text-amber-500 fill-current shrink-0" />}
           </div>
           
-          <div className="flex flex-wrap items-center gap-x-2 md:gap-x-3 gap-y-1 text-[10px] md:text-[13px] font-medium text-[#6B7280]">
-            <div className="flex items-center gap-1 whitespace-nowrap">
-               <span>{test.totalQuestions}</span>
-               <span className="text-[9px] opacity-60 uppercase font-black">Qs</span>
+          <div className="flex items-center gap-2 md:gap-4 text-[10px] md:text-[13px] font-medium text-[#6B7280]">
+            <div className="flex items-center gap-1">
+               <span className="font-bold text-[#111827]">{test.totalQuestions}</span>
+               <span className="opacity-60 text-[9px] uppercase font-black">Qs</span>
             </div>
-            <span className="opacity-20 hidden md:inline">•</span>
-            <div className="flex items-center gap-1 whitespace-nowrap">
-               <span>{test.totalQuestions * (test.positiveMarks || 1)}</span>
-               <span className="text-[9px] opacity-60 uppercase font-black">Pts</span>
+            <div className="w-px h-3 bg-slate-100" />
+            <div className="flex items-center gap-1">
+               <span className="font-bold text-[#111827]">{test.totalQuestions * (test.positiveMarks || 1)}</span>
+               <span className="opacity-60 text-[9px] uppercase font-black">Pts</span>
             </div>
-            <span className="opacity-20 hidden md:inline">•</span>
-            <div className="flex items-center gap-1 whitespace-nowrap">
-               <span>{test.duration}</span>
-               <span className="text-[9px] opacity-60 uppercase font-black">Min</span>
+            <div className="w-px h-3 bg-slate-100" />
+            <div className="flex items-center gap-1">
+               <span className="font-bold text-[#111827]">{test.duration}</span>
+               <span className="opacity-60 text-[9px] uppercase font-black">Min</span>
             </div>
           </div>
         </div>
 
         {/* RIGHT: ACTION */}
-        <div className="shrink-0 flex items-center">
+        <div className="shrink-0 flex items-center min-w-[80px] justify-end">
           {isNavigating ? (
-            <div className="h-9 w-20 md:w-24 bg-slate-50 flex items-center justify-center rounded-xl">
+            <div className="h-9 w-12 flex items-center justify-center">
                <Loader2 className="h-4 w-4 animate-spin text-primary" />
             </div>
           ) : locked ? (
-            <div className="h-9 md:h-10 px-3 md:px-4 flex items-center justify-center bg-slate-100 text-[#6B7280] rounded-xl font-bold text-[11px] md:text-[13px] gap-1.5">
+            <div className="bg-slate-50 text-slate-400 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-100">
                <Lock className="h-3 w-3" /> <span className="hidden xs:inline">Locked</span>
             </div>
           ) : isCompleted ? (
-            <button className="h-9 md:h-10 px-3 md:px-5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-[11px] md:text-[13px] shadow-md transition-all active:scale-95 whitespace-nowrap">
-               Result
-            </button>
+            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">Result</span>
           ) : isStarted ? (
-            <button className="h-9 md:h-10 px-3 md:px-5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-[11px] md:text-[13px] shadow-md transition-all active:scale-95 whitespace-nowrap">
-               Resume
-            </button>
+            <span className="text-[11px] font-bold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100">Resume</span>
           ) : (
-            <button className="h-9 md:h-10 px-4 md:px-6 bg-[#147BFF] hover:bg-blue-600 text-white rounded-xl font-bold text-[11px] md:text-[13px] shadow-md transition-all active:scale-95 whitespace-nowrap flex items-center gap-1">
-               Start <ChevronRight className="hidden md:inline h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1 text-[#147BFF] font-bold text-[11px] uppercase tracking-tight group-hover:gap-2 transition-all">
+               Start <ChevronRight className="h-3.5 w-3.5" />
+            </div>
           )}
         </div>
       </Card>
     </motion.div>
   );
 }
-
