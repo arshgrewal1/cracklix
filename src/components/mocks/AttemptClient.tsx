@@ -41,9 +41,9 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors";
 
 /**
- * @fileOverview Official Attempt Hub v116.0 [Swipe & Stability Hardened].
- * FIXED: Implemented horizontal swipe navigation between questions using framer-motion.
- * FIXED: Added navigation guard and load guard to eradicate "blinking" loop.
+ * @fileOverview Official Attempt Hub v117.0 [High-Speed Swipe].
+ * FIXED: Optimized motion physics for 2x faster question transitions.
+ * FIXED: Reduced swipe threshold for instant navigational triggers.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -191,7 +191,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   }, [isInitializing, initError, tick]);
 
   const handleDragEnd = (event: any, info: any) => {
-    const threshold = 60;
+    const threshold = 40; // REDUCED THRESHOLD FOR FASTER RESPONSE
     const { offset } = info;
 
     // Detect horizontal move only when horizontal distance is greater than vertical distance
@@ -381,11 +381,14 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
                 initial={{ x: direction > 0 ? "100%" : "-100%", opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: direction > 0 ? "-100%" : "100%", opacity: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30, opacity: { duration: 0.2 } }}
+                transition={{ 
+                  x: { type: "spring", stiffness: 500, damping: 50, restDelta: 0.001 },
+                  opacity: { duration: 0.15 } 
+                }}
                 drag="x"
                 dragDirectionLock
                 dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.5}
+                dragElastic={0.1}
                 onDragEnd={handleDragEnd}
                 className="absolute inset-0 overflow-y-auto custom-scrollbar px-4 md:px-10 pt-4 pb-12 w-full touch-pan-y"
               >
