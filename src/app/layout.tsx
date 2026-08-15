@@ -24,8 +24,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v17.0.
- * UPDATED: Consolidated icon metadata to use the existing blue Cracklix logo consistently.
+ * @fileOverview Global Layout Registry v18.0 [Cache-Bust Hardened].
+ * UPDATED: Implemented ?v=2 versioning to force search engine icon refresh.
  */
 
 export const metadata: Metadata = {
@@ -44,12 +44,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/logo/cracklix-icon.png", sizes: "any", type: "image/png" },
-      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-48x48.png?v=2", sizes: "48x48", type: "image/png" },
+      { url: "/logo/cracklix-icon.png?v=2", sizes: "any", type: "image/png" },
     ],
-    shortcut: "/favicon.ico",
-    apple: "/logo/cracklix-icon.png",
+    shortcut: "/favicon.ico?v=2",
+    apple: "/logo/cracklix-icon.png?v=2",
   },
   robots: {
     index: true,
@@ -149,10 +148,10 @@ export default function RootLayout({
       className="scroll-smooth"
     >
       <head>
-        {/* Favicons & manifest - directly referencing existing public assets */}
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/logo/cracklix-icon.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/logo/cracklix-icon.png" />
+        {/* Favicons & manifest - strictly blue-theme prioritized */}
+        <link rel="icon" href="/icons/icon-48x48.png?v=2" sizes="48x48" />
+        <link rel="icon" href="/logo/cracklix-icon.png?v=2" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo/cracklix-icon.png?v=2" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0B1528" />
 

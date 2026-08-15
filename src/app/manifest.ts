@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Official PWA Manifest Registry v2.8.
- * UPDATED: Synchronized to use the existing Cracklix logo assets exclusively.
+ * @fileOverview Official PWA Manifest Registry v3.0 [Blue Sync].
+ * UPDATED: Prioritized icon-48x48 for crawler compliance.
  */
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -17,6 +17,12 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#05070B",
     theme_color: "#05070B",
     icons: [
+      {
+        src: "/icons/icon-48x48.png",
+        sizes: "48x48",
+        type: "image/png",
+        purpose: "any"
+      },
       {
         src: "/logo/cracklix-icon.png",
         sizes: "512x512",
