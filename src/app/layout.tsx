@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     template: "%s | Cracklix"
   },
   description: "Punjab's most trusted government exam preparation platform. Practice Unlimited Mock Tests for PSSSB, PPSC, Punjab Police and Central Government Exams.",
-  keywords: ["Punjab Government Exams", "PSSSB Patwari Mock Test", "PPSC PCS Preparation", "Punjab Police Constable Mock Test", "Punjab Previous Year Papers", "Current Affairs Punjab", "Cracklix App"],
+  keywords: ["Punjab Government Exams", "PSSSB Patwari Mock Test", "PPSC PCS Preparation", "Punjab Police Constable Mock Test", "Punjab Previous Year Papers", "Current Affairs Punjab", "Cracklix A[...]"],
   authors: [{ name: "Arsh Grewal" }],
   creator: "Arsh Grewal",
   publisher: "Cracklix",
@@ -83,6 +83,12 @@ export const metadata: Metadata = {
   verification: {
     google: "google-site-verification-id", 
   },
+  // Explicit icons metadata to help Google and browsers pick the correct favicon
+  icons: {
+    icon: '/logo/cracklix-icon.png',
+    shortcut: '/favicon.ico',
+    apple: '/logo/cracklix-icon.png',
+  }
 };
 
 export const viewport: Viewport = {
@@ -140,6 +146,13 @@ export default function RootLayout({
       className="scroll-smooth"
     >
       <head>
+        {/* Favicons & manifest - helps Google detect the correct icon */}
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/logo/cracklix-icon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo/cracklix-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0B1528" />
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
