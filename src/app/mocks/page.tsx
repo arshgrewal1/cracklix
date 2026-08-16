@@ -52,8 +52,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v7.0 [Classic List Refined].
- * FIXED: Logo moved to left and text aligned alongside for a clean, high-density UI.
+ * @fileOverview Institutional Practice Hub v7.1 [Typography Refined].
+ * FIXED: Removed forced uppercase from headers and stat labels for a cleaner look.
  */
 
 const FILTER_CHIPS = [
@@ -171,7 +171,7 @@ export default function PracticeHub() {
            <div className="space-y-1">
               <div className="flex items-center gap-2">
                  <Zap className="h-4 w-4 text-primary fill-current" />
-                 <h1 className="text-xl md:text-3xl font-black text-[#071B4D] tracking-tight uppercase">Practice Hub</h1>
+                 <h1 className="text-xl md:text-3xl font-[900] text-[#071B4D] tracking-tight">Practice Hub</h1>
               </div>
               <p className="text-slate-500 font-medium text-xs md:text-sm">Verified series with real-time state ranking.</p>
            </div>
@@ -280,22 +280,22 @@ export default function PracticeHub() {
                                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] md:text-[13px] font-bold text-[#64748B] pt-2">
                                       <div className="flex items-center gap-1.5">
                                          <span className="text-[#071B4D] tabular-nums">{ser.counts.totalTests}</span> 
-                                         <span className="opacity-50 uppercase text-[9px] tracking-tight">Tests</span>
+                                         <span className="opacity-50 uppercase text-[9px] tracking-tight font-black">Tests</span>
                                       </div>
                                       <div className="flex items-center gap-1.5">
                                          <span className="text-[#071B4D] tabular-nums">{ser.counts.questions}</span> 
-                                         <span className="opacity-50 uppercase text-[9px] tracking-tight">Questions</span>
+                                         <span className="opacity-50 uppercase text-[9px] tracking-tight font-black">Questions</span>
                                       </div>
                                       {ser.attemptedCount > 0 && (
                                          <div className="flex items-center gap-1.5 text-[#10B981]">
                                             <span>{ser.attemptedCount}</span> 
-                                            <span className="opacity-50 uppercase text-[9px] tracking-tight">Solved</span>
+                                            <span className="opacity-50 uppercase text-[9px] tracking-tight font-black">Solved</span>
                                          </div>
                                       )}
                                       {ser.avgAccuracy > 0 && (
                                          <div className="flex items-center gap-1.5 text-[#F59E0B]">
                                             <span>{ser.avgAccuracy}%</span> 
-                                            <span className="opacity-50 uppercase text-[9px] tracking-tight">Mastery</span>
+                                            <span className="opacity-50 uppercase text-[9px] tracking-tight font-black">Mastery</span>
                                          </div>
                                       )}
                                    </div>
@@ -344,7 +344,7 @@ function HeaderStat({ label, val, color = "text-[#071B4D]" }: any) {
    return (
       <div className="flex flex-col items-center md:items-start gap-0.5">
          <p className="text-xl md:text-2xl font-black tabular-nums leading-none tracking-tighter">{val}</p>
-         <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-tight">{label}</p>
+         <p className="text-[9px] md:text-[10px] font-[800] text-slate-400 tracking-tight">{label}</p>
       </div>
    )
 }
