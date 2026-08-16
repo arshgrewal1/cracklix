@@ -34,7 +34,8 @@ import {
   Settings,
   Lock,
   SquarePen,
-  Languages
+  Languages,
+  Star
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -62,7 +63,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v62.0 [Language Support Added].
+ * @fileOverview Master Mock Builder v62.1 [Home Featured Added].
  */
 
 export default function MockBuilderPage() {
@@ -123,6 +124,7 @@ function MockBuilderContent() {
     difficulty: "Medium" as Difficulty, 
     accessLevel: "FREE" as AccessLevel,
     published: true,
+    isFeatured: false,
     languageMode: "ENGLISH_PUNJABI" as LanguageDisplayMode,
     positiveMarks: 1,
     negativeMarks: 0.25,
@@ -172,6 +174,7 @@ function MockBuilderContent() {
       boardIds: existingMock.boardIds || (existingMock.boardId ? [existingMock.boardId] : []),
       examIds: existingMock.examIds || (existingMock.examId ? [existingMock.examId] : []),
       accessLevel: existingMock.accessLevel || "FREE",
+      isFeatured: existingMock.isFeatured || false,
       languageMode: existingMock.languageMode || "ENGLISH_PUNJABI"
     });
 
@@ -583,6 +586,17 @@ function MockBuilderContent() {
                  </div>
 
                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <div className={cn("p-3 rounded-xl border flex items-center justify-between transition-all mb-2", mockData.isFeatured ? "bg-amber-50 border-amber-200" : "bg-slate-50 border-slate-100")}>
+                       <div className="space-y-0.5 text-left">
+                          <div className="flex items-center gap-2">
+                             <Star className={cn("h-3 w-3", mockData.isFeatured ? "text-amber-500 fill-current" : "text-slate-400")} />
+                             <p className="text-[9px] font-bold uppercase text-[#0F172A] tracking-tight">Featured Series</p>
+                          </div>
+                          <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none">Promote on Home Page</p>
+                       </div>
+                       <Switch checked={mockData.isFeatured} onCheckedChange={v => setMockData({...mockData, isFeatured: v})} />
+                    </div>
+
                     <div className={cn("p-3 rounded-xl border flex items-center justify-between transition-all", mockData.published ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50 opacity-60")}>
                        <div className="space-y-0.5 text-left">
                           <p className="text-[9px] font-bold uppercase text-[#0F172A] tracking-tight">Activation</p>
@@ -703,7 +717,7 @@ function MockBuilderContent() {
            ) : (
              <div className="space-y-4 animate-in fade-in duration-500 px-1">
                 <div className="flex items-center justify-between">
-                   <h3 className="text-base font-black text-[#0F172A] uppercase flex items-center gap-2">
+                   <h3 className="text-base font-black text-[#0F172A] uppercase flex items-center gap-4">
                       <Layers className="h-4 w-4 text-primary" /> Active area
                    </h3>
                    <Popover>

@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useMemo } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Zap, Lock, ChevronRight, Play } from "lucide-react"
+import { BookOpen, Zap, Lock, ChevronRight, Play, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -14,15 +15,26 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Latest Tests Hub v52.2.
- * FIXED: Standardized button to Cracklix Blue.
+ * @fileOverview High-Density Featured Tests Hub v53.0.
+ * FIXED: Prioritizes mocks marked as 'isFeatured' by the admin.
  */
 export default function LatestMocks() {
   const db = useFirestore()
   const { profile } = useUser()
   
-  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true), limit(2)) : null), [db])
-  const { data: mocks, loading } = useCollection<any>(mocksQuery)
+  // Query for featured mocks primarily
+  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true), limit(6)) : null), [db])
+  const { data: rawMocks, loading } = useCollection<any>(mocksQuery)
+
+  const mocks = useMemo(() => {
+    if (!rawMocks) return [];
+    // Sort featured items to the top client-side to ensure visibility
+    return [...rawMocks].sort((a, b) => {
+       if (a.isFeatured && !b.isFeatured) return -1;
+       if (!a.isFeatured && b.isFeatured) return 1;
+       return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+    }).slice(0, 4);
+  }, [rawMocks]);
 
   const isPassActive = useMemo(() => {
     if (!profile) return false;
@@ -37,11 +49,11 @@ export default function LatestMocks() {
         <div className="flex items-center justify-between px-2 text-left">
           <div className="flex items-center gap-3">
              <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center text-orange-500 shadow-inner shrink-0">
-               <Zap className="h-4 w-4 md:h-5 md:w-5 fill-current" />
+               <Star className="h-4 w-4 md:h-5 md:w-5 fill-current" />
              </div>
              <div className="text-left min-w-0">
-                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight truncate">Latest Mocks</h2>
-                <p className="text-[10px] md:text-xs font-medium text-muted-foreground truncate">New practice series synced</p>
+                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight truncate">Featured Tests</h2>
+                <p className="text-[10px] md:text-xs font-medium text-muted-foreground truncate">Recommended for you</p>
              </div>
           </div>
           <Link href="/mocks" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group shrink-0">
@@ -49,7 +61,7 @@ export default function LatestMocks() {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 gap-4 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
           {loading ? (
              Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-2xl bg-muted" />)
           ) : mocks && mocks.length > 0 ? mocks.map((mock, i) => {
@@ -70,11 +82,18 @@ export default function LatestMocks() {
                   
                   <div className="flex justify-between items-start mb-4">
                     <AuthorityLogo boardId={boardId} size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-lg shadow-sm border-2 border-background bg-muted" />
-                    {isPremium && (
-                       <Badge className="bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-none px-2 py-0.5 rounded-full font-bold text-[7px] flex items-center gap-1">
-                          <Lock className="h-2 w-2" /> Elite
-                       </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                       {mock.isFeatured && (
+                          <Badge className="bg-primary/10 text-primary border-none px-2 py-0.5 rounded-full font-bold text-[7px] flex items-center gap-1 uppercase tracking-tight">
+                             New
+                          </Badge>
+                       )}
+                       {isPremium && (
+                          <Badge className="bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-none px-2 py-0.5 rounded-full font-bold text-[7px] flex items-center gap-1 uppercase tracking-tight">
+                             <Lock className="h-2 w-2" /> Elite
+                          </Badge>
+                       )}
+                    </div>
                   </div>
 
                   <div className="flex-1 space-y-2 min-w-0">

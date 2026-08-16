@@ -310,6 +310,7 @@ export interface MockTest {
   isTodayQuiz?: boolean;
   rewardXP?: number;
   attemptLimit?: number;
+  isFeatured?: boolean;
 }
 
 export interface Question {

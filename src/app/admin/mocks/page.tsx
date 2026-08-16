@@ -35,12 +35,13 @@ import {
   X,
   FileSearch,
   List,
-  ArrowUpRight
+  ArrowUpRight,
+  Star
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, deleteDoc, doc, setDoc, serverTimestamp, query, orderBy, where, writeBatch } from "firebase/firestore"
+import { collection, deleteDoc, doc, setDoc, serverTimestamp, query, orderBy, where, writeBatch, updateDoc } from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
@@ -50,7 +51,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Master Mock Test Manager v4.1.
+ * @fileOverview Master Mock Test Manager v4.2 [Promotion Hub Added].
+ * FIXED: Added Star toggle to feature mock tests on the Home Page.
  */
 
 export default function MockManagement() {
@@ -113,6 +115,16 @@ export default function MockManagement() {
      } finally { setIsProcessing(false) }
   }
 
+  const handleToggleFeatured = async (id: string, current: boolean) => {
+    if (!db) return;
+    try {
+       await updateDoc(doc(db, "mocks", id), { isFeatured: !current, updatedAt: serverTimestamp() });
+       toast({ title: current ? "Removed from Home" : "Pinned to Home", description: "Homepage registry synced." });
+    } catch (e) {
+       toast({ variant: "destructive", title: "Sync failed" });
+    }
+  }
+
   const handleBulkMove = async () => {
      if (!db || selectedIds.length === 0 || !moveTarget.subjectId) return
      setIsProcessing(true)
@@ -163,7 +175,7 @@ export default function MockManagement() {
             </div>
             <div className="space-y-1.5">
                <Label className="text-[10px] font-bold text-slate-400 ml-1">Filter Series</Label>
-               <select value={serFilter} onChange={e => setSortBy(e.target.value)} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]" disabled={subFilter === 'all'}>
+               <select value={serFilter} onChange={e => setSerFilter(e.target.value)} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none text-[#0F172A]" disabled={subFilter === 'all'}>
                   <option value="all">All Series</option>
                   {allSeries?.filter((s: any) => s.subjectId === subFilter).map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
                </select>
@@ -188,13 +200,14 @@ export default function MockManagement() {
                 </TableHead>
                 <TableHead className="px-6 text-[9px] font-bold text-slate-400 tracking-tight uppercase">Test Title</TableHead>
                 <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight uppercase">Category Folder</TableHead>
+                <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight text-center uppercase">Hub</TableHead>
                 <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight text-center uppercase">Status</TableHead>
                 <TableHead className="text-right px-10 text-[9px] font-bold text-slate-400 tracking-tight uppercase">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {mocksLoading ? (
-                <AdminTableSkeleton rows={8} columns={5} />
+                <AdminTableSkeleton rows={8} columns={6} />
               ) : filteredMocks.length > 0 ? filteredMocks.map((mock) => {
                 const sub = subjects?.find(s => s.id === mock.learningSubjectId)
                 const ser = allSeries?.find(s => s.id === mock.seriesId)
@@ -226,6 +239,18 @@ export default function MockManagement() {
                        </div>
                     </TableCell>
                     <TableCell className="text-center">
+                       <button 
+                          onClick={() => handleToggleFeatured(mock.id, !!mock.isFeatured)} 
+                          className={cn(
+                             "h-10 w-10 rounded-xl flex items-center justify-center transition-all shadow-sm border mx-auto active:scale-90 cursor-pointer",
+                             mock.isFeatured ? "bg-amber-50 border-amber-200 text-amber-500" : "bg-slate-50 border-slate-100 text-slate-300 hover:text-amber-500"
+                          )}
+                          title={mock.isFeatured ? "Remove from Home" : "Feature on Home"}
+                       >
+                          <Star className={cn("h-4 w-4", mock.isFeatured && "fill-current")} />
+                       </button>
+                    </TableCell>
+                    <TableCell className="text-center">
                        <Badge className={cn("border-none text-[8px] font-bold px-2 py-0.5", mock.published ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400")}>
                           {mock.published ? 'Live' : 'Draft'}
                        </Badge>
@@ -238,15 +263,15 @@ export default function MockManagement() {
                           <Button variant="ghost" size="icon" title="Edit Structure" className="h-9 w-9 rounded-xl hover:bg-white shadow-sm" asChild>
                              <Link href={`/admin/mocks/builder?id=${mock.id}`}><Edit className="h-4 w-4" /></Link>
                           </Button>
-                          <button onClick={() => handleDuplicate(mock)} title="Duplicate" className="h-9 w-9 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-blue-600 active:scale-90 transition-all"><Copy className="h-4 w-4" /></button>
-                          <button onClick={() => handleDelete(mock.id)} title="Delete" className="h-9 w-9 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-4 w-4" /></button>
+                          <button onClick={() => handleDuplicate(mock)} title="Duplicate" className="h-9 w-9 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-blue-600 active:scale-90 transition-all cursor-pointer"><Copy className="h-4 w-4" /></button>
+                          <button onClick={() => handleDelete(mock.id)} title="Delete" className="h-9 w-9 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all cursor-pointer"><Trash2 className="h-4 w-4" /></button>
                        </div>
                     </TableCell>
                   </TableRow>
                 )
               }) : (
                  <TableRow>
-                    <TableCell colSpan={5} className="h-96 text-center">
+                    <TableCell colSpan={6} className="h-96 text-center">
                        <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
                           <Layers className="h-20 w-20 text-slate-400" />
                           <p className="font-bold text-2xl">Empty list</p>
