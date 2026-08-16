@@ -5,7 +5,7 @@ import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, where, orderBy, doc } from "firebase/firestore"
+import { collection, query, where, orderBy, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,7 +38,9 @@ import {
   FileStack,
   BookMarked,
   Timer,
-  Layout
+  Layout,
+  Bookmark,
+  Loader2
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -50,10 +52,11 @@ import { TestSeries, MockTest } from "@/types"
 import { hasSeriesAccess } from "@/lib/access-control"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter, usePathname } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Institutional Practice Hub v7.1 [Typography Refined].
- * FIXED: Removed forced uppercase from headers and stat labels for a cleaner look.
+ * @fileOverview Institutional Practice Hub v8.0 [Pin Feature Added].
+ * FIXED: Added Pin/Bookmark functionality for Test Series.
  */
 
 const FILTER_CHIPS = [
@@ -67,11 +70,13 @@ export default function PracticeHub() {
   const { user, profile, loading: userLoading } = useUser()
   const router = useRouter()
   const pathname = usePathname()
+  const { toast } = useToast()
   
   const [searchTerm, setSearchTerm] = useState("")
   const [activeFilter, setActiveFilter] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
   const [mounted, setMounted] = useState(false)
+  const [pinningId, setPinningId] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -150,6 +155,30 @@ export default function PracticeHub() {
     return base
   }, [processedSeries, searchTerm, activeFilter, sortBy])
 
+  const handleToggleSeriesPin = async (e: React.MouseEvent, seriesId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!db || !user || pinningId) return;
+
+    setPinningId(seriesId);
+    const isPinned = profile?.pinnedSeries?.includes(seriesId);
+    const userRef = doc(db, "users", user.uid);
+
+    try {
+      if (isPinned) {
+        await updateDoc(userRef, { pinnedSeries: arrayRemove(seriesId), updatedAt: serverTimestamp() });
+        toast({ title: "Removed from dashboard" });
+      } else {
+        await updateDoc(userRef, { pinnedSeries: arrayUnion(seriesId), updatedAt: serverTimestamp() });
+        toast({ title: "Series pinned to dashboard" });
+      }
+    } catch (err) {
+      toast({ variant: "destructive", title: "Sync failed" });
+    } finally {
+      setPinningId(null);
+    }
+  };
+
   const totalStats = useMemo(() => {
      return {
         totalSeries: processedSeries.length,
@@ -170,7 +199,7 @@ export default function PracticeHub() {
         <section className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
            <div className="space-y-1">
               <div className="flex items-center gap-2">
-                 <Zap className="h-4 w-4 text-primary fill-current" />
+                 <Zap className="h-4 w-4 text-[#1677FF] fill-current" />
                  <h1 className="text-xl md:text-3xl font-[900] text-[#071B4D] tracking-tight">Practice Hub</h1>
               </div>
               <p className="text-slate-500 font-medium text-xs md:text-sm">Verified series with real-time state ranking.</p>
@@ -238,6 +267,8 @@ export default function PracticeHub() {
               <div className="grid grid-cols-1 gap-3">
                  {filteredSeries.map((ser, i) => {
                     const isPremium = ser.accessLevel === 'PREMIUM' || ser.counts.premium > 0;
+                    const isPinned = profile?.pinnedSeries?.includes(ser.id);
+                    
                     return (
                        <motion.div 
                          key={ser.id} 
@@ -260,13 +291,25 @@ export default function PracticeHub() {
                                 {/* CENTER: CONTENT HUB */}
                                 <div className="flex-1 min-w-0 space-y-2">
                                    <div className="space-y-1">
-                                      <div className="flex flex-wrap items-center gap-2">
-                                         <span className="text-[9px] font-black text-[#1677FF] uppercase tracking-widest leading-none">{ser.difficulty || 'Expert'}</span>
-                                         {isPremium ? (
-                                            <Badge className="bg-amber-50 text-amber-600 border-none px-2 py-0.5 rounded-md font-black text-[7px] uppercase tracking-widest h-5 flex items-center">Premium</Badge>
-                                         ) : (
-                                            <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 py-0.5 rounded-md font-black text-[7px] uppercase tracking-widest h-5 flex items-center">Free</Badge>
-                                         )}
+                                      <div className="flex flex-wrap items-center justify-between gap-2">
+                                         <div className="flex items-center gap-2">
+                                            <span className="text-[9px] font-black text-[#1677FF] uppercase tracking-widest leading-none">{ser.difficulty || 'Expert'}</span>
+                                            {isPremium ? (
+                                               <Badge className="bg-amber-50 text-amber-600 border-none px-2 py-0.5 rounded-md font-black text-[7px] uppercase tracking-widest h-5 flex items-center">Premium</Badge>
+                                            ) : (
+                                               <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 py-0.5 rounded-md font-black text-[7px] uppercase tracking-widest h-5 flex items-center">Free</Badge>
+                                            )}
+                                         </div>
+                                         <button 
+                                           onClick={(e) => handleToggleSeriesPin(e, ser.id)}
+                                           disabled={pinningId === ser.id}
+                                           className={cn(
+                                             "h-8 w-8 rounded-lg border flex items-center justify-center transition-all active:scale-90",
+                                             isPinned ? "bg-primary/10 border-primary text-primary" : "bg-white border-slate-100 text-slate-300 hover:text-primary hover:border-primary/20"
+                                           )}
+                                         >
+                                            {pinningId === ser.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Bookmark className={cn("h-3.5 w-3.5", isPinned && "fill-current")} />}
+                                         </button>
                                       </div>
                                       <h3 className="text-base md:text-xl font-[800] text-[#071B4D] group-hover:text-[#1677FF] transition-colors leading-tight tracking-tight">
                                          {ser.title}

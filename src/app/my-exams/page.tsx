@@ -24,7 +24,9 @@ import {
   Clock,
   Layout,
   Search,
-  X
+  X,
+  Layers,
+  Bookmark
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -47,8 +49,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import Link from "next/link"
 
 /**
- * @fileOverview Premium Minimalist My Exams Hub v6.0.
- * REDESIGNED: Converted from bulky cards to a spacious, modern list-based UI.
+ * @fileOverview Premium Minimalist My Exams Hub v7.0.
+ * UPDATED: Integrated Pinned Series support and optimized list layout.
  */
 
 const MODAL_CATEGORIES = [
@@ -83,15 +85,15 @@ export default function MyExamsPage() {
 
   // Data Listeners
   const examsQuery = useMemo(() => (db && mounted ? collection(db, "exams") : null), [db, mounted]);
+  const seriesQuery = useMemo(() => (db && mounted ? collection(db, "test_series") : null), [db, mounted]);
   const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]);
   const pyqsQuery = useMemo(() => (db && mounted ? collection(db, "pyqs") : null), [db, mounted]);
   const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid)) : null), [db, user]);
-  const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
 
   const { data: allExams, loading: examsLoading } = useCollection<any>(examsQuery)
+  const { data: allTestSeries, loading: seriesLoading } = useCollection<any>(seriesQuery)
   const { data: mocks } = useCollection<any>(mocksQuery)
   const { data: pyqs } = useCollection<any>(pyqsQuery)
-  const { data: boards } = useCollection<any>(boardsQuery)
   const { data: results } = useCollection<any>(resultsQuery)
 
   const statsMap = useMemo(() => {
@@ -100,12 +102,22 @@ export default function MyExamsPage() {
 
     mocks.forEach(m => {
        const eids = m.examIds || (m.examId ? [m.examId] : []);
+       const sId = m.seriesId;
+       
+       // Handle Exams
        eids.forEach((eid: string) => {
           if (!map[eid]) map[eid] = { mocks: 0, total: 0, attempted: 0, pyq: 0 };
           if (m.mockType === 'FULL') map[eid].mocks++;
           map[eid].total++;
           if (results?.some((r: any) => r.mockId === m.id)) map[eid].attempted++;
        });
+
+       // Handle Series
+       if (sId) {
+          if (!map[sId]) map[sId] = { mocks: 0, total: 0, attempted: 0, pyq: 0 };
+          map[sId].total++;
+          if (results?.some((r: any) => r.mockId === m.id)) map[sId].attempted++;
+       }
     });
     (pyqs || []).forEach(p => {
        if (p.examId) {
@@ -122,32 +134,39 @@ export default function MyExamsPage() {
     return (allExams as any[]).filter((e: any) => profile.pinnedExams?.includes(e.id))
   }, [allExams, profile])
 
+  const pinnedSeries = useMemo(() => {
+     if (!allTestSeries || !profile?.pinnedSeries) return []
+     return (allTestSeries as any[]).filter((s: any) => profile.pinnedSeries?.includes(s.id))
+  }, [allTestSeries, profile])
+
   const topStats = useMemo(() => {
     const totalExams = pinnedExams.length;
-    const totalMocks = pinnedExams.reduce((acc, e) => acc + (statsMap[e.id]?.mocks || 0), 0);
+    const totalSeries = pinnedSeries.length;
     
     let avgProg = 0;
-    if (totalExams > 0) {
-      const sum = pinnedExams.reduce((acc, e) => {
-        const s = statsMap[e.id];
+    const combined = [...pinnedExams, ...pinnedSeries];
+    if (combined.length > 0) {
+      const sum = combined.reduce((acc, item) => {
+        const s = statsMap[item.id];
         return acc + (s?.total > 0 ? (s.attempted / s.total) * 100 : 0);
       }, 0);
-      avgProg = Math.round(sum / totalExams);
+      avgProg = Math.round(sum / combined.length);
     }
 
     return [
-      { label: "Exams", val: totalExams, icon: GraduationCap },
-      { label: "Mock Test", val: totalMocks, icon: Zap },
-      { label: "Practice Rate", val: results?.length > 0 ? `${Math.round((results.length / Math.max(1, totalMocks)) * 100)}%` : "0%", icon: Activity },
-      { label: "Mastery", val: `${avgProg}%`, icon: Trophy },
+      { label: "Target Hubs", val: totalExams + totalSeries, icon: GraduationCap },
+      { label: "Tests Ready", val: combined.reduce((acc, item) => acc + (statsMap[item.id]?.total || 0), 0), icon: Zap },
+      { label: "Attempts", val: results?.length || 0, icon: Activity },
+      { label: "Avg Mastery", val: `${avgProg}%`, icon: Trophy },
     ];
-  }, [pinnedExams, statsMap, results]);
+  }, [pinnedExams, pinnedSeries, statsMap, results]);
 
-  const handleUnpin = async (examId: string) => {
+  const handleUnpin = async (id: string, type: 'EXAM' | 'SERIES') => {
     if (!db || !user || unpinningId) return;
-    setUnpinningId(examId);
+    setUnpinningId(id);
+    const field = type === 'EXAM' ? 'pinnedExams' : 'pinnedSeries';
     try {
-      await updateDoc(doc(db, "users", user.uid), { pinnedExams: arrayRemove(examId), updatedAt: serverTimestamp() });
+      await updateDoc(doc(db, "users", user.uid), { [field]: arrayRemove(id), updatedAt: serverTimestamp() });
       toast({ title: "Removed from dashboard" });
       setSettingsExam(null);
     } catch (e) {
@@ -253,7 +272,7 @@ export default function MyExamsPage() {
                                disabled={isAdded}
                                className={cn(
                                  "h-10 w-10 rounded-xl p-0 transition-all active:scale-90 flex items-center justify-center border-none",
-                                 isAdded ? "text-emerald-500 bg-emerald-50" : "text-slate-300 hover:text-primary hover:bg-primary/5 bg-transparent"
+                                 isAdded ? "text-emerald-50 bg-emerald-500" : "text-slate-300 hover:text-primary hover:bg-primary/5 bg-transparent"
                                )}
                              >
                                 {isAdded ? <CheckCircle2 className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
@@ -274,7 +293,7 @@ export default function MyExamsPage() {
            {topStats.map((stat, i) => (
               <React.Fragment key={i}>
                  <div className="flex flex-col items-center gap-2 md:gap-3 text-center min-w-[80px]">
-                    <stat.icon className={cn("h-4 w-4 md:h-5 md:w-5", stat.color)} />
+                    <stat.icon className={cn("h-4 w-4 md:h-5 md:w-5 text-primary")} />
                     <div className="space-y-0.5">
                        <p className="text-xl md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none">{stat.val}</p>
                        <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
@@ -296,13 +315,7 @@ export default function MyExamsPage() {
               <AnimatePresence mode="popLayout">
                  {examsLoading ? (
                     Array.from({ length: 3 }).map((_, i) => (
-                       <div key={i} className="py-8 border-b border-slate-50 flex items-center gap-6">
-                          <Skeleton className="h-14 w-14 rounded-full bg-slate-50" />
-                          <div className="flex-1 space-y-2">
-                             <Skeleton className="h-6 w-1/3 rounded-lg bg-slate-50" />
-                             <Skeleton className="h-4 w-1/4 rounded-lg bg-slate-50" />
-                          </div>
-                       </div>
+                       <div key={i} className="py-8 border-b border-slate-50 flex items-center gap-6" />
                     ))
                  ) : pinnedExams.length > 0 ? (
                     pinnedExams.map((exam, idx) => {
@@ -317,20 +330,17 @@ export default function MyExamsPage() {
                              exit={{ opacity: 0, scale: 0.98 }}
                              transition={{ delay: idx * 0.05 }}
                           >
-                             <Link href={`/exams/view?id=${exam.id}`} className="group block py-6 md:py-8 border-b border-slate-100 hover:bg-slate-50/50 transition-all rounded-[24px] px-2 md:px-4 -mx-2 md:-mx-4">
+                             <div className="group block py-6 md:py-8 border-b border-slate-100 hover:bg-slate-50/50 transition-all rounded-[24px] px-2 md:px-4 -mx-2 md:-mx-4 cursor-pointer" onClick={() => router.push(`/exams/view?id=${exam.id}`)}>
                                 <div className="flex items-center gap-6">
-                                   {/* LEFT: LOGO */}
                                    <div className="shrink-0 relative">
                                       <AuthorityLogo boardId={exam.boardId} size="md" className="h-14 w-14 md:h-16 md:w-16 rounded-full bg-slate-50 border-none shadow-sm group-hover:scale-105 transition-transform" />
                                    </div>
 
-                                   {/* CENTER: CONTENT */}
                                    <div className="flex-1 min-w-0 space-y-4">
                                       <div className="space-y-2">
                                          <h3 className="text-lg md:text-2xl font-[800] text-[#0F172A] leading-none tracking-tight group-hover:text-[#1677FF] transition-colors">{exam.name}</h3>
                                          <div className="flex flex-wrap items-center gap-2">
                                             <Badge variant="outline" className="bg-[#1677FF]/5 text-[#1677FF] border-none text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm">{exam.boardId} Hub</Badge>
-                                            <Badge variant="outline" className="bg-[#10B981]/5 text-[#10B981] border-none text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm">Live Patterns</Badge>
                                          </div>
                                       </div>
 
@@ -340,17 +350,16 @@ export default function MyExamsPage() {
                                               initial={{ width: 0 }}
                                               animate={{ width: `${progress}%` }}
                                               transition={{ duration: 1.5, ease: "easeOut" }}
-                                              className="h-full bg-[#1677FF] rounded-full shadow-lg shadow-[#1677FF]/20" 
+                                              className="h-full bg-[#1677FF] rounded-full" 
                                             />
                                          </div>
                                          <span className="text-[10px] md:text-sm font-black text-[#1677FF] tabular-nums min-w-[32px] text-right">{progress}%</span>
                                       </div>
                                    </div>
 
-                                   {/* RIGHT: ACTION */}
                                    <div className="shrink-0 flex items-center gap-4">
                                       <button 
-                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSettingsExam(exam); }}
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSettingsExam({...exam, type: 'EXAM'}); }}
                                         className="h-10 w-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-300 hover:text-primary active:scale-90 transition-all opacity-0 group-hover:opacity-100 hidden md:flex"
                                       >
                                          <Settings className="h-5 w-5" />
@@ -360,17 +369,76 @@ export default function MyExamsPage() {
                                       </div>
                                    </div>
                                 </div>
-                             </Link>
+                             </div>
                           </motion.div>
                        )
                     })
                  ) : !examsLoading && (
-                    <div className="py-32 flex flex-col items-center justify-center text-center space-y-8 opacity-40">
-                       <Layout className="h-16 w-16 text-slate-200" />
-                       <div className="space-y-1">
-                          <h3 className="text-xl font-black text-[#0F172A] uppercase">Dashboard empty</h3>
-                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No target verticals registered</p>
-                       </div>
+                    <div className="py-20 text-center opacity-40">
+                       <Layout className="h-12 w-12 text-slate-200 mx-auto mb-4" />
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No target verticals registered</p>
+                    </div>
+                 )}
+              </AnimatePresence>
+           </div>
+        </section>
+
+        {/* 5. TARGET SERIES LIST */}
+        <section className="space-y-10 pt-6">
+           <div className="space-y-1 px-1">
+              <h2 className="text-xl md:text-2xl font-black text-[#0F172A] tracking-tight">Pinned series</h2>
+              <p className="text-slate-400 font-bold text-[10px] md:text-sm">Quick access to specialized preparation series</p>
+           </div>
+
+           <div className="space-y-2">
+              <AnimatePresence mode="popLayout">
+                 {seriesLoading ? (
+                    Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-24 w-full bg-slate-50 animate-pulse rounded-2xl" />)
+                 ) : pinnedSeries.length > 0 ? (
+                    pinnedSeries.map((ser, idx) => {
+                       const s = statsMap[ser.id] || { total: 0, attempted: 0 };
+                       const progress = s.total > 0 ? Math.round((s.attempted / s.total) * 100) : 0;
+                       
+                       return (
+                          <motion.div 
+                             key={ser.id} 
+                             initial={{ opacity: 0, y: 10 }}
+                             animate={{ opacity: 1, y: 0 }}
+                             exit={{ opacity: 0, scale: 0.98 }}
+                             transition={{ delay: idx * 0.05 }}
+                          >
+                             <div className="group block py-6 md:py-8 border-b border-slate-100 hover:bg-slate-50/50 transition-all rounded-[24px] px-2 md:px-4 -mx-2 md:-mx-4 cursor-pointer" onClick={() => router.push(`/subjects/${ser.subjectId}/series/${ser.id}`)}>
+                                <div className="flex items-center gap-6">
+                                   <div className="shrink-0">
+                                      <AuthorityLogo boardId={ser.boardId || "GENERAL"} size="sm" className="h-12 w-12 bg-white border border-slate-100 shadow-inner rounded-xl" />
+                                   </div>
+                                   <div className="flex-1 min-w-0">
+                                      <h3 className="text-base md:text-lg font-bold text-[#0F172A] leading-tight mb-3 group-hover:text-primary transition-colors">{ser.title}</h3>
+                                      <div className="flex items-center gap-4">
+                                         <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${progress}%` }} />
+                                         </div>
+                                         <span className="text-[10px] font-black text-emerald-600 tabular-nums">{progress}%</span>
+                                      </div>
+                                   </div>
+                                   <div className="shrink-0 flex items-center gap-3">
+                                      <button 
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSettingsExam({...ser, type: 'SERIES'}); }}
+                                        className="h-9 w-9 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-slate-300 hover:text-primary active:scale-90 transition-all md:opacity-0 group-hover:opacity-100"
+                                      >
+                                         <Settings className="h-4 w-4" />
+                                      </button>
+                                      <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all" />
+                                   </div>
+                                </div>
+                             </div>
+                          </motion.div>
+                       )
+                    })
+                 ) : !seriesLoading && (
+                    <div className="py-20 text-center opacity-40">
+                       <Layers className="h-12 w-12 text-slate-200 mx-auto mb-4" />
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No pinned series hubs</p>
                     </div>
                  )}
               </AnimatePresence>
@@ -394,8 +462,8 @@ export default function MyExamsPage() {
                      <Settings className="h-5 w-5" />
                   </div>
                   <div className="text-left">
-                     <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tighter uppercase">{settingsExam?.name}</DialogTitle>
-                     <DialogDescription className="text-slate-400 font-bold text-[9px] uppercase tracking-widest">Vertical node control</DialogDescription>
+                     <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tighter uppercase">{settingsExam?.name || settingsExam?.title}</DialogTitle>
+                     <DialogDescription className="text-slate-400 font-bold text-[9px] uppercase tracking-widest">{settingsExam?.type === 'EXAM' ? 'Vertical node control' : 'Series node control'}</DialogDescription>
                   </div>
                </div>
             </DialogHeader>
@@ -415,12 +483,12 @@ export default function MyExamsPage() {
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Lifecycle control</p>
                   <Button 
                     variant="ghost" 
-                    onClick={() => handleUnpin(settingsExam?.id)}
+                    onClick={() => handleUnpin(settingsExam?.id, settingsExam?.type)}
                     disabled={unpinningId === settingsExam?.id}
                     className="w-full h-14 justify-start text-rose-500 hover:bg-rose-50 rounded-xl font-bold gap-3 border-none"
                   >
                      {unpinningId === settingsExam?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                     Remove from my exams
+                     Remove from dashboard
                   </Button>
                </div>
             </div>

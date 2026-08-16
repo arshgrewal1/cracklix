@@ -133,6 +133,7 @@ export interface UserProfile {
   photoURL?: string;
   gender?: Gender;
   pinnedExams?: string[];
+  pinnedSeries?: string[];
   savedVacancies?: string[];
   savedCA?: string[];
   totalTests?: number;
