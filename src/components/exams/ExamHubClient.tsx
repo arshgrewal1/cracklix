@@ -95,7 +95,7 @@ export default function ExamHubClient() {
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
   const { data: rawQuizzes, loading: quizzesLoading } = useCollection<any>(quizzesQuery)
   const { data: results } = useCollection<any>(resultsQuery)
-  const { data: rawPyqs } = useCollection<any>(pyqQuery)
+  const { data: rawPyqs } = useCollection<any>(pyqsQuery)
   const { data: rawNotes } = useCollection<any>(notesQuery)
   
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
