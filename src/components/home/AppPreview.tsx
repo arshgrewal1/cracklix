@@ -17,8 +17,8 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview Study Anywhere v1.2.
- * UPDATED: Replaced "node" with "Hub" and removed uppercase styling.
+ * @fileOverview Study Anywhere v1.3.
+ * UPDATED: Synchronized button hierarchy to Black (Secondary) vs Blue (Primary).
  */
 export default function AppPreview() {
   const features = [
@@ -72,7 +72,7 @@ export default function AppPreview() {
                  </div>
 
                  <div className="mt-auto shrink-0 pt-6 md:pt-10">
-                    <Button asChild variant="ghost" className="w-full h-11 md:h-14 lg:h-16 rounded-full bg-slate-50 text-[#0F172A] hover:bg-primary hover:text-white transition-all font-bold text-[14px] md:text-[15px] tracking-tight border-none shadow-sm active:scale-95">
+                    <Button asChild className="w-full h-11 md:h-14 lg:h-16 rounded-full bg-[#0F172A] text-white hover:bg-black transition-all font-bold text-[14px] md:text-[15px] tracking-tight border-none shadow-xl active:scale-95">
                        <Link href="/install">Get app</Link>
                     </Button>
                  </div>

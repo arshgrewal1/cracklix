@@ -8,8 +8,8 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v68.0.
- * UPDATED: Removed uppercase from primary heading and buttons for professional Title Case.
+ * @fileOverview Premium Mobile-First PWA Hero v69.0.
+ * UPDATED: Implemented Blue vs Black button hierarchy for distinct visual cues.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -105,14 +105,13 @@ export default function Hero() {
                    <Button 
                       onClick={handleInstallClick}
                       disabled={isInstalling}
-                      variant="outline" 
-                      className="w-full h-[48px] md:h-[56px] rounded-xl md:rounded-2xl bg-card border-2 border-primary text-primary font-bold text-xs shadow-sm transition-all duration-300 active:scale-95 hover:bg-primary/5 group flex items-center justify-between px-5"
+                      className="w-full h-[48px] md:h-[56px] rounded-xl md:rounded-2xl bg-[#0F172A] hover:bg-black text-white font-bold text-xs shadow-xl transition-all duration-300 active:scale-95 group flex items-center justify-between px-5 border-none"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center shrink-0 border border-white/5">
                            {isInstalling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
                         </div>
-                        <span className="tracking-tight">Install app</span>
+                        <span className="tracking-tight text-white">Install official app</span>
                       </div>
                       <ChevronRight className="h-3.5 w-3.5 opacity-30 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -126,17 +125,16 @@ export default function Hero() {
                  >
                    <Button 
                       asChild 
-                      variant="outline" 
-                      className="w-full h-[48px] md:h-[56px] rounded-xl md:rounded-2xl bg-card border-2 border-border hover:border-primary text-foreground hover:text-primary font-bold text-xs shadow-sm transition-all duration-300 active:scale-[0.98] flex items-center justify-between px-5"
+                      className="w-full h-[48px] md:h-[56px] rounded-xl md:rounded-2xl bg-[#0F172A] hover:bg-black text-white font-bold text-xs shadow-xl transition-all duration-300 active:scale-[0.98] flex items-center justify-between px-5 border-none"
                     >
                       <Link href="/exams">
                         <div className="flex items-center gap-3">
-                           <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center shrink-0 border border-border group-hover:bg-primary/10 transition-colors">
-                              <Landmark className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                           <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center shrink-0 border border-white/5">
+                              <Landmark className="h-3.5 w-3.5 text-primary" />
                            </div>
-                           <span className="tracking-tight">Browse selection</span>
+                           <span className="tracking-tight text-white">Browse selection</span>
                         </div>
-                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-all group-hover:translate-x-1" />
+                        <ChevronRight className="h-3.5 w-3.5 opacity-30 group-hover:translate-x-1 transition-transform" />
                       </Link>
                     </Button>
                  </motion.div>
