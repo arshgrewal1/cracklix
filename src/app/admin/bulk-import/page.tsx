@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -33,7 +32,9 @@ import {
   RefreshCw,
   X,
   Edit,
-  Save
+  Save,
+  Clock,
+  Landmark
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { 
