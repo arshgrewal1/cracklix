@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -48,8 +49,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v10.0.
- * UPDATED: Standardized grid for new horizontal ExamCard nodes.
+ * @fileOverview Premium Exam Detail Hub v10.1.
+ * FIXED: Resolved pyqQuery ReferenceError and hardened Stats Engine for accurate counts.
  */
 
 export default function ExamHubClient() {
@@ -126,10 +127,16 @@ export default function ExamHubClient() {
   }, [rawMocks, rawQuizzes, rawPyqs, rawNotes, examId, exam, subjects]);
 
   const stats = useMemo(() => {
-     const currentMocks = [...groupedContent.FULL, ...groupedContent.SUBJECT, ...groupedContent.SECTIONAL];
-     const mockIdsSet = new Set(currentMocks.map(m => m.id));
+     // REAL STATUS: Include all practice formats in the count
+     const allPractice = [
+        ...groupedContent.FULL, 
+        ...groupedContent.SUBJECT, 
+        ...groupedContent.SECTIONAL,
+        ...groupedContent.CA
+     ];
+     const mockIdsSet = new Set(allPractice.map(m => m.id));
      
-     const totalTests = currentMocks.length;
+     const totalTests = allPractice.length;
      const attempted = results?.filter(r => mockIdsSet.has(r.mockId)).length || 0;
      
      return { totalTests, attempted };
@@ -189,7 +196,7 @@ export default function ExamHubClient() {
          </div>
          <div className="text-center md:text-left space-y-0.5">
             <p className="text-lg md:text-2xl font-black tabular-nums text-[#0F172A]">{val}</p>
-            <p className="text-[9px] font-bold text-slate-400 tracking-tight">{label}</p>
+            <p className="text-[9px] font-bold text-slate-400 tracking-tight uppercase">{label}</p>
          </div>
       </div>
     )
@@ -264,7 +271,7 @@ export default function ExamHubClient() {
             <div className="flex flex-col lg:flex-row items-center justify-between gap-10 md:gap-14">
                <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 flex-1 min-w-0">
                   {!isStandalone && (
-                     <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary transition-all shadow-sm active:scale-90 shrink-0 cursor-pointer">
+                     <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl border border-slate-100 bg-white flex items-center justify-center text-slate-400 hover:text-primary shadow-sm active:scale-90 shrink-0 cursor-pointer">
                         <ChevronLeft className="h-5 w-5" />
                      </button>
                   )}
