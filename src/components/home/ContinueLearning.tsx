@@ -25,8 +25,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview High-Fidelity Real-Time Progress Hub v11.2.
- * REDESIGNED: Switched to Premium White UI with Cracklix Blue accents.
+ * @fileOverview High-Fidelity Real-Time Progress Hub v11.3.
+ * FIXED: Removed line-clamping from title to ensure full visibility in PWA mode.
  */
 export default function ContinueLearning() {
   const { user } = useUser();
@@ -125,7 +125,7 @@ export default function ContinueLearning() {
                  className="w-full"
                >
                  <Card className="border border-[#E5EAF2] p-6 md:p-8 rounded-[24px] shadow-sm transition-all duration-300 group relative overflow-hidden flex flex-col md:flex-row items-center gap-8 bg-white">
-                   <div className="flex items-center gap-6 flex-1 min-w-0 w-full">
+                   <div className="flex items-start gap-6 flex-1 min-w-0 w-full">
                       <div className="relative shrink-0">
                         <AuthorityLogo boardId={mockMeta?.boardId || "GENERAL"} size="md" className="h-14 w-14 md:h-18 md:w-18 shadow-lg border border-[#E5EAF2] bg-[#F8FAFC]" />
                         {!isCompleted && (
@@ -147,7 +147,7 @@ export default function ContinueLearning() {
                                Updated: {new Date(activeAttempt.updatedAt?.seconds * 1000 || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                          </div>
-                         <h3 className="text-base md:text-2xl font-[800] tracking-tight leading-tight text-[#071B4D] line-clamp-2">
+                         <h3 className="text-base md:text-2xl font-[800] tracking-tight leading-tight text-[#071B4D]">
                             {mockMeta.title}
                          </h3>
                          <div className="flex flex-wrap items-center gap-4 pt-1">

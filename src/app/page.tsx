@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 
 /**
  * @fileOverview Premium Institutional Hub v532.0.
- * FIXED: Resolved syntax error by correctly closing motion.div and balancing tags.
+ * FIXED: Resolved text visibility issues in PWA mode by removing restrictive line-clamping.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -57,16 +57,16 @@ export default function HomePage() {
                initial={{ opacity: 0, y: 20 }}
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
-               className="relative bg-white rounded-[24px] p-6 md:p-10 border border-[#E5EAF2] shadow-sm overflow-hidden group text-left"
+               className="relative bg-white rounded-[24px] p-5 md:p-10 border border-[#E5EAF2] shadow-sm overflow-hidden group text-left"
             >
                <div className="relative z-10 space-y-6 md:space-y-8">
                   {/* Top Row: Brand & Title */}
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
                      <div className="flex items-center gap-3 min-w-0">
                         <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#1677FF]/5 flex items-center justify-center shadow-inner shrink-0 border border-[#1677FF]/10">
                            <Flame className="h-5 w-5 md:h-6 md:w-6 text-[#1677FF] fill-current animate-pulse" />
                         </div>
-                        <h2 className="text-lg md:text-3xl font-[800] text-[#071B4D] tracking-tight antialiased truncate">
+                        <h2 className="text-lg md:text-3xl font-[800] text-[#071B4D] tracking-tight antialiased">
                            Today's Challenge
                         </h2>
                      </div>
@@ -77,7 +77,7 @@ export default function HomePage() {
 
                   {/* Challenge Info Block */}
                   <div className="space-y-2">
-                     <h3 className="text-base md:text-2xl font-black text-[#071B4D] tracking-tight leading-tight line-clamp-1">
+                     <h3 className="text-base md:text-2xl font-black text-[#071B4D] tracking-tight leading-tight">
                         {activeQuiz?.title || "GK Master Challenge"}
                      </h3>
                      <p className="text-[12px] md:text-base text-slate-500 font-medium tracking-tight">
