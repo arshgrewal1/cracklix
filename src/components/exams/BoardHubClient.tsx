@@ -58,8 +58,15 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
 
   const exams = useMemo(() => {
     if (!rawExams) return [];
-    return [...rawExams].sort((a: any, b: any) => (a.displayOrder || 0) - (b.displayOrder || 0));
-  }, [rawExams]);
+    const pinnedExams = profile?.pinnedExams || [];
+    return [...rawExams].sort((a, b) => {
+      const isAPinned = pinnedExams.includes(a.id);
+      const isBPinned = pinnedExams.includes(b.id);
+      if (isAPinned && !isBPinned) return -1;
+      if (!isAPinned && isBPinned) return 1;
+      return (a.displayOrder || 0) - (b.displayOrder || 0);
+    });
+  }, [rawExams, profile]);
 
   if (!mounted || authLoading) return <div className="h-screen w-full flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
