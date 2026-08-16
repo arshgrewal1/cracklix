@@ -13,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Density Current Affairs Preview v28.1.
- * FIXED: Title truncation resolved - allows 2 lines.
+ * @fileOverview High-Density Current Affairs Preview v28.2.
+ * FIXED: Standardized button to Cracklix Blue.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -41,7 +41,7 @@ export default function CurrentAffairsPreview() {
              </div>
              <div className="text-left min-w-0">
                 <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight truncate">Current Affairs</h2>
-                <p className="text-[10px] md:text-xs font-medium text-muted-foreground truncate">Daily verified news</p>
+                <p className="text-[8px] md:text-[10px] font-medium text-muted-foreground truncate">Daily verified news</p>
              </div>
           </div>
           <Link href="/current-affairs" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group shrink-0">
@@ -80,7 +80,7 @@ export default function CurrentAffairsPreview() {
                        </div>
 
                        <div className="mt-6 pt-2">
-                          <Button className="w-full h-10 md:h-11 bg-[#0F172A] hover:bg-primary text-white font-bold text-[10px] rounded-xl transition-all active:scale-95 border-none shadow-md">
+                          <Button className="w-full h-10 md:h-11 bg-primary hover:bg-blue-700 text-white font-bold text-[10px] rounded-xl transition-all active:scale-95 border-none shadow-md">
                              Open Portal <ArrowRight className="h-3.5 w-3.5 ml-2" />
                           </Button>
                        </div>
