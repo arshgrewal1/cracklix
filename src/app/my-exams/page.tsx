@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -26,7 +25,8 @@ import {
   Search,
   X,
   Layers,
-  Bookmark
+  Bookmark,
+  ShieldCheck
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -49,8 +49,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import Link from "next/link"
 
 /**
- * @fileOverview Premium Minimalist My Exams Hub v7.0.
- * UPDATED: Integrated Pinned Series support and optimized list layout.
+ * @fileOverview Premium Minimalist My Exams Hub v7.1.
+ * FIXED: Added missing ShieldCheck import to resolve runtime ReferenceError.
  */
 
 const MODAL_CATEGORIES = [
@@ -182,6 +182,11 @@ export default function MyExamsPage() {
     } catch (e) {
       toast({ variant: "destructive", title: "Sync failed" });
     }
+  };
+
+  const findExamsByBoard = (boardId: string) => {
+    if (!allExams) return [];
+    return allExams.filter((e: any) => e.boardId === boardId);
   };
 
   const filteredModalExams = useMemo(() => {
