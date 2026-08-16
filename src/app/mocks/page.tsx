@@ -52,8 +52,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview Institutional Practice Hub v6.0 [Adda247/Testbook Style].
- * REDESIGNED: Converted from bulky cards to a high-density professional list UI.
+ * @fileOverview Institutional Practice Hub v7.0 [Classic List Refined].
+ * FIXED: Logo moved to left and text aligned alongside for a clean, high-density UI.
  */
 
 const FILTER_CHIPS = [
@@ -235,7 +235,7 @@ export default function PracticeHub() {
            {serLoading || mocksLoading ? (
               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-xl bg-white border border-[#E5EAF2]" />)
            ) : filteredSeries.length > 0 ? (
-              <div className="grid grid-cols-1 gap-1">
+              <div className="grid grid-cols-1 gap-3">
                  {filteredSeries.map((ser, i) => {
                     const isPremium = ser.accessLevel === 'PREMIUM' || ser.counts.premium > 0;
                     return (
@@ -246,77 +246,74 @@ export default function PracticeHub() {
                          transition={{ delay: i * 0.03 }}
                        >
                           <Link href={`/subjects/${ser.subjectId}/series/${ser.id}`}>
-                             <div className="bg-white border border-[#E5EAF2] hover:border-[#1677FF]/30 hover:shadow-lg transition-all duration-300 rounded-[18px] md:rounded-[22px] p-4 md:p-8 group flex flex-col md:flex-row items-center gap-6 md:gap-10 text-left relative overflow-hidden">
+                             <div className="bg-white border border-[#E5EAF2] hover:border-[#1677FF]/30 hover:shadow-lg transition-all duration-300 rounded-[20px] p-4 md:p-6 group flex flex-row items-start gap-4 md:gap-8 text-left relative overflow-hidden">
                                 
-                                {/* LOGO NODE */}
-                                <div className="shrink-0">
-                                   <AuthorityLogo boardId={ser.boardId} size="md" className="h-12 w-12 md:h-16 md:w-16 shadow-md border border-[#E5EAF2] bg-[#F8FAFC] rounded-xl group-hover:scale-105 transition-transform" />
+                                {/* LEFT: LOGO HUB */}
+                                <div className="shrink-0 mt-1">
+                                   <AuthorityLogo 
+                                      boardId={ser.boardId} 
+                                      size="sm" 
+                                      className="h-12 w-12 md:h-16 md:w-16 shadow-sm border border-[#E5EAF2] bg-[#F8FAFC] rounded-xl group-hover:scale-105 transition-transform" 
+                                   />
                                 </div>
 
-                                {/* CONTENT HUB */}
-                                <div className="flex-1 min-w-0 w-full space-y-3">
+                                {/* CENTER: CONTENT HUB */}
+                                <div className="flex-1 min-w-0 space-y-2">
                                    <div className="space-y-1">
                                       <div className="flex flex-wrap items-center gap-2">
-                                         <span className="text-[9px] font-black text-[#1677FF] uppercase tracking-widest">{ser.difficulty || 'Expert'}</span>
+                                         <span className="text-[9px] font-black text-[#1677FF] uppercase tracking-widest leading-none">{ser.difficulty || 'Expert'}</span>
                                          {isPremium ? (
-                                            <Badge className="bg-amber-50 text-amber-600 border-none px-2 py-0.5 rounded-md font-black text-[7px] uppercase tracking-widest">Premium</Badge>
+                                            <Badge className="bg-amber-50 text-amber-600 border-none px-2 py-0.5 rounded-md font-black text-[7px] uppercase tracking-widest h-5 flex items-center">Premium</Badge>
                                          ) : (
-                                            <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 py-0.5 rounded-md font-black text-[7px] uppercase tracking-widest">Free</Badge>
+                                            <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 py-0.5 rounded-md font-black text-[7px] uppercase tracking-widest h-5 flex items-center">Free</Badge>
                                          )}
                                       </div>
-                                      <h3 className="text-[17px] md:text-[20px] font-bold text-[#071B4D] group-hover:text-[#1677FF] transition-colors leading-tight truncate">
+                                      <h3 className="text-base md:text-xl font-[800] text-[#071B4D] group-hover:text-[#1677FF] transition-colors leading-tight tracking-tight">
                                          {ser.title}
                                       </h3>
                                    </div>
                                    
-                                   <p className="text-[#64748B] font-medium text-[13px] md:text-[14px] line-clamp-1 opacity-80">
+                                   <p className="text-[#64748B] font-medium text-[12px] md:text-[14px] line-clamp-2 leading-snug antialiased">
                                       {ser.description || "Official pattern test series verified by institutional mentors."}
                                    </p>
 
-                                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] md:text-[13px] font-bold text-[#64748B] pt-1">
-                                      <div className="flex items-center gap-2">
-                                         <span className="text-[#071B4D]">{ser.counts.totalTests}</span> 
-                                         <span className="opacity-60 uppercase text-[9px]">Tests</span>
+                                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] md:text-[13px] font-bold text-[#64748B] pt-2">
+                                      <div className="flex items-center gap-1.5">
+                                         <span className="text-[#071B4D] tabular-nums">{ser.counts.totalTests}</span> 
+                                         <span className="opacity-50 uppercase text-[9px] tracking-tight">Tests</span>
                                       </div>
-                                      <div className="flex items-center gap-2">
-                                         <span className="text-[#071B4D]">{ser.counts.questions}</span> 
-                                         <span className="opacity-60 uppercase text-[9px]">Questions</span>
+                                      <div className="flex items-center gap-1.5">
+                                         <span className="text-[#071B4D] tabular-nums">{ser.counts.questions}</span> 
+                                         <span className="opacity-50 uppercase text-[9px] tracking-tight">Questions</span>
                                       </div>
                                       {ser.attemptedCount > 0 && (
-                                         <div className="flex items-center gap-2 text-[#10B981]">
+                                         <div className="flex items-center gap-1.5 text-[#10B981]">
                                             <span>{ser.attemptedCount}</span> 
-                                            <span className="opacity-60 uppercase text-[9px]">Solved</span>
+                                            <span className="opacity-50 uppercase text-[9px] tracking-tight">Solved</span>
                                          </div>
                                       )}
                                       {ser.avgAccuracy > 0 && (
-                                         <div className="flex items-center gap-2 text-[#F59E0B]">
+                                         <div className="flex items-center gap-1.5 text-[#F59E0B]">
                                             <span>{ser.avgAccuracy}%</span> 
-                                            <span className="opacity-60 uppercase text-[9px]">Mastery</span>
+                                            <span className="opacity-50 uppercase text-[9px] tracking-tight">Mastery</span>
                                          </div>
                                       )}
                                    </div>
                                 </div>
 
-                                {/* ACTION NODE */}
-                                <div className="shrink-0 w-full md:w-auto flex flex-col md:items-end gap-3 border-t md:border-t-0 border-[#E5EAF2] pt-4 md:pt-0">
-                                   <div className="hidden md:flex flex-col items-end gap-1.5 mb-1">
-                                      <div className="flex justify-between items-center gap-3 w-32">
-                                         <span className="text-[8px] font-black uppercase text-slate-300">My Progress</span>
-                                         <span className="text-[10px] font-black text-[#1677FF]">{ser.progress}%</span>
-                                      </div>
-                                      <div className="h-1 w-32 bg-[#F8FAFC] rounded-full overflow-hidden border border-[#E5EAF2]">
-                                         <motion.div 
-                                           initial={{ width: 0 }}
-                                           animate={{ width: `${ser.progress}%` }}
-                                           transition={{ duration: 1 }}
-                                           className="h-full bg-[#1677FF]" 
-                                         />
-                                      </div>
-                                   </div>
-                                   <Button className="h-10 md:h-11 px-8 bg-[#1677FF] hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-xl border-none shadow-md transition-all active:scale-95 flex items-center justify-center gap-2">
-                                      {ser.progress === 0 ? "Start" : ser.progress === 100 ? "Analysis" : "Continue"}
-                                      <ArrowRight className="h-3.5 w-3.5" />
+                                {/* RIGHT: ACTION HUB */}
+                                <div className="shrink-0 self-center hidden sm:flex flex-col items-end gap-2">
+                                   <Button className="h-10 px-6 bg-[#1677FF] hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-xl border-none shadow-md active:scale-95 transition-all">
+                                      {ser.progress > 0 ? "Continue" : "Start"} →
                                    </Button>
+                                   {ser.progress > 0 && (
+                                      <div className="flex items-center gap-2">
+                                         <div className="w-16 h-1 bg-[#F8FAFC] rounded-full overflow-hidden border border-[#E5EAF2]">
+                                            <div className="h-full bg-[#1677FF]" style={{ width: `${ser.progress}%` }} />
+                                         </div>
+                                         <span className="text-[9px] font-black text-[#1677FF] tabular-nums">{ser.progress}%</span>
+                                      </div>
+                                   )}
                                 </div>
                              </div>
                           </Link>
