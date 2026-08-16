@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Trash2, Edit, Save, FileText, Search, Loader2, X } from "lucide-react"
+import { Plus, Trash2, Edit, Save, FileText, Search, Loader2, X, ShieldCheck, Zap } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, doc, setDoc, deleteDoc, orderBy, serverTimestamp, addDoc } from "firebase/firestore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils"
 import FileUpload from "@/components/admin/FileUpload"
 
 /**
- * @fileOverview Institutional Content Hub CMS v9.0.
- * UPDATED: Integrated Enterprise File Upload Manager with optimized metadata storage.
+ * @fileOverview Institutional Content Hub CMS v10.0 [Upload Fixed].
+ * FIXED: Comprehensive PDF upload state management and Firestore registry sync.
  */
 
 export default function AdminNotesManagement() {
@@ -39,9 +39,19 @@ export default function AdminNotesManagement() {
 
   const handleSave = async () => {
     if (!db || !editingNote || isSaving) return
-    if (!editingNote.title || !editingNote.examId || !editingNote.pdfUrl) {
-       toast({ variant: "destructive", title: "Audit Blocked", description: "Title, Exam Vertical, and PDF node are mandatory." })
-       return
+    
+    // STRICT VALIDATION
+    if (!editingNote.title?.trim()) {
+       toast({ variant: "destructive", title: "Validation Error", description: "Asset title is required." });
+       return;
+    }
+    if (!editingNote.examId) {
+       toast({ variant: "destructive", title: "Validation Error", description: "Select an exam vertical." });
+       return;
+    }
+    if (!editingNote.pdfUrl) {
+       toast({ variant: "destructive", title: "Validation Error", description: "Please upload a verified PDF node." });
+       return;
     }
 
     setIsSaving(true)
@@ -53,7 +63,9 @@ export default function AdminNotesManagement() {
       id: noteId,
       updatedAt: serverTimestamp(),
       createdAt: editingNote.createdAt || serverTimestamp(),
-      status: 'PUBLISHED'
+      status: 'PUBLISHED',
+      author: profile?.name || "Administrator",
+      fileMeta: editingNote.fileMeta || null
     }
 
     try {
@@ -66,10 +78,10 @@ export default function AdminNotesManagement() {
         timestamp: serverTimestamp()
       });
 
-      toast({ title: "Asset Deployed" })
+      toast({ title: "Hub Synchronized", description: "Content is now live in the library." })
       setEditingNote(null)
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed" })
+      toast({ variant: "destructive", title: "Sync Failed", description: "Cloud registry rejection." })
     } finally {
       setIsSaving(false)
     }
@@ -137,13 +149,13 @@ export default function AdminNotesManagement() {
                   <TableCell className="px-8 md:px-12 py-6 md:py-10">
                     <div className="flex items-center gap-5 md:gap-8">
                        <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner group-hover:scale-105 transition-transform shrink-0"><FileText className="h-5 w-5 md:h-7 md:w-7" /></div>
-                       <div className="min-w-0">
+                       <div className="min-w-0 text-left">
                           <p className="font-black text-[#0F172A] text-sm md:text-xl uppercase tracking-tight leading-none truncate max-w-[200px] md:max-w-md">{note.title}</p>
                           <p className="text-[9px] md:text-[11px] font-bold text-slate-400 mt-2 uppercase tracking-widest">{note.category}</p>
                        </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-left">
                      <div className="space-y-1.5">
                         <Badge variant="outline" className="border-slate-200 text-slate-500 text-[8px] md:text-[9px] font-black uppercase px-2 w-fit tracking-widest">{note.boardId || 'PSSSB'} HUB</Badge>
                         <p className="text-[10px] md:text-[13px] font-bold text-slate-400 uppercase truncate max-w-[180px]">{exams?.find((e:any) => e.id === note.examId)?.name || note.examId}</p>
@@ -179,20 +191,20 @@ export default function AdminNotesManagement() {
           </DialogHeader>
           
           <div className="px-6 md:px-14 pb-8 space-y-6 md:space-y-10 overflow-y-auto custom-scrollbar flex-1">
-             <div className="space-y-1.5">
+             <div className="space-y-1.5 text-left">
                 <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Asset Title</Label>
                 <Input value={editingNote?.title || ""} onChange={e => setEditingNote({...editingNote, title: e.target.value})} className="h-12 md:h-16 rounded-2xl border-none bg-slate-50 font-black text-sm md:text-lg px-6 shadow-inner" placeholder="e.g. Punjab History Master Notes" />
              </div>
 
              <div className="grid grid-cols-2 gap-4 md:gap-8">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 text-left">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Board Hub</Label>
                    <select value={editingNote?.boardId || ""} onChange={e => setEditingNote({...editingNote, boardId: e.target.value})} className="w-full h-12 md:h-16 bg-slate-50 border-none rounded-2xl px-6 outline-none font-bold text-sm shadow-inner appearance-none cursor-pointer">
                       <option value="">Select Board</option>
                       {boards?.map((b: any) => <option key={b.id} value={b.id}>{b.abbreviation} Hub</option>)}
                    </select>
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 text-left">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Assigned Exam</Label>
                    <select value={editingNote?.examId || ""} onChange={e => setEditingNote({...editingNote, examId: e.target.value})} className="w-full h-12 md:h-16 bg-slate-50 border-none rounded-2xl px-6 outline-none font-bold text-sm shadow-inner appearance-none cursor-pointer">
                       <option value="">Select Vertical</option>
@@ -202,14 +214,14 @@ export default function AdminNotesManagement() {
              </div>
 
              <div className="grid grid-cols-2 gap-4 md:gap-8">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 text-left">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Subject Hub</Label>
                    <select value={editingNote?.subjectId || ""} onChange={e => setEditingNote({...editingNote, subjectId: e.target.value})} className="w-full h-12 md:h-16 bg-slate-50 border-none rounded-2xl px-6 outline-none font-bold text-sm shadow-inner appearance-none cursor-pointer">
                       <option value="">Select Subject</option>
                       {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                    </select>
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 text-left">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Category</Label>
                    <select value={editingNote?.category || "NOTES"} onChange={e => setEditingNote({...editingNote, category: e.target.value})} className="w-full h-12 md:h-16 bg-slate-50 border-none rounded-2xl px-6 outline-none font-bold text-sm shadow-inner appearance-none cursor-pointer">
                       <option value="NOTES">Study Notes</option>
@@ -224,13 +236,14 @@ export default function AdminNotesManagement() {
                    label="Upload Preparation PDF" 
                    folder="notes" 
                    accept="application/pdf"
+                   maxSizeMB={50}
                    value={editingNote?.pdfUrl} 
                    onChange={(meta) => setEditingNote({...editingNote, pdfUrl: meta?.url, fileMeta: meta})} 
                 />
              </div>
 
              <div className="flex items-center justify-between p-5 md:p-8 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
-                <div className="space-y-1">
+                <div className="space-y-1 text-left">
                    <p className="font-black text-[11px] uppercase text-[#0F172A]">Public node (Free)</p>
                    <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Disable to require a Premium Pass</p>
                 </div>
@@ -238,10 +251,15 @@ export default function AdminNotesManagement() {
              </div>
           </div>
 
-          <DialogFooter className="p-6 md:p-14 pt-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-4">
+          <DialogFooter className="p-6 md:p-14 pt-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-4 shrink-0">
              <Button variant="ghost" onClick={() => setEditingNote(null)} className="w-full sm:w-auto h-12 md:h-14 px-8 font-black uppercase text-[10px] md:text-[11px] text-slate-400 tracking-widest">Discard</Button>
-             <Button onClick={handleSave} disabled={isSaving} className="flex-1 h-12 md:h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-full shadow-2xl gap-3 active:scale-95 border-none">
-                {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />} Commit to Hub
+             <Button 
+                onClick={handleSave} 
+                disabled={isSaving || !editingNote?.pdfUrl} 
+                className="flex-1 h-12 md:h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-full shadow-2xl gap-3 active:scale-95 border-none"
+             >
+                {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />} 
+                Commit to Hub
              </Button>
           </DialogFooter>
         </DialogContent>

@@ -3,7 +3,7 @@ export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_PARTNER' | 'EDITOR' | 'REVIEWER' | 'MODERATOR' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET' | 'DAILY_CHALLENGE' | 'MINI_TEST' | 'REVISION_TEST';
 export type QuestionType = 'MCQ' | 'MULTIPLE_CORRECT' | 'TRUE_FALSE' | 'FILL_BLANK' | 'ASSERTION_REASON' | 'STATEMENT_BASED' | 'PARAGRAPH_BASED' | 'MATCH_FOLLOWING' | 'SEQUENCE' | 'IMAGE_BASED' | 'TABLE_BASED' | 'CASE_STUDY' | 'AUDIO_BASED' | 'VIDEO_BASED';
-export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED' | 'SCHEDULED' | 'EXPIRED' | 'UNUSED' | 'USED' | 'VERIFIED';
+export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED' | 'SCHEDULED' | 'EXPIRED' | 'UNUSED' | 'USED' | 'VERIFIED' | 'UPLOADING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 export type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED' | 'PENDING';
 export type Gender = 'Male' | 'Female' | 'Other';
 
@@ -353,6 +353,27 @@ export interface Question {
   englishReason?: string;
   punjabiReason?: string;
   displayId?: string;
+}
+
+export interface StudyNote {
+  id: string;
+  title: string;
+  boardId: string;
+  examId: string;
+  subjectId: string;
+  category: string;
+  pdfUrl: string;
+  storagePath: string;
+  isFree: boolean;
+  status: ContentStatus;
+  author: string;
+  createdAt: any;
+  updatedAt: any;
+  fileMeta?: {
+    name: string;
+    size: number;
+    type: string;
+  };
 }
 
 export interface AuditLog {

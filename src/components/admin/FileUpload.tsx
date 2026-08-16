@@ -11,7 +11,8 @@ import {
   Image as ImageIcon,
   FileArchive,
   RefreshCw,
-  Eye
+  Eye,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -31,23 +32,23 @@ interface FileUploadProps {
 }
 
 /**
- * @fileOverview Institutional File Ingestion Node v2.0.
- * Supports Drag & Drop, Multi-Type Validation, and Real-Time Registry Sync.
+ * @fileOverview Institutional File Ingestion Hub v3.0 [PDF Fixed].
+ * FIXED: Implemented precise state tracking to prevent "0% Sync" stalls.
  */
 export default function FileUpload({
   label,
   folder,
   accept = "image/*,application/pdf",
-  maxSizeMB = 10,
+  maxSizeMB = 20,
   value,
   onChange,
   className,
   variant = 'full'
 }: FileUploadProps) {
   const { toast } = useToast();
-  const [isUploading, setIsUploading] = useState(false);
+  const [status, setStatus] = useState<'IDLE' | 'UPLOADING' | 'PROCESSING' | 'ERROR'>('IDLE');
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fileUrl = typeof value === 'string' ? value : value?.url;
@@ -56,40 +57,43 @@ export default function FileUpload({
 
   const validateFile = (file: File) => {
     if (file.size > maxSizeMB * 1024 * 1024) {
-      return `File too large. Max allowed is ${maxSizeMB}MB.`;
+      return `File too large. Maximum allowed size is ${maxSizeMB}MB.`;
     }
     const types = accept.split(',').map(t => t.trim());
     const isAccepted = types.some(type => {
-      if (type.includes('*')) {
-        return file.type.startsWith(type.replace('*', ''));
-      }
+      if (type.includes('*')) return file.type.startsWith(type.replace('*', ''));
       return file.type === type;
     });
-    if (!isAccepted) return `File type ${file.type} is not authorized for this node.`;
+    if (!isAccepted) return `File type ${file.type} is not authorized for this hub.`;
     return null;
   };
 
   const handleUpload = async (file: File) => {
-    const validationError = validateFile(file);
-    if (validationError) {
-      setError(validationError);
-      toast({ variant: "destructive", title: "Audit Blocked", description: validationError });
+    const error = validateFile(file);
+    if (error) {
+      setErrorMessage(error);
+      setStatus('ERROR');
+      toast({ variant: "destructive", title: "Validation Blocked", description: error });
       return;
     }
 
-    setError(null);
-    setIsUploading(true);
+    setErrorMessage(null);
+    setStatus('UPLOADING');
     setProgress(0);
 
     try {
-      const metadata = await storageService.uploadFile(file, folder, (p) => setProgress(p));
+      const metadata = await storageService.uploadFile(file, folder, (p) => {
+        setProgress(p);
+        if (p >= 100) setStatus('PROCESSING');
+      });
+      
       onChange(metadata);
-      toast({ title: "Asset Synchronized", description: "Node committed to master storage." });
+      setStatus('IDLE');
+      toast({ title: "Asset Verified", description: "Document successfully synced to Storage." });
     } catch (err: any) {
-      setError("Sync failed. Check connection.");
-      toast({ variant: "destructive", title: "Sync Failure", description: err.message });
-    } finally {
-      setIsUploading(false);
+      setErrorMessage(err.message || "Upload sequence failed.");
+      setStatus('ERROR');
+      toast({ variant: "destructive", title: "Sync Failure", description: "Check network connectivity and try again." });
     }
   };
 
@@ -104,23 +108,24 @@ export default function FileUpload({
       await storageService.deleteFile(value.path);
     }
     onChange(null);
+    setStatus('IDLE');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
     <div className={cn("space-y-3 w-full text-left", className)}>
-      <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">
+      <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">
         {label}
       </label>
 
       <div 
-        onClick={() => !isUploading && fileInputRef.current?.click()}
+        onClick={() => status === 'IDLE' && fileInputRef.current?.click()}
         className={cn(
-          "relative border-2 border-dashed rounded-[2rem] transition-all duration-500 overflow-hidden cursor-pointer",
-          isUploading ? "bg-slate-50 border-primary/20" : "bg-white hover:bg-slate-50 border-slate-100 hover:border-primary/30",
-          fileUrl ? "border-emerald-200 bg-emerald-50/20" : "",
-          error ? "border-rose-200 bg-rose-50/20" : "",
-          variant === 'compact' ? "h-32" : "h-48"
+          "relative border-2 border-dashed rounded-[2rem] transition-all duration-500 overflow-hidden",
+          status === 'UPLOADING' || status === 'PROCESSING' ? "bg-slate-50 border-primary/20 cursor-wait" : "bg-white hover:bg-slate-50 border-slate-100 hover:border-primary/30 cursor-pointer",
+          fileUrl ? "border-emerald-200 bg-emerald-50/10" : "",
+          status === 'ERROR' ? "border-rose-200 bg-rose-50/10" : "",
+          variant === 'compact' ? "h-32" : "h-52"
         )}
       >
         <input 
@@ -129,66 +134,76 @@ export default function FileUpload({
           className="hidden" 
           accept={accept} 
           onChange={onFileChange} 
+          disabled={status !== 'IDLE' && status !== 'ERROR'}
         />
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-3">
-          {isUploading ? (
-            <div className="w-full max-w-[200px] space-y-4">
-              <div className="relative h-12 w-12 mx-auto">
-                 <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                 <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-primary">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-4">
+          {status === 'UPLOADING' ? (
+            <div className="w-full max-w-[240px] space-y-5 animate-in fade-in zoom-in-95">
+              <div className="relative h-14 w-14 mx-auto">
+                 <Loader2 className="h-14 w-14 text-primary animate-spin" />
+                 <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-primary tabular-nums">
                    {Math.round(progress)}%
                  </span>
               </div>
-              <div className="space-y-1">
-                 <p className="text-[10px] font-black uppercase text-primary animate-pulse">Syncing Registry...</p>
-                 <Progress value={progress} className="h-1 bg-primary/10" />
+              <div className="space-y-2">
+                 <p className="text-[10px] font-black uppercase text-primary tracking-widest animate-pulse">Uploading PDF Hub</p>
+                 <Progress value={progress} className="h-1.5 bg-primary/10" />
               </div>
             </div>
+          ) : status === 'PROCESSING' ? (
+            <div className="flex flex-col items-center gap-4 animate-in fade-in">
+               <div className="h-14 w-14 bg-blue-50 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+                  <Zap className="h-7 w-7 animate-pulse fill-current" />
+               </div>
+               <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase text-[#0F172A] tracking-widest">Finalizing Registry</p>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase">Synchronizing cloud nodes...</p>
+               </div>
+            </div>
           ) : fileUrl ? (
-            <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center">
+            <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center space-y-4">
               {isImage ? (
-                <div className="relative h-20 w-20 md:h-24 md:w-24 rounded-2xl overflow-hidden shadow-xl border-4 border-white mb-2">
+                <div className="relative h-24 w-24 rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white mb-2 group/prev">
                   <img src={fileUrl} alt="Preview" className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                     <RefreshCw className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              ) : isPdf ? (
-                <div className="h-16 w-16 md:h-20 md:w-20 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-inner mb-2 border border-rose-100">
-                  <FileText className="h-8 w-8 md:h-10 md:w-10" />
                 </div>
               ) : (
-                <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shadow-inner mb-2">
-                  <FileArchive className="h-8 w-8" />
+                <div className="h-16 w-16 md:h-20 md:w-20 bg-emerald-50 rounded-[1.5rem] flex items-center justify-center text-emerald-600 shadow-inner border border-emerald-100">
+                  <FileText className="h-8 w-8 md:h-10 md:w-10" />
                 </div>
               )}
               
-              <div className="space-y-1">
-                 <p className="text-[10px] font-black text-emerald-600 uppercase flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3 w-3" /> Node Verified
-                 </p>
-                 <div className="flex items-center gap-2">
-                    <button onClick={clearFile} className="text-[9px] font-bold text-rose-400 hover:text-rose-600 uppercase underline">Remove</button>
+              <div className="space-y-2">
+                 <div className="flex items-center justify-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Registry Ready
+                 </div>
+                 <div className="flex items-center justify-center gap-4">
+                    <button onClick={clearFile} className="text-[9px] font-black text-rose-400 hover:text-rose-600 uppercase underline tracking-tighter">Discard node</button>
                     {isPdf && (
-                       <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-[9px] font-bold text-blue-400 hover:text-blue-600 uppercase underline flex items-center gap-1">
-                          <Eye className="h-2 w-2" /> View
+                       <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-blue-600 uppercase underline tracking-tighter flex items-center gap-1">
+                          <Eye className="h-2.5 w-2.5" /> View original
                        </a>
                     )}
                  </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="h-12 w-12 md:h-16 md:w-16 bg-slate-50 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto text-slate-300 shadow-inner group-hover:scale-110 transition-transform">
-                <Upload className="h-6 w-6 md:h-8 md:w-8" />
+            <div className="space-y-6">
+              <div className="h-14 w-14 md:h-20 md:w-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto text-slate-300 shadow-inner group-hover:scale-105 transition-transform border border-slate-100">
+                <Upload className="h-7 w-7 md:h-10 md:w-10" />
               </div>
               <div className="space-y-1">
-                <p className="text-xs md:text-sm font-bold text-[#0F172A]">Drop file here or click</p>
-                <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  {accept.includes('pdf') ? 'PDF, ' : ''}{accept.includes('image') ? 'Images ' : ''} (Max {maxSizeMB}MB)
+                <p className="text-sm font-black text-[#0F172A] uppercase tracking-tight">Select Preparation PDF</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                   Max {maxSizeMB}MB • PDF Only
                 </p>
               </div>
+              {status === 'ERROR' && (
+                 <div className="flex items-center gap-2 text-rose-500 bg-rose-50 px-4 py-2 rounded-xl border border-rose-100 animate-in slide-in-from-bottom-2">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    <span className="text-[10px] font-bold uppercase">{errorMessage}</span>
+                 </div>
+              )}
             </div>
           )}
         </div>
