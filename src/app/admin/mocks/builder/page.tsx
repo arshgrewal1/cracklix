@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -32,7 +33,8 @@ import {
   BookMarked,
   Settings,
   Lock,
-  SquarePen
+  SquarePen,
+  Languages
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -60,8 +62,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Master Mock Builder v61.0 [Fix: State Iteration].
- * TERMINOLOGY: Replaced 'items' with 'questions'.
+ * @fileOverview Master Mock Builder v62.0 [Language Support Added].
  */
 
 export default function MockBuilderPage() {
@@ -170,7 +171,8 @@ function MockBuilderContent() {
       assignmentMode: existingMock.assignmentMode || "MULTIPLE",
       boardIds: existingMock.boardIds || (existingMock.boardId ? [existingMock.boardId] : []),
       examIds: existingMock.examIds || (existingMock.examId ? [existingMock.examId] : []),
-      accessLevel: existingMock.accessLevel || "FREE"
+      accessLevel: existingMock.accessLevel || "FREE",
+      languageMode: existingMock.languageMode || "ENGLISH_PUNJABI"
     });
 
     const hydrateExisting = async () => {
@@ -427,6 +429,19 @@ function MockBuilderContent() {
                        <option value="PREMIUM">Premium Lock</option>
                     </select>
                  </div>
+              </div>
+
+              <div className="space-y-1 text-left pt-2 border-t border-slate-50">
+                 <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase flex items-center gap-2">
+                    <Languages className="h-3 w-3 text-primary" /> Language
+                 </Label>
+                 <select value={mockData.languageMode} onChange={e => setMockData((p: any) => ({...p, languageMode: e.target.value}))} className="w-full h-9 md:h-10 bg-slate-50 border-none rounded-xl px-3 outline-none font-bold text-[10px] shadow-inner text-[#0F172A]">
+                    <option value="ENGLISH">English Only</option>
+                    <option value="PUNJABI">Punjabi Only</option>
+                    <option value="HINDI">Hindi Only</option>
+                    <option value="ENGLISH_PUNJABI">Punjabi & English</option>
+                    <option value="ENGLISH_HINDI">Hindi & English</option>
+                 </select>
               </div>
 
               <AnimatePresence>

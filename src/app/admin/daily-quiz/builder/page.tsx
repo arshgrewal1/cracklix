@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -35,7 +36,8 @@ import {
   Target,
   History,
   Timer,
-  SquarePen
+  SquarePen,
+  Languages
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
 import { 
@@ -62,7 +64,7 @@ import { mcqEngine, DiagnosticReport } from "@/lib/mcq-engine"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Daily Challenge Builder v53.0 [Fix: State Iteration].
+ * @fileOverview Daily Challenge Builder v54.0 [Language Support Added].
  * TERMINOLOGY: Replaced 'items' with 'questions'.
  */
 
@@ -119,7 +121,8 @@ function DailyQuizBuilderContent() {
     rewardXP: 100,
     featured: true,
     reviewModeEnabled: true,
-    explanationModeEnabled: true
+    explanationModeEnabled: true,
+    languageMode: "ENGLISH_PUNJABI"
   })
 
   const [stagedQuestions, setStagedQuestions] = useState<any[]>([])
@@ -156,7 +159,10 @@ function DailyQuizBuilderContent() {
        return;
     }
 
-    setQuizData({ ...existingQuiz });
+    setQuizData({ 
+      ...existingQuiz,
+      languageMode: existingQuiz.languageMode || "ENGLISH_PUNJABI"
+    });
     
     const hydrateExisting = async () => {
       if (existingQuiz.questionIds?.length > 0) {
@@ -310,6 +316,19 @@ function DailyQuizBuilderContent() {
                   <Input value={quizData.title} onChange={e => setQuizData({...quizData, title: e.target.value})} className="h-10 rounded-xl bg-slate-50 border-none font-bold text-sm px-4 shadow-inner text-[#0F172A]" placeholder="Daily Challenge #12" />
                </div>
 
+               <div className="space-y-1 text-left">
+                  <Label className="text-[9px] font-bold text-slate-400 ml-1 uppercase flex items-center gap-2">
+                     <Languages className="h-3 w-3 text-primary" /> Language
+                  </Label>
+                  <select value={quizData.languageMode} onChange={e => setQuizData({...quizData, languageMode: e.target.value})} className="w-full h-9 bg-slate-50 border-none rounded-xl px-3 font-bold text-[10px] outline-none text-[#0F172A]">
+                     <option value="ENGLISH">English Only</option>
+                     <option value="PUNJABI">Punjabi Only</option>
+                     <option value="HINDI">Hindi Only</option>
+                     <option value="ENGLISH_PUNJABI">Punjabi & English</option>
+                     <option value="ENGLISH_HINDI">Hindi & English</option>
+                  </select>
+               </div>
+
                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1 text-left">
                      <Label className="text-[9px] font-bold uppercase text-slate-400 ml-1">Duration (Min)</Label>
@@ -412,7 +431,7 @@ function DailyQuizBuilderContent() {
 
                   <div className="grid grid-cols-1 gap-2 pt-2 px-1">
                      {bankLoading ? (
-                        Array.from({ length: 3 }).map((_, i) => <Skeleton className="h-14 w-full rounded-xl bg-white" />)
+                        Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-xl bg-white" />)
                      ) : displayBank.length > 0 ? displayBank.map((q) => {
                         const isSel = bankSelection.includes(q.id);
                         return (

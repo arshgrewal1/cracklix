@@ -23,6 +23,10 @@ interface QuestionRendererProps {
   className?: string;
 }
 
+/**
+ * @fileOverview Institutional Question Renderer v4.1 [Strict Script Filter].
+ * FIXED: Strictly respects languageMode - hides Punjabi/Hindi if English Only is selected.
+ */
 export default function QuestionRenderer({ 
   question, 
   language = 'ENGLISH_PUNJABI',
@@ -38,16 +42,20 @@ export default function QuestionRenderer({
   const timeLeft = useExamStore(s => s.timeLeft);
   if (!question) return null;
   const q = question as any;
-  const normalizedLang = (language || 'ENGLISH_PUNJABI').toUpperCase();
-  const sectionName = (q.sectionId || "").toUpperCase();
-  const subjectId = (q.subjectId || "").toUpperCase();
-  let renderLang = normalizedLang;
-  if (sectionName.includes("ENGLISH") || subjectId.includes("ENGLISH")) renderLang = "ENGLISH";
-  else if (sectionName.includes("PUNJABI") || sectionName.includes("ਪੰਜਾਬੀ") || subjectId.includes("PUNJABI")) renderLang = "PUNJABI";
-  else if (sectionName.includes("HINDI") || sectionName.includes("हिन्दी") || subjectId.includes("HINDI")) renderLang = "HINDI";
-  const showEn = renderLang.includes('ENGLISH');
-  const showLocal = renderLang.includes('PUNJABI') || renderLang.includes('HINDI');
-  const formatTime = (seconds: number) => { const m = Math.floor((seconds % 3600) / 60); const s = seconds % 60; return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; };
+
+  // Language Filtering Logic
+  const mode = (language || 'ENGLISH_PUNJABI').toUpperCase();
+  
+  const showEn = mode === 'ENGLISH' || mode === 'ENGLISH_PUNJABI' || mode === 'ENGLISH_HINDI';
+  const showPa = mode === 'PUNJABI' || mode === 'ENGLISH_PUNJABI';
+  const showHi = mode === 'HINDI' || mode === 'ENGLISH_HINDI';
+
+  const formatTime = (seconds: number) => { 
+    const m = Math.floor((seconds % 3600) / 60); 
+    const s = seconds % 60; 
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; 
+  };
+  
   const OPT_LABELS = ['A', 'B', 'C', 'D'];
 
   return (
@@ -61,7 +69,7 @@ export default function QuestionRenderer({
               </div>
            </div>
            <div className="flex items-center gap-1 md:gap-2">
-              <button onClick={onBookmark} className={cn("p-1.5 transition-all active:scale-90", isBookmarked ? "text-primary" : "text-slate-300 hover:text-primary")}><Bookmark className={cn("h-5 w-5", isBookmarked && "fill-current")} /></button>
+              <button onClick={onBookmark} className={cn("p-1.5 transition-all active:scale-90", isBookmarked ? "text-primary" : "text-slate-300 hover:text-primary")}><Bookmark className="h-5 w-5" /></button>
               <button onClick={onReport} className="p-1.5 text-slate-300 hover:text-rose-500 transition-all active:scale-90"><AlertTriangle className="h-5 w-5" /></button>
            </div>
         </div>
@@ -96,16 +104,20 @@ export default function QuestionRenderer({
             <div className="space-y-6 w-full p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner relative overflow-hidden">
                <div className="absolute top-2 right-4 opacity-5 pointer-events-none text-[8px] font-black flex items-center gap-2"><Zap className="h-3 w-3" /> Logic hub</div>
                {showEn && (q.englishAssertion || q.englishQuestion) && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed"><MathText text={`Assertion: ${q.englishAssertion || q.englishQuestion}`} /></div>}
-               {showLocal && (q.punjabiAssertion || q.punjabiQuestion) && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed"><MathText text={`ਕਥਨ: ${q.punjabiAssertion || q.punjabiQuestion}`} /></div>}
+               {showPa && (q.punjabiAssertion || q.punjabiQuestion) && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed"><MathText text={`ਕਥਨ: ${q.punjabiAssertion || q.punjabiQuestion}`} /></div>}
+               {showHi && (q.hindiAssertion || q.hindiQuestion) && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed"><MathText text={`कथन: ${q.hindiAssertion || q.hindiQuestion}`} /></div>}
+               
                {showEn && q.englishReason && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed pt-2 border-t border-slate-200/50"><MathText text={`Reason: ${q.englishReason}`} /></div>}
-               {showLocal && q.punjabiReason && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed"><MathText text={`ਕਾਰਨ: ${q.punjabiReason}`} /></div>}
+               {showPa && q.punjabiReason && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed"><MathText text={`ਕਾਰਨ: ${q.punjabiReason}`} /></div>}
+               {showHi && q.hindiReason && <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed"><MathText text={`कारण: ${q.hindiReason}`} /></div>}
             </div>
          )}
 
          {q.questionType !== 'ASSERTION_REASON' && (
             <div className="w-full space-y-4">
                {showEn && q.englishQuestion && <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words w-full", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}><MathText text={q.englishQuestion} /></div>}
-               {showLocal && q.punjabiQuestion && <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4 border-t border-slate-100 pt-4 w-full", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}><MathText text={q.punjabiQuestion} /></div>}
+               {showPa && q.punjabiQuestion && <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4 border-t border-slate-100 pt-4 w-full", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}><MathText text={q.punjabiQuestion} /></div>}
+               {showHi && q.hindiQuestion && <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4 border-t border-slate-100 pt-4 w-full", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}><MathText text={q.hindiQuestion} /></div>}
             </div>
          )}
       </div>
@@ -113,15 +125,21 @@ export default function QuestionRenderer({
       {!hideOptions && (
         <div className={cn("flex flex-col w-full", showSolution ? "space-y-3" : "space-y-3 md:space-y-5")}>
           {OPT_LABELS.map((key, idx) => {
-            const en = q[`option${key}English`]; const pa = q[`option${key}Punjabi`]; const hi = q[`option${key}Hindi`];
-            const localText = pa || hi; const isSelected = selectedAnswer === idx; const hideLocal = localText?.trim() === en?.trim();
-            const isCorrect = q.correctAnswer === key; const isWrongSelected = isSelected && !isCorrect;
+            const en = q[`option${key}English`]; 
+            const pa = q[`option${key}Punjabi`]; 
+            const hi = q[`option${key}Hindi`];
+            
+            const isSelected = selectedAnswer === idx; 
+            const isCorrect = q.correctAnswer === key; 
+            const isWrongSelected = isSelected && !isCorrect;
+            
             return (
               <div key={key} onClick={() => !showSolution && onSelect?.(idx)} className={cn("flex items-center gap-3 md:gap-6 transition-all border w-full box-border", showSolution ? `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2rem] ${isCorrect ? "bg-emerald-50 border-emerald-500 shadow-sm" : isWrongSelected ? "bg-rose-50 border-rose-500" : "bg-white border-slate-100"}` : `p-4 md:p-8 rounded-[1.25rem] md:rounded-[2.5rem] cursor-pointer group/opt active:scale-[0.98] ${isSelected ? "bg-blue-50/50 border-primary ring-2 ring-primary/5 shadow-xl" : "bg-white border-slate-100 hover:border-slate-300 shadow-sm"}`)}>
                 <span className={cn("font-black shrink-0 w-6 md:w-12 text-center transition-colors", showSolution ? "text-base md:text-xl" : "text-sm md:text-3xl", isSelected ? "text-primary" : "text-slate-300 group-hover/opt:text-slate-400")}>{key}</span>
                 <div className="flex flex-col flex-1 min-w-0 space-y-1">
                   {showEn && en && <div className={cn("font-bold leading-tight break-words w-full", showSolution ? "text-sm md:text-base" : "text-[15px] md:text-2xl", isSelected ? "text-primary" : "text-[#0F172A]")}>{en}</div>}
-                  {showLocal && localText && !hideLocal && <div className={cn("font-[800] leading-tight break-words text-[#0F172A] w-full", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>{localText}</div>}
+                  {showPa && pa && <div className={cn("font-[800] leading-tight break-words text-[#0F172A] w-full", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>{pa}</div>}
+                  {showHi && hi && <div className={cn("font-[800] leading-tight break-words text-[#0F172A] w-full", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>{hi}</div>}
                 </div>
               </div>
             )
@@ -135,14 +153,15 @@ export default function QuestionRenderer({
            <div className="p-8 md:p-14 space-y-10">
               <div className="space-y-4">
                  <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-emerald-600 tracking-tight"><ShieldCheck className="h-5 w-5" /> Verified answer</div>
-                 <div className="pl-0 md:pl-8 space-y-2"><p className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight">Option {q.correctAnswer}: {q[`option${q.correctAnswer}English`]}</p></div>
+                 <div className="pl-0 md:pl-8 space-y-2"><p className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight">Option {q.correctAnswer}</p></div>
               </div>
               <div className="h-px w-full bg-slate-200/50" />
               <div className="space-y-6">
                  <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-slate-400 tracking-tight"><Info className="h-5 w-5" /> Explanation</div>
                  <div className="pl-0 md:pl-8 space-y-8">
-                    {q.englishExplanation && <div className="space-y-2"><p className="text-[10px] md:text-[11px] font-black text-slate-400">English rationale</p><div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl"><MathText text={q.englishExplanation} className="text-inherit" /></div></div>}
-                    {q.punjabiExplanation && <div className="space-y-2"><p className="text-[10px] md:text-[11px] font-black text-primary">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p><div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl"><MathText text={q.punjabiExplanation} className="text-inherit" /></div></div>}
+                    {showEn && q.englishExplanation && <div className="space-y-2"><p className="text-[10px] md:text-[11px] font-black text-slate-400">English rationale</p><div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl"><MathText text={q.englishExplanation} className="text-inherit" /></div></div>}
+                    {showPa && q.punjabiExplanation && <div className="space-y-2"><p className="text-[10px] md:text-[11px] font-black text-primary">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p><div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl"><MathText text={q.punjabiExplanation} className="text-inherit" /></div></div>}
+                    {showHi && q.hindiExplanation && <div className="space-y-2"><p className="text-[10px] md:text-[11px] font-black text-orange-600">हिन्दी व्याख्या</p><div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl"><MathText text={q.hindiExplanation} className="text-inherit" /></div></div>}
                  </div>
               </div>
            </div>
