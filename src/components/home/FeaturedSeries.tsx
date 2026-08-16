@@ -14,22 +14,23 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Fidelity Featured Series Hub v1.0.
+ * @fileOverview High-Fidelity Featured Series Hub v1.1.
  * Displays entire series nodes (not just individual tests) on the Home Page.
+ * UPDATED: Strictly limited to 3 visible items on the home screen for optimal scannability.
  */
 
 export default function FeaturedSeries() {
   const db = useFirestore();
   const { user } = useUser();
   
-  // 1. Fetch featured series nodes
+  // 1. Fetch featured series nodes (Fetch up to 10 to ensure pool, but only show 3)
   const seriesQuery = useMemo(() => {
     if (!db) return null;
     return query(
       collection(db, "test_series"),
       where("isActive", "==", true),
       where("isFeatured", "==", true),
-      limit(6)
+      limit(10)
     );
   }, [db]);
 
@@ -80,7 +81,7 @@ export default function FeaturedSeries() {
               Array.from({ length: 3 }).map((_, i) => (
                 <Skeleton key={i} className="h-44 w-full rounded-[24px] bg-slate-50" />
               ))
-           ) : processedSeries.map((ser, idx) => (
+           ) : processedSeries.slice(0, 3).map((ser, idx) => (
               <motion.div 
                 key={ser.id}
                 initial={{ opacity: 0, y: 10 }}
