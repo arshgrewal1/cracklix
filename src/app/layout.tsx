@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
-import MobileNav from "@/components/layout/Navbar"; // Note: This is incorrectly named but preserved as per original structure
+import Navbar from "@/components/layout/Navbar";
+import MobileNav from "@/components/layout/MobileNav";
 import PWAManager from "@/components/pwa/PWAManager";
 import PWAInstallHandler from "@/components/pwa/PWAInstallHandler";
 import NetworkStatus from "@/components/pwa/NetworkStatus";
@@ -25,7 +26,7 @@ const poppins = Poppins({
 
 /**
  * @fileOverview Global Layout Registry v18.0 [Cache-Bust Hardened].
- * UPDATED: Implemented ?v=2 versioning to force search engine icon refresh.
+ * UPDATED: Version 1.0.12 to trigger PWA asset re-sync and restore MobileNav.
  */
 
 export const metadata: Metadata = {
@@ -148,7 +149,6 @@ export default function RootLayout({
       className="scroll-smooth"
     >
       <head>
-        {/* Favicons & manifest - strictly blue-theme prioritized */}
         <link rel="icon" href="/icons/icon-48x48.png?v=2" sizes="48x48" />
         <link rel="icon" href="/logo/cracklix-icon.png?v=2" type="image/png" />
         <link rel="apple-touch-icon" href="/logo/cracklix-icon.png?v=2" />
@@ -189,6 +189,7 @@ export default function RootLayout({
               <div className="flex-1">
                 {children}
               </div>
+              <MobileNav />
             </div>
 
             <StudyTimerManager key="global-timer-manager" />
