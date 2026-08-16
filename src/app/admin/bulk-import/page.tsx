@@ -34,7 +34,8 @@ import {
   Edit,
   Save,
   Clock,
-  Landmark
+  Landmark,
+  ShieldCheck
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { 
@@ -52,7 +53,6 @@ import {
   setDoc
 } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { Board, Subject, Exam, MockType, LanguageDisplayMode } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
@@ -644,7 +644,7 @@ export default function BulkIngestionPage() {
                                    <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center font-black text-[#0F172A] shadow-inner group-hover:bg-primary group-hover:text-white transition-all">{i+1}</div>
                                    <span className="font-bold text-lg text-[#0F172A]">{subjects?.find(sub => sub.id === s.subjectId)?.name || s.subjectId}</span>
                                 </div>
-                                <div className="flex items-center gap-6">
+                                <div className="flex items-center justify-between gap-6">
                                    <span className="font-black text-xl text-[#0F172A] tabular-nums">{s.count} <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest ml-1">Qs</span></span>
                                    <div className={cn("h-2.5 w-2.5 rounded-full", availabilityResults[s.subjectId]?.ok ? "bg-emerald-500" : "bg-slate-200")} />
                                 </div>
