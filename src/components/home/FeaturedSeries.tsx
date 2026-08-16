@@ -14,9 +14,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Fidelity Featured Series Hub v1.1.
+ * @fileOverview High-Fidelity Featured Series Hub v1.2.
  * Displays entire series nodes (not just individual tests) on the Home Page.
- * UPDATED: Strictly limited to 3 visible items on the home screen for optimal scannability.
+ * FIXED: Synchronized button color to Cracklix Blue.
  */
 
 export default function FeaturedSeries() {
@@ -128,7 +128,7 @@ export default function FeaturedSeries() {
                        </div>
 
                        <div className="mt-8 pt-2">
-                          <Button className="w-full h-11 md:h-13 bg-[#0F172A] hover:bg-black text-white font-bold text-[11px] rounded-xl transition-all active:scale-95 border-none shadow-xl gap-2">
+                          <Button className="w-full h-11 md:h-13 bg-[#1677FF] hover:bg-blue-700 text-white font-bold text-[11px] rounded-xl transition-all active:scale-95 border-none shadow-xl gap-2">
                              Open full series <ChevronRight className="h-4 w-4" />
                           </Button>
                        </div>
