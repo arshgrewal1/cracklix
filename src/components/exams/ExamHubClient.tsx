@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -6,7 +7,7 @@ import Link from "next/link"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
-import { doc, collection, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp, getDoc, getDocs, documentId } from "firebase/firestore"
+import { doc, collection, query, where, updateDoc, arrayRemove, arrayUnion, serverTimestamp, getDoc, getDocs, documentId } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -48,8 +49,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Detail Hub v8.1.
- * FIXED: UI Back button hidden in standalone PWA mode.
+ * @fileOverview Premium Exam Detail Hub v9.0.
+ * REDESIGNED: Compact horizontal Subject Hub cards for professional scannability.
  */
 
 export default function ExamHubClient() {
@@ -67,6 +68,7 @@ export default function ExamHubClient() {
   useEffect(() => {
     setMounted(true);
     if (typeof window !== 'undefined') {
+       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
        setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true);
     }
   }, []);
@@ -345,7 +347,7 @@ export default function ExamHubClient() {
       </section>
 
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-16 max-w-7xl pb-40 space-y-12 text-left">
-         <Tabs defaultValue="MOCK" className="space-y-10">
+         <Tabs defaultValue="SUBJECT" className="space-y-10">
             <div className="bg-[#F8FAFC] -mx-4 px-4 py-4 md:py-6 border-b border-slate-100">
                <div className="bg-white border border-slate-200 shadow-xl rounded-[24px] p-1.5 flex items-center h-[60px] md:h-[68px] overflow-hidden max-w-5xl mx-auto">
                   <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-start gap-1.5 overflow-x-auto no-scrollbar snap-x">
@@ -363,26 +365,20 @@ export default function ExamHubClient() {
                <TabsContent value="MOCK"><TestGrid data={groupedContent.FULL} loading={mocksLoading} /></TabsContent>
                <TabsContent value="SUBJECT">
                   {groupedContent.SUBJECTS_WITH_CONTENT.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 max-w-5xl mx-auto">
                       {groupedContent.SUBJECTS_WITH_CONTENT.map((sub: any) => (
                         <Link key={sub.id} href={`/subjects/${sub.id}?examId=${examId}`}>
-                            <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-300 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-8 md:p-12 text-left">
-                              <div className="flex justify-between items-start mb-8">
-                                  <div className="h-16 w-16 md:h-20 md:w-20 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                    <BookOpen className="h-8 w-8" />
+                            <Card className="border border-[#E5EAF2] shadow-sm rounded-[18px] bg-white p-4 flex items-center gap-4 cursor-pointer hover:border-primary/30 transition-all group overflow-hidden">
+                              <div className="h-10 w-10 md:h-12 md:w-12 rounded-[14px] bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 shadow-inner group-hover:scale-105 transition-transform">
+                                <BookOpen className="h-5 w-5 text-primary" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                  <h3 className="text-base md:text-lg font-bold text-[#071B4D] group-hover:text-primary transition-colors leading-tight truncate">{sub.name}</h3>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <p className="text-[11px] md:text-sm font-medium text-slate-400">Multi-series active</p>
                                   </div>
-                                  <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-bold text-[9px] tracking-tight">Subject hub</Badge>
                               </div>
-                              <div className="space-y-4 flex-1">
-                                  <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight tracking-tight">{sub.name}</h3>
-                                  <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-tight flex items-center gap-2">
-                                    <Zap className="h-3.5 w-3.5 text-primary" /> Multi-series active
-                                  </p>
-                              </div>
-                              <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between text-primary font-bold text-[10px] tracking-tight">
-                                  <span>View tests</span>
-                                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                              </div>
+                              <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary group-hover:opacity-100 transition-all shrink-0" />
                             </Card>
                         </Link>
                       ))}
