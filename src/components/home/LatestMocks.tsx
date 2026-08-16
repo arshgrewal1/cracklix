@@ -15,32 +15,31 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Featured Tests Hub v53.0.
- * FIXED: Prioritizes mocks marked as 'isFeatured' by the admin.
+ * @fileOverview High-Density Featured Tests Hub v54.0.
+ * FIXED: Strictly pulls featured mocks. Hides section if empty as requested.
  */
 export default function LatestMocks() {
   const db = useFirestore()
   const { profile } = useUser()
   
-  // Query for featured mocks primarily
-  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true), limit(6)) : null), [db])
-  const { data: rawMocks, loading } = useCollection<any>(mocksQuery)
-
-  const mocks = useMemo(() => {
-    if (!rawMocks) return [];
-    // Sort featured items to the top client-side to ensure visibility
-    return [...rawMocks].sort((a, b) => {
-       if (a.isFeatured && !b.isFeatured) return -1;
-       if (!a.isFeatured && b.isFeatured) return 1;
-       return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
-    }).slice(0, 4);
-  }, [rawMocks]);
+  // STRICT QUERY: Only pull items explicitly marked as Featured by Admin
+  const mocksQuery = useMemo(() => (db ? query(
+    collection(db, "mocks"), 
+    where("published", "==", true), 
+    where("isFeatured", "==", true),
+    limit(6)
+  ) : null), [db])
+  
+  const { data: mocks, loading } = useCollection<any>(mocksQuery)
 
   const isPassActive = useMemo(() => {
     if (!profile) return false;
     if (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN') return true;
     return profile.passStatus === 'active';
   }, [profile]);
+
+  // HIDE LOGIC: If no mocks are featured, the entire section is liquidated from view
+  if (!loading && (!mocks || mocks.length === 0)) return null;
 
   return (
     <section className="py-10 md:py-16 bg-background border-y border-border">
@@ -81,13 +80,11 @@ export default function LatestMocks() {
                 <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-300 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left flex-1 min-h-[160px] md:min-h-[220px]">
                   
                   <div className="flex justify-between items-start mb-4">
-                    <AuthorityLogo boardId={boardId} size="sm" className="h-10 w-10 md:h-12 md:w-12 rounded-lg shadow-sm border-2 border-background bg-muted" />
+                    <AuthorityLogo boardId={boardId} size="sm" className="h-10 w-10 md:h-12 md:w-12 shadow-lg border-2 border-background bg-muted" />
                     <div className="flex items-center gap-2">
-                       {mock.isFeatured && (
-                          <Badge className="bg-primary/10 text-primary border-none px-2 py-0.5 rounded-full font-bold text-[7px] flex items-center gap-1 uppercase tracking-tight">
-                             New
-                          </Badge>
-                       )}
+                       <Badge className="bg-primary/10 text-primary border-none px-2 py-0.5 rounded-full font-bold text-[7px] flex items-center gap-1 uppercase tracking-tight">
+                          Featured
+                       </Badge>
                        {isPremium && (
                           <Badge className="bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-none px-2 py-0.5 rounded-full font-bold text-[7px] flex items-center gap-1 uppercase tracking-tight">
                              <Lock className="h-2 w-2" /> Elite
@@ -125,11 +122,7 @@ export default function LatestMocks() {
                 </Card>
               </motion.div>
             )
-          }) : (
-            <div className="col-span-full py-12 text-center opacity-30 italic font-black uppercase text-[10px] border-2 border-dashed border-border rounded-2xl">
-               Awaiting content sync
-            </div>
-          )}
+          }) : null}
         </div>
       </div>
     </section>
