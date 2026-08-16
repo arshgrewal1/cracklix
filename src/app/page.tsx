@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
-import Hero from "@/components/hero/Hero";
+import Hero from "@/components/home/Hero";
 import QuickActions from "@/components/home/QuickActions";
 import FeaturedCategories from "@/components/home/FeaturedCategories";
 import PopularExams from "@/components/home/PopularExams";
