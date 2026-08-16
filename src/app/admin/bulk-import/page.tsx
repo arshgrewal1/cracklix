@@ -354,28 +354,28 @@ export default function BulkIngestionPage() {
         title="MCQ Ingestion"
         subtitle="Dedicated extraction for subject-wise or full mixed exams."
       >
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto mt-4 md:mt-0">
+        <div className="flex flex-wrap items-center justify-end gap-3 w-full md:w-auto mt-4 md:mt-0">
            <button 
              onClick={() => {
                 setStagedQuestions([]);
                 if (ingestionMode === 'subject-wise') setRawText("");
                 else setMixedSections([{ id: nanoid(5), subjectId: "", rawText: "" }]);
              }} 
-             className="h-[52px] md:h-11 px-6 rounded-xl border border-slate-200 font-bold text-[11px] bg-white hover:bg-slate-50 transition-all flex items-center justify-center min-w-0"
+             className="h-11 px-6 rounded-xl border border-slate-200 font-bold text-[11px] bg-white hover:bg-slate-50 transition-all flex items-center justify-center whitespace-nowrap"
            >
               Reset
            </button>
            <Button 
              onClick={handleLocalParse} 
              disabled={isProcessing} 
-             className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-[52px] md:h-11 px-8 font-bold text-[11px] gap-3 shadow-xl w-full min-w-0"
+             className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-11 px-8 font-bold text-[11px] gap-3 shadow-xl whitespace-nowrap min-w-fit"
            >
               {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4 text-primary fill-current" />} Parse All
            </Button>
            <Button 
              onClick={handleFinalCommit} 
              disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
-             className="bg-primary hover:bg-blue-700 text-white rounded-xl h-[52px] md:h-11 px-8 font-bold text-[11px] gap-3 shadow-xl w-full min-w-0"
+             className="bg-primary hover:bg-blue-700 text-white rounded-xl h-11 px-8 font-bold text-[11px] gap-3 shadow-xl whitespace-nowrap min-w-fit"
            >
               {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />} Commit Hub
            </Button>
