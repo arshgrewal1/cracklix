@@ -25,8 +25,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v534.0 [Full Series Hub Added].
- * FIXED: Replaced individual featured test placeholder with the robust FeaturedSeries component.
+ * @fileOverview Premium Institutional Hub v535.0 [Section Order Hardened].
+ * FIXED: Moved Featured Tests (LatestMocks) higher to follow Featured Series.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -54,6 +54,9 @@ export default function HomePage() {
 
       {/* Primary Featured Series (Admin Curated) */}
       <FeaturedSeries />
+
+      {/* Featured Tests (Admin Curated) - MOVED UP */}
+      <LatestMocks />
 
       {/* Today's Challenge Hub */}
       <section className="py-6 md:py-10 bg-background">
@@ -119,7 +122,6 @@ export default function HomePage() {
       <LatestVacancy />
       <FeaturedCategories />
       <PopularExams />
-      <LatestMocks />
       <CurrentAffairsPreview />
       <MeritPreview />
       <MeetFounder />

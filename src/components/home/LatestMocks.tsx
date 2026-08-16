@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from "react"
@@ -15,14 +14,14 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Featured Tests Hub v54.0.
- * FIXED: Strictly pulls featured mocks. Hides section if empty as requested.
+ * @fileOverview High-Density Featured Tests Hub v55.0.
+ * FIXED: Limited to top 3 items for home screen clarity.
  */
 export default function LatestMocks() {
   const db = useFirestore()
   const { profile } = useUser()
   
-  // STRICT QUERY: Only pull items explicitly marked as Featured by Admin
+  // STRICT QUERY: Pull featured items
   const mocksQuery = useMemo(() => (db ? query(
     collection(db, "mocks"), 
     where("published", "==", true), 
@@ -42,7 +41,7 @@ export default function LatestMocks() {
   if (!loading && (!mocks || mocks.length === 0)) return null;
 
   return (
-    <section className="py-10 md:py-16 bg-background border-y border-border">
+    <section className="py-10 md:py-16 bg-background">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         <div className="flex items-center justify-between px-2 text-left">
@@ -51,8 +50,8 @@ export default function LatestMocks() {
                <Star className="h-4 w-4 md:h-5 md:w-5 fill-current" />
              </div>
              <div className="text-left min-w-0">
-                <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight truncate">Featured Tests</h2>
-                <p className="text-[10px] md:text-xs font-medium text-muted-foreground truncate">Recommended for you</p>
+                <h2 className="text-lg md:text-2xl font-[800] text-[#071B4D] tracking-tight truncate">Featured tests</h2>
+                <p className="text-[10px] md:text-xs font-medium text-slate-400 truncate">Hand-picked tests</p>
              </div>
           </div>
           <Link href="/mocks" className="text-primary font-bold text-[10px] md:text-xs flex items-center gap-1 hover:underline group shrink-0">
@@ -60,10 +59,10 @@ export default function LatestMocks() {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
           {loading ? (
-             Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-2xl bg-muted" />)
-          ) : mocks && mocks.length > 0 ? mocks.map((mock, i) => {
+             Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-44 w-full rounded-2xl bg-muted" />)
+          ) : mocks && mocks.length > 0 ? mocks.slice(0, 3).map((mock, i) => {
             const isPremium = mock.accessLevel?.toUpperCase() === 'PREMIUM';
             const locked = isPremium && !isPassActive;
             const boardId = mock.boardId || mock.boardIds?.[0] || "GENERAL";
@@ -77,7 +76,7 @@ export default function LatestMocks() {
                 transition={{ delay: i * 0.05 }}
                 className="h-full"
               >
-                <Card className="border border-border shadow-sm group-hover:shadow-xl transition-all duration-300 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left flex-1 min-h-[160px] md:min-h-[220px]">
+                <Card className="border border-border shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-card p-4 md:p-6 flex flex-col group h-full relative overflow-hidden text-left flex-1 min-h-[160px] md:min-h-[220px]">
                   
                   <div className="flex justify-between items-start mb-4">
                     <AuthorityLogo boardId={boardId} size="sm" className="h-10 w-10 md:h-12 md:w-12 shadow-lg border-2 border-background bg-muted" />
