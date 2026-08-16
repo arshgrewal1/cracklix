@@ -25,8 +25,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview High-Fidelity Real-Time Progress Hub v11.1.
- * FIXED: Title truncation resolved - allows 2 lines on mobile.
+ * @fileOverview High-Fidelity Real-Time Progress Hub v11.2.
+ * REDESIGNED: Switched to Premium White UI with Cracklix Blue accents.
  */
 export default function ContinueLearning() {
   const { user } = useUser();
@@ -108,10 +108,10 @@ export default function ContinueLearning() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 text-left">
         <div className="flex items-center justify-between px-1">
            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
+              <div className="h-8 w-8 rounded-xl bg-[#1677FF]/5 flex items-center justify-center text-[#1677FF] shadow-inner shrink-0">
                  <Target className="h-4 w-4" />
               </div>
-              <h2 className="text-lg md:text-2xl font-black text-foreground tracking-tight">Continue learning</h2>
+              <h2 className="text-lg md:text-2xl font-[800] text-[#071B4D] tracking-tight">Continue learning</h2>
            </div>
         </div>
 
@@ -124,42 +124,39 @@ export default function ContinueLearning() {
                  animate={{ opacity: 1, y: 0 }}
                  className="w-full"
                >
-                 <Card className={cn(
-                   "border border-border p-4 md:p-6 rounded-2xl shadow-lg transition-all duration-300 group relative overflow-hidden flex flex-col md:flex-row items-center gap-6",
-                   isCompleted ? "bg-white" : "bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-white"
-                 )}>
+                 <Card className="border border-[#E5EAF2] p-6 md:p-8 rounded-[24px] shadow-sm transition-all duration-300 group relative overflow-hidden flex flex-col md:flex-row items-center gap-8 bg-white">
                    <div className="flex items-center gap-6 flex-1 min-w-0 w-full">
                       <div className="relative shrink-0">
-                        <AuthorityLogo boardId={mockMeta?.boardId || "GENERAL"} size="sm" className="h-12 w-12 md:h-16 md:w-16 shadow-xl border-2 border-white/10" />
+                        <AuthorityLogo boardId={mockMeta?.boardId || "GENERAL"} size="md" className="h-14 w-14 md:h-18 md:w-18 shadow-lg border border-[#E5EAF2] bg-[#F8FAFC]" />
                         {!isCompleted && (
-                           <div className="absolute -bottom-1 -right-1 h-6 w-6 bg-primary rounded-lg flex items-center justify-center shadow-lg animate-pulse border-2 border-[#0F172A]">
+                           <div className="absolute -bottom-1 -right-1 h-6 w-6 bg-[#1677FF] rounded-lg flex items-center justify-center shadow-lg animate-pulse border-2 border-white">
                               <Clock className="h-3 w-3 text-white" />
                            </div>
                         )}
                       </div>
                       
                       <div className="flex-1 space-y-2 min-w-0 text-left">
-                         <div className="flex items-center gap-2">
+                         <div className="flex items-center gap-3">
                             <Badge className={cn(
-                              "border-none px-2 py-0.5 rounded-md font-bold text-[8px] uppercase tracking-tight",
-                              isCompleted ? "bg-emerald-100 text-emerald-700" : "bg-primary text-white"
+                              "border-none px-3 py-1 rounded-full font-black text-[8px] uppercase tracking-widest shadow-sm",
+                              isCompleted ? "bg-[#10B981]/10 text-[#10B981]" : "bg-[#1677FF]/10 text-[#1677FF]"
                             )}>
                                {isCompleted ? "Completed" : "In Progress"}
                             </Badge>
-                            <span className={cn("text-[9px] font-bold tabular-nums uppercase", isCompleted ? "text-slate-400" : "text-slate-500")}>
+                            <span className="text-[9px] font-bold tabular-nums uppercase text-slate-400">
                                Updated: {new Date(activeAttempt.updatedAt?.seconds * 1000 || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                          </div>
-                         <h3 className={cn("text-base md:text-xl font-black tracking-tight leading-tight line-clamp-2", isCompleted ? "text-[#0F172A]" : "text-white")}>
+                         <h3 className="text-base md:text-2xl font-[800] tracking-tight leading-tight text-[#071B4D] line-clamp-2">
                             {mockMeta.title}
                          </h3>
                          <div className="flex flex-wrap items-center gap-4 pt-1">
-                            <div className="flex items-center gap-1.5 text-[9px] font-bold opacity-60">
-                               <BookOpen className="h-3 w-3" /> {mockMeta.totalQuestions} Questions
+                            <div className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-slate-400">
+                               <BookOpen className="h-3.5 w-3.5" /> {mockMeta.totalQuestions} Questions
                             </div>
                             {resultData && (
-                               <div className="flex items-center gap-1.5 text-emerald-500 font-black text-[9px]">
-                                  <Trophy className="h-3 w-3" /> Last Score: {resultData.score}
+                               <div className="flex items-center gap-1.5 text-[#10B981] font-black text-[10px] md:text-xs">
+                                  <Trophy className="h-3.5 w-3.5" /> Score: {resultData.score}
                                </div>
                             )}
                          </div>
@@ -167,14 +164,11 @@ export default function ContinueLearning() {
                    </div>
 
                    <div className="shrink-0 w-full md:w-auto">
-                      <Button asChild className={cn(
-                        "w-full md:w-auto h-11 px-8 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg border-none transition-all active:scale-95 gap-2",
-                        isCompleted ? "bg-[#0F172A] hover:bg-black text-white" : "bg-primary hover:bg-blue-700 text-white"
-                      )}>
+                      <Button asChild className="w-full md:w-auto h-14 md:h-16 px-10 rounded-[18px] font-black uppercase text-[11px] md:text-xs tracking-widest shadow-lg border-none transition-all active:scale-95 gap-3 bg-[#1677FF] hover:bg-[#1677FF]/90 text-white group/btn">
                         <Link href={isCompleted ? `/results/view?id=${activeAttempt.mockId}&attemptId=${activeAttempt.attemptId}` : `/mocks/attempt?id=${activeAttempt.mockId}`}>
-                           {isCompleted ? <BarChart3 className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
-                           {isCompleted ? "View Analysis" : "Resume Test"}
-                           <ChevronRight className="h-4 w-4 opacity-40 ml-1" />
+                           {isCompleted ? <BarChart3 className="h-5 w-5" /> : <Play className="h-5 w-5 fill-current" />}
+                           {isCompleted ? "Analysis" : "Resume test"}
+                           <ChevronRight className="h-5 w-5 opacity-40 ml-1 group-hover/btn:translate-x-1 transition-transform" />
                         </Link>
                       </Button>
                    </div>

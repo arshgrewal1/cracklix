@@ -24,8 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v531.1.
- * UPDATED: Standardized Today's Challenge icon background to match logo style.
+ * @fileOverview Premium Institutional Hub v532.0.
+ * FIXED: Resolved syntax error by correctly closing motion.div and balancing tags.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -50,66 +50,63 @@ export default function HomePage() {
 
       {user && <ContinueLearning />}
 
-      {/* Today's Challenge Hub - Square Compact Indicators */}
+      {/* Today's Challenge Hub - Redesigned White Premium UI */}
       <section className="py-6 md:py-10 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
                initial={{ opacity: 0, y: 20 }}
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
-               className="relative bg-gradient-to-br from-[#0B1224] to-[#161F33] rounded-[24px] p-5 md:p-8 border border-white/5 shadow-2xl overflow-hidden group text-left"
+               className="relative bg-white rounded-[24px] p-6 md:p-10 border border-[#E5EAF2] shadow-sm overflow-hidden group text-left"
             >
-               {/* Premium Background Decorations */}
-               <div className="absolute inset-0 pointer-events-none opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-               
                <div className="relative z-10 space-y-6 md:space-y-8">
                   {/* Top Row: Brand & Title */}
                   <div className="flex items-center justify-between gap-4">
                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-slate-50 flex items-center justify-center shadow-inner shrink-0 border border-slate-100">
-                           <Flame className="h-5 w-5 md:h-6 md:w-6 text-primary fill-current animate-pulse" />
+                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#1677FF]/5 flex items-center justify-center shadow-inner shrink-0 border border-[#1677FF]/10">
+                           <Flame className="h-5 w-5 md:h-6 md:w-6 text-[#1677FF] fill-current animate-pulse" />
                         </div>
-                        <h2 className="text-lg md:text-3xl font-[800] text-white tracking-tight antialiased truncate">
+                        <h2 className="text-lg md:text-3xl font-[800] text-[#071B4D] tracking-tight antialiased truncate">
                            Today's Challenge
                         </h2>
                      </div>
-                     <Badge className="bg-primary text-white border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest shadow-xl shrink-0">
+                     <Badge className="bg-[#1677FF] text-white border-none px-4 py-1.5 rounded-full font-black text-[9px] uppercase tracking-widest shadow-lg shrink-0">
                         Sync Live
                      </Badge>
                   </div>
 
                   {/* Challenge Info Block */}
-                  <div className="space-y-1">
-                     <h3 className="text-base md:text-xl font-bold text-white tracking-tight leading-tight line-clamp-1">
+                  <div className="space-y-2">
+                     <h3 className="text-base md:text-2xl font-black text-[#071B4D] tracking-tight leading-tight line-clamp-1">
                         {activeQuiz?.title || "GK Master Challenge"}
                      </h3>
-                     <p className="text-[11px] md:text-sm text-slate-400 font-medium tracking-tight">
+                     <p className="text-[12px] md:text-base text-slate-500 font-medium tracking-tight">
                         Complete today's official patterns to earn XP.
                      </p>
                   </div>
 
-                  {/* Second Row: Square Compact Stat Indicators */}
-                  <div className="flex items-center gap-1.5 md:gap-2">
-                     <StatCard icon={<Clock className="text-orange-400 h-3.5 w-3.5" />} label={`${activeQuiz?.duration || 15}m`} />
-                     <StatCard icon={<HelpCircle className="text-blue-400 h-3.5 w-3.5" />} label={`${activeQuiz?.totalQuestions || 20} Qs`} />
-                     <StatCard icon={<Trophy className="text-amber-400 h-3.5 w-3.5" />} label={`${activeQuiz?.rewardXP || 100} XP`} />
+                  {/* Second Row: Light Stat Cards */}
+                  <div className="flex items-center gap-2 md:gap-4 overflow-x-auto no-scrollbar py-1">
+                     <StatCard icon={<Clock className="text-orange-500 h-4 w-4" />} label={`${activeQuiz?.duration || 15}m`} />
+                     <StatCard icon={<HelpCircle className="text-[#1677FF] h-4 w-4" />} label={`${activeQuiz?.totalQuestions || 20} Qs`} />
+                     <StatCard icon={<Trophy className="text-amber-500 h-4 w-4" />} label={`${activeQuiz?.rewardXP || 100} XP`} />
                   </div>
 
                   {/* Premium CTA Button */}
                   <div className="pt-2">
                      {!isMounted || quizLoading ? (
-                        <div className="h-14 w-full bg-white/5 animate-pulse rounded-2xl" />
+                        <div className="h-14 w-full bg-slate-50 animate-pulse rounded-2xl" />
                      ) : activeQuiz ? (
                         <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="block">
-                           <Button className="w-full h-12 md:h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-xs tracking-widest rounded-xl md:rounded-2xl shadow-xl border-none transition-all active:scale-95 group/btn">
-                              <Zap className="h-4 w-4 mr-2 fill-current" />
+                           <Button className="w-full h-14 md:h-16 bg-[#1677FF] hover:bg-[#1677FF]/90 text-white font-black uppercase text-[11px] md:text-sm tracking-widest rounded-2xl shadow-lg border-none transition-all active:scale-95 group/btn">
+                              <Zap className="h-5 w-5 mr-3 fill-current" />
                               Attempt now
-                              <ArrowRight className="h-4 w-4 ml-auto opacity-40 group-hover/btn:translate-x-1 transition-transform" />
+                              <ArrowRight className="h-5 w-5 ml-auto opacity-40 group-hover/btn:translate-x-2 transition-transform" />
                            </Button>
                         </Link>
                      ) : (
-                        <div className="p-4 bg-white/5 rounded-xl text-center">
-                           <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Awaiting database sync</p>
+                        <div className="p-6 bg-[#F8FAFC] rounded-2xl text-center border border-[#E5EAF2]">
+                           <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Awaiting database sync</p>
                         </div>
                      )}
                   </div>
@@ -133,9 +130,9 @@ export default function HomePage() {
 
 function StatCard({ icon, label }: { icon: React.ReactNode, label: string }) {
    return (
-      <div className="flex flex-col items-center justify-center px-4 py-2 bg-white/5 border border-white/5 rounded-xl space-y-1 hover:bg-white/10 transition-all cursor-default shrink-0 min-w-[70px] md:min-w-[90px]">
-         <div className="opacity-80 scale-90">{icon}</div>
-         <span className="text-[10px] md:text-xs font-black text-white/90 tracking-tight whitespace-nowrap tabular-nums">{label}</span>
+      <div className="flex flex-col items-center justify-center px-6 py-4 bg-[#F8FAFC] border border-[#E5EAF2] rounded-[16px] space-y-2 hover:bg-white hover:shadow-md transition-all cursor-default shrink-0 min-w-[90px] md:min-w-[120px]">
+         <div className="scale-110">{icon}</div>
+         <span className="text-[11px] md:text-sm font-black text-[#071B4D] tracking-tighter whitespace-nowrap tabular-nums">{label}</span>
       </div>
    );
 }
