@@ -36,7 +36,8 @@ import { useToast } from "@/hooks/use-toast"
 import ExamCard from "@/components/exams/ExamCard"
 
 /**
- * @fileOverview Premium Enterprise Exam Dashboard Hub v10.3 [Route Persistent].
+ * @fileOverview Premium Enterprise Exam Dashboard Hub v11.0.
+ * UPDATED: Optimized grid for horizontal ExamCard list-style components.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -235,22 +236,22 @@ export default function ExamsEntryPage() {
           </motion.div>
         </section>
 
-        <section className="space-y-10 md:space-y-14 w-full text-left">
-           <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-8">
-              <div className="flex items-center gap-4">
-                 <div className="h-12 w-12 rounded-2xl bg-[#0F172A] flex items-center justify-center text-primary shadow-2xl">
-                    <Star className="h-6 w-6 fill-current" />
+        <section className="space-y-8 md:space-y-12 w-full text-left">
+           <div className="flex items-center justify-between px-1 border-b border-slate-100 pb-6">
+              <div className="flex items-center gap-3">
+                 <div className="h-10 w-10 rounded-xl bg-[#0F172A] flex items-center justify-center text-primary shadow-lg">
+                    <Star className="h-5 w-5 fill-current" />
                  </div>
                  <div className="text-left">
-                    <h2 className="text-2xl md:text-3xl font-[900] text-[#0F172A] tracking-tighter">Popular Verticals</h2>
-                    <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest mt-1">High-Aspirant Traffic Nodes</p>
+                    <h2 className="text-xl md:text-2xl font-[900] text-[#0F172A] tracking-tighter">Exam Verticals</h2>
+                    <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Official recruitment hubs</p>
                  </div>
               </div>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {examsLoading ? (
-                 Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[540px] w-full rounded-[2.5rem] md:rounded-[3.5rem] bg-white border border-slate-100" />)
+                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[100px] w-full rounded-[18px] bg-white" />)
               ) : featuredExams.map((exam: any) => (
                  <ExamCard 
                    key={exam.id} 

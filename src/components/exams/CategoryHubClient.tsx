@@ -23,8 +23,8 @@ interface CategoryHubClientProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Category Hub v8.1.
- * FIXED: UI Back button hidden in standalone PWA mode.
+ * @fileOverview Premium Enterprise Category Hub v9.0.
+ * UPDATED: Optimized grid for new horizontal list-style ExamCard components.
  */
 
 export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
@@ -142,7 +142,7 @@ export default function CategoryHubClient({ catId }: CategoryHubClientProps) {
                   <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 shadow-inner"><Zap className="h-5 w-5" /></div>
                   <h2 className="text-xl md:text-3xl font-[800] tracking-tighter text-[#0F172A]">Exam Verticals</h2>
                </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 max-w-6xl mx-auto">
                   {activeExams.map((exam) => (
                      <ExamCard 
                        key={exam.id} 

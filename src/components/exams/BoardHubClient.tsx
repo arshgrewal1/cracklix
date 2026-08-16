@@ -23,8 +23,8 @@ interface BoardHubClientProps {
 }
 
 /**
- * @fileOverview Premium Enterprise Board Hub v8.1.
- * FIXED: UI Back button hidden in standalone PWA mode.
+ * @fileOverview Premium Enterprise Board Hub v9.0.
+ * UPDATED: Optimized grid for new horizontal list-style ExamCard components.
  */
 
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
@@ -102,11 +102,11 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
 
       <main className="container mx-auto px-4 md:px-12 py-10 md:py-24 max-w-7xl flex-1">
          {examsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-               {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[520px] w-full rounded-[3rem] bg-white border border-slate-100" />) }
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[100px] w-full rounded-2xl bg-white border border-slate-100" />) }
             </div>
          ) : exams && exams.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 max-w-6xl mx-auto">
                {exams.map((exam) => (
                   <ExamCard 
                     key={exam.id} 
