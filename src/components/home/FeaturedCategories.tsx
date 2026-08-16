@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 
 /**
  * @fileOverview High-Density Categories Hub v52.0.
- * FIXED: Added missing key props to skeleton loaders.
+ * FIXED: Standardized button to Cracklix Blue.
  */
 
 const TARGET_IDS = [
@@ -83,7 +83,7 @@ export default function FeaturedCategories() {
                      </div>
 
                      <div className="mt-6 pt-2">
-                        <Button className="w-full h-10 bg-[#0F172A] hover:bg-primary text-white font-bold text-[10px] rounded-xl transition-all active:scale-95 border-none shadow-md">
+                        <Button className="w-full h-10 bg-primary hover:bg-blue-700 text-white font-bold text-[10px] rounded-xl transition-all active:scale-95 border-none shadow-md">
                            Enter Hub <ArrowRight className="h-3 w-3" />
                         </Button>
                      </div>

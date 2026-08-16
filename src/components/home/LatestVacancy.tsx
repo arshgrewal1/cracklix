@@ -13,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Compact Vacancy Hub v3.6.
- * FIXED: Removed truncate from department to show full institutional lines.
+ * @fileOverview Compact Vacancy Hub v3.7.
+ * FIXED: Standardized button to Cracklix Blue.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
@@ -86,7 +86,7 @@ export default function LatestVacancy() {
                        </div>
 
                        <div className="mt-6 pt-2">
-                          <Button className="w-full h-10 md:h-11 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none shadow-md">
+                          <Button className="w-full h-10 md:h-11 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none shadow-md">
                              Open Portal <ArrowRight className="ml-2 h-3.5 w-3.5" />
                           </Button>
                        </div>

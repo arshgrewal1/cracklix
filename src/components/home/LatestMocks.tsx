@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Latest Tests Hub v52.1.
- * FIXED: Title truncation resolved - allows 2 lines.
+ * @fileOverview High-Density Latest Tests Hub v52.2.
+ * FIXED: Standardized button to Cracklix Blue.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -95,7 +95,7 @@ export default function LatestMocks() {
                   <div className="mt-6 pt-2">
                     <Button asChild className={cn(
                       "w-full h-10 md:h-11 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-md border-none transition-all active:scale-95 gap-2", 
-                      locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-primary text-white"
+                      locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-primary hover:bg-blue-700 text-white"
                     )}>
                         <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`}>
                           {locked ? <Lock className="h-3 w-3" /> : <Play className="h-3 w-3 fill-current" />}

@@ -25,8 +25,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Compact Trending Hubs v58.1.
- * FIXED: Title truncation resolved - allows 2 lines.
+ * @fileOverview Compact Trending Hubs v58.2.
+ * FIXED: Standardized button to Cracklix Blue.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -134,7 +134,7 @@ export default function PopularExams() {
                           </div>
 
                           <div className="mt-6 pt-4 border-t border-border">
-                             <Button className="w-full h-10 md:h-11 bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all border-none">
+                             <Button className="w-full h-10 md:h-11 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all border-none">
                                 Open Hub <ArrowRight className="ml-2 h-3.5 w-3.5" />
                              </Button>
                           </div>
