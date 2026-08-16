@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Trash2, Edit, Save, Layers, Search, Loader2, Image as ImageIcon, ChevronRight, Zap } from "lucide-react"
+import { Plus, Trash2, Edit, Save, Layers, Search, Loader2, Image as ImageIcon, ChevronRight, Zap, Star } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, orderBy, where } from "firebase/firestore"
+import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, orderBy, where, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { TestSeries, Subject, Board } from "@/types"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
@@ -21,8 +21,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Level 2 CMS: Series Registry Hub v3.1.
- * FIXED: Removed forced uppercase from series title in registry.
+ * @fileOverview Level 2 CMS: Series Registry Hub v4.0.
+ * FIXED: Added Star toggle to feature series on the Home Page.
  */
 
 export default function SeriesCMS() {
@@ -63,6 +63,16 @@ export default function SeriesCMS() {
      );
   }
 
+  const handleToggleFeatured = async (id: string, current: boolean) => {
+    if (!db) return;
+    try {
+       await updateDoc(doc(db, "test_series", id), { isFeatured: !current, updatedAt: serverTimestamp() });
+       toast({ title: current ? "Removed from Home" : "Featured on Home" });
+    } catch (e) {
+       toast({ variant: "destructive", title: "Sync failed" });
+    }
+  }
+
   const filteredSeries = useMemo(() => {
      if (!rawSeries) return [];
      return rawSeries.filter(s => {
@@ -81,7 +91,7 @@ export default function SeriesCMS() {
         subtitle="Organize subjects into specialized preparation hubs (Level 2)."
         actionLabel="Initialize Series"
         actionIcon={Plus}
-        onAction={() => setEditingSeries({ title: "", subjectId: subjectFilter !== 'all' ? subjectFilter : "", boardId: "psssb", description: "", difficulty: "Medium", isActive: true, displayOrder: (rawSeries?.length || 0) + 1 })}
+        onAction={() => setEditingSeries({ title: "", subjectId: subjectFilter !== 'all' ? subjectFilter : "", boardId: "psssb", description: "", difficulty: "Medium", isActive: true, isFeatured: false, displayOrder: (rawSeries?.length || 0) + 1 })}
       />
 
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white mx-1 border border-slate-50 p-6 md:p-10">
@@ -100,20 +110,21 @@ export default function SeriesCMS() {
          </div>
       </Card>
 
-      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
+      <Card className="border-none shadow-xl rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
-          <Table className="min-w-[900px]">
+          <Table className="min-w-[1000px]">
             <TableHeader className="bg-slate-50/50">
               <TableRow className="h-20 border-slate-100">
                 <TableHead className="px-8 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Node Identity</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Subject Hub</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Home</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Difficulty</TableHead>
                 <TableHead className="text-right px-8 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <AdminTableSkeleton rows={5} columns={4} />
+                <AdminTableSkeleton rows={5} columns={5} />
               ) : filteredSeries.length > 0 ? filteredSeries.map((s) => (
                 <TableRow key={s.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                   <TableCell className="px-8 md:px-12 py-6 md:py-10">
@@ -133,6 +144,18 @@ export default function SeriesCMS() {
                      </Badge>
                   </TableCell>
                   <TableCell className="text-center">
+                     <button 
+                        onClick={() => handleToggleFeatured(s.id, !!s.isFeatured)} 
+                        className={cn(
+                           "h-10 w-10 rounded-xl flex items-center justify-center transition-all shadow-sm border mx-auto active:scale-90 cursor-pointer",
+                           s.isFeatured ? "bg-amber-50 border-amber-200 text-amber-500" : "bg-slate-50 border-slate-100 text-slate-300 hover:text-amber-500"
+                        )}
+                        title={s.isFeatured ? "Remove from Home" : "Feature on Home"}
+                     >
+                        <Star className={cn("h-4 w-4", s.isFeatured && "fill-current")} />
+                     </button>
+                  </TableCell>
+                  <TableCell className="text-center">
                      <Badge className={cn(
                         "border-none text-[8px] font-black uppercase px-3 py-1 rounded shadow-sm",
                         s.difficulty === 'Easy' ? "bg-emerald-50 text-emerald-600" : s.difficulty === 'Medium' ? "bg-blue-50 text-blue-600" : "bg-rose-50 text-rose-600"
@@ -147,7 +170,7 @@ export default function SeriesCMS() {
                 </TableRow>
               )) : (
                  <TableRow>
-                    <TableCell colSpan={4} className="h-60 text-center opacity-30 italic font-black uppercase text-sm">No series registered</TableCell>
+                    <TableCell colSpan={5} className="h-60 text-center opacity-30 italic font-black uppercase text-sm">No series registered</TableCell>
                  </TableRow>
               )}
             </TableBody>
@@ -218,12 +241,21 @@ export default function SeriesCMS() {
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Display Sequence</Label>
                   <Input type="number" value={editingSeries?.displayOrder || ""} onChange={e => setEditingSeries({...editingSeries, displayOrder: e.target.value})} className="h-12 md:h-14 rounded-xl border-none bg-slate-50 font-black text-center shadow-inner text-[#0F172A]" />
                </div>
-               <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
-                  <div className="space-y-0.5">
-                     <p className="text-[11px] font-black text-[#0F172A] uppercase">Active Hub</p>
-                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Live in selection</p>
+               <div className="space-y-4">
+                  <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
+                     <div className="space-y-0.5">
+                        <p className="text-[11px] font-black text-[#0F172A] uppercase">Active Hub</p>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Live in selection</p>
+                     </div>
+                     <Switch checked={editingSeries?.isActive || false} onCheckedChange={v => setEditingSeries({...editingSeries, isActive: v})} />
                   </div>
-                  <Switch checked={editingSeries?.isActive || false} onCheckedChange={v => setEditingSeries({...editingSeries, isActive: v})} />
+                  <div className="flex items-center justify-between p-5 bg-amber-50/30 rounded-2xl border border-amber-100 shadow-inner">
+                     <div className="space-y-0.5">
+                        <p className="text-[11px] font-black text-[#0F172A] uppercase">Featured</p>
+                        <p className="text-[8px] font-bold text-amber-600 uppercase tracking-widest">Home Page Promotion</p>
+                     </div>
+                     <Switch checked={editingSeries?.isFeatured || false} onCheckedChange={v => setEditingSeries({...editingSeries, isFeatured: v})} />
+                  </div>
                </div>
             </div>
          </div>

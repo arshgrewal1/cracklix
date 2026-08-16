@@ -51,8 +51,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Master Mock Test Manager v4.2 [Promotion Hub Added].
- * FIXED: Added Star toggle to feature mock tests on the Home Page.
+ * @fileOverview Master Mock Test Manager v4.3 [Promote Hub Redesign].
+ * FIXED: Renamed 'Hub' column to 'Promote' for administrative clarity.
  */
 
 export default function MockManagement() {
@@ -200,7 +200,7 @@ export default function MockManagement() {
                 </TableHead>
                 <TableHead className="px-6 text-[9px] font-bold text-slate-400 tracking-tight uppercase">Test Title</TableHead>
                 <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight uppercase">Category Folder</TableHead>
-                <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight text-center uppercase">Hub</TableHead>
+                <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight text-center uppercase">Promote</TableHead>
                 <TableHead className="text-[9px] font-bold text-slate-400 tracking-tight text-center uppercase">Status</TableHead>
                 <TableHead className="text-right px-10 text-[9px] font-bold text-slate-400 tracking-tight uppercase">Actions</TableHead>
               </TableRow>
@@ -300,7 +300,7 @@ export default function MockManagement() {
                   <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                      <Button onClick={() => setIsBulkMoveOpen(true)} className="h-10 md:h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-[9px] md:text-[10px] uppercase gap-2 border border-white/5 px-3 md:px-5 min-w-[70px] justify-center"><MoveHorizontal className="h-3.5 w-3.5" /> <span className="hidden xs:inline">Move</span></Button>
                      <Button onClick={async () => { if(confirm("Bulk delete selected tests?")) { setIsProcessing(true); const b = writeBatch(db!); selectedIds.forEach(id => b.delete(doc(db!, "mocks", id))); await b.commit(); setSelectedIds([]); setIsProcessing(false); toast({ title: "Batch deleted" }); } }} className="h-10 md:h-11 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-[9px] md:text-[10px] uppercase gap-2 border-none shadow-lg px-3 md:px-5 min-w-[70px] justify-center"><Trash2 className="h-3.5 w-3.5" /> <span className="hidden xs:inline">Delete</span></Button>
-                     <button onClick={() => setSelectedIds([])} className="p-2 text-slate-500 hover:text-white bg-transparent border-none cursor-pointer"><X className="h-5 w-5" /></button>
+                     <button onClick={() => setSelectedIds([])} className="p-2 text-slate-400 hover:text-white bg-transparent border-none cursor-pointer"><X className="h-5 w-5" /></button>
                   </div>
                </div>
             </motion.div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -15,7 +16,7 @@ import GlobalSearch from "@/components/home/GlobalSearch";
 import LatestVacancy from "@/components/home/LatestVacancy";
 import MeetFounder from "@/components/home/MeetFounder";
 import { useUser, useCollection, useFirestore } from "@/firebase";
-import { Zap, Clock, Trophy, ChevronRight, Flame, ShieldCheck, Loader2, HelpCircle, ArrowRight, Star } from "lucide-react";
+import { Zap, Clock, Trophy, ChevronRight, Flame, ShieldCheck, Loader2, HelpCircle, ArrowRight, Star, Layers, Bookmark } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -24,8 +25,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Premium Institutional Hub v532.0.
- * FIXED: Resolved text visibility issues in PWA mode by removing restrictive line-clamping.
+ * @fileOverview Premium Institutional Hub v533.0.
+ * FIXED: Added Featured Series section to showcase admin-pinned content.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -37,7 +38,11 @@ export default function HomePage() {
   }, []);
 
   const quizQuery = useMemo(() => (db ? query(collection(db, "daily_quizzes"), where("status", "==", "PUBLISHED"), where("isTodayQuiz", "==", true), limit(1)) : null), [db]);
+  const seriesQuery = useMemo(() => (db ? query(collection(db, "test_series"), where("isActive", "==", true), where("isFeatured", "==", true), limit(3)) : null), [db]);
+
   const { data: quizzes, loading: quizLoading } = useCollection<any>(quizQuery);
+  const { data: featuredSeries, loading: seriesLoading } = useCollection<any>(seriesQuery);
+  
   const activeQuiz = quizzes?.[0];
 
   return (
@@ -50,7 +55,44 @@ export default function HomePage() {
 
       {user && <ContinueLearning />}
 
-      {/* Today's Challenge Hub - Redesigned White Premium UI */}
+      {/* Featured Series Hub (Dynamic Admin Content) */}
+      <AnimatePresence>
+        {featuredSeries && featuredSeries.length > 0 && (
+          <section className="py-6 md:py-10 bg-background border-t border-slate-50">
+             <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-6">
+                <div className="flex items-center justify-between px-1">
+                   <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shadow-inner">
+                         <Star className="h-4 w-4 fill-current" />
+                      </div>
+                      <h2 className="text-lg md:text-2xl font-[800] text-[#071B4D] tracking-tight">Featured series</h2>
+                   </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   {featuredSeries.map((s: any) => (
+                      <Link key={s.id} href={`/subjects/${s.subjectId}/series/${s.id}`}>
+                         <Card className="p-5 md:p-6 bg-white border border-[#E5EAF2] rounded-[24px] shadow-sm hover:shadow-lg transition-all group h-full">
+                            <div className="flex flex-col h-full gap-4">
+                               <div className="flex items-start justify-between">
+                                  <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black uppercase tracking-widest px-2">Featured</Badge>
+                                  <Badge variant="outline" className="text-[7px] border-slate-100 text-slate-300 font-bold uppercase">{s.difficulty}</Badge>
+                               </div>
+                               <h3 className="text-sm md:text-lg font-black text-[#071B4D] group-hover:text-primary transition-colors leading-tight line-clamp-2">{s.title}</h3>
+                               <div className="mt-auto pt-2 flex items-center justify-between text-[#1677FF] font-bold text-[10px] uppercase tracking-widest">
+                                  <span>View tests</span>
+                                  <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                               </div>
+                            </div>
+                         </Card>
+                      </Link>
+                   ))}
+                </div>
+             </div>
+          </section>
+        )}
+      </AnimatePresence>
+
+      {/* Today's Challenge Hub */}
       <section className="py-6 md:py-10 bg-background">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
@@ -60,7 +102,6 @@ export default function HomePage() {
                className="relative bg-white rounded-[24px] p-5 md:p-10 border border-[#E5EAF2] shadow-sm overflow-hidden group text-left"
             >
                <div className="relative z-10 space-y-6 md:space-y-8">
-                  {/* Top Row: Brand & Title */}
                   <div className="flex flex-wrap items-center justify-between gap-4">
                      <div className="flex items-center gap-3 min-w-0">
                         <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#1677FF]/5 flex items-center justify-center shadow-inner shrink-0 border border-[#1677FF]/10">
@@ -75,7 +116,6 @@ export default function HomePage() {
                      </Badge>
                   </div>
 
-                  {/* Challenge Info Block */}
                   <div className="space-y-2">
                      <h3 className="text-base md:text-2xl font-black text-[#071B4D] tracking-tight leading-tight">
                         {activeQuiz?.title || "GK Master Challenge"}
@@ -85,14 +125,12 @@ export default function HomePage() {
                      </p>
                   </div>
 
-                  {/* Second Row: Light Stat Cards */}
                   <div className="flex items-center gap-2 md:gap-4 overflow-x-auto no-scrollbar py-1">
                      <StatCard icon={<Clock className="text-orange-500 h-4 w-4" />} label={`${activeQuiz?.duration || 15}m`} />
                      <StatCard icon={<HelpCircle className="text-[#1677FF] h-4 w-4" />} label={`${activeQuiz?.totalQuestions || 20} Qs`} />
                      <StatCard icon={<Trophy className="text-amber-500 h-4 w-4" />} label={`${activeQuiz?.rewardXP || 100} XP`} />
                   </div>
 
-                  {/* Premium CTA Button */}
                   <div className="pt-2">
                      {!isMounted || quizLoading ? (
                         <div className="h-14 w-full bg-slate-50 animate-pulse rounded-2xl" />

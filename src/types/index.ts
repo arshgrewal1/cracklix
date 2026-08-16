@@ -284,6 +284,7 @@ export interface TestSeries {
   displayOrder: number;
   isActive: boolean;
   accessLevel: AccessLevel;
+  isFeatured?: boolean;
 }
 
 export interface MockTest {
