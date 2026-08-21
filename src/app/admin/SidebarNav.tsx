@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -42,7 +41,8 @@ import {
   Layers,
   RefreshCw,
   CheckCircle,
-  BarChart3
+  BarChart3,
+  Plus
 } from "lucide-react";
 
 import {
@@ -65,6 +65,7 @@ const NAV_GROUPS = [
     label: "Asset Bank",
     items: [
       { label: "Question Bank", href: "/admin/mcq-bank", icon: Database },
+      { label: "Add Question", href: "/admin/mcq-bank/add", icon: Plus, perm: 'uploadQuestions' },
       { label: "Bulk Ingestion", href: "/admin/bulk-import", icon: UploadCloud, perm: 'uploadQuestions' },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Legacy Archive", href: "/admin/questions", icon: Archive },
@@ -85,7 +86,7 @@ const NAV_GROUPS = [
     items: [
       { label: "Live Analytics", href: "/admin/analytics", icon: BarChart3, perm: 'viewAnalytics' },
       { label: "Role Manager", href: "/admin/roles", icon: KeyRound, perm: 'manageRoles' },
-      { label: "Students", href: "/admin/users", icon: GraduationCap, perm: 'manageUsers' },
+      { label: "Students", href: "/admin/users", icon: Users, perm: 'manageUsers' },
       { label: "Success Stories", href: "/admin/success-stories", icon: Trophy, perm: 'publishContent' },
       { label: "Help Articles", href: "/admin/help-center", icon: HelpCircle, perm: 'publishContent' },
       { label: "Support Desk", href: "/admin/support", icon: MessageCircle, perm: 'manageNotifications' },

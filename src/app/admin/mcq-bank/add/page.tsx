@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense } from "react"
@@ -18,8 +17,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Manual MCQ Ingestion Node v4.0.
- * RESTORED: Optimized manual bilingual question type functionality.
+ * @fileOverview Premium Manual MCQ Ingestion Node v4.1 [Strict Restoration].
+ * RESTORED: Optimized manual bilingual question type functionality for central mcqBank.
  * IMPROVED: Parallel side-by-side ingestion for English and Local Script.
  */
 
@@ -50,6 +49,7 @@ function QuestionEntryContent() {
   const { data: existingData } = useDoc<any>(useMemo(() => (db && questionId ? doc(db, "mcqBank", questionId) : null), [db, questionId]))
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
+  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
 
   const [formData, setFormData] = useState<any>({
     boardId: "", examId: "", subjectId: "", difficulty: "Medium",
@@ -82,7 +82,11 @@ function QuestionEntryContent() {
   const handleSave = async () => {
     if (!db || isSaving) return
     if (!formData.englishQuestion && !formData.punjabiQuestion) {
-       toast({ variant: "destructive", title: "Validation Failed", description: "At least one question statement is required." })
+       toast({ variant: "destructive", title: "Validation Failed", description: "Question statement is required." })
+       return
+    }
+    if (!formData.subjectId) {
+       toast({ variant: "destructive", title: "Validation Failed", description: "Select a subject for the question bank." })
        return
     }
 
@@ -95,7 +99,8 @@ function QuestionEntryContent() {
       id: finalId,
       updatedAt: serverTimestamp(),
       createdAt: isEditing ? (existingData?.createdAt || serverTimestamp()) : serverTimestamp(),
-      createdBy: profile?.name || "Administrator"
+      createdBy: profile?.name || "Administrator",
+      status: formData.status || 'PUBLISHED'
     };
 
     try {
@@ -113,6 +118,11 @@ function QuestionEntryContent() {
   const showEnglish = entryMode === 'ENGLISH' || entryMode.startsWith('BILINGUAL');
   const showPunjabi = entryMode === 'PUNJABI' || entryMode === 'BILINGUAL_PA';
   const showHindi = entryMode === 'HINDI' || entryMode === 'BILINGUAL_HI';
+
+  const availableExams = useMemo(() => {
+     if (!exams || !formData.boardId) return [];
+     return exams.filter((e: any) => e.boardId === formData.boardId);
+  }, [exams, formData.boardId]);
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-8 pb-32 text-left pt-2 px-4 md:px-12 animate-in fade-in duration-700">
@@ -221,7 +231,7 @@ function QuestionEntryContent() {
 
               {/* SECTION 3: SOLUTION RATIONALE */}
               <div className="space-y-8 pt-6 border-t border-slate-50">
-                 <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] flex items-center gap-2"><BarChart3 className="h-4 w-4" /> 3. Verification & Solution</p>
+                 <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] flex items-center gap-2"><BarChart3 className="h-4 w-4" /> 3. Classification & Solution</p>
                  
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-3 text-left">
@@ -238,6 +248,23 @@ function QuestionEntryContent() {
                        <Select value={formData.subjectId} onValueChange={v => setFormData({...formData, subjectId: v})}>
                           <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-sm px-8 shadow-inner"><SelectValue placeholder="Select Subject" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white border-white/10 max-h-72 overflow-y-auto">{subjects?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                       </Select>
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3 text-left">
+                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Board Hub (Authority)</Label>
+                       <Select value={formData.boardId} onValueChange={v => setFormData({...formData, boardId: v, examId: ""})}>
+                          <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-sm px-8 shadow-inner"><SelectValue placeholder="Select Board" /></SelectTrigger>
+                          <SelectContent className="bg-[#0B1528] text-white border-white/10">{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
+                       </Select>
+                    </div>
+                    <div className="space-y-3 text-left">
+                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Exam Vertical</Label>
+                       <Select value={formData.examId} onValueChange={v => setFormData({...formData, examId: v})}>
+                          <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-sm px-8 shadow-inner" disabled={!formData.boardId}><SelectValue placeholder="Select Exam" /></SelectTrigger>
+                          <SelectContent className="bg-[#0B1528] text-white border-white/10">{availableExams?.map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
                        </Select>
                     </div>
                  </div>
