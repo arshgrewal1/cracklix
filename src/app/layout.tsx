@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
@@ -25,8 +26,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Global Layout Registry v18.0 [Cache-Bust Hardened].
- * UPDATED: Version 1.0.12 to trigger PWA asset re-sync and restore MobileNav.
+ * @fileOverview Global Layout Registry v19.0 [White Sync].
+ * FIXED: Updated themeColor to white to match new splash branding.
  */
 
 export const metadata: Metadata = {
@@ -95,7 +96,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B1528",
+  themeColor: "#FFFFFF",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -153,7 +154,7 @@ export default function RootLayout({
         <link rel="icon" href="/logo/cracklix-icon.png?v=2" type="image/png" />
         <link rel="apple-touch-icon" href="/logo/cracklix-icon.png?v=2" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#0B1528" />
+        <meta name="theme-color" content="#FFFFFF" />
 
         <script
           type="application/ld+json"

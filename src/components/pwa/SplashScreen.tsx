@@ -6,8 +6,9 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Optimized PWA Splash Hub v15.0 [Fast-Track Hardened].
- * FIXED: Accelerated progress bar and reduced exit latency.
+ * @fileOverview Optimized PWA Splash Hub v16.0 [Pure White Sync].
+ * FIXED: Removed black corners by transitioning to a pure white background.
+ * FIXED: Implemented container masking to clip unwanted rectangular boundaries.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
@@ -38,7 +39,7 @@ export default function SplashScreen() {
           clearInterval(progressInterval);
           return 100;
         }
-        return prev + 6; // Accelerated progress
+        return prev + 6; 
       });
     }, 16);
 
@@ -65,33 +66,30 @@ export default function SplashScreen() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed inset-0 z-[10000] bg-[#05070B] flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none"
+          className="fixed inset-0 z-[10000] bg-white flex flex-col items-center justify-center overflow-hidden pointer-events-none select-none"
         >
-          <div className="absolute top-0 left-0 w-full h-full bg-primary/5 blur-[140px] rounded-full" />
+          {/* Subtle brand-blue glow node */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl aspect-square bg-primary/5 blur-[120px] rounded-full" />
           
           <div className="relative z-10 flex flex-col items-center w-full px-8 max-w-lg">
              <motion.div
-               initial={{ opacity: 0, scale: 0.8, y: 10 }}
+               initial={{ opacity: 0, scale: 0.9, y: 10 }}
                animate={{ opacity: 1, scale: 1, y: 0 }}
-               transition={{ duration: 0.5, ease: "easeOut" }}
+               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                className="relative"
              >
                 <div className="relative flex items-center justify-center">
-                   <motion.div 
-                     animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.4, 0.3] }}
-                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                     className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full scale-90"
-                   />
+                   {/* Logo Container with precision masking to kill black corners */}
                    <div 
-                     className="relative"
-                     style={{ width: 'clamp(240px, 40vw, 400px)', height: 'auto', aspectRatio: '1/1' }}
+                     className="relative overflow-hidden rounded-[22%] bg-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"
+                     style={{ width: 'clamp(200px, 35vw, 320px)', height: 'auto', aspectRatio: '1/1' }}
                    >
                       <Image 
                         src="/logo/cracklix-icon.png" 
                         alt="Cracklix"
                         fill
                         priority
-                        className="object-contain drop-shadow-[0_20px_40px_rgba(37,99,235,0.3)]"
+                        className="object-contain"
                       />
                    </div>
                 </div>
@@ -100,27 +98,25 @@ export default function SplashScreen() {
              <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.5, delay: 0.15 }}
-               className="text-center space-y-2 w-full -mt-16 md:-mt-24"
+               transition={{ duration: 0.5, delay: 0.2 }}
+               className="text-center space-y-3 w-full mt-10"
              >
                 <div className="space-y-1">
-                   <h1 className="text-[48px] md:text-[64px] font-[900] tracking-tighter text-white leading-none antialiased">
+                   <h1 className="text-[32px] md:text-[44px] font-[900] tracking-tighter text-[#0F172A] leading-none antialiased">
                       Cracklix
                    </h1>
-                   <p className="text-[12px] md:text-[14px] font-medium text-slate-400 tracking-tight leading-none opacity-60 italic">
-                      Punjab's Smart Mock Test Platform
+                   <p className="text-[11px] md:text-[13px] font-bold text-slate-400 tracking-widest leading-none uppercase">
+                      Punjab&apos;s Smart Mock Test Platform
                    </p>
                 </div>
 
-                <div className="pt-8 md:pt-10 w-full max-w-[140px] md:max-w-[180px] mx-auto space-y-4">
-                   <div className="flex flex-col items-center gap-4">
-                      <div className="relative h-[2px] w-full bg-white/5 rounded-full overflow-hidden">
-                         <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progress}%` }}
-                            className="h-full bg-primary shadow-[0_0_10px_rgba(37,99,235,0.8)]"
-                         />
-                      </div>
+                <div className="pt-8 w-full max-w-[120px] mx-auto">
+                   <div className="relative h-[2px] w-full bg-slate-100 rounded-full overflow-hidden">
+                      <motion.div 
+                         initial={{ width: 0 }}
+                         animate={{ width: `${progress}%` }}
+                         className="h-full bg-primary"
+                      />
                    </div>
                 </div>
              </motion.div>

@@ -2,8 +2,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 /**
- * @fileOverview Hardened Capacitor Configuration v4.6 [PRODUCTION READY].
- * UPDATED: Set launchShowDuration to 0 to bypass native blue splash in favor of React Splash.
+ * @fileOverview Hardened Capacitor Configuration v4.7 [Pure White Sync].
+ * FIXED: Re-synchronized background colors to #FFFFFF to eliminate black artifacts.
  */
 
 const config: CapacitorConfig = {
@@ -13,7 +13,7 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchShowDuration: 0,
-      backgroundColor: "#000000",
+      backgroundColor: "#FFFFFF",
       showSpinner: false,
       androidScaleType: "CENTER_CROP",
       splashFullScreen: true,
@@ -27,8 +27,8 @@ const config: CapacitorConfig = {
       resizeOnFullScreen: true
     },
     StatusBar: {
-      backgroundColor: '#000000',
-      style: 'DARK'
+      backgroundColor: '#FFFFFF',
+      style: 'LIGHT'
     }
   },
   android: {
