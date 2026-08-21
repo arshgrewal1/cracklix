@@ -14,7 +14,6 @@ import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import GlobalStudyTracker from "@/components/analytics/GlobalStudyTracker";
 import StudyTimerManager from "@/components/analytics/StudyTimerManager";
-import SplashScreen from "@/components/pwa/SplashScreen";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const poppins = Poppins({
@@ -184,8 +183,6 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <FirebaseClientProvider>
-            <SplashScreen key="app-splash-screen" />
-            
             <div key="main-app-container" className="min-h-screen flex flex-col relative bg-background">
               <div className="flex-1">
                 {children}
