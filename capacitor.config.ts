@@ -1,9 +1,8 @@
-
 import { CapacitorConfig } from '@capacitor/cli';
 
 /**
- * @fileOverview Hardened Capacitor Configuration v4.7 [Pure White Sync].
- * FIXED: Re-synchronized background colors to #FFFFFF to eliminate black artifacts.
+ * @fileOverview Hardened Capacitor Configuration v4.8 [Direct Launch Sync].
+ * FIXED: Re-synchronized launch duration and background nodes to eliminate logo flash.
  */
 
 const config: CapacitorConfig = {

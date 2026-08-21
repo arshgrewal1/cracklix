@@ -6,9 +6,9 @@ import Image from 'next/image';
 import { useUser } from '@/firebase';
 
 /**
- * @fileOverview Optimized PWA Splash Hub v16.0 [Pure White Sync].
+ * @fileOverview Optimized PWA Splash Hub v17.0 [Pure White Sync].
  * FIXED: Removed black corners by transitioning to a pure white background.
- * FIXED: Implemented container masking to clip unwanted rectangular boundaries.
+ * FIXED: Eliminated redundant system logo flash by allowing the React logo to be the primary visual entry.
  */
 export default function SplashScreen() {
   const { loading: authLoading, profileLoading, user } = useUser();
