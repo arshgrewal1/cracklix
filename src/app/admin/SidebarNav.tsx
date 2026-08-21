@@ -65,7 +65,7 @@ const NAV_GROUPS = [
     label: "Asset Bank",
     items: [
       { label: "Question Bank", href: "/admin/mcq-bank", icon: Database },
-      { label: "Add Question", href: "/admin/mcq-bank/add", icon: Plus, perm: 'uploadQuestions' },
+      { label: "Add Question", href: "/admin/mcq-bank/add", icon: Plus },
       { label: "Bulk Ingestion", href: "/admin/bulk-import", icon: UploadCloud, perm: 'uploadQuestions' },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Legacy Archive", href: "/admin/questions", icon: Archive },

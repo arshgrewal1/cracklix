@@ -17,9 +17,9 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Premium Manual MCQ Ingestion Node v4.1 [Strict Restoration].
+ * @fileOverview Premium Manual MCQ Ingestion Node v5.0 [Side-by-Side Typing].
+ * IMPROVED: Parallel side-by-side ingestion for English and Local Script in the form.
  * RESTORED: Optimized manual bilingual question type functionality for central mcqBank.
- * IMPROVED: Parallel side-by-side ingestion for English and Local Script.
  */
 
 type EntryMode = 'ENGLISH' | 'PUNJABI' | 'HINDI' | 'BILINGUAL_PA' | 'BILINGUAL_HI';
@@ -130,7 +130,7 @@ function QuestionEntryContent() {
       {/* 1. HEADER HUB */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 px-1">
         <div className="flex items-center gap-6">
-          <button onClick={() => router.back()} className="rounded-2xl h-12 w-12 border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-all shadow-sm shrink-0">
+          <button onClick={() => router.back()} className="rounded-2xl h-12 w-12 border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-all shadow-sm shrink-0 cursor-pointer">
             <ChevronLeft className="h-6 w-6" />
           </button>
           <div className="text-left">
@@ -166,31 +166,37 @@ function QuestionEntryContent() {
         <div className="lg:col-span-7 space-y-8">
            <Card className="border-none bg-white shadow-2xl rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-12 space-y-10 border border-slate-50">
               
-              {/* SECTION 1: QUESTION STATEMENT */}
+              {/* SECTION 1: QUESTION STATEMENT - SIDE-BY-SIDE */}
               <div className="space-y-8">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-4">
                     <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] flex items-center gap-2"><Zap className="h-4 w-4 fill-current" /> 1. Question Statement</p>
                     <Badge variant="outline" className="text-[8px] font-bold uppercase border-slate-100">Database Entry</Badge>
                  </div>
-                 <div className="grid grid-cols-1 gap-6">
+                 
+                 <div className={cn(
+                    "grid grid-cols-1 gap-6",
+                    (showEnglish && (showPunjabi || showHindi)) && "md:grid-cols-2"
+                 )}>
                     {showEnglish && (
                        <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
                           <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">English Statement</Label>
-                          <Textarea value={formData.englishQuestion} onChange={e => setFormData({...formData, englishQuestion: e.target.value})} className="min-h-[120px] rounded-2xl bg-slate-50 border-none font-bold text-base p-6 shadow-inner focus-visible:ring-primary/20" placeholder="Type verified English statement..." />
+                          <Textarea value={formData.englishQuestion} onChange={e => setFormData({...formData, englishQuestion: e.target.value})} className="min-h-[140px] rounded-2xl bg-slate-50 border-none font-bold text-base p-6 shadow-inner focus-visible:ring-primary/20" placeholder="Type verified English statement..." />
                        </div>
                     )}
-                    {showPunjabi && (
-                       <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-                          <Label className="text-[10px] font-black uppercase text-primary ml-1">Punjabi Statement (Gurmukhi)</Label>
-                          <Textarea value={formData.punjabiQuestion} onChange={e => setFormData({...formData, punjabiQuestion: e.target.value})} className="min-h-[120px] rounded-2xl bg-slate-50 border-none font-black text-lg p-6 shadow-inner focus-visible:ring-primary/20" placeholder="ਟਾਈਪ ਕਰੋ..." />
-                       </div>
-                    )}
-                    {showHindi && (
-                       <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-                          <Label className="text-[10px] font-black uppercase text-orange-600 ml-1">Hindi Statement (Devanagari)</Label>
-                          <Textarea value={formData.hindiQuestion} onChange={e => setFormData({...formData, hindiQuestion: e.target.value})} className="min-h-[120px] rounded-2xl bg-slate-50 border-none font-black text-lg p-6 shadow-inner focus-visible:ring-primary/20" placeholder="यहाँ टाइप करें..." />
-                       </div>
-                    )}
+                    <div className="space-y-6">
+                       {showPunjabi && (
+                          <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
+                             <Label className="text-[10px] font-black uppercase text-primary ml-1">Punjabi Statement (Gurmukhi)</Label>
+                             <Textarea value={formData.punjabiQuestion} onChange={e => setFormData({...formData, punjabiQuestion: e.target.value})} className="min-h-[140px] rounded-2xl bg-slate-50 border-none font-black text-lg p-6 shadow-inner focus-visible:ring-primary/20" placeholder="ਟਾਈਪ ਕਰੋ..." />
+                          </div>
+                       )}
+                       {showHindi && (
+                          <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
+                             <Label className="text-[10px] font-black uppercase text-orange-600 ml-1">Hindi Statement (Devanagari)</Label>
+                             <Textarea value={formData.hindiQuestion} onChange={e => setFormData({...formData, hindiQuestion: e.target.value})} className="min-h-[140px] rounded-2xl bg-slate-50 border-none font-black text-lg p-6 shadow-inner focus-visible:ring-primary/20" placeholder="यहाँ टाइप करें..." />
+                          </div>
+                       )}
+                    </div>
                  </div>
               </div>
 
@@ -204,25 +210,30 @@ function QuestionEntryContent() {
                              <div className="h-10 w-10 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-black text-lg shadow-xl shrink-0 group-hover:scale-110 transition-transform">{opt}</div>
                              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Configure Option {opt}</Label>
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className={cn(
+                             "grid grid-cols-1 gap-4",
+                             (showEnglish && (showPunjabi || showHindi)) && "md:grid-cols-2"
+                          )}>
                              {showEnglish && (
                                 <div className="space-y-1.5">
                                    <Label className="text-[8px] font-bold text-slate-400 uppercase ml-2">English</Label>
                                    <Input value={formData[`option${opt}English`]} onChange={e => setFormData({...formData, [`option${opt}English`]: e.target.value})} className="bg-white border-slate-100 font-bold h-12 rounded-xl px-5 shadow-sm" placeholder="---" />
                                 </div>
                              )}
-                             {showPunjabi && (
-                                <div className="space-y-1.5">
-                                   <Label className="text-[8px] font-bold text-primary uppercase ml-2">Punjabi</Label>
-                                   <Input value={formData[`option${opt}Punjabi`]} onChange={e => setFormData({...formData, [`option${opt}Punjabi`]: e.target.value})} className="bg-white border-slate-100 font-black h-12 rounded-xl px-5 shadow-sm" placeholder="---" />
-                                </div>
-                             )}
-                             {showHindi && (
-                                <div className="space-y-1.5">
-                                   <Label className="text-[8px] font-bold text-orange-600 uppercase ml-2">Hindi</Label>
-                                   <Input value={formData[`option${opt}Hindi`]} onChange={e => setFormData({...formData, [`option${opt}Hindi`]: e.target.value})} className="bg-white border-slate-100 font-black h-12 rounded-xl px-5 shadow-sm" placeholder="---" />
-                                </div>
-                             )}
+                             <div className="space-y-4">
+                                {showPunjabi && (
+                                   <div className="space-y-1.5">
+                                      <Label className="text-[8px] font-bold text-primary uppercase ml-2">Punjabi</Label>
+                                      <Input value={formData[`option${opt}Punjabi`]} onChange={e => setFormData({...formData, [`option${opt}Punjabi`]: e.target.value})} className="bg-white border-slate-100 font-black h-12 rounded-xl px-5 shadow-sm" placeholder="---" />
+                                   </div>
+                                )}
+                                {showHindi && (
+                                   <div className="space-y-1.5">
+                                      <Label className="text-[8px] font-bold text-orange-600 uppercase ml-2">Hindi</Label>
+                                      <Input value={formData[`option${opt}Hindi`]} onChange={e => setFormData({...formData, [`option${opt}Hindi`]: e.target.value})} className="bg-white border-slate-100 font-black h-12 rounded-xl px-5 shadow-sm" placeholder="---" />
+                                   </div>
+                                )}
+                             </div>
                           </div>
                        </div>
                     ))}
@@ -269,25 +280,30 @@ function QuestionEntryContent() {
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-1 gap-6">
+                 <div className={cn(
+                    "grid grid-cols-1 gap-6",
+                    (showEnglish && (showPunjabi || showHindi)) && "md:grid-cols-2"
+                 )}>
                     {showEnglish && (
                        <div className="space-y-2 text-left">
                           <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">English Rationalization</Label>
-                          <Textarea value={formData.englishExplanation} onChange={e => setFormData({...formData, englishExplanation: e.target.value})} className="min-h-[140px] rounded-2xl bg-slate-900 border-none text-emerald-400 font-medium p-6 shadow-2xl leading-relaxed" placeholder="Type verified English logic..." />
+                          <Textarea value={formData.englishExplanation} onChange={e => setFormData({...formData, englishExplanation: e.target.value})} className="h-44 rounded-2xl bg-slate-900 border-none text-emerald-400 font-medium p-6 shadow-2xl leading-relaxed" placeholder="Type verified English logic..." />
                        </div>
                     )}
-                    {showPunjabi && (
-                       <div className="space-y-2 text-left">
-                          <Label className="text-[10px] font-black uppercase text-primary ml-1">Punjabi Rationalization</Label>
-                          <Textarea value={formData.punjabiExplanation} onChange={e => setFormData({...formData, punjabiExplanation: e.target.value})} className="min-h-[140px] rounded-2xl bg-slate-900 border-none text-blue-400 font-black p-6 shadow-2xl leading-relaxed" placeholder="ਪੰਜਾਬੀ ਵਿੱਚ ਲਿਖੋ..." />
-                       </div>
-                    )}
-                    {showHindi && (
-                       <div className="space-y-2 text-left">
-                          <Label className="text-[10px] font-black uppercase text-orange-600 ml-1">Hindi Rationalization</Label>
-                          <Textarea value={formData.hindiExplanation} onChange={e => setFormData({...formData, hindiExplanation: e.target.value})} className="min-h-[140px] rounded-2xl bg-slate-900 border-none text-orange-400 font-black p-6 shadow-2xl leading-relaxed" placeholder="हिंदी में लिखें..." />
-                       </div>
-                    )}
+                    <div className="space-y-6">
+                       {showPunjabi && (
+                          <div className="space-y-2 text-left">
+                             <Label className="text-[10px] font-black uppercase text-primary ml-1">Punjabi Rationalization</Label>
+                             <Textarea value={formData.punjabiExplanation} onChange={e => setFormData({...formData, punjabiExplanation: e.target.value})} className="h-44 rounded-2xl bg-slate-900 border-none text-blue-400 font-black p-6 shadow-2xl leading-relaxed" placeholder="ਪੰਜਾਬੀ ਵਿੱਚ ਲਿਖੋ..." />
+                          </div>
+                       )}
+                       {showHindi && (
+                          <div className="space-y-2 text-left">
+                             <Label className="text-[10px] font-black uppercase text-orange-600 ml-1">Hindi Rationalization</Label>
+                             <Textarea value={formData.hindiExplanation} onChange={e => setFormData({...formData, hindiExplanation: e.target.value})} className="h-44 rounded-2xl bg-slate-900 border-none text-orange-400 font-black p-6 shadow-2xl leading-relaxed" placeholder="हिंदी में लिखें..." />
+                          </div>
+                       )}
+                    </div>
                  </div>
               </div>
            </Card>
@@ -307,7 +323,7 @@ function QuestionEntryContent() {
                         key={l}
                         onClick={() => setPreviewLang(l === 'EN' ? 'ENGLISH' : l === 'PA' ? 'ENGLISH_PUNJABI' : 'ENGLISH_HINDI')}
                         className={cn(
-                           "text-[8px] font-black px-2 py-1 rounded border border-white/10 transition-all",
+                           "text-[8px] font-black px-2 py-1 rounded border border-white/10 transition-all cursor-pointer",
                            (previewLang.includes(l.replace('PA','PUNJABI').replace('HI','HINDI'))) ? "bg-primary text-white shadow-lg" : "bg-white/5 text-slate-400 hover:text-white"
                         )}
                       >
